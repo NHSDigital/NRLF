@@ -1,6 +1,6 @@
 #!/bin/bash
 
-yo aws-api:initial-bootstrap-terraform nrlf \
+yo aws-api:account-wide-terraform nrlf \
     eu-west-2 \
     nrlf-terraform-state \
     nrlf-terraform-state-lock \
