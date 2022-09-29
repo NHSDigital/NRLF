@@ -5,7 +5,7 @@ yo aws-api:app nrlf \
     eu-west-2 \
     nrlf-terraform-state \
     nrlf-terraform-state-lock \
-    483433329243 mgmt NHSDAdminRole \
+    483433329243 NHSDAdminRole \
     295962215401 terraform NHSDAdminRole\
     295962215401 terraform NHSDAdminRole\
     295962215401 terraform NHSDAdminRole
@@ -25,13 +25,3 @@ yo aws-api:api-swagger "eu-west-2" consumer "swagger/consumer.yaml" "get /Docume
 
 yo aws-api:dynamodb document-reference "nhs_number" "S" "" "" "" PAY_PER_REQUEST "" "" "document-reference"
 yo aws-api:dynamodb custodian "ods_code" "S" "" "" "" PAY_PER_REQUEST "" "" "custodian"
-
-
-# yo aws-api:account-wide-terraform nrlf \
-#     eu-west-2 \
-#     nrlf-terraform-state \
-#     nrlf-terraform-state-lock \
-#     483433329243 mgmt NHSDAdminRole \
-#     295962215401 terraform NHSDAdminRole\
-#     295962215401 terraform NHSDAdminRole\
-#     295962215401 terraform NHSDAdminRole
