@@ -20,7 +20,7 @@ yo aws-api:kms document-reference "Document reference table KMS key" "eu-west-2"
 yo aws-api:kms custodian "Custodian table KMS key" "eu-west-2" "no"
 
 yo aws-api:lambda-base
-yo aws-api:api-swagger "eu-west-2" producer "swagger/producer.yaml" "post /DocumentReference,put /DocumentReference/{id},delete /DocumentReference/{id}" python "(none)" "nrlf,lambda-utils,third-party" "cloudwatch"
+yo aws-api:api-swagger "eu-west-2" producer "swagger/producer.yaml" "get /DocumentReference,get /DocumentReference/{id},post /DocumentReference,put /DocumentReference/{id},delete /DocumentReference/{id}" python "(none)" "nrlf,lambda-utils,third-party" "cloudwatch"
 yo aws-api:api-swagger "eu-west-2" consumer "swagger/consumer.yaml" "get /DocumentReference,post /DocumentReference/_search,get /DocumentReference/{id}" python "(none)" "nrlf,lambda-utils,third-party" "cloudwatch"
 
 yo aws-api:dynamodb document-reference "nhs_number" "S" "" "" "" PAY_PER_REQUEST "" "" "document-reference"

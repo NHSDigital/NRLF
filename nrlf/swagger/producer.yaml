@@ -9,6 +9,27 @@ tags:
   - name: DocumentReference
 paths:
   /DocumentReference:
+    get:
+      tags:
+        - DocumentReference
+      summary: Search for DocumentReference resources
+      operationId: searchDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/subject"
+        - $ref: "#/components/parameters/custodian"
+        - $ref: "#/components/parameters/snomedCode"
+        - $ref: "#/components/parameters/fromASID"
+        - $ref: "#/components/parameters/toASID"
+      responses:
+        "200":
+          description: Search DocumentReference operation successful
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/Bundle"
+            application/fhir+xml:
+              schema:
+                $ref: "#/components/schemas/Bundle"
     post:
       tags:
         - DocumentReference
@@ -23,6 +44,20 @@ paths:
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
   /DocumentReference/{id}:
+    get:
+      tags:
+        - DocumentReference
+      summary: Read a DocumentReference resource
+      operationId: readDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200":
+          description: Read DocumentReference operation successful
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/DocumentReference"
     put:
       tags:
         - DocumentReference
@@ -62,6 +97,22 @@ components:
       description: logical identifier
       schema:
         $ref: "#/components/schemas/DocumentId"
+    subject:
+      name: "subject"
+      in: query
+      schema:
+        $ref: "#/components/schemas/RequestQuerySubject"
+      required: true
+    custodian:
+      name: "custodian.identifier"
+      in: query
+      schema:
+        $ref: "#/components/schemas/RequestQueryCustodian"
+    snomedCode:
+      name: "snomed.identifier"
+      in: query
+      schema:
+        $ref: "#/components/schemas/RequestQuerySnomedCode"
     fromASID:
       name: fromASID
       description: Client System ASID.
@@ -123,6 +174,26 @@ components:
       required:
         - fromASID
         - toASID
+    RequestParams:
+      type: object
+      properties:
+        subject:
+          $ref: "#/components/schemas/RequestQuerySubject"
+        "custodian.identifier":
+          $ref: "#/components/schemas/RequestQueryCustodian"
+        "snomed.identifier":
+          $ref: "#/components/schemas/RequestQuerySnomedCode"
+      required:
+        - subject
+    RequestQuerySubject:
+      type: string
+      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
+    RequestQueryCustodian:
+      type: string
+      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
+    RequestQuerySnomedCode:
+      type: string
+      pattern: (^http\:\/\/snomed\.info\/sct\|(\d+))
     RequestHeaderFromASID:
       type: string
     RequestHeaderToASID:
