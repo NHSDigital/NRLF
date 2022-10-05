@@ -1,0 +1,1 @@
+assume_role = "terraform"
