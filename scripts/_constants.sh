@@ -1,3 +1,5 @@
 #!/bin/bash
 
-export PROFILE_PREFIX="nhsd-nrlf"
+PROFILE_PREFIX="nhsd-nrlf"
+ADMIN_POLICY_ARN="arn:aws:iam::aws:policy/AdministratorAccess"
+TERRAFORM_ROLE_NAME="terraform"

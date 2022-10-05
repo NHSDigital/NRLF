@@ -45,17 +45,17 @@ function _aws_login() {
         return 1
     fi
 
-    local current_aws_account_id="$(echo $caller_identity_json | jq -r .Account)"
-    local current_principal_arn="$(echo $caller_identity_json | jq -r .Arn)"
-    local current_user="$(echo ${current_principal_arn} | cut -d'/' -f 2)"
-    local mfa_serial="arn:aws:iam::${current_aws_account_id}:mfa/${current_user}"
-    local session_name="${profile_name}-${current_user}"
+    local current_aws_account_id="$(echo ${caller_identity_json} | jq -r .Account)" || return 1
+    local current_principal_arn="$(echo ${caller_identity_json} | jq -r .Arn)" || return 1
+    local current_user="$(echo ${current_principal_arn} | cut -d'/' -f 2)" || return 1
+    local mfa_serial="arn:aws:iam::${current_aws_account_id}:mfa/${current_user}" || return 1
+    local session_name="${profile_name}-${current_user}" || return 1
 
-    local aws_account_id=$(_get_aws_info "$profile_name" aws_account_id)
-    local role_name=$(_get_aws_info "$profile_name" role_name)
-    local duration_seconds=$(_get_aws_info "$profile_name" duration_seconds)
-    local region=$(_get_aws_info "$profile_name" region)
-    local role_arn="arn:aws:iam::${aws_account_id}:role/${role_name}"
+    local aws_account_id=$(_get_aws_info "${profile_name}" aws_account_id) || return 1
+    local role_name=$(_get_aws_info "${profile_name}" role_name) || return 1
+    local duration_seconds=$(_get_aws_info "${profile_name}" duration_seconds) || return 1
+    local region=$(_get_aws_info "${profile_name}" region) || return 1
+    local role_arn="arn:aws:iam::${aws_account_id}:role/${role_name}" || return 1
 
     local session_token_json="$(aws sts assume-role \
         --role-arn "${role_arn}" \
@@ -64,21 +64,21 @@ function _aws_login() {
         --duration-seconds "${duration_seconds}" \
         --serial-number "${mfa_serial}" \
         --token-code "${token_code}" \
-        --query Credentials; )"
+        --query Credentials; )" || return 1
 
-    export AWS_ACCESS_KEY_ID="$(echo $session_token_json | jq -r .AccessKeyId)"
-    export AWS_SECRET_ACCESS_KEY="$(echo $session_token_json | jq -r .SecretAccessKey)"
-    export AWS_SESSION_TOKEN="$(echo $session_token_json | jq -r .SessionToken)"
-    export AWS_SESSION_EXPIRY="$(echo $session_token_json | jq -r .Expiration)"
+    export AWS_ACCESS_KEY_ID="$(echo $session_token_json | jq -r .AccessKeyId)" || return 1
+    export AWS_SECRET_ACCESS_KEY="$(echo $session_token_json | jq -r .SecretAccessKey)" || return 1
+    export AWS_SESSION_TOKEN="$(echo $session_token_json | jq -r .SessionToken)" || return 1
+    export AWS_SESSION_EXPIRY="$(echo $session_token_json | jq -r .Expiration)" || return 1
 
     if [[ \
         -n "${AWS_ACCESS_KEY_ID}"     \
         && -n "${AWS_SECRET_ACCESS_KEY}" \
         && -n "${AWS_SESSION_TOKEN}"     \
     ]]; then
-        export AWS_ROLE="$(echo ${role_arn} | cut -d'/' -f 2)"
-        export AWS_ROLE_ARN="${role_arn}"
-        export AWS_ACCOUNT_ID="$(echo ${role_arn} | cut -d':' -f 5)"
+        export AWS_ROLE="$(echo ${role_arn} | cut -d'/' -f 2)" || return 1
+        export AWS_ROLE_ARN="${role_arn}" || return 1
+        export AWS_ACCOUNT_ID="$(echo ${role_arn} | cut -d':' -f 5)" || return 1
 
         echo "Successfully assumed the role with ARN ${role_arn}."
         echo "Access keys valid until ${AWS_SESSION_EXPIRY}."
@@ -104,4 +104,5 @@ function _get_aws_info() {
     local profile_name=$1
     local key=$2
     python -c "import os; from configparser import ConfigParser; parser = ConfigParser(); parser.read(os.environ['HOME'] + '/.aws/config'); print(parser['${profile_name}']['${key}'])"
+    return $?
 }

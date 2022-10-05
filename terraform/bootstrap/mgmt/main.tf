@@ -17,9 +17,9 @@ terraform {
   backend "s3" {
     encrypt              = false
     region               = "eu-west-2"
-    bucket               = "nrlf--terraform-state"
-    dynamodb_table       = "nrlf--terraform-state-lock"
+    bucket               = "nhsd-nrlf-terraform-state"
+    dynamodb_table       = "nhsd-nrlf-terraform-state-lock"
     key                  = "terraform-state"
-    workspace_key_prefix = "nrlf"
+    workspace_key_prefix = "nhsd-nrlf"
   }
 }

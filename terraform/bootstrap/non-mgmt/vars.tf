@@ -1,5 +1,5 @@
 variable "project_name" {
-  default = "nrlf"
+  default = "nhsd-nrlf"
 }
 
 variable "region_name" {

@@ -4,6 +4,7 @@ export root=$(cd $(dirname ${BASH_SOURCE[0]:-$0}) && pwd)
 
 source $root/scripts/_constants.sh
 source $root/scripts/_aws.sh
+source $root/scripts/_bootstrap.sh
 source $root/scripts/_terraform.sh
 source $root/scripts/_make.sh
 
@@ -23,6 +24,7 @@ function _show_help() {
     echo "  make      - calls the make/build routines"
     echo "  aws       - aws commands"
     echo "  terraform - terraform commands"
+    echo "  bootstrap - terraform commands"
     echo
 }
 
@@ -42,6 +44,7 @@ function nrlf() {
     "aws") _aws $args ;;
     "make") _make $args ;;
     "terraform") _terraform $args ;;
+    "bootstrap") _bootstrap $args ;;
     *) _show_help $args ;;
   esac
 

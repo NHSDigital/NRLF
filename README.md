@@ -8,6 +8,26 @@
 - jq
 - tfenv
 
+## Install python dependencies
+
+```
+pipenv install --dev
+```
+
+## Project CLI and AWS login
+
+These instructions assume that you have enabled the project CLI:
+
+```
+source nrlf.sh
+```
+
+Furthermore, prior to running `nrlf aws login` any time you need to ensure that you've logged out of any previous sessions:
+
+```
+nrlf aws reset-creds
+```
+
 ## Project bootstrap
 
 ### Create Terraform state files
@@ -23,7 +43,7 @@ This will set up your terraform state buckets and import them into your project.
 Log in to your `mgmt` account:
 
 ```
-nrlf aws login mgmt
+nrlf aws login mgmt-admin
 ```
 
 Create and import state buckets:
@@ -46,7 +66,7 @@ need to create a trust role in non-`mgmt`.
 Log in to your non-`mgmt` account (e.g. `dev`):
 
 ```
-nrlf aws login <non-mgmt-account>
+nrlf aws login <non-mgmt-account>-admin
 ```
 
 Create the trust role:
@@ -63,11 +83,11 @@ This is for resources such as Cloudwatch roles which are global to a given accou
 Log in to your `mgmt` account.
 
 ```
-nrlf aws login mgmt
+nrlf aws login mgmt-admin
 ```
 
 Update account wide resources for non-`mgmt` accounts (e.g. `dev`):
 
 ```
-nrlf bootstrap bootstrap-non-mgmt <non-mgmt-account>
+nrlf terraform bootstrap-non-mgmt <non-mgmt-account>
 ```
