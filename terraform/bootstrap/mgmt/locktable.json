@@ -1,0 +1,19 @@
+{
+  "TableName": "nhsd-nrlf-terraform-state-lock",
+  "KeySchema": [
+    {
+      "AttributeName": "LockID",
+      "KeyType": "HASH"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "LockID",
+      "AttributeType": "S"
+    }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 20,
+    "WriteCapacityUnits": 20
+  }
+}
