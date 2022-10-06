@@ -29,6 +29,8 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
 ```
 pipenv install --dev
 pre-commit install
+cd scripts/build_scripts
+pip install -e .
 ```
 
 ## Project CLI and AWS login

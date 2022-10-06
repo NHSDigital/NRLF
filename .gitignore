@@ -2,6 +2,7 @@
 **/.terraform/*
 **/.terraform.lock.hcl
 **/tfplan
+**/output.json
 
 # .tfstate files
 *.tfstate

@@ -10,6 +10,9 @@ pydantic = "*"
 pyhcl = "*"
 pre-commit = "*"
 sh = "*"
+black = "*"
+pytest = "*"
+boto3 = "*"
 
 [requires]
 python_version = "3.9"

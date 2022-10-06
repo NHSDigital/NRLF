@@ -90,6 +90,7 @@ function _terraform() {
     terraform workspace select $env || terraform workspace new $env || return 1
     terraform init || return 1
     terraform apply ./tfplan || return 1
+    terraform output -json > output.json || return 1
     ;;
     #----------------
     "destroy")
