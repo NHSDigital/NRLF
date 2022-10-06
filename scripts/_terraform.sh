@@ -41,37 +41,59 @@ function _terraform() {
   case $command in
     #----------------
     "validate")
-    cd $root/terraform
+    cd $root/terraform/infrastructure
     terraform validate $args || return 1
     ;;
     #----------------
     "fmt")
-    cd $root/terraform
+    cd $root/terraform/infrastructure
     terraform fmt $args || return 1
     ;;
     #----------------
     "init")
-    cd $root/terraform
+    if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+    then
+        echo "Please log in as the mgmt account" >&2
+        return 1
+    fi
+
+    cd $root/terraform/infrastructure
     terraform workspace select $env || terraform workspace new $env || return 1
     terraform init $args || return 1
     ;;
     #----------------
     "plan")
-    cd $root/terraform
+    if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+    then
+        echo "Please log in as the mgmt account" >&2
+        return 1
+    fi
+
+    local profile_name=${PROFILE_PREFIX}-$env-admin
+    local aws_account_id=$(_get_aws_info "$profile_name" aws_account_id)
+
+    cd $root/terraform/infrastructure
+    terraform init || return 1
     terraform workspace select $env || terraform workspace new $env || return 1
     terraform init || return 1
-    terraform plan -var-file="./etc/${env}.tfvars" -out=./tfplan $args || return 1
+    terraform plan -var-file="./etc/${env}.tfvars" -out=./tfplan -var "assume_account=${aws_account_id}"|| return 1
     ;;
     #----------------
     "apply")
-    cd $root/terraform
+    if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+    then
+        echo "Please log in as the mgmt account" >&2
+        return 1
+    fi
+
+    cd $root/terraform/infrastructure
     terraform workspace select $env || terraform workspace new $env || return 1
     terraform init || return 1
-    terraform apply $args ./tfplan || return 1
+    terraform apply ./tfplan || return 1
     ;;
     #----------------
     "destroy")
-    cd $root/terraform
+    cd $root/terraform/infrastructure
     terraform workspace select $env || terraform workspace new $env || return 1
     terraform init || return 1
     terraform destroy -var-file=./etc/dev.tfvars $args || return 1
@@ -139,3 +161,28 @@ function _terraform() {
     *) _terraform_help $args ;;
   esac
 }
+
+# _get_environment_name() {
+#     local environment=$1
+
+#     if [[ -z $environment ]]; then
+#         if [[ -z $TERRAFORM_LOCAL_WORKSPACE_OVERRIDE ]]; then
+#             echo $(whoami | openssl dgst -sha1 -binary | xxd -p | cut -c1-8)
+#         else
+#             echo $TERRAFORM_LOCAL_WORKSPACE_OVERRIDE
+#         fi
+#     else
+#         echo $environment
+#     fi
+# }
+
+# _get_environment_vars_file() {
+#     local environment=$1
+#     local vars_prefix="prod"
+
+#     if [[ $environment != "prod" ]]; then
+#         vars_prefix="dev"
+#     fi
+
+#     echo "./etc/${vars_prefix}.tfvars"
+# }

@@ -6,6 +6,8 @@ variable "region_name" {
   default = "eu-west-2"
 }
 
-variable "assume_account" {}
+variable "assume_account" {
+  default = "terraform"
+}
 
 variable "assume_role" {}

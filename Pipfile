@@ -4,9 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pydantic = "*"
 
 [dev-packages]
 pyhcl = "*"
+pre-commit = "*"
+sh = "*"
 
 [requires]
 python_version = "3.9"
