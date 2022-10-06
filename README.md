@@ -1,5 +1,21 @@
 # NRLF
 
+# Overview
+
+This project has been given the name `nrlf` which stands for `National Records Locator (Futures)`, inheriting it's name from the existing product (NRL) as well as the Spine Futures programme (Futures).
+
+This project uses the `nrlf.sh` script to build, test and deploy. This script will ensure that a developer can reproduce any operation that the CI/CD pipelines does, meaning they can test the application locally or on their own deployed dev environment.
+
+The deployment cycle looks like this.
+
+```
+install -> unit test -> build -> deploy -> integration test -> tear down
+```
+
+The NRLF uses the following cycle during development, which promotes a "fail fast" methodology by moving unit tests to the front of the process ahead of expensive and slow build/deploy/teardown routines.
+
+# Setup
+
 ## Prerequisites
 
 - pipenv
@@ -12,6 +28,7 @@
 
 ```
 pipenv install --dev
+pre-commit install
 ```
 
 ## Project CLI and AWS login
@@ -26,6 +43,129 @@ Furthermore, prior to running `nrlf aws login` any time you need to ensure that 
 
 ```
 nrlf aws reset-creds
+```
+
+# Build, Test & Run the API
+
+Now we have installed the dependencies we're going to need to get the software up and running.
+
+## 1. Setup the virtual environment
+
+The API is written in Python, so we need to get the virtual environment running and then re-mount the `nrlf.sh` script.
+
+```
+pipenv shell
+source nrlf.sh
+```
+
+## 2. Run the Unit Tests
+
+The NRLF adopts a "fail fast" methodology, which means that Unit Tests can be run before any expensive operations, such as a complete build or terraform deployment.
+
+```
+nrlf test unit
+```
+
+## 2. Build the API
+
+Now build the artifacts that will be used to deploy the application.
+
+```
+nrlf make build
+```
+
+## 3. Login to AWS
+
+In order to deploy the NRLF you will need to be able to login to the AWS account using MFA.
+
+```
+nrlf aws login mgmt <mfa code>
+```
+
+## 4. Deploy the NRLF
+
+The NRLF is deployed using terraform, and can be deployed to any number of environments, such as, but not limited to `dev`, `test`, `uat`, `pre-prod`, `production`.
+
+If you do not supply an `<env>` then a hashed key unique to your environment will be generated.
+
+```
+nrlf terraform plan [<env>]
+```
+
+```
+nrlf terraform apply [<env>]
+```
+
+## 5. Run the Integration Tests
+
+Once the environment has been deployed the integration tests can be run.
+
+```
+nrlf test integration
+```
+
+This executes any tests that have been marked with `@pytest.mark.integration`
+
+## 6. Run the Feature Tests
+
+```
+nrlf test feature
+```
+
+This executes any tests that have been marked with `@integration`
+
+## 7. Tear down
+
+Using the same `<env>` from the deployment stage you can tear down the environment you created.
+
+```
+nrlf terraform destroy [<env>]
+```
+
+# Sandbox deployment with LocalStack
+
+In order to deploy the entire stack locally, we use LocalStack which comes bundled with the `dev` dependencies for this project.
+You will however need to install a Docker client on your machine according to the instructions for your OS.
+
+## 1. Setup the virtual environment
+
+As before we need to get the virtual environment running and then re-mount the `nrlf.sh` script.
+
+```
+pipenv shell
+source nrlf.sh
+```
+
+## 1. (re)build the API
+
+In order to pick up any changes to the API we should build the artifacts that will be used to deploy the application as before:
+
+```
+nrlf make build
+```
+
+## 2. Synchronise the build to the sandbox
+
+Since the free tier of LocalStack doesn't support layers, we also amend the artifacts to bundle the layers into the main Lambda.
+
+```
+nrlf sandbox sync
+```
+
+## 3. Deploy the API to LocalStack via Terraform
+
+```
+nrlf sandbox deploy
+```
+
+Note down any URLs provided in this step, as you will be able to run queries against them.
+
+## 4. Seed the Sandbox database with some test data
+
+In order to enable users to run queries against the Sandbox API, we need to seed the database with some test data:
+
+```
+nrlf sandbox seed_db
 ```
 
 ## Project bootstrap
