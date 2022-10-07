@@ -1,20 +1,20 @@
-resource "aws_dynamodb_table" "custodian" {
-  name           = "${local.prefix}--custodian"
+resource "aws_dynamodb_table" "document-types" {
+  name           = "${local.prefix}--document-types"
   billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "ods_code"
+  hash_key       = "nhs_number"
   attribute {
-    name = "ods_code"
+    name = "nhs_number"
     type = "S"
   }
   server_side_encryption {
     enabled = true
-    kms_key_arn = aws_kms_key.custodian.arn
+    kms_key_arn = aws_kms_key.document-types.arn
   }
 }
 
-resource "aws_iam_policy" "custodian__dynamodb-read" {
-  name = "${local.prefix}--custodian--dynamodb-read"
-  description = "Read the custodian table"
+resource "aws_iam_policy" "document-types__dynamodb-read" {
+  name = "${local.prefix}--document-types--dynamodb-read"
+  description = "Read the document-types table"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -25,7 +25,7 @@ resource "aws_iam_policy" "custodian__dynamodb-read" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_kms_key.custodian.arn
+          aws_kms_key.document-types.arn
         ]
       },
       {
@@ -36,16 +36,16 @@ resource "aws_iam_policy" "custodian__dynamodb-read" {
           "dynamodb:GetItem",
         ],
         Resource = [
-          "${aws_dynamodb_table.custodian.arn}*"
+          "${aws_dynamodb_table.document-types.arn}*"
         ]
       }
     ]
   })
 }
 
-resource "aws_iam_policy" "custodian__dynamodb-write" {
-  name = "${local.prefix}--custodian--dynamodb-write"
-  description = "Write to the custodian table"
+resource "aws_iam_policy" "document-types__dynamodb-write" {
+  name = "${local.prefix}--document-types--dynamodb-write"
+  description = "Write to the document-types table"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -56,7 +56,7 @@ resource "aws_iam_policy" "custodian__dynamodb-write" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_kms_key.custodian.arn
+          aws_kms_key.document-types.arn
         ]
       },
       {
@@ -67,7 +67,7 @@ resource "aws_iam_policy" "custodian__dynamodb-write" {
           "dynamodb:DeleteItem",
         ],
         Resource = [
-          "${aws_dynamodb_table.custodian.arn}*"
+          "${aws_dynamodb_table.document-types.arn}*"
         ]
       }
     ]

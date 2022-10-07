@@ -1,20 +1,20 @@
-resource "aws_dynamodb_table" "document-reference" {
-  name           = "${local.prefix}--document-reference"
+resource "aws_dynamodb_table" "producer" {
+  name           = "${local.prefix}--producer"
   billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "nhs_number"
+  hash_key       = "ods_code"
   attribute {
-    name = "nhs_number"
+    name = "ods_code"
     type = "S"
   }
   server_side_encryption {
     enabled = true
-    kms_key_arn = aws_kms_key.document-reference.arn
+    kms_key_arn = aws_kms_key.producer.arn
   }
 }
 
-resource "aws_iam_policy" "document-reference__dynamodb-read" {
-  name = "${local.prefix}--document-reference--dynamodb-read"
-  description = "Read the document-reference table"
+resource "aws_iam_policy" "producer__dynamodb-read" {
+  name = "${local.prefix}--producer--dynamodb-read"
+  description = "Read the producer table"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -25,7 +25,7 @@ resource "aws_iam_policy" "document-reference__dynamodb-read" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_kms_key.document-reference.arn
+          aws_kms_key.producer.arn
         ]
       },
       {
@@ -36,16 +36,16 @@ resource "aws_iam_policy" "document-reference__dynamodb-read" {
           "dynamodb:GetItem",
         ],
         Resource = [
-          "${aws_dynamodb_table.document-reference.arn}*"
+          "${aws_dynamodb_table.producer.arn}*"
         ]
       }
     ]
   })
 }
 
-resource "aws_iam_policy" "document-reference__dynamodb-write" {
-  name = "${local.prefix}--document-reference--dynamodb-write"
-  description = "Write to the document-reference table"
+resource "aws_iam_policy" "producer__dynamodb-write" {
+  name = "${local.prefix}--producer--dynamodb-write"
+  description = "Write to the producer table"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -56,7 +56,7 @@ resource "aws_iam_policy" "document-reference__dynamodb-write" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_kms_key.document-reference.arn
+          aws_kms_key.producer.arn
         ]
       },
       {
@@ -67,7 +67,7 @@ resource "aws_iam_policy" "document-reference__dynamodb-write" {
           "dynamodb:DeleteItem",
         ],
         Resource = [
-          "${aws_dynamodb_table.document-reference.arn}*"
+          "${aws_dynamodb_table.producer.arn}*"
         ]
       }
     ]
