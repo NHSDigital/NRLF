@@ -1,32 +1,20 @@
-locals {
-  kms = {
-    deletion_window_in_days = var.deletion_window_in_days
-  }
+module "kms__cloudwatch" {
+  source         = "./modules/kms"
+  name           = "cloudwatch"
+  assume_account = var.assume_account
+  prefix         = local.prefix
 }
 
-variable "deletion_window_in_days" {
-  type    = number
-  default = 7
+module "kms__custodian" {
+  source         = "./modules/kms"
+  name           = "custodian"
+  assume_account = var.assume_account
+  prefix         = local.prefix
 }
 
-data "aws_iam_policy_document" "kms_default_policy" {
-  statement {
-    principals {
-      type = "AWS"
-
-      identifiers = [
-        "arn:aws:iam::${var.assume_account}:root",
-      ]
-    }
-
-    actions = [
-      "kms:*",
-    ]
-
-    resources = [
-      "*"
-    ]
-
-    sid = "Enable IAM User Permissions"
-  }
+module "kms__document-reference" {
+  source         = "./modules/kms"
+  name           = "document-reference"
+  assume_account = var.assume_account
+  prefix         = local.prefix
 }
