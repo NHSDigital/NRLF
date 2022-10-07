@@ -11,7 +11,7 @@ PATH_TO_OUTPUT = PATH_TO_HERE.parent / "output.json"
 PATH_TO_WORKSPACE = PATH_TO_HERE.parent / ".terraform" / "environment"
 ROLE_ARN = "arn:aws:iam::{account_id}:role/terraform".format
 ROLE_SESSION_NAME = "integration-test-{timestamp}".format
-TABLE_NAME_SUFFIXES = ["custodian", "document-reference"]
+TABLE_NAME_SUFFIXES = ["producer", "document-types"]
 
 
 def _get_access_token(account_id: str) -> dict[str:str]:
