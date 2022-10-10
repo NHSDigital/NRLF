@@ -93,7 +93,7 @@ function _terraform() {
     ;;
     #----------------
     "destroy")
-     if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+    if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
     then
         echo "Please log in as the mgmt account" >&2
         return 1
