@@ -1,9 +1,9 @@
 resource "aws_dynamodb_table" "producer" {
   name           = "${local.prefix}--producer"
   billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "ods_code"
+  hash_key       = "id"
   attribute {
-    name = "ods_code"
+    name = "id"
     type = "S"
   }
   server_side_encryption {

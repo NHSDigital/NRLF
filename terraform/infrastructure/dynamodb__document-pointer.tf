@@ -1,10 +1,21 @@
 resource "aws_dynamodb_table" "document-pointer" {
   name           = "${local.prefix}--document-pointer"
   billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "ods_code"
+  hash_key       = "id"
   attribute {
-    name = "ods_code"
+    name = "id"
     type = "S"
+  }
+  attribute {
+    name = "nhs_number"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name               = "idx_nhs_number_by_id"
+    hash_key           = "nhs_number"
+    range_key          = "id"
+    projection_type    = "ALL"
   }
   server_side_encryption {
     enabled = true

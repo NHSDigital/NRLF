@@ -1,9 +1,9 @@
 resource "aws_dynamodb_table" "document-type" {
   name           = "${local.prefix}--document-type"
   billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "nhs_number"
+  hash_key       = "snomed_code"
   attribute {
-    name = "nhs_number"
+    name = "snomed_code"
     type = "S"
   }
   server_side_encryption {
