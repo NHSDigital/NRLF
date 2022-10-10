@@ -10,6 +10,10 @@ pydantic = "*"
 pyhcl = "*"
 pre-commit = "*"
 sh = "*"
+flake8 = "*"
+pytest = "*"
+requests = "*"
+datamodel-code-generator = "*"
 
 [requires]
 python_version = "3.9"
