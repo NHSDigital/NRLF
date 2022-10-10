@@ -3,10 +3,10 @@ module "consumer__readDocumentReference" {
   apitype                = "consumer"
   name                   = "readDocumentReference"
   region                 = local.region
-  assume_account         = var.assume_account
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${aws_api_gateway_rest_api.consumer.id}/*/DocumentReference/{id}"
+  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/DocumentReference/{id}"
+  kms_key_id             = module.kms__cloudwatch.kms_arn
 }
 
 module "consumer__searchDocumentReference" {
@@ -14,10 +14,10 @@ module "consumer__searchDocumentReference" {
   apitype                = "consumer"
   name                   = "searchDocumentReference"
   region                 = local.region
-  assume_account         = var.assume_account
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${aws_api_gateway_rest_api.consumer.id}/*/DocumentReference"
+  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/DocumentReference"
+  kms_key_id             = module.kms__cloudwatch.kms_arn
 }
 
 module "consumer__searchViaPostDocumentReference" {
@@ -25,10 +25,10 @@ module "consumer__searchViaPostDocumentReference" {
   apitype                = "consumer"
   name                   = "searchViaPostDocumentReference"
   region                 = local.region
-  assume_account         = var.assume_account
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${aws_api_gateway_rest_api.consumer.id}/*/DocumentReference/_search"
+  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/DocumentReference/_search"
+  kms_key_id             = module.kms__cloudwatch.kms_arn
 }
 
 module "producer__createDocumentReference" {
@@ -36,10 +36,10 @@ module "producer__createDocumentReference" {
   apitype                = "producer"
   name                   = "createDocumentReference"
   region                 = local.region
-  assume_account         = var.assume_account
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${aws_api_gateway_rest_api.producer.id}/*/DocumentReference"
+  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/DocumentReference"
+  kms_key_id             = module.kms__cloudwatch.kms_arn
 }
 
 module "producer__deleteDocumentReference" {
@@ -47,10 +47,10 @@ module "producer__deleteDocumentReference" {
   apitype                = "producer"
   name                   = "deleteDocumentReference"
   region                 = local.region
-  assume_account         = var.assume_account
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${aws_api_gateway_rest_api.producer.id}/*/DocumentReference/{id}"
+  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/DocumentReference/{id}"
+  kms_key_id             = module.kms__cloudwatch.kms_arn
 }
 
 module "producer__readDocumentReference" {
@@ -58,10 +58,10 @@ module "producer__readDocumentReference" {
   apitype                = "producer"
   name                   = "readDocumentReference"
   region                 = local.region
-  assume_account         = var.assume_account
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${aws_api_gateway_rest_api.producer.id}/*/DocumentReference/{id}"
+  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/DocumentReference/{id}"
+  kms_key_id             = module.kms__cloudwatch.kms_arn
 }
 
 
@@ -70,10 +70,10 @@ module "producer__searchDocumentReference" {
   apitype                = "producer"
   name                   = "searchDocumentReference"
   region                 = local.region
-  assume_account         = var.assume_account
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${aws_api_gateway_rest_api.producer.id}/*/DocumentReference"
+  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/DocumentReference"
+  kms_key_id             = module.kms__cloudwatch.kms_arn
 }
 
 module "producer__updateDocumentReference" {
@@ -81,8 +81,8 @@ module "producer__updateDocumentReference" {
   apitype                = "producer"
   name                   = "updateDocumentReference"
   region                 = local.region
-  assume_account         = var.assume_account
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${aws_api_gateway_rest_api.producer.id}/*/DocumentReference/{id}"
+  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/DocumentReference/{id}"
+  kms_key_id             = module.kms__cloudwatch.kms_arn
 }

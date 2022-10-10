@@ -1,8 +1,6 @@
 module "consumer__gateway" {
   source                 = "./modules/api_gateway"
   apitype                = "consumer"
-  region                 = local.region
-  assume_account         = var.assume_account
   prefix                 = local.prefix
   lambdas                = {
     environment                           = terraform.workspace
@@ -16,8 +14,6 @@ module "consumer__gateway" {
 module "producer__gateway" {
   source                 = "./modules/api_gateway"
   apitype                = "producer"
-  region                 = local.region
-  assume_account         = var.assume_account
   prefix                 = local.prefix
   lambdas                = {
     environment                    = terraform.workspace

@@ -1,7 +1,7 @@
 resource "aws_api_gateway_rest_api" "api_gateway_rest_api" {
   name        = "${var.prefix}--${var.apitype}"
   description = "Manages an API Gateway Rest API."
-  body = templatefile("${path.module}/../../../api/${var.apitype}/swagger.yaml", var.lambdas)
+  body = templatefile("${path.module}/../../../../api/${var.apitype}/swagger.yaml", var.lambdas)
 }
 
 resource "aws_api_gateway_deployment" "api_gateway_deployment" {
