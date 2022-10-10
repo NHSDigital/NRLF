@@ -1,8 +1,8 @@
 resource "aws_kms_key" "kms_key" {
-  description             = "${title(var.name)} KMS key"
+  description             = "${title(var.name)} table KMS key"
   deletion_window_in_days = local.kms.deletion_window_in_days
 
-  policy = data.aws_iam_policy_document.policy_document.json
+  #policy = data.aws_iam_policy_document.policy_document.json
 
 }
 

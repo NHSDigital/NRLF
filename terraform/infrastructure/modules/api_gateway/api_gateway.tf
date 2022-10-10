@@ -50,7 +50,7 @@ resource "aws_api_gateway_stage" "api_gateway_stage" {
   ]
 }
 
-resource "aws_api_gateway_method_settings" "consumer" {
+resource "aws_api_gateway_method_settings" "api_gateway_method_settings" {
   rest_api_id = aws_api_gateway_rest_api.api_gateway_rest_api.id
   stage_name  = aws_api_gateway_stage.api_gateway_stage.stage_name
   method_path = "*/*"
