@@ -60,5 +60,5 @@ resource "aws_lambda_permission" "producer__readDocumentReference__lambda-permis
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.producer__readDocumentReference.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${local.region}:${var.assume_account}:${aws_api_gateway_rest_api.producer.id}/*/DocumentReference/{id}"
+  source_arn    = "arn:aws:execute-api:${local.region}:${var.assume_account}:${aws_api_gateway_rest_api.producer.id}/*/GET/DocumentReference/{id}"
 }

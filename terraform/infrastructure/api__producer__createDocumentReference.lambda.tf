@@ -60,5 +60,5 @@ resource "aws_lambda_permission" "producer__createDocumentReference__lambda-perm
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.producer__createDocumentReference.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${local.region}:${var.assume_account}:${aws_api_gateway_rest_api.producer.id}/*/DocumentReference"
+  source_arn    = "arn:aws:execute-api:${local.region}:${var.assume_account}:${aws_api_gateway_rest_api.producer.id}/*/POST/DocumentReference"
 }
