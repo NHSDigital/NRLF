@@ -93,10 +93,26 @@ function _terraform() {
     ;;
     #----------------
     "destroy")
+    if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+    then
+        echo "Please log in as the mgmt account" >&2
+        return 1
+    fi
+
+    if [[ -z ${env} ]];
+    then
+        echo "Non-mgmt parameter required" >&2
+        echo "Usage:    nrlf terraform bootstrap-non-mgmt <ENV>"
+        return 1
+    fi
+
+    local profile_name=${PROFILE_PREFIX}-$env-admin
+    local aws_account_id=$(_get_aws_info "$profile_name" aws_account_id)
+
     cd $root/terraform/infrastructure
     terraform workspace select $env || terraform workspace new $env || return 1
     terraform init || return 1
-    terraform destroy -var-file=./etc/dev.tfvars $args || return 1
+    terraform destroy -var-file=./etc/dev.tfvars -var "assume_account=${aws_account_id}" || return 1
     if [ $env != "default" ];
     then
       terraform workspace select default || return 1

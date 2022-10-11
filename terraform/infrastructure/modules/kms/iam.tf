@@ -1,20 +1,4 @@
-resource "aws_kms_key" "cloudwatch" {
-  description             = "Cloudwatch log KMS key"
-  deletion_window_in_days = local.kms.deletion_window_in_days
-
-  policy = data.aws_iam_policy_document.cloudwatch.json
-
-}
-
-resource "aws_kms_alias" "cloudwatch" {
-  name          = "alias/${local.prefix}--cloudwatch"
-  target_key_id = aws_kms_key.cloudwatch.key_id
-}
-
-
-
-
-data "aws_iam_policy_document" "cloudwatch" {
+data "aws_iam_policy_document" "policy_document" {
   source_policy_documents = [
     data.aws_iam_policy_document.kms_default_policy.json
   ]
@@ -41,5 +25,27 @@ data "aws_iam_policy_document" "cloudwatch" {
         "arn:aws:logs:eu-west-2:${var.assume_account}:log-group:*"
       ]
     }
+  }
+}
+
+data "aws_iam_policy_document" "kms_default_policy" {
+  statement {
+    principals {
+      type = "AWS"
+
+      identifiers = [
+        "arn:aws:iam::${var.assume_account}:root",
+      ]
+    }
+
+    actions = [
+      "kms:*",
+    ]
+
+    resources = [
+      "*"
+    ]
+
+    sid = "Enable IAM User Permissions"
   }
 }
