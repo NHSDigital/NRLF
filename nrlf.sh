@@ -1,9 +1,9 @@
 #!/bin/bash
 
 export PIPENV_VENV_IN_PROJECT=1
-project_root=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)
+root=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)
 
-for script_file in "$project_root"/scripts/*.sh; do
+for script_file in "$root"/scripts/*.sh; do
   source $script_file
 done
 
@@ -25,7 +25,7 @@ function nrlf() {
   current=$(pwd)
   local command=$1
 
-  cd $project_root
+  cd $root
 
   case $command in
     "aws") _aws "${@:2}" ;;

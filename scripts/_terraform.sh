@@ -34,171 +34,179 @@ function _get_mgmt_account(){
 }
 
 function _terraform() {
-  command=$1
-  env=$2
-  args=(${@:3})
+  local command=$1
+  local env
+  local aws_account_id
+  local var_file
+  env=$(_get_environment_name "$2")
+  aws_account_id=$(_get_aws_account_id "$env")
+  var_file=$(_get_environment_vars_file "$env")
+  plan_file="./tfplan"
 
   case $command in
     #----------------
     "validate")
-    cd $root/terraform/infrastructure
-    terraform validate $args || return 1
+      cd $root/terraform/infrastructure
+      terraform validate "${@:3}" || return 1
     ;;
     #----------------
     "fmt")
-    cd $root/terraform/infrastructure
-    terraform fmt $args || return 1
+      cd $root/terraform/infrastructure
+      terraform fmt "${@:3}" || return 1
     ;;
     #----------------
     "init")
-    if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
-    then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-    fi
+      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+      then
+          echo "Please log in as the mgmt account" >&2
+          return 1
+      fi
 
-    cd $root/terraform/infrastructure
-    terraform workspace select $env || terraform workspace new $env || return 1
-    terraform init $args || return 1
+      cd $root/terraform/infrastructure
+      terraform init "${@:3}" || return 1
+      terraform workspace select "$env" || terraform workspace new "$env" || return 1
     ;;
     #----------------
     "plan")
-    if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
-    then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-    fi
+      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+      then
+          echo "Please log in as the mgmt account" >&2
+          return 1
+      fi
 
-    local profile_name=${PROFILE_PREFIX}-$env-admin
-    local aws_account_id=$(_get_aws_info "$profile_name" aws_account_id)
-
-    cd $root/terraform/infrastructure
-    terraform init || return 1
-    terraform workspace select $env || terraform workspace new $env || return 1
-    terraform init || return 1
-    terraform plan -var-file="./etc/${env}.tfvars" -out=./tfplan -var "assume_account=${aws_account_id}"|| return 1
+      cd $root/terraform/infrastructure
+      terraform init || return 1
+      terraform workspace select "$env" || terraform workspace new "$env" || return 1
+      terraform plan -var-file="$var_file" -out="$plan_file" -var "assume_account=${aws_account_id}" "${@:3}" || return 1
     ;;
     #----------------
     "apply")
-    if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
-    then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-    fi
+      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+      then
+          echo "Please log in as the mgmt account" >&2
+          return 1
+      fi
 
-    cd $root/terraform/infrastructure
-    terraform workspace select $env || terraform workspace new $env || return 1
-    terraform init || return 1
-    terraform apply ./tfplan || return 1
+      cd $root/terraform/infrastructure
+      terraform workspace select "$env" || terraform workspace new "$env" || return 1
+      terraform apply "$plan_file" "${@:3}" || return 1
     ;;
     #----------------
     "destroy")
-    if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
-    then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-    fi
+      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+      then
+          echo "Please log in as the mgmt account" >&2
+          return 1
+      fi
 
-    if [[ -z ${env} ]];
-    then
-        echo "Non-mgmt parameter required" >&2
-        echo "Usage:    nrlf terraform bootstrap-non-mgmt <ENV>"
-        return 1
-    fi
+      if [[ -z ${env} ]];
+      then
+          echo "Non-mgmt parameter required" >&2
+          echo "Usage:    nrlf terraform bootstrap-non-mgmt <ENV>"
+          return 1
+      fi
 
-    local profile_name=${PROFILE_PREFIX}-$env-admin
-    local aws_account_id=$(_get_aws_info "$profile_name" aws_account_id)
-
-    cd $root/terraform/infrastructure
-    terraform workspace select $env || terraform workspace new $env || return 1
-    terraform init || return 1
-    terraform destroy -var-file=./etc/dev.tfvars -var "assume_account=${aws_account_id}" || return 1
-    if [ $env != "default" ];
-    then
-      terraform workspace select default || return 1
-      terraform workspace delete $env || return 1
-    fi
+      cd $root/terraform/infrastructure
+      terraform workspace select "$env" || terraform workspace new "$env" || return 1
+      terraform destroy -var-file="$var_file" -var "assume_account=${aws_account_id}" || return 1
+      if [ "$env" != "default" ];
+      then
+        terraform workspace select default || return 1
+        terraform workspace delete "$env" || return 1
+      fi
     ;;
     #----------------
     "bootstrap-non-mgmt")
-    if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
-    then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-    fi
+      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+      then
+          echo "Please log in as the mgmt account" >&2
+          return 1
+      fi
 
-    if [[ -z ${env} ]];
-    then
-        echo "Non-mgmt parameter required" >&2
-        echo "Usage:    nrlf terraform bootstrap-non-mgmt <ENV>"
-        return 1
-    fi
+      if [[ -z ${env} ]];
+      then
+          echo "Non-mgmt parameter required" >&2
+          echo "Usage:    nrlf terraform bootstrap-non-mgmt <ENV>"
+          return 1
+      fi
 
-    local profile_name=${PROFILE_PREFIX}-$env-admin
-    local aws_account_id=$(_get_aws_info "$profile_name" aws_account_id)
-
-    cd $root/terraform/bootstrap/non-mgmt
-    terraform init -upgrade || return 1
-    terraform workspace select $env || terraform workspace new $env || return 1
-    terraform init || return 1
-    terraform plan -var-file=etc/non-mgmt.tfvars -out=./tfplan -var "assume_account=${aws_account_id}" || return 1
-    terraform apply ./tfplan || return 1
+      cd $root/terraform/bootstrap/non-mgmt
+      terraform init -upgrade || return 1
+      terraform workspace select "$env" || terraform workspace new "$env" || return 1
+      terraform init || return 1
+      terraform plan -var-file=./etc/non-mgmt.tfvars -out="$plan_file" -var "assume_account=${aws_account_id}" || return 1
+      terraform apply "$plan_file" || return 1
     ;;
     #----------------
     "destroy-bootstrap-non-mgmt")
-    if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
-    then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-    fi
+      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+      then
+          echo "Please log in as the mgmt account" >&2
+          return 1
+      fi
 
-    if [[ -z ${env} ]];
-    then
-        echo "Non-mgmt parameter required" >&2
-        echo "Usage:    nrlf terraform destroy-non-mgmt <ENV>"
-        return 1
-    fi
+      if [[ -z ${env} ]];
+      then
+          echo "Non-mgmt parameter required" >&2
+          echo "Usage:    nrlf terraform destroy-non-mgmt <ENV>"
+          return 1
+      fi
 
-    local profile_name=${PROFILE_PREFIX}-$env-admin
-    local aws_account_id=$(_get_aws_info "$profile_name" aws_account_id) || return 1
-
-    cd $root/terraform/bootstrap/non-mgmt
-    terraform workspace select $env || terraform workspace new $env || return 1
-    terraform init || return 1
-    terraform plan -destroy -var-file=etc/non-mgmt.tfvars -out=./tfplan -var "assume_account=${aws_account_id}" || return 1
-    terraform apply -destroy ./tfplan || return 1
-    if [ $env != "default" ];
-    then
-      terraform workspace select default || return 1
-      terraform workspace delete $env || return 1
-    fi
+      cd $root/terraform/bootstrap/non-mgmt
+      terraform workspace select "$env" || terraform workspace new "$env" || return 1
+      terraform init || return 1
+      terraform plan -destroy -var-file=etc/non-mgmt.tfvars -out="$plan_file" -var "assume_account=${aws_account_id}" || return 1
+      terraform apply -destroy ./tfplan || return 1
+      if [ "$env" != "default" ];
+      then
+        terraform workspace select default || return 1
+        terraform workspace delete "$env" || return 1
+      fi
     ;;
     #----------------
-    *) _terraform_help $args ;;
+    *) _terraform_help ;;
   esac
 }
 
-# _get_environment_name() {
-#     local environment=$1
+ function _get_environment_name() {
+     local environment=$1
 
-#     if [[ -z $environment ]]; then
-#         if [[ -z $TERRAFORM_LOCAL_WORKSPACE_OVERRIDE ]]; then
-#             echo $(whoami | openssl dgst -sha1 -binary | xxd -p | cut -c1-8)
-#         else
-#             echo $TERRAFORM_LOCAL_WORKSPACE_OVERRIDE
-#         fi
-#     else
-#         echo $environment
-#     fi
-# }
+     if [[ -z $environment ]]; then
+         if [[ -z $TERRAFORM_LOCAL_WORKSPACE_OVERRIDE ]]; then
+             echo "$(whoami | openssl dgst -sha1 -binary | xxd -p | cut -c1-8)"
+         else
+             echo "$TERRAFORM_LOCAL_WORKSPACE_OVERRIDE"
+         fi
+     else
+         echo "$environment"
+     fi
+ }
 
-# _get_environment_vars_file() {
-#     local environment=$1
-#     local vars_prefix="prod"
+function _get_profile_name() {
+  local environment=$1
 
-#     if [[ $environment != "prod" ]]; then
-#         vars_prefix="dev"
-#     fi
+  if [ "$environment" = "prod" ]; then
+    echo "${PROFILE_PREFIX}-prod-admin"
+  elif [ "$environment" = "uat" ]; then
+    echo "${PROFILE_PREFIX}-test-admin"
+  else
+    echo "${PROFILE_PREFIX}-dev-admin"
+  fi
+}
 
-#     echo "./etc/${vars_prefix}.tfvars"
-# }
+function _get_aws_account_id() {
+  local profile_name
+  profile_name=$(_get_profile_name "$1")
+  echo "$(_get_aws_info "$profile_name" "aws_account_id")"
+}
+
+ function _get_environment_vars_file() {
+     local environment=$1
+     local vars_prefix="prod"
+
+     if [[ $environment != "prod" ]]; then
+         vars_prefix="dev"
+     fi
+
+     echo "./etc/${vars_prefix}.tfvars"
+ }

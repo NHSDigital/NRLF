@@ -15,6 +15,7 @@ pytest = "*"
 requests = "*"
 datamodel-code-generator = "*"
 build-scripts = { path = "./scripts/build_scripts/", editable = true }
+awscli = "*"
 
 [requires]
 python_version = "3.9"
