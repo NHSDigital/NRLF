@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 pydantic = "*"
+nhs-number = "==1.2.1"
 
 [dev-packages]
 pyhcl = "*"
