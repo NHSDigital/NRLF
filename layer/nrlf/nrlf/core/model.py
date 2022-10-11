@@ -16,8 +16,7 @@ class DocumentPointer(BaseModel):
     nhs_number: DynamoDbType[str]
     status: DynamoDbType[str]
     version: DynamoDbType[int]
-    raw_document: DynamoDbType[str]
-    validated_document: DynamoDbType[str]
+    document: DynamoDbType[str]
 
     @root_validator(pre=True)
     def convert_to_dynamodb_format(cls, values):
@@ -41,14 +40,14 @@ class DocumentPointer(BaseModel):
         validate_status(status=value.raw_value)
         return value
 
-    @validator("raw_document", "validated_document")
+    @validator("document")
     def validate_document(value: any) -> DynamoDbType[str]:
         validate_document(document=value.raw_value)
         return value
 
 
-def fhir_to_core(raw_document: str, api_version: int) -> DocumentPointer:
-    fhir_json = json.loads(raw_document)
+def fhir_to_core(document: str, api_version: int) -> DocumentPointer:
+    fhir_json = json.loads(document)
     fhir_model = DocumentReference(**fhir_json)
     core_model = DocumentPointer(
         id=fhir_model.masterIdentifier.value,
@@ -56,7 +55,6 @@ def fhir_to_core(raw_document: str, api_version: int) -> DocumentPointer:
         producer_id=fhir_model.custodian.id,
         status=fhir_model.status,
         version=api_version,
-        raw_document=raw_document,
-        validated_document=fhir_model.json(exclude_none=True),
+        document=document,
     )
     return core_model
