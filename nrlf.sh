@@ -16,13 +16,13 @@ function _nrlf_commands_help() {
   echo "  make      - calls the make/build routines"
   echo "  aws       - aws commands"
   echo "  terraform - terraform commands"
+  echo "  bootstrap - bootstrap commands"
   echo "  test      - run tests"
   echo
 }
 
 function nrlf() {
-  local current
-  current=$(pwd)
+  local current=$(pwd)
   local command=$1
 
   cd $root
@@ -32,6 +32,7 @@ function nrlf() {
     "make") _make "${@:2}" ;;
     "terraform") _terraform "${@:2}" ;;
     "test") _test "${@:2}" ;;
+    "bootstrap") _bootstrap "${@:2}" ;;
     *) _nrlf_commands_help ;;
   esac
 

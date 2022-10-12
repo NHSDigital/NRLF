@@ -38,5 +38,5 @@ function _clean() {
 }
 
 function _install() {
-  pipenv install --dev
+  pipenv install --dev || return 1
 }
