@@ -1,0 +1,18 @@
+name: "Download artifact"
+description: "Download artifact"
+inputs:
+  name:
+    description: "Name of artifact. Will be prefixed with GITHUB_SHA_SHORT"
+    required: true
+  path:
+    description: "Path to restore artifact"
+    required: false
+    default: ./
+runs:
+  using: "composite"
+  steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ env.GITHUB_SHA_SHORT }}-${{ inputs.name }}
+        path: ${{ inputs.path }}

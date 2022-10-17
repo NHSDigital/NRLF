@@ -18,6 +18,7 @@ function _nrlf_commands_help() {
   echo "  terraform - terraform commands"
   echo "  bootstrap - bootstrap commands"
   echo "  test      - run tests"
+  echo "  lint      - lint commands"
   echo
 }
 
@@ -33,6 +34,7 @@ function nrlf() {
     "terraform") _terraform "${@:2}" ;;
     "test") _test "${@:2}" ;;
     "bootstrap") _bootstrap "${@:2}" ;;
+    "lint") _lint "${@:2}" ;;
     *) _nrlf_commands_help ;;
   esac
 

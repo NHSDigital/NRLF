@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "fc2d845dea6eafc1655c2f2392770f84171f39bb9c23c21ad47ce41b2686d844"
+            "sha256": "465afdb7a6225b081a8a3f262510bd8f8e61ff3f04787980f1a0788bc0686ec0"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -22,7 +22,6 @@
                 "sha256:ee03973e4866a333da703cbead9a7f31173be372db9efb9e0d89be2c7dad6247"
             ],
             "index": "pypi",
-            "markers": "python_full_version >= '3.6.2' and python_full_version < '4.0.0'",
             "version": "==1.31.1"
         },
         "aws-xray-sdk": {
@@ -34,19 +33,18 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:7881fc380f2f489ae9b3a2f2448334aef9f7be58d85a7a0e8c10458247b09afa",
-                "sha256:db9f04eeb942e7998d1971c35e1658e2d9d6687166a4ebc036f484a71a79bbeb"
+                "sha256:f13db0beb3c9fe2cc1ed0f031189f144610d2909b5874a616e77b0bd1ae3b686",
+                "sha256:f4842b395d1580454756622069f4ca0408993885ecede967001d2c101201cdfa"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.24.93"
+            "version": "==1.24.94"
         },
         "botocore": {
             "hashes": [
-                "sha256:7648891692c3c69038eef902f8d64af59f91211f713fe9072fb83ecdd310dbbc",
-                "sha256:d5200f7b9150cdb91c9d3994980870d7bb4554e19c4d9d847f64626d8ceacf95"
+                "sha256:8237c070d2ab29fac4fbcfe9dd2e84e0ee147402e0fed3ac1629f92459c7f1d2"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.27.93"
+            "version": "==1.27.94"
         },
         "dnspython": {
             "hashes": [
@@ -96,7 +94,7 @@
         },
         "nrlf-lambda-pipeline": {
             "git": "https://github.com/NHSDigital/nrlf-lambda-pipeline.git",
-            "ref": "09bc0367f7aa1faa7c6ef610d2ba1e4024339e62"
+            "ref": "6552da5a94b2aced5f5f1498f6e053870f881d7b"
         },
         "pydantic": {
             "extras": [
@@ -273,11 +271,11 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:3caae534c15f519b5c5159176b060098a6bf6317e7bfac7a427d4684a69e37a9",
-                "sha256:f2755c995db186a990330f898fd280880d3e0bf915326486773035646b4f6bf4"
+                "sha256:7a4f6830a93c6e22f30f9cdafbcffa41114bef0775d40ebe90acef798402672e",
+                "sha256:f9dbac5eb171f09c7b4f43fa853223464cd63eb7df0fd8cff97947a03f63901e"
             ],
             "index": "pypi",
-            "version": "==1.25.94"
+            "version": "==1.25.95"
         },
         "black": {
             "hashes": [
@@ -303,24 +301,23 @@
                 "sha256:f513588da599943e0cde4e32cc9879e825d58720d6557062d1098c5ad80080e1",
                 "sha256:fba8a281e570adafb79f7755ac8721b6cf1bbf691186a287e990c7929c7692ff"
             ],
-            "markers": "python_version >= '3.7'",
+            "index": "pypi",
             "version": "==22.10.0"
         },
         "boto3": {
             "hashes": [
-                "sha256:7881fc380f2f489ae9b3a2f2448334aef9f7be58d85a7a0e8c10458247b09afa",
-                "sha256:db9f04eeb942e7998d1971c35e1658e2d9d6687166a4ebc036f484a71a79bbeb"
+                "sha256:f13db0beb3c9fe2cc1ed0f031189f144610d2909b5874a616e77b0bd1ae3b686",
+                "sha256:f4842b395d1580454756622069f4ca0408993885ecede967001d2c101201cdfa"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.24.93"
+            "version": "==1.24.94"
         },
         "botocore": {
             "hashes": [
-                "sha256:7648891692c3c69038eef902f8d64af59f91211f713fe9072fb83ecdd310dbbc",
-                "sha256:d5200f7b9150cdb91c9d3994980870d7bb4554e19c4d9d847f64626d8ceacf95"
+                "sha256:8237c070d2ab29fac4fbcfe9dd2e84e0ee147402e0fed3ac1629f92459c7f1d2"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.27.93"
+            "version": "==1.27.94"
         },
         "build-scripts": {
             "editable": true,
@@ -664,11 +661,11 @@
         },
         "moto": {
             "hashes": [
-                "sha256:6c6d9aa974fd1d74fcaf7441d397bd3005fb1d92a41116d5d8ae633f0171bbd4",
-                "sha256:869cac77cfc2e03be955453a224f6c3e887878f4b43f2d68477f236e615bd462"
+                "sha256:3bd8a72dc385819c84ed3f9d18c386985634041c6ae544d957bd8ab88c6c15f1",
+                "sha256:8761880f5f3c3af27daac3882a56aae7e21fa2121f430cf917e55e977bddaf6b"
             ],
             "index": "pypi",
-            "version": "==4.0.7"
+            "version": "==4.0.8"
         },
         "mypy-extensions": {
             "hashes": [
@@ -895,7 +892,8 @@
         },
         "pytz": {
             "hashes": [
-                "sha256:335ab46900b1465e714b4fda4963d87363264eb662aab5e65da039c25f1f5b22"
+                "sha256:335ab46900b1465e714b4fda4963d87363264eb662aab5e65da039c25f1f5b22",
+                "sha256:c4d88f472f54d615e9cd582a5004d1e5f624854a6a27a6211591c251f22a6914"
             ],
             "version": "==2022.5"
         },
@@ -1054,7 +1052,7 @@
                 "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc",
                 "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"
             ],
-            "markers": "python_version >= '3.7'",
+            "markers": "python_full_version < '3.11.0a7'",
             "version": "==2.0.1"
         },
         "typed-ast": {
@@ -1120,11 +1118,11 @@
         },
         "werkzeug": {
             "hashes": [
-                "sha256:1ce08e8093ed67d638d63879fd1ba3735817f7a80de3674d293f5984f25fb6e6",
-                "sha256:72a4b735692dd3135217911cbeaa1be5fa3f62bffb8745c5215420a03dc55255"
+                "sha256:7ea2d48322cc7c0f8b3a215ed73eabd7b5d75d0b50e31ab006286ccff9e00b8f",
+                "sha256:f979ab81f58d7318e064e99c4506445d60135ac5cd2e177a2de0089bfd4c9bd5"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==2.1.2"
+            "version": "==2.2.2"
         },
         "xmltodict": {
             "hashes": [

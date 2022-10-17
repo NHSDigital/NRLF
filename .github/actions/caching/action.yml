@@ -1,0 +1,17 @@
+name: "Caching"
+description: "Upload and download cache"
+inputs:
+  name:
+    description: "Name of cache. Will be prefixed with GITHUB_SHA_SHORT"
+    required: true
+  path:
+    description: "Path of files to cache"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Create cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ env.GITHUB_SHA_SHORT }}-${{ inputs.name }}

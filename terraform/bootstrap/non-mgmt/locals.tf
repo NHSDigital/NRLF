@@ -3,7 +3,4 @@ locals {
   project     = "nhsd-nrlf"
   environment = terraform.workspace
   prefix      = "${local.project}--${local.environment}"
-  kms = {
-    deletion_window_in_days = 7
-  }
 }

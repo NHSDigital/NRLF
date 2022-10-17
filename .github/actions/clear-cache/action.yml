@@ -1,0 +1,40 @@
+name: "Clear cache"
+description: "Clear specified cache"
+inputs:
+  name:
+    description: "Comma separated list of name of cache to clear. Each name will be prefixed with GITHUB_SHA_SHORT"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Set env
+      run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Clear cache
+      uses: actions/github-script@v6
+      with:
+        script: |
+          console.log("About to clear")
+          const caches = await github.rest.actions.getActionsCacheList({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          })
+          const valid_cache_names = '${{ inputs.name }}'.split(',').map((name) => {
+            return `${process.env.GITHUB_SHA_SHORT}-${name}`
+          })
+          console.log("Cache names to clear")
+          console.log(valid_cache_names)
+          const caches_to_clear = caches.data.actions_caches.filter((cache) => {
+            return valid_cache_names.includes(cache.key)
+          })
+          for (const cache of caches_to_clear) {
+            console.log("Clearing cache")
+            console.log(cache)
+            github.rest.actions.deleteActionsCacheById({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              cache_id: cache.id,
+            })
+          }
+          console.log("Clear completed")
