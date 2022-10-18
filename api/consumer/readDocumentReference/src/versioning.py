@@ -43,10 +43,9 @@ def get_version_from_header(event) -> str:
     return accept_header.version
 
 
-def get_handler(requested_version: str, handler_versions: Dict[str, any]):
+def get_steps(requested_version: str, handler_versions: Dict[str, any]):
     version = get_largest_possible_version(requested_version, handler_versions)
     return handler_versions[version]
-
 
 def get_largest_possible_version(
     requested_version: str, handler_versions: Dict[str, any]

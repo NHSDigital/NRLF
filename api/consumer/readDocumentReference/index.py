@@ -1,4 +1,5 @@
 import os
+from lambda_pipeline.types import LambdaContext
 from src.handler import execute_handler, render_response
 from src.config import Config, build_persistent_dependencies
 
@@ -9,6 +10,9 @@ config = Config(
 dependencies = build_persistent_dependencies(config)
 
 
-def handler(event, context):
-    status_code, result = execute_handler(event, config, **dependencies)
+def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
+    if context is None:
+        context = LambdaContext()
+
+    status_code, result = execute_handler(event, context, config, **dependencies)
     return render_response(status_code, result)
