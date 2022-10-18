@@ -17,6 +17,10 @@ requests = "*"
 datamodel-code-generator = "*"
 build-scripts = { path = "./scripts/build_scripts/", editable = true }
 awscli = "*"
+nrlf = { path = "./layer/nrlf/", editable = true }
+lambda-utils = { path = "./layer/lambda_utils/", editable = true }
+moto = "*"
+boto3 = "*"
 
 [requires]
 python_version = "3.9"

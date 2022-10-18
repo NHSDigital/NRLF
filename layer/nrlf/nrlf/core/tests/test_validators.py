@@ -1,25 +1,26 @@
 import pytest
 
 from nrlf.core.validators import (
-    validate_document,
-    validate_id,
+    validate_tuple,
     validate_nhs_number,
     validate_status,
+    validate_timestamp,
+    make_timestamp,
 )
 
 
 @pytest.mark.parametrize(
-    ["id", "producer_id", "expected_outcome"],
+    ["tuple", "expected_outcome"],
     (
-        ["foo|bar", "foo", True],
-        ["foo|bar", "bar", False],
-        ["foo|bar", "baz", False],
+        ["foo|bar", True],
+        ["foo|bar|baz", False],
+        ["foo", False],
     ),
 )
-def test_validate_id(id, producer_id, expected_outcome):
+def test_validate_tuple(tuple, expected_outcome):
     outcome = True
     try:
-        validate_id(id=id, producer_id=producer_id)
+        validate_tuple(tuple=tuple)
     except ValueError:
         outcome = False
     assert expected_outcome == outcome
@@ -46,8 +47,6 @@ def test_validate_nhs_number(nhs_number, expected_outcome):
     ["status", "expected_outcome"],
     (
         ["current", True],
-        ["superseded", True],
-        ["entered-in-error", True],
         ["foo", False],
     ),
 )
@@ -61,16 +60,23 @@ def test_validate_status(status, expected_outcome):
 
 
 @pytest.mark.parametrize(
-    ["document", "expected_outcome"],
+    ["date", "expected_outcome"],
     (
-        ['{"foo": "bar"}', True],
+        ["2022-10-18T14:47:22.920Z", True],
         ["foo", False],
     ),
 )
-def test_validate_document(document, expected_outcome):
+def test_validate_timestamp(date, expected_outcome):
     outcome = True
     try:
-        validate_document(document=document)
+        validate_timestamp(date=date)
     except ValueError:
         outcome = False
     assert expected_outcome == outcome
+
+
+def test_make_timestamp():
+    from datetime import datetime
+
+    timestamp = make_timestamp()
+    validate_timestamp(timestamp)
