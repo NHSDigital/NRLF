@@ -79,7 +79,7 @@ nrlf make build
 In order to deploy the NRLF you will need to be able to login to the AWS account using MFA.
 
 ```
-nrlf aws login mgmt <mfa code>
+nrlf aws login mgmt-admin <mfa code>
 ```
 
 ## 4. Deploy the NRLF

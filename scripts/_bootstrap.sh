@@ -29,7 +29,7 @@ function _bootstrap() {
     cd $root/terraform/bootstrap/mgmt
     project_name=$(_get_project_name) || return 1
     region_name=$(_get_region_name) || return 1
-    state_bucket_name=${project_name}-terraform-state
+    state_bucket_name="${project_name}-terraform-state"
     aws s3api create-bucket --bucket ${state_bucket_name} --region us-east-1 --create-bucket-configuration LocationConstraint=${region_name}
     aws dynamodb create-table --cli-input-json file://locktable.json --region ${region_name}
 
