@@ -25,8 +25,6 @@ def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
     if context is None:
         context = LambdaContext()
 
-    print(context)
-
     status_code, result = execute_steps(event, context, config, **dependencies)
     return render_response(status_code, result)
 
