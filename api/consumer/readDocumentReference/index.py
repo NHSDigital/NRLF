@@ -8,8 +8,9 @@ from aws_lambda_powertools import APIGatewayProxyEventModel
 from pydantic import ValidationError
 from api.consumer.readDocumentReference.src.v1.handler import steps as v1_steps
 from api.consumer.readDocumentReference.src.v2.handler import steps as v2_steps
-from api.consumer.readDocumentReference.src.versioning import get_steps, get_version_from_header
+from api.consumer.readDocumentReference.src.versioning import get_version_from_header
 from api.consumer.readDocumentReference.src.config import Config
+from layer.lambda_utils.lambda_utils.versioning import get_steps
 
 
 config = Config(
