@@ -1,3 +1,26 @@
+from typing import Any
+from pydantic import BaseModel, validator
+from lambda_pipeline.types import PipelineData, LambdaContext, FrozenDict
+from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
+
+
+class RaiseValidationErrorModel(BaseModel):
+    foo: bool
+
+    @validator("foo")
+    def something(value):
+        raise ValueError
+
+
+def handler_four_hundred(
+    data: PipelineData,
+    context: LambdaContext,
+    event: APIGatewayProxyEventModel,
+    dependencies: FrozenDict[str, Any],
+) -> PipelineData:
+    RaiseValidationErrorModel(foo="1")
+
+
 def make_aws_event(**kwargs):
     return {
         "resource": "/",
