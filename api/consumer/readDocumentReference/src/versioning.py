@@ -3,6 +3,8 @@ from typing import Dict, Tuple
 from pydantic import BaseModel, Field, validator
 import math
 
+class VersionException(Exception):
+    pass
 
 class AcceptHeader(BaseModel):
     parsing_error: str = Field(exclude=True)
@@ -56,5 +58,5 @@ def get_largest_possible_version(
     ]
     largest_possible_version = max(possible_versions, default=math.inf)
     if not math.isfinite(largest_possible_version):
-        raise Exception("Version not supported")
+        raise VersionException("Version not supported")
     return str(largest_possible_version)
