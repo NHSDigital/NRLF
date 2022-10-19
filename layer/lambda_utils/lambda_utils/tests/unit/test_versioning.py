@@ -1,17 +1,21 @@
 from typing import List
 import pytest
-from layer.lambda_utils.lambda_utils.versioning import (
+from lambda_utils.versioning import (
     AcceptHeader,
     VersionException,
     get_largest_possible_version,
-    get_steps
+    get_steps,
 )
+from lambda_utils.tests.unit.utils import make_aws_event
 
 
-def test_api_version_parsing():
-    event = {"headers": {"Accept": "version=1", "test": "test"}}
+@pytest.mark.parametrize(
+    "event, expected_version",
+    [(make_aws_event(), "1"), (make_aws_event(version="2"), "2")],
+)
+def test_api_version_parsing(event: dict, expected_version: str):
     accept_header = AcceptHeader(event)
-    assert accept_header.version == "1"
+    assert accept_header.version == expected_version
 
 
 @pytest.mark.parametrize(
@@ -42,23 +46,23 @@ def test_largest_possible_version_error(requested_version: str):
         )
     assert str(e.value) == "Version not supported"
 
+
 @pytest.mark.parametrize(
     "requested_version,handler_version,expected_steps",
     [
         ("1", {"1": "v1_step"}, "v1_step"),
         ("2", {"2": "v2_step"}, "v2_step"),
-        ("3", {"2": "v2_step"}, "v2_step")
+        ("3", {"2": "v2_step"}, "v2_step"),
     ],
 )
 def test_get_steps(requested_version: str, handler_version: dict, expected_steps: str):
     steps = get_steps(requested_version, handler_version)
     assert steps == expected_steps
 
+
 @pytest.mark.parametrize(
     "requested_version,handler_version,expected_steps",
-    [
-        ("1", {"2": "v2_step"}, "v2_step")
-    ],
+    [("1", {"2": "v2_step"}, "v2_step")],
 )
 def test_get_steps(requested_version: str, handler_version: dict, expected_steps: str):
     with pytest.raises(VersionException) as e:

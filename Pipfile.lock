@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a7d2f6001e1763ae500daccca556fc115e4d8dc14492b553d7db22c9c338c7cb"
+            "sha256": "fc2d845dea6eafc1655c2f2392770f84171f39bb9c23c21ad47ce41b2686d844"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -21,6 +21,7 @@
                 "sha256:17228143e87161ee77bf334d16ef63beb77b2495b94b738ccb8583c4deb62cff",
                 "sha256:ee03973e4866a333da703cbead9a7f31173be372db9efb9e0d89be2c7dad6247"
             ],
+            "index": "pypi",
             "markers": "python_full_version >= '3.6.2' and python_full_version < '4.0.0'",
             "version": "==1.31.1"
         },
@@ -33,19 +34,19 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:3c6cc4e9e38cf4523267f89eb90c0b6084fa415cb4f44e3bf0cad6199340cc92",
-                "sha256:d28bcb98aee4d333b163c55b98341627d933dbf088832f7fc050893617be7dac"
+                "sha256:7881fc380f2f489ae9b3a2f2448334aef9f7be58d85a7a0e8c10458247b09afa",
+                "sha256:db9f04eeb942e7998d1971c35e1658e2d9d6687166a4ebc036f484a71a79bbeb"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.24.92"
+            "version": "==1.24.93"
         },
         "botocore": {
             "hashes": [
-                "sha256:70cf2cb04968794ed4688cc3b07874f6f4c932e325611be4e693a995fdb481be",
-                "sha256:b49c34b80c782625905be75e669da4b42a99f074e0aa3007e15ccc6955682a07"
+                "sha256:7648891692c3c69038eef902f8d64af59f91211f713fe9072fb83ecdd310dbbc",
+                "sha256:d5200f7b9150cdb91c9d3994980870d7bb4554e19c4d9d847f64626d8ceacf95"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.27.92"
+            "version": "==1.27.93"
         },
         "dnspython": {
             "hashes": [
@@ -98,6 +99,9 @@
             "ref": "09bc0367f7aa1faa7c6ef610d2ba1e4024339e62"
         },
         "pydantic": {
+            "extras": [
+                "email"
+            ],
             "hashes": [
                 "sha256:05e00dbebbe810b33c7a7362f231893183bcc4251f3f2ff991c31d5c08240c42",
                 "sha256:06094d18dd5e6f2bbf93efa54991c3240964bb663b87729ac340eb5014310624",
@@ -269,11 +273,11 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:00027e440b75547d72186f2c04a48515ec4c3f5bedf9dc7762c46e8ed2530a8c",
-                "sha256:99bd75ac49013fa71a0f3e8148accc153f0653e5f94545ee7e11c9cb99d212ea"
+                "sha256:3caae534c15f519b5c5159176b060098a6bf6317e7bfac7a427d4684a69e37a9",
+                "sha256:f2755c995db186a990330f898fd280880d3e0bf915326486773035646b4f6bf4"
             ],
             "index": "pypi",
-            "version": "==1.25.93"
+            "version": "==1.25.94"
         },
         "black": {
             "hashes": [
@@ -304,19 +308,19 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:3c6cc4e9e38cf4523267f89eb90c0b6084fa415cb4f44e3bf0cad6199340cc92",
-                "sha256:d28bcb98aee4d333b163c55b98341627d933dbf088832f7fc050893617be7dac"
+                "sha256:7881fc380f2f489ae9b3a2f2448334aef9f7be58d85a7a0e8c10458247b09afa",
+                "sha256:db9f04eeb942e7998d1971c35e1658e2d9d6687166a4ebc036f484a71a79bbeb"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.24.92"
+            "version": "==1.24.93"
         },
         "botocore": {
             "hashes": [
-                "sha256:70cf2cb04968794ed4688cc3b07874f6f4c932e325611be4e693a995fdb481be",
-                "sha256:b49c34b80c782625905be75e669da4b42a99f074e0aa3007e15ccc6955682a07"
+                "sha256:7648891692c3c69038eef902f8d64af59f91211f713fe9072fb83ecdd310dbbc",
+                "sha256:d5200f7b9150cdb91c9d3994980870d7bb4554e19c4d9d847f64626d8ceacf95"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==1.27.92"
+            "version": "==1.27.93"
         },
         "build-scripts": {
             "editable": true,
@@ -792,6 +796,9 @@
             "version": "==2.21"
         },
         "pydantic": {
+            "extras": [
+                "email"
+            ],
             "hashes": [
                 "sha256:05e00dbebbe810b33c7a7362f231893183bcc4251f3f2ff991c31d5c08240c42",
                 "sha256:06094d18dd5e6f2bbf93efa54991c3240964bb663b87729ac340eb5014310624",

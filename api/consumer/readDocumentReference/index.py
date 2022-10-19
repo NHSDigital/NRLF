@@ -1,15 +1,17 @@
 import os
 import json
 
+from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.pipeline import make_pipeline
 from lambda_pipeline.types import LambdaContext, PipelineData
-from src.config import Config, build_persistent_dependencies
-from aws_lambda_powertools import APIGatewayProxyEventModel
 from pydantic import ValidationError
+from api.consumer.readDocumentReference.src.config import (
+    Config,
+    build_persistent_dependencies,
+)
 from api.consumer.readDocumentReference.src.v1.handler import steps as v1_steps
 from api.consumer.readDocumentReference.src.v2.handler import steps as v2_steps
 from api.consumer.readDocumentReference.src.versioning import get_version_from_header
-from api.consumer.readDocumentReference.src.config import Config
 from layer.lambda_utils.lambda_utils.versioning import get_steps
 
 
@@ -22,6 +24,8 @@ dependencies = build_persistent_dependencies(config)
 def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
     if context is None:
         context = LambdaContext()
+
+    print(context)
 
     status_code, result = execute_steps(event, context, config, **dependencies)
     return render_response(status_code, result)

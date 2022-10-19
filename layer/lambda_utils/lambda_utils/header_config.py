@@ -2,6 +2,7 @@ from typing import Dict, Tuple
 
 from pydantic import BaseModel, Field, validator
 
+
 class AcceptHeader(BaseModel):
     parsing_error: str = Field(exclude=True)
     version: str
@@ -24,6 +25,7 @@ class AcceptHeader(BaseModel):
             parts = accept_header.split(";")
             parts = map(str.lower, parts)
             parts = map(str.strip, parts)
+            parts = filter(lambda part: "=" in part, parts)
             parts = map(lambda item: map(str.strip, item.split("=")), parts)
             return "", dict(parts)
         except Exception:
