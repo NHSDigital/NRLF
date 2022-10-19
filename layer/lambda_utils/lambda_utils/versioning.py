@@ -6,16 +6,20 @@ from .header_config import AcceptHeader
 
 import math
 
+
 class VersionException(Exception):
     pass
+
 
 def get_version_from_header(event) -> str:
     accept_header = AcceptHeader(event)
     return accept_header.version
 
+
 def get_steps(requested_version: str, handler_versions: Dict[str, any]):
     version = get_largest_possible_version(requested_version, handler_versions)
     return handler_versions[version]
+
 
 def get_largest_possible_version(
     requested_version: str, handler_versions: Dict[str, any]
