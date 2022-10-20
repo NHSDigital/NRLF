@@ -121,7 +121,6 @@ def test_soft_delete():
     with mock_dynamodb(table_name) as client:
         repository = Repository(table_name)
         repository.create(item=core_model.dict())
-        print()
 
         # Act
         repository.soft_delete(core_model.id.value)
@@ -130,10 +129,12 @@ def test_soft_delete():
     (item,) = response["Items"]
     recovered_item = DocumentPointer.construct(**item)
     now = datetime.now().date()
-    print("now", now)
-    print(datetime.fromisoformat(recovered_item.deleted_on["S"]))
+    deleted_date = datetime.strptime(
+        recovered_item.deleted_on["S"], "%Y-%m-%dT%H:%M:%S.%fZ"
+    ).date()
+
     # Assert
-    assert False == True
+    assert now == deleted_date
 
 
 def test_search():
