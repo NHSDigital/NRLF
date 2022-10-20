@@ -1,29 +1,73 @@
+from contextlib import contextmanager
+from http import client
+from unittest.mock import mock_open
 import moto
 import json
 from datetime import datetime as dt
-from nrlf.core.model import DocumentPointer, fhir_to_core
+from nrlf.core.model import DocumentPointer, create_document_pointer_from_fhir_json
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 import pytest
 from nrlf.core.repository import Repository
+import boto3
+
+DEFAULT_ATTRIBUTE_DEFINITIONS = [{"AttributeName": "id", "AttributeType": "S"}]
+DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]
 
 
-def test_create():
+@contextmanager
+def mock_dynamodb(table_name):
+    with moto.mock_dynamodb():
+        client = boto3.client("dynamodb")
+        client.create_table(
+            AttributeDefinitions=DEFAULT_ATTRIBUTE_DEFINITIONS,
+            TableName=table_name,
+            KeySchema=DEFAULT_KEY_SCHEMA,
+            BillingMode="PAY_PER_REQUEST",
+        )
+        yield client
+
+
+def test_create_document_pointer():
     # Arrange
     document_reference = json.dumps(read_test_data("nrlf"))
     api_version = 1
-    core_model = fhir_to_core(document=document_reference, api_version=api_version)
-    repository = Repository("document-pointer")
-    print(core_model)
+    core_model = create_document_pointer_from_fhir_json(
+        raw_fhir_json=document_reference, api_version=api_version
+    )
+    table_name = "document-pointer"
 
-    # Act
-    repository.create(item=core_model.dict())
+    with mock_dynamodb(table_name) as client:
+        repository = Repository(table_name)
+
+        # Act
+        repository.create(item=core_model.dict())
+        response = client.scan(TableName=table_name)
+
+    (item,) = response["Items"]
+    recovered_item = DocumentPointer.construct(**item)
 
     # Assert
-    assert True == False
+    assert recovered_item.dict() == core_model.dict()
 
 
-def test_read():
-    pass
+def test_read_document_pointer():
+    # Arrange
+    document_reference = json.dumps(read_test_data("nrlf"))
+    api_version = 1
+    core_model = create_document_pointer_from_fhir_json(
+        raw_fhir_json=document_reference, api_version=api_version
+    )
+    table_name = "document-pointer"
+
+    with mock_dynamodb(table_name) as client:
+        repository = Repository(table_name)
+        repository.create(item=core_model.dict())
+
+        # Act
+        result = repository.read(core_model.id.value)
+
+    # Assert
+    assert core_model == result["Item"]
 
 
 def test_update():

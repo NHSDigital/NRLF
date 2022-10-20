@@ -72,8 +72,10 @@ class DocumentPointer(BaseModel):
         return value
 
 
-def fhir_to_core(document: str, api_version: int) -> DocumentPointer:
-    fhir_json = json.loads(document)
+def create_document_pointer_from_fhir_json(
+    raw_fhir_json: str, api_version: int
+) -> DocumentPointer:
+    fhir_json = json.loads(raw_fhir_json)
     fhir_model = DocumentReference(**fhir_json)
     core_model = DocumentPointer(
         id=fhir_model.masterIdentifier.value,

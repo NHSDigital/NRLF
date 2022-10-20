@@ -2,7 +2,11 @@ import json
 from unittest import mock
 
 import pytest
-from nrlf.core.model import DYNAMODB_NULL, create_document_type_tuple, fhir_to_core
+from nrlf.core.model import (
+    DYNAMODB_NULL,
+    create_document_type_tuple,
+    create_document_pointer_from_fhir_json,
+)
 from nrlf.producer.fhir.r4.model import CodeableConcept, Coding
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
@@ -11,12 +15,14 @@ TIMESTAMP = "2022-10-18T14:47:22.920Z"
 
 
 @mock.patch("nrlf.core.model.make_timestamp", return_value=TIMESTAMP)
-def test_fhir_to_core(mock__make_timestamp):
+def test_create_document_pointer_from_fhir_json(mock__make_timestamp):
     fhir_json = read_test_data("nrlf")
     dynamodb_json = read_test_data("nrlf-dynamodb-format")
 
     document = json.dumps(fhir_json)
-    core_model = fhir_to_core(document=document, api_version=API_VERSION)
+    core_model = create_document_pointer_from_fhir_json(
+        document=document, api_version=API_VERSION
+    )
 
     assert core_model.dict() == {
         "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"},
