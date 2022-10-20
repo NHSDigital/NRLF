@@ -15,11 +15,14 @@ def test_handler_returns_200(event: dict):
 
 
 @mock.patch.dict(os.environ, {"AWS_REGION": "eu-west-2"}, clear=True)
+@mock.patch(
+    "api.consumer.readDocumentReference.index.get_steps",
+    return_value=[handler_four_hundred],
+)
 @pytest.mark.parametrize("event", [(make_aws_event())])
-def test_handler_returns_400(event: dict):
+def test_handler_returns_400(mocked_get_steps, event: dict):
     import api.consumer.readDocumentReference.index as index
 
-    index.v1_steps.append(handler_four_hundred)
     response = index.handler(event)
     assert response["statusCode"] == 400
 

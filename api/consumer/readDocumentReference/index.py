@@ -1,19 +1,16 @@
-import os
 import json
+import os
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
-from lambda_pipeline.pipeline import make_pipeline
-from lambda_pipeline.types import LambdaContext, PipelineData
-from pydantic import ValidationError
 from api.consumer.readDocumentReference.src.config import (
     Config,
     build_persistent_dependencies,
 )
-from api.consumer.readDocumentReference.src.v1.handler import steps as v1_steps
-from api.consumer.readDocumentReference.src.v2.handler import steps as v2_steps
 from api.consumer.readDocumentReference.src.versioning import get_version_from_header
-from layer.lambda_utils.lambda_utils.versioning import get_steps
-
+from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
+from lambda_pipeline.pipeline import make_pipeline
+from lambda_pipeline.types import LambdaContext, PipelineData
+from lambda_utils.versioning import get_steps, get_versioned_steps
+from pydantic import ValidationError
 
 config = Config(
     **{env_var: os.environ.get(env_var) for env_var in Config.__fields__.keys()}
@@ -34,9 +31,12 @@ def execute_steps(event, context, config: Config, **dependencies) -> tuple[int, 
     Executes the handler and wraps it in exception handling
     """
     try:
-        handler_versions = {"1": v1_steps, "2": v2_steps}
-        version = get_version_from_header(event)
-        steps = get_steps(version, handler_versions)
+        requested_version = get_version_from_header(event)
+        versioned_steps = get_versioned_steps(__file__)
+        steps = get_steps(
+            requested_version=requested_version, versioned_steps=versioned_steps
+        )
+        print(get_steps)
         pipeline = make_pipeline(
             steps=steps,
             event=APIGatewayProxyEventModel(**event),
