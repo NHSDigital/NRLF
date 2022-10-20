@@ -10,7 +10,7 @@ inputs:
   retention-days:
     description: "Number of days to retain artifact"
     required: false
-    default: 1
+    default: "1"
 runs:
   using: "composite"
   steps:
