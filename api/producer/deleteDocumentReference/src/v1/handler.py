@@ -1,5 +1,15 @@
-from ..config import Config
+from lambda_pipeline.types import PipelineData, LambdaContext, FrozenDict
+from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
+from typing import Any
 
 
-def handler(event, config: Config, **dependencies):
-    return 200, {"message": "version one"}
+def handler(
+    data: PipelineData,
+    context: LambdaContext,
+    event: APIGatewayProxyEventModel,
+    dependencies: FrozenDict[str, Any],
+) -> PipelineData:
+    return PipelineData(message="version one")
+
+
+steps = [handler]

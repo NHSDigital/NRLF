@@ -1,7 +1,5 @@
 from typing import Dict
 
-from api.consumer.readDocumentReference.src.versioning import AcceptHeader
-
 from .header_config import AcceptHeader
 
 import math
