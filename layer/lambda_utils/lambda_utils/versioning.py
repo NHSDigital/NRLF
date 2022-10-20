@@ -1,12 +1,11 @@
+import math
+import re
 from importlib import import_module
 from pathlib import Path
-import re
 from types import ModuleType
-from typing import Dict, Union
+from typing import Union
 
 from .header_config import AcceptHeader
-
-import math
 
 VERSION_RE = re.compile(r"v(\d+)")
 API_ROOT_DIRNAME = "api"
@@ -20,13 +19,6 @@ class VersionException(Exception):
 def get_version_from_header(event) -> str:
     accept_header = AcceptHeader(event)
     return accept_header.version
-
-
-def get_steps(requested_version: str, versioned_steps: Dict[str, any]):
-    version = get_largest_possible_version(
-        requested_version, possible_versions=versioned_steps.keys()
-    )
-    return versioned_steps[version]
 
 
 def get_largest_possible_version(

@@ -1,5 +1,3 @@
-from typing import Dict, Tuple
-
 from pydantic import BaseModel, Field, validator
 
 
@@ -17,7 +15,7 @@ class AcceptHeader(BaseModel):
         return {key.lower(): value for key, value in headers.items()}
 
     @staticmethod
-    def _parse_accept_header(accept_header: str) -> Tuple[str, Dict[str, str]]:
+    def _parse_accept_header(accept_header: str) -> tuple[str, dict[str, str]]:
         if type(accept_header) is not str:
             return "Accept header must be a string", {}
 
