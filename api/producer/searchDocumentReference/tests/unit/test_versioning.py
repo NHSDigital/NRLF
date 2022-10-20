@@ -1,6 +1,6 @@
 from typing import List
 import pytest
-from api.consumer.readDocumentReference.src.versioning import AcceptHeader
+from api.producer.searchDocumentReference.src.versioning import AcceptHeader
 from lambda_utils.tests.unit.utils import make_aws_event
 
 
