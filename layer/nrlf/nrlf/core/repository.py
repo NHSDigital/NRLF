@@ -13,14 +13,14 @@ class Repository:
     def create(self, item: BaseModel):
         return self.dynamodb.put_item(TableName=self.table_name, Item=item)
 
-    def read(self, key: any):
-        return self.dynamodb.get_item(TableName=self.table_name, Key={"id": key})
+    def read(self, id: str):
+        return self.dynamodb.get_item(TableName=self.table_name, Key={"id": id})
 
     def search(self, key: any):
         return self.dynamodb.get_item(Key={key})
 
-    def update(self):
-        pass
+    def update(self, item: BaseModel):
+        return self.dynamodb.put_item(TableName=self.table_name, Item=item)
 
     def supersede(self, item: BaseModel):
         pass

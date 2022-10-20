@@ -70,8 +70,40 @@ def test_read_document_pointer():
     assert core_model == result["Item"]
 
 
-def test_update():
-    pass
+def test_update_document_pointer():
+    # Arrange
+    document_reference = json.dumps(read_test_data("nrlf"))
+
+    updated_document = read_test_data("nrlf")
+    updated_document["content"][0]["attachment"][
+        "url"
+    ] = "https://example.org/different_doc.pdf"
+
+    updated_document_reference = json.dumps(updated_document)
+
+    api_version = 1
+
+    core_model = create_document_pointer_from_fhir_json(
+        raw_fhir_json=document_reference, api_version=api_version
+    )
+    updated_core_model = create_document_pointer_from_fhir_json(
+        raw_fhir_json=updated_document_reference, api_version=api_version
+    )
+    table_name = "document-pointer"
+
+    with mock_dynamodb(table_name) as client:
+        repository = Repository(table_name)
+        repository.create(item=core_model.dict())
+
+        # Act
+        repository.update(item=updated_core_model.dict())
+        response = client.scan(TableName=table_name)
+
+    (item,) = response["Items"]
+    recovered_item = DocumentPointer.construct(**item)
+
+    # Assert
+    assert recovered_item.dict() == updated_core_model.dict()
 
 
 def test_delete():
