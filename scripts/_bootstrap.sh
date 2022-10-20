@@ -32,28 +32,40 @@ function _bootstrap() {
     state_bucket_name="${project_name}-terraform-state"
     aws s3api create-bucket --bucket ${state_bucket_name} --region us-east-1 --create-bucket-configuration LocationConstraint=${region_name}
     aws dynamodb create-table --cli-input-json file://locktable.json --region ${region_name}
+    aws secretsmanager create-secret --name "${project_name}--mgmt--mgmt-account-id"
+    aws secretsmanager create-secret --name "${project_name}--mgmt--dev-account-id"
+    aws secretsmanager create-secret --name "${project_name}--mgmt--test-account-id"
+    aws secretsmanager create-secret --name "${project_name}--mgmt--prod-account-id"
 
     terraform init -upgrade || return 1
     terraform workspace select mgmt || terraform workspace new mgmt || return 1
     terraform init || return 1
 
-    local profile_name=${PROFILE_PREFIX}-mgmt-admin
-    local aws_account_id=$(_get_aws_info "$profile_name" aws_account_id) || return 1
-    local role_name=$(_get_aws_info "$profile_name" role_name) || return 1
-
     terraform import \
-        -var "assume_account=${aws_account_id}"  \
-        -var "assume_role=${role_name}" \
         aws_dynamodb_table.dynamodb_terraform_state_lock \
         ${state_bucket_name}-lock || return 1
 
     terraform import \
-        -var "assume_account=${aws_account_id}"\
-        -var "assume_role=${role_name}"\
-        aws_s3_bucket.terraform_state_bucket\
+        aws_s3_bucket.terraform_state_bucket \
         ${state_bucket_name} || return 1
 
-    terraform plan -var-file=etc/mgmt.tfvars -out=./tfplan -var "assume_account=${aws_account_id}" -var "assume_role=${role_name}" || return 1
+    terraform import \
+        aws_secretsmanager_secret.mgmt_account_id \
+        "${project_name}--mgmt--mgmt-account-id" || return 1
+
+    terraform import \
+        aws_secretsmanager_secret.dev_account_id \
+        "${project_name}--mgmt--dev-account-id" || return 1
+
+    terraform import \
+        aws_secretsmanager_secret.test_account_id \
+        "${project_name}--mgmt--test-account-id" || return 1
+
+    terraform import \
+        aws_secretsmanager_secret.prod_account_id \
+        "${project_name}--mgmt--prod-account-id" || return 1
+
+    terraform plan -out=./tfplan || return 1
     terraform apply ./tfplan || return 1
     ;;
     #----------------

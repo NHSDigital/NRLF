@@ -23,6 +23,7 @@ nrlf = { path = "./layer/nrlf/", editable = true }
 lambda-utils = { path = "./layer/lambda_utils/", editable = true }
 moto = "*"
 boto3 = "*"
+black = "*"
 
 [requires]
 python_version = "3.9"

@@ -1,12 +1,12 @@
 provider "aws" {
-  region = var.region_name
+  region = local.region
   assume_role {
     role_arn = "arn:aws:iam::${var.assume_account}:role/${var.assume_role}"
   }
 
   default_tags {
     tags = {
-      project_name = var.project_name
+      project_name = local.project
       workspace    = terraform.workspace
     }
   }

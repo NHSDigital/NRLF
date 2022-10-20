@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "terraform_state_bucket" {
-  bucket = "${var.project_name}-terraform-state"
+  bucket = "${local.project}-terraform-state"
 }
 
 resource "aws_s3_bucket_acl" "terraform_state_bucket_acl" {

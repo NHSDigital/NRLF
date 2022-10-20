@@ -22,19 +22,11 @@ function _make() {
 }
 
 function _build() {
-  for script in ./**/make.sh; do
-    pushd -q "$(dirname $script)"
-    ./make.sh "build"
-    popd -q
-  done
+  find $root -name make.sh | xargs -I % bash -c 'cd "$(dirname %)" && ./make.sh build'
 }
 
 function _clean() {
-  for script in ./**/make.sh; do
-    pushd -q "$(dirname $script)"
-    ./make.sh "clean"
-    popd -q
-  done
+  find $root -name make.sh | xargs -I % bash -c 'cd "$(dirname %)" && ./make.sh clean'
 }
 
 function _install() {

@@ -19,12 +19,12 @@ function _terraform_help() {
 }
 
 function _get_project_name(){
-  python -c "import hcl; print(hcl.load(open('vars.tf'))['variable']['project_name']['default'])"
+  python -c "import hcl; print(hcl.load(open('locals.tf'))['locals']['project'])"
   return $?
 }
 
 function _get_region_name(){
-  python -c "import hcl; print(hcl.load(open('vars.tf'))['variable']['region_name']['default'])"
+  python -c "import hcl; print(hcl.load(open('locals.tf'))['locals']['region'])"
   return $?
 }
 
@@ -63,7 +63,7 @@ function _terraform() {
       fi
 
       cd $root/terraform/infrastructure
-      terraform init "${@:3}" || return 1
+      terraform init || return 1
       terraform workspace select "$env" || terraform workspace new "$env" || return 1
     ;;
     #----------------
@@ -77,7 +77,7 @@ function _terraform() {
       cd $root/terraform/infrastructure
       terraform init || return 1
       terraform workspace select "$env" || terraform workspace new "$env" || return 1
-      terraform plan -var-file="$var_file" -out="$plan_file" -var "assume_account=${aws_account_id}" "${@:3}" || return 1
+      terraform plan -var-file="$var_file" -out="$plan_file" -var "assume_account=${aws_account_id}" || return 1
     ;;
     #----------------
     "apply")
@@ -115,6 +115,31 @@ function _terraform() {
         terraform workspace delete "$env" || return 1
       fi
     ;;
+
+    "cidestroy")
+      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+      then
+          echo "Please log in as the mgmt account" >&2
+          return 1
+      fi
+
+      if [[ -z ${env} ]];
+      then
+          echo "Non-mgmt parameter required" >&2
+          echo "Usage:    nrlf terraform bootstrap-non-mgmt <ENV>"
+          return 1
+      fi
+
+      cd $root/terraform/infrastructure
+      terraform workspace select "$env" || terraform workspace new "$env" || return 1
+      terraform destroy -var-file="$var_file" -var "assume_account=${aws_account_id}" -auto-approve || return 1
+      if [ "$env" != "default" ];
+      then
+        terraform workspace select default || return 1
+        terraform workspace delete "$env" || return 1
+      fi
+    ;;
+
     #----------------
     "bootstrap-non-mgmt")
       if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
@@ -182,22 +207,22 @@ function _terraform() {
      fi
  }
 
-function _get_profile_name() {
+function _get_secret_name() {
   local environment=$1
 
   if [ "$environment" = "prod" ]; then
-    echo "${PROFILE_PREFIX}-prod-admin"
+    echo "${PROFILE_PREFIX}--mgmt--prod-account-id"
   elif [ "$environment" = "uat" ]; then
-    echo "${PROFILE_PREFIX}-test-admin"
+    echo "${PROFILE_PREFIX}--mgmt--test-account-id"
   else
-    echo "${PROFILE_PREFIX}-dev-admin"
+    echo "${PROFILE_PREFIX}--mgmt--dev-account-id"
   fi
 }
 
 function _get_aws_account_id() {
-  local profile_name
-  profile_name=$(_get_profile_name "$1")
-  echo "$(_get_aws_info "$profile_name" "aws_account_id")"
+  local secret_name
+  secret_name=$(_get_secret_name "$1")
+  aws secretsmanager get-secret-value --secret-id $secret_name --query SecretString --output text
 }
 
  function _get_environment_vars_file() {
