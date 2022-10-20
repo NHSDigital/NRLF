@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from http import client
 from unittest.mock import mock_open
+from nrlf.core.validators import make_timestamp
 import moto
 import json
 from datetime import datetime as dt
@@ -9,6 +10,7 @@ from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 import pytest
 from nrlf.core.repository import Repository
 import boto3
+from datetime import datetime
 
 DEFAULT_ATTRIBUTE_DEFINITIONS = [{"AttributeName": "id", "AttributeType": "S"}]
 DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]
@@ -106,8 +108,32 @@ def test_update_document_pointer():
     assert recovered_item.dict() == updated_core_model.dict()
 
 
-def test_delete():
-    pass
+def test_soft_delete():
+    # Arrange
+    document_reference = json.dumps(read_test_data("nrlf"))
+
+    api_version = 1
+    core_model = create_document_pointer_from_fhir_json(
+        raw_fhir_json=document_reference, api_version=api_version
+    )
+    table_name = "document-pointer"
+
+    with mock_dynamodb(table_name) as client:
+        repository = Repository(table_name)
+        repository.create(item=core_model.dict())
+        print()
+
+        # Act
+        repository.soft_delete(core_model.id.value)
+        response = client.scan(TableName=table_name)
+
+    (item,) = response["Items"]
+    recovered_item = DocumentPointer.construct(**item)
+    now = datetime.now().date()
+    print("now", now)
+    print(datetime.fromisoformat(recovered_item.deleted_on["S"]))
+    # Assert
+    assert False == True
 
 
 def test_search():

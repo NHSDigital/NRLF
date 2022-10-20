@@ -1,3 +1,4 @@
+from nrlf.core.validators import make_timestamp
 import boto3
 from pydantic import BaseModel
 
@@ -25,8 +26,14 @@ class Repository:
     def supersede(self, item: BaseModel):
         pass
 
-    def soft_delete(self):
-        pass
+    def soft_delete(self, id: str):
+
+        return self.dynamodb.update_item(
+            Key={"id": id},
+            TableName=self.table_name,
+            UpdateExpression="SET deleted_on = :now",
+            ExpressionAttributeValues={":now": {"S": make_timestamp()}},
+        )
 
     def hard_delete(self):
         pass
