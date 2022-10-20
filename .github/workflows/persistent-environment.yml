@@ -6,7 +6,7 @@ on:
       environment:
         description: Environment to deploy to
         required: true
-        default: 'dev'
+        default: "dev"
         type: choice
         options:
           - dev
@@ -26,6 +26,7 @@ env:
   ARTIFACT_NAME: ${{ inputs.environment }}-artifact
   TF_ARTIFACT_NAME: ${{ inputs.environment }}-terraform-artifact
   AWS_DEFAULT_REGION: eu-west-2
+  TF_CLI_ARGS: -no-color
 
 jobs:
   cache:
@@ -52,9 +53,8 @@ jobs:
           path: .venv
           name: ${{ env.CACHE_NAME }}
 
-
   build:
-    needs: [ cache ]
+    needs: [cache]
     name: Build - ${{ inputs.branch_name }}
     runs-on: ubuntu-latest
 
@@ -86,9 +86,10 @@ jobs:
           path: ./**/dist/*.zip
 
   terraform-plan:
-    needs: [ build ]
+    needs: [build]
     name: Terraform plan - ${{ inputs.environment }}
     runs-on: ubuntu-latest
+
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
         uses: actions/checkout@v3
@@ -113,8 +114,8 @@ jobs:
       - name: Terraform plan - ${{ env.TF_WORKFLOW_ID }}
         run: |
           source nrlf.sh
-          nrlf terraform init ${TF_WORKFLOW_ID}
-          nrlf terraform plan ${TF_WORKFLOW_ID}
+          nrlf terraform init ${TF_WORKFLOW_ID} >> tf-plan-output.txt
+          nrlf terraform plan ${TF_WORKFLOW_ID} >> tf-plan-output.txt
 
       - name: Upload artifact - ${{ env.TF_ARTIFACT_NAME }}
         uses: ./.github/actions/upload-artifact/
@@ -123,7 +124,7 @@ jobs:
           path: ./terraform/.*tfplan
 
   terraform-apply:
-    needs: [ terraform-plan ]
+    needs: [terraform-plan]
     name: Terraform apply - ${{ inputs.environment }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
@@ -158,12 +159,12 @@ jobs:
       - name: Terraform apply - ${{ env.TF_WORKFLOW_ID }}
         run: |
           source nrlf.sh
-          nrlf terraform init ${TF_WORKFLOW_ID}
-          nrlf terraform apply ${TF_WORKFLOW_ID}
+          nrlf terraform init ${TF_WORKFLOW_ID} >> tf-apply-output.txt
+          nrlf terraform apply ${TF_WORKFLOW_ID} >> tf-apply-output.txt
 
   clear-cache:
     name: Clear Cache
-    needs: [ terraform-apply ]
+    needs: [terraform-apply]
     if: ${{ always() }}
     runs-on: ubuntu-latest
 

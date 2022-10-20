@@ -8,7 +8,6 @@ LIMIT = 100
 ENABLED = "ENABLED"
 PATH_TO_HERE = Path(__file__).parent
 PATH_TO_OUTPUT = PATH_TO_HERE.parent / "output.json"
-PATH_TO_WORKSPACE = PATH_TO_HERE.parent / ".terraform" / "environment"
 ROLE_ARN = "arn:aws:iam::{account_id}:role/terraform".format
 ROLE_SESSION_NAME = "integration-test-{timestamp}".format
 TABLE_NAME_SUFFIXES = ["producer", "consumer", "document-type", "document-pointer"]
@@ -44,8 +43,9 @@ def aws_session() -> boto3.Session:
 
 @pytest.fixture
 def workspace():
-    with open(PATH_TO_WORKSPACE) as f:
-        return f.readlines()[0]
+    with open(PATH_TO_OUTPUT) as f:
+        tf_output = json.load(f)
+    return tf_output["workspace"]["value"]
 
 
 @pytest.fixture(scope="session")
