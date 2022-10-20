@@ -127,6 +127,7 @@ def test_soft_delete():
         response = client.scan(TableName=table_name)
 
     (item,) = response["Items"]
+
     recovered_item = DocumentPointer.construct(**item)
     now = datetime.now().date()
     deleted_date = datetime.strptime(
@@ -135,6 +136,29 @@ def test_soft_delete():
 
     # Assert
     assert now == deleted_date
+
+
+def test_hard_delete():
+    # Arrange
+    document_reference = json.dumps(read_test_data("nrlf"))
+
+    api_version = 1
+    core_model = create_document_pointer_from_fhir_json(
+        raw_fhir_json=document_reference, api_version=api_version
+    )
+    table_name = "document-pointer"
+
+    with mock_dynamodb(table_name) as client:
+        repository = Repository(table_name)
+        repository.create(item=core_model.dict())
+
+        # Act
+        repository.hard_delete(core_model.id.value)
+        response = client.scan(TableName=table_name)
+
+    print(response)
+    # Assert
+    assert len(response["Items"]) == 0
 
 
 def test_search():

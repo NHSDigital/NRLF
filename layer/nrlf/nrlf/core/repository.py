@@ -18,7 +18,7 @@ class Repository:
         return self.dynamodb.get_item(TableName=self.table_name, Key={"id": id})
 
     def search(self, key: any):
-        return self.dynamodb.get_item(Key={key})
+        pass
 
     def update(self, item: BaseModel):
         return self.dynamodb.put_item(TableName=self.table_name, Item=item)
@@ -35,5 +35,5 @@ class Repository:
             ExpressionAttributeValues={":now": {"S": make_timestamp()}},
         )
 
-    def hard_delete(self):
-        pass
+    def hard_delete(self, id: str):
+        return self.dynamodb.delete_item(TableName=self.table_name, Key={"id": id})
