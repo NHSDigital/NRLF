@@ -18,6 +18,7 @@ env:
   BASE_BRANCH_NAME: ${{ github.event.pull_request.base.ref }}
   BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
   TF_CLI_ARGS: -no-color
+  RUNNING_IN_CI: 1
 
 jobs:
   cache-base:
@@ -213,9 +214,9 @@ jobs:
       - name: Terraform apply
         run: |
           source nrlf.sh
-          nrlf terraform init ${GITHUB_SHA_SHORT} >> tf-base-output.txt
-          nrlf terraform plan ${GITHUB_SHA_SHORT} >> tf-base-output.txt
-          nrlf terraform apply ${GITHUB_SHA_SHORT} >> tf-base-output.txt
+          nrlf terraform ciinit ${GITHUB_SHA_SHORT}
+          nrlf terraform ciplan ${GITHUB_SHA_SHORT}
+          nrlf terraform ciapply ${GITHUB_SHA_SHORT}
 
   terraform-apply:
     needs: [build, terraform-base]
@@ -246,9 +247,9 @@ jobs:
       - name: Terraform apply
         run: |
           source nrlf.sh
-          nrlf terraform init ${GITHUB_SHA_SHORT} >> tf-apply-output.txt
-          nrlf terraform plan ${GITHUB_SHA_SHORT} >> tf-apply-output.txt
-          nrlf terraform apply ${GITHUB_SHA_SHORT} >> tf-apply-output.txt
+          nrlf terraform ciinit ${GITHUB_SHA_SHORT}
+          nrlf terraform ciplan ${GITHUB_SHA_SHORT}
+          nrlf terraform ciapply ${GITHUB_SHA_SHORT}
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact/
@@ -326,8 +327,8 @@ jobs:
       - name: Terraform destroy
         run: |
           source nrlf.sh
-          nrlf terraform init ${GITHUB_SHA_SHORT} >> tf-destroy-output.txt
-          nrlf terraform cidestroy ${GITHUB_SHA_SHORT} >> tf-destroy-output.txt
+          nrlf terraform ciinit ${GITHUB_SHA_SHORT}
+          nrlf terraform cidestroy ${GITHUB_SHA_SHORT}
 
   clear-cache:
     name: Clear Cache
