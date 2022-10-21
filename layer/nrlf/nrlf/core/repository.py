@@ -35,15 +35,25 @@ class Repository:
     def update(self, item: BaseModel):
         return self.dynamodb.put_item(TableName=self.table_name, Item=item)
 
-    def supersede(self, item: BaseModel):
-        return NotImplementedError
+    def supersede(self, create_item: BaseModel, delete_item_id: str):
+        return self.dynamodb.transact_write_items(
+            TransactItems=[
+                {"Put": {"TableName": self.table_name, "Item": create_item}},
+                {
+                    "Delete": {
+                        "TableName": self.table_name,
+                        "Key": {"id": delete_item_id},
+                    }
+                },
+            ]
+        )
 
     def soft_delete_document_pointer(self, id: str, status=None):
         update_expression = "SET deleted_on = :now"
         expression_attribute = {":now": {"S": make_timestamp()}}
 
         if status is not None:
-            updateExpression += ", status = :status"
+            update_expression += ", status = :status"
             expression_attribute[":status"] = {"S": status}
 
         return self.dynamodb.update_item(

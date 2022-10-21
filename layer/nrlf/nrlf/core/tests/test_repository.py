@@ -132,6 +132,41 @@ def test_update_document_pointer():
     assert recovered_item.dict() == updated_core_model.dict()
 
 
+def test_supersede():
+    # Arrange
+    document_reference = json.dumps(read_test_data("nrlf"))
+    api_version = 1
+    core_model_for_create = create_document_pointer_from_fhir_json(
+        raw_fhir_json=document_reference, api_version=api_version
+    )
+    core_model_for_create.id.value = {
+        "S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
+    }
+
+    core_model_for_delete = create_document_pointer_from_fhir_json(
+        raw_fhir_json=document_reference, api_version=api_version
+    )
+
+    table_name = "document-pointer"
+
+    with mock_dynamodb(table_name) as client:
+        repository = Repository(DocumentPointer, client)
+        repository.create(item=core_model_for_delete.dict())
+
+        # Act
+        repository.supersede(
+            create_item=core_model_for_create.dict(),
+            delete_item_id=core_model_for_delete.id.value,
+        )
+        response = client.scan(TableName=table_name)
+
+    (item,) = response["Items"]
+    recovered_item = DocumentPointer.construct(**item)
+
+    # Assert
+    assert recovered_item.dict() == core_model_for_create.dict()
+
+
 def test_soft_delete():
     # Arrange
     document_reference = json.dumps(read_test_data("nrlf"))
