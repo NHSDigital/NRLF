@@ -12,6 +12,8 @@ from nrlf.core.repository import Repository
 from nrlf.core.validators import make_timestamp
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 from pydantic import BaseModel
+from datetime import datetime
+import botocore.errorfactory
 
 DEFAULT_ATTRIBUTE_DEFINITIONS = [{"AttributeName": "id", "AttributeType": "S"}]
 DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]
@@ -38,7 +40,7 @@ def test_fields_are_not_all_dynamo_db_type():
     table_name = "document-pointer"
 
     with pytest.raises(TypeError) as error, mock_dynamodb(table_name) as client:
-        repository = Repository(TestClass, client)
+        Repository(TestClass, client)
 
     # Assert
     (message,) = error.value.args
@@ -132,7 +134,7 @@ def test_update_document_pointer():
     assert recovered_item.dict() == updated_core_model.dict()
 
 
-def test_supersede():
+def test_supersede_creates_new_item_and_deletes_existing():
     # Arrange
     document_reference = json.dumps(read_test_data("nrlf"))
     api_version = 1
@@ -165,6 +167,35 @@ def test_supersede():
 
     # Assert
     assert recovered_item.dict() == core_model_for_create.dict()
+
+
+def test_supersede_id_exists_raises_transaction_canceled_exception():
+    # Arrange
+    document_reference = json.dumps(read_test_data("nrlf"))
+    api_version = 1
+    core_model_for_create = create_document_pointer_from_fhir_json(
+        raw_fhir_json=document_reference, api_version=api_version
+    )
+    core_model_for_create.id.value = {
+        "S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
+    }
+
+    core_model_for_delete = create_document_pointer_from_fhir_json(
+        raw_fhir_json=document_reference, api_version=api_version
+    )
+
+    table_name = "document-pointer"
+
+    with pytest.raises(Exception) as error, mock_dynamodb(table_name) as client:
+        repository = Repository(DocumentPointer, client)
+        repository.create(item=core_model_for_delete.dict())
+        repository.create(item=core_model_for_create.dict())
+
+        # Act
+        repository.supersede(
+            create_item=core_model_for_create.dict(),
+            delete_item_id=core_model_for_delete.id.value,
+        )
 
 
 def test_soft_delete():

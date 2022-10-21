@@ -4,6 +4,7 @@ import boto3
 from nrlf.core.dynamodb_types import DynamoDbType
 from nrlf.core.validators import make_timestamp
 from pydantic import BaseModel
+from boto3.dynamodb.conditions import Attr
 
 
 def _to_snake_case(name: str) -> str:
@@ -38,7 +39,13 @@ class Repository:
     def supersede(self, create_item: BaseModel, delete_item_id: str):
         return self.dynamodb.transact_write_items(
             TransactItems=[
-                {"Put": {"TableName": self.table_name, "Item": create_item}},
+                {
+                    "Put": {
+                        "TableName": self.table_name,
+                        "ConditionExpression": "attribute_not_exists(id)",
+                        "Item": create_item,
+                    }
+                },
                 {
                     "Delete": {
                         "TableName": self.table_name,
