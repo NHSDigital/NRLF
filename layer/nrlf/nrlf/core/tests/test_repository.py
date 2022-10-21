@@ -1,15 +1,15 @@
 from contextlib import contextmanager
 from http import client
 from unittest.mock import mock_open
+from pydantic import BaseModel
 from nrlf.core.validators import make_timestamp
 import moto
 import json
-from datetime import datetime as dt
 from nrlf.core.model import DocumentPointer, create_document_pointer_from_fhir_json
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
-import pytest
 from nrlf.core.repository import Repository
 import boto3
+import pytest
 from datetime import datetime
 
 DEFAULT_ATTRIBUTE_DEFINITIONS = [{"AttributeName": "id", "AttributeType": "S"}]
@@ -29,6 +29,29 @@ def mock_dynamodb(table_name):
         yield client
 
 
+def test_fields_are_not_all_dynamo_db_type():
+    # Arrange
+    class TestClass(BaseModel):
+        field: str
+
+    table_name = "document-pointer"
+
+    with pytest.raises(TypeError) as error, mock_dynamodb(table_name) as client:
+        repository = Repository(TestClass, client)
+
+    # Assert
+    (message,) = error.value.args
+    assert message == "Model contains fields that are not of type DynamoDbType"
+
+
+def test_fields_are_all_dynamo_db_type():
+    # Arrange
+    table_name = "document-pointer"
+
+    with mock_dynamodb(table_name):
+        Repository(DocumentPointer, client)
+
+
 def test_create_document_pointer():
     # Arrange
     document_reference = json.dumps(read_test_data("nrlf"))
@@ -39,7 +62,7 @@ def test_create_document_pointer():
     table_name = "document-pointer"
 
     with mock_dynamodb(table_name) as client:
-        repository = Repository(table_name)
+        repository = Repository(DocumentPointer, client)
 
         # Act
         repository.create(item=core_model.dict())
@@ -62,14 +85,14 @@ def test_read_document_pointer():
     table_name = "document-pointer"
 
     with mock_dynamodb(table_name) as client:
-        repository = Repository(table_name)
+        repository = Repository(DocumentPointer, client)
         repository.create(item=core_model.dict())
 
         # Act
-        result = repository.read(core_model.id.value)
+        result = repository.read(id=core_model.id.value)
 
     # Assert
-    assert core_model == result["Item"]
+    assert core_model == result
 
 
 def test_update_document_pointer():
@@ -94,7 +117,7 @@ def test_update_document_pointer():
     table_name = "document-pointer"
 
     with mock_dynamodb(table_name) as client:
-        repository = Repository(table_name)
+        repository = Repository(DocumentPointer, client)
         repository.create(item=core_model.dict())
 
         # Act
@@ -119,11 +142,11 @@ def test_soft_delete():
     table_name = "document-pointer"
 
     with mock_dynamodb(table_name) as client:
-        repository = Repository(table_name)
+        repository = Repository(DocumentPointer, client)
         repository.create(item=core_model.dict())
 
         # Act
-        repository.soft_delete(core_model.id.value)
+        repository.soft_delete_document_pointer(core_model.id.value)
         response = client.scan(TableName=table_name)
 
     (item,) = response["Items"]
@@ -149,14 +172,13 @@ def test_hard_delete():
     table_name = "document-pointer"
 
     with mock_dynamodb(table_name) as client:
-        repository = Repository(table_name)
+        repository = Repository(DocumentPointer, client)
         repository.create(item=core_model.dict())
 
         # Act
         repository.hard_delete(core_model.id.value)
         response = client.scan(TableName=table_name)
 
-    print(response)
     # Assert
     assert len(response["Items"]) == 0
 
