@@ -1,4 +1,19 @@
 repos:
+  - repo: local
+    hooks:
+      - id: trufflehog
+        language: system
+        name: TruffleHog
+        description: Detect secrets in your data.
+        entry: bash -c 'docker run -v "$(pwd):/workspace" -i --rm trufflesecurity/trufflehog:latest git file:///workspace --concurrency=2 --fail'
+        stages: ["commit", "push"]
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        exclude: .pre-commit-config.yaml
+
   - repo: https://github.com/prettier/pre-commit
     rev: 57f39166b5a5a504d6808b87ab98d41ebf095b46
     hooks:
@@ -24,18 +39,3 @@ repos:
     hooks:
       - id: black
         language_version: python3
-
-  - repo: local
-    hooks:
-      - id: trufflehog
-        language: system
-        name: TruffleHog
-        description: Detect secrets in your data.
-        entry: bash -c 'docker run -v "$(pwd):/workspace" -i --rm trufflesecurity/trufflehog:latest git file:///workspace --concurrency=2 --fail'
-        stages: ["commit", "push"]
-
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
-    hooks:
-      - id: detect-secrets
-        exclude: .pre-commit-config.yaml
