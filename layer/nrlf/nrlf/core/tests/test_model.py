@@ -21,7 +21,7 @@ def test_create_document_pointer_from_fhir_json(mock__make_timestamp):
 
     document = json.dumps(fhir_json)
     core_model = create_document_pointer_from_fhir_json(
-        document=document, api_version=API_VERSION
+        raw_fhir_json=document, api_version=API_VERSION
     )
 
     assert core_model.dict() == {
