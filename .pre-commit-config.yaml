@@ -24,3 +24,12 @@ repos:
     hooks:
       - id: black
         language_version: python3
+
+  - repo: local
+    hooks:
+      - id: trufflehog
+        language: system
+        name: TruffleHog
+        description: Detect secrets in your data.
+        entry: bash -c 'docker run -v "$(pwd):/workspace" -i --rm trufflesecurity/trufflehog:latest git file:///workspace --concurrency=2 --fail'
+        stages: ["commit", "push"]
