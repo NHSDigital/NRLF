@@ -8,6 +8,12 @@
 *.tfstate
 *.tfstate.*
 
+# ci tf output files
+*-tf-init-output*.txt
+*-tf-apply-output*.txt
+*-tf-plan-output*.txt
+*-tf-destroy-output*.txt
+
 # Crash log files
 crash.log
 
@@ -41,6 +47,7 @@ override.tf.json
 # python
 __pycache__
 *egg-info*
+.pytest_cache
 .venv
 
 # build dirs

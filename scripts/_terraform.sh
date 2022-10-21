@@ -38,10 +38,13 @@ function _terraform() {
   local env
   local aws_account_id
   local var_file
+  local current_timestamp
   env=$(_get_environment_name "$2")
   aws_account_id=$(_get_aws_account_id "$env")
   var_file=$(_get_environment_vars_file "$env")
-  plan_file="./tfplan"
+  current_timestamp="$(date '+%Y_%m_%d__%H_%M_%S')"
+  local plan_file="./tfplan"
+  local ci_log_bucket="${PROFILE_PREFIX}--mgmt--github-ci-logs"
 
   case $command in
     #----------------
@@ -63,8 +66,7 @@ function _terraform() {
       fi
 
       cd $root/terraform/infrastructure
-      terraform init || return 1
-      terraform workspace select "$env" || terraform workspace new "$env" || return 1
+      _terraform_init "$env"
     ;;
     #----------------
     "plan")
@@ -75,9 +77,7 @@ function _terraform() {
       fi
 
       cd $root/terraform/infrastructure
-      terraform init || return 1
-      terraform workspace select "$env" || terraform workspace new "$env" || return 1
-      terraform plan -var-file="$var_file" -out="$plan_file" -var "assume_account=${aws_account_id}" || return 1
+      _terraform_plan "$env" "$var_file" "$plan_file" "$aws_account_id"
     ;;
     #----------------
     "apply")
@@ -88,9 +88,7 @@ function _terraform() {
       fi
 
       cd $root/terraform/infrastructure
-      terraform workspace select "$env" || terraform workspace new "$env" || return 1
-      terraform apply "$plan_file" "${@:3}" || return 1
-      terraform output -json > output.json || return 1
+      _terraform_apply "$env" "$plan_file"
     ;;
     #----------------
     "destroy")
@@ -108,37 +106,79 @@ function _terraform() {
       fi
 
       cd $root/terraform/infrastructure
-      terraform workspace select "$env" || terraform workspace new "$env" || return 1
-      terraform destroy -var-file="$var_file" -var "assume_account=${aws_account_id}" || return 1
-      if [ "$env" != "default" ];
+      _terraform_destroy "$env" "$var_file" "$aws_account_id"
+    ;;
+
+     "ciinit")
+      if [[ "$RUNNING_IN_CI" != 1 ]];
       then
-        terraform workspace select default || return 1
-        terraform workspace delete "$env" || return 1
+          echo "Command should only be used by CI pipeline" >&2
+          return 1
       fi
+
+      echo "Init terraform for aws workspace: ${env}"
+
+      local tf_init_output="${env}-tf-init-output_${current_timestamp}.txt"
+
+      cd $root/terraform/infrastructure
+      _terraform_init "$env" > "./${tf_init_output}"
+      aws s3 cp "./${tf_init_output}" "s3://${ci_log_bucket}/${env}/${tf_init_output}"
+
+      echo "Init complete. Uploaded output output to: s3://${ci_log_bucket}/${env}/${tf_init_output}"
+    ;;
+
+    "ciplan")
+      if [[ "$RUNNING_IN_CI" != 1 ]];
+      then
+          echo "Command should only be used by CI pipeline" >&2
+          return 1
+      fi
+
+      echo "Creating plan for aws workspace: ${env}"
+
+      local tf_plan_output="${env}-tf-plan-output_${current_timestamp}.txt"
+
+      cd $root/terraform/infrastructure
+      _terraform_plan "$env" "$var_file" "$plan_file" "$aws_account_id" > "./${tf_plan_output}"
+      aws s3 cp "./${tf_plan_output}" "s3://${ci_log_bucket}/${env}/${tf_plan_output}"
+
+      echo "Plan complete. Uploaded output output to: s3://${ci_log_bucket}/${env}/${tf_plan_output}"
+    ;;
+
+    "ciapply")
+      if [[ "$RUNNING_IN_CI" != 1 ]];
+      then
+          echo "Command should only be used by CI pipeline" >&2
+          return 1
+      fi
+
+      echo "Applying change to aws workspace: ${env}"
+
+      local tf_apply_output="${env}-tf-apply-output_${current_timestamp}.txt"
+
+      cd $root/terraform/infrastructure
+      _terraform_apply "$env" "$plan_file" > "./${tf_apply_output}"
+      aws s3 cp "./${tf_apply_output}" "s3://${ci_log_bucket}/${env}/${tf_apply_output}"
+
+      echo "Apply complete. Uploaded output output to: s3://${ci_log_bucket}/${env}/${tf_apply_output}"
     ;;
 
     "cidestroy")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]];
+      if [[ "$RUNNING_IN_CI" != 1 ]];
       then
-          echo "Please log in as the mgmt account" >&2
+          echo "Command should only be used by CI pipeline" >&2
           return 1
       fi
 
-      if [[ -z ${env} ]];
-      then
-          echo "Non-mgmt parameter required" >&2
-          echo "Usage:    nrlf terraform bootstrap-non-mgmt <ENV>"
-          return 1
-      fi
+      echo "Destroying aws workspace: ${env}"
+
+      local tf_destroy_output="${env}-tf-destroy-output_${current_timestamp}.txt"
 
       cd $root/terraform/infrastructure
-      terraform workspace select "$env" || terraform workspace new "$env" || return 1
-      terraform destroy -var-file="$var_file" -var "assume_account=${aws_account_id}" -auto-approve || return 1
-      if [ "$env" != "default" ];
-      then
-        terraform workspace select default || return 1
-        terraform workspace delete "$env" || return 1
-      fi
+      _terraform_destroy "$env" "$var_file" "$aws_account_id" "-auto-approve" > "./${tf_destroy_output}"
+      aws s3 cp "./${tf_destroy_output}" "s3://${ci_log_bucket}/${env}/${tf_destroy_output}"
+
+      echo "Destroy complete. Uploaded output output to: s3://${ci_log_bucket}/${env}/${tf_destroy_output}"
     ;;
 
     #----------------
@@ -236,3 +276,48 @@ function _get_aws_account_id() {
 
      echo "./etc/${vars_prefix}.tfvars"
  }
+
+
+function _terraform_init() {
+  local env=$1
+
+  terraform init || return 1
+  terraform workspace select "$env" || terraform workspace new "$env" || return 1
+}
+
+
+function _terraform_plan() {
+  local env=$1
+  local var_file=$2
+  local plan_file=$3
+  local aws_account_id=$4
+
+  terraform init || return 1
+  terraform workspace select "$env" || terraform workspace new "$env" || return 1
+  terraform plan -var-file="$var_file" -out="$plan_file" -var "assume_account=${aws_account_id}" || return 1
+}
+
+
+function _terraform_destroy() {
+  local env=$1
+  local var_file=$2
+  local aws_account_id=$3
+
+  terraform workspace select "$env" || terraform workspace new "$env" || return 1
+  terraform destroy -var-file="$var_file" -var "assume_account=${aws_account_id}" "${@:4}" || return 1
+  if [ "$env" != "default" ];
+  then
+    terraform workspace select default || return 1
+    terraform workspace delete "$env" || return 1
+  fi
+}
+
+
+function _terraform_apply() {
+  local env=$1
+  local plan_file=$2
+
+  terraform workspace select "$env" || terraform workspace new "$env" || return 1
+  terraform apply "$plan_file" || return 1
+  terraform output -json > output.json || return 1
+}

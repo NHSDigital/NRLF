@@ -27,6 +27,7 @@ env:
   TF_ARTIFACT_NAME: ${{ inputs.environment }}-terraform-artifact
   AWS_DEFAULT_REGION: eu-west-2
   TF_CLI_ARGS: -no-color
+  RUNNING_IN_CI: 1
 
 jobs:
   cache:
@@ -114,14 +115,14 @@ jobs:
       - name: Terraform plan - ${{ env.TF_WORKFLOW_ID }}
         run: |
           source nrlf.sh
-          nrlf terraform init ${TF_WORKFLOW_ID} >> tf-plan-output.txt
-          nrlf terraform plan ${TF_WORKFLOW_ID} >> tf-plan-output.txt
+          nrlf terraform ciinit ${TF_WORKFLOW_ID}
+          nrlf terraform ciplan ${TF_WORKFLOW_ID}
 
       - name: Upload artifact - ${{ env.TF_ARTIFACT_NAME }}
         uses: ./.github/actions/upload-artifact/
         with:
           name: ${{ env.TF_ARTIFACT_NAME }}
-          path: ./terraform/.*tfplan
+          path: ./terraform/infrastructure/.*tfplan
 
   terraform-apply:
     needs: [terraform-plan]
@@ -147,7 +148,7 @@ jobs:
         uses: ./.github/actions/download-artifact/
         with:
           name: ${{ env.TF_ARTIFACT_NAME }}
-          path: ./terraform/
+          path: ./terraform/infrastructure/
 
       - name: Configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -159,8 +160,8 @@ jobs:
       - name: Terraform apply - ${{ env.TF_WORKFLOW_ID }}
         run: |
           source nrlf.sh
-          nrlf terraform init ${TF_WORKFLOW_ID} >> tf-apply-output.txt
-          nrlf terraform apply ${TF_WORKFLOW_ID} >> tf-apply-output.txt
+          nrlf terraform ciinit ${TF_WORKFLOW_ID}
+          nrlf terraform ciapply ${TF_WORKFLOW_ID}
 
   clear-cache:
     name: Clear Cache
