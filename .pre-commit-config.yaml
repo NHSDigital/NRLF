@@ -1,13 +1,4 @@
 repos:
-  - repo: local
-    hooks:
-      - id: trufflehog
-        language: system
-        name: TruffleHog
-        description: Detect secrets in your data.
-        entry: bash -c 'docker run -v "$(pwd):/workspace" -i --rm trufflesecurity/trufflehog:latest git file:///workspace --concurrency=2 --fail'
-        stages: ["commit", "push"]
-
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.4.0
     hooks:
