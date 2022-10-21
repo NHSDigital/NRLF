@@ -17,7 +17,7 @@ function _test() {
     case $command in
         "unit") _test_unit "$2";;
         "integration") _test_integration ;;
-        "feature") _test_feature ;;
+        "feature") echo "not implemented" ;; #_test_feature ;;
         *) _test_help ;;
     esac
 }

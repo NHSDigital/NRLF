@@ -90,6 +90,7 @@ function _terraform() {
       cd $root/terraform/infrastructure
       terraform workspace select "$env" || terraform workspace new "$env" || return 1
       terraform apply "$plan_file" "${@:3}" || return 1
+      terraform output -json > output.json || return 1
     ;;
     #----------------
     "destroy")
