@@ -1,9 +1,9 @@
 import os
-from unittest import mock
-import pytest
-
 from importlib import import_module
-from lambda_utils.tests.unit.utils import make_aws_event, handler_four_hundred
+from unittest import mock
+
+import pytest
+from lambda_utils.tests.unit.utils import handler_four_hundred, make_aws_event
 
 ENDPOINTS = [
     "consumer.readDocumentReference",

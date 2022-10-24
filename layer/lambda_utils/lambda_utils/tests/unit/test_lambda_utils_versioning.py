@@ -1,14 +1,15 @@
 from pathlib import Path
 from unittest import mock
+
 import pytest
+from lambda_utils.tests.unit.example_api import index
+from lambda_utils.tests.unit.utils import make_aws_event
 from lambda_utils.versioning import (
     AcceptHeader,
     VersionException,
     get_largest_possible_version,
     get_versioned_steps,
 )
-from lambda_utils.tests.unit.utils import make_aws_event
-from lambda_utils.tests.unit.example_api import index
 
 PATH_TO_HERE = Path(__file__).parent
 

@@ -6,11 +6,11 @@ from nrlf.core.dynamodb_types import DYNAMODB_NULL, DynamoDbType
 from nrlf.core.validators import (
     create_document_type_tuple,
     generate_producer_id,
-    validate_tuple,
+    make_timestamp,
     validate_nhs_number,
     validate_status,
     validate_timestamp,
-    make_timestamp,
+    validate_tuple,
 )
 from nrlf.producer.fhir.r4.model import DocumentReference
 from pydantic import BaseModel, root_validator, validator

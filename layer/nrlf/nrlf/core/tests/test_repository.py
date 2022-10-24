@@ -1,16 +1,17 @@
+import json
 from contextlib import contextmanager
+from datetime import datetime
 from http import client
 from unittest.mock import mock_open
-from pydantic import BaseModel
-from nrlf.core.validators import make_timestamp
-import moto
-import json
-from nrlf.core.model import DocumentPointer, create_document_pointer_from_fhir_json
-from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
-from nrlf.core.repository import Repository
+
 import boto3
+import moto
 import pytest
-from datetime import datetime
+from nrlf.core.model import DocumentPointer, create_document_pointer_from_fhir_json
+from nrlf.core.repository import Repository
+from nrlf.core.validators import make_timestamp
+from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
+from pydantic import BaseModel
 
 DEFAULT_ATTRIBUTE_DEFINITIONS = [{"AttributeName": "id", "AttributeType": "S"}]
 DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]

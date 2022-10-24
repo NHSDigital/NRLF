@@ -1,11 +1,10 @@
 import pytest
-
 from nrlf.core.validators import (
-    validate_tuple,
+    make_timestamp,
     validate_nhs_number,
     validate_status,
     validate_timestamp,
-    make_timestamp,
+    validate_tuple,
 )
 
 
