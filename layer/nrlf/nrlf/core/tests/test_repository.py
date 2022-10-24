@@ -68,6 +68,21 @@ def test_create_document_pointer():
     assert recovered_item.dict() == core_model.dict()
 
 
+def test_cant_create_if_item_already_exists():
+
+    document_reference = json.dumps(read_test_data("nrlf"))
+    api_version = 1
+    core_model = create_document_pointer_from_fhir_json(
+        raw_fhir_json=document_reference, api_version=api_version
+    )
+
+    with pytest.raises(DynamoDbError) as error, mock_dynamodb(TABLE_NAME) as client:
+        repository = Repository(DocumentPointer, client)
+
+        repository.create(item=core_model)
+        repository.create(item=core_model)
+
+
 def test_read_document_pointer():
 
     document_reference = json.dumps(read_test_data("nrlf"))
@@ -124,13 +139,34 @@ def test_update_document_pointer():
         repository = Repository(DocumentPointer, client)
         repository.create(item=core_model)
 
-        repository.update(item=updated_core_model.dict())
+        repository.update(item=updated_core_model)
         response = client.scan(TableName=TABLE_NAME)
 
     (item,) = response["Items"]
     recovered_item = DocumentPointer.construct(**item)
 
     assert recovered_item.dict() == updated_core_model.dict()
+
+
+def test_update_document_pointer_doesnt_update_if_item_doesnt_exist():
+
+    updated_document = read_test_data("nrlf")
+    updated_document["content"][0]["attachment"][
+        "url"
+    ] = "https://example.org/different_doc.pdf"
+
+    updated_document_reference = json.dumps(updated_document)
+
+    api_version = 1
+
+    updated_core_model = create_document_pointer_from_fhir_json(
+        raw_fhir_json=updated_document_reference, api_version=api_version
+    )
+
+    with pytest.raises(DynamoDbError):
+        repository = Repository(DocumentPointer, client)
+
+        repository.update(item=updated_core_model.dict())
 
 
 def test_supersede_creates_new_item_and_deletes_existing():
@@ -211,6 +247,14 @@ def test_hard_delete():
         response = client.scan(TableName=TABLE_NAME)
 
     assert len(response["Items"]) == 0
+
+
+def test_wont_hard_delete_if_item_doesnt_exist():
+
+    with pytest.raises(DynamoDbError), mock_dynamodb(TABLE_NAME) as client:
+        repository = Repository(DocumentPointer, client)
+
+        repository.hard_delete(id="no")
 
 
 @handle_dynamodb_errors

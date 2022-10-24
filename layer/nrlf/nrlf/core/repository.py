@@ -41,7 +41,11 @@ class Repository:
 
     @handle_dynamodb_errors
     def create(self, item: BaseModel) -> DynamoDbResponse:
-        return self.dynamodb.put_item(TableName=self.table_name, Item=item.dict())
+        return self.dynamodb.put_item(
+            TableName=self.table_name,
+            Item=item.dict(),
+            ConditionExpression="attribute_not_exists(id)",
+        )
 
     @handle_dynamodb_errors
     def read(self, **kwargs) -> DynamoDbResponse:
@@ -60,7 +64,11 @@ class Repository:
 
     @handle_dynamodb_errors
     def update(self, item: BaseModel) -> DynamoDbResponse:
-        return self.dynamodb.put_item(TableName=self.table_name, Item=item)
+        return self.dynamodb.put_item(
+            TableName=self.table_name,
+            Item=item.dict(),
+            ConditionExpression="attribute_exists(id)",
+        )
 
     @handle_dynamodb_errors
     def supersede(
@@ -86,4 +94,8 @@ class Repository:
 
     @handle_dynamodb_errors
     def hard_delete(self, id: str):
-        return self.dynamodb.delete_item(TableName=self.table_name, Key={"id": id})
+        return self.dynamodb.delete_item(
+            TableName=self.table_name,
+            Key={"id": id},
+            ConditionExpression="attribute_exists(id)",
+        )
