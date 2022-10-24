@@ -1,6 +1,7 @@
-from lambda_pipeline.types import PipelineData, LambdaContext, FrozenDict
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from typing import Any
+
+from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
+from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 
 
 def handler(

@@ -4,12 +4,12 @@ from pathlib import Path
 from typing import Generator
 
 from build_scripts.common import (
-    get_base_dir,
-    clean_dir,
-    zip_package,
-    DIST_DIR,
     BUILD_DIR,
+    DIST_DIR,
+    clean_dir,
     copy_source_code,
+    get_base_dir,
+    zip_package,
 )
 
 

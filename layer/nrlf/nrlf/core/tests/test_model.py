@@ -4,8 +4,8 @@ from unittest import mock
 import pytest
 from nrlf.core.model import (
     DYNAMODB_NULL,
-    create_document_type_tuple,
     create_document_pointer_from_fhir_json,
+    create_document_type_tuple,
 )
 from nrlf.producer.fhir.r4.model import CodeableConcept, Coding
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data

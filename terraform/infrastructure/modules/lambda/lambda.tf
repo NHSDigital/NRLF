@@ -7,7 +7,7 @@ resource "aws_lambda_function" "lambda_function" {
   source_code_hash = filebase64sha256("${path.module}/../../../../api/${var.apitype}/${var.name}/dist/${var.name}.zip")
   timeout          = local.lambda_timeout
   memory_size      = 128
-  
+
   environment {
     variables = {
       PREFIX     = var.prefix

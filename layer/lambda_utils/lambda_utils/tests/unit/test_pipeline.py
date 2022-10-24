@@ -1,5 +1,4 @@
 import pytest
-
 from lambda_utils.pipeline import _get_steps
 from lambda_utils.versioning import VersionException
 

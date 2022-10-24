@@ -1,7 +1,8 @@
 import re
+
+import boto3
 from nrlf.core.dynamodb_types import DynamoDbType
 from nrlf.core.validators import make_timestamp
-import boto3
 from pydantic import BaseModel
 
 
