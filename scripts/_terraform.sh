@@ -16,6 +16,7 @@ function _terraform_help() {
     echo "  bootstrap-non-mgmt <env>   - Creates account-wide resources in the provided env"
     echo "  destroy-bootstrap-non-mgmt - Destroys account-wide resources in the provided env"
     echo
+    return 1
 }
 
 function _get_project_name(){
@@ -121,10 +122,12 @@ function _terraform() {
       local tf_init_output="${env}-tf-init-output_${current_timestamp}.txt"
 
       cd $root/terraform/infrastructure
-      _terraform_init "$env" > "./${tf_init_output}"
+      _terraform_init "$env" | tee "./${tf_init_output}" > /dev/null
+      local tf_init_status="${PIPESTATUS[0]}"
       aws s3 cp "./${tf_init_output}" "s3://${ci_log_bucket}/${env}/${tf_init_output}"
 
-      echo "Init complete. Uploaded output output to: s3://${ci_log_bucket}/${env}/${tf_init_output}"
+      echo "Init complete. Uploaded output to: s3://${ci_log_bucket}/${env}/${tf_init_output}"
+      return "$tf_init_status"
     ;;
 
     "ciplan")
@@ -139,10 +142,12 @@ function _terraform() {
       local tf_plan_output="${env}-tf-plan-output_${current_timestamp}.txt"
 
       cd $root/terraform/infrastructure
-      _terraform_plan "$env" "$var_file" "$plan_file" "$aws_account_id" > "./${tf_plan_output}"
+      _terraform_plan "$env" "$var_file" "$plan_file" "$aws_account_id" | tee "./${tf_plan_output}" > /dev/null
+      local tf_plan_status="${PIPESTATUS[0]}"
       aws s3 cp "./${tf_plan_output}" "s3://${ci_log_bucket}/${env}/${tf_plan_output}"
 
       echo "Plan complete. Uploaded output output to: s3://${ci_log_bucket}/${env}/${tf_plan_output}"
+      return "$tf_plan_status"
     ;;
 
     "ciapply")
@@ -157,10 +162,12 @@ function _terraform() {
       local tf_apply_output="${env}-tf-apply-output_${current_timestamp}.txt"
 
       cd $root/terraform/infrastructure
-      _terraform_apply "$env" "$plan_file" > "./${tf_apply_output}"
+      _terraform_apply "$env" "$plan_file" | tee "./${tf_apply_output}" > /dev/null
+      local tf_apply_status="${PIPESTATUS[0]}"
       aws s3 cp "./${tf_apply_output}" "s3://${ci_log_bucket}/${env}/${tf_apply_output}"
 
       echo "Apply complete. Uploaded output output to: s3://${ci_log_bucket}/${env}/${tf_apply_output}"
+      return "$tf_apply_status"
     ;;
 
     "cidestroy")
@@ -175,10 +182,12 @@ function _terraform() {
       local tf_destroy_output="${env}-tf-destroy-output_${current_timestamp}.txt"
 
       cd $root/terraform/infrastructure
-      _terraform_destroy "$env" "$var_file" "$aws_account_id" "-auto-approve" > "./${tf_destroy_output}"
+      _terraform_destroy "$env" "$var_file" "$aws_account_id" "-auto-approve" | tee "./${tf_destroy_output}" > /dev/null
+      local tf_destroy_status="${PIPESTATUS[0]}"
       aws s3 cp "./${tf_destroy_output}" "s3://${ci_log_bucket}/${env}/${tf_destroy_output}"
 
       echo "Destroy complete. Uploaded output output to: s3://${ci_log_bucket}/${env}/${tf_destroy_output}"
+      return "$tf_destroy_status"
     ;;
 
     #----------------

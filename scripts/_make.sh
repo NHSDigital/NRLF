@@ -9,6 +9,7 @@ function _make_help() {
   echo "  build         - Builds the code"
   echo "  clean         - Cleans the artefacts"
   echo "  install       - Setup local dependencies"
+  return 1
 }
 
 function _make() {

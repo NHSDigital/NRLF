@@ -10,6 +10,7 @@ function _test_help() {
     echo "  integration                 - run integration tests"
     echo "  feature                     - run BDD tests"
     echo
+    return 1
 }
 
 function _test() {

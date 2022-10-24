@@ -2,9 +2,6 @@
 
 
 function _aws_help() {
-    local verb=$1
-    local args=(${@:2})
-
     echo
     echo "nrlf aws <command> [options]"
     echo
@@ -13,6 +10,7 @@ function _aws_help() {
     echo "  login <alias> [<mfa-token>] - "
     echo "  reset-creds                 - "
     echo
+    return 1
 }
 
 function _aws() {
@@ -22,7 +20,7 @@ function _aws() {
     case $verb in
         "login") _aws_login $args ;;
         "reset-creds") _aws_reset_creds $args ;;
-        *) _aws_help $args ;;
+        *) _aws_help ;;
     esac
 }
 

@@ -1,6 +1,5 @@
 # Local .terraform directories
 **/.terraform/*
-**/.terraform.lock.hcl
 **/tfplan
 **/terraform/**/output.json
 
