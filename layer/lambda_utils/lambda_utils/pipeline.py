@@ -5,6 +5,8 @@ from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventMo
 from lambda_pipeline.pipeline import make_pipeline
 from lambda_pipeline.types import LambdaContext, PipelineData
 from pydantic import ValidationError
+from nrlf.core.errors import DynamoDbError
+from nrlf.core.errors import ItemNotFound
 
 from .versioning import (
     get_largest_possible_version,
@@ -41,7 +43,7 @@ def execute_steps(
             dependencies=dependencies,
         )
         return 200, pipeline(data=PipelineData()).to_dict()
-    except ValidationError as e:
+    except (ValidationError, ItemNotFound) as e:
         return 400, {"message": str(e)}
     except Exception as e:
         return 500, {"message": str(e)}

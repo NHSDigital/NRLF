@@ -1,5 +1,8 @@
 from typing import Any
 
+from nrlf.core.errors import ItemNotFound
+from pydantic import BaseModel, validator
+from lambda_pipeline.types import PipelineData, LambdaContext, FrozenDict
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from pydantic import BaseModel, validator
@@ -13,13 +16,30 @@ class RaiseValidationErrorModel(BaseModel):
         raise ValueError
 
 
-def handler_four_hundred(
+class RaiseItemNotFoundErrorModel(BaseModel):
+    foo: bool
+
+    @validator("foo")
+    def something(value):
+        raise ItemNotFound
+
+
+def throw_validation_error(
     data: PipelineData,
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
 ) -> PipelineData:
     RaiseValidationErrorModel(foo="1")
+
+
+def throw_item_not_found_error(
+    data: PipelineData,
+    context: LambdaContext,
+    event: APIGatewayProxyEventModel,
+    dependencies: FrozenDict[str, Any],
+) -> PipelineData:
+    RaiseItemNotFoundErrorModel(foo="1")
 
 
 def make_aws_event(**kwargs):

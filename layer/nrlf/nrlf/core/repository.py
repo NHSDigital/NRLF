@@ -1,10 +1,12 @@
+from functools import wraps
 import re
 
 import boto3
+from nrlf.core.errors import DynamoDbError
+from nrlf.core.errors import ItemNotFound
 from nrlf.core.dynamodb_types import DynamoDbType
 from nrlf.core.validators import make_timestamp
 from pydantic import BaseModel
-from boto3.dynamodb.conditions import Attr
 
 
 def _to_kebab_case(name: str) -> str:
@@ -13,6 +15,19 @@ def _to_kebab_case(name: str) -> str:
 
 class DynamoDbResponse(dict):
     pass
+
+
+def handle_dynamodb_errors(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+        except Exception as error:
+            if type(error) is ItemNotFound:
+                raise error
+            raise DynamoDbError("There was an error with the database")
+
+    return wrapper
 
 
 class Repository:
@@ -26,20 +41,30 @@ class Repository:
                     "Model contains fields that are not of type DynamoDbType"
                 )
 
+    @handle_dynamodb_errors
     def create(self, item: BaseModel) -> DynamoDbResponse:
         return self.dynamodb.put_item(TableName=self.table_name, Item=item.dict())
 
+    @handle_dynamodb_errors
     def read(self, **kwargs) -> DynamoDbResponse:
         response = self.dynamodb.get_item(TableName=self.table_name, Key=kwargs)
-        if "Item" in response:
-            return self.item_type.construct(**response["Item"])
 
+        try:
+            item = response["Item"]
+        except KeyError:
+            raise ItemNotFound("Item could not be found")
+
+        return self.item_type.construct(**item)
+
+    @handle_dynamodb_errors
     def search(self, key: any):
         return NotImplementedError
 
+    @handle_dynamodb_errors
     def update(self, item: BaseModel) -> DynamoDbResponse:
         return self.dynamodb.put_item(TableName=self.table_name, Item=item)
 
+    @handle_dynamodb_errors
     def supersede(
         self, create_item: BaseModel, delete_item_id: str
     ) -> DynamoDbResponse:
@@ -61,5 +86,6 @@ class Repository:
             ]
         )
 
+    @handle_dynamodb_errors
     def hard_delete(self, id: str):
         return self.dynamodb.delete_item(TableName=self.table_name, Key={"id": id})

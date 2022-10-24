@@ -4,6 +4,9 @@ from datetime import datetime
 from http import client
 from unittest.mock import mock_open
 
+from nrlf.core.repository import handle_dynamodb_errors
+from nrlf.core.errors import DynamoDbError
+from nrlf.core.errors import ItemNotFound
 from nrlf.core.dynamodb_types import DynamoDbType
 from pydantic import BaseModel
 import moto
@@ -93,6 +96,21 @@ def test_read_document_pointer():
     assert core_model == result
 
 
+def test_read_document_pointer_throws_error_when_items_key_missing():
+
+    document_reference = json.dumps(read_test_data("nrlf"))
+    api_version = 1
+    core_model = create_document_pointer_from_fhir_json(
+        raw_fhir_json=document_reference, api_version=api_version
+    )
+
+    with pytest.raises(ItemNotFound) as error, mock_dynamodb(TABLE_NAME) as client:
+        repository = Repository(DocumentPointer, client)
+        repository.create(item=core_model)
+
+        repository.read(id={"S": "badKey"})
+
+
 def test_update_document_pointer():
 
     document_reference = json.dumps(read_test_data("nrlf"))
@@ -152,9 +170,12 @@ def test_supersede_creates_new_item_and_deletes_existing():
         )
 
         response_for_created_item = repository.read(id=core_model_for_create.id.value)
-        response_for_deleted_item = repository.read(id=core_model_for_delete.id.value)
 
-    assert response_for_deleted_item == None
+        try:
+            repository.read(id=core_model_for_delete.id.value)
+        except ItemNotFound as error:
+            assert error.args[0] == "Item could not be found"
+
     assert response_for_created_item == core_model_for_create
 
 
@@ -201,6 +222,21 @@ def test_hard_delete():
         response = client.scan(TableName=TABLE_NAME)
 
     assert len(response["Items"]) == 0
+
+
+@handle_dynamodb_errors
+def raise_exception(exception):
+    raise exception
+
+
+@pytest.mark.parametrize(
+    ["exception_param"],
+    ([Exception], [TypeError], [ValueError]),
+)
+def test_wrapper_exception_handler(exception_param):
+
+    with pytest.raises(DynamoDbError):
+        raise_exception(exception_param)
 
 
 def test_search():
