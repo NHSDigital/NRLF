@@ -1,18 +1,14 @@
-import json
-from datetime import datetime as dt
 from typing import Optional
 
 from nrlf.core.dynamodb_types import DYNAMODB_NULL, DynamoDbType
 from nrlf.core.validators import (
     create_document_type_tuple,
     generate_producer_id,
-    make_timestamp,
     validate_nhs_number,
-    validate_status,
+    validate_source,
     validate_timestamp,
     validate_tuple,
 )
-from nrlf.producer.fhir.r4.model import DocumentReference
 from pydantic import BaseModel, root_validator, validator
 
 
@@ -21,12 +17,11 @@ class DocumentPointer(BaseModel):
     nhs_number: DynamoDbType[str]
     producer_id: DynamoDbType[str]
     type: DynamoDbType[str]
-    status: DynamoDbType[str]
+    source: DynamoDbType[str]
     version: DynamoDbType[int]
     document: DynamoDbType[dict]
     created_on: DynamoDbType[str]
     updated_on: Optional[DynamoDbType[str]] = DYNAMODB_NULL
-    deleted_on: Optional[DynamoDbType[str]] = DYNAMODB_NULL
 
     @root_validator(pre=True)
     def inject_producer_id(cls, values: dict) -> dict:
@@ -61,29 +56,12 @@ class DocumentPointer(BaseModel):
         validate_nhs_number(nhs_number=value.raw_value)
         return value
 
-    @validator("status")
-    def validate_status(value: any) -> DynamoDbType[str]:
-        validate_status(status=value.raw_value)
+    @validator("source")
+    def validate_source(value: any) -> DynamoDbType[str]:
+        validate_source(source=value.raw_value)
         return value
 
-    @validator("created_on", "updated_on", "deleted_on")
+    @validator("created_on", "updated_on")
     def validate_timestamp(value: any) -> DynamoDbType[str]:
         validate_timestamp(date=value.raw_value)
         return value
-
-
-def create_document_pointer_from_fhir_json(
-    raw_fhir_json: str, api_version: int
-) -> DocumentPointer:
-    fhir_json = json.loads(raw_fhir_json)
-    fhir_model = DocumentReference(**fhir_json)
-    core_model = DocumentPointer(
-        id=fhir_model.masterIdentifier.value,
-        nhs_number=fhir_model.subject.id,
-        type=fhir_model.type,
-        status=fhir_model.status,
-        version=api_version,
-        document=fhir_json,
-        created_on=make_timestamp(),
-    )
-    return core_model

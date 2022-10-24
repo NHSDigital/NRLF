@@ -1,8 +1,10 @@
+from unittest import mock
+
 import pytest
+from nrlf.core.transform import make_timestamp
 from nrlf.core.validators import (
-    make_timestamp,
     validate_nhs_number,
-    validate_status,
+    validate_source,
     validate_timestamp,
     validate_tuple,
 )
@@ -42,17 +44,15 @@ def test_validate_nhs_number(nhs_number, expected_outcome):
     assert expected_outcome == outcome
 
 
+@mock.patch("nrlf.core.validators.VALID_SOURCES", {"foo", "bar"})
 @pytest.mark.parametrize(
-    ["status", "expected_outcome"],
-    (
-        ["current", True],
-        ["foo", False],
-    ),
+    ["source", "expected_outcome"],
+    (["foo", True], ["bar", True], ["baz", False]),
 )
-def test_validate_status(status, expected_outcome):
+def test_validate_source(source, expected_outcome):
     outcome = True
     try:
-        validate_status(status=status)
+        validate_source(source=source)
     except ValueError:
         outcome = False
     assert expected_outcome == outcome
@@ -74,8 +74,6 @@ def test_validate_timestamp(date, expected_outcome):
     assert expected_outcome == outcome
 
 
-def test_make_timestamp():
-    from datetime import datetime
-
+def test__make_timestamp():
     timestamp = make_timestamp()
     validate_timestamp(timestamp)
