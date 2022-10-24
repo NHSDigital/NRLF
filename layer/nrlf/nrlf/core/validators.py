@@ -1,7 +1,7 @@
 from datetime import datetime as dt
 
 from nhs_number import is_valid as is_valid_nhs_number
-from nrlf.core.constants import VALID_STATUSES
+from nrlf.core.constants import VALID_SOURCES
 from nrlf.producer.fhir.r4.model import CodeableConcept
 
 
@@ -43,13 +43,9 @@ def validate_tuple(tuple: str):
     _get_tuple_components(tuple=tuple)
 
 
-def validate_status(status: str):
-    if status not in VALID_STATUSES:
-        raise ValueError(f"Not a status: {status}. Expected one of {VALID_STATUSES}.")
-
-
-def make_timestamp() -> str:
-    return dt.utcnow().isoformat(timespec="milliseconds") + "Z"
+def validate_source(source: str):
+    if source not in VALID_SOURCES:
+        raise ValueError(f"Not a source: {source}. Expected one of {VALID_SOURCES}.")
 
 
 def validate_timestamp(date: str):

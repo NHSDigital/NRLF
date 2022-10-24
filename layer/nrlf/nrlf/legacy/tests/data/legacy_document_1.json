@@ -1,0 +1,151 @@
+{
+  "meta": {
+    "versionId": "1",
+    "profile": [
+      "https://fhir.nhs.uk/STU3/StructureDefinition/NRL-DocumentReference-1"
+    ],
+    "lastUpdated": "Tue, 23 Aug 2022 14:45:17 GMT"
+  },
+  "indexed": "2022-08-23T14:45:17+00:00",
+  "context": {
+    "period": {
+      "start": null,
+      "end": null
+    },
+    "practiceSetting": {
+      "practiceSettingCoding": [
+        {
+          "code": "310167005",
+          "system": "http://snomed.info/sct",
+          "display": "Urology service"
+        }
+      ],
+      "practiceSettingText": null
+    }
+  },
+  "content": [
+    {
+      "attachment": {
+        "url": "https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf",
+        "data": "",
+        "language": "",
+        "contentType": "application/pdf",
+        "creation": "2021-03-08T15:26:00+01:00",
+        "hash": ""
+      },
+      "format": {
+        "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
+        "code": "urn:nhs-ic:unstructured",
+        "display": "Unstructured Document"
+      },
+      "extension": [
+        {
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-ContentStability-1",
+                "code": "dynamic",
+                "id": "",
+                "display": "Dynamic"
+              }
+            ]
+          },
+          "url": "https://fhir.nhs.uk/STU3/StructureDefinition/Extension-NRL-ContentStability-1"
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-ContentStability-1",
+                "code": "dynamic",
+                "id": "",
+                "display": "Dynamic"
+              }
+            ]
+          },
+          "url": "https://fhir.nhs.uk/STU3/StructureDefinition/Extension-NRL-ContentStability-1"
+        }
+      ],
+      "attachment": {
+        "data": "",
+        "language": "",
+        "url": "https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.html",
+        "creation": "2016-03-08T15:26:00+01:00",
+        "hash": "",
+        "contentType": "text/html"
+      },
+      "format": {
+        "code": "urn:nhs-ic:record-contact",
+        "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
+        "display": "Contact details (HTTP Unsecured)"
+      }
+    }
+  ],
+  "attachment": {
+    "url": "https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf",
+    "creation": "2021-03-08T15:26:00+01:00",
+    "title": null,
+    "contentType": "application/pdf"
+  },
+  "stability": {
+    "coding": [
+      {
+        "code": "dynamic",
+        "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-ContentStability-1",
+        "id": "",
+        "display": "Dynamic"
+      }
+    ],
+    "text": null
+  },
+  "removed": false,
+  "lastModified": "Tue, 23 Aug 2022 14:45:17 GMT",
+  "created": null,
+  "logicalIdentifier": {
+    "logicalId": "341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851"
+  },
+  "custodian": {
+    "reference": "https://directory.spineservices.nhs.uk/STU3/Organization/RQI"
+  },
+  "class": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "734163000",
+        "display": "Care plan"
+      }
+    ],
+    "text": null
+  },
+  "format": {
+    "code": "urn:nhs-ic:unstructured",
+    "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
+    "display": "Unstructured Document"
+  },
+  "status": "current",
+  "type": {
+    "code": "718377777",
+    "display": "Another Test data"
+  },
+  "masterIdentifier": {
+    "system": "",
+    "value": ""
+  },
+  "relatesTo": {
+    "code": null,
+    "target": {
+      "reference": null,
+      "identifier": {
+        "value": null,
+        "system": null
+      }
+    }
+  },
+  "author": {
+    "reference": "https://directory.spineservices.nhs.uk/STU3/Organization/RAE"
+  }
+}

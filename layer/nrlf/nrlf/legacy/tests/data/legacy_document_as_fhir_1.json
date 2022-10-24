@@ -1,0 +1,94 @@
+{
+  "resourceType": "DocumentReference",
+  "masterIdentifier": {
+    "system": "LEGACY_SYSTEM",
+    "value": "producer_123|341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851"
+  },
+  "status": "current",
+  "type": {
+    "coding": [
+      {
+        "code": "718377777",
+        "display": "Another Test data",
+        "system": "LEGACY_SYSTEM"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "734163000",
+          "display": "Care plan"
+        }
+      ]
+    }
+  ],
+  "subject": { "id": "3006500369" },
+  "date": "2022-08-23T14:45:17+00:00",
+  "author": [
+    {
+      "reference": "https://directory.spineservices.nhs.uk/STU3/Organization/RAE"
+    }
+  ],
+  "custodian": {
+    "id": "https://directory.spineservices.nhs.uk/STU3/Organization/RQI"
+  },
+  "relatesTo": [],
+  "content": [
+    {
+      "extension": [
+        {
+          "url": "https://fhir.nhs.uk/STU3/StructureDefinition/Extension-NRL-ContentStability-1",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-ContentStability-1",
+                "code": "dynamic",
+                "display": "Dynamic"
+              }
+            ]
+          }
+        }
+      ],
+      "attachment": {
+        "contentType": "application/pdf",
+        "url": "https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf",
+        "creation": "2021-03-08T15:26:00+01:00"
+      },
+      "format": {
+        "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
+        "code": "urn:nhs-ic:unstructured",
+        "display": "Unstructured Document"
+      }
+    },
+    {
+      "extension": [
+        {
+          "url": "https://fhir.nhs.uk/STU3/StructureDefinition/Extension-NRL-ContentStability-1",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-ContentStability-1",
+                "code": "dynamic",
+                "display": "Dynamic"
+              }
+            ]
+          }
+        }
+      ],
+      "attachment": {
+        "contentType": "text/html",
+        "url": "https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.html",
+        "creation": "2016-03-08T15:26:00+01:00"
+      },
+      "format": {
+        "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
+        "code": "urn:nhs-ic:record-contact",
+        "display": "Contact details (HTTP Unsecured)"
+      }
+    }
+  ],
+  "context": { "practiceSetting": {} }
+}

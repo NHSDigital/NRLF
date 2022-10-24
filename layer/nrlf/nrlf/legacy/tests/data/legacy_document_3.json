@@ -1,0 +1,151 @@
+{
+  "context": {
+    "period": {
+      "start": null,
+      "end": null
+    },
+    "practiceSetting": {
+      "practiceSettingCoding": [
+        {
+          "display": "Urology service",
+          "code": "310167005",
+          "system": "http://snomed.info/sct"
+        }
+      ],
+      "practiceSettingText": null
+    }
+  },
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "Tue, 13 Sep 2022 10:14:53 GMT",
+    "profile": [
+      "https://fhir.nhs.uk/STU3/StructureDefinition/NRL-DocumentReference-1"
+    ]
+  },
+  "indexed": "2022-09-13T10:14:53+00:00",
+  "content": [
+    {
+      "attachment": {
+        "creation": "2022-08-01T15:26:00+01:00",
+        "hash": "",
+        "contentType": "application/pdf",
+        "data": "",
+        "language": "",
+        "url": "https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf"
+      },
+      "format": {
+        "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
+        "code": "urn:nhs-ic:unstructured",
+        "display": "Unstructured Document"
+      },
+      "extension": [
+        {
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-ContentStability-1",
+                "code": "dynamic",
+                "id": "",
+                "display": "Dynamic"
+              }
+            ]
+          },
+          "url": "https://fhir.nhs.uk/STU3/StructureDefinition/Extension-NRL-ContentStability-1"
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "https://fhir.nhs.uk/STU3/StructureDefinition/Extension-NRL-ContentStability-1",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-ContentStability-1",
+                "code": "dynamic",
+                "display": "Dynamic",
+                "id": ""
+              }
+            ]
+          }
+        }
+      ],
+      "attachment": {
+        "contentType": "text/html",
+        "creation": "2022-08-01T15:26:00+01:00",
+        "hash": "",
+        "url": "https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.html",
+        "data": "",
+        "language": ""
+      },
+      "format": {
+        "display": "Contact details (HTTP Unsecured)",
+        "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
+        "code": "urn:nhs-ic:record-contact"
+      }
+    }
+  ],
+  "stability": {
+    "coding": [
+      {
+        "display": "Dynamic",
+        "id": "",
+        "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-ContentStability-1",
+        "code": "dynamic"
+      }
+    ],
+    "text": null
+  },
+  "attachment": {
+    "title": null,
+    "creation": "2022-08-01T15:26:00+01:00",
+    "contentType": "application/pdf",
+    "url": "https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf"
+  },
+  "removed": false,
+  "created": null,
+  "lastModified": "Tue, 13 Sep 2022 10:14:53 GMT",
+  "custodian": {
+    "reference": "https://directory.spineservices.nhs.uk/STU3/Organization/RQI"
+  },
+  "class": {
+    "coding": [
+      {
+        "code": "734163000",
+        "system": "http://snomed.info/sct",
+        "display": "Care plan"
+      }
+    ],
+    "text": null
+  },
+  "logicalIdentifier": {
+    "logicalId": "e8a6fec7-334c-11ed-bd8d-000c290de2c0-58504e523530384b5851"
+  },
+  "status": "current",
+  "type": {
+    "code": "736253002",
+    "display": "Mental health crisis plan"
+  },
+  "format": {
+    "display": "Unstructured Document",
+    "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
+    "code": "urn:nhs-ic:unstructured"
+  },
+  "relatesTo": {
+    "code": "replaces",
+    "target": {
+      "reference": "https://psis-sync.national.ncrs.nhs.uk/DocumentReference/e87816c5-1fc9-11ed-bd8d-000c290de2c0-58504e523530384b5851",
+      "identifier": {
+        "value": null,
+        "system": null
+      }
+    }
+  },
+  "masterIdentifier": {
+    "system": "",
+    "value": ""
+  },
+  "author": {
+    "reference": "https://directory.spineservices.nhs.uk/STU3/Organization/TESTV349"
+  }
+}
