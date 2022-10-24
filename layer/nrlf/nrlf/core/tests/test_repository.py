@@ -1,29 +1,7 @@
 import json
 from contextlib import contextmanager
-from datetime import datetime
 from http import client
 from unittest.mock import mock_open
-
-from nrlf.core.repository import handle_dynamodb_errors
-from nrlf.core.errors import DynamoDbError
-from nrlf.core.errors import ItemNotFound
-from nrlf.core.dynamodb_types import DynamoDbType
-from pydantic import BaseModel
-import moto
-import json
-from nrlf.core.model import DocumentPointer, create_document_pointer_from_fhir_json
-from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
-from nrlf.core.repository import Repository, _to_kebab_case
-import boto3
-import moto
-import pytest
-from nrlf.core.model import DocumentPointer, create_document_pointer_from_fhir_json
-from nrlf.core.repository import Repository
-from nrlf.core.validators import make_timestamp
-from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
-from pydantic import BaseModel
-from datetime import datetime
-import botocore.errorfactory
 
 import boto3
 import moto
@@ -32,6 +10,7 @@ from nrlf.core.dynamodb_types import DynamoDbType
 from nrlf.core.errors import DynamoDbError, ItemNotFound
 from nrlf.core.model import DocumentPointer, create_document_pointer_from_fhir_json
 from nrlf.core.repository import Repository, _to_kebab_case, handle_dynamodb_errors
+from nrlf.core.validators import make_timestamp
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 from pydantic import BaseModel
 
