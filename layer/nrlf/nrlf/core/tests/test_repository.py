@@ -4,6 +4,13 @@ from datetime import datetime
 from http import client
 from unittest.mock import mock_open
 
+from nrlf.core.dynamodb_types import DynamoDbType
+from pydantic import BaseModel
+import moto
+import json
+from nrlf.core.model import DocumentPointer, create_document_pointer_from_fhir_json
+from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
+from nrlf.core.repository import Repository, _to_kebab_case
 import boto3
 import moto
 import pytest
@@ -17,6 +24,7 @@ import botocore.errorfactory
 
 DEFAULT_ATTRIBUTE_DEFINITIONS = [{"AttributeName": "id", "AttributeType": "S"}]
 DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]
+TABLE_NAME = _to_kebab_case(DocumentPointer.__name__)
 
 
 @contextmanager
@@ -33,73 +41,60 @@ def mock_dynamodb(table_name):
 
 
 def test_fields_are_not_all_dynamo_db_type():
-    # Arrange
     class TestClass(BaseModel):
         field: str
 
-    table_name = "document-pointer"
-
-    with pytest.raises(TypeError) as error, mock_dynamodb(table_name) as client:
+    with pytest.raises(TypeError) as error, mock_dynamodb(TABLE_NAME) as client:
         Repository(TestClass, client)
 
-    # Assert
     (message,) = error.value.args
     assert message == "Model contains fields that are not of type DynamoDbType"
 
 
 def test_fields_are_all_dynamo_db_type():
-    # Arrange
-    table_name = "document-pointer"
-
-    with mock_dynamodb(table_name):
+    with mock_dynamodb(TABLE_NAME):
         Repository(DocumentPointer, client)
 
 
 def test_create_document_pointer():
-    # Arrange
+
     document_reference = json.dumps(read_test_data("nrlf"))
     api_version = 1
     core_model = create_document_pointer_from_fhir_json(
         raw_fhir_json=document_reference, api_version=api_version
     )
-    table_name = "document-pointer"
 
-    with mock_dynamodb(table_name) as client:
+    with mock_dynamodb(TABLE_NAME) as client:
         repository = Repository(DocumentPointer, client)
 
-        # Act
-        repository.create(item=core_model.dict())
-        response = client.scan(TableName=table_name)
+        repository.create(item=core_model)
+        response = client.scan(TableName=TABLE_NAME)
 
     (item,) = response["Items"]
     recovered_item = DocumentPointer.construct(**item)
 
-    # Assert
     assert recovered_item.dict() == core_model.dict()
 
 
 def test_read_document_pointer():
-    # Arrange
+
     document_reference = json.dumps(read_test_data("nrlf"))
     api_version = 1
     core_model = create_document_pointer_from_fhir_json(
         raw_fhir_json=document_reference, api_version=api_version
     )
-    table_name = "document-pointer"
 
-    with mock_dynamodb(table_name) as client:
+    with mock_dynamodb(TABLE_NAME) as client:
         repository = Repository(DocumentPointer, client)
-        repository.create(item=core_model.dict())
+        repository.create(item=core_model)
 
-        # Act
         result = repository.read(id=core_model.id.value)
 
-    # Assert
     assert core_model == result
 
 
 def test_update_document_pointer():
-    # Arrange
+
     document_reference = json.dumps(read_test_data("nrlf"))
 
     updated_document = read_test_data("nrlf")
@@ -117,60 +112,54 @@ def test_update_document_pointer():
     updated_core_model = create_document_pointer_from_fhir_json(
         raw_fhir_json=updated_document_reference, api_version=api_version
     )
-    table_name = "document-pointer"
 
-    with mock_dynamodb(table_name) as client:
+    with mock_dynamodb(TABLE_NAME) as client:
         repository = Repository(DocumentPointer, client)
-        repository.create(item=core_model.dict())
+        repository.create(item=core_model)
 
-        # Act
         repository.update(item=updated_core_model.dict())
-        response = client.scan(TableName=table_name)
+        response = client.scan(TableName=TABLE_NAME)
 
     (item,) = response["Items"]
     recovered_item = DocumentPointer.construct(**item)
 
-    # Assert
     assert recovered_item.dict() == updated_core_model.dict()
 
 
 def test_supersede_creates_new_item_and_deletes_existing():
-    # Arrange
+
     document_reference = json.dumps(read_test_data("nrlf"))
     api_version = 1
     core_model_for_create = create_document_pointer_from_fhir_json(
         raw_fhir_json=document_reference, api_version=api_version
     )
-    core_model_for_create.id.value = {
-        "S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
-    }
+
+    core_model_for_create.id = DynamoDbType[str](
+        value="ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
+    )
 
     core_model_for_delete = create_document_pointer_from_fhir_json(
         raw_fhir_json=document_reference, api_version=api_version
     )
 
-    table_name = "document-pointer"
-
-    with mock_dynamodb(table_name) as client:
+    with mock_dynamodb(TABLE_NAME) as client:
         repository = Repository(DocumentPointer, client)
-        repository.create(item=core_model_for_delete.dict())
+        repository.create(item=core_model_for_delete)
 
-        # Act
         repository.supersede(
-            create_item=core_model_for_create.dict(),
+            create_item=core_model_for_create,
             delete_item_id=core_model_for_delete.id.value,
         )
-        response = client.scan(TableName=table_name)
 
-    (item,) = response["Items"]
-    recovered_item = DocumentPointer.construct(**item)
+        response_for_created_item = repository.read(id=core_model_for_create.id.value)
+        response_for_deleted_item = repository.read(id=core_model_for_delete.id.value)
 
-    # Assert
-    assert recovered_item.dict() == core_model_for_create.dict()
+    assert response_for_deleted_item == None
+    assert response_for_created_item == core_model_for_create
 
 
 def test_supersede_id_exists_raises_transaction_canceled_exception():
-    # Arrange
+
     document_reference = json.dumps(read_test_data("nrlf"))
     api_version = 1
     core_model_for_create = create_document_pointer_from_fhir_json(
@@ -184,69 +173,33 @@ def test_supersede_id_exists_raises_transaction_canceled_exception():
         raw_fhir_json=document_reference, api_version=api_version
     )
 
-    table_name = "document-pointer"
-
-    with pytest.raises(Exception) as error, mock_dynamodb(table_name) as client:
+    with pytest.raises(Exception) as error, mock_dynamodb(TABLE_NAME) as client:
         repository = Repository(DocumentPointer, client)
-        repository.create(item=core_model_for_delete.dict())
-        repository.create(item=core_model_for_create.dict())
+        repository.create(item=core_model_for_delete)
+        repository.create(item=core_model_for_create)
 
-        # Act
         repository.supersede(
             create_item=core_model_for_create.dict(),
             delete_item_id=core_model_for_delete.id.value,
         )
 
 
-def test_soft_delete():
-    # Arrange
-    document_reference = json.dumps(read_test_data("nrlf"))
-
-    api_version = 1
-    core_model = create_document_pointer_from_fhir_json(
-        raw_fhir_json=document_reference, api_version=api_version
-    )
-    table_name = "document-pointer"
-
-    with mock_dynamodb(table_name) as client:
-        repository = Repository(DocumentPointer, client)
-        repository.create(item=core_model.dict())
-
-        # Act
-        repository.soft_delete_document_pointer(core_model.id.value)
-        response = client.scan(TableName=table_name)
-
-    (item,) = response["Items"]
-
-    recovered_item = DocumentPointer.construct(**item)
-    now = datetime.now().date()
-    deleted_date = datetime.strptime(
-        recovered_item.deleted_on["S"], "%Y-%m-%dT%H:%M:%S.%fZ"
-    ).date()
-
-    # Assert
-    assert now == deleted_date
-
-
 def test_hard_delete():
-    # Arrange
+
     document_reference = json.dumps(read_test_data("nrlf"))
 
     api_version = 1
     core_model = create_document_pointer_from_fhir_json(
         raw_fhir_json=document_reference, api_version=api_version
     )
-    table_name = "document-pointer"
 
-    with mock_dynamodb(table_name) as client:
+    with mock_dynamodb(TABLE_NAME) as client:
         repository = Repository(DocumentPointer, client)
-        repository.create(item=core_model.dict())
+        repository.create(item=core_model)
 
-        # Act
         repository.hard_delete(core_model.id.value)
-        response = client.scan(TableName=table_name)
+        response = client.scan(TableName=TABLE_NAME)
 
-    # Assert
     assert len(response["Items"]) == 0
 
 

@@ -7,43 +7,49 @@ from pydantic import BaseModel
 from boto3.dynamodb.conditions import Attr
 
 
-def _to_snake_case(name: str) -> str:
+def _to_kebab_case(name: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "-", name).lower()
+
+
+class DynamoDbResponse(dict):
+    pass
 
 
 class Repository:
     def __init__(self, item_type: BaseModel, client):
         self.dynamodb = client
         self.item_type = item_type
-        self.table_name = _to_snake_case(item_type.__name__)
+        self.table_name = _to_kebab_case(item_type.__name__)
         for key, value in item_type.__fields__.items():
             if not issubclass(value.type_, DynamoDbType):
-                print(key, value.type_)
                 raise TypeError(
                     "Model contains fields that are not of type DynamoDbType"
                 )
 
-    def create(self, item: BaseModel):
-        return self.dynamodb.put_item(TableName=self.table_name, Item=item)
+    def create(self, item: BaseModel) -> DynamoDbResponse:
+        return self.dynamodb.put_item(TableName=self.table_name, Item=item.dict())
 
-    def read(self, **kwargs):
+    def read(self, **kwargs) -> DynamoDbResponse:
         response = self.dynamodb.get_item(TableName=self.table_name, Key=kwargs)
-        return self.item_type.construct(**response["Item"])
+        if "Item" in response:
+            return self.item_type.construct(**response["Item"])
 
     def search(self, key: any):
         return NotImplementedError
 
-    def update(self, item: BaseModel):
+    def update(self, item: BaseModel) -> DynamoDbResponse:
         return self.dynamodb.put_item(TableName=self.table_name, Item=item)
 
-    def supersede(self, create_item: BaseModel, delete_item_id: str):
+    def supersede(
+        self, create_item: BaseModel, delete_item_id: str
+    ) -> DynamoDbResponse:
         return self.dynamodb.transact_write_items(
             TransactItems=[
                 {
                     "Put": {
                         "TableName": self.table_name,
                         "ConditionExpression": "attribute_not_exists(id)",
-                        "Item": create_item,
+                        "Item": create_item.dict(),
                     }
                 },
                 {
@@ -53,21 +59,6 @@ class Repository:
                     }
                 },
             ]
-        )
-
-    def soft_delete_document_pointer(self, id: str, status=None):
-        update_expression = "SET deleted_on = :now"
-        expression_attribute = {":now": {"S": make_timestamp()}}
-
-        if status is not None:
-            update_expression += ", status = :status"
-            expression_attribute[":status"] = {"S": status}
-
-        return self.dynamodb.update_item(
-            Key={"id": id},
-            TableName="document-pointer",
-            UpdateExpression=update_expression,
-            ExpressionAttributeValues=expression_attribute,
         )
 
     def hard_delete(self, id: str):
