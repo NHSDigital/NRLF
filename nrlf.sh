@@ -20,6 +20,7 @@ function _nrlf_commands_help() {
   echo "  test      - run tests"
   echo "  lint      - lint commands"
   echo
+  return 1
 }
 
 function nrlf() {

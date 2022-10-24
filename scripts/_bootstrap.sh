@@ -11,6 +11,7 @@ function _bootstrap_help() {
     echo "  create-terraform-role-non-mgmt - Creates terraform role in the current non-mgmt account"
     echo "  delete-terraform-role-non-mgmt - Deletes terraform role in the current non-mgmt account"
     echo
+    return 1
 }
 
 function _bootstrap() {
