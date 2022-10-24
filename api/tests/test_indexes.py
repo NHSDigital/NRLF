@@ -5,8 +5,8 @@ from unittest import mock
 import pytest
 from lambda_utils.tests.unit.utils import handler_four_hundred, make_aws_event
 from lambda_utils.tests.unit.utils import (
-    throw_item_not_found_error,
     make_aws_event,
+    throw_item_not_found_error,
     throw_validation_error,
 )
 

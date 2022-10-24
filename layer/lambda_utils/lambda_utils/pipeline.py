@@ -4,9 +4,8 @@ from types import FunctionType
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.pipeline import make_pipeline
 from lambda_pipeline.types import LambdaContext, PipelineData
+from nrlf.core.errors import DynamoDbError, ItemNotFound
 from pydantic import ValidationError
-from nrlf.core.errors import DynamoDbError
-from nrlf.core.errors import ItemNotFound
 
 from .versioning import (
     get_largest_possible_version,
