@@ -47,9 +47,8 @@ def test_create_document_pointer_from_fhir_json(mock__make_timestamp):
     fhir_json = read_test_data("nrlf")
     dynamodb_json = read_test_data("nrlf-dynamodb-format")
 
-    document = json.dumps(fhir_json)
     core_model = create_document_pointer_from_fhir_json(
-        raw_fhir_json=document, api_version=API_VERSION
+        fhir_json=fhir_json, api_version=API_VERSION
     )
 
     assert core_model.dict() == {

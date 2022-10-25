@@ -58,10 +58,9 @@ def test_legacy_document_pointer_is_valid(filename):
 @pytest.mark.parametrize("filename", LEGACY_TEST_DATA_FILENAMES)
 def test_create_document_pointer_from_legacy_json(filename):
     legacy_json = read_test_data(filename)
-    raw_legacy_json = json.dumps(legacy_json)
     legacy_json_as_core = read_test_data(filename, _type="_as_core")
     core_model = create_document_pointer_from_legacy_json(
-        raw_legacy_json=raw_legacy_json, nhs_number=NHS_NUMBER, producer_id=PRODUCER_ID
+        legacy_json=legacy_json, nhs_number=NHS_NUMBER, producer_id=PRODUCER_ID
     )
     core_json = core_model.dict(exclude_none=True)
     core_json["document"] = "<<mocked out>>"  # For readability
@@ -73,11 +72,8 @@ def test_create_document_pointer_from_legacy_json(filename):
 def test__create_fhir_model_from_legacy_model(filename):
     legacy_json = read_test_data(filename)
     legacy_json_as_fhir = read_test_data(filename, _type="_as_fhir")
-    raw_legacy_json = json.dumps(legacy_json)
 
-    legacy_model = _create_legacy_model_from_legacy_json(
-        raw_legacy_json=raw_legacy_json
-    )
+    legacy_model = _create_legacy_model_from_legacy_json(legacy_json=legacy_json)
     fhir_model = _create_fhir_model_from_legacy_model(
         legacy_model=legacy_model, nhs_number=NHS_NUMBER, producer_id=PRODUCER_ID
     )

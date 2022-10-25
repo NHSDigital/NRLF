@@ -57,16 +57,14 @@ def _create_fhir_model_from_legacy_model(
     )
 
 
-def _create_legacy_model_from_legacy_json(raw_legacy_json: str):
-    legacy_json = json.loads(raw_legacy_json)
+def _create_legacy_model_from_legacy_json(legacy_json: dict) -> LegacyDocumentPointer:
     stripped_legacy_json = _strip_empty_json_paths(legacy_json)
     return LegacyDocumentPointer(**stripped_legacy_json)
 
 
 def create_document_pointer_from_fhir_json(
-    raw_fhir_json: str, api_version: int, source: Source = Source.NRLF, **kwargs
+    fhir_json: dict, api_version: int, source: Source = Source.NRLF, **kwargs
 ) -> DocumentPointer:
-    fhir_json = json.loads(raw_fhir_json)
     fhir_model = DocumentReference(**fhir_json)
     core_model = DocumentPointer(
         id=fhir_model.masterIdentifier.value,
@@ -82,16 +80,14 @@ def create_document_pointer_from_fhir_json(
 
 
 def create_document_pointer_from_legacy_json(
-    raw_legacy_json: str, producer_id: str, nhs_number: str
+    legacy_json: dict, producer_id: str, nhs_number: str
 ) -> DocumentPointer:
-    legacy_model = _create_legacy_model_from_legacy_json(
-        raw_legacy_json=raw_legacy_json
-    )
+    legacy_model = _create_legacy_model_from_legacy_json(legacy_json=legacy_json)
     fhir_model = _create_fhir_model_from_legacy_model(
         legacy_model=legacy_model, producer_id=producer_id, nhs_number=nhs_number
     )
     core_model = create_document_pointer_from_fhir_json(
-        raw_fhir_json=fhir_model.json(exclude_none=True),
+        fhir_json=fhir_model.dict(exclude_none=True),
         api_version=LEGACY_VERSION,
         source=Source.LEGACY,
         created_on=legacy_model.lastModified.isoformat(),
