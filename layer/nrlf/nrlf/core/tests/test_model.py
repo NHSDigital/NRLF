@@ -2,13 +2,44 @@ import json
 from unittest import mock
 
 import pytest
-from nrlf.core.model import DYNAMODB_NULL, create_document_type_tuple
+from nrlf.core.model import (
+    DYNAMODB_NULL,
+    DocumentPointer,
+    assert_model_has_only_dynamodb_types,
+    create_document_type_tuple,
+)
 from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.producer.fhir.r4.model import CodeableConcept, Coding
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
 API_VERSION = 1
 TIMESTAMP = "2022-10-18T14:47:22.920Z"
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        DocumentPointer,
+    ],
+)
+def test_assert_model_has_only_dynamodb_types(model):
+    assert_model_has_only_dynamodb_types(model)
+
+
+def test_fields_are_not_all_dynamo_db_type():
+    from pydantic import BaseModel
+
+    class TestClass(BaseModel):
+        bad_field: str
+
+    with pytest.raises(TypeError) as error:
+        assert_model_has_only_dynamodb_types(TestClass)
+
+    (message,) = error.value.args
+    assert (
+        message
+        == "Model contains fields ['bad_field'] that are not of type DynamoDbType"
+    )
 
 
 @mock.patch("nrlf.core.transform.make_timestamp", return_value=TIMESTAMP)

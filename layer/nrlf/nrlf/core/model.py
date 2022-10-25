@@ -12,6 +12,18 @@ from nrlf.core.validators import (
 from pydantic import BaseModel, root_validator, validator
 
 
+def assert_model_has_only_dynamodb_types(model: BaseModel):
+    bad_fields = [
+        field_name
+        for field_name, field_value in model.__fields__.items()
+        if not issubclass(field_value.type_, DynamoDbType)
+    ]
+    if bad_fields:
+        raise TypeError(
+            f"Model contains fields {bad_fields} that are not of type DynamoDbType"
+        )
+
+
 class DocumentPointer(BaseModel):
     id: DynamoDbType[str]
     nhs_number: DynamoDbType[str]
