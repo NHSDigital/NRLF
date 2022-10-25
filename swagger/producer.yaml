@@ -57,7 +57,59 @@ paths:
           description: Create DocumentReference operation successful
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
+    get:
+      tags:
+        - DocumentReference
+      summary: Search for DocumentReference resources
+      operationId: searchDocumentReference
+      parameters: []
+      responses:
+        "200":
+          description: Search DocumentReference operation successful
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/Bundle"
+  /DocumentReference/_search:
+    post:
+      tags:
+        - DocumentReference
+      summary: Search for DocumentReference resources
+      operationId: searchViaPostDocumentReference
+      parameters: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties: {}
+      responses:
+        "200":
+          description: Search DocumentReference operation successful
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/Bundle"
   /DocumentReference/{id}:
+    get:
+      tags:
+        - DocumentReference
+      summary: Read a DocumentReference resource
+      operationId: readDocumentReference
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: logical identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Read DocumentReference operation successful
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/DocumentReference"
     put:
       tags:
         - DocumentReference

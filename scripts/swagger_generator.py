@@ -1,6 +1,8 @@
+import re
+from collections import OrderedDict
 from os import scandir
 
-from yaml import Dumper, FullLoader, dump, load
+from yaml import Dumper, FullLoader, add_representer, dump, load, scan
 
 KEYS_TO_REMOVE = ["x-ibm-configuration"]
 
@@ -10,12 +12,30 @@ class Dumper(Dumper):
         return super().increase_indent(flow=flow, indentless=False)
 
 
-def get_docs():
-    swagger_docs = []
-    for entry in scandir("../swagger"):
-        if entry.name.endswith(".yaml"):
-            swagger_docs.append(entry.name.replace(".yaml", ""))
-    return swagger_docs
+class literal(str):
+    pass
+
+
+def literal_presenter(dumper, data):
+    return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
+
+
+add_representer(literal, literal_presenter)
+
+
+def ordered_dict_presenter(dumper, data):
+    return dumper.represent_dict(data.items())
+
+
+add_representer(OrderedDict, ordered_dict_presenter)
+
+
+def get_docs(dir: str = "../swagger", file_type: str = ".yaml"):
+    docs = []
+    for entry in scandir(dir):
+        if entry.name.endswith(file_type):
+            docs.append(entry.name.replace(file_type, ""))
+    return docs
 
 
 def remove_elements(data):
@@ -52,6 +72,31 @@ def update_components(data, components):
     return data
 
 
+def replace_markdown_variables(data, type):
+    d = temp_dict = {}
+    files = open_markdown(type)
+    if files:
+        for file in files:
+            keys = file.split("-")
+            for index, key in enumerate(keys):
+                if index != len(keys) - 1:
+                    temp_dict.setdefault(key, {})
+                    temp_dict = temp_dict[key]
+                else:
+                    temp_dict.setdefault(key, literal(open_file(file, type, "md")))
+    return data | d
+
+
+def open_file(file, type, file_type):
+    with open(f"../swagger/{type}-static/{file}.{file_type}", "r") as f:
+        return f.read()
+
+
+def open_markdown(type):
+    markdown_files = get_docs(f"../swagger/{type}-static", ".md")
+    return markdown_files
+
+
 def open_yaml(type, static=False, name=""):
     if static:
         with open(f"../swagger/{type}-static/{name}.yaml", "r") as f:
@@ -77,7 +122,9 @@ def process_swagger(type):
             data = update_components(data, components)
         data = remove_discriminator(data)
         data = remove_elements(data)
-        save_yaml(type, data)
+        data = replace_markdown_variables(data, type)
+        d = OrderedDict(data)
+        save_yaml(type, d)
 
 
 def entry(type: str = ""):

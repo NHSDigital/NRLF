@@ -28,7 +28,7 @@ function _generate_consumer_from_fhir() {
 function _generate_producer_from_fhir() {
     rm ./swagger/producer.yaml
     touch ./swagger/producer.yaml
-    java -jar ./tools/fhir-swagger-generator-4.11.1-cli.jar "DocumentReference(create,update,delete)"
+    java -jar ./tools/fhir-swagger-generator-4.11.1-cli.jar "DocumentReference(read,search,create,update,delete)"
     yq -P ./openapi/DocumentReference-openapi.json > ./swagger/producer.yaml
     rm -rf ./openapi/
 }
