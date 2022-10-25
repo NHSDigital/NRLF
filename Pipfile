@@ -25,6 +25,7 @@ moto = "*"
 boto3 = "*"
 black = "*"
 behave = "*"
+pyyaml = "*"
 
 [requires]
 python_version = "3.9"
