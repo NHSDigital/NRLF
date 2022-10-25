@@ -1,0 +1,95 @@
+openapi: 3.0.0
+info:
+  title: DocumentReference API
+  description: A simplified version of the HL7 FHIR API for DocumentReference resources.
+  version: 4.0.1
+servers:
+  - url: /
+tags:
+  - name: DocumentReference
+paths:
+  /DocumentReference:
+    get:
+      tags:
+        - DocumentReference
+      summary: Search for DocumentReference resources
+      operationId: searchDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/subject"
+        - $ref: "#/components/parameters/custodian"
+        - $ref: "#/components/parameters/snomedCode"
+        - $ref: "#/components/parameters/fromASID"
+        - $ref: "#/components/parameters/toASID"
+      responses:
+        "200":
+          description: Search DocumentReference operation successful
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/Bundle"
+            application/fhir+xml:
+              schema:
+                $ref: "#/components/schemas/Bundle"
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: ${method_searchDocumentReference}
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
+  /DocumentReference/_search:
+    post:
+      tags:
+        - DocumentReference
+      summary: Search for DocumentReference resources
+      operationId: searchViaPostDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/fromASID"
+        - $ref: "#/components/parameters/toASID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestParams"
+      responses:
+        "200":
+          description: Search DocumentReference operation successful
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/Bundle"
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: ${method_searchViaPostDocumentReference}
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
+  /DocumentReference/{id}:
+    get:
+      tags:
+        - DocumentReference
+      summary: Read a DocumentReference resource
+      operationId: readDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200":
+          description: Read DocumentReference operation successful
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/DocumentReference"
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: ${method_readDocumentReference}
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
