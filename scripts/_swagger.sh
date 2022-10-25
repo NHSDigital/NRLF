@@ -6,7 +6,9 @@ function _swagger_help() {
     echo
     echo "commands:"
     echo "  help                        - this help screen"
-    echo "  generate <options>          - generate all swagger or producer/consumer if specified"
+    echo "  generate <options>          - generate all swagger and models or producer/consumer if specified"
+    echo "  generate-swagger <options>  - generate all swagger or producer/consumer if specified"
+    echo "  generate-model <options>    - generate all models or producer/consumer if specified"
     echo
 }
 
@@ -38,6 +40,24 @@ function _generate_from_fhir() {
     rm -rf ./tools/
 }
 
+function _generate_producer_model() {
+    if [ ! -d "./layer/nrlf/nrlf/producer/fhir/r4" ]
+    then
+        mkdir -p ./layer/nrlf/nrlf/producer/fhir/r4
+    fi
+
+    datamodel-codegen  --input ./api/producer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/producer/fhir/r4/model.py --use-annotated --enum-field-as-literal all
+}
+
+function _generate_consumer_model() {
+    if [ ! -d "./layer/nrlf/nrlf/consumer/fhir/r4" ]
+    then
+        mkdir -p ./layer/nrlf/nrlf/consumer/fhir/r4
+    fi
+
+    datamodel-codegen  --input ./api/consumer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/consumer/fhir/r4/model.py --use-annotated --enum-field-as-literal all
+}
+
 function _swagger() {
     local command=$1
     local type=$2
@@ -47,8 +67,33 @@ function _swagger() {
         then
             _generate_from_fhir
             (cd scripts ; python3 -c "import swagger_generator as sg; sg.entry()")
+            _generate_consumer_model
+            _generate_producer_model
         else
-            echo $type
+            _get_generator
+            if [ $type = 'consumer' ]
+            then
+                _generate_consumer_from_fhir
+                (cd scripts ; python3 -c "import swagger_generator as sg; sg.entry('$type')")
+                _generate_consumer_model
+            elif [ $type = 'producer' ]
+            then
+                _generate_producer_from_fhir
+                (cd scripts ; python3 -c "import swagger_generator as sg; sg.entry('$type')")
+                _generate_producer_model
+            else
+                rm -rf ./tools/
+                _nrlf_commands_help && return 1
+            fi
+            rm -rf ./tools/
+        fi
+        ;;
+        "generate-swagger")
+        if [[ -z "$type" ]];
+        then
+            _generate_from_fhir
+            (cd scripts ; python3 -c "import swagger_generator as sg; sg.entry()")
+        else
             _get_generator
             if [ $type = 'consumer' ]
             then
@@ -63,6 +108,23 @@ function _swagger() {
             rm -rf ./tools/
 
             (cd scripts ; python3 -c "import swagger_generator as sg; sg.entry('$type')")
+        fi
+        ;;
+        "generate-model")
+        if [[ -z "$type" ]];
+        then
+            _generate_consumer_model
+            _generate_producer_model
+        else
+            if [ $type = 'consumer' ]
+            then
+                _generate_consumer_model
+            elif [ $type = 'producer' ]
+            then
+                _generate_producer_model
+            else
+                _nrlf_commands_help && return 1
+            fi
         fi
         ;;
         *) _swagger_help ;;
