@@ -1,17 +1,27 @@
 import re
 from functools import wraps
 
-from nrlf.core.dynamodb_types import DynamoDbType
 from nrlf.core.errors import DynamoDbError, ItemNotFound
+from nrlf.core.model import assert_model_has_only_dynamodb_types
+from nrlf.core.types import DynamoDbClient, DynamoDbResponse
 from pydantic import BaseModel
+
+MAX_RESULTS = 100
+CAMEL_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
+ATTRIBUTE_EXISTS_ID = "attribute_exists(id)"
+ATTRIBUTE_NOT_EXISTS_ID = "attribute_not_exists(id)"
 
 
 def _to_kebab_case(name: str) -> str:
-    return re.sub(r"(?<!^)(?=[A-Z])", "-", name).lower()
+    return CAMEL_CASE_RE.sub("-", name).lower()
 
 
-class DynamoDbResponse(dict):
-    pass
+def _validate_results_within_limits(results: dict):
+    if len(results["Items"]) >= MAX_RESULTS or "LastEvaluatedKey" in results:
+        raise Exception(
+            "DynamoDB has returned too many results, pagination not implemented yet"
+        )
+    return results
 
 
 def handle_dynamodb_errors(function):
@@ -28,45 +38,48 @@ def handle_dynamodb_errors(function):
 
 
 class Repository:
-    def __init__(self, item_type: BaseModel, client):
+    def __init__(
+        self,
+        item_type: type[BaseModel],
+        client: DynamoDbClient,
+        environment_prefix: str = "",
+    ):
         self.dynamodb = client
         self.item_type = item_type
-        self.table_name = _to_kebab_case(item_type.__name__)
-        for key, value in item_type.__fields__.items():
-            if not issubclass(value.type_, DynamoDbType):
-                raise TypeError(
-                    "Model contains fields that are not of type DynamoDbType"
-                )
+        self.table_name = environment_prefix + _to_kebab_case(item_type.__name__)
+        assert_model_has_only_dynamodb_types(model=item_type)
 
     @handle_dynamodb_errors
     def create(self, item: BaseModel) -> DynamoDbResponse:
         return self.dynamodb.put_item(
             TableName=self.table_name,
             Item=item.dict(),
-            ConditionExpression="attribute_not_exists(id)",
+            ConditionExpression=ATTRIBUTE_NOT_EXISTS_ID,
         )
 
     @handle_dynamodb_errors
-    def read(self, **kwargs) -> DynamoDbResponse:
+    def read(self, **kwargs) -> BaseModel:
         response = self.dynamodb.get_item(TableName=self.table_name, Key=kwargs)
-
         try:
             item = response["Item"]
         except KeyError:
             raise ItemNotFound("Item could not be found")
-
         return self.item_type.construct(**item)
 
     @handle_dynamodb_errors
-    def search(self, key: any):
-        return NotImplementedError
+    def search(self, index_name: str, **kwargs: dict[str, str]) -> list[BaseModel]:
+        results = self.dynamodb.query(
+            TableName=self.table_name, IndexName=index_name, **kwargs
+        )
+        _validate_results_within_limits(results)
+        return [self.item_type.construct(**item) for item in results["Items"]]
 
     @handle_dynamodb_errors
     def update(self, item: BaseModel) -> DynamoDbResponse:
         return self.dynamodb.put_item(
             TableName=self.table_name,
             Item=item.dict(),
-            ConditionExpression="attribute_exists(id)",
+            ConditionExpression=ATTRIBUTE_EXISTS_ID,
         )
 
     @handle_dynamodb_errors
@@ -78,7 +91,7 @@ class Repository:
                 {
                     "Put": {
                         "TableName": self.table_name,
-                        "ConditionExpression": "attribute_not_exists(id)",
+                        "ConditionExpression": ATTRIBUTE_NOT_EXISTS_ID,
                         "Item": create_item.dict(),
                     }
                 },
@@ -92,9 +105,9 @@ class Repository:
         )
 
     @handle_dynamodb_errors
-    def hard_delete(self, id: str):
+    def hard_delete(self, id: str) -> DynamoDbResponse:
         return self.dynamodb.delete_item(
             TableName=self.table_name,
             Key={"id": id},
-            ConditionExpression="attribute_exists(id)",
+            ConditionExpression=ATTRIBUTE_EXISTS_ID,
         )

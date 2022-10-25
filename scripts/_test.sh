@@ -24,7 +24,7 @@ function _test() {
 }
 
 function _test_unit() {
-    python -m pytest -m "not integration"
+    python -m pytest -m "not integration" $1
 }
 
 
