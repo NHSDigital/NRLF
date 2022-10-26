@@ -28,6 +28,7 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
 
 ```
 pipenv install --dev
+pipenv shell
 pre-commit install
 ```
 
@@ -65,6 +66,14 @@ The NRLF adopts a "fail fast" methodology, which means that Unit Tests can be ru
 ```
 nrlf test unit
 ```
+
+Note that if you have not configured aws some unit tests will fail. If you want to run the unit tests without configuring aws, you will have to run:
+
+```
+aws configure
+```
+
+press enter several times without modifying anything except to set the region to `eu-west-2`
 
 ## 2. Build the API
 
