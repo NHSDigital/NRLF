@@ -2520,7 +2520,7 @@ components:
             - url
     DocumentId:
       type: string
-      pattern: '[ \\r\\n\\t\\S]+'
+      pattern: '[ \r\n\t\S]+'
     RequestPathParams:
       type: object
       properties:
@@ -2551,13 +2551,13 @@ components:
         - subject
     RequestQuerySubject:
       type: string
-      pattern: ^https\\:\\/\\/fhir\\.nhs\\.uk\\/Id\\/nhs-number\\|(\\d+)$
+      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
     RequestQueryCustodian:
       type: string
-      pattern: ^https\\:\\/\\/fhir\\.nhs\\.uk\\/Id\\/ods-code\\|(\\w+)$
+      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
     RequestQuerySnomedCode:
       type: string
-      pattern: (^http\\:\\/\\/snomed\\.info\\/sct\\|(\\d+))
+      pattern: (^http\:\/\/snomed\.info\/sct\|(\d+))
     RequestHeaderFromASID:
       type: string
     RequestHeaderToASID:

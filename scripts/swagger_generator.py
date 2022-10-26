@@ -1,8 +1,7 @@
-import re
 from collections import OrderedDict
 from os import scandir
 
-from yaml import Dumper, FullLoader, add_representer, dump, load, scan
+from yaml import Dumper, FullLoader, add_representer, dump, load
 
 KEYS_TO_REMOVE = ["x-ibm-configuration"]
 
