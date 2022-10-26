@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, validator
 
 class AcceptHeader(BaseModel):
     parsing_error: str = Field(exclude=True)
-    version: str
+    version: str = Field(regex="^\\d+\\.?\\d*$")
 
     def __init__(self, event):
         headers = self._convert_keys_to_lowercase(event.get("headers", {}))

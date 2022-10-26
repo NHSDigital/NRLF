@@ -8,7 +8,7 @@ from typing import Union
 from .header_config import AcceptHeader
 
 VERSION_RE = re.compile(r"v(\d+)")
-API_ROOT_DIRNAME = "api"
+API_ROOT_DIRNAME = "src"
 VERSIONED_HANDLER_GLOB = "src/v*/handler.py"
 
 
@@ -26,7 +26,9 @@ def get_largest_possible_version(
 ) -> str:
     integer_versions = map(int, possible_versions)
     possible_versions = [
-        version for version in integer_versions if int(requested_version) >= version
+        version
+        for version in integer_versions
+        if int(float(requested_version)) >= version
     ]
     largest_possible_version = max(possible_versions, default=math.inf)
     if not math.isfinite(largest_possible_version):
