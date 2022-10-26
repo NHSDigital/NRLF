@@ -10,17 +10,36 @@ from lambda_utils.versioning import (
     get_largest_possible_version,
     get_versioned_steps,
 )
+from pydantic import ValidationError
 
 PATH_TO_HERE = Path(__file__).parent
 
 
 @pytest.mark.parametrize(
     "event, expected_version",
-    [(make_aws_event(), "1"), (make_aws_event(version="2"), "2")],
+    [
+        (make_aws_event(), "1"),
+        (make_aws_event(version="2"), "2"),
+        (make_aws_event(version="2.0"), "2.0"),
+    ],
 )
 def test_api_version_parsing(event: dict, expected_version: str):
     accept_header = AcceptHeader(event)
     assert accept_header.version == expected_version
+
+
+@pytest.mark.parametrize(
+    "event",
+    [
+        make_aws_event(version="asdf"),
+        make_aws_event(version="true"),
+        make_aws_event(version="1.0.0"),
+        make_aws_event(version="-1.0"),
+    ],
+)
+def test_api_version_parsing_invalid_version(event: dict):
+    with pytest.raises(ValidationError):
+        _accept_header = AcceptHeader(event)
 
 
 @pytest.mark.parametrize(
@@ -34,6 +53,10 @@ def test_api_version_parsing(event: dict, expected_version: str):
         ("8", "6"),
         ("9", "9"),
         ("1000", "9"),
+        ("3.0", "3"),
+        ("3.5", "3"),
+        ("3.9", "3"),
+        ("10000.1234", "9"),
     ],
 )
 def test_largest_possible_version(requested_version: str, expected_version: str):
