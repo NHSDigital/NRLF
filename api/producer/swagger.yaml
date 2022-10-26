@@ -1,8 +1,18 @@
 openapi: 3.0.0
 info:
   title: DocumentReference API
-  description: A simplified version of the HL7 FHIR API for DocumentReference resources.
   version: 4.0.1
+  info:
+    description: |
+      # Title
+
+      - list
+      - list
+      - list
+
+      ## Title 2
+
+      This is a markdown document.
 servers:
   - url: /fhir-server/api/v4
 tags:

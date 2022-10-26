@@ -84,7 +84,11 @@ def replace_markdown_variables(data, type):
                     temp_dict = temp_dict[key]
                 else:
                     temp_dict.setdefault(key, literal(open_file(file, type, "md")))
-    return data | d
+            key__original_value = data.get(keys[0])
+            key_merged = key__original_value | d
+            data[keys[0]] = key_merged
+
+    return data
 
 
 def open_file(file, type, file_type):

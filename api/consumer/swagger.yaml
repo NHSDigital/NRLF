@@ -1,13 +1,18 @@
 openapi: 3.0.0
 info:
-  description: |-
-    # Title
-    - list
-    - list
-    - list
+  title: DocumentReference API
+  version: 0.0.1
+  info:
+    description: |
+      # Title
 
-    ## Title 2
-    This is a markdown document.
+      - list
+      - list
+      - list
+
+      ## Title 2
+
+      This is a markdown document.
 servers:
   - url: /
 tags:
