@@ -7,6 +7,9 @@ from nrlf.core.model import DocumentPointer
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
 from nrlf.legacy.model import LegacyDocumentPointer
 from nrlf.producer.fhir.r4.model import DocumentReference
+from nrlf.producer.fhir.r4.strict_model import (
+    DocumentReference as StrictDocumentReference,
+)
 
 
 def make_timestamp() -> str:
@@ -38,7 +41,7 @@ def _strip_empty_json_paths(json: Union[list[dict], dict]) -> Union[list[dict], 
 def _create_fhir_model_from_legacy_model(
     legacy_model: LegacyDocumentPointer, producer_id: str, nhs_number: str
 ) -> DocumentReference:
-    return DocumentReference(
+    return StrictDocumentReference(
         resourceType=DocumentReference.__name__,
         masterIdentifier={
             "system": LEGACY_SYSTEM,
@@ -65,13 +68,14 @@ def _create_legacy_model_from_legacy_json(legacy_json: dict) -> LegacyDocumentPo
 def create_document_pointer_from_fhir_json(
     fhir_json: dict, api_version: int, source: Source = Source.NRLF, **kwargs
 ) -> DocumentPointer:
-    fhir_model = DocumentReference(**fhir_json)
+    _fhir_model = DocumentReference(**fhir_json)
+    fhir_strict_model = StrictDocumentReference(**fhir_json)
     core_model = DocumentPointer(
-        id=fhir_model.masterIdentifier.value,
-        nhs_number=fhir_model.subject.id,
-        type=fhir_model.type,
+        id=fhir_strict_model.masterIdentifier.value,
+        nhs_number=fhir_strict_model.subject.id,
+        type=fhir_strict_model.type,
         version=api_version,
-        document=fhir_json,
+        document=json.dumps(fhir_json),
         source=source.value,
         created_on=kwargs.pop("created_on", make_timestamp()),
         **kwargs,

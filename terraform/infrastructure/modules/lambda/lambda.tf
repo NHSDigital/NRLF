@@ -1,7 +1,7 @@
 resource "aws_lambda_function" "lambda_function" {
   function_name    = substr("${var.prefix}--api--${var.apitype}--${var.name}", 0, 64)
   runtime          = "python3.9"
-  handler          = "index.handler"
+  handler          = var.handler
   role             = aws_iam_role.lambda_role.arn
   filename         = "${path.module}/../../../../api/${var.apitype}/${var.name}/dist/${var.name}.zip"
   source_code_hash = filebase64sha256("${path.module}/../../../../api/${var.apitype}/${var.name}/dist/${var.name}.zip")
@@ -9,9 +9,7 @@ resource "aws_lambda_function" "lambda_function" {
   memory_size      = 128
 
   environment {
-    variables = {
-      PREFIX     = var.prefix
-    }
+    variables = var.environment_variables
   }
 
   layers = var.layers

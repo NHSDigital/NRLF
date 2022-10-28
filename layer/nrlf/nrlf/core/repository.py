@@ -1,6 +1,7 @@
 import re
 from functools import wraps
 
+from botocore.exceptions import ClientError
 from nrlf.core.errors import DynamoDbError, ItemNotFound
 from nrlf.core.model import assert_model_has_only_dynamodb_types
 from nrlf.core.types import DynamoDbClient, DynamoDbResponse
@@ -24,17 +25,25 @@ def _validate_results_within_limits(results: dict):
     return results
 
 
-def handle_dynamodb_errors(function):
+def _handle_dynamodb_errors(function, conditional_check_error_message: str = ""):
     @wraps(function)
     def wrapper(*args, **kwargs):
         try:
             return function(*args, **kwargs)
-        except Exception as error:
-            if type(error) is ItemNotFound:
-                raise error
-            raise DynamoDbError("There was an error with the database")
+        except ClientError as error:
+            if error.response["Error"]["Code"] == "ConditionalCheckFailedException":
+                raise DynamoDbError(
+                    f"Condition check failed - {conditional_check_error_message}"
+                )
+            raise Exception("There was an error with the database")
 
     return wrapper
+
+
+def handle_dynamodb_errors(conditional_check_error_message: str = ""):
+    return lambda function: _handle_dynamodb_errors(
+        function, conditional_check_error_message
+    )
 
 
 class Repository:
@@ -49,7 +58,7 @@ class Repository:
         self.table_name = environment_prefix + _to_kebab_case(item_type.__name__)
         assert_model_has_only_dynamodb_types(model=item_type)
 
-    @handle_dynamodb_errors
+    @handle_dynamodb_errors(conditional_check_error_message="Duplicate rejected")
     def create(self, item: BaseModel) -> DynamoDbResponse:
         return self.dynamodb.put_item(
             TableName=self.table_name,
@@ -57,16 +66,20 @@ class Repository:
             ConditionExpression=ATTRIBUTE_NOT_EXISTS_ID,
         )
 
-    @handle_dynamodb_errors
-    def read(self, **kwargs) -> BaseModel:
-        response = self.dynamodb.get_item(TableName=self.table_name, Key=kwargs)
+    @handle_dynamodb_errors()
+    def read(self, KeyConditionExpression: str, **kwargs) -> BaseModel:
+        response = self.dynamodb.query(
+            TableName=self.table_name,
+            KeyConditionExpression=KeyConditionExpression,
+            **kwargs,
+        )
         try:
-            item = response["Item"]
-        except KeyError:
+            (item,) = response["Items"]
+        except (KeyError, ValueError):
             raise ItemNotFound("Item could not be found")
-        return self.item_type.construct(**item)
+        return self.item_type(**item)
 
-    @handle_dynamodb_errors
+    @handle_dynamodb_errors()
     def search(self, index_name: str, **kwargs: dict[str, str]) -> list[BaseModel]:
         results = self.dynamodb.query(
             TableName=self.table_name, IndexName=index_name, **kwargs
@@ -74,7 +87,7 @@ class Repository:
         _validate_results_within_limits(results)
         return [self.item_type.construct(**item) for item in results["Items"]]
 
-    @handle_dynamodb_errors
+    @handle_dynamodb_errors(conditional_check_error_message="Document does not exist")
     def update(self, item: BaseModel) -> DynamoDbResponse:
         return self.dynamodb.put_item(
             TableName=self.table_name,
@@ -82,9 +95,9 @@ class Repository:
             ConditionExpression=ATTRIBUTE_EXISTS_ID,
         )
 
-    @handle_dynamodb_errors
+    @handle_dynamodb_errors(conditional_check_error_message="Supersede failed")
     def supersede(
-        self, create_item: BaseModel, delete_item_id: str
+        self, create_item: BaseModel, delete_item_id: dict
     ) -> DynamoDbResponse:
         return self.dynamodb.transact_write_items(
             TransactItems=[
@@ -99,13 +112,14 @@ class Repository:
                     "Delete": {
                         "TableName": self.table_name,
                         "Key": {"id": delete_item_id},
+                        "ConditionExpression": ATTRIBUTE_EXISTS_ID,
                     }
                 },
             ]
         )
 
-    @handle_dynamodb_errors
-    def hard_delete(self, id: str) -> DynamoDbResponse:
+    @handle_dynamodb_errors(conditional_check_error_message="")
+    def hard_delete(self, id: dict) -> DynamoDbResponse:
         return self.dynamodb.delete_item(
             TableName=self.table_name,
             Key={"id": id},

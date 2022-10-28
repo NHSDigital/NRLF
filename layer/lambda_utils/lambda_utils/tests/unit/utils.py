@@ -119,6 +119,6 @@ def make_aws_event(**kwargs):
             "domainName": "70ixmpl4fl.execute-api.us-east-2.amazonaws.com",
             "apiId": "70ixmpl4fl",
         },
-        "body": None,
+        "body": kwargs.get("body", None),
         "isBase64Encoded": False,
     }

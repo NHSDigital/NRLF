@@ -1,6 +1,13 @@
 from typing import Optional
 
-from nrlf.core.dynamodb_types import DYNAMODB_NULL, DynamoDbType
+from nrlf.core.dynamodb_types import (
+    DYNAMODB_NULL,
+    DynamoDbIntType,
+    DynamoDbStringType,
+    DynamoDbType,
+    convert_dynamo_value_to_raw_value,
+    is_dynamodb_dict,
+)
 from nrlf.core.validators import (
     create_document_type_tuple,
     generate_producer_id,
@@ -9,7 +16,7 @@ from nrlf.core.validators import (
     validate_timestamp,
     validate_tuple,
 )
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, Field, root_validator, validator
 
 
 def assert_model_has_only_dynamodb_types(model: BaseModel):
@@ -25,18 +32,41 @@ def assert_model_has_only_dynamodb_types(model: BaseModel):
 
 
 class DocumentPointer(BaseModel):
-    id: DynamoDbType[str]
-    nhs_number: DynamoDbType[str]
-    producer_id: DynamoDbType[str]
-    type: DynamoDbType[str]
-    source: DynamoDbType[str]
-    version: DynamoDbType[int]
-    document: DynamoDbType[dict]
-    created_on: DynamoDbType[str]
-    updated_on: Optional[DynamoDbType[str]] = DYNAMODB_NULL
+    id: DynamoDbStringType
+    nhs_number: DynamoDbStringType
+    producer_id: DynamoDbStringType
+    type: DynamoDbStringType
+    source: DynamoDbStringType
+    version: DynamoDbIntType
+    document: DynamoDbStringType
+    created_on: DynamoDbStringType
+    updated_on: Optional[DynamoDbStringType] = DYNAMODB_NULL
+    _from_dynamo: bool = Field(
+        default=False,
+        exclude=True,
+        description="internal flag for reading from dynamodb",
+    )
+
+    @staticmethod
+    def public_alias() -> str:
+        return "DocumentReference"
+
+    @root_validator(pre=True)
+    def transform_input_values_if_dynamo_values(cls, values: dict) -> dict:
+        from_dynamo = all(map(is_dynamodb_dict, values.values()))
+
+        if from_dynamo:
+            return {
+                **{k: convert_dynamo_value_to_raw_value(v) for k, v in values.items()},
+                "_from_dynamo": from_dynamo,
+            }
+        return values
 
     @root_validator(pre=True)
     def inject_producer_id(cls, values: dict) -> dict:
+        if values.get("_from_dynamo"):
+            return values
+
         producer_id = generate_producer_id(
             id=values.get("id"), producer_id=values.get("producer_id")
         )
@@ -45,35 +75,39 @@ class DocumentPointer(BaseModel):
 
     @root_validator(pre=True)
     def coerce_document_type_to_tuple(cls, values: dict) -> dict:
+        if values.get("_from_dynamo"):
+            return values
+
         document_type_tuple = create_document_type_tuple(
             document_type=values.get("type")
         )
         values["type"] = document_type_tuple
         return values
 
-    @root_validator(pre=True)
-    def convert_to_dynamodb_format(cls, values: dict) -> dict:
-        for k, v in values.items():
-            _type = DynamoDbType[type(v)]
-            values[k] = _type(value=v)
-        return values
-
     @validator("id", "type")
-    def validate_tuple(value: any) -> DynamoDbType[str]:
-        validate_tuple(tuple=value.raw_value)
+    def validate_tuple(value: any) -> DynamoDbType:
+        validate_tuple(tuple=value.__root__)
         return value
 
     @validator("nhs_number")
-    def validate_nhs_number(value: any) -> DynamoDbType[str]:
-        validate_nhs_number(nhs_number=value.raw_value)
+    def validate_nhs_number(value: any) -> DynamoDbType:
+        validate_nhs_number(nhs_number=value.__root__)
         return value
 
     @validator("source")
-    def validate_source(value: any) -> DynamoDbType[str]:
-        validate_source(source=value.raw_value)
+    def validate_source(value: any) -> DynamoDbType:
+        validate_source(source=value.__root__)
         return value
 
-    @validator("created_on", "updated_on")
-    def validate_timestamp(value: any) -> DynamoDbType[str]:
-        validate_timestamp(date=value.raw_value)
+    @validator("created_on")
+    def validate_created_on(value: any) -> DynamoDbType:
+        validate_timestamp(date=value.__root__)
+        return value
+
+    @validator("updated_on")
+    def validate_updated_on(value: any) -> DynamoDbType:
+        if value == None:
+            return DYNAMODB_NULL
+
+        validate_timestamp(date=value.__root__)
         return value

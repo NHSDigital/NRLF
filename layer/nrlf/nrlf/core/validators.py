@@ -31,7 +31,7 @@ def create_document_type_tuple(document_type: CodeableConcept):
         raise ValueError(
             f"Expected exactly one item in DocumentReference.type.coding, got {n}"
         ) from None
-    return f"{coding.code}|{coding.system}"
+    return f"{coding.system}|{coding.code}"
 
 
 def validate_nhs_number(nhs_number: str):
