@@ -10,9 +10,9 @@ from nrlf.core.errors import DynamoDbError, ItemNotFound
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import (
     Repository,
-    _to_kebab_case,
     _validate_results_within_limits,
     handle_dynamodb_errors,
+    to_kebab_case,
 )
 from nrlf.core.transform import (
     create_document_pointer_from_fhir_json as _create_document_pointer_from_fhir_json,
@@ -25,7 +25,7 @@ DEFAULT_ATTRIBUTE_DEFINITIONS = [
     {"AttributeName": "nhs_number", "AttributeType": "S"},
 ]
 DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]
-TABLE_NAME = _to_kebab_case(DocumentPointer.__name__)
+TABLE_NAME = to_kebab_case(DocumentPointer.__name__)
 API_VERSION = 1
 INDEX_NAME = "idx_nhs_number_by_id"
 create_document_pointer_from_fhir_json = (

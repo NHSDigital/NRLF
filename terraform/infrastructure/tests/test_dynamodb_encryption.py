@@ -32,7 +32,7 @@ def _get_access_token(account_id: str) -> dict[str:str]:
 def _get_aws_account_id():
     with open(PATH_TO_OUTPUT) as f:
         tf_output = json.load(f)
-    return tf_output["aws_account_id"]["value"]
+    return tf_output["assume_account_id"]["value"]
 
 
 @pytest.fixture(scope="session")

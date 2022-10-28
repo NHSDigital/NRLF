@@ -13,7 +13,7 @@ ATTRIBUTE_EXISTS_ID = "attribute_exists(id)"
 ATTRIBUTE_NOT_EXISTS_ID = "attribute_not_exists(id)"
 
 
-def _to_kebab_case(name: str) -> str:
+def to_kebab_case(name: str) -> str:
     return CAMEL_CASE_RE.sub("-", name).lower()
 
 
@@ -55,7 +55,7 @@ class Repository:
     ):
         self.dynamodb = client
         self.item_type = item_type
-        self.table_name = environment_prefix + _to_kebab_case(item_type.__name__)
+        self.table_name = environment_prefix + to_kebab_case(item_type.__name__)
         assert_model_has_only_dynamodb_types(model=item_type)
 
     @handle_dynamodb_errors(conditional_check_error_message="Duplicate rejected")

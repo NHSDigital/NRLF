@@ -1,7 +1,7 @@
 resource "aws_iam_policy" "kms-read-write" {
   name        = "${var.prefix}--${var.name}--kms-read-write"
   description = "Encrypt and decrypt with the kms key"
-  policy      = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {

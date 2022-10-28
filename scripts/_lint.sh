@@ -14,8 +14,20 @@ function _lint_help() {
 function _lint() {
   command=$1
   case $command in
-    "check") python -m black . --check ;;
-    "fix") python -m black . ;;
+    "check") _check_lint ;;
+    "fix") _fix_lint ;;
     *) _lint_help ;;
   esac
+}
+
+function _check_lint() {
+  python -m black . --check
+  cd $root/terraform/infrastructure
+  terraform fmt -check -recursive
+}
+
+function _fix_lint() {
+  python -m black .
+  cd $root/terraform/infrastructure
+  terraform fmt -recursive
 }

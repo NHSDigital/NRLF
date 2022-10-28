@@ -1,21 +1,21 @@
 ####### Consumer ###########
 
 resource "aws_dynamodb_table" "consumer" {
-  name           = "${local.prefix}--consumer"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "id"
+  name         = "${local.prefix}--consumer"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
   attribute {
     name = "id"
     type = "S"
   }
   server_side_encryption {
-    enabled = true
+    enabled     = true
     kms_key_arn = aws_kms_key.consumer.arn
   }
 }
 
 resource "aws_iam_policy" "consumer__dynamodb-read" {
-  name = "${local.prefix}--consumer--dynamodb-read"
+  name        = "${local.prefix}--consumer--dynamodb-read"
   description = "Read the consumer table"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -46,7 +46,7 @@ resource "aws_iam_policy" "consumer__dynamodb-read" {
 }
 
 resource "aws_iam_policy" "consumer__dynamodb-write" {
-  name = "${local.prefix}--consumer--dynamodb-write"
+  name        = "${local.prefix}--consumer--dynamodb-write"
   description = "Write to the consumer table"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -112,21 +112,21 @@ resource "aws_iam_policy" "consumer__kms-read-write" {
 ########## Producer ############
 
 resource "aws_dynamodb_table" "producer" {
-  name           = "${local.prefix}--producer"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "id"
+  name         = "${local.prefix}--producer"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
   attribute {
     name = "id"
     type = "S"
   }
   server_side_encryption {
-    enabled = true
+    enabled     = true
     kms_key_arn = aws_kms_key.producer.arn
   }
 }
 
 resource "aws_iam_policy" "producer__dynamodb-read" {
-  name = "${local.prefix}--producer--dynamodb-read"
+  name        = "${local.prefix}--producer--dynamodb-read"
   description = "Read the producer table"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -157,7 +157,7 @@ resource "aws_iam_policy" "producer__dynamodb-read" {
 }
 
 resource "aws_iam_policy" "producer__dynamodb-write" {
-  name = "${local.prefix}--producer--dynamodb-write"
+  name        = "${local.prefix}--producer--dynamodb-write"
   description = "Write to the producer table"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -224,9 +224,9 @@ resource "aws_iam_policy" "producer__kms-read-write" {
 ########## Document Pointer ############
 
 resource "aws_dynamodb_table" "document-pointer" {
-  name           = "${local.prefix}--document-pointer"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "id"
+  name         = "${local.prefix}--document-pointer"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
   attribute {
     name = "id"
     type = "S"
@@ -237,19 +237,19 @@ resource "aws_dynamodb_table" "document-pointer" {
   }
 
   global_secondary_index {
-    name               = "idx_nhs_number_by_id"
-    hash_key           = "nhs_number"
-    range_key          = "id"
-    projection_type    = "ALL"
+    name            = "idx_nhs_number_by_id"
+    hash_key        = "nhs_number"
+    range_key       = "id"
+    projection_type = "ALL"
   }
   server_side_encryption {
-    enabled = true
+    enabled     = true
     kms_key_arn = aws_kms_key.document-pointer.arn
   }
 }
 
 resource "aws_iam_policy" "document-pointer__dynamodb-read" {
-  name = "${local.prefix}--document-pointer--dynamodb-read"
+  name        = "${local.prefix}--document-pointer--dynamodb-read"
   description = "Read the document-pointer table"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -280,7 +280,7 @@ resource "aws_iam_policy" "document-pointer__dynamodb-read" {
 }
 
 resource "aws_iam_policy" "document-pointer__dynamodb-write" {
-  name = "${local.prefix}--document-pointer--dynamodb-write"
+  name        = "${local.prefix}--document-pointer--dynamodb-write"
   description = "Write to the document-pointer table"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -347,21 +347,21 @@ resource "aws_iam_policy" "document-pointer__kms-read-write" {
 ########## Document Type ############
 
 resource "aws_dynamodb_table" "document-type" {
-  name           = "${local.prefix}--document-type"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "snomed_code"
+  name         = "${local.prefix}--document-type"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "snomed_code"
   attribute {
     name = "snomed_code"
     type = "S"
   }
   server_side_encryption {
-    enabled = true
+    enabled     = true
     kms_key_arn = aws_kms_key.document-type.arn
   }
 }
 
 resource "aws_iam_policy" "document-type__dynamodb-read" {
-  name = "${local.prefix}--document-type--dynamodb-read"
+  name        = "${local.prefix}--document-type--dynamodb-read"
   description = "Read the document-type table"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -392,7 +392,7 @@ resource "aws_iam_policy" "document-type__dynamodb-read" {
 }
 
 resource "aws_iam_policy" "document-type__dynamodb-write" {
-  name = "${local.prefix}--document-type--dynamodb-write"
+  name        = "${local.prefix}--document-type--dynamodb-write"
   description = "Write to the document-type table"
   policy = jsonencode({
     Version = "2012-10-17"

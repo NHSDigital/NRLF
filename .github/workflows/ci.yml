@@ -212,7 +212,7 @@ jobs:
           path: ./**/dist/*.zip
 
   terraform-base:
-    needs: [build-base]
+    needs: [build-base, unit-test, feature-test-local, lint-check]
     name: Terraform base
     runs-on: ubuntu-latest
 
