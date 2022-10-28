@@ -4,14 +4,15 @@ from types import FunctionType
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.pipeline import make_pipeline
 from lambda_pipeline.types import LambdaContext, PipelineData
-from nrlf.core.errors import DynamoDbError, ItemNotFound
-from pydantic import ValidationError
-
-from .versioning import (
+from lambda_utils.errors import RequestParsingError
+from lambda_utils.producer.response import bad_request, get_error_msg
+from lambda_utils.versioning import (
     get_largest_possible_version,
     get_version_from_header,
     get_versioned_steps,
 )
+from nrlf.core.errors import AuthenticationError, DynamoDbError, ItemNotFound
+from pydantic import ValidationError
 
 
 def _get_steps(
@@ -42,8 +43,10 @@ def execute_steps(
             dependencies=dependencies,
         )
         return 200, pipeline(data=PipelineData()).to_dict()
-    except (ValidationError, ItemNotFound) as e:
-        return 400, {"message": str(e)}
+    except ValidationError as e:
+        return bad_request(get_error_msg(e))
+    except (ItemNotFound, AuthenticationError, DynamoDbError, RequestParsingError) as e:
+        return bad_request(str(e))
     except Exception as e:
         return 500, {"message": str(e)}
 

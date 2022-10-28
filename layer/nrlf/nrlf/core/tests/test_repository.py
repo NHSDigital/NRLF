@@ -1,12 +1,11 @@
 import copy
-import json
 from contextlib import contextmanager
 from typing import Generator
 
 import boto3
 import moto
 import pytest
-from nrlf.core.dynamodb_types import DynamoDbType
+from botocore.exceptions import ClientError
 from nrlf.core.errors import DynamoDbError, ItemNotFound
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import (
@@ -82,7 +81,7 @@ def test_create_document_pointer():
         response = client.scan(TableName=TABLE_NAME)
 
     (item,) = response["Items"]
-    recovered_item = DocumentPointer.construct(**item)
+    recovered_item = DocumentPointer(**item)
     assert recovered_item.dict() == core_model.dict()
 
 
@@ -101,7 +100,10 @@ def test_read_document_pointer():
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        result = repository.read(id=core_model.id.value)
+        result = repository.read(
+            KeyConditionExpression="id = :id",
+            ExpressionAttributeValues={":id": core_model.id.dict()},
+        )
     assert core_model == result
 
 
@@ -111,7 +113,10 @@ def test_read_document_pointer_throws_error_when_items_key_missing():
     with pytest.raises(ItemNotFound), mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        repository.read(id={"S": "badKey"})
+        repository.read(
+            KeyConditionExpression="id = :id",
+            ExpressionAttributeValues={":id": {"S": "badKey"}},
+        )
 
 
 def test_update_document_pointer():
@@ -134,7 +139,7 @@ def test_update_document_pointer():
         response = client.scan(TableName=TABLE_NAME)
 
     (item,) = response["Items"]
-    recovered_item = DocumentPointer.construct(**item)
+    recovered_item = DocumentPointer(**item)
     assert recovered_item.dict() == updated_core_model.dict()
 
 
@@ -150,15 +155,15 @@ def test_update_document_pointer_doesnt_update_if_item_doesnt_exist():
 
     with pytest.raises(DynamoDbError), mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        repository.update(item=updated_core_model.dict())
+        repository.update(item=updated_core_model)
 
 
 def test_supersede_creates_new_item_and_deletes_existing():
 
     fhir_json = read_test_data("nrlf")
     core_model_for_create = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    core_model_for_create.id = DynamoDbType[str](
-        value="ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
+    core_model_for_create.id.__root__ = (
+        "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
     )
     core_model_for_delete = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
 
@@ -167,12 +172,18 @@ def test_supersede_creates_new_item_and_deletes_existing():
         repository.create(item=core_model_for_delete)
         repository.supersede(
             create_item=core_model_for_create,
-            delete_item_id=core_model_for_delete.id.value,
+            delete_item_id=core_model_for_delete.id.dict(),
         )
 
-        response_for_created_item = repository.read(id=core_model_for_create.id.value)
+        response_for_created_item = repository.read(
+            KeyConditionExpression="id = :id",
+            ExpressionAttributeValues={":id": core_model_for_create.id.dict()},
+        )
         try:
-            repository.read(id=core_model_for_delete.id.value)
+            repository.read(
+                KeyConditionExpression="id = :id",
+                ExpressionAttributeValues={":id": core_model_for_delete.id.dict()},
+            )
         except ItemNotFound as error:
             assert error.args[0] == "Item could not be found"
 
@@ -183,9 +194,9 @@ def test_supersede_id_exists_raises_transaction_canceled_exception():
 
     fhir_json = read_test_data("nrlf")
     core_model_for_create = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    core_model_for_create.id.value = {
-        "S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
-    }
+    core_model_for_create.id.__root__ = (
+        "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
+    )
 
     core_model_for_delete = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
 
@@ -194,8 +205,8 @@ def test_supersede_id_exists_raises_transaction_canceled_exception():
         repository.create(item=core_model_for_delete)
         repository.create(item=core_model_for_create)
         repository.supersede(
-            create_item=core_model_for_create.dict(),
-            delete_item_id=core_model_for_delete.id.value,
+            create_item=core_model_for_create,
+            delete_item_id=core_model_for_delete.id.dict(),
         )
 
 
@@ -206,7 +217,7 @@ def test_hard_delete():
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        repository.hard_delete(core_model.id.value)
+        repository.hard_delete(core_model.id.dict())
         response = client.scan(TableName=TABLE_NAME)
     assert len(response["Items"]) == 0
 
@@ -214,20 +225,28 @@ def test_hard_delete():
 def test_wont_hard_delete_if_item_doesnt_exist():
     with pytest.raises(DynamoDbError), mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        repository.hard_delete(id="no")
+        repository.hard_delete(id={"S": "no"})
 
 
-@handle_dynamodb_errors
+@handle_dynamodb_errors()
 def raise_exception(exception):
     raise exception
 
 
 @pytest.mark.parametrize(
-    ["exception_param"],
-    ([Exception], [TypeError], [ValueError]),
+    ["exception_param", "expected_exception"],
+    (
+        [Exception, Exception],
+        [TypeError, TypeError],
+        [ValueError, ValueError],
+        [
+            ClientError({"Error": {"Code": "ConditionalCheckFailedException"}}, "test"),
+            DynamoDbError,
+        ],
+    ),
 )
-def test_wrapper_exception_handler(exception_param):
-    with pytest.raises(DynamoDbError):
+def test_wrapper_exception_handler(exception_param, expected_exception):
+    with pytest.raises(expected_exception):
         raise_exception(exception_param)
 
 

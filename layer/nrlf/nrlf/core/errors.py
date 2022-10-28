@@ -4,3 +4,7 @@ class ItemNotFound(Exception):
 
 class DynamoDbError(Exception):
     pass
+
+
+class AuthenticationError(Exception):
+    pass

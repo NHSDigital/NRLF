@@ -7,6 +7,11 @@ module "consumer__readDocumentReference" {
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"
   kms_key_id             = module.kms__cloudwatch.kms_arn
+  environment_variables  = {
+    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
+    PREFIX                      = local.prefix
+  }
+  handler                = "api.consumer.readDocumentReference.index.handler"
 }
 
 module "consumer__searchDocumentReference" {
@@ -18,6 +23,11 @@ module "consumer__searchDocumentReference" {
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference"
   kms_key_id             = module.kms__cloudwatch.kms_arn
+  environment_variables  = {
+    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
+    PREFIX                      = local.prefix
+  }
+  handler                = "api.consumer.searchDocumentReference.index.handler"
 }
 
 module "consumer__searchViaPostDocumentReference" {
@@ -29,6 +39,11 @@ module "consumer__searchViaPostDocumentReference" {
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/POST/DocumentReference/_search"
   kms_key_id             = module.kms__cloudwatch.kms_arn
+  environment_variables  = {
+    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
+    PREFIX                      = local.prefix
+  }
+  handler                = "api.consumer.searchViaPostDocumentReference.index.handler"
 }
 
 module "producer__createDocumentReference" {
@@ -40,6 +55,15 @@ module "producer__createDocumentReference" {
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/POST/DocumentReference"
   kms_key_id             = module.kms__cloudwatch.kms_arn
+  environment_variables  = {
+    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
+    PREFIX                      = "${local.prefix}--"
+  }
+  additional_policies = [
+    aws_iam_policy.document-pointer__dynamodb-write.arn,
+    aws_iam_policy.document-pointer__kms-read-write.arn
+  ]
+  handler                = "api.producer.createDocumentReference.index.handler"
 }
 
 module "producer__deleteDocumentReference" {
@@ -51,6 +75,11 @@ module "producer__deleteDocumentReference" {
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/DELETE/DocumentReference/{id}"
   kms_key_id             = module.kms__cloudwatch.kms_arn
+  environment_variables  = {
+    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
+    PREFIX                      = local.prefix
+  }
+  handler                = "api.producer.deleteDocumentReference.index.handler"
 }
 
 module "producer__readDocumentReference" {
@@ -62,6 +91,11 @@ module "producer__readDocumentReference" {
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"
   kms_key_id             = module.kms__cloudwatch.kms_arn
+  environment_variables  = {
+    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
+    PREFIX                      = local.prefix
+  }
+  handler                = "api.producer.readDocumentReference.index.handler"
 }
 
 
@@ -74,6 +108,11 @@ module "producer__searchDocumentReference" {
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference"
   kms_key_id             = module.kms__cloudwatch.kms_arn
+  environment_variables  = {
+    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
+    PREFIX                      = local.prefix
+  }
+  handler                = "api.producer.searchDocumentReference.index.handler"
 }
 
 module "producer__updateDocumentReference" {
@@ -85,4 +124,9 @@ module "producer__updateDocumentReference" {
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference/{id}"
   kms_key_id             = module.kms__cloudwatch.kms_arn
+  environment_variables  = {
+    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
+    PREFIX                      = local.prefix
+  }
+  handler                = "api.producer.updateDocumentReference.index.handler"
 }

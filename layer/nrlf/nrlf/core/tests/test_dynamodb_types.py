@@ -4,11 +4,14 @@ import boto3
 import moto
 import pytest
 from nrlf.core.dynamodb_types import (
+    DynamoDbIntType,
+    DynamoDbStringType,
     DynamoDbType,
     convert_dynamo_value_to_raw_value,
     convert_value_to_dynamo_format,
 )
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
+from pydantic import ValidationError
 
 DEFAULT_ATTRIBUTE_DEFINITIONS = [{"AttributeName": "id", "AttributeType": "S"}]
 DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]
@@ -34,47 +37,50 @@ def dynamodb_table(
 
 
 @pytest.mark.parametrize(
-    ["python_type", "value", "expected"],
-    (
-        [str, "foo", {"S": "foo"}],
-        [int, 1, {"N": "1"}],
-        [float, 2.3, {"N": "2.3"}],
-        [dict, {"foo": {"bar": "123"}}, {"M": {"foo": {"M": {"bar": {"S": "123"}}}}}],
-        [list, ["foo", "bar"], {"L": [{"S": "foo"}, {"S": "bar"}]}],
-        [type(None), None, {"NULL": True}],
-    ),
+    "input_value,expected_value",
+    [("1", "1"), ("test", "test")],
 )
-def test_converting_to_dynamodb_type(python_type, value, expected):
-    obj = DynamoDbType[python_type](value=value)
-    id = DynamoDbType[str](value="my_id")
+def test_dynamo_db_string_type_validation_success(input_value, expected_value: str):
+    dynamo_db_string = DynamoDbStringType(__root__=input_value)
+    assert dynamo_db_string.dict() == {"S": expected_value}
 
-    assert obj.dict() == expected
 
-    item = {"id": id.dict(), "obj": obj.dict()}
-    table_name = "dummy_table"
-    with dynamodb_table(table_name=table_name) as client:
-        client.put_item(TableName=table_name, Item=item)
-        response = client.get_item(TableName=table_name, Key={"id": id.dict()})
-        _item = response["Item"]
-        _obj = DynamoDbType[python_type].construct(value=_item["obj"])
-        assert _item == item
-        assert _obj == obj
+@pytest.mark.parametrize("input_value", [None, 2, True])
+def test_dynamo_db_string_type_validation_failure(input_value):
+    with pytest.raises(ValidationError):
+        _dynamo_db_string = DynamoDbStringType(__root__=input_value)
 
 
 @pytest.mark.parametrize(
-    ["python_type", "value", "expected"],
+    "input_value,expected_value",
+    [(2, "2"), (-1, "-1")],
+)
+def test_dynamo_db_int_type_validation_success(input_value, expected_value: str):
+    dynamo_db_int = DynamoDbIntType(__root__=input_value)
+    assert dynamo_db_int.dict() == {"N": expected_value}
+
+
+@pytest.mark.parametrize(
+    "input_value", [None, "1.4", "1.0", "test", "1", 1.3, 2.9, -1.0]
+)
+def test_dynamo_db_int_type_validation_failure(input_value):
+    with pytest.raises(ValidationError):
+        _dynamo_db_string = DynamoDbIntType(__root__=input_value)
+
+
+@pytest.mark.parametrize(
+    ["value", "expected"],
     (
-        [str, {"S": "foo"}, "foo"],
-        [int, {"N": "1"}, 1],
-        [float, {"N": "2.3"}, 2.3],
-        [dict, {"M": {"foo": {"M": {"bar": {"S": "123"}}}}}, {"foo": {"bar": "123"}}],
-        [list, {"L": [{"S": "foo"}, {"S": "bar"}]}, ["foo", "bar"]],
-        [type(None), {"NULL": True}, None],
+        [{"S": "foo"}, "foo"],
+        [{"N": "1"}, 1],
+        [{"N": "2.3"}, 2.3],
+        [{"M": {"foo": {"M": {"bar": {"S": "123"}}}}}, {"foo": {"bar": "123"}}],
+        [{"L": [{"S": "foo"}, {"S": "bar"}]}, ["foo", "bar"]],
+        [{"NULL": True}, None],
     ),
 )
-def test_converting_dynamodb_to_raw_value(python_type, value, expected):
-    obj = DynamoDbType[python_type].construct(value=value)
-    raw_value = convert_dynamo_value_to_raw_value(obj)
+def test_converting_dynamodb_to_raw_value(value, expected):
+    raw_value = convert_dynamo_value_to_raw_value(value)
     assert raw_value == expected
 
 

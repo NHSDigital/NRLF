@@ -24,6 +24,7 @@ lambda-utils = { path = "./layer/lambda_utils/", editable = true }
 moto = "*"
 boto3 = "*"
 black = "*"
+behave = "*"
 
 [requires]
 python_version = "3.9"

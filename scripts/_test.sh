@@ -1,38 +1,43 @@
 #!/bin/bash
 
 function _test_help() {
-    echo
-    echo "nrlf test <command> [options]"
-    echo
-    echo "commands:"
-    echo "  help                        - this help screen"
-    echo "  unit                        - run unit tests"
-    echo "  integration                 - run integration tests"
-    echo "  feature                     - run BDD tests"
-    echo
-    return 1
+  echo
+  echo "nrlf test <command> [options]"
+  echo
+  echo "commands:"
+  echo "  help                        - this help screen"
+  echo "  unit                        - run unit tests"
+  echo "  integration                 - run integration tests"
+  echo "  feature local               - run local BDD tests"
+  echo "  feature integration         - run integration BDD tests"
+  echo
+  return 1
 }
 
 function _test() {
-    local command=$1
-    case $command in
-        "unit") _test_unit "$2";;
-        "integration") _test_integration ;;
-        "feature") echo "not implemented" ;; #_test_feature ;;
-        *) _test_help ;;
-    esac
+  local command=$1
+  case $command in
+  "unit") _test_unit "$2" ;;
+  "integration") _test_integration ;;
+  "feature") _test_feature "$2" ;;
+  *) _test_help ;;
+  esac
 }
 
 function _test_unit() {
-    python -m pytest -m "not integration" $1
+  python -m pytest -m "not integration" "$1"
 }
-
 
 function _test_integration() {
-    python -m pytest -m "integration"
+  python -m pytest -m "integration"
 }
 
-
 function _test_feature() {
-    python -m behave feature-tests
+  local command=$1
+
+  case $command in
+  "local") python -m behave feature_tests --tags=local ;;
+  "integration") python -m behave feature_tests --tags=-local ;;
+  *) _test_help ;;
+  esac
 }

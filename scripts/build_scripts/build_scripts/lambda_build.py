@@ -19,11 +19,12 @@ def create_zip_package(
 ) -> Generator[Path, None, None]:
     dist_dir = base_dir / DIST_DIR
     build_dir = dist_dir / BUILD_DIR
+    copy_dir = build_dir / Path(*base_dir.parts[-3:])
 
     clean_dir(dist_dir)
 
     print(f"Building {package_name}")
-    yield build_dir
+    yield copy_dir
     zip_package(str(build_dir))
     shutil.move(dist_dir / f"{BUILD_DIR}.zip", dist_dir / f"{package_name}.zip")
 

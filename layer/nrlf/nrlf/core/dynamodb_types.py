@@ -1,8 +1,7 @@
 from ast import literal_eval
-from typing import Any, Generic, TypeVar, Union
+from typing import TypeVar, Union
 
-from pydantic import validator
-from pydantic.generics import GenericModel
+from pydantic import BaseModel, StrictInt, StrictStr
 
 PythonType = TypeVar("PythonType")
 NoneType = type(None)
@@ -16,20 +15,21 @@ DYNAMODB_TYPE_LOOKUP = {
 }
 
 
-class DynamoDbType(GenericModel, Generic[PythonType]):
-    value: dict[str, Any]
-
-    @property
-    def raw_value(self):
-        (_raw_value,) = self.value.values()
-        return _raw_value
-
-    @validator("value", pre=True)
-    def convert_to_dynamodb_format(value):
-        return convert_value_to_dynamo_format(value)
-
+class DynamoDbType(BaseModel):
     def dict(self, *args, **kwargs):
-        return self.value
+        return convert_value_to_dynamo_format(self.__root__)
+
+
+class DynamoDbStringType(DynamoDbType):
+    __root__: StrictStr
+
+
+class DynamoDbIntType(DynamoDbType):
+    __root__: StrictInt
+
+
+class DynamoDbNullType(DynamoDbType):
+    __root__: NoneType = None
 
 
 def convert_value_to_dynamo_format(obj):
@@ -52,7 +52,7 @@ def convert_dynamo_value_to_raw_value(obj: Union[DynamoDbType, dict]):
     if _type in (list, dict):
         ((dynamo_type, value),) = obj.items()
     else:
-        ((dynamo_type, value),) = obj.value.items()
+        ((dynamo_type, value),) = obj.dict().items()
 
     if dynamo_type in (DYNAMODB_TYPE_LOOKUP[dict], dict):
         return {k: convert_dynamo_value_to_raw_value(v) for k, v in value.items()}
@@ -64,4 +64,12 @@ def convert_dynamo_value_to_raw_value(obj: Union[DynamoDbType, dict]):
     return literal_eval(value) if dynamo_type == "N" else value
 
 
-DYNAMODB_NULL = DynamoDbType[NoneType](value=None)
+def is_dynamodb_dict(obj: any) -> bool:
+    try:
+        convert_dynamo_value_to_raw_value(obj)
+    except:
+        return False
+    return True
+
+
+DYNAMODB_NULL = DynamoDbNullType()

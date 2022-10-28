@@ -22,6 +22,20 @@
 #
 #
 # @mock.patch.dict(os.environ, {"AWS_REGION": "eu-west-2"}, clear=True)
+# @pytest.fixture(autouse=True)
+# def set_env_vars():
+#     with mock.patch.dict(
+#         os.environ,
+#         {
+#             "AWS_REGION": "eu-west-2",
+#             "PREFIX": "nhsd-nrlf",
+#             "DOCUMENT_POINTER_TABLE_NAME": "document-pointer",
+#         },
+#         clear=True,
+#     ):
+#         yield
+#
+#
 # @pytest.mark.parametrize("event", [(make_aws_event()), (make_aws_event(version="2"))])
 # @pytest.mark.parametrize("endpoint", ENDPOINTS)
 # def test_handler_returns_200(endpoint: str, event: dict):

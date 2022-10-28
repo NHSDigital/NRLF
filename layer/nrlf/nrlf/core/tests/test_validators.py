@@ -74,6 +74,6 @@ def test_validate_timestamp(date, expected_outcome):
     assert expected_outcome == outcome
 
 
-def test__make_timestamp():
+def test_make_timestamp():
     timestamp = make_timestamp()
     validate_timestamp(timestamp)
