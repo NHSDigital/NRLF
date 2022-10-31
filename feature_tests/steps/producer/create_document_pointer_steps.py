@@ -8,11 +8,6 @@ from lambda_utils.tests.unit.utils import make_aws_event
 from feature_tests.steps.common.common_utils import render_template_document
 
 
-@given('Producer "{producer}" has permission to create Document Pointers for')
-def given_producer_has_permission(context, producer: str):
-    context.valid_producer = True
-
-
 @given('Producer "{producer}" does not exist in the system')
 def given_producer_not_exist(context, producer: str):
     context.producer_exists = False

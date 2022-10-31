@@ -2,6 +2,7 @@ import json
 from unittest import mock
 
 import pytest
+from nrlf.core.dynamodb_types import convert_value_to_dynamo_format
 from nrlf.core.model import (
     DocumentPointer,
     assert_model_has_only_dynamodb_types,

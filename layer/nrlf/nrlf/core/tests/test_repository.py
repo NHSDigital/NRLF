@@ -253,7 +253,7 @@ def test_wrapper_exception_handler(exception_param, expected_exception):
 def test_search_returns_multiple_values_with_same_nhs_number():
     fhir_json = read_test_data("nrlf")
     fhir_json_2 = copy.deepcopy(fhir_json)
-    fhir_json_2["masterIdentifier"]["value"] = "Oooogleboogly|1243356678"
+    fhir_json_2["masterIdentifier"]["value"] = "spam|1243356678"
 
     core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
     core_model_2 = create_document_pointer_from_fhir_json(fhir_json=fhir_json_2)
@@ -274,7 +274,7 @@ def test_search_returns_single_value():
     fhir_json = read_test_data("nrlf")
     fhir_json_2 = copy.deepcopy(fhir_json)
     fhir_json_2["subject"]["id"] = "3137554160"
-    fhir_json_2["masterIdentifier"]["value"] = "Oooogleboogly|1243356678"
+    fhir_json_2["masterIdentifier"]["value"] = "spam|1243356678"
 
     core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
     core_model_2 = create_document_pointer_from_fhir_json(fhir_json=fhir_json_2)
