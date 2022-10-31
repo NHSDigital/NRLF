@@ -1,6 +1,4 @@
 from collections import OrderedDict
-from dataclasses import replace
-from ipaddress import v6_int_to_packed
 from os import scandir
 
 from yaml import Dumper, FullLoader, add_representer, dump, load
@@ -81,7 +79,7 @@ def list_replace_value(l, key):
         elif isinstance(e, dict):
             e = dict_replace_value(e, key)
         elif isinstance(e, str):
-            e = e.replace('_', '')
+            e = e.replace("_", "")
         x.append(e)
     return x
 
@@ -90,7 +88,7 @@ def dict_replace_value(d, key):
     x = {}
     for k, v in d.items():
         if key == k:
-            v = v.replace('_', '')
+            v = v.replace("_", "")
         elif isinstance(v, dict):
             v = dict_replace_value(v, key)
         elif isinstance(v, list):
@@ -100,12 +98,12 @@ def dict_replace_value(d, key):
 
 
 def replace_underscore_values(data):
-    d = dict_replace_value(data, '$ref')
-    for key in list(d['components']['schemas']):
+    d = dict_replace_value(data, "$ref")
+    for key in list(d["components"]["schemas"]):
         if "_" in key:
-            new_key = key.replace('_', '')
-            d['components']['schemas'][new_key] = d['components']['schemas'][key]
-            del d['components']['schemas'][key]
+            new_key = key.replace("_", "")
+            d["components"]["schemas"][new_key] = d["components"]["schemas"][key]
+            del d["components"]["schemas"][key]
     return d
 
 
