@@ -16,7 +16,6 @@ sh = "*"
 flake8 = "*"
 pytest = "*"
 requests = "*"
-datamodel-code-generator = "*"
 build-scripts = { path = "./scripts/build_scripts/", editable = true }
 awscli = "*"
 nrlf = { path = "./layer/nrlf/", editable = true }
@@ -25,6 +24,8 @@ moto = "*"
 boto3 = "*"
 black = "*"
 behave = "*"
+pyyaml = "*"
+datamodel-code-generator = "*"
 
 [requires]
 python_version = "3.9"

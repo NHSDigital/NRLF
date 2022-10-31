@@ -24,6 +24,12 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
 - jq
 - tfenv
 
+Swagger generation requirements.
+
+- curl
+- jre
+- yq v4
+
 ## Install python dependencies
 
 ```

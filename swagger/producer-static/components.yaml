@@ -1,0 +1,110 @@
+components:
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      description: logical identifier
+      schema:
+        $ref: "#/components/schemas/DocumentId"
+    subject:
+      name: subject
+      in: query
+      schema:
+        $ref: "#/components/schemas/RequestQuerySubject"
+      required: true
+    custodian:
+      name: custodian.identifier
+      in: query
+      schema:
+        $ref: "#/components/schemas/RequestQueryCustodian"
+    snomedCode:
+      name: snomed.identifier
+      in: query
+      schema:
+        $ref: "#/components/schemas/RequestQuerySnomedCode"
+    fromASID:
+      name: fromASID
+      description: Client System ASID.
+      in: header
+      schema:
+        $ref: "#/components/schemas/RequestHeaderFromASID"
+      required: true
+    toASID:
+      name: toASID
+      description: The Spine ASID.
+      in: header
+      schema:
+        $ref: "#/components/schemas/RequestHeaderToASID"
+      required: true
+  responses:
+    Success:
+      description: Success Response
+      content:
+        application/fhir+json:
+          schema:
+            $ref: "#/components/schemas/OperationOutcome"
+        application/fhir+xml:
+          schema:
+            $ref: "#/components/schemas/OperationOutcome"
+    Error:
+      description: Error Response
+      content:
+        application/fhir+json:
+          schema:
+            $ref: "#/components/schemas/OperationOutcome"
+        application/fhir+xml:
+          schema:
+            $ref: "#/components/schemas/OperationOutcome"
+  requestBodies:
+    DocumentReference:
+      content:
+        application/fhir+json:
+          schema:
+            $ref: "#/components/schemas/DocumentReference"
+      required: true
+  schemas:
+    DocumentId:
+      type: string
+      pattern: '[ \r\n\t\S]+'
+    RequestPathParams:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/DocumentId"
+      required:
+        - id
+    RequestHeader:
+      type: object
+      properties:
+        fromASID:
+          $ref: "#/components/schemas/RequestHeaderFromASID"
+        toASID:
+          $ref: "#/components/schemas/RequestHeaderToASID"
+      required:
+        - fromASID
+        - toASID
+    RequestParams:
+      type: object
+      properties:
+        subject:
+          $ref: "#/components/schemas/RequestQuerySubject"
+        custodian.identifier:
+          $ref: "#/components/schemas/RequestQueryCustodian"
+        snomed.identifier:
+          $ref: "#/components/schemas/RequestQuerySnomedCode"
+      required:
+        - subject
+    RequestQuerySubject:
+      type: string
+      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
+    RequestQueryCustodian:
+      type: string
+      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
+    RequestQuerySnomedCode:
+      type: string
+      pattern: (^http\:\/\/snomed\.info\/sct\|(\d+))
+    RequestHeaderFromASID:
+      type: string
+    RequestHeaderToASID:
+      type: string
