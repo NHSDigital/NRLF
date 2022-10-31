@@ -148,7 +148,7 @@ jobs:
           nrlf test feature local
 
   build-base:
-    needs: [cache-base, unit-test, lint-check, feature-test-local]
+    needs: [cache-base]
     name: Build base
     runs-on: ubuntu-latest
 
@@ -180,7 +180,7 @@ jobs:
           path: ./**/dist/*.zip
 
   build:
-    needs: [cache, unit-test, lint-check, feature-test-local]
+    needs: [cache]
     name: Build
     runs-on: ubuntu-latest
 
@@ -245,7 +245,7 @@ jobs:
           nrlf terraform ciapply ${GITHUB_SHA_SHORT}
 
   terraform-apply:
-    needs: [build, terraform-base]
+    needs: [build, terraform-base, unit-test, lint-check, feature-test-local]
     name: Terraform apply
     runs-on: ubuntu-latest
 

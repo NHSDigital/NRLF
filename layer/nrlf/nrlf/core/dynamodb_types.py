@@ -73,3 +73,12 @@ def is_dynamodb_dict(obj: any) -> bool:
 
 
 DYNAMODB_NULL = DynamoDbNullType()
+DYNAMODBTYPE_TYPE_LOOKUP = {
+    str: DynamoDbStringType,
+    int: DynamoDbIntType,
+    NoneType: DynamoDbNullType,
+}
+
+
+def to_dynamodb_dict(value: PythonType) -> dict[str:PythonType]:
+    return DYNAMODBTYPE_TYPE_LOOKUP[type(value)](__root__=value).dict()
