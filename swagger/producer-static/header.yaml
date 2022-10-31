@@ -1,16 +1,16 @@
 openapi: 3.0.0
 info:
-  title: DocumentReference API
-  version: 4.0.1
+  title: NRLF Producer API
+  version: 0.0.1
 servers:
   - url: /fhir-server/api/v4
 tags:
-  - name: DocumentReference
+  - name: NRLF Producer
 paths:
   /DocumentReference:
     get:
       tags:
-        - DocumentReference
+        - NRLF Producer
       summary: Search for DocumentReference resources
       operationId: searchDocumentReference
       parameters:
@@ -40,7 +40,7 @@ paths:
         contentHandling: CONVERT_TO_TEXT
     post:
       tags:
-        - DocumentReference
+        - NRLF Producer
       summary: Create a DocumentReference resource
       operationId: createDocumentReference
       parameters:
@@ -63,7 +63,7 @@ paths:
   /DocumentReference/{id}:
     get:
       tags:
-        - DocumentReference
+        - NRLF Producer
       summary: Read a DocumentReference resource
       operationId: readDocumentReference
       parameters:
@@ -86,7 +86,7 @@ paths:
         contentHandling: CONVERT_TO_TEXT
     put:
       tags:
-        - DocumentReference
+        - NRLF Producer
       summary: Update an existing DocumentReference resource
       operationId: updateDocumentReference
       parameters:
@@ -111,7 +111,7 @@ paths:
         contentHandling: CONVERT_TO_TEXT
     delete:
       tags:
-        - DocumentReference
+        - NRLF Producer
       summary: Delete a DocumentReference resource
       operationId: deleteDocumentReference
       parameters:

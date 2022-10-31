@@ -1,16 +1,16 @@
 openapi: 3.0.0
 info:
-  title: DocumentReference API
+  title: NRLF Consumer API
   version: 0.0.1
 servers:
   - url: /
 tags:
-  - name: DocumentReference
+  - name: NRLF Consumer
 paths:
   /DocumentReference:
     get:
       tags:
-        - DocumentReference
+        - NRLF Consumer
       summary: Search for DocumentReference resources
       operationId: searchDocumentReference
       parameters:
@@ -41,7 +41,7 @@ paths:
   /DocumentReference/_search:
     post:
       tags:
-        - DocumentReference
+        - NRLF Consumer
       summary: Search for DocumentReference resources
       operationId: searchViaPostDocumentReference
       parameters:
@@ -71,7 +71,7 @@ paths:
   /DocumentReference/{id}:
     get:
       tags:
-        - DocumentReference
+        - NRLF Consumer
       summary: Read a DocumentReference resource
       operationId: readDocumentReference
       parameters:
