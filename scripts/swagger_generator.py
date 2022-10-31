@@ -1,4 +1,6 @@
 from collections import OrderedDict
+from dataclasses import replace
+from ipaddress import v6_int_to_packed
 from os import scandir
 
 from yaml import Dumper, FullLoader, add_representer, dump, load
@@ -71,6 +73,42 @@ def update_components(data, components):
     return data
 
 
+def list_replace_value(l, key):
+    x = []
+    for e in l:
+        if isinstance(e, list):
+            e = list_replace_value(e, key)
+        elif isinstance(e, dict):
+            e = dict_replace_value(e, key)
+        elif isinstance(e, str):
+            e = e.replace('_', '')
+        x.append(e)
+    return x
+
+
+def dict_replace_value(d, key):
+    x = {}
+    for k, v in d.items():
+        if key == k:
+            v = v.replace('_', '')
+        elif isinstance(v, dict):
+            v = dict_replace_value(v, key)
+        elif isinstance(v, list):
+            v = list_replace_value(v, key)
+        x[k] = v
+    return x
+
+
+def replace_underscore_values(data):
+    d = dict_replace_value(data, '$ref')
+    for key in list(d['components']['schemas']):
+        if "_" in key:
+            new_key = key.replace('_', '')
+            d['components']['schemas'][new_key] = d['components']['schemas'][key]
+            del d['components']['schemas'][key]
+    return d
+
+
 def replace_markdown_variables(data, type):
     d = temp_dict = {}
     files = open_markdown(type)
@@ -125,6 +163,7 @@ def process_swagger(type):
             data = update_components(data, components)
         data = remove_discriminator(data)
         data = remove_elements(data)
+        data = replace_underscore_values(data)
         data = replace_markdown_variables(data, type)
         d = OrderedDict(data)
         save_yaml(type, d)
