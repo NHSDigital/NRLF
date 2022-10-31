@@ -1,10 +1,10 @@
 resource "aws_iam_role" "lambda_role" {
-  name               = substr("${var.prefix}--api--${var.apitype}--${var.name}", 0, 64)
+  name = substr("${var.prefix}--api--${var.apitype}--${var.name}", 0, 64)
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17",
+    Version = "2012-10-17",
     Statement = [
       {
-        Effect    = "Allow",
+        Effect = "Allow",
         Principal = {
           Service = "lambda.amazonaws.com"
         },
@@ -24,11 +24,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
 }
 
 resource "aws_iam_role_policy_attachment" "additional_policies" {
-  for_each   = toset(var.additional_policies)
   role       = aws_iam_role.lambda_role.name
-  policy_arn = each.key
-
-  depends_on = [
-    aws_iam_role.lambda_role
-  ]
+  count      = length(var.additional_policies)
+  policy_arn = var.additional_policies[count.index]
 }
