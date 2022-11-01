@@ -3,6 +3,7 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
+from lambda_utils.header_config import ClientRpDetailsHeader
 from nrlf.core.model import DocumentPointer
 from nrlf.core.query import create_read_and_filter_query
 from nrlf.core.repository import Repository
@@ -14,10 +15,9 @@ def parse_producer_permissions(
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
 ) -> PipelineData:
-    client_rp_details = json.loads(event.headers["NHSD-Client-RP-Details"])
+    client_rp_details = ClientRpDetailsHeader(event)
     return PipelineData(
-        producer_id=client_rp_details["app.ASID"],
-        pointer_types=client_rp_details["nrl.pointer-types"],
+        client_rp_details=client_rp_details,
         **data,
     )
 
@@ -29,10 +29,11 @@ def read_document_reference(
     dependencies: FrozenDict[str, Any],
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
+    client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
     read_and_filter_query = create_read_and_filter_query(
         id=event.pathParameters["id"],
-        producer_id=data["producer_id"],
-        type=data["pointer_types"],
+        producer_id=client_rp_details.custodian,
+        type=client_rp_details.pointer_types,
     )
     document_pointer: DocumentPointer = repository.read(**read_and_filter_query)
     return PipelineData(**json.loads(document_pointer.document.__root__))

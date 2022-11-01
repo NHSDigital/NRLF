@@ -6,6 +6,7 @@ from typing import Generator
 from build_scripts.common import (
     BUILD_DIR,
     DIST_DIR,
+    PROJECT_ROOT_DIR,
     clean_dir,
     copy_source_code,
     get_base_dir,
@@ -19,7 +20,7 @@ def create_zip_package(
 ) -> Generator[Path, None, None]:
     dist_dir = base_dir / DIST_DIR
     build_dir = dist_dir / BUILD_DIR
-    copy_dir = build_dir / Path(*base_dir.parts[-3:])
+    copy_dir = build_dir / Path(str(base_dir).replace(f"{PROJECT_ROOT_DIR}/", ""))
 
     clean_dir(dist_dir)
 

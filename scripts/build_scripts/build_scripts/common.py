@@ -15,6 +15,7 @@ UNNECESSARY_DIRS = [
     "*tests",
     "*.egg-info",
 ]
+PROJECT_ROOT_DIR = str(Path(__file__).parent.parent.parent.parent)
 
 
 @cache

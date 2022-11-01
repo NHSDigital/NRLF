@@ -7,6 +7,7 @@ from nrlf.core.repository import Repository
 from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.core.validators import validate_timestamp
 
+from feature_tests.steps.aws.resources.dynamodb import get_dynamo_db_repository
 from feature_tests.steps.common.common_utils import render_template_document
 
 
@@ -20,7 +21,6 @@ def given_producer_has_permission(context, producer: str):
     context.producer_allowed_types += [
         f'https://snomed.info/ict|{row["snomed_code"]}' for row in context.table
     ]
-    context.valid_producer = True
 
 
 @then("the operation is unsuccessful")
@@ -38,9 +38,7 @@ def assert_error_message(context, error_message: str):
 
 @given("a Document Pointer exists in the system with the below values")
 def given_document_pointer_exists(context):
-    document_pointer_repository = Repository(
-        DocumentPointer, client=context.dynamodb_client
-    )
+    document_pointer_repository = get_dynamo_db_repository(context, "Document Pointers")
     body = json.loads(render_template_document(context))
     core_model = create_document_pointer_from_fhir_json(body, 1)
     document_pointer_repository.create(core_model)
@@ -56,9 +54,7 @@ def assert_operation_successful(context):
 
 @then('Document Pointer "{document_id}" exists')
 def assert_document_pointer_exists(context, document_id: str):
-    document_pointer_client = Repository(
-        DocumentPointer, client=context.dynamodb_client
-    )
+    document_pointer_client = get_dynamo_db_repository(context, "Document Pointers")
     item = document_pointer_client.read(
         KeyConditionExpression="id = :id",
         ExpressionAttributeValues={":id": {"S": document_id}},

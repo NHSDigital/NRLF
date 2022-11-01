@@ -5,6 +5,7 @@ from behave import given, when
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
 
+from feature_tests.steps.aws.resources.api import create_document_pointer_api_request
 from feature_tests.steps.common.common_utils import render_template_document
 
 
@@ -15,25 +16,35 @@ def given_producer_not_exist(context, producer: str):
 
 @given('Producer "{producer}" does not have permission to create Document Pointers for')
 def given_producer_no_permission(context, producer: str):
-    context.valid_producer = False
+    context.producer_allowed_types = []
 
 
 @when('Producer "{producer}" creates a Document Reference from DOCUMENT template')
 def producer_create_document_pointer_from_template(context, producer: str):
-    from api.producer.createDocumentReference.index import handler
-
     body = render_template_document(context)
+    headers = {
+        "NHSD-Client-RP-Details": json.dumps(
+            {
+                "app.ASID": producer,
+                "nrl.pointer-types": context.producer_allowed_types,
+            }
+        )
+    }
     context.sent_document = json.dumps(json.loads(body))
-    event = make_aws_event(body=body)
-    lambda_context = LambdaContext()
+    if context.local_test:
+        from api.producer.createDocumentReference.index import handler
 
-    with mock.patch(
-        "api.producer.createDocumentReference.src.v1.handler._is_valid_producer",
-        return_value=context.valid_producer,
-    ), mock.patch(
-        "api.producer.createDocumentReference.src.v1.handler._producer_exists",
-        return_value=context.producer_exists,
-    ):
-        response = handler(event, lambda_context)
-        context.response_status_code = response["statusCode"]
-        context.response_message = response["body"]
+        event = make_aws_event(body=body, headers=headers)
+        lambda_context = LambdaContext()
+
+        with mock.patch(
+            "api.producer.createDocumentReference.src.v1.handler._producer_exists",
+            return_value=context.producer_exists,
+        ):
+            response = handler(event, lambda_context)
+            context.response_status_code = response["statusCode"]
+            context.response_message = response["body"]
+    else:
+        response = create_document_pointer_api_request(body, headers)
+        context.response_status_code = response.status_code
+        context.response_message = response.text

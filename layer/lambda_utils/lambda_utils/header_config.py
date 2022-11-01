@@ -1,7 +1,16 @@
-from pydantic import BaseModel, Field, validator
+import json
+
+from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
+from pydantic import BaseModel, Field, StrictStr, validator
 
 
-class AcceptHeader(BaseModel):
+class AbstractHeader(BaseModel):
+    @staticmethod
+    def _convert_keys_to_lowercase(headers):
+        return {key.lower(): value for key, value in headers.items()}
+
+
+class AcceptHeader(AbstractHeader):
     parsing_error: str = Field(exclude=True)
     version: str = Field(regex="^\\d+\\.?\\d*$")
 
@@ -9,10 +18,6 @@ class AcceptHeader(BaseModel):
         headers = self._convert_keys_to_lowercase(event.get("headers", {}))
         parsing_error, accept_header = self._parse_accept_header(headers.get("accept"))
         super().__init__(parsing_error=parsing_error, **accept_header)
-
-    @staticmethod
-    def _convert_keys_to_lowercase(headers):
-        return {key.lower(): value for key, value in headers.items()}
 
     @staticmethod
     def _parse_accept_header(accept_header: str) -> tuple[str, dict[str, str]]:
@@ -34,3 +39,12 @@ class AcceptHeader(BaseModel):
         if parsing_error:
             raise ValueError(parsing_error)
         return parsing_error
+
+
+class ClientRpDetailsHeader(AbstractHeader):
+    custodian: StrictStr = Field(alias="app.ASID")
+    pointer_types: list[StrictStr] = Field(alias="nrl.pointer-types")
+
+    def __init__(self, event: APIGatewayProxyEventModel):
+        client_rp_details = event.headers.get("NHSD-Client-RP-Details", "{}")
+        super().__init__(**json.loads(client_rp_details))
