@@ -3,6 +3,7 @@ from datetime import datetime as dt
 from typing import Union
 
 from nrlf.core.constants import EMPTY_VALUES, JSON_TYPES, Source
+from nrlf.core.errors import FhirValidationError
 from nrlf.core.model import DocumentPointer
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
 from nrlf.legacy.model import LegacyDocumentPointer
@@ -43,17 +44,19 @@ def _create_fhir_model_from_legacy_model(
 ) -> DocumentReference:
     return StrictDocumentReference(
         resourceType=DocumentReference.__name__,
-        masterIdentifier={
-            "system": LEGACY_SYSTEM,
-            "value": f"{producer_id}|{legacy_model.logicalIdentifier.logicalId}",
-        },
+        id=f"{producer_id}|{legacy_model.logicalIdentifier.logicalId}",
         status=legacy_model.status,
         type={"coding": [legacy_model.type.dict()]},
         category=[legacy_model.class_.dict()],
-        subject={"system": NHS_NUMBER_SYSTEM_URL, "id": nhs_number},
+        subject={"identifier": {"system": NHS_NUMBER_SYSTEM_URL, "value": nhs_number}},
         date=legacy_model.indexed.isoformat(),
         author=[legacy_model.author],
-        custodian={"system": LEGACY_SYSTEM, "id": legacy_model.custodian.reference},
+        custodian={
+            "identifier": {
+                "system": LEGACY_SYSTEM,
+                "value": legacy_model.custodian.reference,
+            }
+        },
         relatesTo=[legacy_model.relatesTo] if legacy_model.relatesTo else [],
         content=legacy_model.content,
         context=legacy_model.context,
@@ -65,14 +68,22 @@ def _create_legacy_model_from_legacy_json(legacy_json: dict) -> LegacyDocumentPo
     return LegacyDocumentPointer(**stripped_legacy_json)
 
 
+def validate_no_extra_fields(input_fhir_json, output_fhir_json):
+    if input_fhir_json != output_fhir_json:
+        raise FhirValidationError("Input FHIR JSON has additional non-FHIR fields.")
+
+
 def create_document_pointer_from_fhir_json(
     fhir_json: dict, api_version: int, source: Source = Source.NRLF, **kwargs
 ) -> DocumentPointer:
-    _fhir_model = DocumentReference(**fhir_json)
+    fhir_model = DocumentReference(**fhir_json)
+    validate_no_extra_fields(
+        input_fhir_json=fhir_json, output_fhir_json=fhir_model.dict(exclude_none=True)
+    )
     fhir_strict_model = StrictDocumentReference(**fhir_json)
     core_model = DocumentPointer(
-        id=fhir_strict_model.masterIdentifier.value,
-        nhs_number=fhir_strict_model.subject.id,
+        id=fhir_strict_model.id,
+        nhs_number=fhir_strict_model.subject.identifier.value,
         type=fhir_strict_model.type,
         version=api_version,
         document=json.dumps(fhir_json),

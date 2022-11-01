@@ -8,3 +8,7 @@ class DynamoDbError(Exception):
 
 class AuthenticationError(Exception):
     pass
+
+
+class FhirValidationError(Exception):
+    pass

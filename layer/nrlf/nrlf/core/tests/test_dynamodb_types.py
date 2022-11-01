@@ -82,15 +82,3 @@ def test_dynamo_db_int_type_validation_failure(input_value):
 def test_converting_dynamodb_to_raw_value(value, expected):
     raw_value = convert_dynamo_value_to_raw_value(value)
     assert raw_value == expected
-
-
-def test_converting_test_doc_to_dynamodb_type():
-    fhir_json = read_test_data("nrlf")
-    dynamodb_json = read_test_data("nrlf-dynamodb-format")
-    assert convert_value_to_dynamo_format(fhir_json) == dynamodb_json
-
-
-def test_converting_test_doc_from_dynamodb_type():
-    fhir_json = read_test_data("nrlf")
-    dynamodb_json = read_test_data("nrlf-dynamodb-format")
-    assert convert_dynamo_value_to_raw_value(dynamodb_json) == fhir_json

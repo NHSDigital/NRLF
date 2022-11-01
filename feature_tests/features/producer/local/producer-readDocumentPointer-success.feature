@@ -6,16 +6,18 @@ Feature: Success scenarios where producer is able to read a Document Pointer
       """
       {
         "resourceType": "DocumentReference",
-        "masterIdentifier": {
-          "value": "$custodian|$identifier"
-        },
+        "id": "$custodian|$identifier",
         "custodian": {
-          "system": "https://fhir.nhs.uk/Id/accredited-system-id",
-          "id": "$custodian"
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "value": "$custodian"
+          }
         },
         "subject": {
-          "system": "https://fhir.nhs.uk/Id/nhs-number",
-          "id": "$subject"
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "$subject"
+          }
         },
         "type": {
           "coding": [

@@ -13,14 +13,11 @@ from api.producer.createDocumentReference.src.v1.handler import parse_request_bo
     "nrlf.core.transform.make_timestamp", return_value="2022-10-25T15:47:49.732Z"
 )
 def test_parse_request_body_to_core_model(mock__make_timestamp):
-    event = APIGatewayProxyEventModel(
-        **make_aws_event(body=json.dumps(read_test_data("nrlf")))
-    )
+    fhir_json = json.dumps(read_test_data("nrlf"))
+    event = APIGatewayProxyEventModel(**make_aws_event(body=fhir_json))
     expected_output = {
         "created_on": {"S": "2022-10-25T15:47:49.732Z"},
-        "document": {
-            "S": '{"resourceType": "DocumentReference", "masterIdentifier": {"value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"}, "custodian": {"system": "https://fhir.nhs.uk/Id/accredited-system-id", "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"}, "subject": {"system": "https://fhir.nhs.uk/Id/nhs-number", "id": "9278693472"}, "type": {"coding": [{"system": "https://snomed.info/ict", "code": "736253002"}]}, "content": [{"attachment": {"contentType": "application/pdf", "url": "https://example.org/my-doc.pdf"}}], "status": "current"}'
-        },
+        "document": {"S": fhir_json},
         "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"},
         "nhs_number": {"S": "9278693472"},
         "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
