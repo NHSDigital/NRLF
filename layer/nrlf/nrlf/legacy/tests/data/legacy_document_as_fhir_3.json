@@ -1,9 +1,6 @@
 {
   "resourceType": "DocumentReference",
-  "masterIdentifier": {
-    "system": "LEGACY_SYSTEM",
-    "value": "producer_123|e8a6fec7-334c-11ed-bd8d-000c290de2c0-58504e523530384b5851"
-  },
+  "id": "producer_123|e8a6fec7-334c-11ed-bd8d-000c290de2c0-58504e523530384b5851",
   "status": "current",
   "type": {
     "coding": [
@@ -25,7 +22,12 @@
       ]
     }
   ],
-  "subject": { "id": "3006500369" },
+  "subject": {
+    "identifier": {
+      "system": "https://fhir.nhs.uk/Id/nhs-number",
+      "value": "3006500369"
+    }
+  },
   "date": "2022-09-13T10:14:53+00:00",
   "author": [
     {
@@ -33,7 +35,10 @@
     }
   ],
   "custodian": {
-    "id": "https://directory.spineservices.nhs.uk/STU3/Organization/RQI"
+    "identifier": {
+      "system": "LEGACY_SYSTEM",
+      "value": "https://directory.spineservices.nhs.uk/STU3/Organization/RQI"
+    }
   },
   "relatesTo": [
     {

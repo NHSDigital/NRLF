@@ -1,15 +1,17 @@
 {
   "resourceType": "DocumentReference",
-  "masterIdentifier": {
-    "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"
-  },
+  "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890",
   "custodian": {
-    "system": "https://fhir.nhs.uk/Id/accredited-system-id",
-    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"
+    "identifier": {
+      "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+      "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"
+    }
   },
   "subject": {
-    "system": "https://fhir.nhs.uk/Id/nhs-number",
-    "id": "9278693472"
+    "identifier": {
+      "system": "https://fhir.nhs.uk/Id/nhs-number",
+      "value": "9278693472"
+    }
   },
   "type": {
     "coding": [
