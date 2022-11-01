@@ -76,7 +76,7 @@ class Repository:
         try:
             (item,) = response["Items"]
         except (KeyError, ValueError):
-            raise ItemNotFound("Item could not be found")
+            raise ItemNotFound
         return self.item_type(**item)
 
     @handle_dynamodb_errors()

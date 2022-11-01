@@ -48,6 +48,9 @@ def execute_steps(
     except (ItemNotFound, AuthenticationError, DynamoDbError, RequestParsingError) as e:
         return bad_request(str(e))
     except Exception as e:
+        import traceback
+
+        print(traceback.format_exc())
         return 500, {"message": str(e)}
 
 

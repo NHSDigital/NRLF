@@ -1,6 +1,3 @@
-import json
-
-
 def render_template_document(context) -> str:
     template_text = context.template_document
     for row in context.table:

@@ -15,6 +15,32 @@ def set_template_document(context):
     context.template_document = context.text
 
 
+@given('Producer "{producer}" has permission to create Document Pointers for')
+def given_producer_has_permission(context, producer: str):
+    context.producer_allowed_types += [
+        f'https://snomed.info/ict|{row["snomed_code"]}' for row in context.table
+    ]
+    context.valid_producer = True
+
+
+@given('Producer "{producer}" has permission to delete Document Pointers for')
+def given_producer_has_permission(context, producer: str):
+    context.producer_allowed_types += [
+        f'https://snomed.info/ict|{row["snomed_code"]}' for row in context.table
+    ]
+    context.valid_producer = True
+
+
+@given(
+    'Producer "{producer}" does not have permission to delete the Document Pointers for'
+)
+def given_producer_has_permission(context, producer: str):
+    context.producer_allowed_types += [
+        f'https://snomed.info/ict|{row["snomed_code"]}' for row in context.table
+    ]
+    context.valid_producer = False
+
+
 @then("the operation is unsuccessful")
 def assert_operation_unsuccessful(context):
     assert context.response_status_code == 400, context.response_status_code
@@ -40,7 +66,10 @@ def given_document_pointer_exists(context):
 
 @then("the operation is successful")
 def assert_operation_successful(context):
-    assert context.response_status_code == 200, context.response_status_code
+    assert context.response_status_code == 200, (
+        context.response_message,
+        context.response_status_code,
+    )
 
 
 @then('Document Pointer "{document_id}" exists')

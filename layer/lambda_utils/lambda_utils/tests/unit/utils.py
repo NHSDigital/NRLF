@@ -61,6 +61,7 @@ def make_aws_event(**kwargs):
             "X-Forwarded-For": "52.255.255.12",
             "X-Forwarded-Port": "443",
             "X-Forwarded-Proto": "https",
+            **kwargs.get("headers", {}),
         },
         "multiValueHeaders": {
             "accept": [
@@ -87,7 +88,7 @@ def make_aws_event(**kwargs):
         },
         "queryStringParameters": None,
         "multiValueQueryStringParameters": None,
-        "pathParameters": None,
+        "pathParameters": kwargs.get("pathParameters"),
         "stageVariables": None,
         "requestContext": {
             "resourceId": "2gxmpl",
