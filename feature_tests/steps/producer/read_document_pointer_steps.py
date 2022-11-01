@@ -18,7 +18,7 @@ def producer_reads_existing_document_reference(
             "NHSD-Client-RP-Details": json.dumps(
                 {
                     "app.ASID": producer,
-                    "nrl.pointer-types": context.producer_allowed_types,
+                    "nrl.pointer-types": context.allowed_types,
                 }
             )
         },

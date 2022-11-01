@@ -8,7 +8,10 @@ from nrlf.core.model import (
     assert_model_has_only_dynamodb_types,
     create_document_type_tuple,
 )
-from nrlf.core.transform import create_document_pointer_from_fhir_json
+from nrlf.core.transform import (
+    create_bundle_from_document_pointers,
+    create_document_pointer_from_fhir_json,
+)
 from nrlf.producer.fhir.r4.model import CodeableConcept, Coding
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
@@ -96,7 +99,7 @@ def test_reconstruct_document_pointer_from_db():
         "created_on": {"S": TIMESTAMP},
         "updated_on": {"NULL": True},
     }
-    print(dynamodb_core_model)
+
     core_model = DocumentPointer(**dynamodb_core_model)
     assert core_model.dict() == {
         "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"},
@@ -109,3 +112,118 @@ def test_reconstruct_document_pointer_from_db():
         "created_on": {"S": TIMESTAMP},
         "updated_on": {"NULL": True},
     }
+
+
+def test_create_bundle_from_muliple_document_pointers():
+    fhir_json = read_test_data("nrlf")
+
+    core_model = create_document_pointer_from_fhir_json(
+        fhir_json=fhir_json, api_version=API_VERSION
+    )
+    core_model_2 = create_document_pointer_from_fhir_json(
+        fhir_json=fhir_json, api_version=API_VERSION
+    )
+
+    result = create_bundle_from_document_pointers([core_model, core_model_2])
+
+    expected_result = {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "total": 2,
+        "entry": [
+            {
+                "resource": {
+                    "resourceType": "DocumentReference",
+                    "masterIdentifier": {
+                        "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"
+                    },
+                    "status": "current",
+                    "type": {
+                        "coding": [
+                            {"system": "https://snomed.info/ict", "code": "736253002"}
+                        ]
+                    },
+                    "subject": {"id": "9278693472"},
+                    "custodian": {"id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+                    "content": [
+                        {
+                            "attachment": {
+                                "contentType": "application/pdf",
+                                "url": "https://example.org/my-doc.pdf",
+                            }
+                        }
+                    ],
+                }
+            },
+            {
+                "resource": {
+                    "resourceType": "DocumentReference",
+                    "masterIdentifier": {
+                        "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"
+                    },
+                    "status": "current",
+                    "type": {
+                        "coding": [
+                            {"system": "https://snomed.info/ict", "code": "736253002"}
+                        ]
+                    },
+                    "subject": {"id": "9278693472"},
+                    "custodian": {"id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+                    "content": [
+                        {
+                            "attachment": {
+                                "contentType": "application/pdf",
+                                "url": "https://example.org/my-doc.pdf",
+                            }
+                        }
+                    ],
+                }
+            },
+        ],
+    }
+
+    assert expected_result == result
+
+
+def test_create_bundle_from_document_pointer():
+    fhir_json = read_test_data("nrlf")
+
+    core_model = create_document_pointer_from_fhir_json(
+        fhir_json=fhir_json, api_version=API_VERSION
+    )
+
+    result = create_bundle_from_document_pointers([core_model])
+
+    expected_result = {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "total": 1,
+        "entry": [
+            {
+                "resource": {
+                    "resourceType": "DocumentReference",
+                    "masterIdentifier": {
+                        "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"
+                    },
+                    "status": "current",
+                    "type": {
+                        "coding": [
+                            {"system": "https://snomed.info/ict", "code": "736253002"}
+                        ]
+                    },
+                    "subject": {"id": "9278693472"},
+                    "custodian": {"id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+                    "content": [
+                        {
+                            "attachment": {
+                                "contentType": "application/pdf",
+                                "url": "https://example.org/my-doc.pdf",
+                            }
+                        }
+                    ],
+                }
+            }
+        ],
+    }
+
+    assert expected_result == result

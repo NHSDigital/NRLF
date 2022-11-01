@@ -85,7 +85,7 @@ class Repository:
             TableName=self.table_name, IndexName=index_name, **kwargs
         )
         _validate_results_within_limits(results)
-        return [self.item_type.construct(**item) for item in results["Items"]]
+        return [self.item_type(**item) for item in results["Items"]]
 
     @handle_dynamodb_errors(conditional_check_error_message="Document does not exist")
     def update(self, item: BaseModel) -> DynamoDbResponse:

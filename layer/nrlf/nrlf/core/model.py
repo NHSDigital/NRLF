@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 
 from nrlf.core.dynamodb_types import (
@@ -16,6 +17,7 @@ from nrlf.core.validators import (
     validate_timestamp,
     validate_tuple,
 )
+from nrlf.producer.fhir.r4.model import BundleEntry
 from pydantic import BaseModel, Field, root_validator, validator
 
 
