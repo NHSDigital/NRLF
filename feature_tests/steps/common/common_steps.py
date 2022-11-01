@@ -48,7 +48,7 @@ def given_document_pointer_exists(context):
     core_model = create_document_pointer_from_fhir_json(body, api_version=1)
     document_pointer_repository.create(core_model)
 
-    context.documents[body["masterIdentifier"]["value"]] = rendered_template
+    context.documents[body["id"]] = rendered_template
 
 
 @then("the operation is successful")

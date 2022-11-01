@@ -81,8 +81,6 @@ def create_document_pointer_from_fhir_json(
         input_fhir_json=fhir_json, output_fhir_json=fhir_model.dict(exclude_none=True)
     )
     fhir_strict_model = StrictDocumentReference(**fhir_json)
-    if _fhir_model.dict() != fhir_json:
-        raise Exception("json does not match model")
     core_model = DocumentPointer(
         id=fhir_strict_model.id,
         nhs_number=fhir_strict_model.subject.identifier.value,
