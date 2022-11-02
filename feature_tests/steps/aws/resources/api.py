@@ -4,12 +4,12 @@ import requests
 
 from feature_tests.steps.aws.resources.common import get_terraform_json
 
-DEFAULT_VERSION = "1.0"
+DEFAULT_VERSION = 1.0
 
 
 def document_pointer_api_request(
     method: str,
-    version: str = DEFAULT_VERSION,
+    version: int = DEFAULT_VERSION,
     path_params: list = [],
     **request_kwargs,
 ):
