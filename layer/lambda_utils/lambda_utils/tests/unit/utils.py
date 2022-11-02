@@ -1,3 +1,4 @@
+import urllib.parse
 from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
@@ -88,7 +89,10 @@ def make_aws_event(**kwargs):
         },
         "queryStringParameters": None,
         "multiValueQueryStringParameters": None,
-        "pathParameters": kwargs.get("pathParameters"),
+        "pathParameters": {
+            k: urllib.parse.quote(v)
+            for k, v in kwargs.get("pathParameters", {}).items()
+        },
         "stageVariables": None,
         "requestContext": {
             "resourceId": "2gxmpl",
