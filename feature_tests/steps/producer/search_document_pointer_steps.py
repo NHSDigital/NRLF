@@ -5,6 +5,7 @@ from behave import then, when
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
 
+from feature_tests.steps.aws.resources.api import document_pointer_api_request
 from feature_tests.steps.common.common_utils import render_template_document
 
 
@@ -59,29 +60,24 @@ def producer_search_document_pointers(context):
     from api.producer.searchDocumentReference.index import handler
 
     queryStringParameters = context.query_parameters
+    headers = {
+        "NHSD-Client-RP-Details": json.dumps(
+            {
+                "app.ASID": context.headers["custodian"],
+                "nrl.pointer-types": context.allowed_types,
+            }
+        )
+    }
 
-    event = make_aws_event(
-        queryStringParameters=queryStringParameters,
-        headers={
-            "NHSD-Client-RP-Details": json.dumps(
-                {
-                    "app.ASID": context.headers["custodian"],
-                    "nrl.pointer-types": context.allowed_types,
-                }
-            )
-        },
-    )
-
-    lambda_context = LambdaContext()
-
-    with mock.patch(
-        "api.producer.searchDocumentReference.src.v1.handler._is_valid_producer",
-        return_value=context.valid_producer,
-    ), mock.patch(
-        "api.producer.searchDocumentReference.src.v1.handler._producer_exists",
-        return_value=context.producer_exists,
-    ):
+    if context.local_test:
+        event = make_aws_event(
+            queryStringParameters=queryStringParameters, headers=headers
+        )
+        lambda_context = LambdaContext()
         response = handler(event, lambda_context)
-
         context.response_status_code = response["statusCode"]
         context.response_message = response["body"]
+    else:
+        response = document_pointer_api_request(method="POST", headers=headers)
+        context.response_status_code = response.status_code
+        context.response_message = response.text

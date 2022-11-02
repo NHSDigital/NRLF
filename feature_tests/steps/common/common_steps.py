@@ -2,6 +2,8 @@ import json
 
 from behave import given, then
 from nrlf.core.dynamodb_types import convert_dynamo_value_to_raw_value
+from nrlf.core.model import DocumentPointer
+from nrlf.core.repository import Repository
 from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.core.validators import validate_timestamp
 

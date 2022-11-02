@@ -3,39 +3,12 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from nrlf.core.errors import AuthenticationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.query import create_search_and_filter_query
 from nrlf.core.repository import Repository
 from nrlf.core.transform import create_bundle_from_document_pointers
 
 from api.producer.searchDocumentReference.src.constants import PersistentDependencies
-
-
-def _is_valid_producer():
-    # TODO: mocked out due to not knowing authentication method
-    return True
-
-
-def _producer_exists():
-    # TODO: mocked out due to not knowing authentication method
-    return True
-
-
-def validate_producer_permissions(
-    data: PipelineData,
-    context: LambdaContext,
-    event: APIGatewayProxyEventModel,
-    dependencies: FrozenDict[str, Any],
-) -> PipelineData:
-    if not _producer_exists():
-        raise AuthenticationError("Custodian does not exist in the system")
-
-    if not _is_valid_producer():
-        raise AuthenticationError(
-            "Required permission to create a document pointer are missing"
-        )
-    return PipelineData(**data)
 
 
 def parse_client_rp_details(
@@ -77,6 +50,5 @@ def search_document_references(
 
 steps = [
     parse_client_rp_details,
-    validate_producer_permissions,
     search_document_references,
 ]
