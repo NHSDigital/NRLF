@@ -3,11 +3,13 @@ import json
 from behave import then, when
 from lambda_utils.tests.unit.utils import make_aws_event
 
-from feature_tests.steps.aws.resources.api import document_pointer_api_request
+from feature_tests.steps.aws.resources.api import producer_read_api_request
 from feature_tests.steps.common.common_utils import render_template_document
 
 
-@when('"{producer}" reads an existing Document Reference "{document_reference_id}"')
+@when(
+    'Producer "{producer}" reads an existing Document Reference "{document_reference_id}"'
+)
 def producer_reads_existing_document_reference(
     context, producer, document_reference_id
 ):
@@ -16,7 +18,7 @@ def producer_reads_existing_document_reference(
         "NHSD-Client-RP-Details": json.dumps(
             {
                 "app.ASID": producer,
-                "nrl.pointer-types": context.producer_allowed_types,
+                "nrl.pointer-types": context.allowed_types,
             }
         )
     }
@@ -29,8 +31,9 @@ def producer_reads_existing_document_reference(
         context.response_status_code = response["statusCode"]
         context.response_message = response["body"]
     else:
-        response = document_pointer_api_request(
-            method="GET", path_params=path_params.values(), headers=headers
+        response = producer_read_api_request(
+            path_params=path_params.values(),
+            headers=headers,
         )
         context.response_status_code = response.status_code
         context.response_message = response.text

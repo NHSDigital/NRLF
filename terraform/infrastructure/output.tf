@@ -22,5 +22,6 @@ output "dynamodb" {
 output "api_base_urls" {
   value = {
     producer = module.producer__gateway.api_base_url
+    consumer = module.consumer__gateway.api_base_url
   }
 }
