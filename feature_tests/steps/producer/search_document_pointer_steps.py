@@ -1,7 +1,7 @@
 import json
 from unittest import mock
 
-from behave import given, then, when
+from behave import then, when
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
 
@@ -54,7 +54,7 @@ def producer_search_document_pointers(context):
     assert json.loads(response) == empty_bundle
 
 
-@then("the search is made")
+@then("the provider searches for document references")
 def producer_search_document_pointers(context):
     from api.producer.searchDocumentReference.index import handler
 

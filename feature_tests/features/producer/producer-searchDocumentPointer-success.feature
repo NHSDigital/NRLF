@@ -74,7 +74,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | property      | value                           |
       | type          | 736253002                       |
       | custodian     | AARON COURT MENTAL NH           |
-    Then the search is made
+    Then the provider searches for document references
     And the operation is successful
     And 2 document references were returned
     And the response contains the DOCUMENT template with the below values
