@@ -34,6 +34,7 @@ def get_access_token():
 
 def new_aws_session() -> boto3.Session:
     access_key_id, secret_access_key, session_token = get_access_token()
+
     return boto3.Session(
         aws_access_key_id=access_key_id,
         aws_secret_access_key=secret_access_key,

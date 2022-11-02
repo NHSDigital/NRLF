@@ -61,3 +61,18 @@ def consumer_read_api_request(
         path_params=path_params,
         headers=headers,
     )
+
+
+def producer_search_api_request(
+    params: dict,
+    headers: dict,
+    version: str = DEFAULT_VERSION,
+):
+
+    return _document_pointer_api_request(
+        product="producer",
+        method="GET",
+        version=version,
+        params=params,
+        headers=headers,
+    )

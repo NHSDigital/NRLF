@@ -41,9 +41,7 @@ def assert_error_message(context, error_message: str):
 
 @given("a Document Pointer exists in the system with the below values")
 def given_document_pointer_exists(context):
-    document_pointer_repository = Repository(
-        DocumentPointer, client=context.dynamodb_client
-    )
+    document_pointer_repository = get_dynamo_db_repository(context, "Document Pointers")
     rendered_template = render_template_document(context)
     body = json.loads(rendered_template)
     core_model = create_document_pointer_from_fhir_json(body, api_version=1)
