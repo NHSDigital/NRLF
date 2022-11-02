@@ -26,8 +26,12 @@ def given_permissions_for_types(context, actor_type: str, actor_name: str, actio
     ]
 
 
-@given('Producer "{producer}" has permission to delete Document Pointers for')
-def given_producer_has_permission(context, producer: str):
+@given(
+    '"{actor_type}" "{actor_name}" has permission to "{action}" Document Pointers for'
+)
+def given_actor_name_has_permission(
+    context, actor_type: str, actor_name: str, action: str
+):
     context.producer_allowed_types += [
         f'https://snomed.info/ict|{row["snomed_code"]}' for row in context.table
     ]

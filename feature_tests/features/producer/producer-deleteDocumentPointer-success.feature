@@ -6,16 +6,18 @@ Feature: Success scenarios where producer is able to delete a Document Pointer
       """
       {
         "resourceType": "DocumentReference",
-        "masterIdentifier": {
-          "value": "$custodian|$identifier"
-        },
+        "id": "$custodian|$identifier",
         "custodian": {
-          "system": "https://fhir.nhs.uk/Id/accredited-system-id",
-          "id": "$custodian"
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "value": "$custodian"
+          }
         },
         "subject": {
-          "system": "https://fhir.nhs.uk/Id/nhs-number",
-          "id": "$subject"
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "$subject"
+          }
         },
         "type": {
           "coding": [
@@ -47,9 +49,9 @@ Feature: Success scenarios where producer is able to delete a Document Pointer
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And Producer "AARON COURT MENTAL NH" has permission to delete Document Pointers for:
+    And "Producer" "AARON COURT MENTAL NH" has permission to "delete" Document Pointers for:
       | snomed_code | description                 |
-      | "736253002" | "Mental health crisis plan" |
+      | 736253002 | "Mental health crisis plan" |
     When Producer "AARON COURT MENTAL NH" deletes an existing Document Reference "1234567890"
     Then the operation is successful
     And the response contains success message "Resource removed"

@@ -13,7 +13,7 @@ PydanticModel = TypeVar("PydanticModel", bound=BaseModel)
 
 MAX_TRANSACT_ITEMS = 100
 MAX_RESULTS = 100
-CAMEL_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
+KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
 ATTRIBUTE_EXISTS_ID = "attribute_exists(id)"
 ATTRIBUTE_NOT_EXISTS_ID = "attribute_not_exists(id)"
 CONDITION_CHECK_CODES = [
@@ -23,7 +23,7 @@ CONDITION_CHECK_CODES = [
 
 
 def to_kebab_case(name: str) -> str:
-    return CAMEL_CASE_RE.sub("-", name).lower()
+    return KEBAB_CASE_RE.sub("-", name).lower()
 
 
 def _validate_results_within_limits(results: dict):
@@ -132,9 +132,5 @@ class Repository:
         return self.dynamodb.transact_write_items(TransactItems=transact_items)
 
     @handle_dynamodb_errors(conditional_check_error_message="")
-    def hard_delete(self, id: dict) -> DynamoDbResponse:
-        return self.dynamodb.delete_item(
-            TableName=self.table_name,
-            Key={"id": id},
-            ConditionExpression=ATTRIBUTE_EXISTS_ID,
-        )
+    def hard_delete(self, **kwargs: dict[str, str]) -> DynamoDbResponse:
+        return self.dynamodb.delete_item(TableName=self.table_name, **kwargs)
