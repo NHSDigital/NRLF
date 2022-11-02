@@ -5,7 +5,7 @@ from behave import then, when
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
 
-from feature_tests.steps.aws.resources.api import document_pointer_api_request
+from feature_tests.steps.aws.resources.api import _document_pointer_api_request
 from feature_tests.steps.common.common_utils import render_template_document
 
 
@@ -78,6 +78,6 @@ def producer_search_document_pointers(context):
         context.response_status_code = response["statusCode"]
         context.response_message = response["body"]
     else:
-        response = document_pointer_api_request(method="POST", headers=headers)
+        response = _document_pointer_api_request(method="POST", headers=headers)
         context.response_status_code = response.status_code
         context.response_message = response.text
