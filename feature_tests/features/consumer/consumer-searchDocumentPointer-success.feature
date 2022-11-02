@@ -73,7 +73,7 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
     And "TEST CONSUMER" searches with the header values:
       | property      | value                           |
       | type          | 736253002                       |
-    Then the search is made
+    Then the consumer searches for document references
     And the operation is successful
     And 2 document references were returned
     And the response contains the DOCUMENT template with the below values

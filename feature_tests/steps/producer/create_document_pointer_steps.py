@@ -5,7 +5,8 @@ from behave import given, when
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
 
-from feature_tests.steps.aws.resources.api import create_document_pointer_api_request
+from feature_tests.steps.aws.resources.api import \
+    create_document_pointer_api_request
 from feature_tests.steps.common.common_utils import render_template_document
 
 
@@ -16,7 +17,7 @@ def given_producer_not_exist(context, producer: str):
 
 @given('Producer "{producer}" does not have permission to create Document Pointers for')
 def given_producer_no_permission(context, producer: str):
-    context.producer_allowed_types = []
+    context.allowed_types = []
 
 
 @when('Producer "{producer}" creates a Document Reference from DOCUMENT template')
@@ -26,7 +27,7 @@ def producer_create_document_pointer_from_template(context, producer: str):
         "NHSD-Client-RP-Details": json.dumps(
             {
                 "app.ASID": producer,
-                "nrl.pointer-types": context.producer_allowed_types,
+                "nrl.pointer-types": context.allowed_types,
             }
         )
     }

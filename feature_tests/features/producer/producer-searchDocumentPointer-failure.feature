@@ -57,7 +57,7 @@ Feature: Basic Failure Scenarios where producer is not able to search for Docume
       | property      | value                           |
       | type          | 736253002                       |
       | custodian     | AARON COURT MENTAL NH           |
-    Then the search is made
+    Then the provider searches for document references
     And the response is an empty bundle
 
   Scenario: Empty results when searching for a Document Pointer when subject has no documents with requesting producer
@@ -87,7 +87,7 @@ Feature: Basic Failure Scenarios where producer is not able to search for Docume
       | property         | value                                     |
       | type             | 736253002                                 |
       | custodian        | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL              |
-    Then the search is made
+    Then the provider searches for document references
     And the response is an empty bundle
 
   Scenario: Empty results when searching for a Document Pointer when provided document type does not exist
@@ -117,5 +117,5 @@ Feature: Basic Failure Scenarios where producer is not able to search for Docume
       | property         | value                                     |
       | type             | 555253002                                 |
       | custodian        | EMERGENCY AMBULANCE SERVICES              |
-    Then the search is made
+    Then the provider searches for document references
     And the response is an empty bundle
