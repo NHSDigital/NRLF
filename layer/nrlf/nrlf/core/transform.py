@@ -76,11 +76,12 @@ def validate_no_extra_fields(input_fhir_json, output_fhir_json):
 def create_document_pointer_from_fhir_json(
     fhir_json: dict, api_version: int, source: Source = Source.NRLF, **kwargs
 ) -> DocumentPointer:
-    fhir_model = DocumentReference(**fhir_json)
-    validate_no_extra_fields(
-        input_fhir_json=fhir_json, output_fhir_json=fhir_model.dict(exclude_none=True)
-    )
+    _fhir_model = DocumentReference(**fhir_json)
     fhir_strict_model = StrictDocumentReference(**fhir_json)
+    validate_no_extra_fields(
+        input_fhir_json=fhir_json,
+        output_fhir_json=fhir_strict_model.dict(exclude_none=True),
+    )
     core_model = DocumentPointer(
         id=fhir_strict_model.id,
         nhs_number=fhir_strict_model.subject.identifier.value,

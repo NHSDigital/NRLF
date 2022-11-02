@@ -34,21 +34,20 @@ def parse_request_body(
     return PipelineData(**data, core_model=core_model)
 
 
-def _is_valid_producer(
+def _invalid_producer(
     client_rp_headers: ClientRpDetailsHeader, core_model: DocumentPointer
 ):
     if not client_rp_headers.custodian == core_model.producer_id.__root__:
-        return False
+        return True
 
     if core_model.type.__root__ not in client_rp_headers.pointer_types:
-        return False
+        return True
 
-    return True
+    return False
 
 
-def _producer_exists():
-    # TODO: mocked out due to not knowing authentication method
-    return True
+def _producer_not_exists(client_rp_headers: ClientRpDetailsHeader):
+    return not client_rp_headers.custodian
 
 
 def validate_producer_permissions(
@@ -59,10 +58,10 @@ def validate_producer_permissions(
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
     client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
-    if not _producer_exists():
+    if _producer_not_exists(client_rp_details):
         raise AuthenticationError("Custodian does not exist in the system")
 
-    if not _is_valid_producer(client_rp_details, core_model):
+    if _invalid_producer(client_rp_details, core_model):
         raise AuthenticationError(
             "Required permission to create a document pointer are missing"
         )

@@ -25,7 +25,7 @@ def producer_create_document_pointer_from_template(context, producer: str):
     headers = {
         "NHSD-Client-RP-Details": json.dumps(
             {
-                "app.ASID": producer,
+                "app.ASID": producer if context.producer_exists else "",
                 "nrl.pointer-types": context.producer_allowed_types,
             }
         )
@@ -36,14 +36,9 @@ def producer_create_document_pointer_from_template(context, producer: str):
 
         event = make_aws_event(body=body, headers=headers)
         lambda_context = LambdaContext()
-
-        with mock.patch(
-            "api.producer.createDocumentReference.src.v1.handler._producer_exists",
-            return_value=context.producer_exists,
-        ):
-            response = handler(event, lambda_context)
-            context.response_status_code = response["statusCode"]
-            context.response_message = response["body"]
+        response = handler(event, lambda_context)
+        context.response_status_code = response["statusCode"]
+        context.response_message = response["body"]
     else:
         response = create_document_pointer_api_request(body, headers)
         context.response_status_code = response.status_code

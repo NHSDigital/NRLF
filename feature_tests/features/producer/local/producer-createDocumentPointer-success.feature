@@ -1,4 +1,3 @@
-@local
 Feature: Basic Success Scenarios where producer is able to create a Document Pointer
 
     Background:
