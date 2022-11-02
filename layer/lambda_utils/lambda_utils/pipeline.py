@@ -11,7 +11,12 @@ from lambda_utils.versioning import (
     get_version_from_header,
     get_versioned_steps,
 )
-from nrlf.core.errors import AuthenticationError, DynamoDbError, ItemNotFound
+from nrlf.core.errors import (
+    AuthenticationError,
+    DynamoDbError,
+    FhirValidationError,
+    ItemNotFound,
+)
 from pydantic import ValidationError
 
 
@@ -45,7 +50,13 @@ def execute_steps(
         return 200, pipeline(data=PipelineData()).to_dict()
     except ValidationError as e:
         return bad_request(get_error_msg(e))
-    except (ItemNotFound, AuthenticationError, DynamoDbError, RequestParsingError) as e:
+    except (
+        ItemNotFound,
+        AuthenticationError,
+        DynamoDbError,
+        RequestParsingError,
+        FhirValidationError,
+    ) as e:
         return bad_request(str(e))
     except Exception as e:
         return 500, {"message": str(e)}

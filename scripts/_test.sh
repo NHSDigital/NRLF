@@ -36,8 +36,8 @@ function _test_feature() {
   local command=$1
 
   case $command in
-  "local") python -m behave feature_tests --tags=local ;;
-  "integration") python -m behave feature_tests --tags=-local ;;
+  "local") python -m behave feature_tests  ;;
+  "integration") python -m behave --define="integration_test=true" feature_tests ;;
   *) _test_help ;;
   esac
 }

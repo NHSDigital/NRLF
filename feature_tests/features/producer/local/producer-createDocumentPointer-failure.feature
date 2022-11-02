@@ -1,4 +1,3 @@
-@local
 Feature: Failure Scenarios where producer unable to create a Document Pointer
 
     Background:
@@ -91,7 +90,7 @@ Feature: Failure Scenarios where producer unable to create a Document Pointer
             | 1234567890 | 736253002 | 45646             | https://example.org/my-doc.pdf | DocumentReference validation failure - Invalid nhs_number - Not a valid NHS Number: 45646             |
             | 1234567890 | 736253002 |                   | https://example.org/my-doc.pdf | DocumentReference validation failure - Invalid subject                                                |
             | 1234567890 | 736253002 | Device/9278693472 | https://example.org/my-doc.pdf | DocumentReference validation failure - Invalid nhs_number - Not a valid NHS Number: Device/9278693472 |
-    #            | 1234567890   | 736253002   | 9278693472          | https://example.org               | Resource is invalid : url                                         |
+#            | 1234567890 | 736253002 | 9278693472        |                                | DocumentReference validation failure - Blank value for key url                                                    |
     #            | 1234567890   | 67          | 9278693472  | https://example.org/my-doc.pdf    | Code '67' from system 'http://snomed.info/sct' does not exist     |
 
 
