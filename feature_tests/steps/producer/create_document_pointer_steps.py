@@ -5,8 +5,7 @@ from behave import given, when
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
 
-from feature_tests.steps.aws.resources.api import \
-    create_document_pointer_api_request
+from feature_tests.steps.aws.resources.api import create_document_pointer_api_request
 from feature_tests.steps.common.common_utils import render_template_document
 
 

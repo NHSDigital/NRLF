@@ -34,6 +34,6 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
         "repository": Repository(
             item_type=DocumentPointer,
             client=boto3.client("dynamodb"),
-            environment_prefix=config.PREFIX
+            environment_prefix=config.PREFIX,
         )
     }
