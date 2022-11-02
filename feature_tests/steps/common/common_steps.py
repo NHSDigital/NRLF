@@ -14,9 +14,9 @@ def set_template_document(context):
     context.template_document = context.text
 
 
-@given('Producer "{producer}" has permission to create Document Pointers for')
-def given_producer_has_permission(context, producer: str):
-    context.producer_allowed_types += [
+@given('{actor_type} "{actor_name}" has permission to {action} Document Pointers for')
+def given_permissions_for_types(context, actor_type: str, actor_name: str, action: str):
+    context.allowed_types += [
         f'https://snomed.info/ict|{row["snomed_code"]}' for row in context.table
     ]
 

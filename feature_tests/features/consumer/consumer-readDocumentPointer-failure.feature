@@ -1,4 +1,4 @@
-Feature: Success scenarios where producer is able to read a Document Pointer
+Feature: Failure scenarios where consumer is unable to read a Document Pointer
 
   Background:
     Given template DOCUMENT
@@ -38,7 +38,7 @@ Feature: Success scenarios where producer is able to read a Document Pointer
       }
       """
 
-  Scenario: Read an existing current Document Pointer
+  Scenario: Consumer permissions do not match the Document Pointer type
     Given a Document Pointer exists in the system with the below values
       | property    | value                          |
       | identifier  | 1234567890                     |
@@ -47,16 +47,17 @@ Feature: Success scenarios where producer is able to read a Document Pointer
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And Producer "AARON COURT MENTAL NH" has permission to create Document Pointers for
+    And Consumer "WEST YORKSHIRE AMBULANCE SERVICE" has permission to read Document Pointers for
+      | snomed_code | description |
+      | 734163000   | Care plan   |
+    When Consumer "WEST YORKSHIRE AMBULANCE SERVICE" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890"
+    Then the operation is unsuccessful
+    And the response contains error message "Item could not be found"
+
+  Scenario: The Document Pointer does not exist
+    Given Consumer "WEST YORKSHIRE AMBULANCE SERVICE" has permission to read Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When Producer "AARON COURT MENTAL NH" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890"
-    Then the operation is successful
-    And the response is the DOCUMENT template with the below values
-      | property    | value                          |
-      | identifier  | 1234567890                     |
-      | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+    When Consumer "WEST YORKSHIRE AMBULANCE SERVICE" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890"
+    Then the operation is unsuccessful
+    And the response contains error message "Item could not be found"
