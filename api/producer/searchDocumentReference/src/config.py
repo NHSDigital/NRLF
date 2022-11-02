@@ -1,3 +1,6 @@
+import boto3
+from nrlf.core.model import DocumentPointer
+from nrlf.core.repository import Repository
 from pydantic import BaseModel
 
 
@@ -14,6 +17,7 @@ class Config(BaseModel):
     """
 
     AWS_REGION: str
+    PREFIX: str
 
 
 def build_persistent_dependencies(config: Config) -> dict[str, any]:
@@ -26,4 +30,10 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
     may not be each execution, depending on how busy the API is.
     These dependencies will be passed through to your `handle` function below.
     """
-    return {}
+    return {
+        "repository": Repository(
+            item_type=DocumentPointer,
+            client=boto3.client("dynamodb"),
+            environment_prefix=config.PREFIX,
+        )
+    }

@@ -27,6 +27,10 @@ def before_all(context):
 
 def before_scenario(context, scenario):
     context.template_document = None
+    context.documents = {}
+    context.query_parameters = {}
+    context.headers = {}
+    context.valid_producer = True
     context.response_status_code = None
     context.response_message = None
     context.producer_exists = True

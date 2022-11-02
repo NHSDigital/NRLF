@@ -7,7 +7,7 @@ from nrlf.core.errors import FhirValidationError
 from nrlf.core.model import DocumentPointer
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
 from nrlf.legacy.model import LegacyDocumentPointer
-from nrlf.producer.fhir.r4.model import DocumentReference
+from nrlf.producer.fhir.r4.model import Bundle, BundleEntry, DocumentReference
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
@@ -110,3 +110,37 @@ def create_document_pointer_from_legacy_json(
         updated_on=legacy_model.lastModified.isoformat(),
     )
     return core_model
+
+
+def create_document_references_from_document_pointers(
+    document_pointers: list[DocumentPointer],
+) -> list[DocumentReference]:
+    document_pointer_jsons = map(
+        lambda document_pointer: json.loads(document_pointer.document.__root__),
+        document_pointers,
+    )
+    document_references = map(
+        lambda document_json: DocumentReference(**document_json), document_pointer_jsons
+    )
+
+    return list(document_references)
+
+
+def create_bundle_from_document_pointers(
+    document_pointers: list[DocumentPointer],
+) -> Bundle:
+
+    document_references = create_document_references_from_document_pointers(
+        document_pointers
+    )
+
+    bundleEntryList = [
+        BundleEntry(resource=reference) for reference in document_references
+    ]
+
+    return Bundle(
+        resourceType="Bundle",
+        type="searchset",
+        total=len(document_pointers),
+        entry=bundleEntryList,
+    ).dict(exclude_none=True, exclude_defaults=True)
