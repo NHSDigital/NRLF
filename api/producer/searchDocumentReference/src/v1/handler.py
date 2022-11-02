@@ -5,11 +5,10 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from nrlf.core.errors import AuthenticationError
-from nrlf.core.model import BundleEntry, DocumentPointer
-from nrlf.core.query import create_read_and_filter_query
+from nrlf.core.model import DocumentPointer
+from nrlf.core.query import create_search_and_filter_query
 from nrlf.core.repository import Repository
 from nrlf.core.transform import create_bundle_from_document_pointers
-from nrlf.producer.fhir.r4.model import Bundle, DocumentReference
 
 from api.producer.searchDocumentReference.src.constants import PersistentDependencies
 
@@ -63,7 +62,7 @@ def search_document_references(
 
     repository: Repository = dependencies["repository"]
 
-    search_and_filter_query = create_read_and_filter_query(
+    search_and_filter_query = create_search_and_filter_query(
         nhs_number=event.queryStringParameters["subject"],
         producer_id=data["producer_id"],
         type=data["pointer_types"],

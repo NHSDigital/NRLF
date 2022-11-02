@@ -26,7 +26,9 @@ def the_response_is_the_list_of_template_documents(context, number_of_documents:
 
 @when('"{producer}" searches with query parameters')
 def producer_search_document_pointers(context, producer: str):
-    query_parameters = {row["property"]: row["value"] for row in context.table}
+    query_parameters = {
+        row["property"]: row["value"] for row in context.table if row["value"] != "null"
+    }
 
     context.query_parameters = query_parameters
 
@@ -36,6 +38,20 @@ def producer_search_document_pointers(context, producer: str):
     headers = {row["property"]: row["value"] for row in context.table}
 
     context.headers = headers
+
+
+@then("the response is an empty bundle")
+def producer_search_document_pointers(context):
+    response = context.response_message
+
+    empty_bundle = {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "total": 0,
+        "entry": [],
+    }
+
+    assert json.loads(response) == empty_bundle
 
 
 @then("the search is made")

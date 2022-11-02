@@ -134,17 +134,25 @@ def test_create_bundle_from_muliple_document_pointers():
             {
                 "resource": {
                     "resourceType": "DocumentReference",
-                    "masterIdentifier": {
-                        "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"
-                    },
+                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890",
                     "status": "current",
                     "type": {
                         "coding": [
                             {"system": "https://snomed.info/ict", "code": "736253002"}
                         ]
                     },
-                    "subject": {"id": "9278693472"},
-                    "custodian": {"id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+                    "subject": {
+                        "identifier": {
+                            "system": "https://fhir.nhs.uk/Id/nhs-number",
+                            "value": "9278693472",
+                        }
+                    },
+                    "custodian": {
+                        "identifier": {
+                            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+                            "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL",
+                        }
+                    },
                     "content": [
                         {
                             "attachment": {
@@ -158,17 +166,25 @@ def test_create_bundle_from_muliple_document_pointers():
             {
                 "resource": {
                     "resourceType": "DocumentReference",
-                    "masterIdentifier": {
-                        "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"
-                    },
+                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890",
                     "status": "current",
                     "type": {
                         "coding": [
                             {"system": "https://snomed.info/ict", "code": "736253002"}
                         ]
                     },
-                    "subject": {"id": "9278693472"},
-                    "custodian": {"id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+                    "subject": {
+                        "identifier": {
+                            "system": "https://fhir.nhs.uk/Id/nhs-number",
+                            "value": "9278693472",
+                        }
+                    },
+                    "custodian": {
+                        "identifier": {
+                            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+                            "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL",
+                        }
+                    },
                     "content": [
                         {
                             "attachment": {
@@ -202,17 +218,25 @@ def test_create_bundle_from_document_pointer():
             {
                 "resource": {
                     "resourceType": "DocumentReference",
-                    "masterIdentifier": {
-                        "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"
-                    },
+                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890",
                     "status": "current",
                     "type": {
                         "coding": [
                             {"system": "https://snomed.info/ict", "code": "736253002"}
                         ]
                     },
-                    "subject": {"id": "9278693472"},
-                    "custodian": {"id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+                    "subject": {
+                        "identifier": {
+                            "system": "https://fhir.nhs.uk/Id/nhs-number",
+                            "value": "9278693472",
+                        }
+                    },
+                    "custodian": {
+                        "identifier": {
+                            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+                            "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL",
+                        }
+                    },
                     "content": [
                         {
                             "attachment": {
@@ -224,6 +248,20 @@ def test_create_bundle_from_document_pointer():
                 }
             }
         ],
+    }
+
+    assert expected_result == result
+
+
+def test_create_bundle_from_document_pointer():
+
+    result = create_bundle_from_document_pointers([])
+
+    expected_result = {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "total": 0,
+        "entry": [],
     }
 
     assert expected_result == result

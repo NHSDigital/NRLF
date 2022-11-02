@@ -50,7 +50,7 @@ def create_read_and_filter_query(id, **filters):
     return read_and_filter_query
 
 
-def create_read_and_filter_query(nhs_number, **filters):
+def create_search_and_filter_query(nhs_number, **filters):
     read_and_filter_query = create_filter_query(**filters)
     read_and_filter_query["ExpressionAttributeValues"][
         ":nhs_number"
