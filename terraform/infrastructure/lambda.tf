@@ -9,7 +9,7 @@ module "consumer__readDocumentReference" {
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = local.prefix
+    PREFIX                      = "${local.prefix}--"
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -29,7 +29,7 @@ module "consumer__searchDocumentReference" {
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = local.prefix
+    PREFIX                      = "${local.prefix}--"
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -49,7 +49,7 @@ module "consumer__searchViaPostDocumentReference" {
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = local.prefix
+    PREFIX                      = "${local.prefix}--"
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -89,7 +89,7 @@ module "producer__deleteDocumentReference" {
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = local.prefix
+    PREFIX                      = "${local.prefix}--"
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-write.arn,
@@ -109,7 +109,7 @@ module "producer__readDocumentReference" {
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = local.prefix
+    PREFIX                      = "${local.prefix}--"
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -130,7 +130,7 @@ module "producer__searchDocumentReference" {
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = local.prefix
+    PREFIX                      = "${local.prefix}--"
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -150,7 +150,7 @@ module "producer__updateDocumentReference" {
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = local.prefix
+    PREFIX                      = "${local.prefix}--"
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-write.arn,

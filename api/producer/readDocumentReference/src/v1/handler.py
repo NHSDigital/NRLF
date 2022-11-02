@@ -1,4 +1,5 @@
 import json
+import urllib.parse
 from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
@@ -30,8 +31,9 @@ def read_document_reference(
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
     client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
+    decoded_id = urllib.parse.unquote(event.pathParameters["id"])
     read_and_filter_query = create_read_and_filter_query(
-        id=event.pathParameters["id"],
+        id=decoded_id,
         producer_id=client_rp_details.custodian,
         type=client_rp_details.pointer_types,
     )

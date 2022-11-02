@@ -1,11 +1,10 @@
 import json
-from unittest import mock
 
 from behave import given, when
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
 
-from feature_tests.steps.aws.resources.api import create_document_pointer_api_request
+from feature_tests.steps.aws.resources.api import document_pointer_api_request
 from feature_tests.steps.common.common_utils import render_template_document
 
 
@@ -40,6 +39,8 @@ def producer_create_document_pointer_from_template(context, producer: str):
         context.response_status_code = response["statusCode"]
         context.response_message = response["body"]
     else:
-        response = create_document_pointer_api_request(body, headers)
+        response = document_pointer_api_request(
+            method="POST", data=body, headers=headers
+        )
         context.response_status_code = response.status_code
         context.response_message = response.text

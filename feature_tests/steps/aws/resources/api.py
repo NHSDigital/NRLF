@@ -1,10 +1,24 @@
+import urllib.parse
+
 import requests
 
 from feature_tests.steps.aws.resources.common import get_terraform_json
 
+DEFAULT_VERSION = "1.0"
 
-def create_document_pointer_api_request(body: str, headers: dict, version: str = "1.0"):
+
+def document_pointer_api_request(
+    method: str,
+    version: str = DEFAULT_VERSION,
+    path_params: list = [],
+    **request_kwargs,
+):
     url = f'{get_terraform_json()["api_base_urls"]["value"]["producer"]}/DocumentReference'
-    return requests.post(
-        url=url, headers={**headers, "Accept": f"version={version}"}, data=body
-    )
+    for value in path_params:
+        url += f"/{urllib.parse.quote(value)}"
+
+    request_kwargs["headers"] = {
+        **request_kwargs.get("headers", {}),
+        "Accept": f"version={version}",
+    }
+    return requests.request(method=method, url=url, **request_kwargs)
