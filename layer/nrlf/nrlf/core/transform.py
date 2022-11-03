@@ -143,6 +143,6 @@ def create_bundle_from_document_pointers(
     return Bundle(
         resourceType="Bundle",
         type="searchset",
-        total=len(document_pointers),
+        total=len(bundleEntryList),
         entry=bundleEntryList,
     ).dict(exclude_none=True, exclude_defaults=True)

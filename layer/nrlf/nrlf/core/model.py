@@ -1,4 +1,3 @@
-import json
 from typing import Optional
 
 from nrlf.core.dynamodb_types import (
