@@ -6,9 +6,10 @@ import boto3
 import moto
 import pytest
 from botocore.exceptions import ClientError
-from nrlf.core.errors import DynamoDbError, ItemNotFound
+from nrlf.core.errors import DynamoDbError, ItemNotFound, TooManyItemsError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import (
+    MAX_TRANSACT_ITEMS,
     Repository,
     _validate_results_within_limits,
     handle_dynamodb_errors,
@@ -172,7 +173,7 @@ def test_supersede_creates_new_item_and_deletes_existing():
         repository.create(item=core_model_for_delete)
         repository.supersede(
             create_item=core_model_for_create,
-            delete_item_id=core_model_for_delete.id.dict(),
+            delete_item_ids=[core_model_for_delete.id.__root__],
         )
 
         response_for_created_item = repository.read(
@@ -220,6 +221,27 @@ def test_hard_delete():
         repository.hard_delete(core_model.id.dict())
         response = client.scan(TableName=TABLE_NAME)
     assert len(response["Items"]) == 0
+
+
+@pytest.mark.parametrize(
+    "max_transact_items",
+    [MAX_TRANSACT_ITEMS, MAX_TRANSACT_ITEMS + 1, MAX_TRANSACT_ITEMS * 10],
+)
+def test_supersede_too_many_items(max_transact_items):
+
+    fhir_json = read_test_data("nrlf")
+    core_model_for_create = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
+    core_model_for_create.id.__root__ = (
+        "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
+    )
+    core_model_for_delete = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
+
+    with pytest.raises(TooManyItemsError), mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        repository.supersede(
+            create_item=core_model_for_create,
+            delete_item_ids=[core_model_for_delete.id.__root__] * max_transact_items,
+        )
 
 
 def test_wont_hard_delete_if_item_doesnt_exist():

@@ -74,18 +74,16 @@ def validate_no_extra_fields(input_fhir_json, output_fhir_json):
 
 
 def create_document_pointer_from_fhir_json(
-    fhir_json: dict, api_version: int, source: Source = Source.NRLF, **kwargs
+    fhir_json: dict,
+    api_version: int,
+    source: Source = Source.NRLF,
+    **kwargs,
 ) -> DocumentPointer:
-    _fhir_model = DocumentReference(**fhir_json)
-    fhir_strict_model = StrictDocumentReference(**fhir_json)
-    validate_no_extra_fields(
-        input_fhir_json=fhir_json,
-        output_fhir_json=fhir_strict_model.dict(exclude_none=True),
-    )
+    fhir_model = create_fhir_model_from_fhir_json(fhir_json=fhir_json)
     core_model = DocumentPointer(
-        id=fhir_strict_model.id,
-        nhs_number=fhir_strict_model.subject.identifier.value,
-        type=fhir_strict_model.type,
+        id=fhir_model.id,
+        nhs_number=fhir_model.subject.identifier.value,
+        type=fhir_model.type,
         version=api_version,
         document=json.dumps(fhir_json),
         source=source.value,
@@ -93,6 +91,16 @@ def create_document_pointer_from_fhir_json(
         **kwargs,
     )
     return core_model
+
+
+def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference:
+    DocumentReference(**fhir_json)
+    fhir_strict_model = StrictDocumentReference(**fhir_json)
+    validate_no_extra_fields(
+        input_fhir_json=fhir_json,
+        output_fhir_json=fhir_strict_model.dict(exclude_none=True),
+    )
+    return fhir_strict_model
 
 
 def create_document_pointer_from_legacy_json(

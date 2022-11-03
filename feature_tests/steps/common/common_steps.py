@@ -1,14 +1,17 @@
 import json
 
+import pytest
 from behave import given, then
 from nrlf.core.dynamodb_types import convert_dynamo_value_to_raw_value
-from nrlf.core.model import DocumentPointer
-from nrlf.core.repository import Repository
+from nrlf.core.errors import ItemNotFound
 from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.core.validators import validate_timestamp
 
 from feature_tests.steps.aws.resources.dynamodb import get_dynamo_db_repository
-from feature_tests.steps.common.common_utils import render_template_document
+from feature_tests.steps.common.common_utils import (
+    render_template_document,
+    update_supersede_targets_in_fhir_json,
+)
 
 
 @given("template DOCUMENT")
@@ -44,6 +47,7 @@ def given_document_pointer_exists(context):
     document_pointer_repository = get_dynamo_db_repository(context, "Document Pointers")
     rendered_template = render_template_document(context)
     body = json.loads(rendered_template)
+    update_supersede_targets_in_fhir_json(context=context, fhir_json=body)
     core_model = create_document_pointer_from_fhir_json(body, api_version=1)
     document_pointer_repository.create(core_model)
 
@@ -78,3 +82,13 @@ def assert_document_pointer_exists(context, document_id: str):
             assert dynamo_value == property_type(
                 row["value"]
             ), f'expected {row["value"]} got {dynamo_value}'
+
+
+@then('Document Pointer "{document_id}" does not exist')
+def assert_document_pointer_exists(context, document_id: str):
+    document_pointer_client = get_dynamo_db_repository(context, "Document Pointers")
+    with pytest.raises(ItemNotFound):
+        document_pointer_client.read(
+            KeyConditionExpression="id = :id",
+            ExpressionAttributeValues={":id": {"S": document_id}},
+        )

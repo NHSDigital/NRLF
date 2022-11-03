@@ -12,3 +12,7 @@ class AuthenticationError(Exception):
 
 class FhirValidationError(Exception):
     pass
+
+
+class TooManyItemsError(Exception):
+    pass

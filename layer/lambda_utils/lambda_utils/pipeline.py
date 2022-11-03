@@ -16,6 +16,7 @@ from nrlf.core.errors import (
     DynamoDbError,
     FhirValidationError,
     ItemNotFound,
+    TooManyItemsError,
 )
 from pydantic import ValidationError
 
@@ -56,6 +57,7 @@ def execute_steps(
         DynamoDbError,
         RequestParsingError,
         FhirValidationError,
+        TooManyItemsError,
     ) as e:
         return bad_request(str(e))
     except Exception as e:
