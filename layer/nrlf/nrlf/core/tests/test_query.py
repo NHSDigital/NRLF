@@ -4,6 +4,7 @@ from nrlf.core.model import DocumentPointer
 from nrlf.core.query import (
     create_filter_query,
     create_read_and_filter_query,
+    create_search_and_filter_query,
     to_dynamodb_dict,
 )
 from nrlf.core.repository import Repository
@@ -81,13 +82,54 @@ def test_filter_query_in_db_not_found():
         repository.read(KeyConditionExpression="id = :id", **query)
 
 
+def test_create_search_and_filter_query_in_db():
+    nhs_number_index = "idx_nhs_number_by_id"
+    fhir_json = read_test_data("nrlf")
+    core_model = create_document_pointer_from_fhir_json(
+        fhir_json=fhir_json, api_version=1
+    )
+    query = create_search_and_filter_query(
+        nhs_number=core_model.nhs_number.__root__,
+        id=core_model.id.__root__,
+        type="https://snomed.info/ict|736253002",
+    )
+
+    with mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        repository.create(item=core_model)
+        item = repository.search(nhs_number_index, **query)
+        assert item == [core_model]
+
+
+def test_create_search_and_filter_query_in_db_returns_empty_bundle():
+    nhs_number_index = "idx_nhs_number_by_id"
+    fhir_json = read_test_data("nrlf")
+    core_model = create_document_pointer_from_fhir_json(
+        fhir_json=fhir_json, api_version=1
+    )
+    query = create_search_and_filter_query(
+        nhs_number=core_model.nhs_number.__root__,
+        id=core_model.id.__root__,
+        type="https://snomed.info/ict|736253002",
+    )
+
+    empty_item = []
+
+    with mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        item = repository.search(nhs_number_index, **query)
+        assert item == empty_item
+
+
 def test_create_read_and_filter_query_in_db():
     fhir_json = read_test_data("nrlf")
     core_model = create_document_pointer_from_fhir_json(
         fhir_json=fhir_json, api_version=1
     )
     query = create_read_and_filter_query(
-        id=core_model.id.__root__, type="https://snomed.info/ict|736253002"
+        id=core_model.id.__root__,
+        producer_id=core_model.producer_id.__root__,
+        type="https://snomed.info/ict|736253002",
     )
 
     with mock_dynamodb() as client:

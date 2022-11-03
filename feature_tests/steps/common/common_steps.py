@@ -2,6 +2,8 @@ import json
 
 from behave import given, then
 from nrlf.core.dynamodb_types import convert_dynamo_value_to_raw_value
+from nrlf.core.model import DocumentPointer
+from nrlf.core.repository import Repository
 from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.core.validators import validate_timestamp
 
@@ -40,9 +42,12 @@ def assert_error_message(context, error_message: str):
 @given("a Document Pointer exists in the system with the below values")
 def given_document_pointer_exists(context):
     document_pointer_repository = get_dynamo_db_repository(context, "Document Pointers")
-    body = json.loads(render_template_document(context))
-    core_model = create_document_pointer_from_fhir_json(body, 1)
+    rendered_template = render_template_document(context)
+    body = json.loads(rendered_template)
+    core_model = create_document_pointer_from_fhir_json(body, api_version=1)
     document_pointer_repository.create(core_model)
+
+    context.documents[body["id"]] = rendered_template
 
 
 @then("the operation is successful")

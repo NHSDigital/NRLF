@@ -48,3 +48,12 @@ def create_read_and_filter_query(id, **filters):
     read_and_filter_query["ExpressionAttributeValues"][":id"] = to_dynamodb_dict(id)
     read_and_filter_query["KeyConditionExpression"] = "id = :id"
     return read_and_filter_query
+
+
+def create_search_and_filter_query(nhs_number, **filters):
+    read_and_filter_query = create_filter_query(**filters)
+    read_and_filter_query["ExpressionAttributeValues"][
+        ":nhs_number"
+    ] = to_dynamodb_dict(nhs_number)
+    read_and_filter_query["KeyConditionExpression"] = "nhs_number = :nhs_number"
+    return read_and_filter_query

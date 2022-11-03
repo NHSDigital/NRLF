@@ -87,7 +87,7 @@ def make_aws_event(**kwargs):
             "X-Forwarded-Port": ["443"],
             "X-Forwarded-Proto": ["https"],
         },
-        "queryStringParameters": None,
+        "queryStringParameters": kwargs.get("queryStringParameters"),
         "multiValueQueryStringParameters": None,
         "pathParameters": {
             k: urllib.parse.quote(v)
