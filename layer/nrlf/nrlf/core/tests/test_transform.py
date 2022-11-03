@@ -2,11 +2,11 @@ import pytest
 from nrlf.core.errors import FhirValidationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import (
+    create_bundle_entries_from_document_pointers,
     create_document_pointer_from_fhir_json,
-    create_document_references_from_document_pointers,
     validate_no_extra_fields,
 )
-from nrlf.producer.fhir.r4.model import DocumentReference
+from nrlf.producer.fhir.r4.model import BundleEntry, DocumentReference
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 from pydantic import BaseModel
 
@@ -38,7 +38,30 @@ def test_create_document_references_from_document_pointers():
     core_model = create_document_pointer_from_fhir_json(
         fhir_json=fhir_json, api_version=1
     )
-    expected_reference = [DocumentReference(**fhir_json)]
-    result = create_document_references_from_document_pointers([core_model])
+
+    document_reference = DocumentReference(**fhir_json)
+    expected_reference = [BundleEntry(resource=document_reference)]
+
+    result = create_bundle_entries_from_document_pointers([core_model])
+
+    assert result == expected_reference
+
+
+def test_create_document_references_from_document_pointers_multiple():
+    fhir_json = read_test_data("nrlf")
+    core_model = create_document_pointer_from_fhir_json(
+        fhir_json=fhir_json, api_version=1
+    )
+    core_model_2 = create_document_pointer_from_fhir_json(
+        fhir_json=fhir_json, api_version=1
+    )
+
+    document_reference = DocumentReference(**fhir_json)
+    expected_reference = [
+        BundleEntry(resource=document_reference),
+        BundleEntry(resource=document_reference),
+    ]
+
+    result = create_bundle_entries_from_document_pointers([core_model, core_model_2])
 
     assert result == expected_reference

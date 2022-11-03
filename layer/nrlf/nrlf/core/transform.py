@@ -112,9 +112,9 @@ def create_document_pointer_from_legacy_json(
     return core_model
 
 
-def create_document_references_from_document_pointers(
+def create_bundle_entries_from_document_pointers(
     document_pointers: list[DocumentPointer],
-) -> list[DocumentReference]:
+) -> list[BundleEntry]:
     document_pointer_jsons = map(
         lambda document_pointer: json.loads(document_pointer.document.__root__),
         document_pointers,
@@ -123,20 +123,14 @@ def create_document_references_from_document_pointers(
         lambda document_json: DocumentReference(**document_json), document_pointer_jsons
     )
 
-    return list(document_references)
+    return [BundleEntry(resource=reference) for reference in document_references]
 
 
 def create_bundle_from_document_pointers(
     document_pointers: list[DocumentPointer],
 ) -> Bundle:
 
-    document_references = create_document_references_from_document_pointers(
-        document_pointers
-    )
-
-    bundleEntryList = [
-        BundleEntry(resource=reference) for reference in document_references
-    ]
+    bundleEntryList = create_bundle_entries_from_document_pointers(document_pointers)
 
     return Bundle(
         resourceType="Bundle",

@@ -45,5 +45,4 @@ def before_scenario(context, scenario):
         session = new_aws_session()
 
         context.dynamodb_client = session.client("dynamodb")
-        print(context.dynamodb_client.list_tables())
         _empty_dynamo_db_table(context, "Document Pointers")
