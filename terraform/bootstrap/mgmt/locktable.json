@@ -1,5 +1,5 @@
 {
-  "TableName": "nhsd-nrlf-terraform-state-lock",
+  "TableName": "nhsd-nrlf--terraform-state-lock",
   "KeySchema": [
     {
       "AttributeName": "LockID",

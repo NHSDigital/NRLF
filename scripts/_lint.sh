@@ -24,10 +24,26 @@ function _check_lint() {
   python -m black . --check
   cd $root/terraform/infrastructure
   terraform fmt -check -recursive
+  cd $root/terraform/account-wide-infrastructure/dev
+  terraform fmt -check -recursive
+  cd $root/terraform/account-wide-infrastructure/mgmt
+  terraform fmt -check -recursive
+  cd $root/terraform/account-wide-infrastructure/test
+  terraform fmt -check -recursive
+  cd $root/terraform/account-wide-infrastructure/prod
+  terraform fmt -check -recursive
 }
 
 function _fix_lint() {
   python -m black .
   cd $root/terraform/infrastructure
+  terraform fmt -recursive
+  cd $root/terraform/account-wide-infrastructure/dev
+  terraform fmt -recursive
+  cd $root/terraform/account-wide-infrastructure/mgmt
+  terraform fmt -recursive
+  cd $root/terraform/account-wide-infrastructure/test
+  terraform fmt -recursive
+  cd $root/terraform/account-wide-infrastructure/prod
   terraform fmt -recursive
 }

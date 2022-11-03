@@ -1,5 +1,5 @@
 variable "assume_account" {
-  default = "terraform"
+  sensitive = true
 }
 
 variable "assume_role" {}

@@ -1,5 +1,5 @@
 resource "aws_iam_role" "api_gateway_to_cloudwatch" {
-  name = "api-gateway-cloudwatch-logs"
+  name = "${local.prefix}--api-gateway-cloudwatch-logs"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
