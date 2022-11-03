@@ -1,16 +1,25 @@
 import re
 from functools import wraps
+from typing import TypeVar
 
 from botocore.exceptions import ClientError
-from nrlf.core.errors import DynamoDbError, ItemNotFound
+from nrlf.core.dynamodb_types import to_dynamodb_dict
+from nrlf.core.errors import DynamoDbError, ItemNotFound, TooManyItemsError
 from nrlf.core.model import assert_model_has_only_dynamodb_types
 from nrlf.core.types import DynamoDbClient, DynamoDbResponse
 from pydantic import BaseModel
 
+PydanticModel = TypeVar("PydanticModel", bound=BaseModel)
+
+MAX_TRANSACT_ITEMS = 100
 MAX_RESULTS = 100
 CAMEL_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
 ATTRIBUTE_EXISTS_ID = "attribute_exists(id)"
 ATTRIBUTE_NOT_EXISTS_ID = "attribute_not_exists(id)"
+CONDITION_CHECK_CODES = [
+    "ConditionalCheckFailedException",
+    "TransactionCanceledException",
+]
 
 
 def to_kebab_case(name: str) -> str:
@@ -31,7 +40,7 @@ def _handle_dynamodb_errors(function, conditional_check_error_message: str = "")
         try:
             return function(*args, **kwargs)
         except ClientError as error:
-            if error.response["Error"]["Code"] == "ConditionalCheckFailedException":
+            if error.response["Error"]["Code"] in CONDITION_CHECK_CODES:
                 raise DynamoDbError(
                     f"Condition check failed - {conditional_check_error_message}"
                 )
@@ -49,7 +58,7 @@ def handle_dynamodb_errors(conditional_check_error_message: str = ""):
 class Repository:
     def __init__(
         self,
-        item_type: type[BaseModel],
+        item_type: type[PydanticModel],
         client: DynamoDbClient,
         environment_prefix: str = "",
     ):
@@ -59,7 +68,7 @@ class Repository:
         assert_model_has_only_dynamodb_types(model=item_type)
 
     @handle_dynamodb_errors(conditional_check_error_message="Duplicate rejected")
-    def create(self, item: BaseModel) -> DynamoDbResponse:
+    def create(self, item: PydanticModel) -> DynamoDbResponse:
         return self.dynamodb.put_item(
             TableName=self.table_name,
             Item=item.dict(),
@@ -67,7 +76,7 @@ class Repository:
         )
 
     @handle_dynamodb_errors()
-    def read(self, KeyConditionExpression: str, **kwargs) -> BaseModel:
+    def read(self, KeyConditionExpression: str, **kwargs) -> PydanticModel:
         response = self.dynamodb.query(
             TableName=self.table_name,
             KeyConditionExpression=KeyConditionExpression,
@@ -80,7 +89,7 @@ class Repository:
         return self.item_type(**item)
 
     @handle_dynamodb_errors()
-    def search(self, index_name: str, **kwargs: dict[str, str]) -> list[BaseModel]:
+    def search(self, index_name: str, **kwargs: dict[str, str]) -> list[PydanticModel]:
         results = self.dynamodb.query(
             TableName=self.table_name, IndexName=index_name, **kwargs
         )
@@ -88,35 +97,39 @@ class Repository:
         return [self.item_type(**item) for item in results["Items"]]
 
     @handle_dynamodb_errors(conditional_check_error_message="Document does not exist")
-    def update(self, item: BaseModel) -> DynamoDbResponse:
+    def update(self, item: PydanticModel) -> DynamoDbResponse:
         return self.dynamodb.put_item(
             TableName=self.table_name,
             Item=item.dict(),
             ConditionExpression=ATTRIBUTE_EXISTS_ID,
         )
 
-    @handle_dynamodb_errors(conditional_check_error_message="Supersede failed")
+    @handle_dynamodb_errors(conditional_check_error_message="Supersede ID mismatch")
     def supersede(
-        self, create_item: BaseModel, delete_item_id: dict
+        self, create_item: PydanticModel, delete_item_ids: list[str]
     ) -> DynamoDbResponse:
-        return self.dynamodb.transact_write_items(
-            TransactItems=[
-                {
-                    "Put": {
-                        "TableName": self.table_name,
-                        "ConditionExpression": ATTRIBUTE_NOT_EXISTS_ID,
-                        "Item": create_item.dict(),
-                    }
-                },
-                {
-                    "Delete": {
-                        "TableName": self.table_name,
-                        "Key": {"id": delete_item_id},
-                        "ConditionExpression": ATTRIBUTE_EXISTS_ID,
-                    }
-                },
-            ]
-        )
+        if len(delete_item_ids) >= MAX_TRANSACT_ITEMS:
+            raise TooManyItemsError("Too many items to process in one transaction")
+
+        transact_items = [
+            {
+                "Delete": {
+                    "TableName": self.table_name,
+                    "ConditionExpression": ATTRIBUTE_EXISTS_ID,
+                    "Key": {"id": to_dynamodb_dict(id)},
+                }
+            }
+            for id in delete_item_ids
+        ] + [
+            {
+                "Put": {
+                    "TableName": self.table_name,
+                    "ConditionExpression": ATTRIBUTE_NOT_EXISTS_ID,
+                    "Item": create_item.dict(),
+                }
+            }
+        ]
+        return self.dynamodb.transact_write_items(TransactItems=transact_items)
 
     @handle_dynamodb_errors(conditional_check_error_message="")
     def hard_delete(self, id: dict) -> DynamoDbResponse:
