@@ -4,7 +4,10 @@ from behave import then, when
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
 
-from feature_tests.steps.aws.resources.api import producer_search_api_request
+from feature_tests.steps.aws.resources.api import (
+    consumer_search_api_request,
+    producer_search_api_request,
+)
 from feature_tests.steps.common.common_utils import render_template_document
 
 
@@ -44,7 +47,6 @@ def producer_search_document_pointers(context, producer: str):
 def producer_search_document_pointers(context):
     response = context.response_message
 
-    print("response", response)
     empty_bundle = {
         "resourceType": "Bundle",
         "type": "searchset",
@@ -55,7 +57,7 @@ def producer_search_document_pointers(context):
     assert json.loads(response) == empty_bundle
 
 
-@then("the search is made")
+@then("the producer search is made")
 def producer_search_document_pointers(context):
 
     queryStringParameters = context.query_parameters
