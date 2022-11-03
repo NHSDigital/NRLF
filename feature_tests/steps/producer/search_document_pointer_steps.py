@@ -44,6 +44,7 @@ def producer_search_document_pointers(context, producer: str):
 def producer_search_document_pointers(context):
     response = context.response_message
 
+    print("response", response)
     empty_bundle = {
         "resourceType": "Bundle",
         "type": "searchset",
