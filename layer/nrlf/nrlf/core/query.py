@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from nrlf.core.dynamodb_types import to_dynamodb_dict
 
 ATTRIBUTE_EXISTS_ID = "attribute_exists(id)"
@@ -61,10 +63,18 @@ def create_search_and_filter_query(nhs_number, **filters):
     return read_and_filter_query
 
 
-def create_hard_delete_query(**filters) -> dict:
-    condition_expression = []
+def create_hard_delete_query(
+    id: str, condition_expression: list = [], **filters
+) -> dict:
     attribute_values = {}
     attribute_names = {}
+
+    if len(filters) == 0:
+        (condition,) = condition_expression
+        return {
+            "ConditionExpression": condition,
+        }
+
     for field_name, filter_value in filters.items():
         attribute_names[f"#{field_name}"] = field_name
     if type(filter_value) is list:
@@ -91,20 +101,16 @@ def _append_attribute_exists_id_condition_expression(hard_delete_query: dict):
     if "ConditionExpression" not in hard_delete_query:
         hard_delete_query["ConditionExpression"] = ATTRIBUTE_EXISTS_ID
     else:
-        hard_delete_query["ConditionExpression"] = hard_delete_query[
+        hard_delete_query[
             "ConditionExpression"
-        ].append(f" AND {ATTRIBUTE_EXISTS_ID}")
+        ] = f'{hard_delete_query["ConditionExpression"]} AND {ATTRIBUTE_EXISTS_ID}'
+
     return hard_delete_query
 
 
 def hard_delete_query(id, **filters):
-    hard_delete_query = {}
-
-    if bool(filters) is not False:
-        hard_delete_query = create_hard_delete_query(**filters)
-
-    hard_delete_query = _append_attribute_exists_id_condition_expression(
-        hard_delete_query=hard_delete_query
+    hard_delete_query = create_hard_delete_query(
+        id=id, condition_expression=[ATTRIBUTE_EXISTS_ID], **filters
     )
     hard_delete_query["Key"] = {"id": to_dynamodb_dict(id)}
     return hard_delete_query

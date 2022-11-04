@@ -27,17 +27,6 @@ def parse_client_rp_details(
     return PipelineData(**data, client_rp_details=client_rp_details)
 
 
-def parse_request_body(
-    data: PipelineData,
-    context: LambdaContext,
-    event: APIGatewayProxyEventModel,
-    dependencies: FrozenDict[str, Any],
-) -> PipelineData:
-    body = fetch_body_from_event(event)
-    core_model = create_document_pointer_from_fhir_json(body, API_VERSION)
-    return PipelineData(**data, body=body, core_model=core_model)
-
-
 def parse_producer_permissions(
     data: PipelineData,
     context: LambdaContext,
