@@ -1,10 +1,7 @@
-from nrlf.core.dynamodb_types import to_dynamodb_dict
 import json
 from collections import defaultdict
-<< << << < HEAD
-== == == =
->>>>>> > 0a48b71(update endpoint)
 
+from nrlf.core.dynamodb_types import to_dynamodb_dict
 
 ATTRIBUTE_EXISTS_ID = "attribute_exists(id)"
 
@@ -36,11 +33,9 @@ def create_filter_query(**filters) -> dict:
             filter_values_alias = ",".join(
                 f":{field_name}{idx}" for idx in range(len(filter_value))
             )
-            condition_expression.append(
-                f"#{field_name} IN ({filter_values_alias})")
+            condition_expression.append(f"#{field_name} IN ({filter_values_alias})")
             for idx, value in enumerate(filter_value):
-                attribute_values[f":{field_name}{idx}"] = to_dynamodb_dict(
-                    value)
+                attribute_values[f":{field_name}{idx}"] = to_dynamodb_dict(value)
         else:
             condition_expression.append(f"#{field_name} = :{field_name}")
             attribute_values[f":{field_name}"] = to_dynamodb_dict(filter_value)
@@ -55,8 +50,7 @@ def create_filter_query(**filters) -> dict:
 
 def create_read_and_filter_query(id, **filters):
     read_and_filter_query = create_filter_query(**filters)
-    read_and_filter_query["ExpressionAttributeValues"][":id"] = to_dynamodb_dict(
-        id)
+    read_and_filter_query["ExpressionAttributeValues"][":id"] = to_dynamodb_dict(id)
     read_and_filter_query["KeyConditionExpression"] = "id = :id"
     return read_and_filter_query
 
@@ -88,8 +82,7 @@ def create_hard_delete_query(
         filter_values_alias = ",".join(
             f":{field_name}{idx}" for idx in range(len(filter_value))
         )
-        condition_expression.append(
-            f"#{field_name} IN ({filter_values_alias})")
+        condition_expression.append(f"#{field_name} IN ({filter_values_alias})")
         for idx, value in enumerate(filter_value):
             attribute_values[f":{field_name}{idx}"] = to_dynamodb_dict(value)
     else:
