@@ -13,19 +13,9 @@ from nrlf.core.repository import Repository
 from nrlf.core.transform import update_document_pointer_from_fhir_json
 
 from api.producer.updateDocumentReference.src.constants import PersistentDependencies
-from api.producer.updateDocumentReference.src.v1.constants import API_VERSION
-
-IMMUTABLE_FIELDS = set(
-    (
-        "masterIdentifier",
-        "identifier",
-        "status",
-        "type",
-        "subject",
-        "date",
-        "custodian",
-        "relatesTo",
-    )
+from api.producer.updateDocumentReference.src.v1.constants import (
+    API_VERSION,
+    IMMUTABLE_FIELDS,
 )
 
 
@@ -36,7 +26,6 @@ def parse_request_body(
     dependencies: FrozenDict[str, Any],
 ) -> PipelineData:
     body = fetch_body_from_event(event)
-    print(body)
     core_model = update_document_pointer_from_fhir_json(body, API_VERSION)
     return PipelineData(core_model=core_model)
 
@@ -97,7 +86,6 @@ def document_pointer_exists(
     document_pointer: DocumentPointer = repository.read(**read_and_filter_query)
     return PipelineData(
         original_document=document_pointer.document.__root__,
-        original_created_on=document_pointer.created_on.__root__,
         **data,
     )
 

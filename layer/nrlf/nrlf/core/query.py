@@ -147,5 +147,4 @@ def create_updated_expression_query(**update_values) -> dict:
 def update_and_filter_query(**values):
     update_and_filter_query = create_updated_expression_query(**values)
     update_and_filter_query["Key"] = {"id": values["id"]}
-    print(update_and_filter_query)
     return update_and_filter_query

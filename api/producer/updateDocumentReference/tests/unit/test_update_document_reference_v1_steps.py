@@ -65,7 +65,6 @@ def test_compare_immutable_fields_success(mock__make_timestamp):
     pipeline_data = parse_request_body(PipelineData(), {}, event, {})
     output = dict(pipeline_data)
     output["original_document"] = json.dumps(fhir_json)
-    output["original_created_on"] = "2022-10-20T15:47:49.732Z"
     pipeline_data = compare_immutable_fields(PipelineData(output), {}, event, {})
     assert pipeline_data["core_model"].dict() == expected_output
 
@@ -89,5 +88,4 @@ def test_compare_immutable_fields_failure(mock__make_timestamp):
         pipeline_data = parse_request_body(PipelineData(), {}, event, {})
         output = dict(pipeline_data)
         output["original_document"] = json.dumps(fhir_json)
-        output["original_created_on"] = "2022-10-20T15:47:49.732Z"
         pipeline_data = compare_immutable_fields(PipelineData(output), {}, event, {})

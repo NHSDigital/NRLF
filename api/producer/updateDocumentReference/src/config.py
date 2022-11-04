@@ -19,7 +19,6 @@ class Config(BaseModel):
     """
 
     AWS_REGION: str
-    DOCUMENT_POINTER_TABLE_NAME: str
     PREFIX: str
 
 

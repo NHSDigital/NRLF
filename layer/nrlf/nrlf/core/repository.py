@@ -44,7 +44,6 @@ def _handle_dynamodb_errors(function, conditional_check_error_message: str = "")
                 raise DynamoDbError(
                     f"Condition check failed - {conditional_check_error_message}"
                 )
-            print(error)
             raise Exception("There was an error with the database")
 
     return wrapper
