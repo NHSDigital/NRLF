@@ -54,7 +54,6 @@ Feature: Failure scenarios where producer is unable to read a Document Pointer
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"
 
-
   Scenario: Request comes from a Producer whose ID does not match the Document Pointer's producer ID
     Given a Document Pointer exists in the system with the below values
       | property    | value                          |
@@ -70,7 +69,6 @@ Feature: Failure scenarios where producer is unable to read a Document Pointer
     When Producer "ABUNDANT LIFE CARE LIMITED" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890"
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"
-
 
   Scenario: The Document Pointer does not exist
     Given Producer "AARON COURT MENTAL NH" has permission to create Document Pointers for

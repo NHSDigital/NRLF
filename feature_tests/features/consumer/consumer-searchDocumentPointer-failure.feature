@@ -1,4 +1,5 @@
 Feature: Basic Failure Scenarios where consumer is not able to search for Document Pointers
+
   Background:
     Given template DOCUMENT
       """
@@ -47,13 +48,13 @@ Feature: Basic Failure Scenarios where consumer is not able to search for Docume
       | contentType | application/pdf                   |
       | url         | https://example.org/my-doc.pdf    |
     And Consumer "TEST CONSUMER" has permission to search Document Pointers for
-      | snomed_code | description                       |
-      | 736253002   | Mental health crisis plan         |
+      | snomed_code | description               |
+      | 736253002   | Mental health crisis plan |
     When "TEST CONSUMER" searches with query parameters
-      | property      | value                           |
-      | subject       | 9278693472                      |
+      | property | value      |
+      | subject  | 9278693472 |
     And "TEST CONSUMER" searches with the header values
-      | property      | value                           |
-      | type          | 736253002                       |
+      | property | value     |
+      | type     | 736253002 |
     Then the consumer search is made
     And the response is an empty bundle

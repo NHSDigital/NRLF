@@ -50,7 +50,6 @@ Feature: Success Scenarios where producer unable to supersede Document Pointers
       """
 
   Scenario: Supersede multiple Document Pointers
-
     Given a Document Pointer exists in the system with the below values
       | property    | value                                               |
       | identifier  | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567890 |
