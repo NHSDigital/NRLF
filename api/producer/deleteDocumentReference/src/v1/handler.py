@@ -1,20 +1,14 @@
 import json
 import urllib.parse
-from functools import partial
 from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.header_config import ClientRpDetailsHeader
 from nrlf.core.errors import AuthenticationError
-from nrlf.core.model import DocumentPointer
 from nrlf.core.query import hard_delete_query
 from nrlf.core.repository import Repository
-from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.core.validators import generate_producer_id
-
-from api.producer.createDocumentReference.src.v1.constants import API_VERSION
 
 
 def parse_client_rp_details(
