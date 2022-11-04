@@ -7,7 +7,6 @@ from nrlf.core.query import (
     create_search_and_filter_query,
     create_updated_expression_query,
     to_dynamodb_dict,
-    validate_immutable_fields_for_update,
 )
 from nrlf.core.repository import Repository
 from nrlf.core.tests.test_repository import mock_dynamodb
