@@ -123,7 +123,7 @@ jobs:
         uses: ./.github/actions/upload-artifact/
         with:
           name: ${{ env.TF_ARTIFACT_NAME }}
-          path: ./terraform/infrastructure/.*tfplan
+          path: ./terraform/infrastructure/tfplan
 
   terraform-apply:
     needs: [terraform-plan]
