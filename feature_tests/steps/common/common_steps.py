@@ -26,17 +26,6 @@ def given_permissions_for_types(context, actor_type: str, actor_name: str, actio
     ]
 
 
-@given(
-    '{actor_type} "{actor_name}" does not have permission to {action} Document Pointers for'
-)
-def given_no_permissions_for_types(
-    context, actor_type: str, actor_name: str, action: str
-):
-    context.allowed_types += [
-        f'https://snomed.info/ict|{row["snomed_code"]}' for row in context.table
-    ]
-
-
 @then("the operation is unsuccessful")
 def assert_operation_unsuccessful(context):
     assert context.response_status_code == 400, (
