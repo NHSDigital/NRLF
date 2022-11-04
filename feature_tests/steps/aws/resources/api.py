@@ -49,6 +49,20 @@ def producer_read_api_request(
     )
 
 
+def producer_delete_api_request(
+    path_params: list,
+    headers: dict,
+    version: str = DEFAULT_VERSION,
+):
+    return _document_pointer_api_request(
+        product="producer",
+        method="DELETE",
+        version=version,
+        path_params=path_params,
+        headers=headers,
+    )
+
+
 def consumer_read_api_request(
     path_params: list,
     headers: dict,

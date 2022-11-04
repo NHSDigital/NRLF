@@ -8,6 +8,7 @@ import pytest
 from botocore.exceptions import ClientError
 from nrlf.core.errors import DynamoDbError, ItemNotFound, TooManyItemsError
 from nrlf.core.model import DocumentPointer
+from nrlf.core.query import hard_delete_query
 from nrlf.core.repository import (
     MAX_TRANSACT_ITEMS,
     Repository,
@@ -214,11 +215,11 @@ def test_supersede_id_exists_raises_transaction_canceled_exception():
 def test_hard_delete():
     fhir_json = read_test_data("nrlf")
     core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-
+    query = hard_delete_query(id=core_model.id.__root__)
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        repository.hard_delete(core_model.id.dict())
+        repository.hard_delete(**query)
         response = client.scan(TableName=TABLE_NAME)
     assert len(response["Items"]) == 0
 
@@ -247,7 +248,8 @@ def test_supersede_too_many_items(max_transact_items):
 def test_wont_hard_delete_if_item_doesnt_exist():
     with pytest.raises(DynamoDbError), mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        repository.hard_delete(id={"S": "no"})
+        query = hard_delete_query(id="no")
+        repository.hard_delete(**query)
 
 
 @handle_dynamodb_errors()

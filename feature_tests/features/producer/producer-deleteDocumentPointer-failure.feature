@@ -50,23 +50,15 @@ Feature: Failure scenarios where producer is unable to delete a Document Pointer
         And Producer "AARON COURT MENTAL NH" does not have permission to delete Document Pointers for:
             | snomed_code | description                 |
             | 736253001   | "Mental health crisis plan" |
-        When Producer "CUTHBERT'S CLOSE CARE HOME" deletes an existing Document Reference "1234567890"
+        When Producer "CUTHBERT'S CLOSE CARE HOME" deletes an existing Document Reference "CUTHBERT'S CLOSE CARE HOME|1234567890"
         Then the operation is unsuccessful
         And the response contains error message "Condition check failed - Forbidden"
 
-    # Scenario: Unable to delete a Document Pointer when the Producer does not exist
+    Scenario: Delete an existing current Document Pointer
 
-    #     Given Producer "Lancashire Care" does not exist in the system
-    #     When Producer "Lancashire Care" deletes an existing Document Reference "1234567890"
-    #     Then the operation is unsuccessful
-    #     And the response contains error message "Condition check failed - Forbidden"
-
-    # Scenario: Unable to delete a Document Pointer that does not exist
-
-    #     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to delete Document Pointers for:
-    #         | snomed_code | description                 |
-    #         | "736253002" | "Mental health crisis plan" |
-    #     And DOCUMENT_POINTER "7852369851" does not exist in the system
-    #     When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" deletes the DOCUMENT_POINTER "7852369851"
-    #     Then the operation is unsuccessful
-    #     And the response contains error message "DocumentReference does not exist in the system"
+        Given "Producer" "AARON COURT MENTAL NH" has permission to "delete" Document Pointers for:
+            | snomed_code | description               |
+            | 736253002   | Mental health crisis plan |
+        When Producer "AARON COURT MENTAL NH" deletes an existing Document Reference "AARON COURT MENTAL NH|1234567890"
+        Then the operation is unsuccessful
+        And the response contains error message "Condition check failed - Forbidden"

@@ -1,5 +1,7 @@
 from nrlf.core.dynamodb_types import to_dynamodb_dict
 
+ATTRIBUTE_EXISTS_ID = "attribute_exists(id)"
+
 
 def create_filter_query(**filters) -> dict:
     """
@@ -63,7 +65,6 @@ def create_hard_delete_query(**filters) -> dict:
     condition_expression = []
     attribute_values = {}
     attribute_names = {}
-
     for field_name, filter_value in filters.items():
         attribute_names[f"#{field_name}"] = field_name
     if type(filter_value) is list:
@@ -86,7 +87,24 @@ def create_hard_delete_query(**filters) -> dict:
     }
 
 
+def _append_attribute_exists_id_condition_expression(hard_delete_query: dict):
+    if "ConditionExpression" not in hard_delete_query:
+        hard_delete_query["ConditionExpression"] = ATTRIBUTE_EXISTS_ID
+    else:
+        hard_delete_query["ConditionExpression"] = hard_delete_query[
+            "ConditionExpression"
+        ].append(f" AND {ATTRIBUTE_EXISTS_ID}")
+    return hard_delete_query
+
+
 def hard_delete_query(id, **filters):
-    hard_delete_query = create_hard_delete_query(**filters)
+    hard_delete_query = {}
+
+    if bool(filters) is not False:
+        create_hard_delete_query(**filters)
+
+    hard_delete_query = _append_attribute_exists_id_condition_expression(
+        hard_delete_query=hard_delete_query
+    )
     hard_delete_query["Key"] = {"id": to_dynamodb_dict(id)}
     return hard_delete_query

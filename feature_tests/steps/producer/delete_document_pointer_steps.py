@@ -3,7 +3,10 @@ import json
 from behave import then, when
 from lambda_utils.tests.unit.utils import make_aws_event
 
-from feature_tests.steps.aws.resources.api import producer_read_api_request
+from feature_tests.steps.aws.resources.api import (
+    producer_delete_api_request,
+    producer_read_api_request,
+)
 from feature_tests.steps.common.common_utils import render_template_document
 
 
@@ -32,7 +35,7 @@ def producer_deletes_existing_document_reference(
         context.response_status_code = response["statusCode"]
         context.response_message = response["body"]
     else:
-        response = producer_read_api_request(
+        response = producer_delete_api_request(
             path_params=path_params.values(),
             headers=headers,
         )
