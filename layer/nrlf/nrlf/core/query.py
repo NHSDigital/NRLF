@@ -1,6 +1,10 @@
-from collections import defaultdict
-
 from nrlf.core.dynamodb_types import to_dynamodb_dict
+import json
+from collections import defaultdict
+<< << << < HEAD
+== == == =
+>>>>>> > 0a48b71(update endpoint)
+
 
 ATTRIBUTE_EXISTS_ID = "attribute_exists(id)"
 
@@ -32,9 +36,11 @@ def create_filter_query(**filters) -> dict:
             filter_values_alias = ",".join(
                 f":{field_name}{idx}" for idx in range(len(filter_value))
             )
-            condition_expression.append(f"#{field_name} IN ({filter_values_alias})")
+            condition_expression.append(
+                f"#{field_name} IN ({filter_values_alias})")
             for idx, value in enumerate(filter_value):
-                attribute_values[f":{field_name}{idx}"] = to_dynamodb_dict(value)
+                attribute_values[f":{field_name}{idx}"] = to_dynamodb_dict(
+                    value)
         else:
             condition_expression.append(f"#{field_name} = :{field_name}")
             attribute_values[f":{field_name}"] = to_dynamodb_dict(filter_value)
@@ -49,7 +55,8 @@ def create_filter_query(**filters) -> dict:
 
 def create_read_and_filter_query(id, **filters):
     read_and_filter_query = create_filter_query(**filters)
-    read_and_filter_query["ExpressionAttributeValues"][":id"] = to_dynamodb_dict(id)
+    read_and_filter_query["ExpressionAttributeValues"][":id"] = to_dynamodb_dict(
+        id)
     read_and_filter_query["KeyConditionExpression"] = "id = :id"
     return read_and_filter_query
 
@@ -81,7 +88,8 @@ def create_hard_delete_query(
         filter_values_alias = ",".join(
             f":{field_name}{idx}" for idx in range(len(filter_value))
         )
-        condition_expression.append(f"#{field_name} IN ({filter_values_alias})")
+        condition_expression.append(
+            f"#{field_name} IN ({filter_values_alias})")
         for idx, value in enumerate(filter_value):
             attribute_values[f":{field_name}{idx}"] = to_dynamodb_dict(value)
     else:
@@ -103,3 +111,48 @@ def hard_delete_query(id, **filters):
     )
     hard_delete_query["Key"] = {"id": to_dynamodb_dict(id)}
     return hard_delete_query
+
+
+def create_updated_expression_query(**update_values) -> dict:
+    """
+    example:
+        create_updated_expression_query(foo="bar")
+
+    will create a DynamoDB client update, to only include results with:
+        * foo must equal "bar"
+
+    which in DynamoDB client language is:
+        {
+            "UpdateExpression": "SET #foo=:foo,#bar=:bar",
+            "ExpressionAttributeValues": {":foo": "123", ":bar": "456"},
+            "ExpressionAttributeNames": {"#foo": "foo", "#bar": "bar"}
+        }
+
+        ConditionExpression=f"{ATTRIBUTE_EXISTS_ID} AND #producer_id = :producer_id",
+
+    noting that `ExpressionAttributeNames` is required to safeguard against reserved keywords.
+    """
+    update_expression = []
+    attribute_values = {}
+    attribute_names = {}
+
+    for field_name, field_value in update_values.items():
+        if field_name not in ["created_on", "id"]:
+            attribute_names[f"#{field_name}"] = field_name
+            update_expression.append(f"#{field_name}=:{field_name}")
+            attribute_values[f":{field_name}"] = field_value
+    update_expression = ",".join(update_expression)
+
+    return {
+        "ConditionExpression": f"{ATTRIBUTE_EXISTS_ID} AND #producer_id = :producer_id",
+        "UpdateExpression": "SET {}".format(update_expression),
+        "ExpressionAttributeValues": attribute_values,
+        "ExpressionAttributeNames": attribute_names,
+    }
+
+
+def update_and_filter_query(**values):
+    update_and_filter_query = create_updated_expression_query(**values)
+    update_and_filter_query["Key"] = {"id": values["id"]}
+    print(update_and_filter_query)
+    return update_and_filter_query

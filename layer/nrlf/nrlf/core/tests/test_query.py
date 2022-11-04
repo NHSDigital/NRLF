@@ -5,7 +5,9 @@ from nrlf.core.query import (
     create_filter_query,
     create_read_and_filter_query,
     create_search_and_filter_query,
+    create_updated_expression_query,
     to_dynamodb_dict,
+    validate_immutable_fields_for_update,
 )
 from nrlf.core.repository import Repository
 from nrlf.core.tests.test_repository import mock_dynamodb
@@ -137,3 +139,52 @@ def test_create_search_and_filter_query_in_db_returns_empty_bundle():
         repository = Repository(item_type=DocumentPointer, client=client)
         item = repository.search(nhs_number_index, **query)
         assert item == empty_item
+
+
+def test_create_read_and_filter_query_in_db():
+    fhir_json = read_test_data("nrlf")
+    core_model = create_document_pointer_from_fhir_json(
+        fhir_json=fhir_json, api_version=1
+    )
+    query = create_read_and_filter_query(
+        id=core_model.id.__root__,
+        producer_id=core_model.producer_id.__root__,
+        type="https://snomed.info/ict|736253002",
+    )
+
+    with mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        repository.create(item=core_model)
+        item = repository.read(**query)
+        assert item == core_model
+
+
+@pytest.mark.parametrize(
+    ("values", "expected"),
+    (
+        (
+            {
+                "foo": {"N": "123"},
+                "bar": {"S": "456"},
+                "created_on": {"S": "test"},
+                "producer_id": {"S": "TEST PRODUCER"},
+            },
+            {
+                "ConditionExpression": "attribute_exists(id) AND #producer_id = :producer_id",
+                "UpdateExpression": "SET #foo=:foo,#bar=:bar,#producer_id=:producer_id",
+                "ExpressionAttributeValues": {
+                    ":foo": {"N": "123"},
+                    ":bar": {"S": "456"},
+                    ":producer_id": {"S": "TEST PRODUCER"},
+                },
+                "ExpressionAttributeNames": {
+                    "#foo": "foo",
+                    "#bar": "bar",
+                    "#producer_id": "producer_id",
+                },
+            },
+        ),
+    ),
+)
+def test_create_updated_expression_query(values, expected):
+    assert create_updated_expression_query(**values) == expected

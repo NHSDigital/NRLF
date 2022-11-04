@@ -16,3 +16,7 @@ class FhirValidationError(Exception):
 
 class TooManyItemsError(Exception):
     pass
+
+
+class ImmutableFieldViolationError(Exception):
+    pass

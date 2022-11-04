@@ -11,6 +11,7 @@ from nrlf.core.model import (
 from nrlf.core.transform import (
     create_bundle_from_document_pointers,
     create_document_pointer_from_fhir_json,
+    update_document_pointer_from_fhir_json,
 )
 from nrlf.producer.fhir.r4.model import CodeableConcept, Coding
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
@@ -83,6 +84,27 @@ def test_create_document_type_tuple_incorrect_size(coding):
     document_type = CodeableConcept(coding=coding)
     with pytest.raises(ValueError):
         create_document_type_tuple(document_type=document_type)
+
+
+@mock.patch("nrlf.core.transform.make_timestamp", return_value=TIMESTAMP)
+def test_update_document_pointer_from_fhir_json(mock__make_timestamp):
+    fhir_json = read_test_data("nrlf")
+
+    core_model = update_document_pointer_from_fhir_json(
+        fhir_json=fhir_json, api_version=API_VERSION
+    )
+
+    assert core_model.dict() == {
+        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"},
+        "nhs_number": {"S": "9278693472"},
+        "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+        "type": {"S": "https://snomed.info/ict|736253002"},
+        "source": {"S": "NRLF"},
+        "version": {"N": str(API_VERSION)},
+        "document": {"S": json.dumps(fhir_json)},
+        "created_on": {"S": TIMESTAMP},
+        "updated_on": {"S": TIMESTAMP},
+    }
 
 
 def test_reconstruct_document_pointer_from_db():
