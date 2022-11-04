@@ -198,13 +198,11 @@ def test_update_document_pointer_doesnt_update_if_producer_didnt_create():
 def test_supersede_creates_new_item_and_deletes_existing():
 
     fhir_json = read_test_data("nrlf")
-    core_model_for_create = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json)
+    core_model_for_create = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
     core_model_for_create.id.__root__ = (
         "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
     )
-    core_model_for_delete = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json)
+    core_model_for_delete = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
 
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
@@ -221,8 +219,7 @@ def test_supersede_creates_new_item_and_deletes_existing():
         try:
             repository.read(
                 KeyConditionExpression="id = :id",
-                ExpressionAttributeValues={
-                    ":id": core_model_for_delete.id.dict()},
+                ExpressionAttributeValues={":id": core_model_for_delete.id.dict()},
             )
         except ItemNotFound as error:
             assert error.args[0] == "Item could not be found"
@@ -233,14 +230,12 @@ def test_supersede_creates_new_item_and_deletes_existing():
 def test_supersede_id_exists_raises_transaction_canceled_exception():
 
     fhir_json = read_test_data("nrlf")
-    core_model_for_create = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json)
+    core_model_for_create = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
     core_model_for_create.id.__root__ = (
         "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
     )
 
-    core_model_for_delete = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json)
+    core_model_for_delete = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
 
     with pytest.raises(Exception), mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
@@ -271,20 +266,17 @@ def test_hard_delete():
 def test_supersede_too_many_items(max_transact_items):
 
     fhir_json = read_test_data("nrlf")
-    core_model_for_create = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json)
+    core_model_for_create = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
     core_model_for_create.id.__root__ = (
         "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
     )
-    core_model_for_delete = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json)
+    core_model_for_delete = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
 
     with pytest.raises(TooManyItemsError), mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.supersede(
             create_item=core_model_for_create,
-            delete_item_ids=[
-                core_model_for_delete.id.__root__] * max_transact_items,
+            delete_item_ids=[core_model_for_delete.id.__root__] * max_transact_items,
         )
 
 
@@ -307,8 +299,7 @@ def raise_exception(exception):
         [TypeError, TypeError],
         [ValueError, ValueError],
         [
-            ClientError(
-                {"Error": {"Code": "ConditionalCheckFailedException"}}, "test"),
+            ClientError({"Error": {"Code": "ConditionalCheckFailedException"}}, "test"),
             DynamoDbError,
         ],
     ),
@@ -323,8 +314,7 @@ def test_search_returns_multiple_values_with_same_nhs_number():
     fhir_json_2 = deepcopy(fhir_json)
     fhir_json_2["id"] = "spam|1243356678"
     core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    core_model_2 = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json_2)
+    core_model_2 = create_document_pointer_from_fhir_json(fhir_json=fhir_json_2)
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
@@ -343,8 +333,7 @@ def test_search_returns_single_value():
     fhir_json_2["subject"]["identifier"]["value"] = "3137554160"
     fhir_json_2["id"] = "spam|1243356678"
     core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    core_model_2 = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json_2)
+    core_model_2 = create_document_pointer_from_fhir_json(fhir_json=fhir_json_2)
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
@@ -360,8 +349,7 @@ def test_search_returns_single_value():
 def test_validate_results_less_than_100_items():
     array_size = 99
     items = [""] * array_size
-    request_results = {"Items": items,
-                       "Count": array_size, "ScannedCount": array_size}
+    request_results = {"Items": items, "Count": array_size, "ScannedCount": array_size}
     result = _validate_results_within_limits(request_results)
     assert result == request_results
 
@@ -369,8 +357,7 @@ def test_validate_results_less_than_100_items():
 def test_validate_results_throws_exception_when_more_than_100_items():
     array_size = 101
     items = [""] * array_size
-    request_results = {"Items": items,
-                       "Count": array_size, "ScannedCount": array_size}
+    request_results = {"Items": items, "Count": array_size, "ScannedCount": array_size}
 
     with pytest.raises(Exception) as error:
         _validate_results_within_limits(request_results)
