@@ -137,6 +137,43 @@ Using the same `<env>` from the deployment stage you can tear down the environme
 nrlf terraform destroy [<env>]
 ```
 
+# Create / update account-wide resources
+
+This is for resources such as Cloudwatch roles which are global to a given account instead of a workspace.
+Account wide resources should be deployed manually and not be run as part of CI.
+
+Log in to your `mgmt` account.
+
+```shell
+nrlf aws login mgmt-admin
+```
+
+Update account wide resources for accounts (e.g. `dev`, `test`, `prod`, `mgmt`)
+
+Initialise terraform
+
+```shell
+nrlf terraform init <account> account_wide
+```
+
+Create a terraform plan
+
+```shell
+nrlf terraform plan <account> account_wide
+```
+
+Apply changes
+
+```shell
+nrlf terraform apply <account> account_wide
+```
+
+To teardown account wide resources
+
+```shell
+nrlf terraform destroy <account> account_wide
+```
+
 # Sandbox deployment with LocalStack
 
 In order to deploy the entire stack locally, we use LocalStack which comes bundled with the `dev` dependencies for this project.
@@ -185,7 +222,7 @@ nrlf sandbox seed_db
 
 ## Project bootstrap
 
-### Create Terraform state files
+### Setup mgmt account resources
 
 ```
 🚨 ------------------------------------------------ 🚨
@@ -201,11 +238,18 @@ Log in to your `mgmt` account:
 nrlf aws login mgmt-admin
 ```
 
-Create and import state buckets:
+Create resources on mgmt account required for terraform to work. This includes:
+
+- terraform state bucket
+- terraform state lock table
+- secret managers to hold account ids for the non-mgmt accounts
 
 ```
-nrlf bootstrap create-mgmt-state
+nrlf bootstrap create-mgmt
 ```
+
+Now log on to AWS web console and manually add the aws account ids to each respective secrets
+`nhsd-nrlf--mgmt--mgmt-account-id`, `nhsd-nrlf--mgmt--prod-account-id`, `nhsd-nrlf--mgmt--test-account-id` and `nhsd-nrlf--mgmt--dev-account-id`
 
 ### Create trust role for `mgmt` for your non-`mgmt` accounts
 
@@ -227,22 +271,5 @@ nrlf aws login <non-mgmt-account>-admin
 Create the trust role:
 
 ```
-nrlf bootstrap create-terraform-role-non-mgmt
-```
-
-## Create / update account-wide resources for non-`mgmt` accounts
-
-Whenever you need to update account-wide resources for non-`mgmt` accounts (e.g. `dev`, `prod`, `test`).
-This is for resources such as Cloudwatch roles which are global to a given account.
-
-Log in to your `mgmt` account.
-
-```
-nrlf aws login mgmt-admin
-```
-
-Update account wide resources for non-`mgmt` accounts (e.g. `dev`):
-
-```
-nrlf terraform bootstrap-non-mgmt <non-mgmt-account>
+nrlf bootstrap create-non-mgmt
 ```

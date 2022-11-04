@@ -240,9 +240,9 @@ jobs:
       - name: Terraform apply
         run: |
           source nrlf.sh
-          nrlf terraform ciinit ${GITHUB_SHA_SHORT}
-          nrlf terraform ciplan ${GITHUB_SHA_SHORT}
-          nrlf terraform ciapply ${GITHUB_SHA_SHORT}
+          nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform ciplan ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform ciapply ${GITHUB_SHA_SHORT}-ci
 
   terraform-apply:
     needs: [build, terraform-base, unit-test, lint-check, feature-test-local]
@@ -273,9 +273,9 @@ jobs:
       - name: Terraform apply
         run: |
           source nrlf.sh
-          nrlf terraform ciinit ${GITHUB_SHA_SHORT}
-          nrlf terraform ciplan ${GITHUB_SHA_SHORT}
-          nrlf terraform ciapply ${GITHUB_SHA_SHORT}
+          nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform ciplan ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform ciapply ${GITHUB_SHA_SHORT}-ci
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact/
@@ -353,8 +353,8 @@ jobs:
       - name: Terraform destroy
         run: |
           source nrlf.sh
-          nrlf terraform ciinit ${GITHUB_SHA_SHORT}
-          nrlf terraform cidestroy ${GITHUB_SHA_SHORT}
+          nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform cidestroy ${GITHUB_SHA_SHORT}-ci
 
   clear-cache:
     name: Clear Cache
