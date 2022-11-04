@@ -97,17 +97,6 @@ def create_hard_delete_query(
     }
 
 
-def _append_attribute_exists_id_condition_expression(hard_delete_query: dict):
-    if "ConditionExpression" not in hard_delete_query:
-        hard_delete_query["ConditionExpression"] = ATTRIBUTE_EXISTS_ID
-    else:
-        hard_delete_query[
-            "ConditionExpression"
-        ] = f'{hard_delete_query["ConditionExpression"]} AND {ATTRIBUTE_EXISTS_ID}'
-
-    return hard_delete_query
-
-
 def hard_delete_query(id, **filters):
     hard_delete_query = create_hard_delete_query(
         id=id, condition_expression=[ATTRIBUTE_EXISTS_ID], **filters
