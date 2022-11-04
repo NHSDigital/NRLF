@@ -13,6 +13,9 @@ class DynamoDbClient:
     def put_item(self, *args, **kwargs) -> DynamoDbResponse:
         pass
 
+    def update_item(self, *args, **kwargs) -> DynamoDbResponse:
+        pass
+
     def delete_item(self, *args, **kwargs) -> DynamoDbResponse:
         pass
 

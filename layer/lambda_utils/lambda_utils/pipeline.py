@@ -15,6 +15,7 @@ from nrlf.core.errors import (
     AuthenticationError,
     DynamoDbError,
     FhirValidationError,
+    ImmutableFieldViolationError,
     ItemNotFound,
     TooManyItemsError,
 )
@@ -58,6 +59,7 @@ def execute_steps(
         RequestParsingError,
         FhirValidationError,
         TooManyItemsError,
+        ImmutableFieldViolationError,
     ) as e:
         return bad_request(str(e))
     except Exception as e:

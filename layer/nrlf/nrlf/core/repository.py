@@ -96,13 +96,9 @@ class Repository:
         _validate_results_within_limits(results)
         return [self.item_type(**item) for item in results["Items"]]
 
-    @handle_dynamodb_errors(conditional_check_error_message="Document does not exist")
-    def update(self, item: PydanticModel) -> DynamoDbResponse:
-        return self.dynamodb.put_item(
-            TableName=self.table_name,
-            Item=item.dict(),
-            ConditionExpression=ATTRIBUTE_EXISTS_ID,
-        )
+    @handle_dynamodb_errors(conditional_check_error_message="Permission denied")
+    def update(self, **kwargs: dict[str, str]) -> DynamoDbResponse:
+        return self.dynamodb.update_item(TableName=self.table_name, **kwargs)
 
     @handle_dynamodb_errors(conditional_check_error_message="Supersede ID mismatch")
     def supersede(

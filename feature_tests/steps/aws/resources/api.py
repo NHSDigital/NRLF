@@ -35,6 +35,22 @@ def producer_create_api_request(
     )
 
 
+def producer_update_api_request(
+    path_params: list,
+    data: dict,
+    headers: dict,
+    version: str = DEFAULT_VERSION,
+):
+    return _document_pointer_api_request(
+        product="producer",
+        method="PUT",
+        version=version,
+        data=data,
+        headers=headers,
+        path_params=path_params,
+    )
+
+
 def producer_read_api_request(
     path_params: list,
     headers: dict,

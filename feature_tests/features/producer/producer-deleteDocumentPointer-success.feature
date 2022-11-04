@@ -39,7 +39,6 @@ Feature: Success scenarios where producer is able to delete a Document Pointer
       """
 
   Scenario: Delete an existing current Document Pointer
-
     Given a Document Pointer exists in the system with the below values:
       | property    | value                          |
       | identifier  | 1234567890                     |

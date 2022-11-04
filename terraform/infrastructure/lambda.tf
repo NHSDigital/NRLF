@@ -153,8 +153,15 @@ module "producer__updateDocumentReference" {
     PREFIX                      = "${local.prefix}--"
   }
   additional_policies = [
+    aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__dynamodb-write.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   handler = "api.producer.updateDocumentReference.index.handler"
+
+  depends_on = [
+    aws_iam_policy.document-pointer__dynamodb-read,
+    aws_iam_policy.document-pointer__dynamodb-write,
+    aws_iam_policy.document-pointer__kms-read-write
+  ]
 }

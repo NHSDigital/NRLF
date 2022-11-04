@@ -103,6 +103,19 @@ def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference
     return fhir_strict_model
 
 
+def update_document_pointer_from_fhir_json(
+    fhir_json: dict, api_version: int, source: Source = Source.NRLF, **kwargs
+) -> DocumentPointer:
+    core_model = create_document_pointer_from_fhir_json(
+        fhir_json=fhir_json,
+        api_version=api_version,
+        source=source,
+        created_on=kwargs.pop("created_on", make_timestamp()),
+        updated_on=kwargs.pop("updated_on", make_timestamp()),
+    )
+    return core_model
+
+
 def create_document_pointer_from_legacy_json(
     legacy_json: dict, producer_id: str, nhs_number: str
 ) -> DocumentPointer:
