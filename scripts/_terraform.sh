@@ -183,7 +183,7 @@ function _get_environment_name() {
 function _get_account_id_location() {
   local environment=$1
 
-  if [ "$RUNNING_IN_CI" = 1 ]; then
+  if [ "$RUNNING_IN_CI" = 1 ] && [ "$CI_DEPLOY_PERSISTENT_ENV" != 1 ]; then
     echo "${TEST_ACCOUNT_ID_LOCATION}"
   elif [ "$environment" = "mgmt" ]; then
     echo "${MGMT_ACCOUNT_ID_LOCATION}"
@@ -206,7 +206,7 @@ function _get_environment_vars_file() {
   local environment=$1
   local vars_prefix="dev"
 
-  if [ "$RUNNING_IN_CI" = 1 ]; then
+  if [ "$RUNNING_IN_CI" = 1 ] && [ "$CI_DEPLOY_PERSISTENT_ENV" != 1 ]; then
     vars_prefix="test"
   elif [ "$environment" = "mgmt" ]; then
     vars_prefix="mgmt"

@@ -28,6 +28,7 @@ env:
   AWS_DEFAULT_REGION: eu-west-2
   TF_CLI_ARGS: -no-color
   RUNNING_IN_CI: 1
+  CI_DEPLOY_PERSISTENT_ENV: 1
 
 jobs:
   cache:
