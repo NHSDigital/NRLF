@@ -101,7 +101,7 @@ def hard_delete_query(id, **filters):
     hard_delete_query = {}
 
     if bool(filters) is not False:
-        create_hard_delete_query(**filters)
+        hard_delete_query = create_hard_delete_query(**filters)
 
     hard_delete_query = _append_attribute_exists_id_condition_expression(
         hard_delete_query=hard_delete_query
