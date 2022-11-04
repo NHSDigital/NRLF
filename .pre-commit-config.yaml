@@ -36,3 +36,16 @@ repos:
     hooks:
       - id: isort
         args: ["--profile", "black", "--filter-files"]
+
+  - repo: https://github.com/ducminh-phan/reformat-gherkin
+    rev: v3.0.1
+    hooks:
+      - id: reformat-gherkin
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.76.0
+    hooks:
+      - id: terraform_fmt
+        args:
+          - --args=-write=true
+          - --args=-recursive

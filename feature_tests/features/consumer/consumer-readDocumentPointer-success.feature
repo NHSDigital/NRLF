@@ -38,7 +38,6 @@ Feature: Success scenarios where consumer is able to read a Document Pointer
       }
       """
 
-
   Scenario: Read an existing current Document Pointer
     Given a Document Pointer exists in the system with the below values
       | property    | value                          |
