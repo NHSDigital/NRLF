@@ -1,5 +1,3 @@
-
-@local
 Feature: Failure scenarios where producer is unable to delete a Document Pointer
 
     Background:
@@ -49,33 +47,26 @@ Feature: Failure scenarios where producer is unable to delete a Document Pointer
             | subject     | 9278693472                     |
             | contentType | application/pdf                |
             | url         | https://example.org/my-doc.pdf |
+        And Producer "AARON COURT MENTAL NH" does not have permission to delete Document Pointers for:
+            | snomed_code | description                 |
+            | 736253001   | "Mental health crisis plan" |
         When Producer "CUTHBERT'S CLOSE CARE HOME" deletes an existing Document Reference "1234567890"
         Then the operation is unsuccessful
-        And the response contains error message "Required permissions to delete a DocumentReference are missing"
+        And the response contains error message "Condition check failed - Forbidden"
 
-    Scenario: Unable to delete a Document Pointer when the Producer does not exist
+    # Scenario: Unable to delete a Document Pointer when the Producer does not exist
 
-        Given Producer "Lancashire Care" does not exist in the system
-        When Producer "Lancashire Care" deletes an existing Document Reference "1234567890"
-        Then the operation is unsuccessful
-        And the response contains error message "Custodian does not exist in the system"
+    #     Given Producer "Lancashire Care" does not exist in the system
+    #     When Producer "Lancashire Care" deletes an existing Document Reference "1234567890"
+    #     Then the operation is unsuccessful
+    #     And the response contains error message "Condition check failed - Forbidden"
 
-    Scenario: Unable to delete a Document Pointer that does not exist
+    # Scenario: Unable to delete a Document Pointer that does not exist
 
-        Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to delete Document Pointers for:
-            | snomed_code | description                 |
-            | "736253002" | "Mental health crisis plan" |
-        And DOCUMENT_POINTER "7852369851" does not exist in the system
-        When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" deletes the DOCUMENT_POINTER "7852369851"
-        Then the operation is unsuccessful
-        And the response contains error message "DocumentReference does not exist in the system"
-
-    Scenario: Unable to delete a Document Pointer that was already deleted
-
-        Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to delete Document Pointers for:
-            | snomed_code | description                 |
-            | "736253002" | "Mental health crisis plan" |
-        And DOCUMENT POINTER "1234567895" exist in the system as status 'entered-in-error'
-        When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" deletes the DOCUMENT_POINTER "1234567895"
-        Then the operation is unsuccessful
-        And the response contains error message "DocumentReference does not exist in the system"
+    #     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to delete Document Pointers for:
+    #         | snomed_code | description                 |
+    #         | "736253002" | "Mental health crisis plan" |
+    #     And DOCUMENT_POINTER "7852369851" does not exist in the system
+    #     When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" deletes the DOCUMENT_POINTER "7852369851"
+    #     Then the operation is unsuccessful
+    #     And the response contains error message "DocumentReference does not exist in the system"

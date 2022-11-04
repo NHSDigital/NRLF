@@ -27,25 +27,14 @@ def given_permissions_for_types(context, actor_type: str, actor_name: str, actio
 
 
 @given(
-    '"{actor_type}" "{actor_name}" has permission to "{action}" Document Pointers for'
+    '{actor_type} "{actor_name}" does not have permission to {action} Document Pointers for'
 )
-def given_actor_name_has_permission(
+def given_no_permissions_for_types(
     context, actor_type: str, actor_name: str, action: str
 ):
-    context.producer_allowed_types += [
+    context.allowed_types += [
         f'https://snomed.info/ict|{row["snomed_code"]}' for row in context.table
     ]
-    context.valid_producer = True
-
-
-@given(
-    'Producer "{producer}" does not have permission to delete the Document Pointers for'
-)
-def given_producer_has_permission(context, producer: str):
-    context.producer_allowed_types += [
-        f'https://snomed.info/ict|{row["snomed_code"]}' for row in context.table
-    ]
-    context.valid_producer = False
 
 
 @then("the operation is unsuccessful")

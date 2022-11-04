@@ -131,6 +131,6 @@ class Repository:
         ]
         return self.dynamodb.transact_write_items(TransactItems=transact_items)
 
-    @handle_dynamodb_errors(conditional_check_error_message="")
+    @handle_dynamodb_errors(conditional_check_error_message="Forbidden")
     def hard_delete(self, **kwargs: dict[str, str]) -> DynamoDbResponse:
-        return self.dynamodb.delete_item(TableName=self.table_name, **kwargs)
+        self.dynamodb.delete_item(TableName=self.table_name, **kwargs)

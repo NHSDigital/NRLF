@@ -3,6 +3,7 @@ import json
 from behave import then, when
 from lambda_utils.tests.unit.utils import make_aws_event
 
+from feature_tests.steps.aws.resources.api import producer_read_api_request
 from feature_tests.steps.common.common_utils import render_template_document
 
 
@@ -12,23 +13,31 @@ from feature_tests.steps.common.common_utils import render_template_document
 def producer_deletes_existing_document_reference(
     context, producer, document_reference_id
 ):
-    from api.producer.deleteDocumentReference.index import handler
 
-    event = make_aws_event(
-        pathParameters={"id": f"{producer}|{document_reference_id}"},
-        headers={
-            "NHSD-Client-RP-Details": json.dumps(
-                {
-                    "app.ASID": producer,
-                    "nrl.pointer-types": context.producer_allowed_types,
-                }
-            )
-        },
-    )
+    path_params = {"id": document_reference_id}
+    headers = {
+        "NHSD-Client-RP-Details": json.dumps(
+            {
+                "app.ASID": producer,
+                "nrl.pointer-types": context.allowed_types,
+            }
+        )
+    }
 
-    response = handler(event)
-    context.response_status_code = response["statusCode"]
-    context.response_message = response["body"]
+    if context.local_test:
+        from api.producer.deleteDocumentReference.index import handler
+
+        event = make_aws_event(pathParameters=path_params, headers=headers)
+        response = handler(event)
+        context.response_status_code = response["statusCode"]
+        context.response_message = response["body"]
+    else:
+        response = producer_read_api_request(
+            path_params=path_params.values(),
+            headers=headers,
+        )
+        context.response_status_code = response.status_code
+        context.response_message = response.text
 
 
 @then('the response contains success message "Resource removed"')
