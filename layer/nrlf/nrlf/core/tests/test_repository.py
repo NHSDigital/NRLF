@@ -1,3 +1,4 @@
+import time
 from contextlib import contextmanager
 from copy import deepcopy
 from typing import Generator
@@ -137,6 +138,7 @@ def test_update_document_pointer():
         "url"
     ] = "https://example.org/different_doc.pdf"
     core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
+    time.sleep(1)
     updated_core_model = update_document_pointer_from_fhir_json(
         fhir_json=updated_fhir_json
     )
