@@ -20,8 +20,10 @@ def the_response_contains_the_template_with_values(context):
     assert json.loads(render_template_document(context=context)) in document_references
 
 
-@then("{number_of_documents:d} document references were returned")
-def the_response_is_the_list_of_template_documents(context, number_of_documents: int):
+@then("{number_of_documents:d} document {references} {were} returned")
+def the_response_is_the_list_of_template_documents(
+    context, number_of_documents: int, references, were
+):
 
     response = json.loads(context.response_message)
     assert number_of_documents == response["total"]

@@ -47,6 +47,36 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
+    And Consumer "TEST CONSUMER" has permission to search Document Pointers for
+      | snomed_code | description               |
+      | 736253002   | Mental health crisis plan |
+    When "TEST CONSUMER" searches with query parameters:
+      | property | value      |
+      | subject  | 9278693472 |
+    And "TEST CONSUMER" searches with the header values:
+      | property | value     |
+      | type     | 736253002 |
+    Then the consumer search is made
+    And the operation is successful
+    And 1 document reference was returned
+    And the response contains the DOCUMENT template with the below values
+      | property    | value                          |
+      | identifier  | 1114567890                     |
+      | type        | 736253002                      |
+      | custodian   | AARON COURT MENTAL NH          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+
+  Scenario: Successfully search for multiple Document Pointers by NHS number
+    Given a Document Pointer exists in the system with the below values
+      | property    | value                          |
+      | identifier  | 1114567890                     |
+      | type        | 736253002                      |
+      | custodian   | AARON COURT MENTAL NH          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
     And a Document Pointer exists in the system with the below values
       | property    | value                            |
       | identifier  | 2224567890                       |
