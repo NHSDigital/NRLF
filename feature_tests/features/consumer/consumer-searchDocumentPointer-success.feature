@@ -144,7 +144,7 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
     And the response is an empty bundle
 
   Scenario: Empty results when searching for a Document Pointer when subject has no documents
-    And Consumer "TEST CONSUMER" has permission to search Document Pointers for
+    Given Consumer "TEST CONSUMER" has permission to search Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
     When "TEST CONSUMER" searches with query parameters
