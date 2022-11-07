@@ -34,7 +34,14 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
                }
             }
          ],
-         "status": "current"
+         "status": "current",
+         "docStatus": "$docStatus",
+         "author": [
+            {
+               "reference": "$author"
+            }
+         ],
+         "description": "$description"
       }
       """
     And a Document Pointer exists in the system with the below values
@@ -45,8 +52,11 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
       | subject     | 9278693472                              |
       | contentType | application/pdf                         |
       | url         | https://example.org/my-doc.pdf          |
+      | docStatus   | preliminary                             |
+      | author      | Practitioner/xcda1                      |
+      | description | Physical                                |
 
-  Scenario Outline: Successfully update the mutable properties of a Document Pointer
+  Scenario Outline: Successfully update the mutable properties of a Document Pointer with only one change
     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
       | snomed_code | description                 |
       | 736253002   | "Mental health crisis plan" |
@@ -73,9 +83,37 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
       | updated_on  | <<timestamp>>                                       |
 
     Examples:
-      | property      | value                                           |
-      | docStatus     | amended                                         |
-      | author        | Organization/1XR                                |
-      | authenticator | Organization/MHT01                              |
-      | description   | Therapy Summary Document for Patient 9278693472 |
-      | url           | https://example.org/different-doc.pdf           |
+      | property    | value                                           |
+      | docStatus   | amended                                         |
+      | author      | Organization/1XR                                |
+      | description | Therapy Summary Document for Patient 9278693472 |
+      | url         | https://example.org/different-doc.pdf           |
+
+  Scenario: Successfully update the mutable properties of a Document Pointer with multiple changes
+    Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
+      | snomed_code | description                 |
+      | 736253002   | "Mental health crisis plan" |
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template
+      | property    | value                                           |
+      | identifier  | 1234567890                                      |
+      | status      | current                                         |
+      | type        | 736253002                                       |
+      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL         |
+      | subject     | 9278693472                                      |
+      | contentType | application/pdf                                 |
+      | docStatus   | amended                                         |
+      | author      | Organization/1XR                                |
+      | description | Therapy Summary Document for Patient 9278693472 |
+      | url         | https://example.org/different-doc.pdf           |
+    Then the operation is successful
+    And Document Pointer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" exists
+      | property    | value                                               |
+      | id          | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567890 |
+      | nhs_number  | 9278693472                                          |
+      | producer_id | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL             |
+      | type        | https://snomed.info/ict\|736253002                  |
+      | source      | NRLF                                                |
+      | version     | 1                                                   |
+      | document    | <<template>>                                        |
+      | created_on  | <<timestamp>>                                       |
+      | updated_on  | <<timestamp>>                                       |
