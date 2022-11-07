@@ -97,7 +97,7 @@ function _terraform() {
       local tf_init_output="${env}-tf-init-output_${current_timestamp}.txt"
 
       cd "$terraform_dir" || return 1
-      _terraform_init "$env" | tee "./${tf_init_output}" > /dev/null
+      _terraform_init "$env" |& tee "./${tf_init_output}" > /dev/null
       local tf_init_status="${PIPESTATUS[0]}"
       aws s3 cp "./${tf_init_output}" "s3://${ci_log_bucket}/${env}/${tf_init_output}"
 
@@ -116,7 +116,7 @@ function _terraform() {
       local tf_plan_output="${env}-tf-plan-output_${current_timestamp}.txt"
 
       cd "$terraform_dir" || return 1
-      _terraform_plan "$env" "$var_file" "$plan_file" "$aws_account_id" | tee "./${tf_plan_output}" > /dev/null
+      _terraform_plan "$env" "$var_file" "$plan_file" "$aws_account_id" |& tee "./${tf_plan_output}" > /dev/null
       local tf_plan_status="${PIPESTATUS[0]}"
       aws s3 cp "./${tf_plan_output}" "s3://${ci_log_bucket}/${env}/${tf_plan_output}"
 
@@ -135,7 +135,7 @@ function _terraform() {
       local tf_apply_output="${env}-tf-apply-output_${current_timestamp}.txt"
 
       cd "$terraform_dir" || return 1
-      _terraform_apply "$env" "$plan_file" | tee "./${tf_apply_output}" > /dev/null
+      _terraform_apply "$env" "$plan_file" |& tee "./${tf_apply_output}" > /dev/null
       local tf_apply_status="${PIPESTATUS[0]}"
       aws s3 cp "./${tf_apply_output}" "s3://${ci_log_bucket}/${env}/${tf_apply_output}"
 
@@ -154,7 +154,7 @@ function _terraform() {
       local tf_destroy_output="${env}-tf-destroy-output_${current_timestamp}.txt"
 
       cd "$terraform_dir" || return 1
-      _terraform_destroy "$env" "$var_file" "$aws_account_id" "-auto-approve" | tee "./${tf_destroy_output}" > /dev/null
+      _terraform_destroy "$env" "$var_file" "$aws_account_id" "-auto-approve" |& tee "./${tf_destroy_output}" > /dev/null
       local tf_destroy_status="${PIPESTATUS[0]}"
       aws s3 cp "./${tf_destroy_output}" "s3://${ci_log_bucket}/${env}/${tf_destroy_output}"
 
