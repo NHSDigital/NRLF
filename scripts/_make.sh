@@ -31,5 +31,5 @@ function _clean() {
 }
 
 function _install() {
-  pipenv install --dev || return 1
+  poetry install || return 1
 }

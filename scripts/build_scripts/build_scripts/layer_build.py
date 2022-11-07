@@ -89,15 +89,14 @@ def build_third_party(file):
     ) as build_dir:
         requirements_txt_path = layer_base_dir / "requirements.txt"
         with create_temp_path(path=requirements_txt_path, is_dir=False):
-            requirements = sh.pipenv("requirements", _cwd=root_dir)
+            requirements = sh.poetry(
+                "export", "-f", "requirements.txt", "--without-hashes", _cwd=root_dir
+            )
             with open(requirements_txt_path, "w") as f:
                 data_split = str(requirements).split("\n")
                 f.write("\n".join(data_split[:-1]))
-            sh.pipenv(
-                "run",
-                "pip",
+            sh.pip(
                 "install",
-                "--upgrade",
                 "-r",
                 requirements_txt_path,
                 "--target",

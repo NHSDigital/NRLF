@@ -8,8 +8,8 @@ runs:
       with:
         python-version: 3.9.15
 
-    - name: Install pipenv
-      run: pip install pipenv
+    - name: Install poetry
+      run: pip install poetry
       shell: bash
 
     - name: Set up terraform 1.0.0

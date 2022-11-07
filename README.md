@@ -18,7 +18,7 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
 
 ## Prerequisites
 
-- pipenv
+- poetry
 - python 3.9
 - terraform
 - jq
@@ -33,8 +33,8 @@ Swagger generation requirements.
 ## Install python dependencies
 
 ```
-pipenv install --dev
-pipenv shell
+poetry install
+poetry shell
 pre-commit install
 ```
 
@@ -61,7 +61,7 @@ Now we have installed the dependencies we're going to need to get the software u
 The API is written in Python, so we need to get the virtual environment running and then re-mount the `nrlf.sh` script.
 
 ```
-pipenv shell
+poetry shell
 source nrlf.sh
 ```
 
@@ -184,7 +184,7 @@ You will however need to install a Docker client on your machine according to th
 As before we need to get the virtual environment running and then re-mount the `nrlf.sh` script.
 
 ```
-pipenv shell
+poetry shell
 source nrlf.sh
 ```
 
