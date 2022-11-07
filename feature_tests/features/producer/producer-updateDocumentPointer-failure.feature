@@ -34,7 +34,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
               }
           }
           ],
-          "status": "current",
+          "status": "$status",
           "relatesTo": [
               {
                   "code": "replaces",
@@ -55,6 +55,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
       | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL |
       | subject     | 9278693472                              |
       | contentType | application/pdf                         |
+      | status      | current                                 |
       | url         | https://example.org/my-doc.pdf          |
 
   Scenario: Unable to update a Document Pointer that does not exist
@@ -89,7 +90,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"
 
-  Scenario: Unable to update the immutable properties of a DOCUMENT_POINTER
+  Scenario: Unable to update the relatesTo immutable property of a DOCUMENT_POINTER
     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
       | snomed_code | description                 |
       | 736253002   | "Mental health crisis plan" |
@@ -102,5 +103,35 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
       | subject     | 9278693472                              |
       | contentType | application/pdf                         |
       | relatesTo   | 536941082                               |
+    Then the operation is unsuccessful
+    And the response contains error message "Trying to update one or more immutable fields"
+
+  Scenario: Unable to update the status immutable property of a DOCUMENT_POINTER
+    Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
+      | snomed_code | description                 |
+      | 736253002   | "Mental health crisis plan" |
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template
+      | property    | value                                   |
+      | identifier  | 1234567890                              |
+      | status      | deleted                                 |
+      | type        | 736253002                               |
+      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL |
+      | subject     | 9278693472                              |
+      | contentType | application/pdf                         |
+    Then the operation is unsuccessful
+    And the response contains error message "Trying to update one or more immutable fields"
+
+  Scenario: Unable to update the custodian immutable property of a DOCUMENT_POINTER
+    Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
+      | snomed_code | description                 |
+      | 736253002   | "Mental health crisis plan" |
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template
+      | property    | value                                     |
+      | identifier  | 1234567890                                |
+      | status      | current                                   |
+      | type        | 736253002                                 |
+      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL 2 |
+      | subject     | 9278693472                                |
+      | contentType | application/pdf                           |
     Then the operation is unsuccessful
     And the response contains error message "Trying to update one or more immutable fields"
