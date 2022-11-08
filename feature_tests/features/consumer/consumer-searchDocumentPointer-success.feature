@@ -51,8 +51,8 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
     When "TEST CONSUMER" searches with query parameters:
-      | property | value      |
-      | subject  | 9278693472 |
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     And "TEST CONSUMER" searches with the header values:
       | property | value     |
       | type     | 736253002 |
@@ -97,8 +97,8 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
     When "TEST CONSUMER" searches with query parameters:
-      | property | value      |
-      | subject  | 9278693472 |
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     And "TEST CONSUMER" searches with the header values:
       | property | value     |
       | type     | 736253002 |
@@ -135,8 +135,8 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
     When "TEST CONSUMER" searches with query parameters
-      | property | value      |
-      | subject  | 9278693472 |
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     And "TEST CONSUMER" searches with the header values
       | property | value     |
       | type     | 736253002 |
@@ -148,8 +148,8 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
     When "TEST CONSUMER" searches with query parameters
-      | property | value      |
-      | subject  | 9278693472 |
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     And "TEST CONSUMER" searches with the header values
       | property | value     |
       | type     | 736253002 |

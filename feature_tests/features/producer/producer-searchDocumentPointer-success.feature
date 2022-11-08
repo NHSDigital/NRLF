@@ -51,8 +51,8 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
     When "AARON COURT MENTAL NH" searches with query parameters:
-      | property | value      |
-      | subject  | 9278693472 |
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     And "AARON COURT MENTAL NH" searches with the header values:
       | property  | value                 |
       | type      | 736253002             |
@@ -98,8 +98,8 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
     When "AARON COURT MENTAL NH" searches with query parameters:
-      | property | value      |
-      | subject  | 9278693472 |
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     And "AARON COURT MENTAL NH" searches with the header values:
       | property  | value                 |
       | type      | 736253002             |
@@ -137,8 +137,8 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
     When "AARON COURT MENTAL NH" searches with query parameters
-      | property | value      |
-      | subject  | 9278693472 |
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     And "AARON COURT MENTAL NH" searches with the header values
       | property  | value                 |
       | type      | 736253002             |
@@ -167,8 +167,8 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
     When "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with query parameters
-      | property | value      |
-      | subject  | 7736959498 |
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|7736959498 |
     And "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with the header values
       | property  | value                                   |
       | type      | 736253002                               |
@@ -197,8 +197,8 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
     When "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with query parameters
-      | property | value      |
-      | subject  | 7736959498 |
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|7736959498 |
     And "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with the header values
       | property  | value                        |
       | type      | 555253002                    |
