@@ -26,7 +26,7 @@ def create_zip_package(
 
     print(f"Building {package_name}")
     yield copy_dir
-    zip_package(str(build_dir))
+    zip_package(build_dir)
     shutil.move(dist_dir / f"{BUILD_DIR}.zip", dist_dir / f"{package_name}.zip")
 
 
