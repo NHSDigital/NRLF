@@ -121,3 +121,20 @@ def consumer_search_api_request(
         params=params,
         headers=headers,
     )
+
+
+def consumer_search_api_request_post(
+    path_params: list,
+    data: dict,
+    headers: dict,
+    version: str = DEFAULT_VERSION,
+):
+
+    return _document_pointer_api_request(
+        product="consumer",
+        method="POST",
+        version=version,
+        data=data,
+        path_params=path_params,
+        headers=headers,
+    )

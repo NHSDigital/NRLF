@@ -43,7 +43,7 @@ paths:
       tags:
         - NRLF Consumer
       summary: Search for DocumentReference resources
-      operationId: searchViaPostDocumentReference
+      operationId: searchPostDocumentReference
       parameters:
         - $ref: "#/components/parameters/fromASID"
         - $ref: "#/components/parameters/toASID"
@@ -62,7 +62,7 @@ paths:
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
-        uri: ${method_searchViaPostDocumentReference}
+        uri: ${method_searchPostDocumentReference}
         responses:
           default:
             statusCode: "200"

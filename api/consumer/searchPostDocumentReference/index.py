@@ -3,7 +3,7 @@ import os
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.pipeline import execute_steps, render_response
 
-from api.consumer.searchViaPostDocumentReference.src.config import (
+from api.consumer.searchPostDocumentReference.src.config import (
     Config,
     build_persistent_dependencies,
 )

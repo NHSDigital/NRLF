@@ -10,7 +10,7 @@ from nrlf.core.query import create_search_and_filter_query
 from nrlf.core.repository import Repository
 from nrlf.core.transform import create_bundle_from_document_pointers
 
-from api.consumer.searchViaPostDocumentReference.src.constants import (
+from api.consumer.searchPostDocumentReference.src.constants import (
     PersistentDependencies,
 )
 

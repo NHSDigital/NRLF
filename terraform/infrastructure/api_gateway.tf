@@ -3,10 +3,10 @@ module "consumer__gateway" {
   apitype = "consumer"
   prefix  = local.prefix
   lambdas = {
-    environment                           = terraform.workspace
-    method_searchDocumentReference        = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${local.prefix}--api--consumer--searchDocumentReference/invocations"
-    method_searchViaPostDocumentReference = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${local.prefix}--api--consumer--searchViaPostDocumentReference/invocations"
-    method_readDocumentReference          = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${local.prefix}--api--consumer--readDocumentReference/invocations"
+    environment                        = terraform.workspace
+    method_searchDocumentReference     = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${local.prefix}--api--consumer--searchDocumentReference/invocations"
+    method_searchPostDocumentReference = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${local.prefix}--api--consumer--searchPostDocumentReference/invocations"
+    method_readDocumentReference       = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${local.prefix}--api--consumer--readDocumentReference/invocations"
   }
   kms_key_id = module.kms__cloudwatch.kms_arn
 }

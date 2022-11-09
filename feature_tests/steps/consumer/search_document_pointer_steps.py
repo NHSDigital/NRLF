@@ -5,7 +5,10 @@ from behave import then, when
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
 
-from feature_tests.steps.aws.resources.api import consumer_search_api_request
+from feature_tests.steps.aws.resources.api import (
+    consumer_search_api_request,
+    consumer_search_api_request_post,
+)
 
 
 @then("the consumer search is made")
@@ -60,7 +63,7 @@ def consumer_search_document_pointers_by_post(context):
     }
 
     if context.local_test:
-        from api.consumer.searchViaPostDocumentReference.index import handler
+        from api.consumer.searchPostDocumentReference.index import handler
 
         event = make_aws_event(body=json.dumps(body), headers=headers)
         lambda_context = LambdaContext()
@@ -68,8 +71,9 @@ def consumer_search_document_pointers_by_post(context):
         context.response_status_code = response["statusCode"]
         context.response_message = response["body"]
     else:
-        response = consumer_search_api_request(
-            headers=headers, params=queryStringParameters
+        response = consumer_search_api_request_post(
+            headers=headers, data=json.dumps(context.body), path_params=["_search"]
         )
+        print(response)
         context.response_status_code = response.status_code
         context.response_message = response.text
