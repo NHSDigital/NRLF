@@ -12,7 +12,7 @@
 # ENDPOINTS = [
 #     "consumer.readDocumentReference",
 #     "consumer.searchDocumentReference",
-#     "consumer.searchViaPostDocumentReference",
+#     "consumer.searchPostDocumentReference",
 #     "producer.createDocumentReference",
 #     "producer.deleteDocumentReference",
 #     "producer.readDocumentReference",

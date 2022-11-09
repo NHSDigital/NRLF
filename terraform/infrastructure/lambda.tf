@@ -38,10 +38,10 @@ module "consumer__searchDocumentReference" {
   handler = "api.consumer.searchDocumentReference.index.handler"
 }
 
-module "consumer__searchViaPostDocumentReference" {
+module "consumer__searchPostDocumentReference" {
   source                 = "./modules/lambda"
   apitype                = "consumer"
-  name                   = "searchViaPostDocumentReference"
+  name                   = "searchPostDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
@@ -55,7 +55,7 @@ module "consumer__searchViaPostDocumentReference" {
     aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
-  handler = "api.consumer.searchViaPostDocumentReference.index.handler"
+  handler = "api.consumer.searchPostDocumentReference.index.handler"
 }
 
 module "producer__createDocumentReference" {
