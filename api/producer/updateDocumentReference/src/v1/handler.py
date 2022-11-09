@@ -1,5 +1,6 @@
 import json
 import urllib.parse
+from logging import Logger
 from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
@@ -24,6 +25,7 @@ def parse_request_body(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     body = fetch_body_from_event(event)
     core_model = update_document_pointer_from_fhir_json(body, API_VERSION)
@@ -35,6 +37,7 @@ def parse_producer_permissions(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     client_rp_details = ClientRpDetailsHeader(event)
     return PipelineData(
@@ -58,6 +61,7 @@ def validate_producer_permissions(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     if not _producer_exists():
         raise AuthenticationError("Custodian does not exist in the system")
@@ -74,6 +78,7 @@ def document_pointer_exists(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     repository: Repository = dependencies["document_pointer_repository"]
     client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
@@ -95,6 +100,7 @@ def compare_immutable_fields(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     core_model = data["core_model"]
     original_document = json.loads(data["original_document"])
@@ -113,6 +119,7 @@ def update_core_model_to_db(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
     update_query = update_and_filter_query(**core_model.dict())

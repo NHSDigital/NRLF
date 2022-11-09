@@ -1,7 +1,14 @@
 import json
 
 from lambda_pipeline.types import LambdaContext
+
+# ANTICIPATE THIS IN THE NEXT PR
+# from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.tests.unit.utils import make_aws_event
+
+
+def generate_transaction_id():
+    return "foobar"
 
 
 def update_supersede_targets_in_fhir_json(context, fhir_json: dict):
@@ -29,3 +36,12 @@ def run_lambda_handler_locally(context, handler) -> dict:
     event = make_aws_event(body=body)
     lambda_context = LambdaContext()
     return handler(event, lambda_context)
+
+
+def uuid_headers(context) -> dict:
+    uuid = generate_transaction_id()
+    return {
+        "x-correlation-id": f"{context.scenario.name} | {uuid}",
+        "nhsd-correlation-id": uuid,
+        "x-request-id": uuid,
+    }
