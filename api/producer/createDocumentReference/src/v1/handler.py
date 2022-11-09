@@ -6,6 +6,7 @@ from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventMo
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.header_config import ClientRpDetailsHeader
+from lambda_utils.logging import log_action
 from nrlf.core.errors import AuthenticationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
@@ -22,6 +23,7 @@ from api.producer.createDocumentReference.src.constants import PersistentDepende
 from api.producer.createDocumentReference.src.v1.constants import API_VERSION
 
 
+@log_action(narrative="Parsing ClientRpDetails header")
 def parse_client_rp_details(
     data: PipelineData,
     context: LambdaContext,
@@ -33,6 +35,7 @@ def parse_client_rp_details(
     return PipelineData(**data, client_rp_details=client_rp_details)
 
 
+@log_action(narrative="Parsing request body")
 def parse_request_body(
     data: PipelineData,
     context: LambdaContext,
@@ -45,6 +48,7 @@ def parse_request_body(
     return PipelineData(**data, body=body, core_model=core_model)
 
 
+@log_action(narrative="Determining whether document reference will supersede")
 def mark_as_supersede(
     data: PipelineData,
     context: LambdaContext,
@@ -92,6 +96,7 @@ def _producer_not_exists(client_rp_details: ClientRpDetailsHeader):
     return not client_rp_details.custodian
 
 
+@log_action(narrative="Validating producer permissions")
 def validate_producer_permissions(
     data: PipelineData,
     context: LambdaContext,
@@ -122,6 +127,7 @@ def validate_producer_permissions(
     return PipelineData(**data)
 
 
+@log_action(narrative="Saving document pointer to db")
 def save_core_model_to_db(
     data: PipelineData,
     context: LambdaContext,

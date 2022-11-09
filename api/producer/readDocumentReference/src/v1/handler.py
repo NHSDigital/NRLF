@@ -6,11 +6,13 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.header_config import ClientRpDetailsHeader
+from lambda_utils.logging import log_action
 from nrlf.core.model import DocumentPointer
 from nrlf.core.query import create_read_and_filter_query
 from nrlf.core.repository import Repository
 
 
+@log_action(narrative="Parsing producer permissions")
 def parse_producer_permissions(
     data: PipelineData,
     context: LambdaContext,
@@ -25,6 +27,7 @@ def parse_producer_permissions(
     )
 
 
+@log_action(narrative="Reading document reference")
 def read_document_reference(
     data: PipelineData,
     context: LambdaContext,

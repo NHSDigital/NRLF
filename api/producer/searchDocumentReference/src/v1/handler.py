@@ -4,6 +4,7 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.header_config import ClientRpDetailsHeader
+from lambda_utils.logging import log_action
 from nrlf.core.model import DocumentPointer, ProducerRequestParams
 from nrlf.core.query import create_search_and_filter_query
 from nrlf.core.repository import Repository
@@ -13,6 +14,7 @@ from nrlf.producer.fhir.r4.model import RequestQuerySubject
 from api.producer.searchDocumentReference.src.constants import PersistentDependencies
 
 
+@log_action(narrative="Parsing ClientRpDetails header")
 def parse_client_rp_details(
     data: PipelineData,
     context: LambdaContext,
@@ -28,6 +30,7 @@ def parse_client_rp_details(
     )
 
 
+@log_action(narrative="Searching for document references")
 def search_document_references(
     data: PipelineData,
     context: LambdaContext,

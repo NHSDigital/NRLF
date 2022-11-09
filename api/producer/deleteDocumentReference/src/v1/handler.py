@@ -6,12 +6,14 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.header_config import ClientRpDetailsHeader
+from lambda_utils.logging import log_action
 from nrlf.core.errors import AuthenticationError
 from nrlf.core.query import hard_delete_query
 from nrlf.core.repository import Repository
 from nrlf.core.validators import generate_producer_id
 
 
+@log_action(narrative="Parsing ClientRpDetails header")
 def parse_client_rp_details(
     data: PipelineData,
     context: LambdaContext,
@@ -23,6 +25,7 @@ def parse_client_rp_details(
     return PipelineData(**data, client_rp_details=client_rp_details)
 
 
+@log_action(narrative="Parsing producer permissions")
 def parse_producer_permissions(
     data: PipelineData,
     context: LambdaContext,
@@ -50,6 +53,7 @@ def _producer_not_exists(client_rp_details: ClientRpDetailsHeader):
     return not client_rp_details.custodian
 
 
+@log_action(narrative="Validating producer permissions")
 def validate_producer_permissions(
     data: PipelineData,
     context: LambdaContext,
@@ -72,6 +76,7 @@ def validate_producer_permissions(
     return PipelineData(decoded_id=decoded_id, **data)
 
 
+@log_action(narrative="Deleting document reference")
 def delete_document_reference(
     data: PipelineData,
     context: LambdaContext,

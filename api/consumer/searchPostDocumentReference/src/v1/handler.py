@@ -5,6 +5,7 @@ from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventMo
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.header_config import ClientRpDetailsHeader
+from lambda_utils.logging import log_action
 from nrlf.consumer.fhir.r4.model import RequestQuerySubject
 from nrlf.core.model import ConsumerRequestParams, DocumentPointer
 from nrlf.core.query import create_search_and_filter_query
@@ -16,6 +17,7 @@ from api.consumer.searchPostDocumentReference.src.constants import (
 )
 
 
+@log_action(narrative="Parsing ClientRpDetails header")
 def parse_client_rp_details(
     data: PipelineData,
     context: LambdaContext,
@@ -27,6 +29,7 @@ def parse_client_rp_details(
     return PipelineData(client_rp_details=client_rp_details, **data)
 
 
+@log_action(narrative="Searching for document references")
 def search_document_references(
     data: PipelineData,
     context: LambdaContext,
