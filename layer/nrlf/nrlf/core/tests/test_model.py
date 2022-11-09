@@ -4,7 +4,9 @@ from unittest import mock
 import pytest
 from nrlf.core.dynamodb_types import convert_value_to_dynamo_format
 from nrlf.core.model import (
+    ConsumerRequestParams,
     DocumentPointer,
+    ProducerRequestParams,
     assert_model_has_only_dynamodb_types,
     create_document_type_tuple,
 )
@@ -287,3 +289,37 @@ def test_create_bundle_from_document_pointer():
     }
 
     assert expected_result == result
+
+
+def test_producer_request_params_splits_nhs_id():
+    queryParams = {"subject": "https://fhir.nhs.uk/Id/nhs-number|7736959498"}
+
+    request_params = ProducerRequestParams(**queryParams)
+    expected = "7736959498"
+    assert expected == request_params.nhs_number
+
+
+def test_producer_request_params_throws_error_on_invalid_nhs_number():
+    queryParams = {"subject": "https://fhir.nhs.uk/Id/nhs-number|773695"}
+
+    with pytest.raises(ValueError):
+        request_params = ProducerRequestParams(**queryParams)
+        request_params.nhs_number
+
+
+def test_consumer_request_params_splits_nhs_id():
+    queryParams = {"subject": "https://fhir.nhs.uk/Id/nhs-number|7736959498"}
+
+    request_params = ConsumerRequestParams(**queryParams)
+
+    expected_nhs_number = "7736959498"
+
+    assert expected_nhs_number == request_params.nhs_number
+
+
+def test_consumer_request_params_throws_error_on_invalid_nhs_number():
+    queryParams = {"subject": "https://fhir.nhs.uk/Id/nhs-number|773695"}
+
+    with pytest.raises(ValueError):
+        request_params = ConsumerRequestParams(**queryParams)
+        request_params.nhs_number

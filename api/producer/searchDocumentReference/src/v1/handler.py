@@ -3,10 +3,11 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.header_config import ClientRpDetailsHeader
-from nrlf.core.model import DocumentPointer
+from nrlf.core.model import DocumentPointer, ProducerRequestParams
 from nrlf.core.query import create_search_and_filter_query
 from nrlf.core.repository import Repository
 from nrlf.core.transform import create_bundle_from_document_pointers
+from nrlf.producer.fhir.r4.model import RequestQuerySubject
 
 from api.producer.searchDocumentReference.src.constants import PersistentDependencies
 
@@ -35,8 +36,11 @@ def search_document_references(
     repository: Repository = dependencies["repository"]
     client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
 
+    request_params = ProducerRequestParams(**event.queryStringParameters)
+    nhs_number: RequestQuerySubject = request_params.nhs_number
+
     search_and_filter_query = create_search_and_filter_query(
-        nhs_number=event.queryStringParameters["subject"],
+        nhs_number=nhs_number,
         producer_id=client_rp_details.custodian,
         type=client_rp_details.pointer_types,
     )

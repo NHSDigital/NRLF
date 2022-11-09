@@ -1,5 +1,7 @@
 from typing import Optional
 
+import nrlf.consumer.fhir.r4.model as consumer_model
+import nrlf.producer.fhir.r4.model as producer_model
 from nrlf.core.dynamodb_types import (
     DYNAMODB_NULL,
     DynamoDbIntType,
@@ -111,3 +113,19 @@ class DocumentPointer(BaseModel):
 
         validate_timestamp(date=value.__root__)
         return value
+
+
+class ProducerRequestParams(producer_model.RequestParams):
+    @property
+    def nhs_number(self) -> str:
+        nhs_number = self.subject.__root__.split("|")[1]
+        validate_nhs_number(nhs_number)
+        return nhs_number
+
+
+class ConsumerRequestParams(consumer_model.RequestParams):
+    @property
+    def nhs_number(self) -> str:
+        nhs_number = self.subject.__root__.split("|")[1]
+        validate_nhs_number(nhs_number)
+        return nhs_number
