@@ -48,6 +48,7 @@ def mock_environmental_variables(context, *args, **kwargs):
             "PREFIX": "",
             "DOCUMENT_POINTER_TABLE_NAME": "document-pointer",
             "AWS_DEFAULT_REGION": "eu-west-2",
+            "ENVIRONMENT": "__environment__",
         },
         clear=True,
     ):

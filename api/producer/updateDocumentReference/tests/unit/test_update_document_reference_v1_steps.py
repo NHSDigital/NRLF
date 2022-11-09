@@ -1,5 +1,6 @@
 import json
 from copy import deepcopy
+from logging import getLogger
 from unittest import mock
 
 import pytest
@@ -34,7 +35,9 @@ def test_parse_request_body_to_core_model(mock__make_timestamp):
         "updated_on": {"S": "2022-10-25T15:47:49.732Z"},
         "version": {"N": "1"},
     }
-    pipeline_data = parse_request_body(PipelineData(), {}, event, {})
+    pipeline_data = parse_request_body(
+        PipelineData(), {}, event, {}, getLogger(__name__)
+    )
     assert pipeline_data["core_model"].dict() == expected_output
 
 
@@ -62,10 +65,14 @@ def test_compare_immutable_fields_success(mock__make_timestamp):
         "updated_on": {"S": "2022-10-25T15:47:49.732Z"},
         "version": {"N": "1"},
     }
-    pipeline_data = parse_request_body(PipelineData(), {}, event, {})
+    pipeline_data = parse_request_body(
+        PipelineData(), {}, event, {}, getLogger(__name__)
+    )
     output = dict(pipeline_data)
     output["original_document"] = json.dumps(fhir_json)
-    pipeline_data = compare_immutable_fields(PipelineData(output), {}, event, {})
+    pipeline_data = compare_immutable_fields(
+        PipelineData(output), {}, event, {}, getLogger(__name__)
+    )
     assert pipeline_data["core_model"].dict() == expected_output
 
 
@@ -85,7 +92,11 @@ def test_compare_immutable_fields_failure(mock__make_timestamp):
             **make_aws_event(body=json.dumps(updated_fhir_json))
         )
 
-        pipeline_data = parse_request_body(PipelineData(), {}, event, {})
+        pipeline_data = parse_request_body(
+            PipelineData(), {}, event, {}, getLogger(__name__)
+        )
         output = dict(pipeline_data)
         output["original_document"] = json.dumps(fhir_json)
-        pipeline_data = compare_immutable_fields(PipelineData(output), {}, event, {})
+        pipeline_data = compare_immutable_fields(
+            PipelineData(output), {}, event, {}, getLogger(__name__)
+        )

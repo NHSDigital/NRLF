@@ -1,5 +1,6 @@
 import json
 import urllib.parse
+from logging import Logger
 from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
@@ -15,6 +16,7 @@ def parse_consumer_permissions(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     client_rp_details = ClientRpDetailsHeader(event)
     return PipelineData(
@@ -28,6 +30,7 @@ def read_document_reference(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
     client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]

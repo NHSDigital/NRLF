@@ -1,4 +1,5 @@
 import json
+from logging import getLogger
 from types import FunctionType
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
@@ -48,6 +49,7 @@ def execute_steps(
             event=APIGatewayProxyEventModel(**event),
             context=context,
             dependencies=dependencies,
+            logger=getLogger(__name__),
         )
         return 200, pipeline(data=PipelineData()).to_dict()
     except ValidationError as e:

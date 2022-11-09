@@ -10,6 +10,7 @@ module "consumer__readDocumentReference" {
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
+    ENVIRONMENT                 = local.environment
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -30,6 +31,7 @@ module "consumer__searchDocumentReference" {
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
+    ENVIRONMENT                 = local.environment
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -50,6 +52,7 @@ module "consumer__searchPostDocumentReference" {
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
+    ENVIRONMENT                 = local.environment
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -70,6 +73,7 @@ module "producer__createDocumentReference" {
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
+    ENVIRONMENT                 = local.environment
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-write.arn,
@@ -90,6 +94,7 @@ module "producer__deleteDocumentReference" {
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
+    ENVIRONMENT                 = local.environment
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-write.arn,
@@ -110,6 +115,7 @@ module "producer__readDocumentReference" {
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
+    ENVIRONMENT                 = local.environment
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -131,6 +137,7 @@ module "producer__searchDocumentReference" {
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
+    ENVIRONMENT                 = local.environment
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -151,6 +158,7 @@ module "producer__updateDocumentReference" {
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
+    ENVIRONMENT                 = local.environment
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,

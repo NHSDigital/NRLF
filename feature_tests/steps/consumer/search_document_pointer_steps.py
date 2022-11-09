@@ -1,5 +1,4 @@
 import json
-from unittest.mock import patch
 
 from behave import then, when
 from lambda_pipeline.types import LambdaContext
@@ -9,6 +8,7 @@ from feature_tests.steps.aws.resources.api import (
     consumer_search_api_request,
     consumer_search_api_request_post,
 )
+from feature_tests.steps.common.common_utils import uuid_headers
 
 
 @then("the consumer search is made")
@@ -21,7 +21,8 @@ def consumer_search_document_pointers(context):
                 "app.ASID": "foobar",
                 "nrl.pointer-types": context.allowed_types,
             }
-        )
+        ),
+        **uuid_headers(context),
     }
 
     if context.local_test:

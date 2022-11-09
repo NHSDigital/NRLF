@@ -1,4 +1,5 @@
 from functools import partial
+from logging import Logger
 from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
@@ -26,6 +27,7 @@ def parse_client_rp_details(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     client_rp_details = ClientRpDetailsHeader(event)
     return PipelineData(**data, client_rp_details=client_rp_details)
@@ -36,6 +38,7 @@ def parse_request_body(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     body = fetch_body_from_event(event)
     core_model = create_document_pointer_from_fhir_json(body, API_VERSION)
@@ -47,6 +50,7 @@ def mark_as_supersede(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     fhir_model: StrictDocumentReference = create_fhir_model_from_fhir_json(
         fhir_json=data["body"]
@@ -93,6 +97,7 @@ def validate_producer_permissions(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
     client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
@@ -122,6 +127,7 @@ def save_core_model_to_db(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
     document_pointer_repository: Repository = dependencies.get(

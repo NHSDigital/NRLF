@@ -4,7 +4,10 @@ from behave import then, when
 from lambda_utils.tests.unit.utils import make_aws_event
 
 from feature_tests.steps.aws.resources.api import producer_read_api_request
-from feature_tests.steps.common.common_utils import render_template_document
+from feature_tests.steps.common.common_utils import (
+    render_template_document,
+    uuid_headers,
+)
 
 
 @when(
@@ -20,7 +23,8 @@ def producer_reads_existing_document_reference(
                 "app.ASID": producer,
                 "nrl.pointer-types": context.allowed_types,
             }
-        )
+        ),
+        **uuid_headers(context),
     }
 
     if context.local_test:

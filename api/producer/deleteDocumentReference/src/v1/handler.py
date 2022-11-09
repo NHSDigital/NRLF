@@ -1,5 +1,6 @@
 import json
 import urllib.parse
+from logging import Logger
 from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
@@ -16,6 +17,7 @@ def parse_client_rp_details(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     client_rp_details = ClientRpDetailsHeader(event)
     return PipelineData(**data, client_rp_details=client_rp_details)
@@ -26,6 +28,7 @@ def parse_producer_permissions(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     client_rp_details = json.loads(event.headers["NHSD-Client-RP-Details"])
     return PipelineData(
@@ -52,6 +55,7 @@ def validate_producer_permissions(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
     decoded_id = urllib.parse.unquote(event.pathParameters["id"])
@@ -73,6 +77,7 @@ def delete_document_reference(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
     query = hard_delete_query(

@@ -53,14 +53,14 @@ wrapt = "*"
 
 [[package]]
 name = "awscli"
-version = "1.27.3"
+version = "1.27.4"
 description = "Universal Command Line Environment for AWS."
 category = "dev"
 optional = false
 python-versions = ">= 3.7"
 
 [package.dependencies]
-botocore = "1.29.3"
+botocore = "1.29.4"
 colorama = ">=0.2.5,<0.4.5"
 docutils = ">=0.10,<0.17"
 PyYAML = ">=3.10,<5.5"
@@ -108,14 +108,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.26.3"
+version = "1.26.4"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 
 [package.dependencies]
-botocore = ">=1.29.3,<1.30.0"
+botocore = ">=1.29.4,<1.30.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -124,7 +124,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.29.3"
+version = "1.29.4"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -585,7 +585,7 @@ url = "layer/nrlf"
 
 [[package]]
 name = "nrlf-lambda-pipeline"
-version = "0.1.0"
+version = "0.2.0"
 description = "Robust implementation of step chaining for AWS Lambda executions"
 category = "main"
 optional = false
@@ -599,8 +599,8 @@ pydantic = {version = "^1.10.2", extras = ["email"]}
 [package.source]
 type = "git"
 url = "https://github.com/NHSDigital/nrlf-lambda-pipeline.git"
-reference = "v0.1.0"
-resolved_reference = "09bc0367f7aa1faa7c6ef610d2ba1e4024339e62"
+reference = "v0.2.0"
+resolved_reference = "a36c69ce4902df54fc58777f5cfd8848c8a8600e"
 
 [[package]]
 name = "openapi-schema-validator"
@@ -1105,7 +1105,7 @@ python-versions = ">=3.4"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "059dacdb911a5e1b8f20b85884ddcd250652cb6ccb58793c86f2095d2ea4e006"
+content-hash = "65e51048ecd3568cf64ed14837588ac2880f36e50aa7a7937b7460c5e7701212"
 
 [metadata.files]
 argcomplete = [
@@ -1125,8 +1125,8 @@ aws-xray-sdk = [
     {file = "aws_xray_sdk-2.10.0-py2.py3-none-any.whl", hash = "sha256:7551e81a796e1a5471ebe84844c40e8edf7c218db33506d046fec61f7495eda4"},
 ]
 awscli = [
-    {file = "awscli-1.27.3-py3-none-any.whl", hash = "sha256:b76f52822f98e25e3dde497e66ab4b30e2aa9572ac35513a4f376b04940592d0"},
-    {file = "awscli-1.27.3.tar.gz", hash = "sha256:3a719932a1d1808347c7ad796916fe99dea0fe7d971909f53e7b6f2680d495a8"},
+    {file = "awscli-1.27.4-py3-none-any.whl", hash = "sha256:1a794b2c12cf370db7601b2b2bb1bec9aafda0666943895f401bb71fdbdd29f9"},
+    {file = "awscli-1.27.4.tar.gz", hash = "sha256:e43ecfaa173d7af6d557f746b41827b831908b3c5db3572b352df0c0ab514dc3"},
 ]
 behave = [
     {file = "behave-1.2.6-py2.py3-none-any.whl", hash = "sha256:ebda1a6c9e5bfe95c5f9f0a2794e01c7098b3dde86c10a95d8621c5907ff6f1c"},
@@ -1156,12 +1156,12 @@ black = [
     {file = "black-22.10.0.tar.gz", hash = "sha256:f513588da599943e0cde4e32cc9879e825d58720d6557062d1098c5ad80080e1"},
 ]
 boto3 = [
-    {file = "boto3-1.26.3-py3-none-any.whl", hash = "sha256:7e871c481f88e5b2fc6ac16eb190c95de21efb43ab2d959beacf8b7b096b11d2"},
-    {file = "boto3-1.26.3.tar.gz", hash = "sha256:b81e4aa16891eac7532ce6cc9eb690a8d2e0ceea3bcf44b5c5a1309c2500d35f"},
+    {file = "boto3-1.26.4-py3-none-any.whl", hash = "sha256:9bfe15f394a7cd8ca2520e42722269d9aa2bbc222e348283c527d3aa88484314"},
+    {file = "boto3-1.26.4.tar.gz", hash = "sha256:244fd0776fc1f69c3ed34f359db7a90a6108372486abc999ce8515a79bbfc86e"},
 ]
 botocore = [
-    {file = "botocore-1.29.3-py3-none-any.whl", hash = "sha256:100534532b2745f6fa019b79199a8941f04b8168f9d557d0847191455f1f1eed"},
-    {file = "botocore-1.29.3.tar.gz", hash = "sha256:ac7986fefe1b9c6323d381c4fdee3845c67fa53eb6c9cf586a8e8a07270dbcfe"},
+    {file = "botocore-1.29.4-py3-none-any.whl", hash = "sha256:4c7dedc1096417ac8a120a3f42b81bddaec5451cdd6add7af98680903fd73b18"},
+    {file = "botocore-1.29.4.tar.gz", hash = "sha256:fa86747f5092723c0dc7f201a48cdfac3ad8d03dd6cb7abc189abc708be43269"},
 ]
 build-scripts = []
 certifi = [

@@ -20,6 +20,7 @@ class Config(BaseModel):
 
     AWS_REGION: str
     PREFIX: str
+    ENVIRONMENT: str
 
 
 def build_persistent_dependencies(config: Config) -> dict[str, any]:
@@ -36,5 +37,6 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
     return {
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY: Repository(
             DocumentPointer, dynamo_client, environment_prefix=config.PREFIX
-        )
+        ),
+        "environment": config.ENVIRONMENT,
     }

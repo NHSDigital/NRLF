@@ -8,7 +8,10 @@ from feature_tests.steps.aws.resources.api import (
     consumer_search_api_request,
     producer_search_api_request,
 )
-from feature_tests.steps.common.common_utils import render_template_document
+from feature_tests.steps.common.common_utils import (
+    render_template_document,
+    uuid_headers,
+)
 
 
 @then("the response contains the DOCUMENT template with the below values")
@@ -55,8 +58,7 @@ def producer_search_document_pointers(context):
         "total": 0,
         "entry": [],
     }
-
-    assert json.loads(response) == empty_bundle
+    assert json.loads(response) == empty_bundle, json.loads(response)
 
 
 @then("the producer search is made")
@@ -69,7 +71,8 @@ def producer_search_document_pointers(context):
                 "app.ASID": context.headers["custodian"],
                 "nrl.pointer-types": context.allowed_types,
             }
-        )
+        ),
+        **uuid_headers(context),
     }
 
     if context.local_test:

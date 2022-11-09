@@ -1,4 +1,5 @@
 import json
+from logging import getLogger
 from unittest import mock
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
@@ -26,5 +27,7 @@ def test_parse_request_body_to_core_model(mock__make_timestamp):
         "updated_on": {"NULL": True},
         "version": {"N": "1"},
     }
-    pipeline_data = parse_request_body(PipelineData(), {}, event, {})
+    pipeline_data = parse_request_body(
+        PipelineData(), {}, event, {}, getLogger(__name__)
+    )
     assert pipeline_data["core_model"].dict() == expected_output

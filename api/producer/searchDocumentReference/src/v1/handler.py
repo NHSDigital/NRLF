@@ -1,3 +1,4 @@
+from logging import Logger
 from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
@@ -17,6 +18,7 @@ def parse_client_rp_details(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
     client_rp_details = ClientRpDetailsHeader(event)
 
@@ -31,6 +33,7 @@ def search_document_references(
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
+    logger: Logger,
 ) -> PipelineData:
 
     repository: Repository = dependencies["repository"]

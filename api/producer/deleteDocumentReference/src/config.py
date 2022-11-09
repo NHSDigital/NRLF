@@ -18,6 +18,7 @@ class Config(BaseModel):
 
     AWS_REGION: str
     PREFIX: str
+    ENVIRONMENT: str
 
 
 def build_persistent_dependencies(config: Config) -> dict[str, any]:
@@ -35,5 +36,6 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
             item_type=DocumentPointer,
             client=boto3.client("dynamodb"),
             environment_prefix=config.PREFIX,
-        )
+        ),
+        "environment": config.ENVIRONMENT,
     }
