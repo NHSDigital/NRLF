@@ -118,10 +118,14 @@ class DocumentPointer(BaseModel):
 class ProducerRequestParams(producer_model.RequestParams):
     @property
     def nhs_number(self) -> str:
-        return self.subject.__root__.split("|")[1]
+        nhs_number = self.subject.__root__.split("|")[1]
+        validate_nhs_number(nhs_number)
+        return nhs_number
 
 
 class ConsumerRequestParams(consumer_model.RequestParams):
     @property
     def nhs_number(self) -> str:
-        return self.subject.__root__.split("|")[1]
+        nhs_number = self.subject.__root__.split("|")[1]
+        validate_nhs_number(nhs_number)
+        return nhs_number
