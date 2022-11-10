@@ -7,6 +7,7 @@ from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventMo
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.header_config import ClientRpDetailsHeader
+from lambda_utils.logging import log_action
 from nrlf.core.errors import AuthenticationError, ImmutableFieldViolationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.query import create_read_and_filter_query, update_and_filter_query
@@ -20,6 +21,7 @@ from api.producer.updateDocumentReference.src.v1.constants import (
 )
 
 
+@log_action(narrative="Parsing request body")
 def parse_request_body(
     data: PipelineData,
     context: LambdaContext,
@@ -32,6 +34,7 @@ def parse_request_body(
     return PipelineData(core_model=core_model)
 
 
+@log_action(narrative="Parsing producer permissions")
 def parse_producer_permissions(
     data: PipelineData,
     context: LambdaContext,
@@ -56,6 +59,7 @@ def _producer_exists():
     return True
 
 
+@log_action(narrative="Validating producer permissions")
 def validate_producer_permissions(
     data: PipelineData,
     context: LambdaContext,
@@ -73,6 +77,7 @@ def validate_producer_permissions(
     return PipelineData(**data)
 
 
+@log_action(narrative="Determining whether document pointer exists")
 def document_pointer_exists(
     data: PipelineData,
     context: LambdaContext,
@@ -95,6 +100,7 @@ def document_pointer_exists(
     )
 
 
+@log_action(narrative="Comparing immutable fields")
 def compare_immutable_fields(
     data: PipelineData,
     context: LambdaContext,
@@ -114,6 +120,7 @@ def compare_immutable_fields(
     return PipelineData(**data)
 
 
+@log_action(narrative="Updating document pointer model in db")
 def update_core_model_to_db(
     data: PipelineData,
     context: LambdaContext,
