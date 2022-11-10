@@ -27,7 +27,12 @@ jobs:
 
     steps:
       - name: WHo am I
-        run: whoami
+        run: |
+          whoami
+          ls -a
+          cd /home/ubuntu
+          ls -a
+
 #  cache-base:
 #    name: Create base cache
 #    runs-on: ubuntu-latest
