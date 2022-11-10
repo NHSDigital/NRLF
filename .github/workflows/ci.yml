@@ -29,8 +29,10 @@ jobs:
       - name: WHo am I
         run: |
           whoami
+          pwd
           ls -a
           cd /home/ubuntu
+          pwd
           ls -a
 
 #  cache-base:
