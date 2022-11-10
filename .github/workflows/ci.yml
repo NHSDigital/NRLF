@@ -26,14 +26,14 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
       - name: WHo am I
         run: |
-          whoami
-          pwd
-          ls -a
-          cd /home/ubuntu
-          pwd
-          ls -a
+          pyenv --version
 
 #  cache-base:
 #    name: Create base cache
