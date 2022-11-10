@@ -12,6 +12,8 @@ aws-lambda-powertools = "==1.29.2"
 nhs-number = "==1.2.1"
 pydantic = "==1.10.2"
 nrlf-lambda-pipeline = {git = "https://github.com/NHSDigital/nrlf-lambda-pipeline.git", tag = "v0.2.0"}
+libffx = "0.0.2"
+
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"

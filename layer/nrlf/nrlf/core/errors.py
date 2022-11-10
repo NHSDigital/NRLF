@@ -25,6 +25,10 @@ class ImmutableFieldViolationError(Exception):
     pass
 
 
+class InvalidLogicalIdError(Exception):
+    pass
+
+
 ERROR_SET_4XX = (
     AuthenticationError,
     DynamoDbError,
