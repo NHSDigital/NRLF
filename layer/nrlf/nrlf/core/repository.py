@@ -19,6 +19,7 @@ ATTRIBUTE_NOT_EXISTS_ID = "attribute_not_exists(id)"
 CONDITION_CHECK_CODES = [
     "ConditionalCheckFailedException",
     "TransactionCanceledException",
+    "ValidationException",
 ]
 
 

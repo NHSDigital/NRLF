@@ -91,5 +91,5 @@ Feature: Success Scenarios where producer unable to supersede Document Pointers
       | updated_on  | NULL                                                |
       | document    | <<template>>                                        |
       | created_on  | <<timestamp>>                                       |
-    And Document Pointer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567890" does not exist
-    And Document Pointer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567891" does not exist
+    And Document Pointer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" does not exist
+    And Document Pointer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891" does not exist
