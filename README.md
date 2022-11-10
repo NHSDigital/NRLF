@@ -334,3 +334,45 @@ Create the trust role:
 ```
 nrlf bootstrap create-non-mgmt
 ```
+
+# Route53 & Hosted Zones
+
+There are 2 parts to the Route53 configuration:
+
+## 1. environment accounts
+
+In `terraform/account-wide-infrastructure/prod/route53.tf`, for example, we have a Hosted Zone:
+
+```
+resource "aws_route53_zone" "dev-ns" {
+  name = "dev.internal.record-locator.devspineservices.nhs.uk"
+}
+```
+
+## 2. mgmt account
+
+In `terraform/account-wide-infrastructure/mgmt/route53.tf` we have both a Hosted Zone and a Record per environment, for example:
+
+```
+resource "aws_route53_zone" "prodspine" {
+  name = "record-locator.spineservices.nhs.uk"
+
+  tags = {
+    Environment = terraform.workspace
+  }
+}
+
+resource "aws_route53_record" "prodspine" {
+  zone_id = aws_route53_zone.prodspine.zone_id
+  name    = "prod.internal.record-locator.spineservices.nhs.uk"
+  records = ["ns-904.awsdns-49.net.",
+    "ns-1539.awsdns-00.co.uk.",
+    "ns-1398.awsdns-46.org.",
+    "ns-300.awsdns-37.com."
+  ]
+  ttl  = 300
+  type = "NS"
+}
+```
+
+The `records` property is derived by first deploying to a specific environment, in this instance, production, and from the AWS Console navigating to the Route53 Hosted Zone that was just deployed and copying the "Value/Route traffic to" information into the `records` property. Finally, deploy to the mgmt account with the new information.

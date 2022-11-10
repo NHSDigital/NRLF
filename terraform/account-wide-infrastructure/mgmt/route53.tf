@@ -1,4 +1,4 @@
-resource "aws_route53_zone" "spine" {
+resource "aws_route53_zone" "prodspine" {
   name = "record-locator.spineservices.nhs.uk"
 
   tags = {
@@ -6,7 +6,7 @@ resource "aws_route53_zone" "spine" {
   }
 }
 
-resource "aws_route53_record" "spine" {
+resource "aws_route53_record" "prodspine" {
   zone_id = aws_route53_zone.spine.zone_id
   name    = "prod.internal.record-locator.spineservices.nhs.uk"
   records = ["ns-904.awsdns-49.net.",
