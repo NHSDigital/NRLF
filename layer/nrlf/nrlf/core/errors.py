@@ -20,3 +20,13 @@ class TooManyItemsError(Exception):
 
 class ImmutableFieldViolationError(Exception):
     pass
+
+
+ERROR_SET_4XX = (
+    AuthenticationError,
+    DynamoDbError,
+    FhirValidationError,
+    ImmutableFieldViolationError,
+    ItemNotFound,
+    TooManyItemsError,
+)

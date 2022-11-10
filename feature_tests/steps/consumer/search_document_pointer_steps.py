@@ -60,7 +60,8 @@ def consumer_search_document_pointers_by_post(context):
                 "app.ASID": "foobar",
                 "nrl.pointer-types": context.allowed_types,
             }
-        )
+        ),
+        **uuid_headers(context),
     }
 
     if context.local_test:

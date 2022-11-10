@@ -1,25 +1,18 @@
 import json
-from logging import getLogger
+from pathlib import Path
 from types import FunctionType
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.pipeline import make_pipeline
 from lambda_pipeline.types import LambdaContext, PipelineData
-from lambda_utils.errors import RequestParsingError
+from lambda_utils.logging import Logger
 from lambda_utils.producer.response import bad_request, get_error_msg
 from lambda_utils.versioning import (
     get_largest_possible_version,
     get_version_from_header,
     get_versioned_steps,
 )
-from nrlf.core.errors import (
-    AuthenticationError,
-    DynamoDbError,
-    FhirValidationError,
-    ImmutableFieldViolationError,
-    ItemNotFound,
-    TooManyItemsError,
-)
+from nrlf.core.errors import ERROR_SET_4XX
 from pydantic import ValidationError
 
 
@@ -39,6 +32,13 @@ def execute_steps(
     Executes the handler and wraps it in exception handling
     """
     try:
+        _event = APIGatewayProxyEventModel(**event)
+        lambda_name = Path(index_path).stem
+        logger = Logger(
+            logger_name=lambda_name,
+            aws_lambda_event=_event,
+            aws_environment=dependencies["environment"],
+        )
         requested_version = get_version_from_header(event)
         versioned_steps = get_versioned_steps(index_path)
         steps = _get_steps(
@@ -46,23 +46,15 @@ def execute_steps(
         )
         pipeline = make_pipeline(
             steps=steps,
-            event=APIGatewayProxyEventModel(**event),
+            event=_event,
             context=context,
             dependencies=dependencies,
-            logger=getLogger(__name__),
+            logger=logger,
         )
         return 200, pipeline(data=PipelineData()).to_dict()
     except ValidationError as e:
         return bad_request(get_error_msg(e))
-    except (
-        ItemNotFound,
-        AuthenticationError,
-        DynamoDbError,
-        RequestParsingError,
-        FhirValidationError,
-        TooManyItemsError,
-        ImmutableFieldViolationError,
-    ) as e:
+    except ERROR_SET_4XX as e:
         return bad_request(str(e))
     except Exception as e:
         return 500, {"message": str(e)}

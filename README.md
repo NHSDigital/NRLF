@@ -174,6 +174,67 @@ To teardown account wide resources
 nrlf terraform destroy <account> account_wide
 ```
 
+# Logging
+
+This project implements action-based logging. In order to use this, you must decorate any function (i.e. your "action") with the `lambda_utils.logging.log_action` decorator:
+
+```python
+from lambda_utils.logging import log_action
+
+@log_action(narrative="Reading a document", log_fields=["id"], sensitive=False)
+def read_a_document(id, something_i_dont_want_shared):
+    ...
+```
+
+💡 Only fields specified in `log_fields` will be logged.
+
+To run your decorated function as normal (i.e. without logging) then simply run it is normal:
+
+```python
+read_a_document(id=123, something_i_dont_want_shared="xxxx")
+```
+
+To activate logging for your decorated function you just need to pass in an instance of `lambda_utils.logging.Logger`:
+
+```python
+logger = Logger(...)  # Read the docs for the required fields
+read_a_document(id=123, something_i_dont_want_shared="xxxx", logger=logger)
+```
+
+As you can see above, `log_action` has enabled an extra argument `logger` for `read_a_document`, which will be stripped by default before executing your function `read_a_document`.
+
+💡 Don't worry if your function already has an argument named `logger`, it will be retained if you defined it to be there.
+
+Other notes:
+
+- All logs are considered sensitive unless otherwise stated: explicitly setting `sensitive=False` will enable the log in question to flow through to the non-sensitive Splunk indexes.
+- The function / action result can be excluded with `log_action(..., log_result=False, ...)`
+- If the function / action outcome leads to a 4XX error, it is treated with outcome `FAILURE` and the result is the raised error .
+- If the function / action outcome leads to a 5XX error, it is treated with outcome `ERROR` and the `call_stack` and `error` are also returned.
+
+## Sample log from above example
+
+```json
+{
+  "correlation_id": "abasbee3-c461-4bc6-93f0-95c2ee7d3aab",
+  "nhsd_correlation_id": "cbbbab64-c461-4bc6-93f0-95c2ee7d3aab",
+  "transaction_id": "a3278113-38c6-4fcc-8d25-7b1bda4e1c64",
+  "request_id": "daas23e3-c461-4bc6-93f0-95c2ee7d3aab",
+  "environment": "a4081ca6",
+  "sensitive": false,
+  "log_level": "INFO",
+  "log_reference": "my.example.module.read_a_document",
+  "outcome": "SUCCESS",
+  "duration_ms": 258,
+  "message": "Reading a document",
+  "data": {
+    "result": "Lorem ipsum",
+    "inputs": { "id": 123 }
+  },
+  "timestamp": "2022-11-08T16:39:00.090Z"
+}
+```
+
 # Sandbox deployment with LocalStack
 
 In order to deploy the entire stack locally, we use LocalStack which comes bundled with the `dev` dependencies for this project.
