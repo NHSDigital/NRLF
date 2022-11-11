@@ -9,7 +9,7 @@ permissions:
 jobs:
   clear-cache:
     name: Clear Cache
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ci]
 
     steps:
       - name: Clear all cache

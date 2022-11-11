@@ -33,7 +33,7 @@ env:
 jobs:
   cache:
     name: Create cache
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ci]
 
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
@@ -58,7 +58,7 @@ jobs:
   build:
     needs: [cache]
     name: Build - ${{ inputs.branch_name }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ci]
 
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
@@ -90,7 +90,7 @@ jobs:
   terraform-plan:
     needs: [build]
     name: Terraform plan - ${{ inputs.environment }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ci]
 
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
@@ -128,7 +128,7 @@ jobs:
   terraform-apply:
     needs: [terraform-plan]
     name: Terraform apply - ${{ inputs.environment }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
 
     steps:
@@ -168,7 +168,7 @@ jobs:
     name: Clear Cache
     needs: [terraform-apply]
     if: ${{ always() }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ci]
 
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
