@@ -27,7 +27,10 @@ jobs:
 
     steps:
       - name: Test Secret
-        run: aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--github-personal-access-token --query SecretString --output text
+        run: |
+          aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--github-personal-access-token --query SecretString --output text > test.txt
+          cat test.txt
+
 #  cache-base:
 #    name: Create base cache
 #    runs-on: [self-hosted]
