@@ -7,7 +7,7 @@ resource "aws_route53_zone" "prodspine" {
 }
 
 resource "aws_route53_record" "prodspine" {
-  zone_id = aws_route53_zone.spine.zone_id
+  zone_id = aws_route53_zone.prodspine.zone_id
   name    = "prod.internal.record-locator.spineservices.nhs.uk"
   records = ["ns-904.awsdns-49.net.",
     "ns-1539.awsdns-00.co.uk.",
