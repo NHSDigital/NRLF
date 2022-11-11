@@ -29,8 +29,10 @@ jobs:
       - name: get package version
         run: |
           pyenv --version
-          python --version
-          poetry --version
+          pyenv version
+
+#          python --version
+#          poetry --version
 
 #  cache-base:
 #    name: Create base cache
