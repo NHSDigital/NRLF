@@ -21,9 +21,33 @@ env:
   RUNNING_IN_CI: 1
 
 jobs:
-  test-ci:
-    name: Test CI
-    runs-on: self-hosted
+  cache-base:
+    name: Create base cache
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Git clone - ${{ env.BASE_BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BASE_BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Install dependencies
+        run: |
+          source nrlf.sh
+          nrlf make install
+
+      - name: Create cache - ${{ env.BASE_CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.BASE_CACHE_NAME }}
+
+  cache:
+    name: Create cache
+    runs-on: [self-hosted]
 
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
@@ -31,357 +55,319 @@ jobs:
         with:
           ref: ${{ env.BRANCH_NAME }}
 
-      - name: WHo am I
-        run: |
-          pyenv --version
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
 
-#  cache-base:
-#    name: Create base cache
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Git clone - ${{ env.BASE_BRANCH_NAME }}
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ env.BASE_BRANCH_NAME }}
-#
-#      - name: Runner setup
-#        uses: ./.github/actions/runner-setup/
-#
-#      - name: Install dependencies
-#        run: |
-#          source nrlf.sh
-#          nrlf make install
-#
-#      - name: Create cache - ${{ env.BASE_CACHE_NAME }}
-#        uses: ./.github/actions/caching/
-#        with:
-#          path: .venv
-#          name: ${{ env.BASE_CACHE_NAME }}
-#
-#  cache:
-#    name: Create cache
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Git clone - ${{ env.BRANCH_NAME }}
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ env.BRANCH_NAME }}
-#
-#      - name: Runner setup
-#        uses: ./.github/actions/runner-setup/
-#
-#      - name: Install dependencies
-#        run: |
-#          source nrlf.sh
-#          nrlf make install
-#
-#      - name: Create cache - ${{ env.CACHE_NAME }}
-#        uses: ./.github/actions/caching/
-#        with:
-#          path: .venv
-#          name: ${{ env.CACHE_NAME }}
-#
-#  lint-check:
-#    needs: [cache]
-#    name: Linting check
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Git clone - ${{ env.BRANCH_NAME }}
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ env.BRANCH_NAME }}
-#
-#      - name: Runner setup
-#        uses: ./.github/actions/runner-setup/
-#
-#      - name: Download cache - ${{ env.CACHE_NAME }}
-#        uses: ./.github/actions/caching/
-#        with:
-#          path: .venv
-#          name: ${{ env.CACHE_NAME }}
-#
-#      - name: Run linting
-#        run: |
-#          source .venv/bin/activate
-#          source nrlf.sh
-#          nrlf lint check
-#
-#  unit-test:
-#    needs: [cache]
-#    name: Unit test
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Git clone - ${{ env.BRANCH_NAME }}
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ env.BRANCH_NAME }}
-#
-#      - name: Runner setup
-#        uses: ./.github/actions/runner-setup/
-#
-#      - name: Download cache - ${{ env.CACHE_NAME }}
-#        uses: ./.github/actions/caching/
-#        with:
-#          path: .venv
-#          name: ${{ env.CACHE_NAME }}
-#
-#      - name: Run test
-#        run: |
-#          source .venv/bin/activate
-#          source nrlf.sh
-#          nrlf test unit
-#
-#  feature-test-local:
-#    needs: [cache]
-#    name: Local Feature Test
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Git clone - ${{ env.BRANCH_NAME }}
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ env.BRANCH_NAME }}
-#
-#      - name: Runner setup
-#        uses: ./.github/actions/runner-setup/
-#
-#      - name: Download cache - ${{ env.CACHE_NAME }}
-#        uses: ./.github/actions/caching/
-#        with:
-#          path: .venv
-#          name: ${{ env.CACHE_NAME }}
-#
-#      - name: Run test
-#        run: |
-#          source .venv/bin/activate
-#          source nrlf.sh
-#          nrlf test feature local
-#
-#  build-base:
-#    needs: [cache-base]
-#    name: Build base
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Git clone - ${{ env.BASE_BRANCH_NAME }}
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ env.BASE_BRANCH_NAME }}
-#
-#      - name: Runner setup
-#        uses: ./.github/actions/runner-setup/
-#
-#      - name: Download cache - ${{ env.BASE_CACHE_NAME }}
-#        uses: ./.github/actions/caching/
-#        with:
-#          path: .venv
-#          name: ${{ env.BASE_CACHE_NAME }}
-#
-#      - name: Build
-#        run: |
-#          source .venv/bin/activate
-#          source nrlf.sh
-#          nrlf make build
-#
-#      - name: Upload artifact - ${{ env.BASE_ARTIFACT_NAME }}
-#        uses: ./.github/actions/upload-artifact/
-#        with:
-#          name: ${{ env.BASE_ARTIFACT_NAME }}
-#          path: ./**/dist/*.zip
-#
-#  build:
-#    needs: [cache]
-#    name: Build
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Git clone - ${{ env.BRANCH_NAME }}
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ env.BRANCH_NAME }}
-#
-#      - name: Runner setup
-#        uses: ./.github/actions/runner-setup/
-#
-#      - name: Download cache - ${{ env.CACHE_NAME }}
-#        uses: ./.github/actions/caching/
-#        with:
-#          path: .venv
-#          name: ${{ env.CACHE_NAME }}
-#
-#      - name: Build
-#        run: |
-#          source .venv/bin/activate
-#          source nrlf.sh
-#          nrlf make build
-#
-#      - name: Upload artifact - ${{ env.ARTIFACT_NAME }}
-#        uses: ./.github/actions/upload-artifact/
-#        with:
-#          name: ${{ env.ARTIFACT_NAME }}
-#          path: ./**/dist/*.zip
-#
-#  terraform-base:
-#    needs: [build-base, unit-test, feature-test-local, lint-check]
-#    name: Terraform base
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Git clone - ${{ env.BASE_BRANCH_NAME }}
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ env.BASE_BRANCH_NAME }}
-#
-#      - name: Runner setup
-#        uses: ./.github/actions/runner-setup/
-#
-#      - name: Download artifacts - ${{ env.BASE_ARTIFACT_NAME }}
-#        uses: ./.github/actions/download-artifact/
-#        with:
-#          name: ${{ env.BASE_ARTIFACT_NAME }}
-#
-#      - name: Configure aws credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-#          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
-#          aws-region: eu-west-2
-#
-#      - name: Terraform apply
-#        run: |
-#          source nrlf.sh
-#          nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
-#          nrlf terraform ciplan ${GITHUB_SHA_SHORT}-ci
-#          nrlf terraform ciapply ${GITHUB_SHA_SHORT}-ci
-#
-#  terraform-apply:
-#    needs: [build, terraform-base, unit-test, lint-check, feature-test-local]
-#    name: Terraform apply
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Git clone - ${{ env.BRANCH_NAME }}
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ env.BRANCH_NAME }}
-#
-#      - name: Runner setup
-#        uses: ./.github/actions/runner-setup/
-#
-#      - name: Download artifacts - ${{ env.ARTIFACT_NAME }}
-#        uses: ./.github/actions/download-artifact/
-#        with:
-#          name: ${{ env.ARTIFACT_NAME }}
-#
-#      - name: Configure aws credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-#          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
-#          aws-region: eu-west-2
-#
-#      - name: Terraform apply
-#        run: |
-#          source nrlf.sh
-#          nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
-#          nrlf terraform ciplan ${GITHUB_SHA_SHORT}-ci
-#          nrlf terraform ciapply ${GITHUB_SHA_SHORT}-ci
-#
-#      - name: Upload artifact
-#        uses: ./.github/actions/upload-artifact/
-#        with:
-#          name: ${{ env.TF_ARTIFACT_NAME }}
-#          path: ./terraform/infrastructure/output.json
-#
-#  integration-test:
-#    needs: [build, terraform-apply]
-#    name: Integration test
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Git clone - ${{ env.BRANCH_NAME }}
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ env.BRANCH_NAME }}
-#
-#      - name: Runner setup
-#        uses: ./.github/actions/runner-setup/
-#
-#      - name: Download artifacts - ${{ env.TF_ARTIFACT_NAME }}
-#        uses: ./.github/actions/download-artifact/
-#        with:
-#          name: ${{ env.TF_ARTIFACT_NAME }}
-#          path: ./terraform/infrastructure/
-#
-#      - name: Download cache - ${{ env.CACHE_NAME }}
-#        uses: ./.github/actions/caching/
-#        with:
-#          path: .venv
-#          name: ${{ env.CACHE_NAME }}
-#
-#      - name: Configure aws credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-#          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
-#          aws-region: eu-west-2
-#
-#      - name: Run test
-#        run: |
-#          source .venv/bin/activate
-#          source nrlf.sh
-#          nrlf test integration
-#          nrlf test feature integration
-#
-#  terraform-destroy:
-#    needs: [integration-test]
-#    if: ${{ always() }}
-#    name: Terraform destroy
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Git clone - ${{ env.BRANCH_NAME }}
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ env.BRANCH_NAME }}
-#
-#      - name: Runner setup
-#        uses: ./.github/actions/runner-setup/
-#
-#      - name: Download artifacts - ${{ env.ARTIFACT_NAME }}
-#        uses: ./.github/actions/download-artifact/
-#        with:
-#          name: ${{ env.ARTIFACT_NAME }}
-#
-#      - name: Configure aws credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-#          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
-#          aws-region: eu-west-2
-#
-#      - name: Terraform destroy
-#        run: |
-#          source nrlf.sh
-#          nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
-#          nrlf terraform cidestroy ${GITHUB_SHA_SHORT}-ci
-#
-#  clear-cache:
-#    name: Clear Cache
-#    needs: [terraform-destroy]
-#    if: ${{ always() }}
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Git clone - ${{ env.BRANCH_NAME }}
-#        uses: actions/checkout@v3
-#        with:
-#          ref: ${{ env.BRANCH_NAME }}
-#
-#      - name: Clear cache
-#        uses: ./.github/actions/clear-cache/
-#        with:
-#          name: ${{ env.BASE_CACHE_NAME }},${{ env.CACHE_NAME }}
+      - name: Install dependencies
+        run: |
+          source nrlf.sh
+          nrlf make install
+
+      - name: Create cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
+  lint-check:
+    needs: [cache]
+    name: Linting check
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
+      - name: Run linting
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf lint check
+
+  unit-test:
+    needs: [cache]
+    name: Unit test
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
+      - name: Run test
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf test unit
+
+  feature-test-local:
+    needs: [cache]
+    name: Local Feature Test
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
+      - name: Run test
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf test feature local
+
+  build-base:
+    needs: [cache-base]
+    name: Build base
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Git clone - ${{ env.BASE_BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BASE_BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download cache - ${{ env.BASE_CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.BASE_CACHE_NAME }}
+
+      - name: Build
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf make build
+
+      - name: Upload artifact - ${{ env.BASE_ARTIFACT_NAME }}
+        uses: ./.github/actions/upload-artifact/
+        with:
+          name: ${{ env.BASE_ARTIFACT_NAME }}
+          path: ./**/dist/*.zip
+
+  build:
+    needs: [cache]
+    name: Build
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
+      - name: Build
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf make build
+
+      - name: Upload artifact - ${{ env.ARTIFACT_NAME }}
+        uses: ./.github/actions/upload-artifact/
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ./**/dist/*.zip
+
+  terraform-base:
+    needs: [build-base, unit-test, feature-test-local, lint-check]
+    name: Terraform base
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Git clone - ${{ env.BASE_BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BASE_BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download artifacts - ${{ env.BASE_ARTIFACT_NAME }}
+        uses: ./.github/actions/download-artifact/
+        with:
+          name: ${{ env.BASE_ARTIFACT_NAME }}
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
+          aws-region: eu-west-2
+
+      - name: Terraform apply
+        run: |
+          source nrlf.sh
+          nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform ciplan ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform ciapply ${GITHUB_SHA_SHORT}-ci
+
+  terraform-apply:
+    needs: [build, terraform-base, unit-test, lint-check, feature-test-local]
+    name: Terraform apply
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download artifacts - ${{ env.ARTIFACT_NAME }}
+        uses: ./.github/actions/download-artifact/
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
+          aws-region: eu-west-2
+
+      - name: Terraform apply
+        run: |
+          source nrlf.sh
+          nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform ciplan ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform ciapply ${GITHUB_SHA_SHORT}-ci
+
+      - name: Upload artifact
+        uses: ./.github/actions/upload-artifact/
+        with:
+          name: ${{ env.TF_ARTIFACT_NAME }}
+          path: ./terraform/infrastructure/output.json
+
+  integration-test:
+    needs: [build, terraform-apply]
+    name: Integration test
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download artifacts - ${{ env.TF_ARTIFACT_NAME }}
+        uses: ./.github/actions/download-artifact/
+        with:
+          name: ${{ env.TF_ARTIFACT_NAME }}
+          path: ./terraform/infrastructure/
+
+      - name: Download cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
+          aws-region: eu-west-2
+
+      - name: Run test
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf test integration
+          nrlf test feature integration
+
+  terraform-destroy:
+    needs: [integration-test]
+    if: ${{ always() }}
+    name: Terraform destroy
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download artifacts - ${{ env.ARTIFACT_NAME }}
+        uses: ./.github/actions/download-artifact/
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
+          aws-region: eu-west-2
+
+      - name: Terraform destroy
+        run: |
+          source nrlf.sh
+          nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform cidestroy ${GITHUB_SHA_SHORT}-ci
+
+  clear-cache:
+    name: Clear Cache
+    needs: [terraform-destroy]
+    if: ${{ always() }}
+    runs-on: [self-hosted]
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Clear cache
+        uses: ./.github/actions/clear-cache/
+        with:
+          name: ${{ env.BASE_CACHE_NAME }},${{ env.CACHE_NAME }}
