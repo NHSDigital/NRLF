@@ -1,6 +1,7 @@
 import json
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
+from lambda_utils.logging_utils import generate_transaction_id
 from pydantic import BaseModel, Field, StrictStr, validator
 
 
@@ -48,3 +49,10 @@ class ClientRpDetailsHeader(AbstractHeader):
     def __init__(self, event: APIGatewayProxyEventModel):
         client_rp_details = event.headers.get("NHSD-Client-RP-Details", "{}")
         super().__init__(**json.loads(client_rp_details))
+
+
+class LoggingHeader(AbstractHeader):
+    correlation_id: StrictStr = Field(alias="x-correlation-id")
+    nhsd_correlation_id: StrictStr = Field(alias="nhsd-correlation-id")
+    transaction_id: StrictStr = Field(default_factory=generate_transaction_id)
+    request_id: StrictStr = Field(alias="x-request-id")

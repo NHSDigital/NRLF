@@ -7,12 +7,12 @@ from types import FunctionType
 from aws_lambda_powertools import Logger as _Logger
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_utils.constants import LoggingOutcomes, LogLevel
+from lambda_utils.header_config import LoggingHeader
 from lambda_utils.logging_utils import (
     CustomFormatter,
     duration_in_milliseconds,
     filter_visible_function_arguments,
     function_handler,
-    generate_transaction_id,
     json_encode_message,
 )
 from nrlf.core.transform import make_timestamp
@@ -50,11 +50,13 @@ class Logger(_Logger):
         nrlf_transaction_id: str = None,
         **kwargs,
     ):
+        _logging_header_inputs = aws_lambda_event.dict().get("headers", {})
+        if nrlf_transaction_id:
+            _logging_header_inputs["transaction_id"] = nrlf_transaction_id
+        logging_header = LoggingHeader(**_logging_header_inputs)
+
         self._base_message = LogTemplate(
-            correlation_id=aws_lambda_event.headers["x-correlation-id"],
-            nhsd_correlation_id=aws_lambda_event.headers["nhsd-correlation-id"],
-            transaction_id=nrlf_transaction_id or generate_transaction_id(),
-            request_id=aws_lambda_event.headers["x-request-id"],
+            **logging_header.dict(),
             host=aws_lambda_event.requestContext.accountId,
             environment=aws_environment,
         )

@@ -39,6 +39,8 @@ def _json_encoder(obj: any) -> str:
         return obj.isoformat()
     elif isinstance(obj, Exception):
         return f"{type(obj).__name__}: {str(obj)}"
+    elif callable(obj):
+        return obj.__name__
     return json._default_encoder.encode(obj)
 
 
