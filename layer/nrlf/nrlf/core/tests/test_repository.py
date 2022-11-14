@@ -1,3 +1,4 @@
+import json
 import time
 from contextlib import contextmanager
 from copy import deepcopy
@@ -34,6 +35,10 @@ DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]
 TABLE_NAME = to_kebab_case(DocumentPointer.__name__)
 API_VERSION = 1
 INDEX_NAME = "idx_nhs_number_by_id"
+SORT_ARGUMENTS = {
+    "sort_by": "id",
+    "order_by": "desc",
+}
 create_document_pointer_from_fhir_json = (
     lambda *args, **kwargs: _create_document_pointer_from_fhir_json(
         *args, api_version=API_VERSION, **kwargs
@@ -320,10 +325,121 @@ def test_search_returns_multiple_values_with_same_nhs_number():
         repository.create(item=core_model_2)
         items = repository.search(
             index_name=INDEX_NAME,
+            sort_params=SORT_ARGUMENTS,
             KeyConditionExpression="nhs_number = :nhs_number",
             ExpressionAttributeValues={":nhs_number": {"S": "9278693472"}},
         )
     assert len(items) == 2
+
+
+@pytest.mark.parametrize(
+    ("sorting", "expected"),
+    (
+        (
+            {"sort_by": "created_on", "order_by": "desc"},
+            "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890",
+        ),
+        (
+            {"sort_by": "created_on", "order_by": "asc"},
+            "spam|1243356678",
+        ),
+        (
+            {"sort_by": "id", "order_by": "desc"},
+            "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890",
+        ),
+        (
+            {"sort_by": "id", "order_by": "asc"},
+            "spam|1243356678",
+        ),
+    ),
+)
+def test_search_returns_multiple_values_with_same_nhs_number_and_sort(
+    sorting, expected
+):
+    fhir_json = read_test_data("nrlf")
+    fhir_json_2 = deepcopy(fhir_json)
+    fhir_json_2["id"] = "spam|1243356678"
+    core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
+    time.sleep(1)
+    core_model_2 = create_document_pointer_from_fhir_json(fhir_json=fhir_json_2)
+    with mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        repository.create(item=core_model)
+        repository.create(item=core_model_2)
+        items = repository.search(
+            index_name=INDEX_NAME,
+            sort_params=sorting,
+            KeyConditionExpression="nhs_number = :nhs_number",
+            ExpressionAttributeValues={":nhs_number": {"S": "9278693472"}},
+        )
+    first_item = items[0].document.__root__
+    first_item = json.loads(first_item)
+    assert first_item["id"] == expected
+
+
+@pytest.mark.parametrize(
+    ("sorting", "expected1", "expected2", "expected3"),
+    (
+        (
+            {"sort_by": "updated_on", "order_by": "desc"},
+            "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890",
+            "spam|1243356678",
+            "spam|4213356678",
+        ),
+        (
+            {"sort_by": "updated_on", "order_by": "asc"},
+            "spam|4213356678",
+            "spam|1243356678",
+            "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890",
+        ),
+    ),
+)
+def test_search_returns_multiple_values_with_same_nhs_number_and_sort_by_update(
+    sorting, expected1, expected2, expected3
+):
+    fhir_json = read_test_data("nrlf")
+    fhir_json_2 = deepcopy(fhir_json)
+    fhir_json_2["id"] = "spam|1243356678"
+    fhir_json_3 = deepcopy(fhir_json)
+    fhir_json_3["id"] = "spam|4213356678"
+    core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
+    core_model_2 = create_document_pointer_from_fhir_json(fhir_json=fhir_json_2)
+    core_model_3 = create_document_pointer_from_fhir_json(fhir_json=fhir_json_3)
+
+    fhir_json_2["content"][0]["attachment"][
+        "url"
+    ] = "https://example.org/different_doc2.pdf"
+    fhir_json_3["content"][0]["attachment"][
+        "url"
+    ] = "https://example.org/different_doc2.pdf"
+    time.sleep(1)
+    updated_core_model_2 = update_document_pointer_from_fhir_json(fhir_json=fhir_json_2)
+    time.sleep(1)
+    updated_core_model_3 = update_document_pointer_from_fhir_json(fhir_json=fhir_json_3)
+    query_params2 = update_and_filter_query(**updated_core_model_2.dict())
+    query_params3 = update_and_filter_query(**updated_core_model_3.dict())
+    with mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        repository.create(item=core_model)
+        repository.create(item=core_model_2)
+        repository.create(item=core_model_3)
+        repository.update(**query_params3)
+        repository.update(**query_params2)
+        items = repository.search(
+            index_name=INDEX_NAME,
+            sort_params=sorting,
+            KeyConditionExpression="nhs_number = :nhs_number",
+            ExpressionAttributeValues={":nhs_number": {"S": "9278693472"}},
+        )
+    first_item = items[0].document.__root__
+    first_item = json.loads(first_item)
+    second_item = items[1].document.__root__
+    second_item = json.loads(second_item)
+    last_item = items[2].document.__root__
+    last_item = json.loads(last_item)
+    assert first_item["id"] == expected1
+    assert second_item["id"] == expected2
+    assert last_item["id"] == expected3
 
 
 def test_search_returns_single_value():
@@ -339,6 +455,7 @@ def test_search_returns_single_value():
         repository.create(item=core_model_2)
         items = repository.search(
             index_name=INDEX_NAME,
+            sort_params=SORT_ARGUMENTS,
             KeyConditionExpression="nhs_number = :nhs_number",
             ExpressionAttributeValues={":nhs_number": {"S": "9278693472"}},
         )

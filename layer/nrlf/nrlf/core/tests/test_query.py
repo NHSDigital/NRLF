@@ -13,6 +13,11 @@ from nrlf.core.tests.test_repository import mock_dynamodb
 from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
+SORT_ARGUMENTS = {
+    "sort_by": "id",
+    "order_by": "desc",
+}
+
 
 @pytest.mark.parametrize(
     ("value", "expected"),
@@ -98,7 +103,7 @@ def test_create_search_and_filter_query_in_db():
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        item = repository.search(nhs_number_index, **query)
+        item = repository.search(nhs_number_index, SORT_ARGUMENTS, **query)
         assert item == [core_model]
 
 
@@ -136,7 +141,7 @@ def test_create_search_and_filter_query_in_db_returns_empty_bundle():
 
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        item = repository.search(nhs_number_index, **query)
+        item = repository.search(nhs_number_index, SORT_ARGUMENTS, **query)
         assert item == empty_item
 
 

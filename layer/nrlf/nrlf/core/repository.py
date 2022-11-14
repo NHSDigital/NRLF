@@ -3,7 +3,7 @@ from functools import wraps
 from typing import TypeVar
 
 from botocore.exceptions import ClientError
-from nrlf.core.dynamodb_types import to_dynamodb_dict
+from nrlf.core.dynamodb_types import convert_dynamo_value_to_raw_value, to_dynamodb_dict
 from nrlf.core.errors import DynamoDbError, ItemNotFound, TooManyItemsError
 from nrlf.core.model import assert_model_has_only_dynamodb_types
 from nrlf.core.types import DynamoDbClient, DynamoDbResponse
@@ -22,6 +22,16 @@ CONDITION_CHECK_CODES = [
 ]
 
 
+def search_results_dynamo_conversion(results: dict, to_dynamo: bool = True):
+    for i, value in enumerate(results["Items"]):
+        for k, v in value.items():
+            if to_dynamo:
+                results["Items"][i][k] = to_dynamodb_dict(v)
+            else:
+                results["Items"][i][k] = convert_dynamo_value_to_raw_value(v)
+    return results
+
+
 def to_kebab_case(name: str) -> str:
     return KEBAB_CASE_RE.sub("-", name).lower()
 
@@ -31,6 +41,20 @@ def _validate_results_within_limits(results: dict):
         raise Exception(
             "DynamoDB has returned too many results, pagination not implemented yet"
         )
+    return results
+
+
+def _sort_search_results(results: dict, sort_params: dict):
+    reverse = True if sort_params["order_by"] == "asc" else False
+    results = search_results_dynamo_conversion(results, False)
+    results["Items"] = sorted(
+        results["Items"],
+        key=lambda v: (
+            v[sort_params["sort_by"]] if v[sort_params["sort_by"]] else v["created_on"]
+        ),
+        reverse=reverse,
+    )
+    results = search_results_dynamo_conversion(results)
     return results
 
 
@@ -89,10 +113,13 @@ class Repository:
         return self.item_type(**item)
 
     @handle_dynamodb_errors()
-    def search(self, index_name: str, **kwargs: dict[str, str]) -> list[PydanticModel]:
+    def search(
+        self, index_name: str, sort_params: dict, **kwargs: dict[str, str]
+    ) -> list[PydanticModel]:
         results = self.dynamodb.query(
             TableName=self.table_name, IndexName=index_name, **kwargs
         )
+        results = _sort_search_results(results, sort_params)
         _validate_results_within_limits(results)
         return [self.item_type(**item) for item in results["Items"]]
 

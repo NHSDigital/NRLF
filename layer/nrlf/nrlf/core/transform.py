@@ -159,3 +159,10 @@ def create_bundle_from_document_pointers(
         total=len(bundleEntryList),
         entry=bundleEntryList,
     ).dict(exclude_none=True, exclude_defaults=True)
+
+
+def sorting_parameters(**query_params) -> dict:
+    return {
+        "sort_by": query_params.get("sort_by", "id"),
+        "order_by": query_params.get("order_by", "desc"),
+    }

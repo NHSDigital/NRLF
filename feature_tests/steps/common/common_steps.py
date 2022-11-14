@@ -1,10 +1,16 @@
 import json
+import time
+from copy import deepcopy
 
 import pytest
 from behave import given, then
 from nrlf.core.dynamodb_types import convert_dynamo_value_to_raw_value
 from nrlf.core.errors import ItemNotFound
-from nrlf.core.transform import create_document_pointer_from_fhir_json
+from nrlf.core.query import update_and_filter_query
+from nrlf.core.transform import (
+    create_document_pointer_from_fhir_json,
+    update_document_pointer_from_fhir_json,
+)
 from nrlf.core.validators import validate_timestamp
 
 from feature_tests.steps.aws.resources.dynamodb import get_dynamo_db_repository
@@ -54,6 +60,32 @@ def given_document_pointer_exists(context):
     context.documents[body["id"]] = rendered_template
 
 
+@given("a Document Pointer exists in the system with the below values and is updated")
+def given_document_pointer_exists_and_is_updated(context):
+    document_pointer_repository = get_dynamo_db_repository(context, "Document Pointers")
+    rendered_template = render_template_document(context)
+    body = json.loads(rendered_template)
+
+    body_update = deepcopy(body)
+    body_update["content"][0]["attachment"][
+        "url"
+    ] = "https://example.org/different_doc.pdf"
+
+    update_supersede_targets_in_fhir_json(context=context, fhir_json=body)
+    core_model = create_document_pointer_from_fhir_json(body, api_version=1)
+    document_pointer_repository.create(core_model)
+    time.sleep(1)
+    core_model_update = update_document_pointer_from_fhir_json(
+        body_update, api_version=1
+    )
+    core_model_update.created_on.__root__ = core_model.created_on.__root__
+
+    update_query = update_and_filter_query(**core_model_update.dict())
+    document_pointer_repository.update(**update_query)
+
+    context.documents[body["id"]] = rendered_template
+
+
 @then("the operation is successful")
 def assert_operation_successful(context):
     assert context.response_status_code == 200, (
@@ -92,3 +124,8 @@ def assert_document_pointer_exists(context, document_id: str):
             KeyConditionExpression="id = :id",
             ExpressionAttributeValues={":id": {"S": document_id}},
         )
+
+
+@given("some time passes")
+def some_time_passes(context):
+    time.sleep(1)

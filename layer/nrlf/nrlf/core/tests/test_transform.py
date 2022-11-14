@@ -4,6 +4,7 @@ from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import (
     create_bundle_entries_from_document_pointers,
     create_document_pointer_from_fhir_json,
+    sorting_parameters,
     validate_no_extra_fields,
 )
 from nrlf.producer.fhir.r4.model import BundleEntry, DocumentReference
@@ -65,3 +66,25 @@ def test_create_document_references_from_document_pointers_multiple():
     result = create_bundle_entries_from_document_pointers([core_model, core_model_2])
 
     assert result == expected_reference
+
+
+@pytest.mark.parametrize(
+    ("queries", "expected"),
+    (
+        (
+            {"subject": "foo", "sort_by": "created_on", "order_by": "desc"},
+            {"sort_by": "created_on", "order_by": "desc"},
+        ),
+        (
+            {"subject": "foo", "sort_by": "updated_on", "order_by": "asc"},
+            {"sort_by": "updated_on", "order_by": "asc"},
+        ),
+        (
+            {"subject": "foo"},
+            {"sort_by": "id", "order_by": "desc"},
+        ),
+    ),
+)
+def test_sort_parameters(queries, expected):
+    params = sorting_parameters(**queries)
+    assert params == expected

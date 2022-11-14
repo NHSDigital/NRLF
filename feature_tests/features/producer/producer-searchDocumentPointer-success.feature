@@ -50,7 +50,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
     And Producer "AARON COURT MENTAL NH" has permission to search Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When "AARON COURT MENTAL NH" searches with query parameters:
+    When "AARON COURT MENTAL NH" searches with query parameters
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     And "AARON COURT MENTAL NH" searches with the header values:
@@ -97,7 +97,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
     And Producer "AARON COURT MENTAL NH" has permission to search Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When "AARON COURT MENTAL NH" searches with query parameters:
+    When "AARON COURT MENTAL NH" searches with query parameters
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     And "AARON COURT MENTAL NH" searches with the header values:
@@ -205,3 +205,257 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | custodian | EMERGENCY AMBULANCE SERVICES |
     Then the producer search is made
     And the response is an empty bundle
+
+  Scenario: Successfully search for multiple Document Pointers by NHS number without sorting
+    Given a Document Pointer exists in the system with the below values
+      | property    | value                          |
+      | identifier  | 3334567890                     |
+      | type        | 736253002                      |
+      | custodian   | AARON COURT MENTAL NH          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values
+      | property    | value                            |
+      | identifier  | 2224567890                       |
+      | type        | 736253002                        |
+      | custodian   | AARON COURT MENTAL NH            |
+      | subject     | 9278693472                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And a Document Pointer exists in the system with the below values
+      | property    | value                            |
+      | identifier  | 1114567890                       |
+      | type        | 736253002                        |
+      | custodian   | AARON COURT MENTAL NH            |
+      | subject     | 9278693472                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And Producer "AARON COURT MENTAL NH" has permission to search Document Pointers for
+      | snomed_code | description               |
+      | 736253002   | Mental health crisis plan |
+    When "AARON COURT MENTAL NH" searches with query parameters
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+    And "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with the header values
+      | property  | value                 |
+      | type      | 736253002             |
+      | custodian | AARON COURT MENTAL NH |
+    Then the producer search is made
+    And the operation is successful
+    And id of document number 0 contains 1114567890
+    And id of document number 1 contains 2224567890
+    And id of document number 2 contains 3334567890
+
+  Scenario: Successfully search for multiple Document Pointers by NHS number without sorting reverse ordering
+    Given a Document Pointer exists in the system with the below values
+      | property    | value                          |
+      | identifier  | 3334567890                     |
+      | type        | 736253002                      |
+      | custodian   | AARON COURT MENTAL NH          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values
+      | property    | value                            |
+      | identifier  | 2224567890                       |
+      | type        | 736253002                        |
+      | custodian   | AARON COURT MENTAL NH            |
+      | subject     | 9278693472                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And a Document Pointer exists in the system with the below values
+      | property    | value                            |
+      | identifier  | 1114567890                       |
+      | type        | 736253002                        |
+      | custodian   | AARON COURT MENTAL NH            |
+      | subject     | 9278693472                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And Producer "AARON COURT MENTAL NH" has permission to search Document Pointers for
+      | snomed_code | description               |
+      | 736253002   | Mental health crisis plan |
+    When "AARON COURT MENTAL NH" searches with query parameters
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | order_by | asc                                           |
+    And "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with the header values
+      | property  | value                 |
+      | type      | 736253002             |
+      | custodian | AARON COURT MENTAL NH |
+    Then the producer search is made
+    And the operation is successful
+    And id of document number 0 contains 3334567890
+    And id of document number 1 contains 2224567890
+    And id of document number 2 contains 1114567890
+
+  Scenario: Successfully search for multiple Document Pointers by NHS number and sort and order by created_on
+    Given a Document Pointer exists in the system with the below values
+      | property    | value                          |
+      | identifier  | 3334567890                     |
+      | type        | 736253002                      |
+      | custodian   | AARON COURT MENTAL NH          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values
+      | property    | value                            |
+      | identifier  | 2224567890                       |
+      | type        | 736253002                        |
+      | custodian   | AARON COURT MENTAL NH            |
+      | subject     | 9278693472                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And a Document Pointer exists in the system with the below values
+      | property    | value                            |
+      | identifier  | 1114567890                       |
+      | type        | 736253002                        |
+      | custodian   | AARON COURT MENTAL NH            |
+      | subject     | 9278693472                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And Producer "AARON COURT MENTAL NH" has permission to search Document Pointers for
+      | snomed_code | description               |
+      | 736253002   | Mental health crisis plan |
+    When "AARON COURT MENTAL NH" searches with query parameters
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | sort_by  | created_on                                    |
+      | order_by | desc                                          |
+    And "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with the header values
+      | property  | value                 |
+      | type      | 736253002             |
+      | custodian | AARON COURT MENTAL NH |
+    Then the producer search is made
+    And the operation is successful
+    And id of document number 0 contains 3334567890
+    And id of document number 1 contains 2224567890
+    And id of document number 2 contains 1114567890
+
+  Scenario: Successfully search for multiple Document Pointers by NHS number and sort and order by created_on and reversed
+    Given a Document Pointer exists in the system with the below values
+      | property    | value                          |
+      | identifier  | 3334567890                     |
+      | type        | 736253002                      |
+      | custodian   | AARON COURT MENTAL NH          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values
+      | property    | value                            |
+      | identifier  | 2224567890                       |
+      | type        | 736253002                        |
+      | custodian   | AARON COURT MENTAL NH            |
+      | subject     | 9278693472                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And a Document Pointer exists in the system with the below values
+      | property    | value                            |
+      | identifier  | 1114567890                       |
+      | type        | 736253002                        |
+      | custodian   | AARON COURT MENTAL NH            |
+      | subject     | 9278693472                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And Producer "AARON COURT MENTAL NH" has permission to search Document Pointers for
+      | snomed_code | description               |
+      | 736253002   | Mental health crisis plan |
+    When "AARON COURT MENTAL NH" searches with query parameters
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | sort_by  | created_on                                    |
+      | order_by | asc                                           |
+    And "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with the header values
+      | property  | value                 |
+      | type      | 736253002             |
+      | custodian | AARON COURT MENTAL NH |
+    Then the producer search is made
+    And the operation is successful
+    And id of document number 0 contains 1114567890
+    And id of document number 1 contains 2224567890
+    And id of document number 2 contains 3334567890
+
+  Scenario: Successfully search for multiple Document Pointers by NHS number and sort and order by updated_on
+    Given a Document Pointer exists in the system with the below values and is updated
+      | property    | value                          |
+      | identifier  | 3334567890                     |
+      | type        | 736253002                      |
+      | custodian   | AARON COURT MENTAL NH          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values
+      | property    | value                            |
+      | identifier  | 2224567890                       |
+      | type        | 736253002                        |
+      | custodian   | AARON COURT MENTAL NH            |
+      | subject     | 9278693472                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And a Document Pointer exists in the system with the below values and is updated
+      | property    | value                            |
+      | identifier  | 1114567890                       |
+      | type        | 736253002                        |
+      | custodian   | AARON COURT MENTAL NH            |
+      | subject     | 9278693472                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And Producer "AARON COURT MENTAL NH" has permission to search Document Pointers for
+      | snomed_code | description               |
+      | 736253002   | Mental health crisis plan |
+    When "AARON COURT MENTAL NH" searches with query parameters
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | sort_by  | updated_on                                    |
+    And "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with the header values
+      | property  | value                 |
+      | type      | 736253002             |
+      | custodian | AARON COURT MENTAL NH |
+    Then the producer search is made
+    And the operation is successful
+    And id of document number 0 contains 3334567890
+    And id of document number 1 contains 2224567890
+    And id of document number 2 contains 1114567890
+
+  Scenario: Successfully search for multiple Document Pointers by NHS number and sort and order by updated_on and reversed
+    Given a Document Pointer exists in the system with the below values and is updated
+      | property    | value                          |
+      | identifier  | 3334567890                     |
+      | type        | 736253002                      |
+      | custodian   | AARON COURT MENTAL NH          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values
+      | property    | value                            |
+      | identifier  | 2224567890                       |
+      | type        | 736253002                        |
+      | custodian   | AARON COURT MENTAL NH            |
+      | subject     | 9278693472                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And a Document Pointer exists in the system with the below values and is updated
+      | property    | value                            |
+      | identifier  | 1114567890                       |
+      | type        | 736253002                        |
+      | custodian   | AARON COURT MENTAL NH            |
+      | subject     | 9278693472                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And Producer "AARON COURT MENTAL NH" has permission to search Document Pointers for
+      | snomed_code | description               |
+      | 736253002   | Mental health crisis plan |
+    When "AARON COURT MENTAL NH" searches with query parameters
+      | property | value                                         |
+      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | sort_by  | updated_on                                    |
+      | order_by | asc                                           |
+    And "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with the header values
+      | property  | value                 |
+      | type      | 736253002             |
+      | custodian | AARON COURT MENTAL NH |
+    Then the producer search is made
+    And the operation is successful
+    And id of document number 0 contains 1114567890
+    And id of document number 1 contains 2224567890
+    And id of document number 2 contains 3334567890
