@@ -23,7 +23,6 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
 - terraform
 - jq
 - tfenv
-- gmp development files. libffx python library needs these files. libffx is used to encode/decode the logicalId (for ubuntu/debian: `apt install libgmp-dev`)
 
 Swagger generation requirements.
 
