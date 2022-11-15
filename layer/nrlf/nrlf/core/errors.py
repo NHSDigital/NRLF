@@ -1,3 +1,6 @@
+from pydantic import ValidationError
+
+
 class ItemNotFound(Exception):
     pass
 
@@ -29,4 +32,5 @@ ERROR_SET_4XX = (
     ImmutableFieldViolationError,
     ItemNotFound,
     TooManyItemsError,
+    ValidationError,
 )
