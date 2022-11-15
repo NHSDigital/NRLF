@@ -112,3 +112,28 @@ Feature: Failure Scenarios where producer unable to supersede Document Pointers
       | url         | https://example.org/my-doc.pdf                      |
     Then the operation is unsuccessful
     And the response contains error message "Condition check failed - Supersede ID mismatch"
+
+  Scenario: Targets must be unique
+    Given a Document Pointer exists in the system with the below values
+      | property    | value                                               |
+      | identifier  | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567890 |
+      | type        | 736253002                                           |
+      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL             |
+      | subject     | 9278693472                                          |
+      | contentType | application/pdf                                     |
+      | url         | https://example.org/my-doc.pdf                      |
+    And Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to create Document Pointers for
+      | snomed_code | description               |
+      | 736253002   | Mental health crisis plan |
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" creates a Document Reference from DOCUMENT template
+      | property    | value                                               |
+      | identifier  | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567891 |
+      | target      | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567890 |
+      | target      | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567890 |
+      | type        | 736253002                                           |
+      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL             |
+      | subject     | 9278693472                                          |
+      | contentType | application/pdf                                     |
+      | url         | https://example.org/my-doc.pdf                      |
+    Then the operation is unsuccessful
+    And the response contains error message "Condition check failed - Supersede ID mismatch"

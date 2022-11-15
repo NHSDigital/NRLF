@@ -1,32 +1,31 @@
 import json
+from copy import deepcopy
 
 from lambda_pipeline.types import LambdaContext
-
-# ANTICIPATE THIS IN THE NEXT PR
-# from lambda_utils.logging_utils import generate_transaction_id
+from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.tests.unit.utils import make_aws_event
 
 
-def generate_transaction_id():
-    return "foobar"
-
-
-def update_supersede_targets_in_fhir_json(context, fhir_json: dict):
+def update_supersede_targets_in_fhir_json(context, template_text: str) -> str:
+    fhir_json = json.loads(template_text)
     supersede_targets = [
-        row["value"] for row in context.table if row["property"] == "$target"
+        row["value"] for row in context.table if row["property"] == "target"
     ]
     if supersede_targets:
-        fhir_json["relatesTo"] *= len(supersede_targets)
+        (_relatesTo,) = fhir_json.pop("relatesTo")
+        fhir_json["relatesTo"] = [deepcopy(_relatesTo) for _ in supersede_targets]
         for relatesTo, target in zip(fhir_json["relatesTo"], supersede_targets):
             relatesTo["target"]["identifier"]["value"] = target
+    return json.dumps(fhir_json)
 
 
 def render_template_document(context) -> str:
     template_text = context.template_document
     for row in context.table:
-        if row["property"] == "$target":
+        if row["property"] == "target":
             continue
         template_text = template_text.replace(f'${row["property"]}', row["value"])
+    template_text = update_supersede_targets_in_fhir_json(context, template_text)
     return template_text
 
 
