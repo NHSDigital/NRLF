@@ -1,6 +1,6 @@
 # NRLF
 
-# Overview
+## Overview
 
 This project has been given the name `nrlf` which stands for `National Records Locator (Futures)`, inheriting it's name from the existing product (NRL) as well as the Spine Futures programme (Futures).
 
@@ -14,15 +14,30 @@ install -> unit test -> build -> deploy -> integration test -> tear down
 
 The NRLF uses the following cycle during development, which promotes a "fail fast" methodology by moving unit tests to the front of the process ahead of expensive and slow build/deploy/teardown routines.
 
-# Setup
+## Table of Contents
 
-## Prerequisites
+1. [Setup](#setup)
+   1. [Prerequisites](#1-prerequisites)
+   2. [Install python dependencies](#2-install-python-dependencies)
+2. [Initialise shell environment](#initialise-shell-environment)
+3. [Login to AWS](#login-to-aws)
+4. [Build, Test & Run the API](#build-test--run-the-api)
+   1. [Run unit tests](#1-run-the-unit-tests)
+   2. [Deploy NRLF](#2-deploy-the-nrlf)
+   3. [Run integration tests](#3-run-the-integration-tests)
+   4. [Run feature tests](#4-run-the-feature-tests)
+5. [Logging](#logging)
+6. [Sandbox deployment with localstack](#sandbox-deployment-with-localstack)
+7. [Route 53 & Hosted zones](#route53--hosted-zones)
 
-- poetry
-- python 3.9
-- terraform
+## Setup
+
+### 1. Prerequisites
+
+- [poetry](https://python-poetry.org/docs/)
+- [pyenv](https://github.com/pyenv/pyenv) (this repository uses python 3.9.15)
 - jq
-- tfenv
+- [tfenv](https://github.com/tfutils/tfenv) (this repository uses terraform 1.3.4)
 
 Swagger generation requirements.
 
@@ -30,151 +45,103 @@ Swagger generation requirements.
 - jre
 - yq v4
 
-## Install python dependencies
+### 2. Install python dependencies
 
-```
+At the root of the repo, run:
+
+```shell
 poetry install
 poetry shell
 pre-commit install
 ```
 
-## Project CLI and AWS login
+## Initialise shell environment
 
-These instructions assume that you have enabled the project CLI:
+To use `nrlf` shell script commands. We must initialise the shell environment. Ensure all packages are installed, run the following commands at the root of the repository.
 
-```
-source nrlf.sh
-```
-
-Furthermore, prior to running `nrlf aws login` any time you need to ensure that you've logged out of any previous sessions:
-
-```
-nrlf aws reset-creds
-```
-
-# Build, Test & Run the API
-
-Now we have installed the dependencies we're going to need to get the software up and running.
-
-## 1. Setup the virtual environment
-
-The API is written in Python, so we need to get the virtual environment running and then re-mount the `nrlf.sh` script.
-
-```
+```shell
 poetry shell
 source nrlf.sh
 ```
 
-## 2. Run the Unit Tests
+This will enable the `nrlf` commands.
+
+## Login to AWS
+
+To login to AWS, use:
+
+```shell
+nrlf aws login <role alias> <mfa token>
+```
+
+This reads `~/.aws/config` file. You will need to ensure the config file is setup correctly.
+
+Furthermore, prior to running `nrlf aws login` any time you need to ensure that you've logged out of any previous sessions:
+
+```shell
+nrlf aws reset-creds
+```
+
+## Build, Test & Run the API
+
+Now we have installed the dependencies we're going to need to get the software up and running.
+
+The API is written in Python, so ensure [Initialise shell environment](#initialise-shell-environment) step is completed
+
+### 1. Run the Unit Tests
 
 The NRLF adopts a "fail fast" methodology, which means that Unit Tests can be run before any expensive operations, such as a complete build or terraform deployment.
 
-```
+```shell
 nrlf test unit
 ```
 
-Note that if you have not configured aws some unit tests will fail. If you want to run the unit tests without configuring aws, you will have to run:
+Note that if you have not configured aws some unit tests will fail. To set the correct aws region for the unit tests.
 
-```
-aws configure
-```
-
-press enter several times without modifying anything except to set the region to `eu-west-2`
-
-## 2. Build the API
-
-Now build the artifacts that will be used to deploy the application.
-
-```
-nrlf make build
+```shell
+aws configure set default.region "eu-west-2"
 ```
 
-## 3. Login to AWS
+### 2. Deploy the NRLF
 
-In order to deploy the NRLF you will need to be able to login to the AWS account using MFA.
+The NRLF is deployed using terraform. The infrastructure is split into two parts.
 
-```
-nrlf aws login mgmt-admin <mfa code>
-```
+One part contains the main infrastructure, which contains all AWS resources that are not required to be tied to AWS accounts (e.g. lambdas, api gateways etc.). You can find the terraform for NRLF main infrastructure in `terraform/infrastructure`
 
-## 4. Deploy the NRLF
+The second part include resources that should be shared by other resources in the same AWS account. This can include Route 53 hosted zones or IAM roles. You can find the terraform for NRLF account wide infrastructure in `terraform/account-wide-infrastructure`
 
-The NRLF is deployed using terraform, and can be deployed to any number of environments, such as, but not limited to `dev`, `test`, `uat`, `pre-prod`, `production`.
+Information on deploying these two parts:
 
-If you do not supply an `<env>` then a hashed key unique to your environment will be generated.
+- [NRLF main infrastructure](./terraform/infrastructure/README.md)
+- [NRLF account wide infrastructure](./terraform/account-wide-infrastructure/README.md)
 
-```
-nrlf terraform plan [<env>]
-```
-
-```
-nrlf terraform apply [<env>]
-```
-
-## 5. Run the Integration Tests
+### 3. Run the Integration Tests
 
 Once the environment has been deployed the integration tests can be run.
 
-```
+```shell
 nrlf test integration
 ```
 
 This executes any tests that have been marked with `@pytest.mark.integration`
 
-## 6. Run the Feature Tests
+### 4. Run the Feature Tests
 
-```
-nrlf test feature
-```
+Feature tests are environment agnostic. They can either be run against local code or against the deployed infrastructure.
 
-This executes any tests that have been marked with `@integration`
-
-## 7. Tear down
-
-Using the same `<env>` from the deployment stage you can tear down the environment you created.
-
-```
-nrlf terraform destroy [<env>]
-```
-
-# Create / update account-wide resources
-
-This is for resources such as Cloudwatch roles which are global to a given account instead of a workspace.
-Account wide resources should be deployed manually and not be run as part of CI.
-
-Log in to your `mgmt` account.
+To run feature tests locally
 
 ```shell
-nrlf aws login mgmt-admin
+nrlf test feature local
 ```
 
-Update account wide resources for accounts (e.g. `dev`, `test`, `prod`, `mgmt`)
-
-Initialise terraform
+To run feature tests against deployed infrastructure
 
 ```shell
-nrlf terraform init <account> account_wide
+nrlf test feature integration
 ```
 
-Create a terraform plan
-
-```shell
-nrlf terraform plan <account> account_wide
-```
-
-Apply changes
-
-```shell
-nrlf terraform apply <account> account_wide
-```
-
-To teardown account wide resources
-
-```shell
-nrlf terraform destroy <account> account_wide
-```
-
-# Logging
+## Logging
 
 This project implements action-based logging. In order to use this, you must decorate any function (i.e. your "action") with the `lambda_utils.logging.log_action` decorator:
 
@@ -212,7 +179,7 @@ Other notes:
 - If the function / action outcome leads to a 4XX error, it is treated with outcome `FAILURE` and the result is the raised error .
 - If the function / action outcome leads to a 5XX error, it is treated with outcome `ERROR` and the `call_stack` and `error` are also returned.
 
-## Sample log from above example
+### Sample log from above example
 
 ```json
 {
@@ -235,125 +202,71 @@ Other notes:
 }
 ```
 
-# Sandbox deployment with LocalStack
+## Sandbox deployment with LocalStack
 
 In order to deploy the entire stack locally, we use LocalStack which comes bundled with the `dev` dependencies for this project.
 You will however need to install a Docker client on your machine according to the instructions for your OS.
 
-## 1. Setup the virtual environment
+### 1. Setup the virtual environment
 
 As before we need to get the virtual environment running and then re-mount the `nrlf.sh` script.
 
-```
+```shell
 poetry shell
 source nrlf.sh
 ```
 
-## 1. (re)build the API
+### 1. (re)build the API
 
 In order to pick up any changes to the API we should build the artifacts that will be used to deploy the application as before:
 
-```
+```shell
 nrlf make build
 ```
 
-## 2. Synchronise the build to the sandbox
+### 2. Synchronise the build to the sandbox
 
 Since the free tier of LocalStack doesn't support layers, we also amend the artifacts to bundle the layers into the main Lambda.
 
-```
+```shell
 nrlf sandbox sync
 ```
 
-## 3. Deploy the API to LocalStack via Terraform
+### 3. Deploy the API to LocalStack via Terraform
 
-```
+```shell
 nrlf sandbox deploy
 ```
 
 Note down any URLs provided in this step, as you will be able to run queries against them.
 
-## 4. Seed the Sandbox database with some test data
+### 4. Seed the Sandbox database with some test data
 
 In order to enable users to run queries against the Sandbox API, we need to seed the database with some test data:
 
-```
+```shell
 nrlf sandbox seed_db
 ```
 
-## Project bootstrap
-
-### Setup mgmt account resources
-
-```
-🚨 ------------------------------------------------ 🚨
-This should only be performed on project setup, and never again.
-🚨 ------------------------------------------------ 🚨
-```
-
-This will set up your terraform state buckets and import them into your project.
-
-Log in to your `mgmt` account:
-
-```
-nrlf aws login mgmt-admin
-```
-
-Create resources on mgmt account required for terraform to work. This includes:
-
-- terraform state bucket
-- terraform state lock table
-- secret managers to hold account ids for the non-mgmt accounts
-
-```
-nrlf bootstrap create-mgmt
-```
-
-Now log on to AWS web console and manually add the aws account ids to each respective secrets
-`nhsd-nrlf--mgmt--mgmt-account-id`, `nhsd-nrlf--mgmt--prod-account-id`, `nhsd-nrlf--mgmt--test-account-id` and `nhsd-nrlf--mgmt--dev-account-id`
-
-### Create trust role for `mgmt` for your non-`mgmt` accounts
-
-```
-🚨 ------------------------------------------------ 🚨
-This should only be performed on setup of new non-mgmt accounts, and never again.
-🚨 ------------------------------------------------ 🚨
-```
-
-In order to allow `mgmt` to create resources in non-`mgmt` accounts you
-need to create a trust role in non-`mgmt`.
-
-Log in to your non-`mgmt` account (e.g. `dev`):
-
-```
-nrlf aws login <non-mgmt-account>-admin
-```
-
-Create the trust role:
-
-```
-nrlf bootstrap create-non-mgmt
-```
-
-# Route53 & Hosted Zones
+## Route53 & Hosted Zones
 
 There are 2 parts to the Route53 configuration:
 
-## 1. environment accounts
+### 1. environment accounts
 
 In `terraform/account-wide-infrastructure/prod/route53.tf`, for example, we have a Hosted Zone:
 
-```
+```terraform
 resource "aws_route53_zone" "dev-ns" {
   name = "dev.internal.record-locator.devspineservices.nhs.uk"
 }
 ```
 
-## 2. mgmt account
+### 2. mgmt account
 
 In `terraform/account-wide-infrastructure/mgmt/route53.tf` we have both a Hosted Zone and a Record per environment, for example:
 
-```
+```terraform
 resource "aws_route53_zone" "prodspine" {
   name = "record-locator.spineservices.nhs.uk"
 
