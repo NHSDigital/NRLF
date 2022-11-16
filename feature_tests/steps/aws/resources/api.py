@@ -12,9 +12,13 @@ def _document_pointer_api_request(
     product: str,
     version: int = DEFAULT_VERSION,
     path_params: list = [],
+    sandbox=False,
     **request_kwargs,
 ):
-    url = f'{get_terraform_json()["api_base_urls"]["value"][product]}/DocumentReference'
+    base_url = f'{get_terraform_json()["api_base_urls"]["value"][product]}'
+    if sandbox:
+        base_url = f"http://localhost:8000/{product}"
+    url = f"{base_url}/DocumentReference"
     for value in path_params:
         url += f"/{urllib.parse.quote(value)}"
 
@@ -29,9 +33,15 @@ def producer_create_api_request(
     data: dict,
     headers: dict,
     version: str = DEFAULT_VERSION,
+    sandbox=False,
 ):
     return _document_pointer_api_request(
-        product="producer", method="POST", version=version, data=data, headers=headers
+        product="producer",
+        method="POST",
+        version=version,
+        data=data,
+        headers=headers,
+        sandbox=sandbox,
     )
 
 
@@ -40,6 +50,7 @@ def producer_update_api_request(
     data: dict,
     headers: dict,
     version: str = DEFAULT_VERSION,
+    sandbox=False,
 ):
     return _document_pointer_api_request(
         product="producer",
@@ -48,6 +59,7 @@ def producer_update_api_request(
         data=data,
         headers=headers,
         path_params=path_params,
+        sandbox=sandbox,
     )
 
 
@@ -55,6 +67,7 @@ def producer_read_api_request(
     path_params: list,
     headers: dict,
     version: str = DEFAULT_VERSION,
+    sandbox=False,
 ):
     return _document_pointer_api_request(
         product="producer",
@@ -62,6 +75,7 @@ def producer_read_api_request(
         version=version,
         path_params=path_params,
         headers=headers,
+        sandbox=sandbox,
     )
 
 
@@ -69,6 +83,7 @@ def producer_delete_api_request(
     path_params: list,
     headers: dict,
     version: str = DEFAULT_VERSION,
+    sandbox=False,
 ):
     return _document_pointer_api_request(
         product="producer",
@@ -76,6 +91,7 @@ def producer_delete_api_request(
         version=version,
         path_params=path_params,
         headers=headers,
+        sandbox=sandbox,
     )
 
 
@@ -83,6 +99,7 @@ def consumer_read_api_request(
     path_params: list,
     headers: dict,
     version: str = DEFAULT_VERSION,
+    sandbox=False,
 ):
     return _document_pointer_api_request(
         product="consumer",
@@ -90,6 +107,7 @@ def consumer_read_api_request(
         version=version,
         path_params=path_params,
         headers=headers,
+        sandbox=sandbox,
     )
 
 
@@ -97,6 +115,7 @@ def producer_search_api_request(
     params: dict,
     headers: dict,
     version: str = DEFAULT_VERSION,
+    sandbox=False,
 ):
 
     return _document_pointer_api_request(
@@ -105,6 +124,7 @@ def producer_search_api_request(
         version=version,
         params=params,
         headers=headers,
+        sandbox=sandbox,
     )
 
 
@@ -112,6 +132,7 @@ def consumer_search_api_request(
     params: dict,
     headers: dict,
     version: str = DEFAULT_VERSION,
+    sandbox=False,
 ):
 
     return _document_pointer_api_request(
@@ -120,6 +141,7 @@ def consumer_search_api_request(
         version=version,
         params=params,
         headers=headers,
+        sandbox=sandbox,
     )
 
 
@@ -128,6 +150,7 @@ def consumer_search_api_request_post(
     data: dict,
     headers: dict,
     version: str = DEFAULT_VERSION,
+    sandbox=False,
 ):
 
     return _document_pointer_api_request(
@@ -137,4 +160,5 @@ def consumer_search_api_request_post(
         data=data,
         path_params=path_params,
         headers=headers,
+        sandbox=sandbox,
     )

@@ -35,6 +35,7 @@ def consumer_reads_existing_document_reference(
         response = consumer_read_api_request(
             path_params=path_params.values(),
             headers=headers,
+            sandbox=context.sandbox_test,
         )
         context.response_status_code = response.status_code
         context.response_message = response.text

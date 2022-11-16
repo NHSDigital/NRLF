@@ -63,7 +63,12 @@ def get_dynamo_db_repository(context, table_name: str):
     if context.local_test:
         return _DYNAMO_DB_REPOSITORY_MAP[table_name](client=context.dynamodb_client)
 
+    tf_json = get_terraform_json()
+    environmental_prefix = f'{tf_json["prefix"]["value"]}--'
+    if context.sandbox_test:
+        workspace = tf_json["workspace"]["value"]
+        environmental_prefix = environmental_prefix.replace(workspace, "default")
+
     return _DYNAMO_DB_REPOSITORY_MAP[table_name](
-        client=context.dynamodb_client,
-        environmental_prefix=f'{get_terraform_json()["prefix"]["value"]}--',
+        client=context.dynamodb_client, environmental_prefix=environmental_prefix
     )

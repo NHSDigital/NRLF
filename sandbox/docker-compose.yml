@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  nrlf:
+    build: .
+    environment:
+      SERVICES: iam,lambda,apigateway,s3,dynamodb
+      AWS_DEFAULT_REGION: eu-west-2
+      DEBUG: "${DEBUG-}"
+      PERSISTENCE: "${PERSISTENCE-}"
+      LAMBDA_EXECUTOR: "docker"
+      DOCKER_HOST: unix:///var/run/docker.sock
+    ports:
+      - 4566:4566
+      - 4510-4559:4510-4559
+      - 8000:5000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test:
+        - CMD
+        - curl -sSf http://0.0.0.0:4566/health
+        - curl -sSf http://0.0.0.0:8000/_status
+      interval: 5s
+      timeout: 10s
+      start_period: 10s
