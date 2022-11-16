@@ -43,6 +43,8 @@ def producer_create_document_pointer_from_template(context, producer: str):
         context.response_status_code = response["statusCode"]
         context.response_message = response["body"]
     else:
-        response = producer_create_api_request(data=body, headers=headers)
+        response = producer_create_api_request(
+            data=body, headers=headers, sandbox=context.sandbox_test
+        )
         context.response_status_code = response.status_code
         context.response_message = response.text

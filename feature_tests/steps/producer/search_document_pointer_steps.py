@@ -87,7 +87,7 @@ def producer_search_document_pointers(context):
         context.response_message = response["body"]
     else:
         response = producer_search_api_request(
-            headers=headers, params=queryStringParameters
+            headers=headers, params=queryStringParameters, sandbox=context.sandbox_test
         )
         context.response_status_code = response.status_code
         context.response_message = response.text

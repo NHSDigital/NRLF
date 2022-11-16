@@ -46,6 +46,7 @@ def producer_update_document_pointer_from_template(
             data=body,
             headers=headers,
             path_params=path_params.values(),
+            sandbox=context.sandbox_test,
         )
         context.response_status_code = response.status_code
         context.response_message = response.text

@@ -17,6 +17,7 @@ function _nrlf_commands_help() {
   echo "  bootstrap - bootstrap commands"
   echo "  lint      - lint commands"
   echo "  make      - calls the make/build routines"
+  echo "  sandbox   - setup sandbox"
   echo "  swagger   - swagger generation commands"
   echo "  terraform - terraform commands"
   echo "  test      - run tests"
@@ -37,6 +38,7 @@ function nrlf() {
     "test") _test "${@:2}" ;;
     "bootstrap") _bootstrap "${@:2}" ;;
     "lint") _lint "${@:2}" ;;
+    "sandbox") _sandbox "${@:2}" ;;
     "swagger") _swagger "${@:2}" ;;
     *) _nrlf_commands_help ;;
   esac

@@ -204,48 +204,37 @@ Other notes:
 
 ## Sandbox deployment with LocalStack
 
-In order to deploy the entire stack locally, we use LocalStack which comes bundled with the `dev` dependencies for this project.
+In order to deploy the entire stack locally, we use LocalStack which comes bundled with the `sandbox` dependencies for this project.
 You will however need to install a Docker client on your machine according to the instructions for your OS.
 
 ### 1. Setup the virtual environment
 
-As before we need to get the virtual environment running and then re-mount the `nrlf.sh` script.
+As before we need to get the virtual environment running and then re-mount the `nrlf.sh` script. Make sure that you've installed the sandbox dependencies also:
 
 ```shell
+poetry install --with sandbox
 poetry shell
 source nrlf.sh
 ```
 
-### 1. (re)build the API
+### 2. (re)build the API
 
-In order to pick up any changes to the API we should build the artifacts that will be used to deploy the application as before:
+In order to build the sandbox, and have it run locally, do:
 
 ```shell
-nrlf make build
+nrlf sandbox build
 ```
 
-### 2. Synchronise the build to the sandbox
-
-Since the free tier of LocalStack doesn't support layers, we also amend the artifacts to bundle the layers into the main Lambda.
+You can verify that the sandbox proxy is running with:
 
 ```shell
-nrlf sandbox sync
+curl http://localhost:8000/_status
 ```
 
-### 3. Deploy the API to LocalStack via Terraform
+and you can run feature tests with:
 
 ```shell
-nrlf sandbox deploy
-```
-
-Note down any URLs provided in this step, as you will be able to run queries against them.
-
-### 4. Seed the Sandbox database with some test data
-
-In order to enable users to run queries against the Sandbox API, we need to seed the database with some test data:
-
-```shell
-nrlf sandbox seed_db
+nrlf test feature sandbox
 ```
 
 ## Route53 & Hosted Zones
