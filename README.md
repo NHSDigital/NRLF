@@ -264,6 +264,12 @@ You can verify that the sandbox proxy is running with:
 curl http://localhost:8000/_status
 ```
 
+and you can run feature tests with:
+
+```
+nrlf test feature sandbox
+```
+
 ## Project bootstrap
 
 ### Setup mgmt account resources

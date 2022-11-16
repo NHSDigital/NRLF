@@ -42,6 +42,7 @@ def producer_deletes_existing_document_reference(
         response = producer_delete_api_request(
             path_params=path_params.values(),
             headers=headers,
+            sandbox=context.sandbox_test,
         )
         context.response_status_code = response.status_code
         context.response_message = response.text

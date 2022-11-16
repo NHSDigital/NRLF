@@ -37,7 +37,7 @@ def consumer_search_document_pointers(context):
         context.response_message = response["body"]
     else:
         response = consumer_search_api_request(
-            headers=headers, params=queryStringParameters
+            headers=headers, params=queryStringParameters, sandbox=context.sandbox_test
         )
         context.response_status_code = response.status_code
         context.response_message = response.text
@@ -74,7 +74,10 @@ def consumer_search_document_pointers_by_post(context):
         context.response_message = response["body"]
     else:
         response = consumer_search_api_request_post(
-            headers=headers, data=json.dumps(context.body), path_params=["_search"]
+            headers=headers,
+            data=json.dumps(context.body),
+            path_params=["_search"],
+            sandbox=context.sandbox_test,
         )
         print(response)
         context.response_status_code = response.status_code

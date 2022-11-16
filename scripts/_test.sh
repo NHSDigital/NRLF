@@ -10,6 +10,7 @@ function _test_help() {
   echo "  integration                 - run integration tests"
   echo "  feature local               - run local BDD tests"
   echo "  feature integration         - run integration BDD tests"
+  echo "  feature sandbox             - run sandbox BDD tests"
   echo
   return 1
 }
@@ -37,12 +38,17 @@ function _test_sandbox() {
   python -m pytest -m "sandbox and not integration"
 }
 
+function _test_sandbox() {
+  python -m pytest -m "sandbox"
+}
+
 function _test_feature() {
   local command=$1
 
   case $command in
   "local") python -m behave feature_tests  ;;
   "integration") python -m behave --define="integration_test=true" feature_tests ;;
+  "sandbox") python -m behave --define="sandbox_test=true" feature_tests ;;
   *) _test_help ;;
   esac
 }

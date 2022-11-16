@@ -47,7 +47,8 @@ class ClientRpDetailsHeader(AbstractHeader):
     pointer_types: list[StrictStr] = Field(alias="nrl.pointer-types")
 
     def __init__(self, event: APIGatewayProxyEventModel):
-        client_rp_details = event.headers.get("NHSD-Client-RP-Details", "{}")
+        headers = {k.lower(): v for k, v in event.headers.items()}
+        client_rp_details = headers.get("nhsd-client-rp-details", "{}")
         super().__init__(**json.loads(client_rp_details))
 
 
