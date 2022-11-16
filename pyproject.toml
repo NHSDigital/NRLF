@@ -33,6 +33,12 @@ build-scripts = { path = "./scripts/build_scripts/", develop = true }
 nrlf = { path = "./layer/nrlf/", develop = true }
 lambda-utils = { path = "./layer/lambda_utils/", develop = true }
 
+[tool.poetry.group.sandbox]
+optional = true
+
+[tool.poetry.group.sandbox.dependencies]
+terraform-local = "^0.6"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

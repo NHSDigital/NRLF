@@ -19,17 +19,22 @@ function _test() {
   case $command in
   "unit") _test_unit "$2" ;;
   "integration") _test_integration ;;
+  "sandbox") _test_sandbox ;;
   "feature") _test_feature "$2" ;;
   *) _test_help ;;
   esac
 }
 
 function _test_unit() {
-  python -m pytest -m "not integration" "$1"
+  python -m pytest -m "not integration and not sandbox" "$1"
 }
 
 function _test_integration() {
-  python -m pytest -m "integration"
+  python -m pytest -m "integration and not sandbox"
+}
+
+function _test_sandbox() {
+  python -m pytest -m "sandbox and not integration"
 }
 
 function _test_feature() {

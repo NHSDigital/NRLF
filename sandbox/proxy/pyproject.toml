@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "nrlf-api-sandbox"
+version = "1.0.0"
+description = ""
+authors = ["NHS Digital"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+flask = "^2.2.2"
+requests = "2.25"
+
+[tool.poetry.group.sanbdox.dependencies]
+awscli-local = "^0.20"
+flask = "^2.2.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
