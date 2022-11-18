@@ -8,7 +8,7 @@ from feature_tests.steps.aws.resources.api import (
     consumer_search_api_request,
     consumer_search_api_request_post,
 )
-from feature_tests.steps.common.common_utils import uuid_headers
+from feature_tests.steps.common.common_utils import authorisation_headers, uuid_headers
 
 
 @then("the consumer search is made")
@@ -20,9 +20,12 @@ def consumer_search_document_pointers(context):
             {
                 "app.ASID": "foobar",
                 "nrl.pointer-types": context.allowed_types,
+                "developer.app.id": "application id",
+                "developer.app.name": "application name",
             }
         ),
         **uuid_headers(context),
+        **authorisation_headers(),
     }
 
     if context.local_test:
@@ -59,9 +62,12 @@ def consumer_search_document_pointers_by_post(context):
             {
                 "app.ASID": "foobar",
                 "nrl.pointer-types": context.allowed_types,
+                "developer.app.id": "application id",
+                "developer.app.name": "application name",
             }
         ),
         **uuid_headers(context),
+        **authorisation_headers(),
     }
 
     if context.local_test:
@@ -79,6 +85,5 @@ def consumer_search_document_pointers_by_post(context):
             path_params=["_search"],
             sandbox=context.sandbox_test,
         )
-        print(response)
         context.response_status_code = response.status_code
         context.response_message = response.text

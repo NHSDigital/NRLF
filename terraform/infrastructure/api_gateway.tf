@@ -8,7 +8,9 @@ module "consumer__gateway" {
     method_searchPostDocumentReference = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${local.prefix}--api--consumer--searchPostDocumentReference/invocations"
     method_readDocumentReference       = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${local.prefix}--api--consumer--readDocumentReference/invocations"
   }
-  kms_key_id = module.kms__cloudwatch.kms_arn
+  kms_key_id                   = module.kms__cloudwatch.kms_arn
+  authoriser_lambda_invoke_arn = module.consumer__authoriser_lambda.invoke_arn
+  authoriser_lambda_arn        = module.consumer__authoriser_lambda.arn
 }
 
 module "producer__gateway" {
@@ -23,5 +25,7 @@ module "producer__gateway" {
     method_updateDocumentReference = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${local.prefix}--api--producer--updateDocumentReference/invocations"
     method_deleteDocumentReference = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${local.prefix}--api--producer--deleteDocumentReference/invocations"
   }
-  kms_key_id = module.kms__cloudwatch.kms_arn
+  kms_key_id                   = module.kms__cloudwatch.kms_arn
+  authoriser_lambda_invoke_arn = module.producer__authoriser_lambda.invoke_arn
+  authoriser_lambda_arn        = module.producer__authoriser_lambda.arn
 }

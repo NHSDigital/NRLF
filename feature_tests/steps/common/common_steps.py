@@ -7,12 +7,29 @@ from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.core.validators import validate_timestamp
 
 from feature_tests.steps.aws.resources.dynamodb import get_dynamo_db_repository
-from feature_tests.steps.common.common_utils import render_template_document
+from feature_tests.steps.common.common_utils import (
+    render_template
+)
 
 
 @given("template DOCUMENT")
 def set_template_document(context):
-    context.template_document = context.text
+    context.template = context.text
+
+
+@given("example HEADERS")
+def set_template_headers(context):
+    context.template_headers = context.text
+
+
+@given("template POLICY_RESPONSE")
+def set_template_headers(context):
+    context.template = context.text
+
+
+@given("a request contains all the correct headers to be authorised")
+def request_contains_correct_headers(context):
+    context.headers = json.loads(context.template_headers)
 
 
 @given('{actor_type} "{actor_name}" has permission to {action} Document Pointers for')
@@ -41,7 +58,7 @@ def assert_error_message(context, error_message: str):
 @given("a Document Pointer exists in the system with the below values")
 def given_document_pointer_exists(context):
     document_pointer_repository = get_dynamo_db_repository(context, "Document Pointers")
-    rendered_template = render_template_document(context)
+    rendered_template = render_template(context)
     body = json.loads(rendered_template)
     core_model = create_document_pointer_from_fhir_json(body, api_version=1)
     document_pointer_repository.create(core_model)
@@ -88,8 +105,31 @@ def assert_document_pointer_exists(context, document_id: str):
             KeyConditionExpression="id = :id",
             ExpressionAttributeValues={":id": {"S": document_id}},
         )
+<<<<<<< HEAD
     except ItemNotFound:
         return
     except Exception as e:
         item = e
     assert False, item
+=======
+
+
+@then("returns the correct policy")
+def response_contains_correct_policy(context):
+    headers = {**context.developer_headers, **context.headers}
+    headers = _remove_authorisation_headers(headers)
+
+    expected = json.loads(render_template(context))
+    expected["context"] = headers
+
+    expected = json.dumps(expected)
+
+    assert json.loads(expected) == json.loads(json.dumps(context.response_message))
+
+
+def _remove_authorisation_headers(headers):
+    headers.pop("Authorization")
+    headers.pop("Accept")
+    headers.pop("x-request-id")
+    return headers
+>>>>>>> 7d09056 (feautre/nrlf-158-lambda-authoriser le squash)

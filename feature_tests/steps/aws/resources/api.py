@@ -1,8 +1,10 @@
+import json
 import urllib.parse
 
 import requests
+from lambda_utils.tests.unit.utils import make_aws_event
 
-from feature_tests.steps.aws.resources.common import get_terraform_json
+from feature_tests.steps.aws.resources.common import get_terraform_json, new_aws_session
 
 DEFAULT_VERSION = 1.0
 
@@ -27,6 +29,24 @@ def _document_pointer_api_request(
         "Accept": f"version={version}",
     }
     return requests.request(method=method, url=url, **request_kwargs)
+
+
+def _authoriser_lambda_request(
+    product: str,
+    event: dict,
+    version: int = DEFAULT_VERSION,
+):
+    function_name = f'nhsd-nrlf--{get_terraform_json()["workspace"]["value"]}--api--{product}--authoriser'
+    session = new_aws_session()
+    client = session.client("lambda")
+
+    response = client.invoke(
+        FunctionName=function_name,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(event),
+    )
+
+    return json.loads(response["Payload"].read().decode("utf-8"))
 
 
 def producer_create_api_request(
@@ -162,3 +182,19 @@ def consumer_search_api_request_post(
         headers=headers,
         sandbox=sandbox,
     )
+
+
+def producer_authoriser_lambda(
+    event: dict,
+    version: str = DEFAULT_VERSION,
+):
+
+    return _authoriser_lambda_request(product="producer", event=event, version=version)
+
+
+def consumer_authoriser_lambda(
+    event: dict,
+    version: str = DEFAULT_VERSION,
+):
+
+    return _authoriser_lambda_request(product="consumer", event=event, version=version)

@@ -19,22 +19,14 @@ def update_supersede_targets_in_fhir_json(context, template_text: str) -> str:
     return json.dumps(fhir_json)
 
 
-def render_template_document(context) -> str:
-    template_text = context.template_document
+def render_template(context) -> str:
+    template_text = context.template
     for row in context.table:
         if row["property"] == "target":
             continue
         template_text = template_text.replace(f'${row["property"]}', row["value"])
     template_text = update_supersede_targets_in_fhir_json(context, template_text)
     return template_text
-
-
-def run_lambda_handler_locally(context, handler) -> dict:
-    body = render_template_document(context)
-    context.sent_document = json.dumps(json.loads(body))
-    event = make_aws_event(body=body)
-    lambda_context = LambdaContext()
-    return handler(event, lambda_context)
 
 
 def uuid_headers(context) -> dict:
@@ -44,3 +36,15 @@ def uuid_headers(context) -> dict:
         "nhsd-correlation-id": uuid,
         "x-request-id": uuid,
     }
+
+
+def authorisation_headers() -> dict:
+    return {
+        "Authorization": "letmein",
+    }
+
+
+def make_aws_authoriser_event(**kwargs) -> dict:
+    event = make_aws_event(**kwargs)
+    event.pop("isBase64Encoded")
+    return event

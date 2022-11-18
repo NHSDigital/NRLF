@@ -5,7 +5,7 @@ module "consumer__readDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
@@ -26,7 +26,7 @@ module "consumer__searchDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference"
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
@@ -47,7 +47,7 @@ module "consumer__searchPostDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/POST/DocumentReference/_search"
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/POST/DocumentReference/_search"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
@@ -68,7 +68,7 @@ module "producer__createDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/POST/DocumentReference"
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/POST/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
@@ -89,7 +89,7 @@ module "producer__deleteDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/DELETE/DocumentReference/{id}"
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/DELETE/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
@@ -110,7 +110,7 @@ module "producer__readDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
@@ -132,7 +132,7 @@ module "producer__searchDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference"
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
@@ -153,7 +153,7 @@ module "producer__updateDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = "arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference/{id}"
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
@@ -172,4 +172,34 @@ module "producer__updateDocumentReference" {
     aws_iam_policy.document-pointer__dynamodb-write,
     aws_iam_policy.document-pointer__kms-read-write
   ]
+}
+
+module "producer__authoriser_lambda" {
+  source     = "./modules/lambda"
+  apitype    = "producer"
+  name       = "authoriser"
+  region     = local.region
+  prefix     = local.prefix
+  layers     = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  kms_key_id = module.kms__cloudwatch.kms_arn
+  environment_variables = {
+    PREFIX      = "${local.prefix}--"
+    ENVIRONMENT = local.environment
+  }
+  handler = "api.producer.authoriser.index.handler"
+}
+
+module "consumer__authoriser_lambda" {
+  source     = "./modules/lambda"
+  apitype    = "consumer"
+  name       = "authoriser"
+  region     = local.region
+  prefix     = local.prefix
+  layers     = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  kms_key_id = module.kms__cloudwatch.kms_arn
+  environment_variables = {
+    PREFIX      = "${local.prefix}--"
+    ENVIRONMENT = local.environment
+  }
+  handler = "api.consumer.authoriser.index.handler"
 }
