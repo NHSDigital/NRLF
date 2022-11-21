@@ -36,8 +36,10 @@ def _function_handler(fn, args, kwargs):
         return 500, {"message": str(e)}
 
 
-def _setup_logger(index_path: str, event: dict, **dependencies) -> tuple[int, any]:
-    _event = APIGatewayProxyEventModel(**event)
+def _setup_logger(
+    index_path: str, event: dict, extra_event_kwargs: dict, **dependencies
+) -> tuple[int, any]:
+    _event = APIGatewayProxyEventModel(**event, **extra_event_kwargs)
     lambda_name = Path(index_path).stem
     return Logger(
         logger_name=lambda_name,
@@ -63,7 +65,7 @@ def _execute_steps(
     dependencies: dict,
     logger: Logger,
     extra_event_kwargs={},
-    initial_pipeline_data={}
+    initial_pipeline_data={},
 ) -> tuple[int, any]:
     _event = APIGatewayProxyEventModel(**event, **extra_event_kwargs)
     pipeline = make_pipeline(
@@ -77,9 +79,9 @@ def _execute_steps(
 
 
 def execute_steps(
-    index_path: str, 
-    event: dict, 
-    context: LambdaContext, 
+    index_path: str,
+    event: dict,
+    context: LambdaContext,
     extra_event_kwargs={},
     initial_pipeline_data={},
     **dependencies
@@ -87,9 +89,12 @@ def execute_steps(
     """
     Executes the handler and wraps it in exception handling
     """
+    print("here?")
     status_code, response = _function_handler(
-        _setup_logger, args=(index_path, event), kwargs=dependencies
+        _setup_logger, args=(index_path, event, extra_event_kwargs), kwargs=dependencies
     )
+    print("here?2", response)
+
     if status_code != 200:
         return status_code, response
     logger = response
@@ -99,6 +104,7 @@ def execute_steps(
         args=(index_path, event),
         kwargs={"logger": logger},
     )
+
     if status_code != 200:
         return status_code, response
     steps = response
@@ -106,7 +112,12 @@ def execute_steps(
     return _function_handler(
         _execute_steps,
         args=(steps, event, context),
-        kwargs={"logger": logger, "dependencies": dependencies, "initial_pipeline_data": initial_pipeline_data,"extra_event_kwargs":extra_event_kwargs},
+        kwargs={
+            "logger": logger,
+            "dependencies": dependencies,
+            "initial_pipeline_data": initial_pipeline_data,
+            "extra_event_kwargs": extra_event_kwargs,
+        },
     )
 
 
