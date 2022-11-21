@@ -7,9 +7,7 @@ from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.core.validators import validate_timestamp
 
 from feature_tests.steps.aws.resources.dynamodb import get_dynamo_db_repository
-from feature_tests.steps.common.common_utils import (
-    render_template
-)
+from feature_tests.steps.common.common_utils import render_template
 
 
 @given("template DOCUMENT")
@@ -105,13 +103,11 @@ def assert_document_pointer_exists(context, document_id: str):
             KeyConditionExpression="id = :id",
             ExpressionAttributeValues={":id": {"S": document_id}},
         )
-<<<<<<< HEAD
     except ItemNotFound:
         return
     except Exception as e:
         item = e
     assert False, item
-=======
 
 
 @then("returns the correct policy")
@@ -132,4 +128,3 @@ def _remove_authorisation_headers(headers):
     headers.pop("Accept")
     headers.pop("x-request-id")
     return headers
->>>>>>> 7d09056 (feautre/nrlf-158-lambda-authoriser le squash)
