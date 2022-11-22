@@ -4,6 +4,7 @@ from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import (
     create_bundle_entries_from_document_pointers,
     create_document_pointer_from_fhir_json,
+    pagination_parameters,
     validate_no_extra_fields,
 )
 from nrlf.producer.fhir.r4.model import BundleEntry, DocumentReference
@@ -65,3 +66,25 @@ def test_create_document_references_from_document_pointers_multiple():
     result = create_bundle_entries_from_document_pointers([core_model, core_model_2])
 
     assert result == expected_reference
+
+
+@pytest.mark.parametrize(
+    ("queries", "expected"),
+    (
+        (
+            {"subject": "foo", "page": "1", "asc": "true", "pagesize": "3"},
+            {"pagesize": 3, "page": 1, "order": "true"},
+        ),
+        (
+            {"subject": "foo"},
+            {"pagesize": 20, "page": 0, "order": "false"},
+        ),
+        (
+            {"subject": "foo", "pagesize": "101", "asc": "foo"},
+            {"pagesize": 100, "page": 0, "order": "foo"},
+        ),
+    ),
+)
+def test_sort_parameters(queries, expected):
+    params = pagination_parameters(**queries)
+    assert params == expected
