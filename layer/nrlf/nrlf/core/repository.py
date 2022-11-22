@@ -88,14 +88,13 @@ class Repository:
         current_page: int = 0,
         **kwargs: dict[str, str],
     ) -> list[PydanticModel]:
-        global results
         results = self.dynamodb.query(
             TableName=self.table_name, IndexName=index_name, **kwargs
         )
         if current_page != required_page:
             if "LastEvaluatedKey" in results:
                 kwargs["ExclusiveStartKey"] = results["LastEvaluatedKey"]
-                self.search(
+                return self.search(
                     index_name=index_name,
                     required_page=required_page,
                     current_page=current_page + 1,
