@@ -55,12 +55,15 @@ def create_read_and_filter_query(id, **filters):
     return read_and_filter_query
 
 
-def create_search_and_filter_query(nhs_number, **filters):
+def create_search_and_filter_query(nhs_number, pagesize, order, **filters):
+    asc = True if order.lower() == "true" else False
     read_and_filter_query = create_filter_query(**filters)
     read_and_filter_query["ExpressionAttributeValues"][
         ":nhs_number"
     ] = to_dynamodb_dict(nhs_number)
     read_and_filter_query["KeyConditionExpression"] = "nhs_number = :nhs_number"
+    read_and_filter_query["Limit"] = pagesize
+    read_and_filter_query["ScanIndexForward"] = asc
     return read_and_filter_query
 
 

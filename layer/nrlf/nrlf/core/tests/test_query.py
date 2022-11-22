@@ -91,6 +91,8 @@ def test_create_search_and_filter_query_in_db():
     )
     query = create_search_and_filter_query(
         nhs_number=core_model.nhs_number.__root__,
+        pagesize=100,
+        order="false",
         id=core_model.id.__root__,
         type="https://snomed.info/ict|736253002",
     )
@@ -128,6 +130,8 @@ def test_create_search_and_filter_query_in_db_returns_empty_bundle():
     )
     query = create_search_and_filter_query(
         nhs_number=core_model.nhs_number.__root__,
+        pagesize=100,
+        order="false",
         id=core_model.id.__root__,
         type="https://snomed.info/ict|736253002",
     )

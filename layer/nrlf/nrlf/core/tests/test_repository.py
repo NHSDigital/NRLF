@@ -13,7 +13,6 @@ from nrlf.core.query import hard_delete_query, update_and_filter_query
 from nrlf.core.repository import (
     MAX_TRANSACT_ITEMS,
     Repository,
-    _validate_results_within_limits,
     handle_dynamodb_errors,
     to_kebab_case,
 )
@@ -345,40 +344,67 @@ def test_search_returns_single_value():
     assert len(items) == 1
 
 
-def test_validate_results_less_than_100_items():
-    array_size = 99
-    items = [""] * array_size
-    request_results = {"Items": items, "Count": array_size, "ScannedCount": array_size}
-    result = _validate_results_within_limits(request_results)
-    assert result == request_results
+def test_search_returns_one_value_with_same_nhs_number_using_limit():
+    fhir_json = read_test_data("nrlf")
+    fhir_json_2 = deepcopy(fhir_json)
+    fhir_json_2["id"] = "spam|1243356678"
+    core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
+    core_model_2 = create_document_pointer_from_fhir_json(fhir_json=fhir_json_2)
+    with mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        repository.create(item=core_model)
+        repository.create(item=core_model_2)
+        items = repository.search(
+            index_name=INDEX_NAME,
+            required_page=0,
+            KeyConditionExpression="nhs_number = :nhs_number",
+            ExpressionAttributeValues={":nhs_number": {"S": "9278693472"}},
+            Limit=1,
+            ScanIndexForward=False,
+        )
+    assert items[0].id.__root__ == "spam|1243356678"
+    assert len(items) == 1
 
 
-def test_validate_results_throws_exception_when_more_than_100_items():
-    array_size = 101
-    items = [""] * array_size
-    request_results = {"Items": items, "Count": array_size, "ScannedCount": array_size}
+def test_search_returns_one_value_with_same_nhs_number_using_limit_from_page_1():
+    fhir_json = read_test_data("nrlf")
+    fhir_json_2 = deepcopy(fhir_json)
+    fhir_json_2["id"] = "spam|1243356678"
+    core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
+    core_model_2 = create_document_pointer_from_fhir_json(fhir_json=fhir_json_2)
+    with mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        repository.create(item=core_model)
+        repository.create(item=core_model_2)
+        items = repository.search(
+            index_name=INDEX_NAME,
+            required_page=1,
+            KeyConditionExpression="nhs_number = :nhs_number",
+            ExpressionAttributeValues={":nhs_number": {"S": "9278693472"}},
+            Limit=1,
+            ScanIndexForward=False,
+        )
+    assert len(items) == 1
+    assert items[0].id.__root__ == "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"
 
-    with pytest.raises(Exception) as error:
-        _validate_results_within_limits(request_results)
-        assert (
-            error.value
-            == "DynamoDB has returned too many results, pagination not implemented yet"
+
+def test_search_returns_multiple_values_with_same_nhs_number_in_reverse_order():
+    fhir_json = read_test_data("nrlf")
+    fhir_json_2 = deepcopy(fhir_json)
+    fhir_json_2["id"] = "spam|1243356678"
+    core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
+    core_model_2 = create_document_pointer_from_fhir_json(fhir_json=fhir_json_2)
+    with mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        repository.create(item=core_model)
+        repository.create(item=core_model_2)
+        items = repository.search(
+            index_name=INDEX_NAME,
+            KeyConditionExpression="nhs_number = :nhs_number",
+            ExpressionAttributeValues={":nhs_number": {"S": "9278693472"}},
+            ScanIndexForward=True,
         )
 
-
-def test_validate_results_throws_exception_when_last_evaluated_key_exists():
-    array_size = 98
-    items = [""] * array_size
-    request_results = {
-        "Items": items,
-        "Count": array_size,
-        "ScannedCount": array_size,
-        "LastEvaluatedKey": array_size,
-    }
-
-    with pytest.raises(Exception) as error:
-        _validate_results_within_limits(request_results)
-        assert (
-            error.value
-            == "DynamoDB has returned too many results, pagination not implemented yet"
-        )
+    assert items[0].id.__root__ == "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"
+    assert items[1].id.__root__ == "spam|1243356678"
+    assert len(items) == 2

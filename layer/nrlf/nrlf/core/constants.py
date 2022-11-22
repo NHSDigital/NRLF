@@ -9,3 +9,4 @@ class Source(Enum):
 VALID_SOURCES = frozenset(item.value for item in Source.__members__.values())
 EMPTY_VALUES = ("", None, [], {})
 JSON_TYPES = {dict, list}
+MAX_RESULTS = 100
