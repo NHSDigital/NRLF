@@ -56,7 +56,7 @@ def create_read_and_filter_query(id, **filters):
 
 
 def create_search_and_filter_query(nhs_number, pagesize, order, **filters):
-    asc = True if order.lower() == "true" else False
+    asc = order.lower() == "true"
     read_and_filter_query = create_filter_query(**filters)
     read_and_filter_query["ExpressionAttributeValues"][
         ":nhs_number"
