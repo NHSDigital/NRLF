@@ -27,7 +27,7 @@ function _test() {
 }
 
 function _test_unit() {
-  python -m pytest -m "not integration and not sandbox" "$1"
+  python -m pytest -m "not integration and not sandbox and not legacy" "$1"
 }
 
 function _test_integration() {

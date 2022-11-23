@@ -89,11 +89,9 @@ def execute_steps(
     """
     Executes the handler and wraps it in exception handling
     """
-    print("here?")
     status_code, response = _function_handler(
         _setup_logger, args=(index_path, event, extra_event_kwargs), kwargs=dependencies
     )
-    print("here?2", response)
 
     if status_code != 200:
         return status_code, response
