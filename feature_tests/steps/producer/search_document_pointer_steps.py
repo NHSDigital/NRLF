@@ -91,6 +91,7 @@ def producer_search_document_pointers(context):
         event = make_aws_event(
             queryStringParameters=queryStringParameters, headers=headers
         )
+
         lambda_context = LambdaContext()
         response = handler(event, lambda_context)
         context.response_status_code = response["statusCode"]

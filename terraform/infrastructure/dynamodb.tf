@@ -4,8 +4,13 @@ resource "aws_dynamodb_table" "consumer" {
   name         = "${local.prefix}--consumer"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
+  range_key    = "created_on"
   attribute {
     name = "id"
+    type = "S"
+  }
+  attribute {
+    name = "created_on"
     type = "S"
   }
   server_side_encryption {
@@ -115,8 +120,13 @@ resource "aws_dynamodb_table" "producer" {
   name         = "${local.prefix}--producer"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
+  range_key    = "created_on"
   attribute {
     name = "id"
+    type = "S"
+  }
+  attribute {
+    name = "created_on"
     type = "S"
   }
   server_side_encryption {
