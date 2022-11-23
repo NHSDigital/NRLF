@@ -1,5 +1,4 @@
 import json
-import time
 
 from behave import given, then
 from nrlf.core.dynamodb_types import convert_dynamo_value_to_raw_value
