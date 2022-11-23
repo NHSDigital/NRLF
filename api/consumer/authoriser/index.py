@@ -17,14 +17,13 @@ def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
 
     # This field isnt in the event for authoriser requests for some reason
     # adding it here to pass pydantic validation later
-    extra_event_kwargs = {"isBase64Encoded": False}
+    event["isBase64Encoded"] = False
 
     _, result = execute_steps(
         index_path=__file__,
         event=event,
         context=context,
         config=config,
-        extra_event_kwargs=extra_event_kwargs,
         initial_pipeline_data={"method_arn": event["methodArn"]},
         **dependencies
     )
