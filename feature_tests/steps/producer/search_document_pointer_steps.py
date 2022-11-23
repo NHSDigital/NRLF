@@ -9,7 +9,8 @@ from feature_tests.steps.aws.resources.api import (
     producer_search_api_request,
 )
 from feature_tests.steps.common.common_utils import (
-    render_template_document,
+    authorisation_headers,
+    render_template,
     uuid_headers,
 )
 
@@ -20,7 +21,7 @@ def the_response_contains_the_template_with_values(context):
 
     document_references = [entry["resource"] for entry in response["entry"]]
 
-    assert json.loads(render_template_document(context=context)) in document_references
+    assert json.loads(render_template(context=context)) in document_references
 
 
 @then("{number_of_documents:d} document {references} {were} returned")
@@ -76,9 +77,12 @@ def producer_search_document_pointers(context):
             {
                 "app.ASID": context.headers["custodian"],
                 "nrl.pointer-types": context.allowed_types,
+                "developer.app.id": "application id",
+                "developer.app.name": "application name",
             }
         ),
         **uuid_headers(context),
+        **authorisation_headers(),
     }
 
     if context.local_test:

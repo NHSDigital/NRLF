@@ -65,7 +65,7 @@ paths:
       tags:
         - DocumentReference
       summary: Search for DocumentReference resources
-      operationId: searchPostDocumentReference
+      operationId: searchViaPostDocumentReference
       parameters: []
       requestBody:
         content:

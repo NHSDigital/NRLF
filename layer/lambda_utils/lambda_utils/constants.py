@@ -22,3 +22,19 @@ class LoggingConstants:
 class LogLevel:
     INFO = INFO
     ERROR = ERROR
+
+
+class ApiRequestLevel:
+    USER_RESTRICTED = "user_restricted"
+    APP_RESTRICTED = "app_restricted"
+
+
+class AUTHORISER_CONTEXT_FIELDS:
+    X_CORRELATION_ID = "x-correlation-id"
+    NHSD_CORRELATION_ID = "nhsd-correlation-id"
+    REQUEST_TYPE = "request-type"
+    CLIENT_APP_NAME = "developer.app.name"
+    CLIENT_APP_ID = "developer.app.id"
+    SHARING_CODE = "nhsd-remote-sharing-code"
+    AUTHORISED_TARGETS = "authorised-targets"
+    ACCEPT_HEADER = "accept"

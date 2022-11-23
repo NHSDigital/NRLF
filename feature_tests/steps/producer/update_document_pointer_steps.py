@@ -6,7 +6,8 @@ from lambda_utils.tests.unit.utils import make_aws_event
 
 from feature_tests.steps.aws.resources.api import producer_update_api_request
 from feature_tests.steps.common.common_utils import (
-    render_template_document,
+    authorisation_headers,
+    render_template,
     uuid_headers,
 )
 
@@ -17,16 +18,19 @@ from feature_tests.steps.common.common_utils import (
 def producer_update_document_pointer_from_template(
     context, producer: str, document_reference_id
 ):
-    body = render_template_document(context)
+    body = render_template(context)
     path_params = {"id": document_reference_id}
     headers = {
         "NHSD-Client-RP-Details": json.dumps(
             {
                 "app.ASID": producer if context.producer_exists else "",
                 "nrl.pointer-types": context.allowed_types,
+                "developer.app.id": "application id",
+                "developer.app.name": "application name",
             }
         ),
         **uuid_headers(context),
+        **authorisation_headers(),
     }
     context.sent_document = json.dumps(json.loads(body))
     if context.local_test:

@@ -8,7 +8,8 @@ from feature_tests.steps.aws.resources.api import (
     producer_read_api_request,
 )
 from feature_tests.steps.common.common_utils import (
-    render_template_document,
+    authorisation_headers,
+    render_template,
     uuid_headers,
 )
 
@@ -26,9 +27,12 @@ def producer_deletes_existing_document_reference(
             {
                 "app.ASID": producer,
                 "nrl.pointer-types": context.allowed_types,
+                "developer.app.id": "application id",
+                "developer.app.name": "application name",
             }
         ),
         **uuid_headers(context),
+        **authorisation_headers(),
     }
 
     if context.local_test:

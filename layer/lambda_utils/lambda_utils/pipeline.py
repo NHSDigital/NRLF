@@ -62,6 +62,7 @@ def _execute_steps(
     context: LambdaContext,
     dependencies: dict,
     logger: Logger,
+    initial_pipeline_data={},
 ) -> tuple[int, any]:
     _event = APIGatewayProxyEventModel(**event)
     pipeline = make_pipeline(
@@ -71,11 +72,15 @@ def _execute_steps(
         dependencies=dependencies,
         logger=logger,
     )
-    return pipeline(data=PipelineData()).to_dict()
+    return pipeline(data=PipelineData(**initial_pipeline_data)).to_dict()
 
 
 def execute_steps(
-    index_path: str, event: dict, context: LambdaContext, **dependencies
+    index_path: str,
+    event: dict,
+    context: LambdaContext,
+    initial_pipeline_data={},
+    **dependencies
 ) -> tuple[int, any]:
     """
     Executes the handler and wraps it in exception handling
@@ -83,6 +88,7 @@ def execute_steps(
     status_code, response = _function_handler(
         _setup_logger, args=(index_path, event), kwargs=dependencies
     )
+
     if status_code != 200:
         return status_code, response
     logger = response
@@ -92,6 +98,7 @@ def execute_steps(
         args=(index_path, event),
         kwargs={"logger": logger},
     )
+
     if status_code != 200:
         return status_code, response
     steps = response
@@ -99,7 +106,11 @@ def execute_steps(
     return _function_handler(
         _execute_steps,
         args=(steps, event, context),
-        kwargs={"logger": logger, "dependencies": dependencies},
+        kwargs={
+            "logger": logger,
+            "dependencies": dependencies,
+            "initial_pipeline_data": initial_pipeline_data,
+        },
     )
 
 

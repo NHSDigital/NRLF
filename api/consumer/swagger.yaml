@@ -39,6 +39,8 @@ paths:
             application/fhir+xml:
               schema:
                 $ref: "#/components/schemas/Bundle"
+      security:
+        - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -69,6 +71,8 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
+      security:
+        - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -93,6 +97,8 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/DocumentReference"
+      security:
+        - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -2522,6 +2528,18 @@ components:
                 The number of minutes from the event. If the event code
                 does not indicate whether the minutes is before or after the event,
                 then the offset is assumed to be after the event.
+  securitySchemes:
+    ${authoriser_name}:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: custom
+      x-amazon-apigateway-authorizer:
+        type: request
+        authorizerUri: ${lambda_invoke_arn}
+        authorizerCredentials: ${authoriser_iam_role}
+        identitySource: method.request.header.Authorization
+        authorizerResultTtlInSeconds: 0
   parameters:
     id:
       name: id

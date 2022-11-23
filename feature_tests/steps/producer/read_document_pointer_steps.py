@@ -5,7 +5,8 @@ from lambda_utils.tests.unit.utils import make_aws_event
 
 from feature_tests.steps.aws.resources.api import producer_read_api_request
 from feature_tests.steps.common.common_utils import (
-    render_template_document,
+    authorisation_headers,
+    render_template,
     uuid_headers,
 )
 
@@ -22,9 +23,12 @@ def producer_reads_existing_document_reference(
             {
                 "app.ASID": producer,
                 "nrl.pointer-types": context.allowed_types,
+                "developer.app.id": "application id",
+                "developer.app.name": "application name",
             }
         ),
         **uuid_headers(context),
+        **authorisation_headers(),
     }
 
     if context.local_test:
@@ -47,5 +51,5 @@ def producer_reads_existing_document_reference(
 @then("the response is the DOCUMENT template with the below values")
 def the_response_is_the_template_with_values(context):
     assert json.loads(context.response_message) == json.loads(
-        render_template_document(context=context)
+        render_template(context=context)
     ), json.loads(context.response_message)

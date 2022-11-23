@@ -38,7 +38,11 @@ def before_all(context):
 
 
 def before_scenario(context, scenario):
+    context.template = None
     context.template_document = None
+    context.template_headers = None
+    context.template_policy_response = None
+    context.developer_headers = {}
     context.documents = {}
     context.query_parameters = {}
     context.headers = {}

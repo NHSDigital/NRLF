@@ -4,7 +4,7 @@ from behave import when
 from lambda_utils.tests.unit.utils import make_aws_event
 
 from feature_tests.steps.aws.resources.api import consumer_read_api_request
-from feature_tests.steps.common.common_utils import uuid_headers
+from feature_tests.steps.common.common_utils import authorisation_headers, uuid_headers
 
 
 @when(
@@ -19,9 +19,12 @@ def consumer_reads_existing_document_reference(
             {
                 "app.ASID": "foobar",
                 "nrl.pointer-types": context.allowed_types,
+                "developer.app.id": "application id",
+                "developer.app.name": "application name",
             }
         ),
         **uuid_headers(context),
+        **authorisation_headers(),
     }
 
     if context.local_test:

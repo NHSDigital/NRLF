@@ -20,11 +20,12 @@ resource "aws_lambda_function" "lambda_function" {
 }
 
 resource "aws_lambda_permission" "lambda_permission" {
-  statement_id  = "AllowExecutionFromAPIGateway"
+  count         = length(var.api_gateway_source_arn)
+  statement_id  = "AllowExecutionFromAPIGateway-${count.index}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = var.api_gateway_source_arn
+  source_arn    = var.api_gateway_source_arn[count.index]
 
   depends_on = [
     aws_lambda_function.lambda_function

@@ -6,7 +6,9 @@ variable "apitype" {}
 
 variable "name" {}
 
-variable "api_gateway_source_arn" {}
+variable "api_gateway_source_arn" {
+  default = []
+}
 
 variable "layers" {}
 
