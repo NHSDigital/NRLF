@@ -32,7 +32,7 @@ DEFAULT_ATTRIBUTE_DEFINITIONS = [
 DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]
 TABLE_NAME = to_kebab_case(DocumentPointer.__name__)
 API_VERSION = 1
-INDEX_NAME = "idx_nhs_number_by_id"
+INDEX_NAME = "idx_nhs_number_by_created_on"
 create_document_pointer_from_fhir_json = (
     lambda *args, **kwargs: _create_document_pointer_from_fhir_json(
         *args, api_version=API_VERSION, **kwargs

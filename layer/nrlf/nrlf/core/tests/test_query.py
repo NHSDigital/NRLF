@@ -84,7 +84,7 @@ def test_filter_query_in_db_not_found():
 
 
 def test_create_search_and_filter_query_in_db():
-    nhs_number_index = "idx_nhs_number_by_id"
+    nhs_number_index = "idx_nhs_number_by_created_on"
     fhir_json = read_test_data("nrlf")
     core_model = create_document_pointer_from_fhir_json(
         fhir_json=fhir_json, api_version=1
@@ -123,7 +123,7 @@ def test_create_read_and_filter_query_in_db():
 
 
 def test_create_search_and_filter_query_in_db_returns_empty_bundle():
-    nhs_number_index = "idx_nhs_number_by_id"
+    nhs_number_index = "idx_nhs_number_by_created_on"
     fhir_json = read_test_data("nrlf")
     core_model = create_document_pointer_from_fhir_json(
         fhir_json=fhir_json, api_version=1

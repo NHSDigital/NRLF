@@ -15,16 +15,17 @@ def mock_document_pointer_dynamo_db(context, *args, **kwargs):
             AttributeDefinitions=[
                 {"AttributeName": "id", "AttributeType": "S"},
                 {"AttributeName": "nhs_number", "AttributeType": "S"},
+                {"AttributeName": "created_on", "AttributeType": "S"},
             ],
             TableName="document-pointer",
             KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
             BillingMode="PAY_PER_REQUEST",
             GlobalSecondaryIndexes=[
                 {
-                    "IndexName": "idx_nhs_number_by_id",
+                    "IndexName": "idx_nhs_number_by_created_on",
                     "KeySchema": [
                         {"AttributeName": "nhs_number", "KeyType": "HASH"},
-                        {"AttributeName": "id", "KeyType": "RANGE"},
+                        {"AttributeName": "created_on", "KeyType": "RANGE"},
                     ],
                     "Projection": {
                         "ProjectionType": "ALL",

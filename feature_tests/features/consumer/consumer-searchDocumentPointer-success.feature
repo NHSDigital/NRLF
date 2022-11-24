@@ -200,10 +200,10 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
     Then the consumer search is made
     And the operation is successful
     And 4 document references were returned
-    And id of document number 0 contains LIFE A HEALTHY MENTAL LIFE
-    And id of document number 1 contains ANOTHER DIFFERENT CUSTODIAN
-    And id of document number 2 contains AARON COURT MENTAL NH
-    And id of document number 3 contains A DIFFERENT CUSTODIAN
+    And id of document number 0 contains ANOTHER DIFFERENT CUSTODIAN
+    And id of document number 1 contains A DIFFERENT CUSTODIAN
+    And id of document number 2 contains LIFE A HEALTHY MENTAL LIFE
+    And id of document number 3 contains AARON COURT MENTAL NH
 
   Scenario: Successfully search for multiple Document Pointers by NHS number limit by 1 item
     Given a Document Pointer exists in the system with the below values
@@ -242,7 +242,7 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
     Then the consumer search is made
     And the operation is successful
     And 1 document references were returned
-    And id of document number 0 contains LIFE A HEALTHY MENTAL LIFE
+    And id of document number 0 contains A DIFFERENT CUSTODIAN
 
   Scenario: Successfully search for multiple Document Pointers by NHS number with the order in descending order
     Given a Document Pointer exists in the system with the below values
@@ -281,9 +281,9 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
     Then the consumer search is made
     And the operation is successful
     And 3 document references were returned
-    And id of document number 0 contains LIFE A HEALTHY MENTAL LIFE
-    And id of document number 1 contains AARON COURT MENTAL NH
-    And id of document number 2 contains A DIFFERENT CUSTODIAN
+    And id of document number 0 contains A DIFFERENT CUSTODIAN
+    And id of document number 1 contains LIFE A HEALTHY MENTAL LIFE
+    And id of document number 2 contains AARON COURT MENTAL NH
 
   Scenario: Successfully search for multiple Document Pointers by NHS number reverse the order
     Given a Document Pointer exists in the system with the below values
@@ -315,7 +315,7 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
     When "TEST CONSUMER" searches with query parameters
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | asc      | true                                          |
+      | asc      | false                                         |
     And "TEST CONSUMER" searches with the header values:
       | property | value     |
       | type     | 736253002 |
@@ -323,8 +323,8 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
     And the operation is successful
     And 3 document references were returned
     And id of document number 0 contains A DIFFERENT CUSTODIAN
-    And id of document number 1 contains AARON COURT MENTAL NH
-    And id of document number 2 contains LIFE A HEALTHY MENTAL LIFE
+    And id of document number 1 contains LIFE A HEALTHY MENTAL LIFE
+    And id of document number 2 contains AARON COURT MENTAL NH
 
   Scenario: Successfully search for multiple Document Pointers by NHS number limit by 2 items and access page 1
     Given a Document Pointer exists in the system with the below values
@@ -372,8 +372,8 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
     Then the consumer search is made
     And the operation is successful
     And 2 document references were returned
-    And id of document number 0 contains A DIFFERENT CUSTODIAN
-    And id of document number 1 contains A DIFFERENT CUSTODIAN 2
+    And id of document number 0 contains LIFE A HEALTHY MENTAL LIFE
+    And id of document number 1 contains AARON COURT MENTAL NH
 
   Scenario: Successfully search for multiple Document Pointers by NHS number limit to 4 items but on page 3
     Given a Document Pointer exists in the system with the below values
@@ -429,5 +429,5 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
     Then the consumer search is made
     And the operation is successful
     And 2 document references were returned
-    And id of document number 0 contains AARON COURT MENTAL NH
-    And id of document number 1 contains A DIFFERENT CUSTODIAN
+    And id of document number 0 contains LIFE A HEALTHY MENTAL LIFE
+    And id of document number 1 contains AARON COURT MENTAL NH

@@ -244,9 +244,9 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
     Then the producer search is made
     And the operation is successful
     And 3 document references were returned
-    And id of document number 0 contains 3334567890
+    And id of document number 0 contains 1114567890
     And id of document number 1 contains 2224567890
-    And id of document number 2 contains 1114567890
+    And id of document number 2 contains 3334567890
 
   Scenario: Successfully search for multiple Document Pointers by NHS number reverse ordering
     Given a Document Pointer exists in the system with the below values
@@ -279,7 +279,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
     When "AARON COURT MENTAL NH" searches with query parameters
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | asc      | true                                          |
+      | asc      | false                                         |
     And "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with the header values
       | property  | value                 |
       | type      | 736253002             |
@@ -329,7 +329,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
     Then the producer search is made
     And the operation is successful
     And 1 document references were returned
-    And id of document number 0 contains 3334567890
+    And id of document number 0 contains 1114567890
 
   Scenario: Successfully search for multiple Document Pointers by NHS number limit by 2 items and access page 1
     Given a Document Pointer exists in the system with the below values
@@ -371,7 +371,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
     Then the producer search is made
     And the operation is successful
     And 1 document references were returned
-    And id of document number 0 contains 1114567890
+    And id of document number 0 contains 3334567890
 
   Scenario: Successfully search for multiple Document Pointers by NHS number limit by 2 items and access page 2
     Given a Document Pointer exists in the system with the below values
@@ -413,4 +413,4 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
     Then the producer search is made
     And the operation is successful
     And 1 document references were returned
-    And id of document number 0 contains 1114567890
+    And id of document number 0 contains 3334567890

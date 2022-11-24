@@ -4,13 +4,8 @@ resource "aws_dynamodb_table" "consumer" {
   name         = "${local.prefix}--consumer"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
-  range_key    = "created_on"
   attribute {
     name = "id"
-    type = "S"
-  }
-  attribute {
-    name = "created_on"
     type = "S"
   }
   server_side_encryption {
@@ -120,13 +115,8 @@ resource "aws_dynamodb_table" "producer" {
   name         = "${local.prefix}--producer"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
-  range_key    = "created_on"
   attribute {
     name = "id"
-    type = "S"
-  }
-  attribute {
-    name = "created_on"
     type = "S"
   }
   server_side_encryption {
@@ -245,11 +235,15 @@ resource "aws_dynamodb_table" "document-pointer" {
     name = "nhs_number"
     type = "S"
   }
+  attribute {
+    name = "created_on"
+    type = "S"
+  }
 
   global_secondary_index {
-    name            = "idx_nhs_number_by_id"
+    name            = "idx_nhs_number_by_created_on"
     hash_key        = "nhs_number"
-    range_key       = "id"
+    range_key       = "created_on"
     projection_type = "ALL"
   }
   server_side_encryption {
