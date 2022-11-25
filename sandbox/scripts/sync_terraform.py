@@ -10,6 +10,7 @@ PATTERNS_TO_REMOVE = [
     "*tfstate",
     "tfplan",
     "**/layer/**/*",
+    "sandbox.tf",
 ]
 
 

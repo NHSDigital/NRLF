@@ -204,26 +204,37 @@ Other notes:
 
 ## Sandbox deployment with LocalStack
 
-In order to deploy the entire stack locally, we use LocalStack which comes bundled with the `sandbox` dependencies for this project.
-You will however need to install a Docker client on your machine according to the instructions for your OS.
+In order to deploy the entire stack locally we use LocalStack.
+
+💡 You need to install a Docker client on your machine according to the instructions for your OS.
 
 ### 1. Setup the virtual environment
 
-As before we need to get the virtual environment running and then re-mount the `nrlf.sh` script. Make sure that you've installed the sandbox dependencies also:
+As before we need to get the virtual environment running and then re-mount the `nrlf.sh` script:
 
 ```shell
-poetry install --with sandbox
+poetry install
 poetry shell
 source nrlf.sh
 ```
 
-### 2. (re)build the API
+### 2. (re)build the sandbox image
 
-In order to build the sandbox, and have it run locally, do:
+In order to build the sandbox, do:
 
 ```shell
 nrlf sandbox build
 ```
+
+### 3. Run the sandbox locally
+
+In order to spin up a sandbox container from the sandbox image, do:
+
+```shell
+nrlf sandbox up
+```
+
+Note that there is a short wait while the terraform infrastructure is deployed.
 
 You can verify that the sandbox proxy is running with:
 
@@ -231,11 +242,47 @@ You can verify that the sandbox proxy is running with:
 curl http://localhost:8000/_status
 ```
 
+and you can hit the Consumer and Producer endpoints with:
+
+```shell
+curl http://localhost:8000/producer/DocumentReference
+curl http://localhost:8000/consumer/DocumentReference
+```
+
 and you can run feature tests with:
 
 ```shell
 nrlf test feature sandbox
 ```
+
+💡 Note that if you would like to interact with the "AWS" infrastructure in your container you can do so on port 4566, and specifically with `boto3` you can use the keyword argument `endpoint_url=http://localhost:4566` in `boto3.client`. This is the mechanism that our feature tests use to seed data in the dynamodb tables, for example.
+
+### 4. 🚧 Deploy the sandbox on AWS (work in progress) 🚧
+
+Assuming that you have already deployed all of the infrastructure via
+
+```
+nrlf terraform plan
+```
+
+and
+
+```
+nrlf terraform apply
+```
+
+then you can deploy the sandbox image to AWS with:
+
+```
+nrlf sandbox deploy
+```
+
+#### Work in progress instructions:
+
+- In order to activate the sandbox on AWS you must modify the sandbox.tf file so that the memory / n_cpus match the instance_type. For example, setting instance_type to `t3.large` with the current settings will work fine.
+- In order to hit the sandbox endpoint you should look up the DNS of the load balancer for the ec2 instance in your sandbox's autoscaling group. Similarly to the local sandbox, you can hit them on port 8000, with endpoints `consumer/DocumentReference` and `producer/DocumentReference`.
+- Port 4566 is not enabled
+- Outstanding issue: the lambdas in the sandbox (which are docker-in-docker invoked containers) cannot communicate with the main container's dynamodb service. The most portable solution would be to switch to localstack's `local` mode of lambda execution, which we would need to prototype locally first. The more robust solution would be to understand how to get the lambda containers to speak to the main container.
 
 ## Route53 & Hosted Zones
 

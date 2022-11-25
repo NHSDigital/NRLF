@@ -35,12 +35,17 @@ def api_url(api_name: str, path: str) -> str:
 
 
 @app.route("/_status", methods=["GET"])
-def health() -> dict:
+def status() -> dict:
     try:
         response = requests.get(url=f"{LOCAL_STACK_URL}/health")
         response.raise_for_status()
     except Exception:
         return ERROR_500
+    return {"message": "ok"}
+
+
+@app.route("/health", methods=["GET"])
+def health() -> dict:
     return {"message": "ok"}
 
 
@@ -72,4 +77,4 @@ def catch_all(path: str):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=os.environ.get("DEBUG") == "1")
+    app.run(host="0.0.0.0", port=8000, debug=os.environ.get("DEBUG") == "1")

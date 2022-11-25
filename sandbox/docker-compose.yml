@@ -1,18 +1,19 @@
 version: "3.9"
 services:
   nrlf:
+    image: ${IMAGE_NAME}
     build: .
     environment:
       SERVICES: iam,lambda,apigateway,s3,dynamodb
       AWS_DEFAULT_REGION: eu-west-2
-      DEBUG: "${DEBUG-}"
+      DEBUG: "1"
       PERSISTENCE: "${PERSISTENCE-}"
       LAMBDA_EXECUTOR: "docker"
       DOCKER_HOST: unix:///var/run/docker.sock
     ports:
       - 4566:4566
       - 4510-4559:4510-4559
-      - 8000:5000
+      - 8000:8000
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
