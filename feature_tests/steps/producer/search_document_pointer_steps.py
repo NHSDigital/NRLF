@@ -36,7 +36,6 @@ def the_response_is_the_list_of_template_documents(
 @then("id of document number {number_of_document:d} contains {custodian}")
 def id_of_document_equals(context, number_of_document: int, custodian: str):
     response = json.loads(context.response_message)
-    print("response_id", response["entry"][number_of_document]["resource"]["id"])
     assert custodian in response["entry"][number_of_document]["resource"]["id"]
 
 
