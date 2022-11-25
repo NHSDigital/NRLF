@@ -1,23 +1,11 @@
-import json
 from datetime import datetime
-from pathlib import Path
 
 import boto3
 
-terraform_output_json_path = str(
-    Path(__file__).parent.parent.parent.parent.parent
-    / "terraform"
-    / "infrastructure"
-    / "output.json"
-)
+from helpers.terraform import get_terraform_json
 
 
-def get_terraform_json() -> dict:
-    with open(terraform_output_json_path, "r") as f:
-        return json.loads(f.read())
-
-
-def get_access_token():
+def _get_access_token():
     account_id = get_terraform_json()["assume_account_id"]["value"]
     sts_client = boto3.client("sts")
     current_time = datetime.utcnow().timestamp()
@@ -33,7 +21,7 @@ def get_access_token():
 
 
 def new_aws_session() -> boto3.Session:
-    access_key_id, secret_access_key, session_token = get_access_token()
+    access_key_id, secret_access_key, session_token = _get_access_token()
 
     return boto3.Session(
         aws_access_key_id=access_key_id,

@@ -30,6 +30,7 @@ boto3 = "^1.26.3"
 build-scripts = { path = "./scripts/build_scripts/", develop = true }
 nrlf = { path = "./layer/nrlf/", develop = true }
 lambda-utils = { path = "./layer/lambda_utils/", develop = true }
+helpers = { path = "./helpers/", develop = true }
 
 [tool.poetry.group.legacy]
 optional = true

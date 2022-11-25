@@ -4,7 +4,8 @@ import urllib.parse
 import requests
 from lambda_utils.tests.unit.utils import make_aws_event
 
-from feature_tests.steps.aws.resources.common import get_terraform_json, new_aws_session
+from helpers.aws_session import new_aws_session
+from helpers.terraform import get_terraform_json
 
 DEFAULT_VERSION = 1.0
 
