@@ -1,7 +1,6 @@
 import boto3
 from behave import use_fixture
 
-from feature_tests.steps.aws.resources.common import new_aws_session
 from feature_tests.steps.aws.resources.dynamodb import (
     FeatureTestDynamoRepository,
     get_dynamo_db_repository,
@@ -10,6 +9,7 @@ from feature_tests.steps.fixtures import (
     mock_document_pointer_dynamo_db,
     mock_environmental_variables,
 )
+from helpers.aws_session import new_aws_session
 
 
 def _empty_dynamo_db_table(context, table_name: str):

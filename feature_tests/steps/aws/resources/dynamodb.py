@@ -3,7 +3,7 @@ from nrlf.core.repository import Repository
 from nrlf.core.types import DynamoDbClient
 from pydantic import BaseModel
 
-from feature_tests.steps.aws.resources.common import get_terraform_json
+from helpers.terraform import get_terraform_json
 
 
 def _chunk_list(list_a, chunk_size):
