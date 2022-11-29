@@ -9,7 +9,7 @@ from .header_config import AcceptHeader
 
 VERSION_RE = re.compile(r"v(\d+)")
 API_ROOT_DIRNAME = "api"
-VERSIONED_HANDLER_GLOB = "src/v*/handler.py"
+VERSIONED_HANDLER_GLOB = "**/v*/handler.py"
 
 
 class VersionException(Exception):

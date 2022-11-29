@@ -40,5 +40,5 @@ def request_contains_correct_headers(context, requestor):
         event = make_aws_authoriser_event(
             headers=headers, methodArn={"methodArn": "methodarn"}
         )
-        response = consumer_authoriser_lambda(event=event)
+        response = consumer_authoriser_lambda(event=event, sandbox=context.sandbox_test)
         context.response_message = response

@@ -1,8 +1,8 @@
 import json
 import urllib.parse
 
+import boto3
 import requests
-from lambda_utils.tests.unit.utils import make_aws_event
 
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
@@ -33,14 +33,16 @@ def _document_pointer_api_request(
 
 
 def _authoriser_lambda_request(
-    product: str,
-    event: dict,
-    version: int = DEFAULT_VERSION,
+    product: str, event: dict, version: int = DEFAULT_VERSION, sandbox=False
 ):
-    function_name = f'nhsd-nrlf--{get_terraform_json()["workspace"]["value"]}--api--{product}--authoriser'
-    session = new_aws_session()
-    client = session.client("lambda")
+    if sandbox:
+        workspace = "default"
+        client = boto3.client("lambda", endpoint_url="http://localhost:4566")
+    else:
+        workspace = get_terraform_json()["workspace"]["value"]
+        client = new_aws_session().client("lambda")
 
+    function_name = f"nhsd-nrlf--{workspace}--api--{product}--authoriser"
     response = client.invoke(
         FunctionName=function_name,
         InvocationType="RequestResponse",
@@ -186,16 +188,18 @@ def consumer_search_api_request_post(
 
 
 def producer_authoriser_lambda(
-    event: dict,
-    version: str = DEFAULT_VERSION,
+    event: dict, version: str = DEFAULT_VERSION, sandbox=False
 ):
 
-    return _authoriser_lambda_request(product="producer", event=event, version=version)
+    return _authoriser_lambda_request(
+        product="producer", event=event, version=version, sandbox=sandbox
+    )
 
 
 def consumer_authoriser_lambda(
-    event: dict,
-    version: str = DEFAULT_VERSION,
+    event: dict, version: str = DEFAULT_VERSION, sandbox=False
 ):
 
-    return _authoriser_lambda_request(product="consumer", event=event, version=version)
+    return _authoriser_lambda_request(
+        product="consumer", event=event, version=version, sandbox=sandbox
+    )

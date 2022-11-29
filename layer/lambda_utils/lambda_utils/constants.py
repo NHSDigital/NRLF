@@ -1,3 +1,4 @@
+import os
 from logging import ERROR, INFO
 
 
@@ -38,3 +39,6 @@ class AUTHORISER_CONTEXT_FIELDS:
     SHARING_CODE = "nhsd-remote-sharing-code"
     AUTHORISED_TARGETS = "authorised-targets"
     ACCEPT_HEADER = "accept"
+
+
+RUNNING_IN_LOCALSTACK = "LOCALSTACK_HOSTNAME" in os.environ

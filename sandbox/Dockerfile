@@ -1,4 +1,4 @@
-FROM localstack/localstack:latest
+FROM localstack/localstack-light:1.2.0
 
 ENV PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
