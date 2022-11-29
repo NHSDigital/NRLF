@@ -22,19 +22,17 @@ function _sandbox() {
   case $command in
     #----------------
     "build")
-      nrlf make clean
-      nrlf make build
       cd $sandbox_dir || return 1
       python scripts/sync_zips.py || return 1
       python scripts/sync_terraform.py || return 1
-      docker-compose down &> /dev/null || return 1
+      docker-compose down || return 1
       IMAGE_NAME=${image_name} docker-compose build || return 1
       cd $root
     ;;
     #----------------
     "up")
       cd $sandbox_dir || return 1
-      docker-compose down &> /dev/null || return 1
+      docker-compose down || return 1
       IMAGE_NAME=${image_name} docker-compose up -d || return 1
       CONTAINER_ID=$(docker-compose ps -q nrlf)
       echo -n "Waiting for terraform to finish..."
