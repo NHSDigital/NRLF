@@ -211,6 +211,34 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
           path: ./**/dist/*.zip
 
+  sandbox-build:
+    needs: [build, unit-test, feature-test-local, lint-check]
+    name: Sandbox build
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
+      - name: Build sandbox
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf sandbox build
+          nrlf sandbox up
+          nrlf test feature sandbox
+
   terraform-base:
     needs: [build-base, unit-test, feature-test-local, lint-check]
     name: Terraform base
