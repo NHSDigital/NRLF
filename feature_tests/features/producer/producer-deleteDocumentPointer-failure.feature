@@ -50,7 +50,7 @@ Feature: Failure scenarios where producer is unable to delete a Document Pointer
     And Producer "AARON COURT MENTAL NH" has permission to delete Document Pointers for:
       | snomed_code | description                 |
       | 736253001   | "Mental health crisis plan" |
-    When Producer "CUTHBERT'S CLOSE CARE HOME" deletes an existing Document Reference "CUTHBERT'S CLOSE CARE HOME|1234567890"
+    When Producer "CUTHBERT'S CLOSE CARE HOME" deletes an existing Document Reference "CUTHBERT'S CLOSE CARE HOME|1234567890" as "Yorkshire Ambulance Service"
     Then the operation is unsuccessful
     And the response contains error message "Condition check failed - Forbidden"
 
@@ -58,6 +58,6 @@ Feature: Failure scenarios where producer is unable to delete a Document Pointer
     Given "Producer" "AARON COURT MENTAL NH" has permission to "delete" Document Pointers for:
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When Producer "AARON COURT MENTAL NH" deletes an existing Document Reference "AARON COURT MENTAL NH|1234567890"
+    When Producer "AARON COURT MENTAL NH" deletes an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
     Then the operation is unsuccessful
     And the response contains error message "Condition check failed - Forbidden"

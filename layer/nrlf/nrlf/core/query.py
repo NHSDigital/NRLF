@@ -1,6 +1,3 @@
-import json
-from collections import defaultdict
-
 from nrlf.core.dynamodb_types import to_dynamodb_dict
 
 ATTRIBUTE_EXISTS_ID = "attribute_exists(id)"
@@ -41,17 +38,28 @@ def create_filter_query(**filters) -> dict:
             attribute_values[f":{field_name}"] = to_dynamodb_dict(filter_value)
     condition_expression = " AND ".join(condition_expression)
 
-    return {
-        "FilterExpression": condition_expression,
-        "ExpressionAttributeValues": attribute_values,
-        "ExpressionAttributeNames": attribute_names,
-    }
+    response = {"ExpressionAttributeValues": attribute_values}
+
+    if attribute_names:
+        response["ExpressionAttributeNames"] = attribute_names
+
+    if condition_expression:
+        response["FilterExpression"] = condition_expression
+
+    return response
 
 
 def create_read_and_filter_query(id, **filters):
     read_and_filter_query = create_filter_query(**filters)
     read_and_filter_query["ExpressionAttributeValues"][":id"] = to_dynamodb_dict(id)
     read_and_filter_query["KeyConditionExpression"] = "id = :id"
+    return read_and_filter_query
+
+
+def create_begins_with_read_query(id, **filters):
+    read_and_filter_query = create_filter_query(**filters)
+    read_and_filter_query["ExpressionAttributeValues"][":id"] = to_dynamodb_dict(id)
+    read_and_filter_query["KeyConditionExpression"] = "begins_with(id, :id)"
     return read_and_filter_query
 
 

@@ -42,7 +42,7 @@ Feature: Failure Scenarios where producer unable to create a Document Pointer
     Given Producer "CUTHBERT'S CLOSE CARE HOME" does not have permission to create Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When Producer "CUTHBERT'S CLOSE CARE HOME" creates a Document Reference from DOCUMENT template
+    When Producer "CUTHBERT'S CLOSE CARE HOME" creates a Document Reference from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                          |
       | identifier  | 1234567892                     |
       | type        | 887701000000100                |
@@ -55,7 +55,7 @@ Feature: Failure Scenarios where producer unable to create a Document Pointer
 
   Scenario: Non existent producer
     Given Producer "CUTHBERT'S CLOSE CARE HOME4" does not exist in the system
-    When Producer "CUTHBERT'S CLOSE CARE HOME4" creates a Document Reference from DOCUMENT template
+    When Producer "CUTHBERT'S CLOSE CARE HOME4" creates a Document Reference from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                          |
       | identifier  | 1234567892                     |
       | type        | 887701000000100                |
@@ -70,7 +70,7 @@ Feature: Failure Scenarios where producer unable to create a Document Pointer
     Given Producer "AARON COURT MENTAL NH" has permission to create Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When Producer "AARON COURT MENTAL NH" creates a Document Reference from DOCUMENT template
+    When Producer "AARON COURT MENTAL NH" creates a Document Reference from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                 |
       | identifier  | <identifier>          |
       | type        | <type>                |
@@ -101,7 +101,7 @@ Feature: Failure Scenarios where producer unable to create a Document Pointer
     And Producer "AARON COURT MENTAL NH" has permission to create Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When Producer "AARON COURT MENTAL NH" creates a Document Reference from DOCUMENT template
+    When Producer "AARON COURT MENTAL NH" creates a Document Reference from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |

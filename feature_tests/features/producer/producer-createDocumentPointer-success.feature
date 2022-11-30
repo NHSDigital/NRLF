@@ -42,7 +42,7 @@ Feature: Basic Success Scenarios where producer is able to create a Document Poi
     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to create Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" creates a Document Reference from DOCUMENT template
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" creates a Document Reference from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                                   |
       | identifier  | 1234567890                              |
       | type        | 736253002                               |
@@ -70,7 +70,7 @@ Feature: Basic Success Scenarios where producer is able to create a Document Poi
     Given Producer "ABUNDANT LIFE CARE LIMITED" has permission to create Document Pointers for
       | snomed_code     |
       | 861421000000109 |
-    When Producer "ABUNDANT LIFE CARE LIMITED" creates a Document Reference from DOCUMENT template
+    When Producer "ABUNDANT LIFE CARE LIMITED" creates a Document Reference from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                          |
       | identifier  | 1234567891                     |
       | type        | 861421000000109                |

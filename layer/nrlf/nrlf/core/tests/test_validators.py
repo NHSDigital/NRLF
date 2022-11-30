@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 from nrlf.core.transform import make_timestamp
 from nrlf.core.validators import (
+    requesting_application_is_not_authorised,
     validate_nhs_number,
     validate_source,
     validate_timestamp,
@@ -77,3 +78,22 @@ def test_validate_timestamp(date, expected_outcome):
 def test_make_timestamp():
     timestamp = make_timestamp()
     validate_timestamp(timestamp)
+
+
+@pytest.mark.parametrize(
+    ["requesting_application_id", "authenticated_application_id", "expected_outcome"],
+    (
+        ["SCRa", "SCRa", False],
+        ["SCRa", "APIM", True],
+        ["APIM", "SCRA", True],
+        ["SCRA", 4, True],
+    ),
+)
+def test_requesting_application_is_not_authorised(
+    requesting_application_id, authenticated_application_id, expected_outcome
+):
+    result = requesting_application_is_not_authorised(
+        requesting_application_id, authenticated_application_id
+    )
+
+    assert result == expected_outcome

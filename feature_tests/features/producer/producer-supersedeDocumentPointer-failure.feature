@@ -61,7 +61,7 @@ Feature: Failure Scenarios where producer unable to supersede Document Pointers
     And Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to create Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" creates a Document Reference from DOCUMENT template
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" creates a Document Reference from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                                               |
       | identifier  | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567892 |
       | target      | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567890 |
@@ -85,7 +85,7 @@ Feature: Failure Scenarios where producer unable to supersede Document Pointers
     And Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to create Document Pointers for
       | snomed_code | description |
       | 734163000   | Care plan   |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" creates a Document Reference from DOCUMENT template
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" creates a Document Reference from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                                               |
       | identifier  | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567892 |
       | target      | AARON COURT MENTAL NH\|1234567890                   |
@@ -101,7 +101,7 @@ Feature: Failure Scenarios where producer unable to supersede Document Pointers
     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to create Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" creates a Document Reference from DOCUMENT template
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" creates a Document Reference from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                                               |
       | identifier  | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567892 |
       | target      | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567890 |
@@ -125,7 +125,7 @@ Feature: Failure Scenarios where producer unable to supersede Document Pointers
     And Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to create Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" creates a Document Reference from DOCUMENT template
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" creates a Document Reference from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                                               |
       | identifier  | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567891 |
       | target      | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL\|1234567890 |

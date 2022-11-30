@@ -1,17 +1,6 @@
 Feature: Success scenarios where request is authorised for consumer
 
   Background:
-    Given example HEADERS
-      """
-      {
-        "x-correlation-id": "x-corr",
-        "nhsd-correlation-id": "nhsd-corr",
-        "request-type": "app_restricted",
-        "Accept": "version=1",
-        "Authorization": "letmein",
-        "x-request-id": "requestid"
-      }
-      """
     Given template POLICY_RESPONSE
       """
       {
@@ -31,12 +20,19 @@ Feature: Success scenarios where request is authorised for consumer
       """
 
   Scenario: Authoriser returns ok for request
-    Given a request contains all the correct headers to be authorised
-    When Consumer "AARON COURT MENTAL NH" makes a request
+    Given a request for "Yorkshire Ambulance Service" contains all the correct headers to be authorised
+    And the following organisation to application relationship exists
+      | organisation                | application |
+      | Yorkshire Ambulance Service | SCRa        |
+    And "Yorkshire Ambulance Service" can access the following document types
+      | system                  | value           |
+      | https://snomed.info/ict | 861421000000109 |
+      | https://snomed.info/ict | 861421000000108 |
+    When Consumer "Yorkshire Ambulance Service" makes a request
       | property           | value            |
-      | developer.app.id   | application id   |
+      | developer.app.id   | SCRa             |
       | developer.app.name | application name |
-    Then returns the correct policy
+    Then returns the correct allow policy to consumer
       | property     | value     |
       | principal_id | nhsd-corr |
       | effect       | Allow     |

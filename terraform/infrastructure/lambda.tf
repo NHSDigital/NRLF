@@ -186,7 +186,15 @@ module "producer__authoriser_lambda" {
     PREFIX      = "${local.prefix}--"
     ENVIRONMENT = local.environment
   }
+  additional_policies = [
+    aws_iam_policy.auth__dynamodb-read.arn,
+    aws_iam_policy.auth__kms-read-write.arn
+  ]
   handler = "api.producer.authoriser.index.handler"
+  depends_on = [
+    aws_iam_policy.auth__dynamodb-read,
+    aws_iam_policy.auth__kms-read-write
+  ]
 }
 
 module "consumer__authoriser_lambda" {
@@ -201,5 +209,13 @@ module "consumer__authoriser_lambda" {
     PREFIX      = "${local.prefix}--"
     ENVIRONMENT = local.environment
   }
+  additional_policies = [
+    aws_iam_policy.auth__dynamodb-read.arn,
+    aws_iam_policy.auth__kms-read-write.arn
+  ]
   handler = "api.consumer.authoriser.index.handler"
+  depends_on = [
+    aws_iam_policy.auth__dynamodb-read,
+    aws_iam_policy.auth__kms-read-write
+  ]
 }

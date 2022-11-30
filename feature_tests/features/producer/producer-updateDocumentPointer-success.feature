@@ -60,7 +60,7 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
       | snomed_code | description                 |
       | 736253002   | "Mental health crisis plan" |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                                   |
       | identifier  | 1234567890                              |
       | status      | current                                 |
@@ -93,7 +93,7 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
       | snomed_code | description                 |
       | 736253002   | "Mental health crisis plan" |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                                           |
       | identifier  | 1234567890                                      |
       | status      | current                                         |

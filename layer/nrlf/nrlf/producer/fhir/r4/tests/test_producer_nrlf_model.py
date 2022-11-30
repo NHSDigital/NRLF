@@ -11,7 +11,6 @@ PATH_TO_TEST_DATA = Path(__file__).parent / "data"
 TEST_DATA_RELATIVE_PATHS = ["nrlf", "www.hl7.org/fhir/R4", "www.hl7.org/fhir/R4B"]
 
 
-@cache
 def read_test_data(relative_path: str):
     with open(
         PATH_TO_TEST_DATA / relative_path / "documentreference-example.json"

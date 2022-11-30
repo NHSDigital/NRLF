@@ -54,3 +54,9 @@ def validate_timestamp(date: str):
         dt.fromisoformat(_date)
     except ValueError:
         raise ValueError(f"Not a valid ISO date: {date}") from None
+
+
+def requesting_application_is_not_authorised(
+    requesting_application_id, authenticated_application_id
+):
+    return requesting_application_id != authenticated_application_id

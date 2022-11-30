@@ -7,18 +7,18 @@ from lambda_utils.tests.unit.utils import make_aws_event
 from feature_tests.steps.aws.resources.api import producer_update_api_request
 from feature_tests.steps.common.common_utils import (
     authorisation_headers,
-    render_template,
+    render_fhir_template,
     uuid_headers,
 )
 
 
 @when(
-    'Producer "{producer}" updates a Document Reference "{document_reference_id}" from DOCUMENT template'
+    'Producer "{producer}" updates a Document Reference "{document_reference_id}" from DOCUMENT template as {organisation}'
 )
 def producer_update_document_pointer_from_template(
-    context, producer: str, document_reference_id
+    context, producer: str, document_reference_id, organisation
 ):
-    body = render_template(context)
+    body = render_fhir_template(context, context.template)
     path_params = {"id": document_reference_id}
     headers = {
         "NHSD-Client-RP-Details": json.dumps(
@@ -30,7 +30,7 @@ def producer_update_document_pointer_from_template(
             }
         ),
         **uuid_headers(context),
-        **authorisation_headers(),
+        **authorisation_headers(context, organisation),
     }
     context.sent_document = json.dumps(json.loads(body))
     if context.local_test:

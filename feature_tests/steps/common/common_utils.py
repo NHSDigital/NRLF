@@ -19,13 +19,20 @@ def update_supersede_targets_in_fhir_json(context, template_text: str) -> str:
     return json.dumps(fhir_json)
 
 
-def render_template(context) -> str:
-    template_text = context.template
+def render_fhir_template(context, template_text) -> str:
     for row in context.table:
         if row["property"] == "target":
             continue
         template_text = template_text.replace(f'${row["property"]}', row["value"])
     template_text = update_supersede_targets_in_fhir_json(context, template_text)
+    return template_text
+
+
+def render_template(context, template_text) -> str:
+    for row in context.table:
+        if row["property"] == "target":
+            continue
+        template_text = template_text.replace(f'${row["property"]}', row["value"])
     return template_text
 
 
@@ -38,10 +45,8 @@ def uuid_headers(context) -> dict:
     }
 
 
-def authorisation_headers() -> dict:
-    return {
-        "Authorization": "letmein",
-    }
+def authorisation_headers(context, organisation) -> dict:
+    return {"Authorization": "letmein", "Organisation-Code": json.loads(organisation)}
 
 
 def make_aws_authoriser_event(**kwargs) -> dict:

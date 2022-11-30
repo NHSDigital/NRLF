@@ -8,7 +8,7 @@ from nrlf.core.types import DynamoDbClient
 
 
 @fixture(name="fixture.mock.document_pointer_dynamo_db")
-def mock_document_pointer_dynamo_db(context, *args, **kwargs):
+def mock_nrlf_dynamo_db(context, *args, **kwargs):
     with moto.mock_dynamodb() as client:
         client: DynamoDbClient = boto3.client("dynamodb")
         client.create_table(
@@ -35,6 +35,12 @@ def mock_document_pointer_dynamo_db(context, *args, **kwargs):
                     },
                 },
             ],
+        )
+        client.create_table(
+            AttributeDefinitions=[{"AttributeName": "id", "AttributeType": "S"}],
+            TableName="auth",
+            KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
+            BillingMode="PAY_PER_REQUEST",
         )
         yield client
 

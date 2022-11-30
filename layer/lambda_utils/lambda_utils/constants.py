@@ -38,3 +38,4 @@ class AUTHORISER_CONTEXT_FIELDS:
     SHARING_CODE = "nhsd-remote-sharing-code"
     AUTHORISED_TARGETS = "authorised-targets"
     ACCEPT_HEADER = "accept"
+    ORGANISATION_CODE = "Organisation-Code"

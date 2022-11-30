@@ -50,7 +50,7 @@ Feature: Success scenarios where producer is able to read a Document Pointer
     And Producer "AARON COURT MENTAL NH" has permission to create Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When Producer "AARON COURT MENTAL NH" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890"
+    When Producer "AARON COURT MENTAL NH" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
     Then the operation is successful
     And the response is the DOCUMENT template with the below values
       | property    | value                          |

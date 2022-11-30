@@ -138,7 +138,7 @@ def test_reconstruct_document_pointer_from_db():
     }
 
 
-def test_create_bundle_from_muliple_document_pointers():
+def test_create_bundle_from_multiple_document_pointers():
     fhir_json = read_test_data("nrlf")
 
     core_model = create_document_pointer_from_fhir_json(

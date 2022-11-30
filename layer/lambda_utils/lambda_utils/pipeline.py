@@ -85,6 +85,11 @@ def execute_steps(
     """
     Executes the handler and wraps it in exception handling
     """
+    # Due to a discrepency between powertools and the authoriser code with API gateway, this will match the model.
+    event["requestContext"]["authorizer"] = {
+        "claims": event["requestContext"].pop("authorizer", None)
+    }
+
     status_code, response = _function_handler(
         _setup_logger, args=(index_path, event), kwargs=dependencies
     )

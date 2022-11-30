@@ -11,28 +11,35 @@ from feature_tests.steps.aws.resources.api import (
 from feature_tests.steps.common.common_utils import authorisation_headers, uuid_headers
 
 
-@then("the consumer search is made")
-def consumer_search_document_pointers(context):
+@then("the consumer search is made as {organisation}")
+def consumer_search_document_pointers(context, organisation):
 
     queryStringParameters = context.query_parameters
+    developer_headers = {
+        row["property"]: row["value"] for row in context.table if row["value"] != "null"
+    }
+    context.developer_headers = developer_headers
     headers = {
         "NHSD-Client-RP-Details": json.dumps(
             {
                 "app.ASID": "foobar",
                 "nrl.pointer-types": context.allowed_types,
-                "developer.app.id": "application id",
-                "developer.app.name": "application name",
+                **developer_headers,
             }
         ),
         **uuid_headers(context),
-        **authorisation_headers(),
+        **authorisation_headers(context, organisation),
     }
 
     if context.local_test:
         from api.consumer.searchDocumentReference.index import handler
 
+        authorizer = {"document_types": json.dumps(context.allowed_types)}
+
         event = make_aws_event(
-            queryStringParameters=queryStringParameters, headers=headers
+            queryStringParameters=queryStringParameters,
+            headers=headers,
+            authorizer=authorizer,
         )
         lambda_context = LambdaContext()
         response = handler(event, lambda_context)
@@ -54,26 +61,33 @@ def consumer_search_document_pointers(context, consumer: str):
     context.body = body
 
 
-@then("the consumer search is made by POST")
-def consumer_search_document_pointers_by_post(context):
+@then("the consumer search is made by POST as {organisation}")
+def consumer_search_document_pointers_by_post(context, organisation):
     body = context.body
+    developer_headers = {
+        row["property"]: row["value"] for row in context.table if row["value"] != "null"
+    }
+    context.developer_headers = developer_headers
     headers = {
         "NHSD-Client-RP-Details": json.dumps(
             {
                 "app.ASID": "foobar",
                 "nrl.pointer-types": context.allowed_types,
-                "developer.app.id": "application id",
-                "developer.app.name": "application name",
+                **developer_headers,
             }
         ),
         **uuid_headers(context),
-        **authorisation_headers(),
+        **authorisation_headers(context, organisation),
     }
 
     if context.local_test:
         from api.consumer.searchPostDocumentReference.index import handler
 
-        event = make_aws_event(body=json.dumps(body), headers=headers)
+        authorizer = {"document_types": json.dumps(context.allowed_types)}
+
+        event = make_aws_event(
+            body=json.dumps(body), headers=headers, authorizer=authorizer
+        )
         lambda_context = LambdaContext()
         response = handler(event, lambda_context)
         context.response_status_code = response["statusCode"]

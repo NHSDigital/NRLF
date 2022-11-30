@@ -5,13 +5,14 @@ from lambda_pipeline.types import LambdaContext
 
 from feature_tests.steps.aws.resources.api import producer_authoriser_lambda
 from feature_tests.steps.common.common_utils import (
+    authorisation_headers,
     make_aws_authoriser_event,
     uuid_headers,
 )
 
 
-@when('Producer "{requestor}" makes a request')
-def request_contains_correct_headers(context, requestor):
+@when("producer {organisation} makes a request")
+def producer_request_contains_correct_headers(context, organisation):
 
     developer_headers = {
         row["property"]: row["value"] for row in context.table if row["value"] != "null"
@@ -22,7 +23,6 @@ def request_contains_correct_headers(context, requestor):
         "NHSD-Client-RP-Details": json.dumps(
             {"app.ASID": "foobar", "nrl.pointer-types": ["type1"], **developer_headers}
         ),
-        **uuid_headers(context),
         **context.headers,
     }
 

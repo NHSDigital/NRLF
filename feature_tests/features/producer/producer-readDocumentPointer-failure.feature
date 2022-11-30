@@ -50,7 +50,7 @@ Feature: Failure scenarios where producer is unable to read a Document Pointer
     And Producer "AARON COURT MENTAL NH" has permission to create Document Pointers for
       | snomed_code | description |
       | 734163000   | Care plan   |
-    When Producer "AARON COURT MENTAL NH" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890"
+    When Producer "AARON COURT MENTAL NH" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"
 
@@ -66,7 +66,7 @@ Feature: Failure scenarios where producer is unable to read a Document Pointer
     And Producer "ABUNDANT LIFE CARE LIMITED" has permission to create Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When Producer "ABUNDANT LIFE CARE LIMITED" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890"
+    When Producer "ABUNDANT LIFE CARE LIMITED" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"
 
@@ -74,6 +74,6 @@ Feature: Failure scenarios where producer is unable to read a Document Pointer
     Given Producer "AARON COURT MENTAL NH" has permission to create Document Pointers for
       | snomed_code | description               |
       | 736253002   | Mental health crisis plan |
-    When Producer "AARON COURT MENTAL NH" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890"
+    When Producer "AARON COURT MENTAL NH" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"
