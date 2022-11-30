@@ -8,29 +8,37 @@ from feature_tests.steps.common.common_utils import authorisation_headers, uuid_
 
 
 @when(
-    'Consumer "{consumer}" reads an existing Document Reference "{document_reference_id}"'
+    'Consumer "{consumer}" reads an existing Document Reference "{document_reference_id}" as {organisation}'
 )
 def consumer_reads_existing_document_reference(
-    context, consumer, document_reference_id
+    context, consumer, document_reference_id, organisation
 ):
     path_params = {"id": document_reference_id}
+    developer_headers = {
+        row["property"]: row["value"] for row in context.table if row["value"] != "null"
+    }
+    context.developer_headers = developer_headers
+
     headers = {
         "NHSD-Client-RP-Details": json.dumps(
             {
                 "app.ASID": "foobar",
                 "nrl.pointer-types": context.allowed_types,
-                "developer.app.id": "application id",
-                "developer.app.name": "application name",
+                **developer_headers,
             }
         ),
         **uuid_headers(context),
-        **authorisation_headers(),
+        **authorisation_headers(context, organisation),
     }
 
     if context.local_test:
         from api.consumer.readDocumentReference.index import handler
 
-        event = make_aws_event(pathParameters=path_params, headers=headers)
+        authorizer = {"document_types": json.dumps(context.allowed_types)}
+
+        event = make_aws_event(
+            pathParameters=path_params, headers=headers, authorizer=authorizer
+        )
         response = handler(event)
         context.response_status_code = response["statusCode"]
         context.response_message = response["body"]

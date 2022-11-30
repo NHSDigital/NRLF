@@ -6,8 +6,8 @@ from feature_tests.steps.aws.resources.dynamodb import (
     get_dynamo_db_repository,
 )
 from feature_tests.steps.fixtures import (
-    mock_document_pointer_dynamo_db,
     mock_environmental_variables,
+    mock_nrlf_dynamo_db,
 )
 from helpers.aws_session import new_aws_session
 
@@ -41,6 +41,7 @@ def before_scenario(context, scenario):
     context.template = None
     context.template_document = None
     context.template_headers = None
+    context.template_auth = {}
     context.template_policy_response = None
     context.developer_headers = {}
     context.documents = {}
@@ -55,14 +56,16 @@ def before_scenario(context, scenario):
 
     if context.local_test:
         use_fixture(mock_environmental_variables, context)
-        use_fixture(mock_document_pointer_dynamo_db, context)
+        use_fixture(mock_nrlf_dynamo_db, context)
         context.dynamodb_client = boto3.client("dynamodb")
     elif context.sandbox_test:
         context.dynamodb_client = boto3.client(
             "dynamodb", endpoint_url="http://localhost:4566"
         )
         _empty_dynamo_db_table(context, "Document Pointers")
+        _empty_dynamo_db_table(context, "Auth")
     else:
         session = new_aws_session()
         context.dynamodb_client = session.client("dynamodb")
         _empty_dynamo_db_table(context, "Document Pointers")
+        _empty_dynamo_db_table(context, "Auth")

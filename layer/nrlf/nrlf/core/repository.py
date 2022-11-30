@@ -41,9 +41,10 @@ def _handle_dynamodb_errors(function, conditional_check_error_message: str = "")
         try:
             return function(*args, **kwargs)
         except ClientError as error:
-            if error.response["Error"]["Code"] in CONDITION_CHECK_CODES:
+            error_code = error.response["Error"]["Code"]
+            if error_code in CONDITION_CHECK_CODES:
                 raise DynamoDbError(
-                    f"Condition check failed - {conditional_check_error_message}"
+                    f"Condition check failed - {conditional_check_error_message or error_code}"
                 )
             raise Exception("There was an error with the database")
 

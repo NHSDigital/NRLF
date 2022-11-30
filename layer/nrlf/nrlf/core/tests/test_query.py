@@ -9,7 +9,7 @@ from nrlf.core.query import (
     to_dynamodb_dict,
 )
 from nrlf.core.repository import Repository
-from nrlf.core.tests.test_repository import mock_dynamodb
+from nrlf.core.tests.test_document_pointers_repository import mock_dynamodb
 from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 

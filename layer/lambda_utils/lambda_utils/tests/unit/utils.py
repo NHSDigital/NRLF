@@ -41,7 +41,7 @@ def throw_item_not_found_error(
     RaiseItemNotFoundErrorModel(foo="1")
 
 
-def make_aws_event(**kwargs):
+def make_aws_event(authorizer={}, **kwargs):
     return {
         "resource": "/",
         "path": "/",
@@ -124,6 +124,7 @@ def make_aws_event(**kwargs):
             },
             "domainName": "70ixmpl4fl.execute-api.us-east-2.amazonaws.com",
             "apiId": "70ixmpl4fl",
+            "authorizer": authorizer,
         },
         "body": kwargs.get("body", None),
         "isBase64Encoded": False,

@@ -62,7 +62,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
       | snomed_code | description                 |
       | 736253002   | "Mental health crisis plan" |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|0987654321" from DOCUMENT template
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|0987654321" from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                                   |
       | identifier  | 1234567890                              |
       | status      | current                                 |
@@ -78,7 +78,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL 2" has permission to update Document Pointers for
       | snomed_code | description                 |
       | 736253002   | "Mental health crisis plan" |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL 2" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL 2" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                                   |
       | identifier  | 1234567890                              |
       | status      | current                                 |
@@ -94,7 +94,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
       | snomed_code | description                 |
       | 736253002   | "Mental health crisis plan" |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                                   |
       | identifier  | 1234567890                              |
       | status      | current                                 |
@@ -110,7 +110,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
       | snomed_code | description                 |
       | 736253002   | "Mental health crisis plan" |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                                   |
       | identifier  | 1234567890                              |
       | status      | deleted                                 |
@@ -125,7 +125,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
     Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
       | snomed_code | description                 |
       | 736253002   | "Mental health crisis plan" |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template
+    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template as "Yorkshire Ambulance Service"
       | property    | value                                     |
       | identifier  | 1234567890                                |
       | status      | current                                   |

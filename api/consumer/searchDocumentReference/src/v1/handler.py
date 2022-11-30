@@ -1,3 +1,4 @@
+import json
 from logging import Logger
 from typing import Any
 
@@ -14,18 +15,6 @@ from nrlf.core.transform import create_bundle_from_document_pointers
 from api.consumer.searchDocumentReference.src.constants import PersistentDependencies
 
 
-@log_action(narrative="Parsing ClientRpDetails header")
-def parse_client_rp_details(
-    data: PipelineData,
-    context: LambdaContext,
-    event: APIGatewayProxyEventModel,
-    dependencies: FrozenDict[str, Any],
-    logger: Logger,
-) -> PipelineData:
-    client_rp_details = ClientRpDetailsHeader(event)
-    return PipelineData(client_rp_details=client_rp_details, **data)
-
-
 @log_action(narrative="Searching for document references")
 def search_document_references(
     data: PipelineData,
@@ -35,14 +24,16 @@ def search_document_references(
     logger: Logger,
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
-    client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
 
     request_params = ConsumerRequestParams(**event.queryStringParameters)
     nhs_number: RequestQuerySubject = request_params.nhs_number
 
+    document_types = json.loads(
+        event.requestContext.authorizer.claims["document_types"]
+    )
+
     search_and_filter_query = create_search_and_filter_query(
-        nhs_number=nhs_number,
-        type=client_rp_details.pointer_types,
+        nhs_number=nhs_number, type=document_types
     )
 
     document_pointers: list[DocumentPointer] = repository.search(
@@ -54,6 +45,5 @@ def search_document_references(
 
 
 steps = [
-    parse_client_rp_details,
     search_document_references,
 ]

@@ -6,16 +6,16 @@ from lambda_utils.tests.unit.utils import make_aws_event
 from feature_tests.steps.aws.resources.api import producer_read_api_request
 from feature_tests.steps.common.common_utils import (
     authorisation_headers,
-    render_template,
+    render_fhir_template,
     uuid_headers,
 )
 
 
 @when(
-    'Producer "{producer}" reads an existing Document Reference "{document_reference_id}"'
+    'Producer "{producer}" reads an existing Document Reference "{document_reference_id}" as {organisation}'
 )
 def producer_reads_existing_document_reference(
-    context, producer, document_reference_id
+    context, producer, document_reference_id, organisation
 ):
     path_params = {"id": document_reference_id}
     headers = {
@@ -28,7 +28,7 @@ def producer_reads_existing_document_reference(
             }
         ),
         **uuid_headers(context),
-        **authorisation_headers(),
+        **authorisation_headers(context, organisation),
     }
 
     if context.local_test:
@@ -51,5 +51,5 @@ def producer_reads_existing_document_reference(
 @then("the response is the DOCUMENT template with the below values")
 def the_response_is_the_template_with_values(context):
     assert json.loads(context.response_message) == json.loads(
-        render_template(context=context)
+        render_fhir_template(context, context.template)
     ), json.loads(context.response_message)

@@ -10,7 +10,7 @@ from feature_tests.steps.aws.resources.api import (
 )
 from feature_tests.steps.common.common_utils import (
     authorisation_headers,
-    render_template,
+    render_fhir_template,
     uuid_headers,
 )
 
@@ -21,7 +21,10 @@ def the_response_contains_the_template_with_values(context):
 
     document_references = [entry["resource"] for entry in response["entry"]]
 
-    assert json.loads(render_template(context=context)) in document_references
+    assert (
+        json.loads(render_fhir_template(context, context.template))
+        in document_references
+    )
 
 
 @then("{number_of_documents:d} document {references} {were} returned")
@@ -62,8 +65,8 @@ def producer_search_document_pointers(context):
     assert json.loads(response) == empty_bundle, json.loads(response)
 
 
-@then("the producer search is made")
-def producer_search_document_pointers(context):
+@then("the producer search is made as {organisation}")
+def producer_search_document_pointers(context, organisation):
 
     queryStringParameters = context.query_parameters
     headers = {
@@ -76,7 +79,7 @@ def producer_search_document_pointers(context):
             }
         ),
         **uuid_headers(context),
-        **authorisation_headers(),
+        **authorisation_headers(context, organisation),
     }
 
     if context.local_test:

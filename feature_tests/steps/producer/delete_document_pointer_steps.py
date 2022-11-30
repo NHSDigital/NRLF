@@ -9,16 +9,16 @@ from feature_tests.steps.aws.resources.api import (
 )
 from feature_tests.steps.common.common_utils import (
     authorisation_headers,
-    render_template,
+    render_fhir_template,
     uuid_headers,
 )
 
 
 @when(
-    'Producer "{producer}" deletes an existing Document Reference "{document_reference_id}"'
+    'Producer "{producer}" deletes an existing Document Reference "{document_reference_id}" as {organisation}'
 )
 def producer_deletes_existing_document_reference(
-    context, producer, document_reference_id
+    context, producer, document_reference_id, organisation
 ):
 
     path_params = {"id": document_reference_id}
@@ -32,7 +32,7 @@ def producer_deletes_existing_document_reference(
             }
         ),
         **uuid_headers(context),
-        **authorisation_headers(),
+        **authorisation_headers(context, organisation),
     }
 
     if context.local_test:

@@ -32,6 +32,10 @@ class DynamoDbNullType(DynamoDbType):
     __root__: NoneType = None
 
 
+class DynamoDbListType(DynamoDbType):
+    __root__: list[str]
+
+
 def convert_value_to_dynamo_format(obj):
     _type = type(obj)
 
@@ -77,6 +81,7 @@ DYNAMODBTYPE_TYPE_LOOKUP = {
     str: DynamoDbStringType,
     int: DynamoDbIntType,
     NoneType: DynamoDbNullType,
+    list: DynamoDbListType,
 }
 
 

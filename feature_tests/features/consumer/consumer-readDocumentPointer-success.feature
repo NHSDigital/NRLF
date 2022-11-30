@@ -47,10 +47,16 @@ Feature: Success scenarios where consumer is able to read a Document Pointer
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And Consumer "WEST YORKSHIRE AMBULANCE SERVICE" has permission to read Document Pointers for
-      | snomed_code | description               |
-      | 736253002   | Mental health crisis plan |
-    When Consumer "WEST YORKSHIRE AMBULANCE SERVICE" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890"
+    And the following organisation to application relationship exists
+      | organisation                | application |
+      | Yorkshire Ambulance Service | SCRa        |
+    And "Yorkshire Ambulance Service" can access the following document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    When Consumer "WEST YORKSHIRE AMBULANCE SERVICE" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
+      | property           | value            |
+      | developer.app.id   | SCRa             |
+      | developer.app.name | application name |
     Then the operation is successful
     And the response is the DOCUMENT template with the below values
       | property    | value                          |

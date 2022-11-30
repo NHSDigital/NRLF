@@ -57,7 +57,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | property  | value                 |
       | type      | 736253002             |
       | custodian | AARON COURT MENTAL NH |
-    Then the producer search is made
+    Then the producer search is made as "Yorkshire Ambulance Service"
     And the operation is successful
     And 1 document reference was returned
     And the response contains the DOCUMENT template with the below values
@@ -104,7 +104,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | property  | value                 |
       | type      | 736253002             |
       | custodian | AARON COURT MENTAL NH |
-    Then the producer search is made
+    Then the producer search is made as "Yorkshire Ambulance Service"
     And the operation is successful
     And 2 document references were returned
     And the response contains the DOCUMENT template with the below values
@@ -143,7 +143,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | property  | value                 |
       | type      | 736253002             |
       | custodian | AARON COURT MENTAL NH |
-    Then the producer search is made
+    Then the producer search is made as "Yorkshire Ambulance Service"
     And the response is an empty bundle
 
   Scenario: Empty results when searching for a Document Pointer when subject has no documents with requesting producer
@@ -173,7 +173,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | property  | value                                   |
       | type      | 736253002                               |
       | custodian | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL |
-    Then the producer search is made
+    Then the producer search is made as "Yorkshire Ambulance Service"
     And the response is an empty bundle
 
   Scenario: Empty results when searching for a Document Pointer when provided document type does not exist
@@ -203,5 +203,5 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | property  | value                        |
       | type      | 555253002                    |
       | custodian | EMERGENCY AMBULANCE SERVICES |
-    Then the producer search is made
+    Then the producer search is made as "Yorkshire Ambulance Service"
     And the response is an empty bundle

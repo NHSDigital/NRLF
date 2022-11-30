@@ -38,7 +38,7 @@ Feature: Failure scenarios where consumer is unable to read a Document Pointer
       }
       """
 
-  Scenario: Consumer permissions do not match the Document Pointer type
+  Scenario: Consumer permissions do not allow them to read requested Document Pointer type
     Given a Document Pointer exists in the system with the below values
       | property    | value                          |
       | identifier  | 1234567890                     |
@@ -47,17 +47,29 @@ Feature: Failure scenarios where consumer is unable to read a Document Pointer
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And Consumer "WEST YORKSHIRE AMBULANCE SERVICE" has permission to read Document Pointers for
-      | snomed_code | description |
-      | 734163000   | Care plan   |
-    When Consumer "WEST YORKSHIRE AMBULANCE SERVICE" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890"
+    And the following organisation to application relationship exists
+      | organisation                | application |
+      | Yorkshire Ambulance Service | SCRa        |
+    And "Yorkshire Ambulance Service" can access the following document types
+      | system                  | value           |
+      | https://snomed.info/ict | 861421000000109 |
+    When Consumer "WEST YORKSHIRE AMBULANCE SERVICE" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
+      | property           | value            |
+      | developer.app.id   | SCRa             |
+      | developer.app.name | application name |
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"
 
   Scenario: The Document Pointer does not exist
-    Given Consumer "WEST YORKSHIRE AMBULANCE SERVICE" has permission to read Document Pointers for
-      | snomed_code | description               |
-      | 736253002   | Mental health crisis plan |
-    When Consumer "WEST YORKSHIRE AMBULANCE SERVICE" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890"
+    Given the following organisation to application relationship exists
+      | organisation                | application |
+      | Yorkshire Ambulance Service | SCRa        |
+    And "Yorkshire Ambulance Service" can access the following document types
+      | system                  | value           |
+      | https://snomed.info/ict | 861421000000109 |
+    When Consumer "WEST YORKSHIRE AMBULANCE SERVICE" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
+      | property           | value            |
+      | developer.app.id   | SCRa             |
+      | developer.app.name | application name |
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"

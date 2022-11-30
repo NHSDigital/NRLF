@@ -5,6 +5,7 @@ import nrlf.producer.fhir.r4.model as producer_model
 from nrlf.core.dynamodb_types import (
     DYNAMODB_NULL,
     DynamoDbIntType,
+    DynamoDbListType,
     DynamoDbStringType,
     DynamoDbType,
     convert_dynamo_value_to_raw_value,
@@ -129,3 +130,29 @@ class ConsumerRequestParams(consumer_model.RequestParams):
         nhs_number = self.subject.__root__.split("|")[1]
         validate_nhs_number(nhs_number)
         return nhs_number
+
+
+class Auth(BaseModel):
+    id: DynamoDbStringType
+    application_id: DynamoDbStringType
+    document_types: DynamoDbListType
+    _from_dynamo: bool = Field(
+        default=False,
+        exclude=True,
+        description="internal flag for reading from dynamodb",
+    )
+
+    @staticmethod
+    def public_alias() -> str:
+        return "Auth"
+
+    @root_validator(pre=True)
+    def transform_input_values_if_dynamo_values(cls, values: dict) -> dict:
+        from_dynamo = all(map(is_dynamodb_dict, values.values()))
+
+        if from_dynamo:
+            return {
+                **{k: convert_dynamo_value_to_raw_value(v) for k, v in values.items()},
+                "_from_dynamo": from_dynamo,
+            }
+        return values
