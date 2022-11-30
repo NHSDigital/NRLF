@@ -8,10 +8,7 @@ from lambda_utils.logging import log_action
 from nrlf.core.model import DocumentPointer, ProducerRequestParams
 from nrlf.core.query import create_search_and_filter_query
 from nrlf.core.repository import Repository
-from nrlf.core.transform import (
-    create_bundle_from_document_pointers,
-    pagination_parameters,
-)
+from nrlf.core.transform import create_bundle_from_document_pointers
 from nrlf.producer.fhir.r4.model import RequestQuerySubject
 
 from api.producer.searchDocumentReference.src.constants import PersistentDependencies
@@ -47,20 +44,15 @@ def search_document_references(
 
     request_params = ProducerRequestParams(**event.queryStringParameters)
     nhs_number: RequestQuerySubject = request_params.nhs_number
-    pagination = pagination_parameters(**event.queryStringParameters)
 
     search_and_filter_query = create_search_and_filter_query(
         nhs_number=nhs_number,
-        pagesize=pagination["pagesize"],
-        order=pagination["order"],
         producer_id=client_rp_details.custodian,
         type=client_rp_details.pointer_types,
     )
 
     document_pointers: list[DocumentPointer] = repository.search(
-        index_name=PersistentDependencies.NHS_NUMBER_INDEX,
-        required_page=pagination["page"],
-        **search_and_filter_query,
+        index_name=PersistentDependencies.NHS_NUMBER_INDEX, **search_and_filter_query
     )
 
     bundle = create_bundle_from_document_pointers(document_pointers)

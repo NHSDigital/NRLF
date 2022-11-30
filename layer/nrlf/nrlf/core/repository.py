@@ -12,6 +12,7 @@ from pydantic import BaseModel
 PydanticModel = TypeVar("PydanticModel", bound=BaseModel)
 
 MAX_TRANSACT_ITEMS = 100
+MAX_RESULTS = 100
 KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
 ATTRIBUTE_EXISTS_ID = "attribute_exists(id)"
 ATTRIBUTE_NOT_EXISTS_ID = "attribute_not_exists(id)"
@@ -24,6 +25,14 @@ CONDITION_CHECK_CODES = [
 
 def to_kebab_case(name: str) -> str:
     return KEBAB_CASE_RE.sub("-", name).lower()
+
+
+def _validate_results_within_limits(results: dict):
+    if len(results["Items"]) >= MAX_RESULTS or "LastEvaluatedKey" in results:
+        raise Exception(
+            "DynamoDB has returned too many results, pagination not implemented yet"
+        )
+    return results
 
 
 def _handle_dynamodb_errors(function, conditional_check_error_message: str = ""):
@@ -84,23 +93,12 @@ class Repository:
     def search(
         self,
         index_name: str,
-        required_page: int = 0,
-        current_page: int = 0,
         **kwargs: dict[str, str],
     ) -> list[PydanticModel]:
         results = self.dynamodb.query(
             TableName=self.table_name, IndexName=index_name, **kwargs
         )
-        if current_page != required_page:
-            if "LastEvaluatedKey" in results:
-                kwargs["ExclusiveStartKey"] = results["LastEvaluatedKey"]
-                return self.search(
-                    index_name=index_name,
-                    required_page=required_page,
-                    current_page=current_page + 1,
-                    **kwargs,
-                )
-
+        _validate_results_within_limits(results)
         return [self.item_type(**item) for item in results["Items"]]
 
     @handle_dynamodb_errors(conditional_check_error_message="Permission denied")

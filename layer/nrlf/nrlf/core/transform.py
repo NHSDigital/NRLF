@@ -2,7 +2,7 @@ import json
 from datetime import datetime as dt
 from typing import Union
 
-from nrlf.core.constants import EMPTY_VALUES, JSON_TYPES, MAX_RESULTS, Source
+from nrlf.core.constants import EMPTY_VALUES, JSON_TYPES, Source
 from nrlf.core.errors import FhirValidationError
 from nrlf.core.model import DocumentPointer
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
@@ -159,15 +159,3 @@ def create_bundle_from_document_pointers(
         total=len(bundleEntryList),
         entry=bundleEntryList,
     ).dict(exclude_none=True, exclude_defaults=True)
-
-
-def pagination_parameters(**query_params) -> dict:
-    pagesize = int(query_params.get("pagesize", 20))
-    if pagesize >= MAX_RESULTS:
-        pagesize = MAX_RESULTS
-
-    return {
-        "pagesize": pagesize,
-        "page": int(query_params.get("page", "0")),
-        "order": query_params.get("asc", "false"),
-    }
