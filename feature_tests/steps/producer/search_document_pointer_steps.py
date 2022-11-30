@@ -33,12 +33,6 @@ def the_response_is_the_list_of_template_documents(
     assert number_of_documents == response["total"]
 
 
-@then("id of document number {number_of_document:d} contains {custodian}")
-def id_of_document_equals(context, number_of_document: int, custodian: str):
-    response = json.loads(context.response_message)
-    assert custodian in response["entry"][number_of_document]["resource"]["id"]
-
-
 @when('"{producer}" searches with query parameters')
 def producer_search_document_pointers(context, producer: str):
     query_parameters = {
