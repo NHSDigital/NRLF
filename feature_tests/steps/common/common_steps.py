@@ -12,7 +12,7 @@ from feature_tests.steps.common.common_utils import (
     render_template,
     uuid_headers,
 )
-from layer.nrlf.nrlf.core.model import Auth
+from layer.nrlf.nrlf.core.model import AuthConsumer
 
 
 @given("template DOCUMENT")
@@ -79,7 +79,7 @@ def given_auth_details_exists(context):
     rendered_template = render_template(context, context.template_auth)
     auth_json = json.loads(rendered_template)
     context.allowed_types = auth_json["document_types"]
-    auth_repository.create(Auth(**auth_json))
+    auth_repository.create(AuthConsumer(**auth_json))
 
 
 @given("the following organisation to application relationship exists")
@@ -100,9 +100,9 @@ def given_organisation_document_types(context, organisation):
 
     context.template_auth["document_types"] = document_types
 
-    auth_repository = get_dynamo_db_repository(context, "Auth")
+    auth_repository = get_dynamo_db_repository(context, "Auth Consumer")
     context.allowed_types = document_types
-    auth_repository.create(Auth(**context.template_auth))
+    auth_repository.create(AuthConsumer(**context.template_auth))
 
 
 @given("a Document Pointer exists in the system with the below values")

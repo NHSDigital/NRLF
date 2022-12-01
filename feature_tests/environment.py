@@ -63,9 +63,9 @@ def before_scenario(context, scenario):
             "dynamodb", endpoint_url="http://localhost:4566"
         )
         _empty_dynamo_db_table(context, "Document Pointers")
-        _empty_dynamo_db_table(context, "Auth")
+        _empty_dynamo_db_table(context, "Auth Consumer")
     else:
         session = new_aws_session()
         context.dynamodb_client = session.client("dynamodb")
         _empty_dynamo_db_table(context, "Document Pointers")
-        _empty_dynamo_db_table(context, "Auth")
+        _empty_dynamo_db_table(context, "Auth Consumer")

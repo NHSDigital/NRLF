@@ -7,28 +7,14 @@ from typing import Generator
 import boto3
 import moto
 import pytest
-from botocore.exceptions import ClientError
-from nrlf.core.errors import DynamoDbError, ItemNotFound, TooManyItemsError
-from nrlf.core.model import Auth, DocumentPointer
-from nrlf.core.query import hard_delete_query, update_and_filter_query
-from nrlf.core.repository import (
-    MAX_TRANSACT_ITEMS,
-    Repository,
-    handle_dynamodb_errors,
-    to_kebab_case,
-)
-from nrlf.core.transform import (
-    create_document_pointer_from_fhir_json as _create_document_pointer_from_fhir_json,
-)
-from nrlf.core.transform import (
-    update_document_pointer_from_fhir_json as _update_document_pointer_from_fhir_json,
-)
+from nrlf.core.errors import DynamoDbError
+from nrlf.core.model import AuthConsumer
+from nrlf.core.repository import MAX_TRANSACT_ITEMS, Repository, to_kebab_case
 from nrlf.core.types import DynamoDbClient
-from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
 DEFAULT_ATTRIBUTE_DEFINITIONS = [{"AttributeName": "id", "AttributeType": "S"}]
 DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]
-TABLE_NAME = to_kebab_case(Auth.__name__)
+TABLE_NAME = to_kebab_case(AuthConsumer.__name__)
 API_VERSION = 1
 auth_json = {
     "id": "Yorkshire Ambulance Service",
@@ -55,34 +41,36 @@ def mock_dynamodb() -> Generator[DynamoDbClient, None, None]:
 
 
 def test__table_name_prefix():
-    repository = Repository(item_type=Auth, client=None, environment_prefix="foo-bar-")
-    assert repository.table_name == "foo-bar-auth"
+    repository = Repository(
+        item_type=AuthConsumer, client=None, environment_prefix="foo-bar-"
+    )
+    assert repository.table_name == "foo-bar-auth-consumer"
 
 
 def test_create_auth_details():
-    model = Auth(**auth_json)
+    model = AuthConsumer(**auth_json)
     with mock_dynamodb() as client:
-        repository = Repository(item_type=Auth, client=client)
+        repository = Repository(item_type=AuthConsumer, client=client)
         repository.create(item=model)
         response = client.scan(TableName=TABLE_NAME)
 
     (item,) = response["Items"]
-    recovered_item = Auth(**item)
+    recovered_item = AuthConsumer(**item)
     assert recovered_item.dict() == model
 
 
 def test_cant_create_if_item_already_exists():
-    model = Auth(**auth_json)
+    model = AuthConsumer(**auth_json)
     with pytest.raises(DynamoDbError), mock_dynamodb() as client:
-        repository = Repository(item_type=Auth, client=client)
+        repository = Repository(item_type=AuthConsumer, client=client)
         repository.create(item=model)
         repository.create(item=model)
 
 
 def test_read_auth():
-    model = Auth(**auth_json)
+    model = AuthConsumer(**auth_json)
     with mock_dynamodb() as client:
-        repository = Repository(item_type=Auth, client=client)
+        repository = Repository(item_type=AuthConsumer, client=client)
         repository.create(item=model)
         result = repository.read(
             KeyConditionExpression="id = :id",

@@ -1,5 +1,5 @@
 from lambda_utils.aws import boto3_client
-from nrlf.core.model import Auth
+from nrlf.core.model import AuthConsumer
 from nrlf.core.repository import Repository
 from pydantic import BaseModel
 
@@ -33,7 +33,7 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
     """
     return {
         "repository": Repository(
-            item_type=Auth,
+            item_type=AuthConsumer,
             client=boto3_client("dynamodb"),
             environment_prefix=config.PREFIX,
         ),

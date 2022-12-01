@@ -132,7 +132,7 @@ class ConsumerRequestParams(consumer_model.RequestParams):
         return nhs_number
 
 
-class Auth(BaseModel):
+class AuthConsumer(BaseModel):
     id: DynamoDbStringType
     application_id: DynamoDbStringType
     document_types: DynamoDbListType
@@ -144,7 +144,7 @@ class Auth(BaseModel):
 
     @staticmethod
     def public_alias() -> str:
-        return "Auth"
+        return "Auth Consumer"
 
     @root_validator(pre=True)
     def transform_input_values_if_dynamo_values(cls, values: dict) -> dict:
