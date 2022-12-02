@@ -234,10 +234,10 @@ resource "aws_iam_policy" "document-type__kms-read-write" {
 }
 
 
-########## Auth ############
+########## Auth Consumer ############
 
-resource "aws_dynamodb_table" "auth" {
-  name         = "${local.prefix}--auth"
+resource "aws_dynamodb_table" "auth_consumer" {
+  name         = "${local.prefix}--auth-consumer"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
   attribute {
@@ -247,13 +247,13 @@ resource "aws_dynamodb_table" "auth" {
 
   server_side_encryption {
     enabled     = true
-    kms_key_arn = aws_kms_key.auth.arn
+    kms_key_arn = aws_kms_key.auth_consumer.arn
   }
 }
 
-resource "aws_iam_policy" "auth__dynamodb-read" {
-  name        = "${local.prefix}--auth--dynamodb-read"
-  description = "Read the auth table"
+resource "aws_iam_policy" "auth_consumer__dynamodb-read" {
+  name        = "${local.prefix}--auth-consumer--dynamodb-read"
+  description = "Read the auth consumer table"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -264,7 +264,7 @@ resource "aws_iam_policy" "auth__dynamodb-read" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_kms_key.auth.arn
+          aws_kms_key.auth_consumer.arn
         ]
       },
       {
@@ -275,16 +275,16 @@ resource "aws_iam_policy" "auth__dynamodb-read" {
           "dynamodb:GetItem",
         ],
         Resource = [
-          "${aws_dynamodb_table.auth.arn}*"
+          "${aws_dynamodb_table.auth_consumer.arn}*"
         ]
       }
     ]
   })
 }
 
-resource "aws_iam_policy" "auth__dynamodb-write" {
-  name        = "${local.prefix}--auth--dynamodb-write"
-  description = "Write to the auth table"
+resource "aws_iam_policy" "auth_consumer__dynamodb-write" {
+  name        = "${local.prefix}--auth-consumer--dynamodb-write"
+  description = "Write to the auth consumer table"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -295,7 +295,7 @@ resource "aws_iam_policy" "auth__dynamodb-write" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_kms_key.auth.arn
+          aws_kms_key.auth_consumer.arn
         ]
       },
       {
@@ -306,28 +306,28 @@ resource "aws_iam_policy" "auth__dynamodb-write" {
           "dynamodb:DeleteItem",
         ],
         Resource = [
-          "${aws_dynamodb_table.auth.arn}*"
+          "${aws_dynamodb_table.auth_consumer.arn}*"
         ]
       }
     ]
   })
 }
 
-resource "aws_kms_key" "auth" {
-  description             = "auth table KMS key"
+resource "aws_kms_key" "auth_consumer" {
+  description             = "auth consumer table KMS key"
   deletion_window_in_days = local.kms.deletion_window_in_days
 
 }
 
-resource "aws_kms_alias" "auth" {
-  name          = "alias/${local.prefix}--auth"
-  target_key_id = aws_kms_key.auth.key_id
+resource "aws_kms_alias" "auth_consumer" {
+  name          = "alias/${local.prefix}--auth-consumer"
+  target_key_id = aws_kms_key.auth_consumer.key_id
 }
 
 
-resource "aws_iam_policy" "auth__kms-read-write" {
-  name        = "${local.prefix}--auth--kms-read-write"
-  description = "Encrypt and decrypt with the auth kms key"
+resource "aws_iam_policy" "auth_consumer__kms-read-write" {
+  name        = "${local.prefix}--auth-consumer--kms-read-write"
+  description = "Encrypt and decrypt with the auth consumer kms key"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -340,7 +340,120 @@ resource "aws_iam_policy" "auth__kms-read-write" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_kms_key.auth.arn
+          aws_kms_key.auth_consumer.arn
+        ]
+      }
+    ]
+  })
+}
+
+########## Auth Producer ############
+
+resource "aws_dynamodb_table" "auth_producer" {
+  name         = "${local.prefix}--auth-producer"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = aws_kms_key.auth_producer.arn
+  }
+}
+
+resource "aws_iam_policy" "auth_producer__dynamodb-read" {
+  name        = "${local.prefix}--auth-producer--dynamodb-read"
+  description = "Read the auth producer table"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "kms:Decrypt",
+          "kms:DescribeKey"
+        ]
+        Effect = "Allow"
+        Resource = [
+          aws_kms_key.auth_producer.arn
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:Query",
+          "dynamodb:Scan",
+          "dynamodb:GetItem",
+        ],
+        Resource = [
+          "${aws_dynamodb_table.auth_producer.arn}*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "auth_producer__dynamodb-write" {
+  name        = "${local.prefix}--auth-producer--dynamodb-write"
+  description = "Write to the auth producer table"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "kms:Encrypt",
+          "kms:GenerateDataKey"
+        ]
+        Effect = "Allow"
+        Resource = [
+          aws_kms_key.auth_producer.arn
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+        ],
+        Resource = [
+          "${aws_dynamodb_table.auth_producer.arn}*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_kms_key" "auth_producer" {
+  description             = "auth producer table KMS key"
+  deletion_window_in_days = local.kms.deletion_window_in_days
+
+}
+
+resource "aws_kms_alias" "auth_producer" {
+  name          = "alias/${local.prefix}--auth-producer"
+  target_key_id = aws_kms_key.auth_producer.key_id
+}
+
+
+resource "aws_iam_policy" "auth_producer__kms-read-write" {
+  name        = "${local.prefix}--auth-producer--kms-read-write"
+  description = "Encrypt and decrypt with the auth producer kms key"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "kms:Decrypt",
+          "kms:DescribeKey",
+          "kms:Encrypt",
+          "kms:GenerateDataKey"
+        ]
+        Effect = "Allow"
+        Resource = [
+          aws_kms_key.auth_producer.arn
         ]
       }
     ]

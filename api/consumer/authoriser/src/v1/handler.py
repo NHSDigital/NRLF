@@ -9,7 +9,7 @@ from lambda_utils.header_config import ClientRpDetailsHeader
 from lambda_utils.logging import log_action
 from nrlf.core.authoriser_response import authorisation_denied, authorisation_ok
 from nrlf.core.errors import ItemNotFound
-from nrlf.core.model import Auth
+from nrlf.core.model import AuthConsumer
 from nrlf.core.query import create_read_and_filter_query
 from nrlf.core.repository import Repository
 from nrlf.core.validators import requesting_application_is_not_authorised
@@ -53,7 +53,7 @@ def authenticate_request(
     authentication_query = create_read_and_filter_query(id=organisation_code)
 
     try:
-        authentication_results: Auth = repository.read(**authentication_query)
+        authentication_results: AuthConsumer = repository.read(**authentication_query)
     except ItemNotFound:
         response = authorisation_denied(principle_id, data["method_arn"], context)
         return PipelineData(response=response)

@@ -1,4 +1,4 @@
-from nrlf.core.model import Auth, DocumentPointer
+from nrlf.core.model import AuthConsumer, DocumentPointer
 from nrlf.core.repository import Repository
 from nrlf.core.types import DynamoDbClient
 from pydantic import BaseModel
@@ -56,14 +56,14 @@ class FeatureTestDocumentPointerRepository(FeatureTestDynamoRepository):
         super().__init__(DocumentPointer, client, ["id"], environmental_prefix)
 
 
-class FeatureTestAuthRepository(FeatureTestDynamoRepository):
+class FeatureTestAuthConsumerRepository(FeatureTestDynamoRepository):
     def __init__(self, client: DynamoDbClient, environmental_prefix: str = ""):
-        super().__init__(Auth, client, ["id"], environmental_prefix)
+        super().__init__(AuthConsumer, client, ["id"], environmental_prefix)
 
 
 _DYNAMO_DB_REPOSITORY_MAP = {
     "Document Pointers": FeatureTestDocumentPointerRepository,
-    "Auth": FeatureTestAuthRepository,
+    "Auth Consumer": FeatureTestAuthConsumerRepository,
 }
 
 

@@ -38,7 +38,7 @@ def mock_nrlf_dynamo_db(context, *args, **kwargs):
         )
         client.create_table(
             AttributeDefinitions=[{"AttributeName": "id", "AttributeType": "S"}],
-            TableName="auth",
+            TableName="auth-consumer",
             KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
             BillingMode="PAY_PER_REQUEST",
         )
