@@ -14,6 +14,11 @@ on:
       branch_name:
         description: Branch to deploy
         required: true
+      deploy_to_sandbox:
+        description: Deploy these changes to the sandbox workspace, instead of the main workspace?
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   id-token: write
@@ -29,6 +34,7 @@ env:
   TF_CLI_ARGS: -no-color
   RUNNING_IN_CI: 1
   CI_DEPLOY_PERSISTENT_ENV: 1
+  USE_OPTIONAL_SANDBOX_SUFFIX: ${{ inputs.deploy_to_sandbox }}
 
 jobs:
   cache:
@@ -89,10 +95,15 @@ jobs:
 
   terraform-plan:
     needs: [build]
-    name: Terraform plan - ${{ inputs.environment }}
+    name: Terraform plan - ${{ inputs.environment }}${{ env.OPTIONAL_SANDBOX_SUFFIX }}
     runs-on: [self-hosted, ci]
 
     steps:
+      - name: Set any dynamic environmental variables
+        run: |
+          OPTIONAL_SANDBOX_SUFFIX=$([ ${{ env.USE_OPTIONAL_SANDBOX_SUFFIX }} == 'true' ] && echo "-sandbox")
+          echo $OPTIONAL_SANDBOX_SUFFIX >> $GITHUB_ENV
+
       - name: Git clone - ${{ inputs.branch_name }}
         uses: actions/checkout@v3
         with:
@@ -113,11 +124,11 @@ jobs:
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
           aws-region: eu-west-2
 
-      - name: Terraform plan - ${{ env.TF_WORKFLOW_ID }}
+      - name: Terraform plan - ${{ env.TF_WORKFLOW_ID }}${{ env.OPTIONAL_SANDBOX_SUFFIX }}
         run: |
           source nrlf.sh
-          nrlf terraform ciinit ${TF_WORKFLOW_ID}
-          nrlf terraform ciplan ${TF_WORKFLOW_ID}
+          nrlf terraform ciinit ${TF_WORKFLOW_ID}${OPTIONAL_SANDBOX_SUFFIX}
+          nrlf terraform ciplan ${TF_WORKFLOW_ID}${OPTIONAL_SANDBOX_SUFFIX}
 
       - name: Upload artifact - ${{ env.TF_ARTIFACT_NAME }}
         uses: ./.github/actions/upload-artifact/
@@ -127,9 +138,9 @@ jobs:
 
   terraform-apply:
     needs: [terraform-plan]
-    name: Terraform apply - ${{ inputs.environment }}
+    name: Terraform apply - ${{ inputs.environment }}${{ env.OPTIONAL_SANDBOX_SUFFIX }}
     runs-on: [self-hosted, ci]
-    environment: ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}${{ env.OPTIONAL_SANDBOX_SUFFIX }}
 
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
@@ -158,11 +169,11 @@ jobs:
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
           aws-region: eu-west-2
 
-      - name: Terraform apply - ${{ env.TF_WORKFLOW_ID }}
+      - name: Terraform apply - ${{ env.TF_WORKFLOW_ID }}${{ env.OPTIONAL_SANDBOX_SUFFIX }}
         run: |
           source nrlf.sh
-          nrlf terraform ciinit ${TF_WORKFLOW_ID}
-          nrlf terraform ciapply ${TF_WORKFLOW_ID}
+          nrlf terraform ciinit ${TF_WORKFLOW_ID}${OPTIONAL_SANDBOX_SUFFIX}
+          nrlf terraform ciapply ${TF_WORKFLOW_ID}${OPTIONAL_SANDBOX_SUFFIX}
 
   clear-cache:
     name: Clear Cache
