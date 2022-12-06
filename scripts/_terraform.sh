@@ -184,12 +184,12 @@ function _get_account_id_location() {
   local environment=$1
 
   if [ "$RUNNING_IN_CI" = 1 ] && [ "$CI_DEPLOY_PERSISTENT_ENV" != 1 ]; then
-    echo "${TEST_ACCOUNT_ID_LOCATION}"
+    echo "${TEST_ACCOUNT_ID_LOCATION}"     # CI deployments to TEST by default
   elif [ "$environment" = "mgmt" ]; then
     echo "${MGMT_ACCOUNT_ID_LOCATION}"
   elif [ "$environment" = "prod" ]; then
     echo "${PROD_ACCOUNT_ID_LOCATION}"
-  elif [ "$environment" = "ref" ] || [ "$environment" = "test" ]; then
+  elif [ "$environment" = "ref" ] || [ "$environment" = "test" ] || [ "$environment" = "ref-sandbox" ]; then
     echo "${TEST_ACCOUNT_ID_LOCATION}"
   else
     echo "${DEV_ACCOUNT_ID_LOCATION}"

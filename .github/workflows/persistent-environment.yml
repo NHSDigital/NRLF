@@ -14,6 +14,14 @@ on:
       branch_name:
         description: Branch to deploy
         required: true
+      workspace_suffix:
+        description: If deploying these changes to the sandbox workspace, select '-sandbox'
+        required: true
+        default: ""
+        type: choice
+        options:
+          - ""
+          - -sandbox
 
 permissions:
   id-token: write
@@ -29,6 +37,7 @@ env:
   TF_CLI_ARGS: -no-color
   RUNNING_IN_CI: 1
   CI_DEPLOY_PERSISTENT_ENV: 1
+  OPTIONAL_SANDBOX_SUFFIX: ${{ inputs.workspace_suffix }}
 
 jobs:
   cache:
@@ -89,7 +98,7 @@ jobs:
 
   terraform-plan:
     needs: [build]
-    name: Terraform plan - ${{ inputs.environment }}
+    name: Terraform plan - ${{ inputs.environment }} ${{ inputs.workspace_suffix }}
     runs-on: [self-hosted, ci]
 
     steps:
@@ -116,8 +125,8 @@ jobs:
       - name: Terraform plan - ${{ env.TF_WORKFLOW_ID }}
         run: |
           source nrlf.sh
-          nrlf terraform ciinit ${TF_WORKFLOW_ID}
-          nrlf terraform ciplan ${TF_WORKFLOW_ID}
+          nrlf terraform ciinit ${TF_WORKFLOW_ID}${OPTIONAL_SANDBOX_SUFFIX}
+          nrlf terraform ciplan ${TF_WORKFLOW_ID}${OPTIONAL_SANDBOX_SUFFIX}
 
       - name: Upload artifact - ${{ env.TF_ARTIFACT_NAME }}
         uses: ./.github/actions/upload-artifact/
@@ -127,9 +136,9 @@ jobs:
 
   terraform-apply:
     needs: [terraform-plan]
-    name: Terraform apply - ${{ inputs.environment }}
+    name: Terraform apply - ${{ inputs.environment }} ${{ inputs.workspace_suffix }}
     runs-on: [self-hosted, ci]
-    environment: ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}${{ inputs.workspace_suffix }}
 
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
@@ -158,11 +167,11 @@ jobs:
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
           aws-region: eu-west-2
 
-      - name: Terraform apply - ${{ env.TF_WORKFLOW_ID }}
+      - name: Terraform apply - ${{ env.TF_WORKFLOW_ID }}${{ env.OPTIONAL_SANDBOX_SUFFIX }}
         run: |
           source nrlf.sh
-          nrlf terraform ciinit ${TF_WORKFLOW_ID}
-          nrlf terraform ciapply ${TF_WORKFLOW_ID}
+          nrlf terraform ciinit ${TF_WORKFLOW_ID}${OPTIONAL_SANDBOX_SUFFIX}
+          nrlf terraform ciapply ${TF_WORKFLOW_ID}${OPTIONAL_SANDBOX_SUFFIX}
 
   clear-cache:
     name: Clear Cache
