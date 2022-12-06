@@ -27,8 +27,7 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
    3. [Run integration tests](#3-run-the-integration-tests)
    4. [Run feature tests](#4-run-the-feature-tests)
 5. [Logging](#logging)
-6. [Sandbox deployment with localstack](#sandbox-deployment-with-localstack)
-7. [Route 53 & Hosted zones](#route53--hosted-zones)
+6. [Route 53 & Hosted zones](#route53--hosted-zones)
 
 ## Setup
 
@@ -200,41 +199,6 @@ Other notes:
   },
   "timestamp": "2022-11-08T16:39:00.090Z"
 }
-```
-
-## Sandbox deployment with LocalStack
-
-In order to deploy the entire stack locally, we use LocalStack which comes bundled with the `sandbox` dependencies for this project.
-You will however need to install a Docker client on your machine according to the instructions for your OS.
-
-### 1. Setup the virtual environment
-
-As before we need to get the virtual environment running and then re-mount the `nrlf.sh` script. Make sure that you've installed the sandbox dependencies also:
-
-```shell
-poetry install --with sandbox
-poetry shell
-source nrlf.sh
-```
-
-### 2. (re)build the API
-
-In order to build the sandbox, and have it run locally, do:
-
-```shell
-nrlf sandbox build
-```
-
-You can verify that the sandbox proxy is running with:
-
-```shell
-curl http://localhost:8000/_status
-```
-
-and you can run feature tests with:
-
-```shell
-nrlf test feature sandbox
 ```
 
 ## Route53 & Hosted Zones
