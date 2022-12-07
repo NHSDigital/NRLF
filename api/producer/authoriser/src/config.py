@@ -1,3 +1,6 @@
+from lambda_utils.aws import boto3_client
+from nrlf.core.model import AuthProducer
+from nrlf.core.repository import Repository
 from pydantic import BaseModel
 
 
@@ -29,5 +32,10 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
     These dependencies will be passed through to your `handle` function below.
     """
     return {
+        "repository": Repository(
+            item_type=AuthProducer,
+            client=boto3_client("dynamodb"),
+            environment_prefix=config.PREFIX,
+        ),
         "environment": config.ENVIRONMENT,
     }

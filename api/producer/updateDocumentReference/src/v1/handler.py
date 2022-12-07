@@ -6,7 +6,7 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
-from lambda_utils.header_config import ClientRpDetailsHeader
+from lambda_utils.header_config import AuthHeader, ClientRpDetailsHeader
 from lambda_utils.logging import log_action
 from nrlf.core.errors import AuthenticationError, ImmutableFieldViolationError
 from nrlf.core.model import DocumentPointer
@@ -34,29 +34,34 @@ def parse_request_body(
     return PipelineData(core_model=core_model)
 
 
-@log_action(narrative="Parsing producer permissions")
-def parse_producer_permissions(
+@log_action(narrative="Parsing headers")
+def parse_headers(
     data: PipelineData,
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-    client_rp_details = ClientRpDetailsHeader(event)
+    organisation_code = AuthHeader(**event.headers).organisation_code
+
+    document_types = json.loads(
+        event.requestContext.authorizer.claims["document_types"]
+    )
     return PipelineData(
-        client_rp_details=client_rp_details,
-        **data,
+        **data, organisation_code=organisation_code, document_types=document_types
     )
 
 
-def _is_valid_producer():
-    # TODO: mocked out due to not knowing authentication method
-    return True
+def _invalid_producer_for_update(
+    organisation_code, document_types, core_model: DocumentPointer
+):
+    if not organisation_code == core_model.producer_id.__root__:
+        return True
 
+    if core_model.type.__root__ not in document_types:
+        return True
 
-def _producer_exists():
-    # TODO: mocked out due to not knowing authentication method
-    return True
+    return False
 
 
 @log_action(narrative="Validating producer permissions")
@@ -67,12 +72,15 @@ def validate_producer_permissions(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-    if not _producer_exists():
-        raise AuthenticationError("Custodian does not exist in the system")
+    core_model: DocumentPointer = data["core_model"]
+    organisation_code = data["organisation_code"]
+    document_types = data["document_types"]
 
-    if not _is_valid_producer():
+    if _invalid_producer_for_update(
+        organisation_code, document_types, core_model=core_model
+    ):
         raise AuthenticationError(
-            "Required permission to create a document pointer are missing"
+            "Required permissions to create a document pointer are missing"
         )
     return PipelineData(**data)
 
@@ -86,14 +94,17 @@ def document_pointer_exists(
     logger: Logger,
 ) -> PipelineData:
     repository: Repository = dependencies["document_pointer_repository"]
-    client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
     decoded_id = urllib.parse.unquote(event.pathParameters["id"])
+    organisation_code = data["organisation_code"]
+    document_types = data["document_types"]
+
     read_and_filter_query = create_read_and_filter_query(
         id=decoded_id,
-        producer_id=client_rp_details.custodian,
-        type=client_rp_details.pointer_types,
+        producer_id=organisation_code,
+        type=document_types,
     )
     document_pointer: DocumentPointer = repository.read(**read_and_filter_query)
+
     return PipelineData(
         original_document=document_pointer.document.__root__,
         **data,
@@ -139,7 +150,7 @@ def update_core_model_to_db(
 
 steps = [
     parse_request_body,
-    parse_producer_permissions,
+    parse_headers,
     validate_producer_permissions,
     document_pointer_exists,
     compare_immutable_fields,

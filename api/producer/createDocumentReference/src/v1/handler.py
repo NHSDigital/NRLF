@@ -1,3 +1,4 @@
+import json
 from functools import partial
 from logging import Logger
 from typing import Any
@@ -5,7 +6,7 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
-from lambda_utils.header_config import ClientRpDetailsHeader
+from lambda_utils.header_config import AuthHeader, ClientRpDetailsHeader
 from lambda_utils.logging import log_action
 from nrlf.core.errors import AuthenticationError
 from nrlf.core.model import DocumentPointer
@@ -23,16 +24,37 @@ from api.producer.createDocumentReference.src.constants import PersistentDepende
 from api.producer.createDocumentReference.src.v1.constants import API_VERSION
 
 
-@log_action(narrative="Parsing ClientRpDetails header")
-def parse_client_rp_details(
+def _invalid_producer_for_create(
+    organisation_code,
+    core_model: DocumentPointer,
+    document_types,
+):
+    if not organisation_code == core_model.producer_id.__root__:
+        return True
+
+    if core_model.type.__root__ not in document_types:
+        return True
+
+    return False
+
+
+def _invalid_producer_for_delete(organisation_code, delete_item_id: str):
+    producer_id = generate_producer_id(id=delete_item_id, producer_id=None)
+    if not organisation_code == producer_id:
+        return True
+    return False
+
+
+@log_action(narrative="Parsing headers")
+def parse_headers(
     data: PipelineData,
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-    client_rp_details = ClientRpDetailsHeader(event)
-    return PipelineData(**data, client_rp_details=client_rp_details)
+    organisation_code = AuthHeader(**event.headers).organisation_code
+    return PipelineData(**data, organisation_code=organisation_code)
 
 
 @log_action(narrative="Parsing request body")
@@ -59,7 +81,6 @@ def mark_as_supersede(
     fhir_model: StrictDocumentReference = create_fhir_model_from_fhir_json(
         fhir_json=data["body"]
     )
-
     output = {}
     if fhir_model.relatesTo:
         output["delete_item_ids"] = [
@@ -71,31 +92,6 @@ def mark_as_supersede(
     return PipelineData(**data, **output)
 
 
-def _invalid_producer_for_create(
-    client_rp_details: ClientRpDetailsHeader, core_model: DocumentPointer
-):
-    if not client_rp_details.custodian == core_model.producer_id.__root__:
-        return True
-
-    if core_model.type.__root__ not in client_rp_details.pointer_types:
-        return True
-
-    return False
-
-
-def _invalid_producer_for_delete(
-    client_rp_details: ClientRpDetailsHeader, delete_item_id: str
-):
-    producer_id = generate_producer_id(id=delete_item_id, producer_id=None)
-    if not client_rp_details.custodian == producer_id:
-        return True
-    return False
-
-
-def _producer_not_exists(client_rp_details: ClientRpDetailsHeader):
-    return not client_rp_details.custodian
-
-
 @log_action(narrative="Validating producer permissions")
 def validate_producer_permissions(
     data: PipelineData,
@@ -105,23 +101,26 @@ def validate_producer_permissions(
     logger: Logger,
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
-    client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
+    document_types = json.loads(
+        event.requestContext.authorizer.claims["document_types"]
+    )
+    organisation_code = data["organisation_code"]
     delete_item_ids: list[str] = data.get("delete_item_ids", [])
 
-    if _producer_not_exists(client_rp_details=client_rp_details):
-        raise AuthenticationError("Custodian does not exist in the system")
-
     if _invalid_producer_for_create(
-        client_rp_details=client_rp_details, core_model=core_model
+        organisation_code=organisation_code,
+        core_model=core_model,
+        document_types=document_types,
     ):
         raise AuthenticationError(
-            "Required permission to create a document pointer are missing"
+            "Required permissions to create a document pointer are missing"
         )
 
-    __cannot_delete = partial(_invalid_producer_for_delete, client_rp_details)
+    __cannot_delete = partial(_invalid_producer_for_delete, organisation_code)
+
     if any(map(__cannot_delete, delete_item_ids)):
         raise AuthenticationError(
-            "Required permission to delete a document pointer are missing"
+            "Required permissions to delete a document pointer are missing"
         )
 
     return PipelineData(**data)
@@ -152,7 +151,7 @@ def save_core_model_to_db(
 
 
 steps = [
-    parse_client_rp_details,
+    parse_headers,
     parse_request_body,
     mark_as_supersede,
     validate_producer_permissions,
