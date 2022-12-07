@@ -1,0 +1,178 @@
+import json
+import urllib.parse
+from abc import abstractmethod
+from dataclasses import dataclass, field
+from types import FunctionType
+
+import requests
+from behave.model import Table
+from lambda_pipeline.types import LambdaContext
+from lambda_utils.header_config import AuthHeader, ClientRpDetailsHeader
+from lambda_utils.tests.unit.utils import make_aws_event
+from nrlf.producer.fhir.r4.model import OperationOutcome
+from pydantic import BaseModel
+
+from feature_tests.common.constants import (
+    DEFAULT_AUTHORIZATION,
+    DEFAULT_CLIENT_RP_DETAILS,
+    DEFAULT_METHOD_ARN,
+    STATUS_CODE_200,
+    Action,
+    ActorType,
+    TestMode,
+)
+from feature_tests.common.repository import FeatureTestRepository
+from feature_tests.common.utils import (
+    logging_headers,
+    render_regular_properties,
+    render_relatesTo_properties,
+)
+
+
+@dataclass
+class Template:
+    raw: str
+
+    def render(self, table: Table) -> str:
+        return render_regular_properties(raw=self.raw, table=table)
+
+    def render_fhir(self, table: Table) -> str:
+        rendered = render_regular_properties(raw=self.raw, table=table)
+        return render_relatesTo_properties(fhir_json=json.loads(rendered), table=table)
+
+
+@dataclass
+class Response:
+    body: str
+    status_code: str = STATUS_CODE_200
+
+    def success(self):
+        return self.status_code == STATUS_CODE_200
+
+    @property
+    def error(self) -> str:
+        operation_outcome = OperationOutcome.parse_raw(self.body)
+        (issue,) = operation_outcome.issue
+        return issue.diagnostics
+
+    @property
+    def dict(self) -> dict:
+        return json.loads(self.body)
+
+
+@dataclass
+class BaseRequest:
+    endpoint: str = None
+    headers: dict = field(default_factory=dict)
+    client_rp_details: ClientRpDetailsHeader = field(
+        default_factory=lambda: ClientRpDetailsHeader(**DEFAULT_CLIENT_RP_DETAILS)
+    )
+    scenario_name: str = None
+    version: float = None
+    sent_documents: list[str] = field(default_factory=list)
+    sent_requests: list[str] = field(default_factory=list)
+
+    @abstractmethod
+    def _invoke(self, **kwargs) -> dict:
+        raise NotImplementedError
+
+    def invoke(self, **kwargs) -> Response:
+        client_rp_details = {
+            "NHSD-Client-RP-Details": self.client_rp_details.json(by_alias=True)
+        }
+        self.headers["Accept"] = f"version={self.version}"
+        self.headers["Authorization"] = DEFAULT_AUTHORIZATION
+        self.headers.update(**logging_headers(self.scenario_name))
+        self.headers.update(**client_rp_details)
+        raw_response = self._invoke(**kwargs)
+        if kwargs.get("body"):
+            self.sent_documents.append(kwargs["body"])
+        return Response(**raw_response)
+
+    def set_auth_headers(self, org_code: str, app_id: str):
+        auth_header = AuthHeader(**{"Organisation-Code": org_code}).dict(by_alias=True)
+        self.client_rp_details.developer_app_id = app_id
+        self.headers.update(**auth_header)
+
+
+@dataclass
+class ApiRequest(BaseRequest):
+    request_method: str = None
+    method_slug: str = None
+
+    def _invoke(
+        self, body: str = None, query_params: dict = {}, path_params: dict = {}
+    ) -> dict:
+        url = f"{self.endpoint}{self.method_slug}"
+        request_kwargs = {
+            "method": self.request_method.upper(),
+            "url": url,
+            "headers": self.headers,
+        }
+        if body:
+            request_kwargs["data"] = body
+        if query_params:
+            request_kwargs["params"] = query_params
+        for key, value in path_params.items():
+            url = url.format(**{key: f"{urllib.parse.quote(value)}"})
+
+        raw_response: requests.Response = requests.request(**request_kwargs)
+        self.sent_requests.append(request_kwargs)
+        return {"body": raw_response.text, "status_code": raw_response.status_code}
+
+
+@dataclass
+class LocalApiRequest(BaseRequest):
+    handler: FunctionType = None
+
+    def _invoke(self, body: dict = None, **kwargs) -> dict:
+        authorizer = {"document_types": json.dumps(self.headers.pop("document-types"))}
+        event = make_aws_event(
+            body=body, headers=self.headers, authorizer=authorizer, **kwargs
+        )
+        response = self.handler(event=event, context=LambdaContext())
+        return {"body": response["body"], "status_code": response["statusCode"]}
+
+
+@dataclass
+class AuthLambdaRequest(BaseRequest):
+    lambda_client: any = None
+
+    def _invoke(self) -> dict:
+        event = make_aws_event(
+            headers=self.headers, methodArn={"methodArn": DEFAULT_METHOD_ARN}
+        )
+        event.pop("isBase64Encoded")
+        aws_response = self.lambda_client.invoke(
+            FunctionName=self.endpoint,
+            InvocationType="RequestResponse",
+            Payload=json.dumps(event),
+        )
+        response = aws_response["Payload"].read().decode()
+        return {"body": response, "status_code": None}
+
+
+@dataclass
+class LocalAuthLambdaRequest(BaseRequest):
+    handler: FunctionType = None
+
+    def _invoke(self) -> dict:
+        event = make_aws_event(
+            headers=self.headers, methodArn={"methodArn": DEFAULT_METHOD_ARN}
+        )
+        event.pop("isBase64Encoded")
+        response = self.handler(event=event, context=LambdaContext())
+        return {"body": json.dumps(response), "status_code": None}
+
+
+@dataclass
+class TestConfig:
+    mode: TestMode
+    request: BaseRequest = field(default_factory=BaseRequest)
+    response: Response = None
+    repositories: dict[BaseModel, FeatureTestRepository] = field(default_factory=dict)
+    templates: dict[str, Template] = field(default_factory=dict)
+    actor: str = None
+    actor_type: ActorType = None
+    action: Action = None
+    environment_prefix: str = None

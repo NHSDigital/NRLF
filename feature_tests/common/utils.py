@@ -1,0 +1,137 @@
+import json
+from copy import copy, deepcopy
+from functools import cache
+from importlib import import_module
+from pathlib import Path
+
+import boto3
+import yaml
+from behave.model import Table
+from behave.runner import Context
+from lambda_utils.header_config import LoggingHeader
+from lambda_utils.logging_utils import generate_transaction_id
+from nrlf.core.types import DynamoDbClient
+
+from feature_tests.common.constants import Action, TestMode
+from helpers.aws_session import new_aws_session
+from helpers.terraform import get_terraform_json
+
+RELATES_TO = "relatesTo"
+TARGET = "target"
+
+PATH_TO_HERE = Path(__file__).parent
+
+
+def _json_escape(value: str) -> str:
+    return value.replace('"', '\\"')
+
+
+def render_regular_properties(raw: str, table: Table):
+    rendered = copy(raw)
+    if table is None:
+        table = []
+    for row in table:
+        if row["property"] == TARGET:
+            continue
+        rendered = rendered.replace(f'${row["property"]}', _json_escape(row["value"]))
+    return rendered
+
+
+def render_relatesTo_properties(fhir_json: dict, table: Table) -> str:
+    (_relatesTo,) = fhir_json.pop(RELATES_TO, [None])
+    if _relatesTo:
+        fhir_json[RELATES_TO] = []
+        for row in table:
+            if row["property"] != TARGET:
+                continue
+            relatesTo = deepcopy(_relatesTo)
+            relatesTo["target"]["identifier"]["value"] = row["value"]
+            fhir_json[RELATES_TO].append(relatesTo)
+    return json.dumps(fhir_json)
+
+
+def logging_headers(scenario_name) -> dict:
+    uuid = generate_transaction_id()
+    return LoggingHeader(
+        **{
+            "x-correlation-id": f"{scenario_name}|{uuid}",
+            "nhsd-correlation-id": uuid,
+            "x-request-id": uuid,
+        }
+    ).dict(by_alias=True)
+
+
+def _get_boto3_client(client_name: str, test_mode: TestMode):
+    session = boto3 if test_mode is TestMode.LOCAL_TEST else new_aws_session()
+    return session.client(client_name)
+
+
+def get_dynamodb_client(test_mode: TestMode) -> DynamoDbClient:
+    return _get_boto3_client(client_name="dynamodb", test_mode=test_mode)
+
+
+def get_lambda_client(test_mode: TestMode) -> any:
+    return _get_boto3_client(client_name="lambda", test_mode=test_mode)
+
+
+def get_test_mode(context: Context) -> TestMode:
+    return (
+        TestMode.INTEGRATION_TEST
+        if context.config.userdata.get("integration_test", "false") == "true"
+        else TestMode.LOCAL_TEST
+    )
+
+
+def get_environment_prefix(test_mode: TestMode):
+    return (
+        ""
+        if test_mode is TestMode.LOCAL_TEST
+        else f'{get_terraform_json()["prefix"]["value"]}--'
+    )
+
+
+def get_endpoint(test_mode: TestMode, actor_type: str) -> str:
+    return (
+        ""
+        if test_mode is TestMode.LOCAL_TEST
+        else get_terraform_json()["api_base_urls"]["value"][actor_type.lower()]
+    )
+
+
+def get_lambda_arn(test_mode: TestMode, actor_type: str) -> str:
+    return (
+        ""
+        if test_mode is TestMode.LOCAL_TEST
+        else get_terraform_json()["authoriser_lambda_function_names"]["value"][
+            actor_type.lower()
+        ]
+    )
+
+
+@cache
+def get_api_definitions_from_swagger(actor_type: str):
+    path_to_repo_base = PATH_TO_HERE.parent.parent.resolve()
+    path_to_swagger = path_to_repo_base / "api" / actor_type.lower() / "swagger.yaml"
+    with open(path_to_swagger) as f:
+        swagger = yaml.load(f, Loader=yaml.FullLoader)
+    paths = swagger["paths"]
+    api_definitions = {}
+    for method_slug, method_collection in paths.items():
+        for request_method, api_definition in method_collection.items():
+            operation_id = api_definition["operationId"]
+            action = operation_id.replace("DocumentReference", "")
+            api_definitions[action] = {
+                "method_slug": method_slug,
+                "request_method": request_method,
+            }
+    return api_definitions
+
+
+def get_lambda_handler(actor_type: str, action: Action, suffix: str = ""):
+    actor_type = actor_type.lower()
+    index = import_module(f"api.{actor_type}.{action.name}{suffix}.index")
+    return index.handler
+
+
+def table_as_dict(table: Table) -> dict:
+    return {row["property"]: row["value"] for row in table if row["value"] != "null"}

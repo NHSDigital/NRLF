@@ -1,0 +1,19 @@
+from dataclasses import asdict
+
+from behave.runner import Context
+
+from feature_tests.common.constants import Outcomes
+from feature_tests.common.decorators import then
+from feature_tests.common.models import TestConfig
+
+
+@then("the operation is {outcome}")
+def assert_operation_successful(context: Context, outcome: str):
+    test_config: TestConfig = context.test_config
+    result = test_config.response.success()
+    expected_result = Outcomes._member_map_.get(outcome)
+    if expected_result is None:
+        raise ValueError(
+            f"Outcome must be one of {Outcomes._member_names_}, got {outcome}"
+        )
+    assert result is expected_result.value, asdict(test_config.response)

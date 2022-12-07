@@ -43,15 +43,8 @@ class AcceptHeader(AbstractHeader):
 
 
 class ClientRpDetailsHeader(AbstractHeader):
-    custodian: StrictStr = Field(alias="app.ASID")
-    pointer_types: list[StrictStr] = Field(alias="nrl.pointer-types")
     developer_app_name: StrictStr = Field(alias="developer.app.name")
     developer_app_id: StrictStr = Field(alias="developer.app.id")
-
-    def __init__(self, event: APIGatewayProxyEventModel):
-        headers = {k.lower(): v for k, v in event.headers.items()}
-        client_rp_details = headers.get("nhsd-client-rp-details", "{}")
-        super().__init__(**json.loads(client_rp_details))
 
 
 class LoggingHeader(AbstractHeader):
@@ -59,3 +52,7 @@ class LoggingHeader(AbstractHeader):
     nhsd_correlation_id: StrictStr = Field(alias="nhsd-correlation-id")
     transaction_id: StrictStr = Field(default_factory=generate_transaction_id)
     request_id: StrictStr = Field(alias="x-request-id")
+
+
+class AuthHeader(AbstractHeader):
+    organisation_code: StrictStr = Field(alias="Organisation-Code")
