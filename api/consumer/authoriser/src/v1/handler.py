@@ -5,7 +5,7 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.constants import AUTHORISER_CONTEXT_FIELDS, ApiRequestLevel
-from lambda_utils.header_config import ClientRpDetailsHeader
+from lambda_utils.header_config import AuthHeader, ClientRpDetailsHeader, LoggingHeader
 from lambda_utils.logging import log_action
 from nrlf.core.authoriser_response import authorisation_denied, authorisation_ok
 from nrlf.core.errors import ItemNotFound
@@ -13,6 +13,7 @@ from nrlf.core.model import AuthConsumer
 from nrlf.core.query import create_read_and_filter_query
 from nrlf.core.repository import Repository
 from nrlf.core.validators import requesting_application_is_not_authorised
+from pydantic import ValidationError
 
 
 @log_action(narrative="Parsing headers")
@@ -23,21 +24,29 @@ def parse_headers(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-    headers = event.headers
-    client_rp_details = ClientRpDetailsHeader(event)
+    raw_client_rp_details = event.headers.get("NHSD-Client-RP-Details", "")
+    try:
+        logging_headers = LoggingHeader(**event.headers)
+        auth_headers = AuthHeader(**event.headers)
+        client_rp_details = ClientRpDetailsHeader.parse_raw(raw_client_rp_details)
+    except ValidationError as err:
+        response = authorisation_denied(
+            principal_id="null", resource=data["method_arn"], context={}
+        )
+        return PipelineData(response=response)
+
     context = {
-        AUTHORISER_CONTEXT_FIELDS.X_CORRELATION_ID: headers["x-correlation-id"],
-        AUTHORISER_CONTEXT_FIELDS.NHSD_CORRELATION_ID: headers["nhsd-correlation-id"],
+        AUTHORISER_CONTEXT_FIELDS.X_CORRELATION_ID: logging_headers.correlation_id,
+        AUTHORISER_CONTEXT_FIELDS.NHSD_CORRELATION_ID: logging_headers.nhsd_correlation_id,
         AUTHORISER_CONTEXT_FIELDS.REQUEST_TYPE: ApiRequestLevel.APP_RESTRICTED,
         AUTHORISER_CONTEXT_FIELDS.CLIENT_APP_NAME: client_rp_details.developer_app_name,
         AUTHORISER_CONTEXT_FIELDS.CLIENT_APP_ID: client_rp_details.developer_app_id,
-        AUTHORISER_CONTEXT_FIELDS.ORGANISATION_CODE: headers["Organisation-Code"],
+        AUTHORISER_CONTEXT_FIELDS.ORGANISATION_CODE: auth_headers.organisation_code,
     }
-
     return PipelineData(client_rp_details=client_rp_details, context=context, **data)
 
 
-@log_action(narrative="Authenticate request")
+@log_action(narrative="Authenticate consumer request")
 def authenticate_request(
     data: PipelineData,
     context: LambdaContext,
@@ -45,6 +54,10 @@ def authenticate_request(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
+    response = data.get("response")
+    if response:
+        return PipelineData(response=response)
+
     repository: Repository = dependencies["repository"]
 
     context = data["context"]
@@ -64,7 +77,7 @@ def authenticate_request(
     )
 
 
-@log_action(narrative="Authorise request")
+@log_action(narrative="Authorise consumer request")
 def authorise_request(
     data: PipelineData,
     context: LambdaContext,
