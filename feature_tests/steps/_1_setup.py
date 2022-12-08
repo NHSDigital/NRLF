@@ -21,44 +21,71 @@ def create_template_document(context: Context, template_name: str):
     test_config.templates[template_name] = Template(raw=context.text)
 
 
-@behave_given('{actor_type} "{actor}" is requesting to {action} Document Pointers')
+@behave_given(
+    '{actor_type} "{actor}" (Organisation ID "{org_id}") is requesting to {action} Document Pointers'
+)
 def given_permissions_for_types(
-    context: Context, actor_type: str, actor: str, action: str
+    context: Context, actor_type: str, actor: str, org_id: str, action: str
 ):
     if "Authoriser" in context.scenario.name:
         action = "authoriser"
 
     test_config: TestConfig = context.test_config
     test_config.request = request_setup(
-        context=context, actor=actor, actor_type=actor_type, action=action
+        context=context,
+        actor=actor,
+        org_id=org_id,
+        actor_type=actor_type,
+        action=action,
     )
 
 
 @given(
-    '{actor_type} "{actor}" {has_hasnt} authorisation headers for application "{id}"'
+    '{actor_type} "{actor}" {has_hasnt} authorisation headers for application "{app_name}" (ID "{app_id}")'
 )
 def authorised_for_application(
-    context: Context, actor_type: str, actor: str, has_hasnt: str, id: str
+    context: Context,
+    actor_type: str,
+    actor: str,
+    has_hasnt: str,
+    app_name: str,
+    app_id: str,
 ):
     test_config: TestConfig = context.test_config
     if has_hasnt == "has":
-        test_config.request.set_auth_headers(org_code=actor, app_id=id)
+        test_config.request.set_auth_headers(
+            org_id=test_config.actor_context.org_id, app_id=app_id
+        )
     elif has_hasnt != "does not have":
         raise ValueError(f"'{has_hasnt}' must be one of ['has', 'does not have']")
 
     if test_config.mode is TestMode.LOCAL_TEST:
-        mock_local_auth(test_config=test_config, org_code=actor)
+        mock_local_auth(
+            test_config=test_config, org_id=test_config.actor_context.org_id
+        )
 
 
 @given(
-    '{actor_type} "{actor}" is registered in the system for application "{id}" for document types'
+    '{actor_type} "{actor}" is registered in the system for application "{app_name}" (ID "{app_id}") for document types'
 )
-def registered_in_system(context: Context, actor_type: str, actor: str, id: str):
-    register_application(context=context, org_code=actor, app_id=id)
+def registered_in_system(
+    context: Context, actor_type: str, actor: str, app_name: str, app_id: str
+):
+    test_config: TestConfig = context.test_config
+    register_application(
+        context=context,
+        org_id=test_config.actor_context.org_id,
+        app_name=app_name,
+        app_id=app_id,
+    )
 
 
-@given('{actor_type} "{actor}" is not registered in the system for application "{id}"')
-def registered_in_system(context: Context, actor_type: str, actor: str, id: str):
+@given(
+    '{actor_type} "{actor}" is not registered in the system for application "{app_name}" (ID "{app_id}")'
+)
+def registered_in_system(
+    context: Context, actor_type: str, actor: str, app_name: str, app_id: str
+):
     pass
 
 

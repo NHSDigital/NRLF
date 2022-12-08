@@ -39,19 +39,19 @@ Feature: Success scenarios where producer is able to delete a Document Pointer
       """
 
   Scenario: Delete an existing current Document Pointer
-    Given Producer "Aaron Court Mental Health NH" is requesting to delete Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to delete Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |
-      | custodian   | Aaron Court Mental Health NH   |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    When Producer "Aaron Court Mental Health NH" deletes an existing Document Reference "Aaron Court Mental Health NH|1234567890"
+    When Producer "Aaron Court Mental Health NH" deletes an existing Document Reference "8FW23|1234567890"
     Then the operation is successful
     And the response contains the message "Resource removed"

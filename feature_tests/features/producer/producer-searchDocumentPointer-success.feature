@@ -39,16 +39,16 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       """
 
   Scenario: Successfully search for a single Document Pointer by NHS number
-    Given Producer "Aaron Court Mental Health NH" is requesting to search Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | Aaron Court Mental Health NH   |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -61,22 +61,22 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | Aaron Court Mental Health NH   |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
 
   Scenario: Successfully search for multiple Document Pointers by NHS number
-    Given Producer "Aaron Court Mental Health NH" is requesting to search Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | Aaron Court Mental Health NH   |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -84,7 +84,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | property    | value                            |
       | identifier  | 2224567890                       |
       | type        | 736253002                        |
-      | custodian   | Aaron Court Mental Health NH     |
+      | custodian   | 8FW23                            |
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
@@ -92,7 +92,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | property    | value                            |
       | identifier  | 3334567890                       |
       | type        | 555553002                        |
-      | custodian   | Aaron Court Mental Health NH     |
+      | custodian   | 8FW23                            |
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
@@ -105,7 +105,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | Aaron Court Mental Health NH   |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -113,25 +113,25 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | property    | value                            |
       | identifier  | 2224567890                       |
       | type        | 736253002                        |
-      | custodian   | Aaron Court Mental Health NH     |
+      | custodian   | 8FW23                            |
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
 
   Scenario: Empty results when searching for a Document Pointer when the producer has no documents
-    Given Producer "Aaron Court Mental Health NH" is requesting to search Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
-      | property    | value                             |
-      | identifier  | 1114567890                        |
-      | type        | 999253002                         |
-      | custodian   | AMBULANCE PEOPLE TRUST IN THYSELF |
-      | subject     | 9278693472                        |
-      | contentType | application/pdf                   |
-      | url         | https://example.org/my-doc.pdf    |
+      | property    | value                          |
+      | identifier  | 1114567890                     |
+      | type        | 999253002                      |
+      | custodian   | VN6DL                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
@@ -139,16 +139,16 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
     And the response is a Bundle with 0 entries
 
   Scenario: Empty results when searching for a Document Pointer when subject has no documents with requesting producer
-    Given Producer "Aaron Court Mental Health NH" is requesting to search Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                            |
       | identifier  | 1234567891                       |
       | type        | 736253002                        |
-      | custodian   | EMERGENCY AMBULANCE SERVICES     |
+      | custodian   | VN6DL                            |
       | subject     | 7736959498                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
@@ -159,16 +159,16 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
     And the response is a Bundle with 0 entries
 
   Scenario: Empty results when searching for a Document Pointer when provided document type does not match any documents
-    Given Producer "Aaron Court Mental Health NH" is requesting to search Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 0000000000                     |
-      | custodian   | Aaron Court Mental Health NH   |
+      | custodian   | 8FW23                          |
       | subject     | 7736959498                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -176,7 +176,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | property    | value                            |
       | identifier  | 1234567891                       |
       | type        | 0000000000                       |
-      | custodian   | Aaron Court Mental Health NH     |
+      | custodian   | 8FW23                            |
       | subject     | 7736959498                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |

@@ -39,16 +39,16 @@ Feature: Failure Scenarios where producer unable to create a Document Pointer
       """
 
   Scenario: Requesting producer does not have permission to create another producers document
-    Given Producer "Aaron Court Mental Health NH" is requesting to create Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value           |
       | https://snomed.info/ict | 887701000000100 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567892                     |
       | type        | 887701000000100                |
-      | custodian   | CUTHBERT'S CLOSE CARE HOME     |
+      | custodian   | VLP01                          |
       | subject     | 2742179658                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -56,19 +56,19 @@ Feature: Failure Scenarios where producer unable to create a Document Pointer
     And the response contains error message "Required permissions to create a document pointer are missing"
 
   Scenario Outline: Missing/invalid required params
-    Given Producer "Aaron Court Mental Health NH" is requesting to create Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
-      | property    | value                        |
-      | identifier  | <identifier>                 |
-      | type        | <type>                       |
-      | custodian   | Aaron Court Mental Health NH |
-      | subject     | <subject>                    |
-      | contentType | application/pdf              |
-      | url         | <url>                        |
+      | property    | value           |
+      | identifier  | <identifier>    |
+      | type        | <type>          |
+      | custodian   | 8FW23           |
+      | subject     | <subject>       |
+      | contentType | application/pdf |
+      | url         | <url>           |
     Then the operation is unsuccessful
     And the response contains error message "<error_message>"
 
@@ -79,16 +79,16 @@ Feature: Failure Scenarios where producer unable to create a Document Pointer
       | 1234567890 | 736253002 | Device/9278693472 | https://example.org/my-doc.pdf | DocumentReference validation failure - Invalid nhs_number - Not a valid NHS Number: Device/9278693472 |
 
   Scenario: Duplicate Document Pointer
-    Given Producer "Aaron Court Mental Health NH" is requesting to create Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |
-      | custodian   | Aaron Court Mental Health NH   |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -96,7 +96,7 @@ Feature: Failure Scenarios where producer unable to create a Document Pointer
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |
-      | custodian   | Aaron Court Mental Health NH   |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |

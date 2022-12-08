@@ -92,6 +92,8 @@ ALLOWED_TERMS = [
     "action",
     "actor_type",
     "id",
+    "app_name",
+    "app_id",
     "template_name",
     "message",
     "count",
@@ -100,7 +102,8 @@ ALLOWED_TERMS = [
 ]
 
 ALLOWED_CONSUMERS = ["Yorkshire Ambulance Service"]
-
 ALLOWED_PRODUCERS = ["Aaron Court Mental Health NH"]
-
-ALLOWED_APP_IDS = ["DataShare"]
+ALLOWED_APPS = ["DataShare"]
+ALLOWED_APP_IDS = ["z00z-y11y-x22x", "a33a-b22b-c11c"]
+ALLOWED_CONSUMER_ORG_IDS = ["RX898"]
+ALLOWED_PRODUCER_ORG_IDS = ["8FW23"]

@@ -13,6 +13,7 @@ from nrlf.producer.fhir.r4.model import OperationOutcome
 from pydantic import BaseModel
 
 from feature_tests.common.constants import (
+    ALLOWED_APP_IDS,
     DEFAULT_AUTHORIZATION,
     DEFAULT_CLIENT_RP_DETAILS,
     DEFAULT_METHOD_ARN,
@@ -23,6 +24,10 @@ from feature_tests.common.constants import (
 )
 from feature_tests.common.repository import FeatureTestRepository
 from feature_tests.common.utils import (
+    get_action,
+    get_actor,
+    get_actor_type,
+    get_org_id,
     logging_headers,
     render_regular_properties,
     render_relatesTo_properties,
@@ -89,8 +94,11 @@ class BaseRequest:
             self.sent_documents.append(kwargs["body"])
         return Response(**raw_response)
 
-    def set_auth_headers(self, org_code: str, app_id: str):
-        auth_header = AuthHeader(**{"Organisation-Code": org_code}).dict(by_alias=True)
+    def set_auth_headers(self, org_id: str, app_id: str):
+        if app_id not in ALLOWED_APP_IDS:
+            raise ValueError(f"App ID {app_id} must be one of {ALLOWED_APP_IDS}")
+
+        auth_header = AuthHeader(**{"Organisation-Code": org_id}).dict(by_alias=True)
         self.client_rp_details.developer_app_id = app_id
         self.headers.update(**auth_header)
 
@@ -165,6 +173,20 @@ class LocalAuthLambdaRequest(BaseRequest):
         return {"body": json.dumps(response), "status_code": None}
 
 
+@dataclass(init=False)
+class ActorContext:
+    actor: str
+    actor_type: ActorType
+    action: Action
+    org_id: str
+
+    def __init__(self, actor: str, actor_type: str, action: Action, org_id: str):
+        self.action = get_action(action_name=action)
+        self.actor_type = get_actor_type(actor_type_name=actor_type)
+        self.actor = get_actor(actor=actor, actor_type=self.actor_type)
+        self.org_id = get_org_id(org_id=org_id, actor_type=self.actor_type)
+
+
 @dataclass
 class TestConfig:
     mode: TestMode
@@ -172,7 +194,4 @@ class TestConfig:
     response: Response = None
     repositories: dict[BaseModel, FeatureTestRepository] = field(default_factory=dict)
     templates: dict[str, Template] = field(default_factory=dict)
-    actor: str = None
-    actor_type: ActorType = None
-    action: Action = None
-    environment_prefix: str = None
+    actor_context: ActorContext = None

@@ -77,7 +77,7 @@ def _populate_template_policy_from_request_headers(
     headers = {**test_config.request.headers, **client_rp_details}
 
     template_policy["context"] = {
-        k: headers[k] if k in headers else v
+        k: headers[k] if k in headers and f"<{k}>" == v else v
         for k, v in template_policy["context"].items()
     }
 
@@ -85,4 +85,5 @@ def _populate_template_policy_from_request_headers(
     if principal_id_keyword != "null":
         principal_id_keyword = _remove_outer_brackets(template_policy["principalId"])
         template_policy["principalId"] = headers[principal_id_keyword]
+
     return template_policy

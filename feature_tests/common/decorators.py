@@ -45,8 +45,8 @@ def _assert_consistent_actor_type(
 ):
     if provided_actor_type is not expected_actor_type:
         raise Exception(
-            f"ActorType {provided_actor_type} provided in this step "
-            f"is not the same as the ActorType {expected_actor_type} expected "
+            f"ActorType {provided_actor_type.name} provided in this step "
+            f"is not the same as the ActorType {expected_actor_type.name} expected "
             "from the Scenario initialisation."
         )
 
@@ -68,17 +68,20 @@ def _step_checks(context: Context, **kwargs):
     if actor_type is not None:
         _assert_consistent_actor_type(
             provided_actor_type=actor_type,
-            expected_actor_type=test_config.actor_type,
+            expected_actor_type=test_config.actor_context.actor_type,
         )
 
     actor = kwargs.get("actor")
     if actor is not None:
-        _assert_consistent_actor(provided_actor=actor, expected_actor=test_config.actor)
+        _assert_consistent_actor(
+            provided_actor=actor, expected_actor=test_config.actor_context.actor
+        )
 
     action = kwargs.get("action")
     if action is not None:
         _assert_consistent_action(
-            provided_action=action, expected_action=test_config.action.name
+            provided_action=action,
+            expected_action=test_config.actor_context.action.name,
         )
 
 

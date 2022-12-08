@@ -9,10 +9,8 @@ from nrlf.core.model import AuthConsumer, AuthProducer
 from nrlf.core.query import create_read_and_filter_query
 
 from feature_tests.common.constants import (
-    ACTION_ALIASES,
     ALLOWED_APP_IDS,
-    ALLOWED_CONSUMERS,
-    ALLOWED_PRODUCERS,
+    ALLOWED_APPS,
     DEFAULT_VERSION,
     TABLE_CONFIG,
     Action,
@@ -25,6 +23,7 @@ from feature_tests.common.fixtures import (
     setup_tables,
 )
 from feature_tests.common.models import (
+    ActorContext,
     ApiRequest,
     AuthLambdaRequest,
     LocalApiRequest,
@@ -50,55 +49,30 @@ def _local_mock(context: Context):
     setup_tables()
 
 
-def _get_actor(actor: str, actor_type: ActorType) -> str:
-    allowed_actors = (
-        ALLOWED_CONSUMERS if actor_type is ActorType.Consumer else ALLOWED_PRODUCERS
-    )
-    if actor not in allowed_actors:
-        raise ValueError(
-            f"Actor name {actor} of type {actor_type.name} must be one of {allowed_actors}"
-        )
-    return actor
-
-
-def _get_action(action_name: str) -> Action:
-    action_name = ACTION_ALIASES.get(action_name) or action_name
-    action = Action._member_map_.get(action_name)
-    if not action:
-        raise ValueError(
-            f"Action name {action_name} must be one of {Action._member_names_} or {list(ACTION_ALIASES.keys())}"
-        )
-    return action
-
-
-def _get_actor_type(actor_type_name: str) -> Action:
-    actor_type = ActorType._member_map_.get(actor_type_name)
-    if not actor_type:
-        raise ValueError(
-            f"ActorType name {actor_type_name} must be one of {ActorType._member_names_}"
-        )
-    return actor_type
-
-
 def request_setup(
-    context: Context, actor: str, actor_type: str, action: str
+    context: Context, actor: str, org_id: str, actor_type: str, action: str
 ) -> Union[ApiRequest, LocalApiRequest, AuthLambdaRequest, LocalAuthLambdaRequest]:
     test_config: TestConfig = context.test_config
-    action: Action = _get_action(action_name=action)
-    test_config.actor_type = _get_actor_type(actor_type_name=actor_type)
-    test_config.actor = _get_actor(actor=actor, actor_type=test_config.actor_type)
-    test_config.action = action
+
+    actor_context = ActorContext(
+        actor=actor, org_id=org_id, actor_type=actor_type, action=action
+    )
+    test_config.actor_context = actor_context
 
     base_request_config = asdict(test_config.request)
     del base_request_config["endpoint"]
 
     request = None
-    if action is Action.authoriser:
+    if actor_context.action is Action.authoriser:
         if test_config.mode is TestMode.LOCAL_TEST:
-            handler = get_lambda_handler(actor_type=actor_type, action=action)
+            handler = get_lambda_handler(
+                actor_type=actor_context.actor_type, action=actor_context.action
+            )
             request = LocalAuthLambdaRequest(**base_request_config, handler=handler)
         else:
-            arn = get_lambda_arn(test_mode=test_config.mode, actor_type=actor_type)
+            arn = get_lambda_arn(
+                test_mode=test_config.mode, actor_type=actor_context.actor_type
+            )
             lambda_client = get_lambda_client(test_mode=test_config.mode)
             request = AuthLambdaRequest(
                 **base_request_config, endpoint=arn, lambda_client=lambda_client
@@ -106,13 +80,19 @@ def request_setup(
     else:
         if test_config.mode is TestMode.LOCAL_TEST:
             handler = get_lambda_handler(
-                actor_type=actor_type, action=action, suffix="DocumentReference"
+                actor_type=actor_context.actor_type,
+                action=actor_context.action,
+                suffix="DocumentReference",
             )
             request = LocalApiRequest(**base_request_config, handler=handler)
         else:
-            api_definitions = get_api_definitions_from_swagger(actor_type=actor_type)
-            api_definition = api_definitions[action.name]
-            endpoint = get_endpoint(test_mode=test_config.mode, actor_type=actor_type)
+            api_definitions = get_api_definitions_from_swagger(
+                actor_type=actor_context.actor_type
+            )
+            api_definition = api_definitions[actor_context.action.name]
+            endpoint = get_endpoint(
+                test_mode=test_config.mode, actor_type=actor_context.actor_type
+            )
             request = ApiRequest(
                 **base_request_config, endpoint=endpoint, **api_definition
             )
@@ -136,35 +116,41 @@ def config_setup(context: Context, scenario_name: str) -> TestConfig:
     }
     test_config = TestConfig(
         mode=test_mode,
-        environment_prefix=environment_prefix,
         repositories=repositories,
     )
     test_config.request.scenario_name = scenario_name
     return test_config
 
 
-def register_application(context: Context, org_code: str, app_id: str):
+def register_application(context: Context, org_id: str, app_name: str, app_id: str):
     test_config: TestConfig = context.test_config
+    if app_name not in ALLOWED_APPS:
+        raise ValueError(f"App name {app_name} must be one of {ALLOWED_APPS}")
+
     if app_id not in ALLOWED_APP_IDS:
         raise ValueError(f"App ID {app_id} must be one of {ALLOWED_APP_IDS}")
 
     auth_model = (
-        AuthProducer if test_config.actor_type is ActorType.Producer else AuthConsumer
+        AuthProducer
+        if test_config.actor_context.actor_type is ActorType.Producer
+        else AuthConsumer
     )
     auth_repository = test_config.repositories[auth_model]
     auth: Union[AuthProducer, AuthConsumer] = auth_model(
-        id=org_code,
+        id=org_id,
         application_id=app_id,
         document_types=[f'{row["system"]}|{row["value"]}' for row in context.table],
     )
     auth_repository.create(auth)
 
 
-def mock_local_auth(test_config: TestConfig, org_code: str):
+def mock_local_auth(test_config: TestConfig, org_id: str):
     auth_model = (
-        AuthProducer if test_config.actor_type is ActorType.Producer else AuthConsumer
+        AuthProducer
+        if test_config.actor_context.actor_type is ActorType.Producer
+        else AuthConsumer
     )
-    authentication_query = create_read_and_filter_query(id=org_code)
+    authentication_query = create_read_and_filter_query(id=org_id)
     try:
         auth: Union[AuthProducer, AuthConsumer] = test_config.repositories[
             auth_model
@@ -175,6 +161,6 @@ def mock_local_auth(test_config: TestConfig, org_code: str):
         document_types = auth.document_types.__root__
         test_config.request.headers["document-types"] = (
             json.dumps(document_types)
-            if test_config.action is Action.authoriser
+            if test_config.actor_context.action is Action.authoriser
             else document_types
         )

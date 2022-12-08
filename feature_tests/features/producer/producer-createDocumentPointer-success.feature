@@ -39,52 +39,52 @@ Feature: Basic Success Scenarios where producer is able to create a Document Poi
       """
 
   Scenario: Successfully create a Document Pointer of type Mental health crisis plan
-    Given Producer "Aaron Court Mental Health NH" is requesting to create Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |
-      | custodian   | Aaron Court Mental Health NH   |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is successful
-    And Document Pointer "Aaron Court Mental Health NH|1234567890" exists
-      | property    | value                                    |
-      | id          | Aaron Court Mental Health NH\|1234567890 |
-      | nhs_number  | 9278693472                               |
-      | producer_id | Aaron Court Mental Health NH             |
-      | type        | https://snomed.info/ict\|736253002       |
-      | source      | NRLF                                     |
-      | version     | 1                                        |
-      | updated_on  | NULL                                     |
-      | document    | <document>                               |
-      | created_on  | <timestamp>                              |
+    And Document Pointer "8FW23|1234567890" exists
+      | property    | value                              |
+      | id          | 8FW23\|1234567890                  |
+      | nhs_number  | 9278693472                         |
+      | producer_id | 8FW23                              |
+      | type        | https://snomed.info/ict\|736253002 |
+      | source      | NRLF                               |
+      | version     | 1                                  |
+      | updated_on  | NULL                               |
+      | document    | <document>                         |
+      | created_on  | <timestamp>                        |
 
   Scenario: Successfully create a Document Pointer of type End of life care coordination summary
-    Given Producer "Aaron Court Mental Health NH" is requesting to create Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value           |
       | https://snomed.info/ict | 861421000000109 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567891                     |
       | type        | 861421000000109                |
-      | custodian   | Aaron Court Mental Health NH   |
+      | custodian   | 8FW23                          |
       | subject     | 2742179658                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is successful
-    And Document Pointer "Aaron Court Mental Health NH|1234567891" exists
+    And Document Pointer "8FW23|1234567891" exists
       | property    | value                                    |
-      | id          | Aaron Court Mental Health NH\|1234567891 |
+      | id          | 8FW23\|1234567891                        |
       | nhs_number  | 2742179658                               |
-      | producer_id | Aaron Court Mental Health NH             |
+      | producer_id | 8FW23                                    |
       | type        | https://snomed.info/ict\|861421000000109 |
       | source      | NRLF                                     |
       | version     | 1                                        |

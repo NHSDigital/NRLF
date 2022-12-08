@@ -39,16 +39,16 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       """
 
   Scenario: Successfully search for a single Document Pointer by NHS number
-    Given Consumer "Yorkshire Ambulance Service" is requesting to search Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" for document types
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare"
+    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -61,22 +61,22 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
 
   Scenario: Successfully search for multiple Document Pointers by NHS number
-    Given Consumer "Yorkshire Ambulance Service" is requesting to search Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" for document types
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare"
+    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -84,7 +84,7 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | property    | value                            |
       | identifier  | 2224567890                       |
       | type        | 736253002                        |
-      | custodian   | LIFE A HEALTHY MENTAL LIFE       |
+      | custodian   | 8HX13                            |
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
@@ -92,7 +92,7 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | property    | value                            |
       | identifier  | 3334567890                       |
       | type        | 555553002                        |
-      | custodian   | A DIFFERENT CUSTODIAN            |
+      | custodian   | C0D9R                            |
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
@@ -105,7 +105,7 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -113,22 +113,22 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | property    | value                            |
       | identifier  | 2224567890                       |
       | type        | 736253002                        |
-      | custodian   | LIFE A HEALTHY MENTAL LIFE       |
+      | custodian   | 8HX13                            |
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
 
   Scenario: Empty results when searching for a Document Pointer when the consumer can't access existing document type
-    Given Consumer "Yorkshire Ambulance Service" is requesting to search Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" for document types
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare"
+    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 999253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -139,11 +139,11 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
     And the response is a Bundle with 0 entries
 
   Scenario: Empty results when searching for a Document Pointer when subject has no documents
-    Given Consumer "Yorkshire Ambulance Service" is requesting to search Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" for document types
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare"
+    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |

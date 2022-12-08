@@ -12,7 +12,16 @@ from lambda_utils.header_config import LoggingHeader
 from lambda_utils.logging_utils import generate_transaction_id
 from nrlf.core.types import DynamoDbClient
 
-from feature_tests.common.constants import Action, TestMode
+from feature_tests.common.constants import (
+    ACTION_ALIASES,
+    ALLOWED_CONSUMER_ORG_IDS,
+    ALLOWED_CONSUMERS,
+    ALLOWED_PRODUCER_ORG_IDS,
+    ALLOWED_PRODUCERS,
+    Action,
+    ActorType,
+    TestMode,
+)
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
 
@@ -90,28 +99,30 @@ def get_environment_prefix(test_mode: TestMode):
     )
 
 
-def get_endpoint(test_mode: TestMode, actor_type: str) -> str:
+def get_endpoint(test_mode: TestMode, actor_type: ActorType) -> str:
     return (
         ""
         if test_mode is TestMode.LOCAL_TEST
-        else get_terraform_json()["api_base_urls"]["value"][actor_type.lower()]
+        else get_terraform_json()["api_base_urls"]["value"][actor_type.name.lower()]
     )
 
 
-def get_lambda_arn(test_mode: TestMode, actor_type: str) -> str:
+def get_lambda_arn(test_mode: TestMode, actor_type: ActorType) -> str:
     return (
         ""
         if test_mode is TestMode.LOCAL_TEST
         else get_terraform_json()["authoriser_lambda_function_names"]["value"][
-            actor_type.lower()
+            actor_type.name.lower()
         ]
     )
 
 
 @cache
-def get_api_definitions_from_swagger(actor_type: str):
+def get_api_definitions_from_swagger(actor_type: ActorType):
     path_to_repo_base = PATH_TO_HERE.parent.parent.resolve()
-    path_to_swagger = path_to_repo_base / "api" / actor_type.lower() / "swagger.yaml"
+    path_to_swagger = (
+        path_to_repo_base / "api" / actor_type.name.lower() / "swagger.yaml"
+    )
     with open(path_to_swagger) as f:
         swagger = yaml.load(f, Loader=yaml.FullLoader)
     paths = swagger["paths"]
@@ -127,11 +138,54 @@ def get_api_definitions_from_swagger(actor_type: str):
     return api_definitions
 
 
-def get_lambda_handler(actor_type: str, action: Action, suffix: str = ""):
-    actor_type = actor_type.lower()
+def get_lambda_handler(actor_type: ActorType, action: Action, suffix: str = ""):
+    actor_type = actor_type.name.lower()
     index = import_module(f"api.{actor_type}.{action.name}{suffix}.index")
     return index.handler
 
 
 def table_as_dict(table: Table) -> dict:
     return {row["property"]: row["value"] for row in table if row["value"] != "null"}
+
+
+def get_org_id(org_id: str, actor_type: ActorType) -> str:
+    allowed_org_ids = (
+        ALLOWED_CONSUMER_ORG_IDS
+        if actor_type is ActorType.Consumer
+        else ALLOWED_PRODUCER_ORG_IDS
+    )
+    if org_id not in allowed_org_ids:
+        raise ValueError(
+            f"Organisation ID {org_id} of type {actor_type.name} must be one of {allowed_org_ids}"
+        )
+    return org_id
+
+
+def get_actor(actor: str, actor_type: ActorType) -> str:
+    allowed_actors = (
+        ALLOWED_CONSUMERS if actor_type is ActorType.Consumer else ALLOWED_PRODUCERS
+    )
+    if actor not in allowed_actors:
+        raise ValueError(
+            f"Actor name {actor} of type {actor_type.name} must be one of {allowed_actors}"
+        )
+    return actor
+
+
+def get_action(action_name: str) -> Action:
+    action_name = ACTION_ALIASES.get(action_name) or action_name
+    action = Action._member_map_.get(action_name)
+    if not action:
+        raise ValueError(
+            f"Action name {action_name} must be one of {Action._member_names_} or {list(ACTION_ALIASES.keys())}"
+        )
+    return action
+
+
+def get_actor_type(actor_type_name: str) -> Action:
+    actor_type = ActorType._member_map_.get(actor_type_name)
+    if not actor_type:
+        raise ValueError(
+            f"ActorType name {actor_type_name} must be one of {ActorType._member_names_}"
+        )
+    return actor_type
