@@ -39,41 +39,47 @@ Feature: Failure scenarios where producer is unable to read a Document Pointer
       """
 
   Scenario: Producer permissions do not match the Document Pointer type
-    Given a Document Pointer exists in the system with the below values
+    Given Producer "Aaron Court Mental Health NH" is requesting to read Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 734163000 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | Aaron Court Mental Health NH   |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And Producer "AARON COURT MENTAL NH" has permission to create Document Pointers for
-      | snomed_code | description |
-      | 734163000   | Care plan   |
-    When Producer "AARON COURT MENTAL NH" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
+    When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "Aaron Court Mental Health NH|1234567890"
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"
 
   Scenario: Request comes from a Producer whose ID does not match the Document Pointer's producer ID
-    Given a Document Pointer exists in the system with the below values
+    Given Producer "Aaron Court Mental Health NH" is requesting to read Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 734163000 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | ABUNDANT LIFE CARE LIMITED     |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And Producer "ABUNDANT LIFE CARE LIMITED" has permission to create Document Pointers for
-      | snomed_code | description               |
-      | 736253002   | Mental health crisis plan |
-    When Producer "ABUNDANT LIFE CARE LIMITED" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
+    When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "ABUNDANT LIFE CARE LIMITED|1234567890"
     Then the operation is unsuccessful
-    And the response contains error message "Item could not be found"
+    And the response contains error message "Required permissions to read a document pointer are missing"
 
   Scenario: The Document Pointer does not exist
-    Given Producer "AARON COURT MENTAL NH" has permission to create Document Pointers for
-      | snomed_code | description               |
-      | 736253002   | Mental health crisis plan |
-    When Producer "AARON COURT MENTAL NH" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
+    Given Producer "Aaron Court Mental Health NH" is requesting to read Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 734163000 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "Aaron Court Mental Health NH|1234567890"
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"

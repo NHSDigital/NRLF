@@ -106,7 +106,6 @@ class ApiRequest(BaseRequest):
         url = f"{self.endpoint}{self.method_slug}"
         request_kwargs = {
             "method": self.request_method.upper(),
-            "url": url,
             "headers": self.headers,
         }
         if body:
@@ -116,6 +115,7 @@ class ApiRequest(BaseRequest):
         for key, value in path_params.items():
             url = url.format(**{key: f"{urllib.parse.quote(value)}"})
 
+        request_kwargs["url"] = url
         raw_response: requests.Response = requests.request(**request_kwargs)
         self.sent_requests.append(request_kwargs)
         return {"body": raw_response.text, "status_code": raw_response.status_code}

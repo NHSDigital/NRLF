@@ -67,7 +67,7 @@ def test_create_document_pointer():
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        response = client.scan(TableName=TABLE_NAME)
+        response = client.scan(TableName=to_kebab_case(DocumentPointer.__name__))
 
     (item,) = response["Items"]
     recovered_item = DocumentPointer(**item)
@@ -125,7 +125,7 @@ def test_update_document_pointer():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
         repository.update(**query_params)
-        response = client.scan(TableName=TABLE_NAME)
+        response = client.scan(TableName=to_kebab_case(DocumentPointer.__name__))
 
     (item,) = response["Items"]
     recovered_item = DocumentPointer(**item)
@@ -232,7 +232,7 @@ def test_hard_delete():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
         repository.hard_delete(**query)
-        response = client.scan(TableName=TABLE_NAME)
+        response = client.scan(TableName=to_kebab_case(DocumentPointer.__name__))
     assert len(response["Items"]) == 0
 
 

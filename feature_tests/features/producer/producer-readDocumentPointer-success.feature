@@ -39,24 +39,26 @@ Feature: Success scenarios where producer is able to read a Document Pointer
       """
 
   Scenario: Read an existing current Document Pointer
-    Given a Document Pointer exists in the system with the below values
+    Given Producer "Aaron Court Mental Health NH" is requesting to read Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare"
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | Aaron Court Mental Health NH   |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And Producer "AARON COURT MENTAL NH" has permission to create Document Pointers for
-      | snomed_code | description               |
-      | 736253002   | Mental health crisis plan |
-    When Producer "AARON COURT MENTAL NH" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
+    When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "Aaron Court Mental Health NH|1234567890"
     Then the operation is successful
     And the response is the DOCUMENT template with the below values
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | Aaron Court Mental Health NH   |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |

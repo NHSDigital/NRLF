@@ -38,8 +38,13 @@ Feature: Failure scenarios where consumer is unable to read a Document Pointer
       }
       """
 
-  Scenario: Consumer permissions do not allow them to read requested Document Pointer type
-    Given a Document Pointer exists in the system with the below values
+  Scenario: Consumer permissions do not match the Document Pointer type
+    Given Consumer "Yorkshire Ambulance Service" is requesting to read Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253001 |
+    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare"
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |
@@ -47,29 +52,16 @@ Feature: Failure scenarios where consumer is unable to read a Document Pointer
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And the following organisation to application relationship exists
-      | organisation                | application |
-      | Yorkshire Ambulance Service | SCRa        |
-    And "Yorkshire Ambulance Service" can access the following document types
-      | system                  | value           |
-      | https://snomed.info/ict | 861421000000109 |
-    When Consumer "WEST YORKSHIRE AMBULANCE SERVICE" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
-      | property           | value            |
-      | developer.app.id   | SCRa             |
-      | developer.app.name | application name |
+    When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "Yorkshire Ambulance Service|1234567890"
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"
 
   Scenario: The Document Pointer does not exist
-    Given the following organisation to application relationship exists
-      | organisation                | application |
-      | Yorkshire Ambulance Service | SCRa        |
-    And "Yorkshire Ambulance Service" can access the following document types
-      | system                  | value           |
-      | https://snomed.info/ict | 861421000000109 |
-    When Consumer "WEST YORKSHIRE AMBULANCE SERVICE" reads an existing Document Reference "AARON COURT MENTAL NH|1234567890" as "Yorkshire Ambulance Service"
-      | property           | value            |
-      | developer.app.id   | SCRa             |
-      | developer.app.name | application name |
+    Given Consumer "Yorkshire Ambulance Service" is requesting to read Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare"
+    When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "Yorkshire Ambulance Service|1234567890"
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"
