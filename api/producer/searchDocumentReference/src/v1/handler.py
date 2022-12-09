@@ -1,10 +1,12 @@
+import json
 from logging import Logger
 from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.header_config import ClientRpDetailsHeader
+from lambda_utils.header_config import AuthHeader
 from lambda_utils.logging import log_action
+from nrlf.core.errors import assert_no_extra_params
 from nrlf.core.model import DocumentPointer, ProducerRequestParams
 from nrlf.core.query import create_search_and_filter_query
 from nrlf.core.repository import Repository
@@ -14,19 +16,19 @@ from nrlf.producer.fhir.r4.model import RequestQuerySubject
 from api.producer.searchDocumentReference.src.constants import PersistentDependencies
 
 
-@log_action(narrative="Parsing ClientRpDetails header")
-def parse_client_rp_details(
+@log_action(narrative="Parsing headers")
+def parse_headers(
     data: PipelineData,
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-    client_rp_details = ClientRpDetailsHeader(event)
+    organisation_code = AuthHeader(**event.headers).organisation_code
 
+    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
     return PipelineData(
-        client_rp_details=client_rp_details,
-        **data,
+        **data, organisation_code=organisation_code, pointer_types=pointer_types
     )
 
 
@@ -40,15 +42,19 @@ def search_document_references(
 ) -> PipelineData:
 
     repository: Repository = dependencies["repository"]
-    client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
-
     request_params = ProducerRequestParams(**event.queryStringParameters)
+    assert_no_extra_params(
+        request_params=request_params, provided_params=event.queryStringParameters
+    )
+
     nhs_number: RequestQuerySubject = request_params.nhs_number
+    organisation_code = data["organisation_code"]
+    pointer_types = data["pointer_types"]
 
     search_and_filter_query = create_search_and_filter_query(
         nhs_number=nhs_number,
-        producer_id=client_rp_details.custodian,
-        type=client_rp_details.pointer_types,
+        producer_id=organisation_code,
+        type=pointer_types,
     )
 
     document_pointers: list[DocumentPointer] = repository.search(
@@ -60,6 +66,6 @@ def search_document_references(
 
 
 steps = [
-    parse_client_rp_details,
+    parse_headers,
     search_document_references,
 ]

@@ -4,134 +4,153 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
     Given template DOCUMENT:
       """
       {
-          "resourceType": "DocumentReference",
-          "id": "$custodian|$identifier",
-          "custodian": {
+        "resourceType": "DocumentReference",
+        "id": "$custodian|$identifier",
+        "custodian": {
           "identifier": {
-              "system": "https://fhir.nhs.uk/Id/accredited-system-id",
-              "value": "$custodian"
+            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "value": "$custodian"
           }
-          },
-          "subject": {
+        },
+        "subject": {
           "identifier": {
-              "system": "https://fhir.nhs.uk/Id/nhs-number",
-              "value": "$subject"
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "$subject"
           }
-          },
-          "type": {
+        },
+        "type": {
           "coding": [
-              {
-                      "system": "https://snomed.info/ict",
-                      "code": "$type"
-              }
+            {
+              "system": "https://snomed.info/ict",
+              "code": "$type"
+            }
           ]
-          },
-          "content": [
+        },
+        "content": [
           {
-              "attachment": {
-                      "contentType": "$contentType",
-                      "url": "$url"
-              }
+            "attachment": {
+              "contentType": "$contentType",
+              "url": "$url"
+            }
           }
-          ],
-          "status": "$status",
-          "relatesTo": [
-              {
-                  "code": "replaces",
-                  "target": {
-                      "type": "DocumentReference",
-                      "identifier": {
-                          "value": "$relatesTo"
-                      }
-                  }
+        ],
+        "status": "$status",
+        "relatesTo": [
+          {
+            "code": "replaces",
+            "target": {
+              "type": "DocumentReference",
+              "identifier": {
+                "value": "$target"
               }
-          ]
+            }
+          }
+        ]
       }
       """
-    And a Document Pointer exists in the system with the below values
-      | property    | value                                   |
-      | identifier  | 1234567890                              |
-      | type        | 736253002                               |
-      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL |
-      | subject     | 9278693472                              |
-      | contentType | application/pdf                         |
-      | status      | current                                 |
-      | url         | https://example.org/my-doc.pdf          |
 
   Scenario: Unable to update a Document Pointer that does not exist
-    Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
-      | snomed_code | description                 |
-      | 736253002   | "Mental health crisis plan" |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|0987654321" from DOCUMENT template as "Yorkshire Ambulance Service"
-      | property    | value                                   |
-      | identifier  | 1234567890                              |
-      | status      | current                                 |
-      | type        | 736253002                               |
-      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL |
-      | subject     | 9278693472                              |
-      | contentType | application/pdf                         |
-      | url         | https://example.org/different-doc.pdf   |
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | status      | current                        |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23|0987654321" from DOCUMENT template
+      | property    | value                                 |
+      | identifier  | 1234567890                            |
+      | status      | current                               |
+      | type        | 736253002                             |
+      | custodian   | 8FW23                                 |
+      | subject     | 9278693472                            |
+      | contentType | application/pdf                       |
+      | url         | https://example.org/different-doc.pdf |
     Then the operation is unsuccessful
     And the response contains error message "Item could not be found"
 
-  Scenario: Unable to update a Document Pointer when Producer does not have permission
-    Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL 2" has permission to update Document Pointers for
-      | snomed_code | description                 |
-      | 736253002   | "Mental health crisis plan" |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL 2" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template as "Yorkshire Ambulance Service"
-      | property    | value                                   |
-      | identifier  | 1234567890                              |
-      | status      | current                                 |
-      | type        | 736253002                               |
-      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL |
-      | subject     | 9278693472                              |
-      | contentType | application/pdf                         |
-      | url         | https://example.org/different-doc.pdf   |
+  Scenario: Unable to update a Document Pointer when Producer does not have permission for existing types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253003 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | status      | current                        |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23|0987654321" from DOCUMENT template
+      | property    | value                                 |
+      | identifier  | 1234567890                            |
+      | type        | 736253002                             |
+      | custodian   | 8FW23                                 |
+      | subject     | 9278693472                            |
+      | contentType | application/pdf                       |
+      | url         | https://example.org/different-doc.pdf |
     Then the operation is unsuccessful
-    And the response contains error message "Item could not be found"
+    And the response contains error message "Required permissions to create a document pointer are missing"
 
   Scenario: Unable to update the relatesTo immutable property of a DOCUMENT_POINTER
-    Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
-      | snomed_code | description                 |
-      | 736253002   | "Mental health crisis plan" |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template as "Yorkshire Ambulance Service"
-      | property    | value                                   |
-      | identifier  | 1234567890                              |
-      | status      | current                                 |
-      | type        | 736253002                               |
-      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL |
-      | subject     | 9278693472                              |
-      | contentType | application/pdf                         |
-      | relatesTo   | 536941082                               |
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | status      | current                        |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23|1234567890" from DOCUMENT template
+      | property    | value           |
+      | identifier  | 1234567890      |
+      | status      | current         |
+      | type        | 736253002       |
+      | custodian   | 8FW23           |
+      | subject     | 9278693472      |
+      | contentType | application/pdf |
+      | target      | 536941082       |
     Then the operation is unsuccessful
     And the response contains error message "Trying to update one or more immutable fields"
 
   Scenario: Unable to update the status immutable property of a DOCUMENT_POINTER
-    Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
-      | snomed_code | description                 |
-      | 736253002   | "Mental health crisis plan" |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template as "Yorkshire Ambulance Service"
-      | property    | value                                   |
-      | identifier  | 1234567890                              |
-      | status      | deleted                                 |
-      | type        | 736253002                               |
-      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL |
-      | subject     | 9278693472                              |
-      | contentType | application/pdf                         |
-    Then the operation is unsuccessful
-    And the response contains error message "Trying to update one or more immutable fields"
-
-  Scenario: Unable to update the custodian immutable property of a DOCUMENT_POINTER
-    Given Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to update Document Pointers for
-      | snomed_code | description                 |
-      | 736253002   | "Mental health crisis plan" |
-    When Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" updates a Document Reference "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890" from DOCUMENT template as "Yorkshire Ambulance Service"
-      | property    | value                                     |
-      | identifier  | 1234567890                                |
-      | status      | current                                   |
-      | type        | 736253002                                 |
-      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL 2 |
-      | subject     | 9278693472                                |
-      | contentType | application/pdf                           |
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | status      | current                        |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23|1234567890" from DOCUMENT template
+      | property    | value           |
+      | identifier  | 1234567890      |
+      | status      | deleted         |
+      | type        | 736253002       |
+      | custodian   | 8FW23           |
+      | subject     | 9278693472      |
+      | contentType | application/pdf |
     Then the operation is unsuccessful
     And the response contains error message "Trying to update one or more immutable fields"

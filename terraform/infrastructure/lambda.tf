@@ -98,6 +98,7 @@ module "producer__deleteDocumentReference" {
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-write.arn,
+    aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   handler = "api.producer.deleteDocumentReference.index.handler"

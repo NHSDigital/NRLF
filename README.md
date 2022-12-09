@@ -26,6 +26,7 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
    2. [Deploy NRLF](#2-deploy-the-nrlf)
    3. [Run integration tests](#3-run-the-integration-tests)
    4. [Run feature tests](#4-run-the-feature-tests)
+   5. [Feature test rules](#5-feature-test-rules)
 5. [Logging](#logging)
 6. [Route 53 & Hosted zones](#route53--hosted-zones)
 
@@ -139,6 +140,47 @@ To run feature tests against deployed infrastructure
 ```shell
 nrlf test feature integration
 ```
+
+### 5. Feature test rules
+
+Referring to the sample feature test below:
+
+```gherkin
+Scenario: Successfully create a Document Pointer of type Mental health crisis plan
+   Given {ACTOR TYPE} "{ACTOR}" (Organisation ID "{ORG_ID}") is requesting to {ACTION} Document Pointers
+   And {ACTOR TYPE} "{ACTOR}" is registered in the system for application "APP 1" (ID "{APP ID 1}") for document types
+     | system                  | value     |
+     | https://snomed.info/ict | 736253002 |
+   And {ACTOR TYPE} "{ACTOR}" has authorisation headers for application "APP 2" (ID "{APP ID 2}")
+   When {ACTOR TYPE} "{ACTOR}" {ACTION} a Document Reference from DOCUMENT template
+     | property    | value                          |
+     | identifier  | 1234567890                     |
+     | type        | 736253002                      |
+     | custodian   | {ORG_ID}                       |
+     | subject     | 9278693472                     |
+     | contentType | application/pdf                |
+     | url         | https://example.org/my-doc.pdf |
+   Then the operation is {RESULT}
+```
+
+The following notes should be made:
+
+1. ACTOR TYPE, ACTOR and ACTION are forced
+   to be consistent throughout your test
+2. ACTOR TYPE, ACTOR, ACTION, ORG_ID, APP, APP ID, and
+   RESULT are enums: their values are
+   restricted to a predefined set
+3. ACTOR is equivalent to to both custodian
+   and organisation
+4. The request method (GET, POST, ...) and
+   slug (e.g. DocumentReference/\_search) for
+   ACTION is taken from the swagger.
+5. ”Given ... is requesting to” is mandatory:
+   it sets up the base request
+6. ”And ... is registered to” sets up a
+   org:app:doc-types entry in Auth table
+7. ”And ... has authorisation headers” sets up
+   authorisation headers
 
 ## Logging
 

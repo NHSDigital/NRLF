@@ -44,36 +44,36 @@ Feature: Failure scenarios where request is authorised for consumer
       """
 
   Scenario: Authoriser rejects request where organisation has not been registered as being associated with the requesting app
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to read Document Pointers
-    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
-    And Consumer "Yorkshire Ambulance Service" is not registered in the system for application "DataShare" (ID "z00z-y11y-x22x")
-    When Consumer "Yorkshire Ambulance Service" has their authorisation evaluated
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to read Document Pointers
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And Producer "Aaron Court Mental Health NH" is not registered in the system for application "DataShare" (ID "z00z-y11y-x22x")
+    When Producer "Aaron Court Mental Health NH" has their authorisation evaluated
     Then the response is the policy from POLICY_RESPONSE template
       | property          | value          |
       | effect            | Deny           |
       | application-id    | z00z-y11y-x22x |
-      | organisation-code | RX898          |
+      | organisation-code | 8FW23          |
 
   Scenario: Authoriser rejects request with authorisation headers for an application for which it does not have permissions
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to read Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to read Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value           |
       | https://snomed.info/ict | 861421000000109 |
       | https://snomed.info/ict | 861421000000108 |
-    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "AnotherAppId456" (ID "a33a-b22b-c11c")
-    When Consumer "Yorkshire Ambulance Service" has their authorisation evaluated
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "AnotherAppId456" (ID "a33a-b22b-c11c")
+    When Producer "Aaron Court Mental Health NH" has their authorisation evaluated
     Then the response is the policy from POLICY_RESPONSE template
       | property          | value          |
       | effect            | Deny           |
       | application-id    | a33a-b22b-c11c |
-      | organisation-code | RX898          |
+      | organisation-code | 8FW23          |
 
   Scenario: Authoriser rejects request without authorisation headers for the requesting app
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to read Document Pointers
-    And Consumer "Yorkshire Ambulance Service" does not have authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to read Document Pointers
+    And Producer "Aaron Court Mental Health NH" does not have authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value           |
       | https://snomed.info/ict | 861421000000109 |
       | https://snomed.info/ict | 861421000000108 |
-    When Consumer "Yorkshire Ambulance Service" has their authorisation evaluated
+    When Producer "Aaron Court Mental Health NH" has their authorisation evaluated
     Then the response is the policy from NULL_POLICY_RESPONSE template

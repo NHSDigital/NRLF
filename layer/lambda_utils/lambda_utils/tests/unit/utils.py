@@ -41,15 +41,23 @@ def throw_item_not_found_error(
     RaiseItemNotFoundErrorModel(foo="1")
 
 
-def make_aws_event(authorizer={}, **kwargs):
+def make_aws_event(
+    body=None,
+    methodArn={},
+    authorizer={},
+    version="1",
+    headers={},
+    query_params={},
+    path_params={},
+):
     return {
         "resource": "/",
         "path": "/",
         "httpMethod": "GET",
-        **kwargs.get("methodArn", {}),
+        **methodArn,
         "headers": {
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9;version="
-            + kwargs.get("version", "1"),
+            + version,
             "accept-encoding": "gzip, deflate, br",
             "accept-language": "en-US,en;q=0.9",
             "cookie": "s_fid=7AAB6XMPLAFD9BBF-0643XMPL09956DE2; regStatus=pre-register",
@@ -63,12 +71,12 @@ def make_aws_event(authorizer={}, **kwargs):
             "X-Forwarded-For": "52.255.255.12",
             "X-Forwarded-Port": "443",
             "X-Forwarded-Proto": "https",
-            **kwargs.get("headers", {}),
+            **headers,
         },
         "multiValueHeaders": {
             "accept": [
                 "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9;version="
-                + kwargs.get("version", "1")
+                + version
             ],
             "accept-encoding": ["gzip, deflate, br"],
             "accept-language": ["en-US,en;q=0.9"],
@@ -88,12 +96,9 @@ def make_aws_event(authorizer={}, **kwargs):
             "X-Forwarded-Port": ["443"],
             "X-Forwarded-Proto": ["https"],
         },
-        "queryStringParameters": kwargs.get("queryStringParameters"),
+        "queryStringParameters": query_params,
         "multiValueQueryStringParameters": None,
-        "pathParameters": {
-            k: urllib.parse.quote(v)
-            for k, v in kwargs.get("pathParameters", {}).items()
-        },
+        "pathParameters": {k: urllib.parse.quote(v) for k, v in path_params.items()},
         "stageVariables": None,
         "requestContext": {
             "resourceId": "2gxmpl",
@@ -126,6 +131,6 @@ def make_aws_event(authorizer={}, **kwargs):
             "apiId": "70ixmpl4fl",
             "authorizer": authorizer,
         },
-        "body": kwargs.get("body", None),
+        "body": body,
         "isBase64Encoded": False,
     }

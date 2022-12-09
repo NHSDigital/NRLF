@@ -39,143 +39,113 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       """
 
   Scenario: Successfully search for a single Document Pointer by NHS number
-    Given a Document Pointer exists in the system with the below values
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And the following organisation to application relationship exists
-      | organisation                | application |
-      | Yorkshire Ambulance Service | SCRa        |
-    And "Yorkshire Ambulance Service" can access the following document types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
-    When "TEST CONSUMER" searches with query parameters:
+    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-    And "TEST CONSUMER" searches with the header values:
-      | property | value     |
-      | type     | 736253002 |
-    Then the consumer search is made as "Yorkshire Ambulance Service"
-      | property           | value            |
-      | developer.app.id   | SCRa             |
-      | developer.app.name | application name |
-    And the operation is successful
-    And 1 document reference was returned
-    And the response contains the DOCUMENT template with the below values
+    Then the operation is successful
+    And the response is a Bundle with 1 entries
+    And the Bundle contains an Entry with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
 
   Scenario: Successfully search for multiple Document Pointers by NHS number
-    Given a Document Pointer exists in the system with the below values
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And a Document Pointer exists in the system with the below values
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                            |
       | identifier  | 2224567890                       |
       | type        | 736253002                        |
-      | custodian   | LIFE A HEALTHY MENTAL LIFE       |
+      | custodian   | 8HX13                            |
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
-    And a Document Pointer exists in the system with the below values
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                            |
       | identifier  | 3334567890                       |
       | type        | 555553002                        |
-      | custodian   | A DIFFERENT CUSTODIAN            |
+      | custodian   | C0D9R                            |
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
-    And the following organisation to application relationship exists
-      | organisation                | application |
-      | Yorkshire Ambulance Service | SCRa        |
-    And "Yorkshire Ambulance Service" can access the following document types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
-    When "TEST CONSUMER" searches with query parameters:
+    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-    And "TEST CONSUMER" searches with the header values:
-      | property | value     |
-      | type     | 736253002 |
-    Then the consumer search is made as "Yorkshire Ambulance Service"
-      | property           | value            |
-      | developer.app.id   | SCRa             |
-      | developer.app.name | application name |
-    And the operation is successful
-    And 2 document references were returned
-    And the response contains the DOCUMENT template with the below values
+    Then the operation is successful
+    And the response is a Bundle with 2 entries
+    And the Bundle contains an Entry with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And the response contains the DOCUMENT template with the below values
+    And the Bundle contains an Entry with the below values for DOCUMENT template
       | property    | value                            |
       | identifier  | 2224567890                       |
       | type        | 736253002                        |
-      | custodian   | LIFE A HEALTHY MENTAL LIFE       |
+      | custodian   | 8HX13                            |
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
 
-  Scenario: Empty results when searching for a Document Pointer when the consumer cant access existing document type
-    Given a Document Pointer exists in the system with the below values
-      | property    | value                             |
-      | identifier  | 1114567890                        |
-      | type        | 999253002                         |
-      | custodian   | AMBULANCE PEOPLE TRUST IN THYSELF |
-      | subject     | 9278693472                        |
-      | contentType | application/pdf                   |
-      | url         | https://example.org/my-doc.pdf    |
-    And the following organisation to application relationship exists
-      | organisation                | application |
-      | Yorkshire Ambulance Service | SCRa        |
-    And "Yorkshire Ambulance Service" can access the following document types
+  Scenario: Empty results when searching for a Document Pointer when the consumer can't access existing document type
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    When "TEST CONSUMER" searches with query parameters
+    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567890                     |
+      | type        | 999253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-    And "TEST CONSUMER" searches with the header values
-      | property | value     |
-      | type     | 736253002 |
-    Then the consumer search is made as "Yorkshire Ambulance Service"
-      | property           | value            |
-      | developer.app.id   | SCRa             |
-      | developer.app.name | application name |
-    And the response is an empty bundle
+    Then the operation is successful
+    And the response is a Bundle with 0 entries
 
   Scenario: Empty results when searching for a Document Pointer when subject has no documents
-    Given the following organisation to application relationship exists
-      | organisation                | application |
-      | Yorkshire Ambulance Service | SCRa        |
-    And "Yorkshire Ambulance Service" can access the following document types
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    When "TEST CONSUMER" searches with query parameters
+    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-    And "TEST CONSUMER" searches with the header values
-      | property | value     |
-      | type     | 736253002 |
-    Then the consumer search is made as "Yorkshire Ambulance Service"
-      | property           | value            |
-      | developer.app.id   | SCRa             |
-      | developer.app.name | application name |
-    And the response is an empty bundle
+    Then the operation is successful
+    And the response is a Bundle with 0 entries

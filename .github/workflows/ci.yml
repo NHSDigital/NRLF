@@ -275,6 +275,8 @@ jobs:
           source nrlf.sh
           nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
           nrlf terraform ciplan ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform ciapply ${GITHUB_SHA_SHORT}-ci || echo "ok"
+          nrlf terraform ciplan ${GITHUB_SHA_SHORT}-ci
           nrlf terraform ciapply ${GITHUB_SHA_SHORT}-ci
 
       - name: Upload artifact

@@ -39,169 +39,149 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       """
 
   Scenario: Successfully search for a single Document Pointer by NHS number
-    Given a Document Pointer exists in the system with the below values
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And Producer "AARON COURT MENTAL NH" has permission to search Document Pointers for
-      | snomed_code | description               |
-      | 736253002   | Mental health crisis plan |
-    When "AARON COURT MENTAL NH" searches with query parameters:
+    When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-    And "AARON COURT MENTAL NH" searches with the header values:
-      | property  | value                 |
-      | type      | 736253002             |
-      | custodian | AARON COURT MENTAL NH |
-    Then the producer search is made as "Yorkshire Ambulance Service"
-    And the operation is successful
-    And 1 document reference was returned
-    And the response contains the DOCUMENT template with the below values
+    Then the operation is successful
+    And the response is a Bundle with 1 entries
+    And the Bundle contains an Entry with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
 
   Scenario: Successfully search for multiple Document Pointers by NHS number
-    Given a Document Pointer exists in the system with the below values
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And a Document Pointer exists in the system with the below values
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                            |
       | identifier  | 2224567890                       |
       | type        | 736253002                        |
-      | custodian   | AARON COURT MENTAL NH            |
+      | custodian   | 8FW23                            |
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
-    And a Document Pointer exists in the system with the below values
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                            |
       | identifier  | 3334567890                       |
       | type        | 555553002                        |
-      | custodian   | AARON COURT MENTAL NH            |
+      | custodian   | 8FW23                            |
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
-    And Producer "AARON COURT MENTAL NH" has permission to search Document Pointers for
-      | snomed_code | description               |
-      | 736253002   | Mental health crisis plan |
-    When "AARON COURT MENTAL NH" searches with query parameters:
+    When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-    And "AARON COURT MENTAL NH" searches with the header values:
-      | property  | value                 |
-      | type      | 736253002             |
-      | custodian | AARON COURT MENTAL NH |
-    Then the producer search is made as "Yorkshire Ambulance Service"
-    And the operation is successful
-    And 2 document references were returned
-    And the response contains the DOCUMENT template with the below values
+    Then the operation is successful
+    And the response is a Bundle with 2 entries
+    And the Bundle contains an Entry with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
       | type        | 736253002                      |
-      | custodian   | AARON COURT MENTAL NH          |
+      | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    And the response contains the DOCUMENT template with the below values
+    And the Bundle contains an Entry with the below values for DOCUMENT template
       | property    | value                            |
       | identifier  | 2224567890                       |
       | type        | 736253002                        |
-      | custodian   | AARON COURT MENTAL NH            |
+      | custodian   | 8FW23                            |
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
 
   Scenario: Empty results when searching for a Document Pointer when the producer has no documents
-    Given a Document Pointer exists in the system with the below values
-      | property    | value                             |
-      | identifier  | 1114567890                        |
-      | type        | 999253002                         |
-      | custodian   | AMBULANCE PEOPLE TRUST IN THYSELF |
-      | subject     | 9278693472                        |
-      | contentType | application/pdf                   |
-      | url         | https://example.org/my-doc.pdf    |
-    And Producer "AARON COURT MENTAL NH" has permission to search Document Pointers for
-      | snomed_code | description               |
-      | 736253002   | Mental health crisis plan |
-    When "AARON COURT MENTAL NH" searches with query parameters
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567890                     |
+      | type        | 999253002                      |
+      | custodian   | VN6DL                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-    And "AARON COURT MENTAL NH" searches with the header values
-      | property  | value                 |
-      | type      | 736253002             |
-      | custodian | AARON COURT MENTAL NH |
-    Then the producer search is made as "Yorkshire Ambulance Service"
-    And the response is an empty bundle
+    Then the operation is successful
+    And the response is a Bundle with 0 entries
 
   Scenario: Empty results when searching for a Document Pointer when subject has no documents with requesting producer
-    Given a Document Pointer exists in the system with the below values
-      | property    | value                                   |
-      | identifier  | 1234567890                              |
-      | type        | 736253002                               |
-      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL |
-      | subject     | 9278693472                              |
-      | contentType | application/pdf                         |
-      | url         | https://example.org/my-doc.pdf          |
-    Given a Document Pointer exists in the system with the below values
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                            |
       | identifier  | 1234567891                       |
       | type        | 736253002                        |
-      | custodian   | EMERGENCY AMBULANCE SERVICES     |
+      | custodian   | VN6DL                            |
       | subject     | 7736959498                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
-    And Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to search Document Pointers for
-      | snomed_code | description               |
-      | 736253002   | Mental health crisis plan |
-    When "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with query parameters
+    When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|7736959498 |
-    And "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with the header values
-      | property  | value                                   |
-      | type      | 736253002                               |
-      | custodian | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL |
-    Then the producer search is made as "Yorkshire Ambulance Service"
-    And the response is an empty bundle
+    Then the operation is successful
+    And the response is a Bundle with 0 entries
 
-  Scenario: Empty results when searching for a Document Pointer when provided document type does not exist
-    Given a Document Pointer exists in the system with the below values
-      | property    | value                                   |
-      | identifier  | 1234567890                              |
-      | type        | 736253002                               |
-      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL |
-      | subject     | 7736959498                              |
-      | contentType | application/pdf                         |
-      | url         | https://example.org/my-doc.pdf          |
-    Given a Document Pointer exists in the system with the below values
-      | property    | value                                   |
-      | identifier  | 1234567891                              |
-      | type        | 736253002                               |
-      | custodian   | ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL |
-      | subject     | 7736959498                              |
-      | contentType | application/pdf                         |
-      | url         | https://example.org/my-doc-2.pdf        |
-    And Producer "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" has permission to search Document Pointers for
-      | snomed_code | description               |
-      | 736253002   | Mental health crisis plan |
-    When "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with query parameters
+  Scenario: Empty results when searching for a Document Pointer when provided document type does not match any documents
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 0000000000                     |
+      | custodian   | 8FW23                          |
+      | subject     | 7736959498                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                            |
+      | identifier  | 1234567891                       |
+      | type        | 0000000000                       |
+      | custodian   | 8FW23                            |
+      | subject     | 7736959498                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|7736959498 |
-    And "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL" searches with the header values
-      | property  | value                        |
-      | type      | 555253002                    |
-      | custodian | EMERGENCY AMBULANCE SERVICES |
-    Then the producer search is made as "Yorkshire Ambulance Service"
-    And the response is an empty bundle
+    Then the operation is successful
+    And the response is a Bundle with 0 entries

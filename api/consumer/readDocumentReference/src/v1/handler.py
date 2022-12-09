@@ -21,11 +21,9 @@ def read_document_reference(
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
     decoded_id = urllib.parse.unquote(event.pathParameters["id"])
-    document_types = json.loads(
-        event.requestContext.authorizer.claims["document_types"]
-    )
+    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
     read_and_filter_query = create_read_and_filter_query(
-        id=decoded_id, type=document_types
+        id=decoded_id, type=pointer_types
     )
     document_pointer: DocumentPointer = repository.read(**read_and_filter_query)
     return PipelineData(**json.loads(document_pointer.document.__root__))

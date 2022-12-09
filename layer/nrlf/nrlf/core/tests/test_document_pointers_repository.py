@@ -26,14 +26,10 @@ from nrlf.core.transform import (
 from nrlf.core.types import DynamoDbClient
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
-DEFAULT_ATTRIBUTE_DEFINITIONS = [
-    {"AttributeName": "id", "AttributeType": "S"},
-    {"AttributeName": "nhs_number", "AttributeType": "S"},
-]
-DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]
-TABLE_NAME = to_kebab_case(DocumentPointer.__name__)
+from feature_tests.common.constants import DOCUMENT_POINTER_TABLE_DEFINITION
+
 API_VERSION = 1
-INDEX_NAME = "idx_nhs_number_by_id"
+INDEX_NAME = DOCUMENT_POINTER_TABLE_DEFINITION["GlobalSecondaryIndexes"][0]["IndexName"]
 create_document_pointer_from_fhir_json = (
     lambda *args, **kwargs: _create_document_pointer_from_fhir_json(
         *args, api_version=API_VERSION, **kwargs
@@ -51,26 +47,8 @@ def mock_dynamodb() -> Generator[DynamoDbClient, None, None]:
     with moto.mock_dynamodb():
         client: DynamoDbClient = boto3.client("dynamodb")
         client.create_table(
-            AttributeDefinitions=DEFAULT_ATTRIBUTE_DEFINITIONS,
-            TableName=TABLE_NAME,
-            KeySchema=DEFAULT_KEY_SCHEMA,
-            BillingMode="PAY_PER_REQUEST",
-            GlobalSecondaryIndexes=[
-                {
-                    "IndexName": INDEX_NAME,
-                    "KeySchema": [
-                        {"AttributeName": "nhs_number", "KeyType": "HASH"},
-                        {"AttributeName": "id", "KeyType": "RANGE"},
-                    ],
-                    "Projection": {
-                        "ProjectionType": "ALL",
-                    },
-                    "ProvisionedThroughput": {
-                        "ReadCapacityUnits": 123,
-                        "WriteCapacityUnits": 123,
-                    },
-                },
-            ],
+            TableName=to_kebab_case(DocumentPointer.__name__),
+            **DOCUMENT_POINTER_TABLE_DEFINITION
         )
         yield client
 
@@ -89,7 +67,7 @@ def test_create_document_pointer():
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        response = client.scan(TableName=TABLE_NAME)
+        response = client.scan(TableName=to_kebab_case(DocumentPointer.__name__))
 
     (item,) = response["Items"]
     recovered_item = DocumentPointer(**item)
@@ -147,7 +125,7 @@ def test_update_document_pointer():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
         repository.update(**query_params)
-        response = client.scan(TableName=TABLE_NAME)
+        response = client.scan(TableName=to_kebab_case(DocumentPointer.__name__))
 
     (item,) = response["Items"]
     recovered_item = DocumentPointer(**item)
@@ -254,7 +232,7 @@ def test_hard_delete():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
         repository.hard_delete(**query)
-        response = client.scan(TableName=TABLE_NAME)
+        response = client.scan(TableName=to_kebab_case(DocumentPointer.__name__))
     assert len(response["Items"]) == 0
 
 

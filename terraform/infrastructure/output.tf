@@ -25,3 +25,10 @@ output "api_base_urls" {
     consumer = module.consumer__gateway.api_base_url
   }
 }
+
+output "authoriser_lambda_function_names" {
+  value = {
+    producer = module.producer__authoriser_lambda.function_name
+    consumer = module.consumer__authoriser_lambda.function_name
+  }
+}

@@ -1,3 +1,6 @@
+from typing import Type
+
+from nrlf.producer.fhir.r4.model import RequestParams
 from pydantic import ValidationError
 
 
@@ -29,6 +32,22 @@ class InvalidLogicalIdError(Exception):
     pass
 
 
+class UnknownParameterError(Exception):
+    pass
+
+
+def assert_no_extra_params(
+    request_params: RequestParams,
+    provided_params: list[str],
+):
+    expected_params = request_params.dict(by_alias=True).keys()
+    unknown_params = set(provided_params) - set(expected_params)
+    if unknown_params:
+        raise UnknownParameterError(
+            f"Unexpected query parameters: {', '.join(unknown_params)}"
+        )
+
+
 ERROR_SET_4XX = (
     AuthenticationError,
     DynamoDbError,
@@ -37,4 +56,5 @@ ERROR_SET_4XX = (
     ItemNotFound,
     TooManyItemsError,
     ValidationError,
+    UnknownParameterError,
 )

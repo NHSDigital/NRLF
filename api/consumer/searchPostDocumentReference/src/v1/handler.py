@@ -7,6 +7,7 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.logging import log_action
 from nrlf.consumer.fhir.r4.model import RequestQuerySubject
+from nrlf.core.errors import assert_no_extra_params
 from nrlf.core.model import ConsumerRequestParams, DocumentPointer
 from nrlf.core.query import create_search_and_filter_query
 from nrlf.core.repository import Repository
@@ -27,16 +28,16 @@ def search_document_references(
 ) -> PipelineData:
 
     repository: Repository = dependencies["repository"]
-    document_types = json.loads(
-        event.requestContext.authorizer.claims["document_types"]
-    )
+    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
 
     body = fetch_body_from_event(event)
     request_params = ConsumerRequestParams(**body)
+    assert_no_extra_params(request_params=request_params, provided_params=body)
+
     nhs_number: RequestQuerySubject = request_params.nhs_number
 
     search_and_filter_query = create_search_and_filter_query(
-        nhs_number=nhs_number, type=document_types
+        nhs_number=nhs_number, type=pointer_types
     )
 
     document_pointers: list[DocumentPointer] = repository.search(

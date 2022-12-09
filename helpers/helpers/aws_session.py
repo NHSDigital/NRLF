@@ -1,4 +1,5 @@
 from datetime import datetime
+from functools import cache
 
 import boto3
 
@@ -20,6 +21,7 @@ def _get_access_token():
     return access_key_id, secret_access_key, session_token
 
 
+@cache
 def new_aws_session() -> boto3.Session:
     access_key_id, secret_access_key, session_token = _get_access_token()
 
