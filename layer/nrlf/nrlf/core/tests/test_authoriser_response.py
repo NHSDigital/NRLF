@@ -1,5 +1,5 @@
 import pytest
-from nrlf.core.authoriser_response import authorisation_denied, authorisation_ok
+from nrlf.core.authoriser import _authorisation_denied, _authorisation_ok
 
 
 @pytest.mark.parametrize(
@@ -10,7 +10,7 @@ from nrlf.core.authoriser_response import authorisation_denied, authorisation_ok
     ),
 )
 def test_authorised_ok(principal_id, resource, context):
-    result = authorisation_ok(principal_id, resource, context)
+    result = _authorisation_ok(principal_id, resource, context)
     expected = {
         "principalId": principal_id,
         "context": context,
@@ -37,7 +37,7 @@ def test_authorised_ok(principal_id, resource, context):
     ),
 )
 def test_authorised_denied(principal_id, resource, context):
-    result = authorisation_denied(principal_id, resource, context)
+    result = _authorisation_denied(principal_id, resource, context)
     expected = {
         "principalId": principal_id,
         "context": context,

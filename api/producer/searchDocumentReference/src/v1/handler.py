@@ -26,11 +26,9 @@ def parse_headers(
 ) -> PipelineData:
     organisation_code = AuthHeader(**event.headers).organisation_code
 
-    document_types = json.loads(
-        event.requestContext.authorizer.claims["document_types"]
-    )
+    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
     return PipelineData(
-        **data, organisation_code=organisation_code, document_types=document_types
+        **data, organisation_code=organisation_code, pointer_types=pointer_types
     )
 
 
@@ -51,12 +49,12 @@ def search_document_references(
 
     nhs_number: RequestQuerySubject = request_params.nhs_number
     organisation_code = data["organisation_code"]
-    document_types = data["document_types"]
+    pointer_types = data["pointer_types"]
 
     search_and_filter_query = create_search_and_filter_query(
         nhs_number=nhs_number,
         producer_id=organisation_code,
-        type=document_types,
+        type=pointer_types,
     )
 
     document_pointers: list[DocumentPointer] = repository.search(

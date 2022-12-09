@@ -5,7 +5,7 @@ from typing import Union
 from behave import use_fixture
 from behave.runner import Context
 from nrlf.core.errors import ItemNotFound
-from nrlf.core.model import AuthConsumer, AuthProducer
+from nrlf.core.model import AuthBase, AuthConsumer, AuthProducer
 from nrlf.core.query import create_read_and_filter_query
 
 from feature_tests.common.constants import (
@@ -139,7 +139,7 @@ def register_application(context: Context, org_id: str, app_name: str, app_id: s
     auth: Union[AuthProducer, AuthConsumer] = auth_model(
         id=org_id,
         application_id=app_id,
-        document_types=[f'{row["system"]}|{row["value"]}' for row in context.table],
+        pointer_types=[f'{row["system"]}|{row["value"]}' for row in context.table],
     )
     auth_repository.create(auth)
 
@@ -152,15 +152,15 @@ def mock_local_auth(test_config: TestConfig, org_id: str):
     )
     authentication_query = create_read_and_filter_query(id=org_id)
     try:
-        auth: Union[AuthProducer, AuthConsumer] = test_config.repositories[
-            auth_model
-        ].read(**authentication_query)
+        auth: AuthBase = test_config.repositories[auth_model].read(
+            **authentication_query
+        )
     except ItemNotFound:
         pass
     else:
-        document_types = auth.document_types.__root__
-        test_config.request.headers["document-types"] = (
-            json.dumps(document_types)
+        pointer_types = auth.pointer_types.__root__
+        test_config.request.headers["pointer-types"] = (
+            json.dumps(pointer_types)
             if test_config.actor_context.action is Action.authoriser
-            else document_types
+            else pointer_types
         )

@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import Optional
 
 import nrlf.consumer.fhir.r4.model as consumer_model
@@ -132,53 +133,48 @@ class ConsumerRequestParams(consumer_model.RequestParams):
         return nhs_number
 
 
-class AuthConsumer(BaseModel):
+class AuthBase(BaseModel):
     id: DynamoDbStringType
     application_id: DynamoDbStringType
-    document_types: DynamoDbListType
+    pointer_types: DynamoDbListType
     _from_dynamo: bool = Field(
         default=False,
         exclude=True,
         description="internal flag for reading from dynamodb",
     )
 
+    @root_validator(pre=True)
+    def transform_input_values_if_dynamo_values(cls, values: dict) -> dict:
+        from_dynamo = all(map(is_dynamodb_dict, values.values()))
+
+        if from_dynamo:
+            return {
+                **{k: convert_dynamo_value_to_raw_value(v) for k, v in values.items()},
+                "_from_dynamo": from_dynamo,
+            }
+        return values
+
+
+class AuthConsumer(AuthBase):
     @staticmethod
     def public_alias() -> str:
         return "Auth Consumer"
 
-    @root_validator(pre=True)
-    def transform_input_values_if_dynamo_values(cls, values: dict) -> dict:
-        from_dynamo = all(map(is_dynamodb_dict, values.values()))
 
-        if from_dynamo:
-            return {
-                **{k: convert_dynamo_value_to_raw_value(v) for k, v in values.items()},
-                "_from_dynamo": from_dynamo,
-            }
-        return values
-
-
-class AuthProducer(BaseModel):
-    id: DynamoDbStringType
-    application_id: DynamoDbStringType
-    document_types: DynamoDbListType
-    _from_dynamo: bool = Field(
-        default=False,
-        exclude=True,
-        description="internal flag for reading from dynamodb",
-    )
-
+class AuthProducer(AuthBase):
     @staticmethod
     def public_alias() -> str:
         return "Auth Producer"
 
-    @root_validator(pre=True)
-    def transform_input_values_if_dynamo_values(cls, values: dict) -> dict:
-        from_dynamo = all(map(is_dynamodb_dict, values.values()))
 
-        if from_dynamo:
-            return {
-                **{k: convert_dynamo_value_to_raw_value(v) for k, v in values.items()},
-                "_from_dynamo": from_dynamo,
-            }
-        return values
+class AuthoriserContext(BaseModel):
+    correlation_id: str = Field(alias="x-correlation-id")
+    nhsd_correlation_id: str = Field(alias="nhsd-correlation-id")
+    request_type: str = Field(alias="request-type")
+    client_app_name: str = Field(alias="developer.app.name")
+    client_app_id: str = Field(alias="developer.app.id")
+    organisation_code: str = Field(alias="Organisation-Code")
+    pointer_types: str = None
+
+    class Config:
+        allow_population_by_field_name = True

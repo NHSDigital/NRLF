@@ -11,7 +11,7 @@ Feature: Success scenarios where request is authorised for producer
           "request-type": "app_restricted",
           "developer.app.name": "<developer.app.name>",
           "developer.app.id": "$application-id",
-          "document_types": "$document-types",
+          "pointer_types": "$pointer-types",
           "Organisation-Code": "$organisation-code"
         },
         "policyDocument": {
@@ -40,4 +40,4 @@ Feature: Success scenarios where request is authorised for producer
       | effect            | Allow                                                                                    |
       | application-id    | z00z-y11y-x22x                                                                           |
       | organisation-code | 8FW23                                                                                    |
-      | document-types    | ["https://snomed.info/ict\|861421000000109", "https://snomed.info/ict\|861421000000108"] |
+      | pointer-types     | ["https://snomed.info/ict\|861421000000109", "https://snomed.info/ict\|861421000000108"] |

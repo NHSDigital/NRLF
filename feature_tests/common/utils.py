@@ -64,7 +64,7 @@ def logging_headers(scenario_name) -> dict:
     return LoggingHeader(
         **{
             "x-correlation-id": f"{scenario_name}|{uuid}",
-            "nhsd-correlation-id": uuid,
+            "nhsd-correlation-id": f"{scenario_name}|{uuid}",
             "x-request-id": uuid,
         }
     ).dict(by_alias=True)

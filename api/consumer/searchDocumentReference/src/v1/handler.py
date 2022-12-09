@@ -32,12 +32,10 @@ def search_document_references(
 
     nhs_number: RequestQuerySubject = request_params.nhs_number
 
-    document_types = json.loads(
-        event.requestContext.authorizer.claims["document_types"]
-    )
+    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
 
     search_and_filter_query = create_search_and_filter_query(
-        nhs_number=nhs_number, type=document_types
+        nhs_number=nhs_number, type=pointer_types
     )
 
     document_pointers: list[DocumentPointer] = repository.search(

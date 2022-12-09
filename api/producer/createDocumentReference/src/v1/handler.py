@@ -6,7 +6,7 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
-from lambda_utils.header_config import AuthHeader, ClientRpDetailsHeader
+from lambda_utils.header_config import AuthHeader
 from lambda_utils.logging import log_action
 from nrlf.core.errors import AuthenticationError
 from nrlf.core.model import DocumentPointer
@@ -27,15 +27,11 @@ from api.producer.createDocumentReference.src.v1.constants import API_VERSION
 def _invalid_producer_for_create(
     organisation_code,
     core_model: DocumentPointer,
-    document_types,
+    pointer_types,
 ):
-    if not organisation_code == core_model.producer_id.__root__:
-        return True
-
-    if core_model.type.__root__ not in document_types:
-        return True
-
-    return False
+    return (organisation_code != core_model.producer_id.__root__) or (
+        core_model.type.__root__ not in pointer_types
+    )
 
 
 def _invalid_producer_for_delete(organisation_code, delete_item_id: str):
@@ -101,16 +97,14 @@ def validate_producer_permissions(
     logger: Logger,
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
-    document_types = json.loads(
-        event.requestContext.authorizer.claims["document_types"]
-    )
+    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
     organisation_code = data["organisation_code"]
     delete_item_ids: list[str] = data.get("delete_item_ids", [])
 
     if _invalid_producer_for_create(
         organisation_code=organisation_code,
         core_model=core_model,
-        document_types=document_types,
+        pointer_types=pointer_types,
     ):
         raise AuthenticationError(
             "Required permissions to create a document pointer are missing"

@@ -5,7 +5,7 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.header_config import AuthHeader, ClientRpDetailsHeader
+from lambda_utils.header_config import AuthHeader
 from lambda_utils.logging import log_action
 from nrlf.core.errors import AuthenticationError
 from nrlf.core.query import create_read_and_filter_query, hard_delete_query
@@ -23,11 +23,9 @@ def parse_headers(
 ) -> PipelineData:
     organisation_code = AuthHeader(**event.headers).organisation_code
 
-    document_types = json.loads(
-        event.requestContext.authorizer.claims["document_types"]
-    )
+    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
     return PipelineData(
-        **data, organisation_code=organisation_code, document_types=document_types
+        **data, organisation_code=organisation_code, pointer_types=pointer_types
     )
 
 
@@ -70,12 +68,12 @@ def validate_item_exists(
 
     organisation_code = data["organisation_code"]
     decoded_id = data["decoded_id"]
-    document_types = data["document_types"]
+    pointer_types = data["pointer_types"]
 
     read_and_filter_query = create_read_and_filter_query(
         id=decoded_id,
         producer_id=organisation_code,
-        type=document_types,
+        type=pointer_types,
     )
 
     repository: Repository = dependencies["repository"]
@@ -93,11 +91,9 @@ def delete_document_reference(
     logger: Logger,
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
-    document_types = json.loads(
-        event.requestContext.authorizer.claims["document_types"]
-    )
+    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
 
-    query = hard_delete_query(id=data["decoded_id"], type=document_types)
+    query = hard_delete_query(id=data["decoded_id"], type=pointer_types)
     repository.hard_delete(**query)
     return PipelineData(message="Resource removed")
 

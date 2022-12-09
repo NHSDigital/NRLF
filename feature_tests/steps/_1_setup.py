@@ -54,7 +54,7 @@ def authorised_for_application(
     test_config: TestConfig = context.test_config
     if has_hasnt == "has":
         test_config.request.set_auth_headers(
-            org_id=test_config.actor_context.org_id, app_id=app_id
+            org_id=test_config.actor_context.org_id, app_id=app_id, app_name=app_name
         )
     elif has_hasnt != "does not have":
         raise ValueError(f"'{has_hasnt}' must be one of ['has', 'does not have']")

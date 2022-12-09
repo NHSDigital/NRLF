@@ -13,7 +13,7 @@ def escape_ansi(line):
 
 
 def change_detected(file: str):
-    result = sh.git("diff", "--quiet", "main", "--", file, _ok_code=[0, 1])
+    result = sh.git("diff", "--quiet", "main", "--", file, _ok_code=[0, 1, 128])
     return result.exit_code == 1
 
 

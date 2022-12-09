@@ -5,7 +5,7 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.header_config import AuthHeader, ClientRpDetailsHeader
+from lambda_utils.header_config import AuthHeader
 from lambda_utils.logging import log_action
 from nrlf.core.errors import AuthenticationError
 from nrlf.core.model import DocumentPointer
@@ -31,11 +31,9 @@ def parse_headers(
 ) -> PipelineData:
     organisation_code = AuthHeader(**event.headers).organisation_code
 
-    document_types = json.loads(
-        event.requestContext.authorizer.claims["document_types"]
-    )
+    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
     return PipelineData(
-        **data, organisation_code=organisation_code, document_types=document_types
+        **data, organisation_code=organisation_code, pointer_types=pointer_types
     )
 
 
@@ -71,12 +69,12 @@ def read_document_reference(
     repository: Repository = dependencies["repository"]
     decoded_id = urllib.parse.unquote(event.pathParameters["id"])
     organisation_code = data["organisation_code"]
-    document_types = data["document_types"]
+    pointer_types = data["pointer_types"]
 
     read_and_filter_query = create_read_and_filter_query(
         id=decoded_id,
         producer_id=organisation_code,
-        type=document_types,
+        type=pointer_types,
     )
     document_pointer: DocumentPointer = repository.read(**read_and_filter_query)
     return PipelineData(**json.loads(document_pointer.document.__root__))

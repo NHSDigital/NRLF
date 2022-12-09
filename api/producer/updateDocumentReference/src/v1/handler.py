@@ -6,7 +6,7 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
-from lambda_utils.header_config import AuthHeader, ClientRpDetailsHeader
+from lambda_utils.header_config import AuthHeader
 from lambda_utils.logging import log_action
 from nrlf.core.errors import AuthenticationError, ImmutableFieldViolationError
 from nrlf.core.model import DocumentPointer
@@ -44,21 +44,19 @@ def parse_headers(
 ) -> PipelineData:
     organisation_code = AuthHeader(**event.headers).organisation_code
 
-    document_types = json.loads(
-        event.requestContext.authorizer.claims["document_types"]
-    )
+    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
     return PipelineData(
-        **data, organisation_code=organisation_code, document_types=document_types
+        **data, organisation_code=organisation_code, pointer_types=pointer_types
     )
 
 
 def _invalid_producer_for_update(
-    organisation_code, document_types, core_model: DocumentPointer
+    organisation_code, pointer_types, core_model: DocumentPointer
 ):
     if not organisation_code == core_model.producer_id.__root__:
         return True
 
-    if core_model.type.__root__ not in document_types:
+    if core_model.type.__root__ not in pointer_types:
         return True
 
     return False
@@ -74,10 +72,10 @@ def validate_producer_permissions(
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
     organisation_code = data["organisation_code"]
-    document_types = data["document_types"]
+    pointer_types = data["pointer_types"]
 
     if _invalid_producer_for_update(
-        organisation_code, document_types, core_model=core_model
+        organisation_code, pointer_types, core_model=core_model
     ):
         raise AuthenticationError(
             "Required permissions to create a document pointer are missing"
@@ -96,12 +94,12 @@ def document_pointer_exists(
     repository: Repository = dependencies["document_pointer_repository"]
     decoded_id = urllib.parse.unquote(event.pathParameters["id"])
     organisation_code = data["organisation_code"]
-    document_types = data["document_types"]
+    pointer_types = data["pointer_types"]
 
     read_and_filter_query = create_read_and_filter_query(
         id=decoded_id,
         producer_id=organisation_code,
-        type=document_types,
+        type=pointer_types,
     )
     document_pointer: DocumentPointer = repository.read(**read_and_filter_query)
 
