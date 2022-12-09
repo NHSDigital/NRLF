@@ -29,5 +29,5 @@ class ApiRequestLevel:
     APP_RESTRICTED = "app_restricted"
 
 
-CLIENT_RP_DETAILS = "NHSD-Client-RP-Details"
+CLIENT_RP_DETAILS = "nhsd-client-rp-details"
 NULL = "null"

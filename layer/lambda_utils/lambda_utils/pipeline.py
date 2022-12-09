@@ -48,7 +48,7 @@ def _setup_logger(index_path: str, event: dict, **dependencies) -> tuple[int, an
 
 @log_action(narrative="Getting version from header", log_fields=["index_path", "event"])
 def _get_steps_for_version_header(index_path: str, event: dict) -> tuple[int, any]:
-    requested_version = get_version_from_header(event)
+    requested_version = get_version_from_header(**event["headers"])
     versioned_steps = get_versioned_steps(index_path)
     return _get_steps(
         requested_version=requested_version, versioned_steps=versioned_steps
