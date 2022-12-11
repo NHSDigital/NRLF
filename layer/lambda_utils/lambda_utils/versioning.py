@@ -16,8 +16,8 @@ class VersionException(Exception):
     pass
 
 
-def get_version_from_header(event) -> str:
-    accept_header = AcceptHeader(event)
+def get_version_from_header(**headers) -> str:
+    accept_header = AcceptHeader(**headers)
     return accept_header.version
 
 

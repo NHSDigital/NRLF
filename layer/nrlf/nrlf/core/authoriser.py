@@ -5,7 +5,12 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.constants import CLIENT_RP_DETAILS, NULL, ApiRequestLevel
-from lambda_utils.header_config import AuthHeader, ClientRpDetailsHeader, LoggingHeader
+from lambda_utils.header_config import (
+    AbstractHeader,
+    AuthHeader,
+    ClientRpDetailsHeader,
+    LoggingHeader,
+)
 from lambda_utils.logging import log_action
 from nrlf.core.errors import ItemNotFound
 from nrlf.core.model import AuthBase, AuthoriserContext
@@ -44,10 +49,11 @@ def parse_headers(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-    raw_client_rp_details = event.headers.get(CLIENT_RP_DETAILS, "")
+    headers = AbstractHeader(**event.headers).headers
+    raw_client_rp_details = headers.get(CLIENT_RP_DETAILS, "{}")
     try:
-        logging_headers = LoggingHeader(**event.headers)
-        auth_headers = AuthHeader(**event.headers)
+        logging_headers = LoggingHeader(**headers)
+        auth_headers = AuthHeader(**headers)
         client_rp_details = ClientRpDetailsHeader.parse_raw(raw_client_rp_details)
     except ValidationError:
         response = _authorisation_denied(

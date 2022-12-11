@@ -24,7 +24,7 @@ PATH_TO_HERE = Path(__file__).parent
     ],
 )
 def test_api_version_parsing(event: dict, expected_version: str):
-    accept_header = AcceptHeader(event)
+    accept_header = AcceptHeader(**event["headers"])
     assert accept_header.version == expected_version
 
 
@@ -39,7 +39,7 @@ def test_api_version_parsing(event: dict, expected_version: str):
 )
 def test_api_version_parsing_invalid_version(event: dict):
     with pytest.raises(ValidationError):
-        _accept_header = AcceptHeader(event)
+        AcceptHeader(**event["headers"])
 
 
 @pytest.mark.parametrize(
