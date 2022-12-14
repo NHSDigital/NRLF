@@ -29,6 +29,7 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
    5. [Feature test rules](#5-feature-test-rules)
 5. [Logging](#logging)
 6. [Route 53 & Hosted zones](#route53--hosted-zones)
+7. [Producer and Consumer Auth Tables](#producer-and-consumer-auth-tables)
 
 ## Setup
 
@@ -284,3 +285,13 @@ resource "aws_route53_record" "prodspine" {
 ```
 
 The `records` property is derived by first deploying to a specific environment, in this instance, production, and from the AWS Console navigating to the Route53 Hosted Zone that was just deployed and copying the "Value/Route traffic to" information into the `records` property. Finally, deploy to the mgmt account with the new information.
+
+## Producer and Consumer Auth Tables
+
+As part of authorisation in the api, we need to have the producer and consumer auth tables populated. This can be done in the following manner:
+
+```shell
+nrlf auths consumer|producer <env>
+```
+
+If no `<env>` option is provided, then the a default is used based on the values found in `prefix.value` found in `/NRLF/terraform/infrastructure/output.json`.
