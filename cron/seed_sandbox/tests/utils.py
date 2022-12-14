@@ -38,12 +38,8 @@ def create_table(client: DynamoDbClient, item_type_name: str):
     )
 
 
-def create_local_raw_data(
+def create_dummy_model_json_file(
     raw_data: list[dict], template_path_to_data: str, item_type_name: str
 ):
     with open(template_path_to_data.format(item_type_name=item_type_name), "w") as f:
         f.write(json.dumps(raw_data))
-
-
-def sort_models(models: list[DummyModel]) -> list[DummyModel]:
-    return sorted(models, key=lambda model: model.id.__root__)

@@ -67,7 +67,6 @@ def prepare_default_event_for_logging() -> MinimalEventModelForLogging:
     return MinimalEventModelForLogging(
         headers=logging_headers.dict(by_alias=True),
         requestContext=MinimalRequestContextForLogging(accountId=uid),
-        is_default_event=True,
     )
 
 

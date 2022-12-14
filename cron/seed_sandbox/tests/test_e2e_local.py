@@ -13,6 +13,7 @@ def mock_environment():
         os.environ,
         {
             "AWS_REGION": "eu-west-2",
+            "AWS_DEFAULT_REGION": "eu-west-2",
             "PREFIX": "",
             "ENVIRONMENT": "",
         },
