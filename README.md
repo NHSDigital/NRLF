@@ -294,4 +294,4 @@ As part of authorisation in the api, we need to have the producer and consumer a
 nrlf auths consumer|producer <env>
 ```
 
-If no `<env>` option is provided, then the a default is used based on the values found in `prefix.value` found in `/NRLF/terraform/infrastructure/output.json`.
+If no `<env>` option is provided, then the a default is used based on the value found in `prefix.value` found in `/NRLF/terraform/infrastructure/output.json`.
