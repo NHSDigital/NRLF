@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from typing import Optional
 
 import nrlf.consumer.fhir.r4.model as consumer_model

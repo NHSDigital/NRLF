@@ -29,6 +29,7 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
    5. [Feature test rules](#5-feature-test-rules)
 5. [Logging](#logging)
 6. [Route 53 & Hosted zones](#route53--hosted-zones)
+7. [Sandbox][#sandbox]
 
 ## Setup
 
@@ -284,3 +285,32 @@ resource "aws_route53_record" "prodspine" {
 ```
 
 The `records` property is derived by first deploying to a specific environment, in this instance, production, and from the AWS Console navigating to the Route53 Hosted Zone that was just deployed and copying the "Value/Route traffic to" information into the `records` property. Finally, deploy to the mgmt account with the new information.
+
+## Sandbox
+
+The public-facing sandbox is simply an additional persistent workspace (`ref-sandbox`) deployed in our UAT (`ref` / `test`) environment, alongside the persistent workspace named `ref`. It is identical to our live API, except it is open to the world via Apigee (which implements rate limiting on our behalf).
+
+### Sandbox deployment
+
+In order to deploy to a sandbox environment (`dev-sandbox`, `ref-sandbox`, `production-sandbox`) you should use the GitHub Action for persistent environments, where you should select the option to deploy to the sandbox workspace.
+
+### Sandbox database clear and reseed
+
+Any workspace suffixed with `-sandbox` has a small amount of additional infrastructure deployed to clear and reseed the DynamoDB tables (auth and document pointers) using a Lambda running
+on a cron schedule that can be found in the `cron/seed_sandbox` directory in the root of this project. The data used to seed the DynamoDB tables can found in the `cron/seed_sandbox/data` directory.
+
+Even though you probably won't need to (since there is local end-to-end testing), if you would like to test this Lambda on AWS, you can do, with e.g. `<a_workspace_name>` equal to "my_test_workspace":
+
+```
+nrlf make build
+nrlf terraform plan <a_workspace_name>-sandbox
+nrlf terraform apply <a_workspace_name>-sandbox
+```
+
+The Lambda does not expect any arguments, so you can invoke the Lambda directly on the console using a blank (`{}`) test event.
+
+Don't forget to clean up once you're done:
+
+```
+nrlf terraform destroy <a_workspace_name>-sandbox
+```
