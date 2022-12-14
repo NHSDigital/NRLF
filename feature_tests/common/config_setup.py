@@ -30,7 +30,6 @@ from feature_tests.common.models import (
     LocalAuthLambdaRequest,
     TestConfig,
 )
-from feature_tests.common.repository import FeatureTestRepository
 from feature_tests.common.utils import (
     get_api_definitions_from_swagger,
     get_dynamodb_client,
@@ -41,6 +40,7 @@ from feature_tests.common.utils import (
     get_lambda_handler,
     get_test_mode,
 )
+from helpers.seed_data_repository import SeedDataRepository
 
 
 def _local_mock(context: Context):
@@ -107,7 +107,7 @@ def config_setup(context: Context, scenario_name: str) -> TestConfig:
     environment_prefix = get_environment_prefix(test_mode=test_mode)
     dynamodb_client = get_dynamodb_client(test_mode=test_mode)
     repositories = {
-        table: FeatureTestRepository(
+        table: SeedDataRepository(
             item_type=table,
             client=dynamodb_client,
             environment_prefix=environment_prefix,

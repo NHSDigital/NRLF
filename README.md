@@ -291,7 +291,7 @@ The `records` property is derived by first deploying to a specific environment, 
 As part of authorisation in the api, we need to have the producer and consumer auth tables populated. This can be done in the following manner:
 
 ```shell
-nrlf auths consumer|producer <env>
+nrlf update_auth_tables consumer|producer <env>
 ```
 
-If no `<env>` option is provided, then the a default is used based on the value found in `prefix.value` found in `/NRLF/terraform/infrastructure/output.json`.
+If no `<env>` option is provided, then the a default is used based on the value `prefix.value` in `/NRLF/terraform/infrastructure/output.json`.

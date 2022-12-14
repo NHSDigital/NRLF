@@ -5,13 +5,13 @@ from nrlf.core.validators import validate_timestamp
 
 from feature_tests.common.decorators import then
 from feature_tests.common.models import TestConfig
-from feature_tests.common.repository import FeatureTestRepository
+from helpers.seed_data_repository import SeedDataRepository
 
 
 @then('Document Pointer "{id}" exists')
 def assert_document_pointer_exists(context: Context, id: str):
     test_config: TestConfig = context.test_config
-    repository: FeatureTestRepository = test_config.repositories[DocumentPointer]
+    repository: SeedDataRepository = test_config.repositories[DocumentPointer]
     item, exists, message = repository.item_exists(id=id)
     assert exists, message
 
@@ -35,6 +35,6 @@ def assert_document_pointer_exists(context: Context, id: str):
 @then('Document Pointer "{id}" does not exist')
 def assert_document_pointer_does_not_exist(context: Context, id: str):
     test_config: TestConfig = context.test_config
-    repository: FeatureTestRepository = test_config.repositories[DocumentPointer]
+    repository: SeedDataRepository = test_config.repositories[DocumentPointer]
     _, exists, message = repository.item_exists(id=id)
     assert not exists, message

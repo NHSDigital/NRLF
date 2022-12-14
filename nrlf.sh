@@ -39,7 +39,7 @@ function nrlf() {
     "bootstrap") _bootstrap "${@:2}" ;;
     "lint") _lint "${@:2}" ;;
     "swagger") _swagger "${@:2}" ;;
-    "auths") _auths "${@:2}" ;;
+    "update_auth_tables") _auths "${@:2}" ;;
     *) _nrlf_commands_help ;;
   esac
 

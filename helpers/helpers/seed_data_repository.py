@@ -12,7 +12,7 @@ def _chunk_list(list_a, chunk_size=CHUNK_SIZE):
         yield list_a[i : i + chunk_size]
 
 
-class FeatureTestRepository(Repository):
+class SeedDataRepository(Repository):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.delete_all()

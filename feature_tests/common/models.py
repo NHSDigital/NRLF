@@ -22,7 +22,6 @@ from feature_tests.common.constants import (
     ActorType,
     TestMode,
 )
-from feature_tests.common.repository import FeatureTestRepository
 from feature_tests.common.utils import (
     get_action,
     get_actor,
@@ -32,6 +31,7 @@ from feature_tests.common.utils import (
     render_regular_properties,
     render_relatesTo_properties,
 )
+from helpers.seed_data_repository import SeedDataRepository
 
 
 @dataclass
@@ -193,6 +193,6 @@ class TestConfig:
     mode: TestMode
     request: BaseRequest = field(default_factory=BaseRequest)
     response: Response = None
-    repositories: dict[BaseModel, FeatureTestRepository] = field(default_factory=dict)
+    repositories: dict[BaseModel, SeedDataRepository] = field(default_factory=dict)
     templates: dict[str, Template] = field(default_factory=dict)
     actor_context: ActorContext = None
