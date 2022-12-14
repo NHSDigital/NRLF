@@ -20,6 +20,7 @@ function _nrlf_commands_help() {
   echo "  swagger   - swagger generation commands"
   echo "  terraform - terraform commands"
   echo "  test      - run tests"
+  echo "  auths     - creates the auth entries for producer and consumer dynamodb tables"
   echo
   return 1
 }
@@ -38,6 +39,7 @@ function nrlf() {
     "bootstrap") _bootstrap "${@:2}" ;;
     "lint") _lint "${@:2}" ;;
     "swagger") _swagger "${@:2}" ;;
+    "auths") _auths "${@:2}" ;;
     *) _nrlf_commands_help ;;
   esac
 
