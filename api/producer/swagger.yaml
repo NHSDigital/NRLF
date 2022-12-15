@@ -1,19 +1,14 @@
 openapi: 3.0.0
 info:
-  title: NRLF Producer API
-  version: 0.0.1
-  description: |
-    # Title
-
-    - list
-    - list
-    - list
-
-    ## Title 2
-
-    This is a markdown document.
+  license:
+    name: MIT
 servers:
-  - url: /fhir-server/api/v4
+  - url: https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4
+    description: Sandbox environment.
+  - url: https://int.api.service.nhs.uk/nrl-producer-api/FHIR/R4
+    description: Integration test environment.
+  - url: https://api.service.nhs.uk/nrl-producer-api/FHIR/R4
+    description: Production environment.
 tags:
   - name: NRLF Producer
 paths:

@@ -1,0 +1,18 @@
+# Rename any of the endpoint operationIds, as they are used to name Lambdas
+#
+# paths:
+#   /DocumentReference:
+#     post:
+#       operationId: create
+#     get:
+#       operationId: search
+#   /DocumentReference/_search:
+#     post:
+#       operationId: searchPost
+#   /DocumentReference/{id}:
+#     get:
+#       operationId: read
+#     put:
+#       operationId: update
+#     delete:
+#       operationId: delete
