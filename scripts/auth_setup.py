@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 from typing import Union
@@ -26,6 +27,9 @@ def _get_boto3_client(client_name: str):
 
 class AuthRepository(BaseRepository):
     def recreate_auths(self, actor_type: str):
+        if actor_type not in ["producer", "consumer"]:
+            raise ValueError("Invalid actor_type provided")
+
         self._delete_auths()
         self._create_auths(actor_type=actor_type)
 
@@ -36,7 +40,11 @@ class AuthRepository(BaseRepository):
 
     def _create_auths(self, actor_type: str):
         print("Creating auth records")
-        with open(f"{actor_type}.yml", "r") as strean:
+        print("PATH", os.path.dirname(os.path.realpath(__file__)))
+        with open(
+            os.path.join(os.path.dirname(__file__), f"{actor_type}.yml"), "r"
+        ) as strean:
+            # with open(f"{actor_type}.yml", "r") as strean:
             auths = yaml.safe_load(strean)
 
             for item in auths:

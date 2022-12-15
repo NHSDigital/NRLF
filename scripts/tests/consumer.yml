@@ -1,0 +1,6 @@
+- id: "1"
+  application_id: "1"
+  pointer_types: ["one"]
+- id: "2"
+  application_id: "2"
+  pointer_types: ["two"]

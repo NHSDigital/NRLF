@@ -20,7 +20,7 @@ function _nrlf_commands_help() {
   echo "  swagger   - swagger generation commands"
   echo "  terraform - terraform commands"
   echo "  test      - run tests"
-  echo "  auths     - creates the auth entries for producer and consumer dynamodb tables"
+  echo "  update_auth_tables     - creates the auth entries for producer and consumer dynamodb tables"
   echo
   return 1
 }
