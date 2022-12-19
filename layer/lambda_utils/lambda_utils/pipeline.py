@@ -5,7 +5,12 @@ from types import FunctionType
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.pipeline import make_pipeline
 from lambda_pipeline.types import LambdaContext, PipelineData
-from lambda_utils.logging import Logger, log_action
+from lambda_utils.logging import (
+    Logger,
+    MinimalEventModelForLogging,
+    log_action,
+    prepare_default_event_for_logging,
+)
 from lambda_utils.producer.response import bad_request, get_error_msg
 from lambda_utils.versioning import (
     get_largest_possible_version,
@@ -37,7 +42,10 @@ def _function_handler(fn, args, kwargs):
 
 
 def _setup_logger(index_path: str, event: dict, **dependencies) -> tuple[int, any]:
-    _event = APIGatewayProxyEventModel(**event)
+    try:
+        _event = MinimalEventModelForLogging.parse_obj(event)
+    except ValidationError:
+        _event = prepare_default_event_for_logging()
     lambda_name = Path(index_path).stem
     return Logger(
         logger_name=lambda_name,
@@ -85,10 +93,10 @@ def execute_steps(
     """
     Executes the handler and wraps it in exception handling
     """
-    # Due to a discrepency between powertools and the authoriser code with API gateway, this will match the model.
-    event["requestContext"]["authorizer"] = {
-        "claims": event["requestContext"].pop("authorizer", None)
-    }
+    # Due to a discrepancy between powertools and the authoriser code with API gateway, this will match the model.
+    requestContext = event.get("requestContext", {})
+    claims = requestContext.pop("authorizer", None)
+    requestContext["authorizer"] = {"claims": claims}
 
     status_code, response = _function_handler(
         _setup_logger, args=(index_path, event), kwargs=dependencies

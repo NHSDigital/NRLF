@@ -3,6 +3,7 @@ from inspect import signature
 from logging import getLevelName
 from timeit import default_timer as timer
 from types import FunctionType
+from typing import Any, Optional
 
 from aws_lambda_powertools import Logger as _Logger
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
@@ -13,10 +14,11 @@ from lambda_utils.logging_utils import (
     duration_in_milliseconds,
     filter_visible_function_arguments,
     function_handler,
+    generate_transaction_id,
     json_encode_message,
 )
 from nrlf.core.transform import make_timestamp
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class LogTemplate(BaseModel):
@@ -40,12 +42,40 @@ class LogTemplate(BaseModel):
         arbitrary_types_allowed = True
 
 
+class MinimalRequestContextForLogging(BaseModel):
+    accountId: str
+
+
+class MinimalEventModelForLogging(APIGatewayProxyEventModel):
+    headers: dict[str, str]
+    requestContext: MinimalRequestContextForLogging
+    # Internal flag
+    is_default_event: bool = Field(default=False, allow_mutation=True)
+    # Force 'optional' the following fields
+    resource: Optional[Any]
+    path: Optional[Any]
+    httpMethod: Optional[Any]
+    multiValueHeaders: Optional[Any]
+    isBase64Encoded: Optional[Any]
+
+
+def prepare_default_event_for_logging() -> MinimalEventModelForLogging:
+    uid = f"<no-logging-credentials-provided>-{generate_transaction_id()}"
+    logging_headers = LoggingHeader(
+        **{"x-correlation-id": uid, "x-request-id": uid, "nhsd-correlation-id": uid}
+    )
+    return MinimalEventModelForLogging(
+        headers=logging_headers.dict(by_alias=True),
+        requestContext=MinimalRequestContextForLogging(accountId=uid),
+    )
+
+
 class Logger(_Logger):
     def __init__(
         self,
         *,
         logger_name: str,
-        aws_lambda_event: APIGatewayProxyEventModel,
+        aws_lambda_event: MinimalEventModelForLogging,
         aws_environment: str,
         nrlf_transaction_id: str = None,
         **kwargs,

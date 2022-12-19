@@ -1,0 +1,12 @@
+[
+  {
+    "id": "org_id_123",
+    "application_id": "app_id_123",
+    "pointer_types": ["123", "456"]
+  },
+  {
+    "id": "org_id_456",
+    "application_id": "app_id_456",
+    "pointer_types": ["123", "456"]
+  }
+]
