@@ -6,12 +6,11 @@ import moto
 import pytest
 from nrlf.core.errors import DynamoDbError
 from nrlf.core.model import AuthBase
-from nrlf.core.repository import Repository, to_kebab_case
+from nrlf.core.repository import Repository
 from nrlf.core.types import DynamoDbClient
 
 DEFAULT_ATTRIBUTE_DEFINITIONS = [{"AttributeName": "id", "AttributeType": "S"}]
 DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]
-TABLE_NAME = to_kebab_case(AuthBase.__name__)
 API_VERSION = 1
 auth_json = {
     "id": "Yorkshire Ambulance Service",
@@ -30,7 +29,7 @@ def mock_dynamodb() -> Generator[DynamoDbClient, None, None]:
         client: DynamoDbClient = boto3.client("dynamodb")
         client.create_table(
             AttributeDefinitions=DEFAULT_ATTRIBUTE_DEFINITIONS,
-            TableName=TABLE_NAME,
+            TableName=AuthBase.kebab(),
             KeySchema=DEFAULT_KEY_SCHEMA,
             BillingMode="PAY_PER_REQUEST",
         )
@@ -49,7 +48,7 @@ def test_create_auth_details():
     with mock_dynamodb() as client:
         repository = Repository(item_type=AuthBase, client=client)
         repository.create(item=model)
-        response = client.scan(TableName=TABLE_NAME)
+        response = client.scan(TableName=AuthBase.kebab())
 
     (item,) = response["Items"]
     recovered_item = AuthBase(**item)

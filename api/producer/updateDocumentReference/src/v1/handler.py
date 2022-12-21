@@ -10,8 +10,10 @@ from lambda_utils.header_config import AuthHeader
 from lambda_utils.logging import log_action
 from nrlf.core.errors import AuthenticationError, ImmutableFieldViolationError
 from nrlf.core.model import DocumentPointer
+from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.query import create_read_and_filter_query, update_and_filter_query
 from nrlf.core.repository import Repository
+from nrlf.core.response import operation_outcome_ok
 from nrlf.core.transform import update_document_pointer_from_fhir_json
 
 from api.producer.updateDocumentReference.src.constants import PersistentDependencies
@@ -143,7 +145,11 @@ def update_core_model_to_db(
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
     )
     document_pointer_repository.update(**update_query)
-    return PipelineData(message="Resource updated")
+
+    operation_outcome = operation_outcome_ok(
+        transaction_id=logger.transaction_id, coding=NrlfCoding.RESOURCE_UPDATED
+    )
+    return PipelineData(**operation_outcome)
 
 
 steps = [

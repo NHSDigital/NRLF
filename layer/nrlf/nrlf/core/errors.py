@@ -1,5 +1,4 @@
-from typing import Type
-
+from nrlf.core.nhsd_codings import SpineCoding
 from nrlf.producer.fhir.r4.model import RequestParams
 from pydantic import ValidationError
 
@@ -36,6 +35,21 @@ class UnknownParameterError(Exception):
     pass
 
 
+NRLF_TO_SPINE_4XX_ERROR = {
+    AuthenticationError: SpineCoding.ACCESS_DENIED_LEVEL,
+    DynamoDbError: SpineCoding.RESOURCE_NOT_FOUND,
+    FhirValidationError: SpineCoding.VALIDATION_ERROR,
+    ImmutableFieldViolationError: SpineCoding.VALIDATION_ERROR,
+    ItemNotFound: SpineCoding.RESOURCE_NOT_FOUND,
+    TooManyItemsError: SpineCoding.NOT_ACCEPTABLE,
+    ValidationError: SpineCoding.VALIDATION_ERROR,
+    UnknownParameterError: SpineCoding.VALIDATION_ERROR,
+}
+
+
+ERROR_SET_4XX = tuple(NRLF_TO_SPINE_4XX_ERROR.keys())
+
+
 def assert_no_extra_params(
     request_params: RequestParams,
     provided_params: list[str],
@@ -46,15 +60,3 @@ def assert_no_extra_params(
         raise UnknownParameterError(
             f"Unexpected query parameters: {', '.join(unknown_params)}"
         )
-
-
-ERROR_SET_4XX = (
-    AuthenticationError,
-    DynamoDbError,
-    FhirValidationError,
-    ImmutableFieldViolationError,
-    ItemNotFound,
-    TooManyItemsError,
-    ValidationError,
-    UnknownParameterError,
-)

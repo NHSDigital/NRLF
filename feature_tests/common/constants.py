@@ -75,6 +75,11 @@ class Outcomes(Enum):
     unsuccessful = False
 
 
+class FhirType(Enum):
+    DocumentReference = auto()
+    OperationOutcome = auto()
+
+
 ACTION_ALIASES = {"search by POST for": "searchPost"}
 
 ACTION_SLUG_LOOKUP = {
@@ -99,6 +104,8 @@ ALLOWED_TERMS = [
     "count",
     "outcome",
     "has_hasnt",
+    "a_or_an",
+    "fhir_type",
 ]
 
 ALLOWED_CONSUMERS = ["Yorkshire Ambulance Service"]

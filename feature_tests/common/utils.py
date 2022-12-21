@@ -46,17 +46,19 @@ def render_regular_properties(raw: str, table: Table):
     return rendered
 
 
-def render_relatesTo_properties(fhir_json: dict, table: Table) -> str:
-    (_relatesTo,) = fhir_json.pop(RELATES_TO, [None])
+def render_document_reference_properties(
+    document_reference_json: dict, table: Table
+) -> str:
+    (_relatesTo,) = document_reference_json.pop(RELATES_TO, [None])
     if _relatesTo:
-        fhir_json[RELATES_TO] = []
+        document_reference_json[RELATES_TO] = []
         for row in table:
             if row["property"] != TARGET:
                 continue
             relatesTo = deepcopy(_relatesTo)
             relatesTo["target"]["identifier"]["value"] = row["value"]
-            fhir_json[RELATES_TO].append(relatesTo)
-    return json.dumps(fhir_json)
+            document_reference_json[RELATES_TO].append(relatesTo)
+    return json.dumps(document_reference_json)
 
 
 def logging_headers(scenario_name) -> dict:

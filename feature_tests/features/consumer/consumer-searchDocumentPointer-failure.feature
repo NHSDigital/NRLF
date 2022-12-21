@@ -37,6 +37,34 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
         "status": "current"
       }
       """
+    And template OUTCOME
+      """
+      {
+        "resourceType": "OperationOutcome",
+        "id": "<identifier>",
+        "meta": {
+          "profile": [
+            "https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome"
+          ]
+        },
+        "issue": [
+          {
+            "code": "$issue_type",
+            "severity": "$issue_level",
+            "diagnostics": "$message",
+            "details": {
+              "coding": [
+                {
+                  "code": "$issue_code",
+                  "display": "$issue_description",
+                  "system": "https://fhir.nhs.uk/CodeSystem/Spine-ErrorOrWarningCode"
+                }
+              ]
+            }
+          }
+        ]
+      }
+      """
 
   Scenario: Search fails to return a bundle when extra parameters are found
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
@@ -57,4 +85,10 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | extra    | unwanted field                                |
     Then the operation is unsuccessful
-    And the response contains error message "Unexpected query parameters: extra"
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                   |
+      | issue_type        | processing                                              |
+      | issue_level       | error                                                   |
+      | issue_code        | VALIDATION_ERROR                                        |
+      | issue_description | A parameter or value has resulted in a validation error |
+      | message           | Unexpected query parameters: extra                      |

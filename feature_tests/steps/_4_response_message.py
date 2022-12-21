@@ -1,19 +1,41 @@
 import json
-from dataclasses import asdict
 
 from behave.runner import Context
 from nrlf.producer.fhir.r4.strict_model import Bundle
 
+from feature_tests.common.constants import FhirType
 from feature_tests.common.decorators import then
 from feature_tests.common.models import TestConfig
 
 
-@then("the response is the {template_name} template with the below values")
-def the_response_is_the_template_with_values(context: Context, template_name: str):
+@then(
+    "the response is {a_or_an} {fhir_type} according to the {template_name} template with the below values"
+)
+def the_response_is_the_template_with_values(
+    context: Context, a_or_an: str, fhir_type: str, template_name: str
+):
+    try:
+        fhir_type = FhirType._member_map_[fhir_type]
+    except KeyError:
+        raise ValueError(
+            f"{fhir_type} is not one of {FhirType._member_names_}"
+        ) from None
+
     test_config: TestConfig = context.test_config
-    rendered = test_config.templates[template_name].render_fhir(table=context.table)
+    rendered = test_config.templates[template_name].render(
+        table=context.table, fhir_type=fhir_type
+    )
+
+    if fhir_type is FhirType.OperationOutcome:
+        id = test_config.response.dict["id"]
+        rendered = rendered.replace("<identifier>", id)
+
     fhir_json = json.loads(rendered)
-    assert test_config.response.dict == fhir_json, test_config.response.dict
+
+    assert test_config.response.dict == fhir_json, (
+        test_config.response.dict,
+        fhir_json,
+    )
 
 
 @then("the response is a Bundle with {count:d} entries")
@@ -33,22 +55,11 @@ def the_response_contains_the_template_with_values(
 
     document_references = [entry["resource"] for entry in bundle["entry"]]
     template = test_config.templates[template_name]
-    rendered_template = template.render_fhir(table=context.table)
+    rendered_template = template.render(
+        table=context.table, fhir_type=FhirType.DocumentReference
+    )
     fhir_json = json.loads(rendered_template)
     assert fhir_json in document_references, document_references
-
-
-@then('the response contains the message "{message}"')
-def assert_error_message(context: Context, message: str):
-    test_config: TestConfig = context.test_config
-    actual_message = test_config.response.dict["message"]
-    assert actual_message == message, asdict(test_config.response)
-
-
-@then('the response contains error message "{message}"')
-def assert_error_message(context: Context, message: str):
-    test_config: TestConfig = context.test_config
-    assert test_config.response.error == message, asdict(test_config.response)
 
 
 @then("the response is the policy from {template_name} template")

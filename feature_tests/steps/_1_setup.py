@@ -10,7 +10,7 @@ from feature_tests.common.config_setup import (
     register_application,
     request_setup,
 )
-from feature_tests.common.constants import DEFAULT_VERSION, TestMode
+from feature_tests.common.constants import DEFAULT_VERSION, FhirType, TestMode
 from feature_tests.common.decorators import given
 from feature_tests.common.models import Template, TestConfig
 
@@ -95,7 +95,9 @@ def registered_in_system(
 def given_document_pointer_exists(context: Context, template_name: str):
     test_config: TestConfig = context.test_config
     template = test_config.templates[template_name]
-    rendered_template = template.render_fhir(context.table)
+    rendered_template = template.render(
+        context.table, fhir_type=FhirType.DocumentReference
+    )
     core_model = create_document_pointer_from_fhir_json(
         fhir_json=json.loads(rendered_template), api_version=int(DEFAULT_VERSION)
     )

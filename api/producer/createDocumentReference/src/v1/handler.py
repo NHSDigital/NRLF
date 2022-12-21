@@ -10,7 +10,9 @@ from lambda_utils.header_config import AuthHeader
 from lambda_utils.logging import log_action
 from nrlf.core.errors import AuthenticationError
 from nrlf.core.model import DocumentPointer
+from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
+from nrlf.core.response import operation_outcome_ok
 from nrlf.core.transform import (
     create_document_pointer_from_fhir_json,
     create_fhir_model_from_fhir_json,
@@ -139,9 +141,14 @@ def save_core_model_to_db(
             create_item=core_model,
             delete_item_ids=delete_item_ids,
         )
+        coding = NrlfCoding.RESOURCE_SUPERSEDED
     else:
         document_pointer_repository.create(item=core_model)
-    return PipelineData(message="Complete")
+        coding = NrlfCoding.RESOURCE_CREATED
+    operation_outcome = operation_outcome_ok(
+        transaction_id=logger.transaction_id, coding=coding
+    )
+    return PipelineData(**operation_outcome)
 
 
 steps = [

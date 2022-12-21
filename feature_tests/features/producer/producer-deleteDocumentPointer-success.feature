@@ -37,6 +37,34 @@ Feature: Success scenarios where producer is able to delete a Document Pointer
         "status": "current"
       }
       """
+    And template OUTCOME
+      """
+      {
+        "resourceType": "OperationOutcome",
+        "id": "<identifier>",
+        "meta": {
+          "profile": [
+            "https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome"
+          ]
+        },
+        "issue": [
+          {
+            "code": "$issue_type",
+            "severity": "$issue_level",
+            "diagnostics": "$message",
+            "details": {
+              "coding": [
+                {
+                  "code": "$issue_code",
+                  "display": "$issue_description",
+                  "system": "https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode"
+                }
+              ]
+            }
+          }
+        ]
+      }
+      """
 
   Scenario: Delete an existing current Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to delete Document Pointers
@@ -54,4 +82,10 @@ Feature: Success scenarios where producer is able to delete a Document Pointer
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" deletes an existing Document Reference "8FW23|1234567890"
     Then the operation is successful
-    And the response contains the message "Resource removed"
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value            |
+      | issue_type        | informational    |
+      | issue_level       | information      |
+      | issue_code        | RESOURCE_REMOVED |
+      | issue_description | Resource removed |
+      | message           | Resource removed |

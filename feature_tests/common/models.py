@@ -20,6 +20,7 @@ from feature_tests.common.constants import (
     STATUS_CODE_200,
     Action,
     ActorType,
+    FhirType,
     TestMode,
 )
 from feature_tests.common.repository import FeatureTestRepository
@@ -29,8 +30,8 @@ from feature_tests.common.utils import (
     get_actor_type,
     get_org_id,
     logging_headers,
+    render_document_reference_properties,
     render_regular_properties,
-    render_relatesTo_properties,
 )
 
 
@@ -38,12 +39,13 @@ from feature_tests.common.utils import (
 class Template:
     raw: str
 
-    def render(self, table: Table) -> str:
-        return render_regular_properties(raw=self.raw, table=table)
-
-    def render_fhir(self, table: Table) -> str:
+    def render(self, table: Table, fhir_type: FhirType = None) -> str:
         rendered = render_regular_properties(raw=self.raw, table=table)
-        return render_relatesTo_properties(fhir_json=json.loads(rendered), table=table)
+        if fhir_type is FhirType.DocumentReference:
+            return render_document_reference_properties(
+                document_reference_json=json.loads(rendered), table=table
+            )
+        return rendered
 
 
 @dataclass
@@ -55,7 +57,7 @@ class Response:
         return self.status_code == STATUS_CODE_200
 
     @property
-    def error(self) -> str:
+    def operation_outcome_msg(self) -> str:
         operation_outcome = OperationOutcome.parse_raw(self.body)
         (issue,) = operation_outcome.issue
         return issue.diagnostics

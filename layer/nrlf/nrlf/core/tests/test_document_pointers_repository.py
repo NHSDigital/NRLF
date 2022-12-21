@@ -15,7 +15,6 @@ from nrlf.core.repository import (
     Repository,
     _validate_results_within_limits,
     handle_dynamodb_errors,
-    to_kebab_case,
 )
 from nrlf.core.transform import (
     create_document_pointer_from_fhir_json as _create_document_pointer_from_fhir_json,
@@ -47,8 +46,7 @@ def mock_dynamodb() -> Generator[DynamoDbClient, None, None]:
     with moto.mock_dynamodb():
         client: DynamoDbClient = boto3.client("dynamodb")
         client.create_table(
-            TableName=to_kebab_case(DocumentPointer.__name__),
-            **DOCUMENT_POINTER_TABLE_DEFINITION
+            TableName=DocumentPointer.kebab(), **DOCUMENT_POINTER_TABLE_DEFINITION
         )
         yield client
 
@@ -67,7 +65,7 @@ def test_create_document_pointer():
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        response = client.scan(TableName=to_kebab_case(DocumentPointer.__name__))
+        response = client.scan(TableName=DocumentPointer.kebab())
 
     (item,) = response["Items"]
     recovered_item = DocumentPointer(**item)
@@ -125,7 +123,7 @@ def test_update_document_pointer():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
         repository.update(**query_params)
-        response = client.scan(TableName=to_kebab_case(DocumentPointer.__name__))
+        response = client.scan(TableName=DocumentPointer.kebab())
 
     (item,) = response["Items"]
     recovered_item = DocumentPointer(**item)
@@ -232,7 +230,7 @@ def test_hard_delete():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
         repository.hard_delete(**query)
-        response = client.scan(TableName=to_kebab_case(DocumentPointer.__name__))
+        response = client.scan(TableName=DocumentPointer.kebab())
     assert len(response["Items"]) == 0
 
 

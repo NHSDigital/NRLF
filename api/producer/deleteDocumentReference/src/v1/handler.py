@@ -8,8 +8,10 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.header_config import AuthHeader
 from lambda_utils.logging import log_action
 from nrlf.core.errors import AuthenticationError
+from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.query import create_read_and_filter_query, hard_delete_query
 from nrlf.core.repository import Repository
+from nrlf.core.response import operation_outcome_ok
 from nrlf.core.validators import generate_producer_id
 
 
@@ -95,7 +97,11 @@ def delete_document_reference(
 
     query = hard_delete_query(id=data["decoded_id"], type=pointer_types)
     repository.hard_delete(**query)
-    return PipelineData(message="Resource removed")
+
+    operation_outcome = operation_outcome_ok(
+        transaction_id=logger.transaction_id, coding=NrlfCoding.RESOURCE_REMOVED
+    )
+    return PipelineData(**operation_outcome)
 
 
 steps = [

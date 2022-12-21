@@ -37,7 +37,6 @@ class ClientRpDetailsHeader(AbstractHeader):
 class LoggingHeader(AbstractHeader):
     correlation_id: StrictStr = Field(alias="x-correlation-id")
     nhsd_correlation_id: StrictStr = Field(alias="nhsd-correlation-id")
-    transaction_id: StrictStr = Field(default_factory=generate_transaction_id)
     request_id: StrictStr = Field(alias="x-request-id")
 
 

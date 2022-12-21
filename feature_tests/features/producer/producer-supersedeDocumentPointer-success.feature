@@ -48,6 +48,34 @@ Feature: Success Scenarios where producer unable to supersede Document Pointers
         ]
       }
       """
+    And template OUTCOME
+      """
+      {
+        "resourceType": "OperationOutcome",
+        "id": "<identifier>",
+        "meta": {
+          "profile": [
+            "https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome"
+          ]
+        },
+        "issue": [
+          {
+            "code": "$issue_type",
+            "severity": "$issue_level",
+            "diagnostics": "$message",
+            "details": {
+              "coding": [
+                {
+                  "code": "$issue_code",
+                  "display": "$issue_description",
+                  "system": "https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode"
+                }
+              ]
+            }
+          }
+        ]
+      }
+      """
 
   Scenario: Supersede multiple Document Pointers
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
@@ -82,6 +110,13 @@ Feature: Success Scenarios where producer unable to supersede Document Pointers
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is successful
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                    |
+      | issue_type        | informational                            |
+      | issue_level       | information                              |
+      | issue_code        | RESOURCE_SUPERSEDED                      |
+      | issue_description | Resource created and Resource(s) deleted |
+      | message           | Resource created and Resource(s) deleted |
     And Document Pointer "8FW23|1234567892" exists
       | property    | value                              |
       | id          | 8FW23\|1234567892                  |

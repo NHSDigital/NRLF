@@ -54,7 +54,7 @@ Feature: Success scenarios where producer is able to read a Document Pointer
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "8FW23|1234567890"
     Then the operation is successful
-    And the response is the DOCUMENT template with the below values
+    And the response is a DocumentReference according to the DOCUMENT template with the below values
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |
