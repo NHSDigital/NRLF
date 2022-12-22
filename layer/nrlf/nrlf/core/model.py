@@ -6,7 +6,6 @@ import nrlf.producer.fhir.r4.model as producer_model
 from nrlf.core.dynamodb_types import (
     DYNAMODB_NULL,
     DynamoDbIntType,
-    DynamoDbListType,
     DynamoDbStringType,
     DynamoDbType,
     convert_dynamo_value_to_raw_value,
@@ -152,30 +151,3 @@ class ProducerRequestParams(producer_model.RequestParams, _NhsNumberMixin):
 
 class ConsumerRequestParams(consumer_model.RequestParams, _NhsNumberMixin):
     pass
-
-
-class AuthBase(DynamoDbModel):
-    id: DynamoDbStringType
-    application_id: DynamoDbStringType
-    pointer_types: DynamoDbListType
-
-
-class AuthConsumer(AuthBase):
-    pass
-
-
-class AuthProducer(AuthBase):
-    pass
-
-
-class AuthoriserContext(BaseModel):
-    correlation_id: str = Field(alias="x-correlation-id")
-    nhsd_correlation_id: str = Field(alias="nhsd-correlation-id")
-    request_type: str = Field(alias="request-type")
-    client_app_name: str = Field(alias="developer.app.name")
-    client_app_id: str = Field(alias="developer.app.id")
-    organisation_code: str = Field(alias="Organisation-Code")
-    pointer_types: str = None
-
-    class Config:
-        allow_population_by_field_name = True

@@ -62,7 +62,7 @@ def _operation_outcome(
     ).dict(exclude_none=True)
 
 
-def _get_error_message(exception: Exception) -> str:
+def get_error_message(exception: Exception) -> str:
     return (
         _format_validation_error_message(exception=exception)
         if type(exception) is ValidationError
@@ -104,7 +104,7 @@ def operation_outcome_not_ok(
     transaction_id: str, exception: Exception
 ) -> tuple[int, dict]:
     status_code, coding = _get_error_from_exception(exception=exception)
-    diagnostics = _get_error_message(exception=exception)
+    diagnostics = get_error_message(exception=exception)
     operation_outcome = _operation_outcome(
         id=transaction_id,
         coding=coding,

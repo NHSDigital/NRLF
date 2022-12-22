@@ -7,7 +7,7 @@ from typing import Any
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import MinimalEventModelForLogging, log_action
 from nrlf.core.dynamodb_types import to_dynamodb_dict
-from nrlf.core.model import AuthConsumer, AuthProducer, DocumentPointer
+from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
 from pydantic import BaseModel
 
@@ -70,7 +70,5 @@ def safeguard(
 
 steps = [
     safeguard,
-    _seed_step_factory(item_type=AuthConsumer),
-    _seed_step_factory(item_type=AuthProducer),
     _seed_step_factory(item_type=DocumentPointer),
 ]

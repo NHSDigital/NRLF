@@ -97,11 +97,6 @@ def execute_steps(
     """
     Executes the handler and wraps it in exception handling
     """
-    # Due to a discrepancy between powertools and the authoriser code with API gateway, this will match the model.
-    requestContext = event.get("requestContext", {})
-    claims = requestContext.pop("authorizer", None)
-    requestContext["authorizer"] = {"claims": claims}
-
     transaction_id = generate_transaction_id()
 
     status_code, response = _function_handler(

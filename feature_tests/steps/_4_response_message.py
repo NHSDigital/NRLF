@@ -67,34 +67,10 @@ def response_contains_correct_policy(context: Context, template_name: str):
     test_config: TestConfig = context.test_config
     template = test_config.templates[template_name]
     template_policy = json.loads(template.render(table=context.table))
-    template_policy = _populate_template_policy_from_request_headers(
-        test_config=test_config, template_policy=template_policy
-    )
-    assert template_policy == test_config.response.dict, test_config.response.dict
+    response = test_config.response.dict
 
+    # principalId is generated from the transaction id, so don't test this
+    template_policy.pop("principalId")
+    response.pop("principalId")
 
-def _remove_outer_brackets(text: str):
-    return text[1:-1]
-
-
-def _populate_template_policy_from_request_headers(
-    test_config: TestConfig, template_policy: str
-):
-    """
-    Replaces constants in the template i.e. <things-like-this>
-    with values set in headers, for example <x-correlation-id>
-    """
-    client_rp_details = test_config.request.client_rp_details.dict(by_alias=True)
-    headers = {**test_config.request.headers, **client_rp_details}
-
-    template_policy["context"] = {
-        k: headers[k] if k in headers and f"<{k}>" == v else v
-        for k, v in template_policy["context"].items()
-    }
-
-    principal_id_keyword = template_policy["principalId"]
-    if principal_id_keyword != "null":
-        principal_id_keyword = _remove_outer_brackets(template_policy["principalId"])
-        template_policy["principalId"] = headers[principal_id_keyword]
-
-    return template_policy
+    assert template_policy == response, response

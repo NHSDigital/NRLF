@@ -1,5 +1,5 @@
 import pytest
-from nrlf.core.authoriser import _authorisation_denied, _authorisation_ok
+from nrlf.core.authoriser import _create_policy
 
 
 @pytest.mark.parametrize(
@@ -10,7 +10,9 @@ from nrlf.core.authoriser import _authorisation_denied, _authorisation_ok
     ),
 )
 def test_authorised_ok(principal_id, resource, context):
-    result = _authorisation_ok(principal_id, resource, context)
+    result = _create_policy(
+        principal_id=principal_id, resource=resource, context=context, effect="Allow"
+    )
     expected = {
         "principalId": principal_id,
         "context": context,
@@ -37,7 +39,9 @@ def test_authorised_ok(principal_id, resource, context):
     ),
 )
 def test_authorised_denied(principal_id, resource, context):
-    result = _authorisation_denied(principal_id, resource, context)
+    result = _create_policy(
+        principal_id=principal_id, resource=resource, context=context, effect="Deny"
+    )
     expected = {
         "principalId": principal_id,
         "context": context,

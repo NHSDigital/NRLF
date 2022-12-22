@@ -68,10 +68,9 @@ Feature: Basic Success Scenarios where consumer is able to search by POST for Do
 
   Scenario: Search by POST fails to return a bundle when extra parameters are found
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search by POST for Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |

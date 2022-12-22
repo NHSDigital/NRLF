@@ -17,6 +17,7 @@ function _nrlf_commands_help() {
   echo "  bootstrap - bootstrap commands"
   echo "  lint      - lint commands"
   echo "  make      - calls the make/build routines"
+  echo "  oauth <env> - Generates an oauth token for the env [dev, ref, prod]"
   echo "  swagger   - swagger generation commands"
   echo "  terraform - terraform commands"
   echo "  test      - run tests"
@@ -33,6 +34,7 @@ function nrlf() {
   case $command in
     "aws") _aws "${@:2}" ;;
     "make") _make "${@:2}" ;;
+    "oauth") _oauth_token "${@:2}" ;;
     "terraform") _terraform "${@:2}" ;;
     "test") _test "${@:2}" ;;
     "bootstrap") _bootstrap "${@:2}" ;;

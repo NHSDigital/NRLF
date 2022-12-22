@@ -27,9 +27,10 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
    3. [Run integration tests](#3-run-the-integration-tests)
    4. [Run feature tests](#4-run-the-feature-tests)
    5. [Feature test rules](#5-feature-test-rules)
-5. [Logging](#logging)
-6. [Route 53 & Hosted zones](#route53--hosted-zones)
-7. [Sandbox][#sandbox]
+5. [Smoke tests and oauth tokens for Postman requests](#smoke-tests-and-oauth-tokens)
+6. [Logging](#logging)
+7. [Route 53 & Hosted zones](#route53--hosted-zones)
+8. [Sandbox][#sandbox]
 
 ## Setup
 
@@ -182,6 +183,33 @@ The following notes should be made:
    org:app:doc-types entry in Auth table
 7. ”And ... has authorisation headers” sets up
    authorisation headers
+
+## Smoke tests and OAuth tokens
+
+### Smoke tests
+
+You can run smoke tests from the CLI using:
+
+```
+nrlf test smoke
+```
+
+This will run an end-to-end test against the `dev` environment/workspace via Apigee.
+
+### Get yourself an OAuth token for Postman requests
+
+You can get an OAuth token for e.g. Postman requests by doing:
+
+```
+nrlf oauth dev
+```
+
+Other valid environments in addition to `dev` are `ref` and `prod`. This command will print
+out an OAuth `<token>` which can be used in a request to our Apigee endpoint as a header of the form:
+
+```
+Authorization: Bearer <token>
+```
 
 ## Logging
 

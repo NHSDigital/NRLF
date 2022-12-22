@@ -5,8 +5,8 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.header_config import AuthHeader
 from lambda_utils.logging import log_action
+from nrlf.core.common_steps import parse_headers
 from nrlf.core.errors import AuthenticationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.query import create_read_and_filter_query
@@ -19,22 +19,6 @@ def _invalid_producer_for_read(organisation_code, read_item_id: str):
     if not organisation_code == producer_id:
         return True
     return False
-
-
-@log_action(narrative="Parsing headers")
-def parse_headers(
-    data: PipelineData,
-    context: LambdaContext,
-    event: APIGatewayProxyEventModel,
-    dependencies: FrozenDict[str, Any],
-    logger: Logger,
-) -> PipelineData:
-    organisation_code = AuthHeader(**event.headers).organisation_code
-
-    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
-    return PipelineData(
-        **data, organisation_code=organisation_code, pointer_types=pointer_types
-    )
 
 
 @log_action(narrative="Validating producer permissions")
@@ -80,4 +64,8 @@ def read_document_reference(
     return PipelineData(**json.loads(document_pointer.document.__root__))
 
 
-steps = [parse_headers, validate_producer_permissions, read_document_reference]
+steps = [
+    parse_headers,
+    validate_producer_permissions,
+    read_document_reference,
+]

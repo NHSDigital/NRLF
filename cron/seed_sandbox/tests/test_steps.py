@@ -5,7 +5,7 @@ from unittest import mock
 import boto3
 import moto
 import pytest
-from nrlf.core.model import AuthConsumer, AuthProducer, DocumentPointer
+from nrlf.core.model import DocumentPointer
 from nrlf.core.types import DynamoDbClient
 
 from cron.seed_sandbox.repository import SandboxRepository
@@ -103,6 +103,11 @@ def test__seed_step_factory(data_in_table_before_operation, temp_directory):
     assert created_items == expected_items
 
 
-@pytest.mark.parametrize("item_type", [AuthConsumer, AuthProducer, DocumentPointer])
+@pytest.mark.parametrize(
+    "item_type",
+    [
+        DocumentPointer,
+    ],
+)
 def test__seed_step_factory_works_with_provided_data(item_type):
     _seed_step_factory(item_type=item_type, log=False)

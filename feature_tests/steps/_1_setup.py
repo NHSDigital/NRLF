@@ -5,12 +5,8 @@ from behave.runner import Context
 from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import create_document_pointer_from_fhir_json
 
-from feature_tests.common.config_setup import (
-    mock_local_auth,
-    register_application,
-    request_setup,
-)
-from feature_tests.common.constants import DEFAULT_VERSION, FhirType, TestMode
+from feature_tests.common.config_setup import register_application, request_setup
+from feature_tests.common.constants import DEFAULT_VERSION, WITH_WITHOUT_ANY, FhirType
 from feature_tests.common.decorators import given
 from feature_tests.common.models import Template, TestConfig
 
@@ -41,52 +37,32 @@ def given_permissions_for_types(
 
 
 @given(
-    '{actor_type} "{actor}" {has_hasnt} authorisation headers for application "{app_name}" (ID "{app_id}")'
+    '{actor_type} "{actor}" is registered in the system for application "{app_name}" (ID "{app_id}") {with_without_any} pointer types'
 )
-def authorised_for_application(
+def registered_in_system(
     context: Context,
     actor_type: str,
     actor: str,
-    has_hasnt: str,
     app_name: str,
     app_id: str,
+    with_without_any: str,
 ):
     test_config: TestConfig = context.test_config
-    if has_hasnt == "has":
-        test_config.request.set_auth_headers(
-            org_id=test_config.actor_context.org_id, app_id=app_id, app_name=app_name
-        )
-    elif has_hasnt != "does not have":
-        raise ValueError(f"'{has_hasnt}' must be one of ['has', 'does not have']")
+    if with_without_any not in WITH_WITHOUT_ANY:
+        raise ValueError(f"Term '{with_without_any}' must be one of {WITH_WITHOUT_ANY}")
 
-    if test_config.mode is TestMode.LOCAL_TEST:
-        mock_local_auth(
-            test_config=test_config, org_id=test_config.actor_context.org_id
-        )
-
-
-@given(
-    '{actor_type} "{actor}" is registered in the system for application "{app_name}" (ID "{app_id}") for document types'
-)
-def registered_in_system(
-    context: Context, actor_type: str, actor: str, app_name: str, app_id: str
-):
-    test_config: TestConfig = context.test_config
+    pointer_types = (
+        [f'{row["system"]}|{row["value"]}' for row in context.table]
+        if with_without_any == "with"
+        else []
+    )
     register_application(
         context=context,
         org_id=test_config.actor_context.org_id,
         app_name=app_name,
         app_id=app_id,
+        pointer_types=pointer_types,
     )
-
-
-@given(
-    '{actor_type} "{actor}" is not registered in the system for application "{app_name}" (ID "{app_id}")'
-)
-def registered_in_system(
-    context: Context, actor_type: str, actor: str, app_name: str, app_id: str
-):
-    pass
 
 
 @given(

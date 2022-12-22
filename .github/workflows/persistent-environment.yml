@@ -169,9 +169,54 @@ jobs:
           nrlf terraform ciinit ${TF_WORKFLOW_ID}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
           nrlf terraform ciapply ${TF_WORKFLOW_ID}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
 
+      - name: Upload artifact
+        uses: ./.github/actions/upload-artifact/
+        with:
+          name: ${{ env.TF_ARTIFACT_NAME }}
+          path: ./terraform/infrastructure/output.json
+
+  smoke-test:
+    needs: [build, terraform-apply]
+    name: Smoke tests
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download artifacts - ${{ env.TF_ARTIFACT_NAME }}
+        uses: ./.github/actions/download-artifact/
+        with:
+          name: ${{ env.TF_ARTIFACT_NAME }}
+          path: ./terraform/infrastructure/
+
+      - name: Download cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
+          aws-region: eu-west-2
+
+      - name: Run test
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf test smoke
+
   clear-cache:
     name: Clear Cache
-    needs: [terraform-apply]
+    needs: [terraform-apply, smoke-test]
     if: ${{ always() }}
     runs-on: [self-hosted, ci]
 
