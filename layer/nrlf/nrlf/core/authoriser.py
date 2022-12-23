@@ -1,3 +1,4 @@
+import json
 from logging import Logger
 from typing import Any
 
@@ -75,7 +76,7 @@ def generate_response(
         principal_id=logger.transaction_id,
         resource=data["method_arn"],
         effect="Deny" if error else "Allow",
-        context={"error": error} if error else {},
+        context={"error": json.dumps(error)} if error else {},
     )
     return PipelineData(policy)
 

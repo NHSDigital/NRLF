@@ -6,9 +6,7 @@ Feature: Failure scenarios where request is authorised for consumer
       {
         "principalId": "<transaction-id>",
         "context": {
-          "error": {
-            "message": "$message"
-          }
+          "error": "{\"message\": \"$message\"}"
         },
         "policyDocument": {
           "Version": "2012-10-17",
