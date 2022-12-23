@@ -1,0 +1,1 @@
+from lambda_utils.status_endpoint import handler

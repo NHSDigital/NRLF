@@ -15,7 +15,6 @@ from feature_tests.common.constants import (
     DEFAULT_VERSION,
     TABLE_CONFIG,
     Action,
-    ActorType,
     TestMode,
 )
 from feature_tests.common.fixtures import (

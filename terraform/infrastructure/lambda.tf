@@ -220,3 +220,46 @@ module "consumer__authoriser_lambda" {
     aws_iam_policy.auth_consumer__kms-read-write
   ]
 }
+
+module "consumer__status" {
+  source                 = "./modules/lambda"
+  apitype                = "consumer"
+  name                   = "status"
+  region                 = local.region
+  prefix                 = local.prefix
+  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
+  kms_key_id             = module.kms__cloudwatch.kms_arn
+  environment_variables = {
+    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
+    PREFIX                      = "${local.prefix}--"
+    ENVIRONMENT                 = local.environment
+  }
+  additional_policies = [
+    aws_iam_policy.document-pointer__dynamodb-read.arn,
+    aws_iam_policy.document-pointer__kms-read-write.arn
+  ]
+  handler = "api.consumer.status.index.handler"
+}
+
+
+module "producer__status" {
+  source                 = "./modules/lambda"
+  apitype                = "producer"
+  name                   = "status"
+  region                 = local.region
+  prefix                 = local.prefix
+  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
+  kms_key_id             = module.kms__cloudwatch.kms_arn
+  environment_variables = {
+    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
+    PREFIX                      = "${local.prefix}--"
+    ENVIRONMENT                 = local.environment
+  }
+  additional_policies = [
+    aws_iam_policy.document-pointer__dynamodb-read.arn,
+    aws_iam_policy.document-pointer__kms-read-write.arn
+  ]
+  handler = "api.producer.status.index.handler"
+}

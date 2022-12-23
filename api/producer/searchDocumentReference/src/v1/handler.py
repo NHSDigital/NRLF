@@ -5,14 +5,13 @@ from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventMo
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
 from nrlf.core.common_steps import parse_headers
+from nrlf.core.constants import NHS_NUMBER_INDEX
 from nrlf.core.errors import assert_no_extra_params
 from nrlf.core.model import DocumentPointer, ProducerRequestParams
 from nrlf.core.query import create_search_and_filter_query
 from nrlf.core.repository import Repository
 from nrlf.core.transform import create_bundle_from_document_pointers
 from nrlf.producer.fhir.r4.model import RequestQuerySubject
-
-from api.producer.searchDocumentReference.src.constants import PersistentDependencies
 
 
 @log_action(narrative="Searching for document references")
@@ -39,7 +38,7 @@ def search_document_references(
     )
 
     document_pointers: list[DocumentPointer] = repository.search(
-        index_name=PersistentDependencies.NHS_NUMBER_INDEX, **search_and_filter_query
+        index_name=NHS_NUMBER_INDEX, **search_and_filter_query
     )
 
     bundle = create_bundle_from_document_pointers(document_pointers)

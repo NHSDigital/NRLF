@@ -142,22 +142,48 @@ def get_oauth_token(env: str):
     return oauth_token
 
 
-@pytest.mark.smoke
-def test_smoke(environment):
+def _prepare_base_request(actor: str, environment: str) -> tuple[str, dict]:
     apigee_base_url = NRLF_TO_APIGEE_ENV[environment]
     oauth_token = get_oauth_token(environment)
 
-    base_url = f"https://{apigee_base_url}/nrl-producer-api/FHIR/R4"
-    patient_id = urllib.parse.quote(f"https://fhir.nhs.uk/Id/nhs-number|9278693472")
-    url = f"{base_url}/DocumentReference?subject={patient_id}"
+    base_url = f"https://{apigee_base_url}/nrl-{actor}-api/"
     headers = {
         "accept": "application/json; version=1.0",
         "authorization": f"Bearer {oauth_token}",
         "x-correlation-id": f"SMOKE:{uuid4()}",
         "x-request-id": f"{uuid4()}",
-        "NHSD-End-User-Organisation-ODS": "RJ11",
     }
+    return base_url, headers
 
+
+@pytest.mark.parametrize(
+    "actor",
+    [
+        "producer",
+    ],
+)
+@pytest.mark.smoke
+def test_status_endpoints(environment, actor):
+    base_url, headers = _prepare_base_request(actor=actor, environment=environment)
+
+    url = f"{base_url}/_status"
+    response = requests.get(url=url, headers=headers)
+    assert response.status_code == 200, response.text
+
+
+@pytest.mark.parametrize(
+    "actor",
+    [
+        "producer",
+    ],
+)
+@pytest.mark.smoke
+def test_search_endpoints(environment, actor):
+    base_url, headers = _prepare_base_request(actor=actor, environment=environment)
+
+    patient_id = urllib.parse.quote(f"https://fhir.nhs.uk/Id/nhs-number|9278693472")
+    url = f"{base_url}/FHIR/R4/DocumentReference?subject={patient_id}"
+    headers["NHSD-End-User-Organisation-ODS"] = "RJ11"
     response = requests.get(url=url, headers=headers)
     assert response.status_code == 200, response.text
 

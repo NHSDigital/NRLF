@@ -1,5 +1,6 @@
 from enum import Enum, auto
 
+from nrlf.core.constants import NHS_NUMBER_INDEX
 from nrlf.core.model import DocumentPointer
 
 DEFAULT_VERSION = 1.0
@@ -17,7 +18,7 @@ DOCUMENT_POINTER_TABLE_DEFINITION = {
     "KeySchema": [{"AttributeName": "id", "KeyType": "HASH"}],
     "GlobalSecondaryIndexes": [
         {
-            "IndexName": "idx_nhs_number_by_id",
+            "IndexName": NHS_NUMBER_INDEX,
             "KeySchema": [
                 {"AttributeName": "nhs_number", "KeyType": "HASH"},
                 {"AttributeName": "id", "KeyType": "RANGE"},
