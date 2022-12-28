@@ -139,15 +139,15 @@ function _swagger() {
             cat ./swagger/${type}.yaml |
                 yq e 'del(.x-ibm-configuration)' |
                 yq e 'del(.components.schemas.*.discriminator)' \
-                    > ./swagger/${type}-static/clean.yaml
+                    > ./swagger/${type}.tmp.yaml
 
             # Merge in the narrative
             yq eval-all '. as $item ireduce ({}; . * $item)' \
-                ./swagger/${type}-static/clean.yaml \
+                ./swagger/${type}.tmp.yaml \
                 ./swagger/${type}-static/*.yaml \
                 > ./swagger/nrl-${type}-api.yaml
 
-            rm ./swagger/${type}-static/clean.yaml
+            rm ./swagger/${type}.tmp.yaml
         else
             _swagger_help
         fi
