@@ -1,4 +1,3 @@
-from lambda_utils.logging_utils import generate_transaction_id
 from pydantic import BaseModel, Field, StrictStr, root_validator
 
 
@@ -34,12 +33,12 @@ class ClientRpDetailsHeader(AbstractHeader):
     developer_app_id: StrictStr = Field(alias="developer.app.id")
 
 
+class ConnectionMetadata(AbstractHeader):
+    pointer_types: list[str] = Field(alias="nrl.pointer-types")
+    ods_code: str = Field(alias="nrl.ods-code")
+
+
 class LoggingHeader(AbstractHeader):
     correlation_id: StrictStr = Field(alias="x-correlation-id")
     nhsd_correlation_id: StrictStr = Field(alias="nhsd-correlation-id")
-    transaction_id: StrictStr = Field(default_factory=generate_transaction_id)
     request_id: StrictStr = Field(alias="x-request-id")
-
-
-class AuthHeader(AbstractHeader):
-    organisation_code: StrictStr = Field(alias="organisation-code")

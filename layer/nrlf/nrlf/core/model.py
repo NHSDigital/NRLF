@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 
 import nrlf.consumer.fhir.r4.model as consumer_model
@@ -5,7 +6,6 @@ import nrlf.producer.fhir.r4.model as producer_model
 from nrlf.core.dynamodb_types import (
     DYNAMODB_NULL,
     DynamoDbIntType,
-    DynamoDbListType,
     DynamoDbStringType,
     DynamoDbType,
     convert_dynamo_value_to_raw_value,
@@ -21,6 +21,12 @@ from nrlf.core.validators import (
 )
 from pydantic import BaseModel, Field, root_validator, validator
 
+KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
+
+
+def to_kebab_case(name: str) -> str:
+    return KEBAB_CASE_RE.sub("-", name).lower()
+
 
 def assert_model_has_only_dynamodb_types(model: BaseModel):
     bad_fields = [
@@ -30,29 +36,20 @@ def assert_model_has_only_dynamodb_types(model: BaseModel):
     ]
     if bad_fields:
         raise TypeError(
-            f"Model contains fields {bad_fields} that are not of type DynamoDbType"
+            f"Model {model.__name__} contains fields {bad_fields} that are not of type DynamoDbType"
         )
 
 
-class DocumentPointer(BaseModel):
-    id: DynamoDbStringType
-    nhs_number: DynamoDbStringType
-    producer_id: DynamoDbStringType
-    type: DynamoDbStringType
-    source: DynamoDbStringType
-    version: DynamoDbIntType
-    document: DynamoDbStringType
-    created_on: DynamoDbStringType
-    updated_on: Optional[DynamoDbStringType] = DYNAMODB_NULL
+class DynamoDbModel(BaseModel):
     _from_dynamo: bool = Field(
         default=False,
         exclude=True,
         description="internal flag for reading from dynamodb",
     )
 
-    @staticmethod
-    def public_alias() -> str:
-        return "DocumentReference"
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        assert_model_has_only_dynamodb_types(model=self)
 
     @root_validator(pre=True)
     def transform_input_values_if_dynamo_values(cls, values: dict) -> dict:
@@ -64,6 +61,30 @@ class DocumentPointer(BaseModel):
                 "_from_dynamo": from_dynamo,
             }
         return values
+
+    @classmethod
+    def kebab(cls) -> str:
+        return to_kebab_case(cls.__name__)
+
+    @classmethod
+    def public_alias(cls) -> str:
+        return cls.__name__
+
+
+class DocumentPointer(DynamoDbModel):
+    id: DynamoDbStringType
+    nhs_number: DynamoDbStringType
+    producer_id: DynamoDbStringType
+    type: DynamoDbStringType
+    source: DynamoDbStringType
+    version: DynamoDbIntType
+    document: DynamoDbStringType
+    created_on: DynamoDbStringType
+    updated_on: Optional[DynamoDbStringType] = DYNAMODB_NULL
+
+    @classmethod
+    def public_alias(cls) -> str:
+        return "DocumentReference"
 
     @root_validator(pre=True)
     def inject_producer_id(cls, values: dict) -> dict:
@@ -116,7 +137,7 @@ class DocumentPointer(BaseModel):
         return value
 
 
-class ProducerRequestParams(producer_model.RequestParams):
+class _NhsNumberMixin:
     @property
     def nhs_number(self) -> str:
         nhs_number = self.subject.__root__.split("|")[1]
@@ -124,56 +145,9 @@ class ProducerRequestParams(producer_model.RequestParams):
         return nhs_number
 
 
-class ConsumerRequestParams(consumer_model.RequestParams):
-    @property
-    def nhs_number(self) -> str:
-        nhs_number = self.subject.__root__.split("|")[1]
-        validate_nhs_number(nhs_number)
-        return nhs_number
+class ProducerRequestParams(producer_model.RequestParams, _NhsNumberMixin):
+    pass
 
 
-class AuthBase(BaseModel):
-    id: DynamoDbStringType
-    application_id: DynamoDbStringType
-    pointer_types: DynamoDbListType
-    _from_dynamo: bool = Field(
-        default=False,
-        exclude=True,
-        description="internal flag for reading from dynamodb",
-    )
-
-    @root_validator(pre=True)
-    def transform_input_values_if_dynamo_values(cls, values: dict) -> dict:
-        from_dynamo = all(map(is_dynamodb_dict, values.values()))
-
-        if from_dynamo:
-            return {
-                **{k: convert_dynamo_value_to_raw_value(v) for k, v in values.items()},
-                "_from_dynamo": from_dynamo,
-            }
-        return values
-
-
-class AuthConsumer(AuthBase):
-    @staticmethod
-    def public_alias() -> str:
-        return "Auth Consumer"
-
-
-class AuthProducer(AuthBase):
-    @staticmethod
-    def public_alias() -> str:
-        return "Auth Producer"
-
-
-class AuthoriserContext(BaseModel):
-    correlation_id: str = Field(alias="x-correlation-id")
-    nhsd_correlation_id: str = Field(alias="nhsd-correlation-id")
-    request_type: str = Field(alias="request-type")
-    client_app_name: str = Field(alias="developer.app.name")
-    client_app_id: str = Field(alias="developer.app.id")
-    organisation_code: str = Field(alias="Organisation-Code")
-    pointer_types: str = None
-
-    class Config:
-        allow_population_by_field_name = True
+class ConsumerRequestParams(consumer_model.RequestParams, _NhsNumberMixin):
+    pass

@@ -37,13 +37,40 @@ Feature: Basic Success Scenarios where consumer is able to search by POST for Do
         "status": "current"
       }
       """
+    And template OUTCOME
+      """
+      {
+        "resourceType": "OperationOutcome",
+        "id": "<identifier>",
+        "meta": {
+          "profile": [
+            "https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome"
+          ]
+        },
+        "issue": [
+          {
+            "code": "$issue_type",
+            "severity": "$issue_level",
+            "diagnostics": "$message",
+            "details": {
+              "coding": [
+                {
+                  "code": "$issue_code",
+                  "display": "$issue_description",
+                  "system": "https://fhir.nhs.uk/CodeSystem/Spine-ErrorOrWarningCode"
+                }
+              ]
+            }
+          }
+        ]
+      }
+      """
 
   Scenario: Search by POST fails to return a bundle when extra parameters are found
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search by POST for Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -57,4 +84,10 @@ Feature: Basic Success Scenarios where consumer is able to search by POST for Do
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | extra    | unwanted field                                |
     Then the operation is unsuccessful
-    And the response contains error message "Unexpected query parameters: extra"
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                   |
+      | issue_type        | processing                                              |
+      | issue_level       | error                                                   |
+      | issue_code        | VALIDATION_ERROR                                        |
+      | issue_description | A parameter or value has resulted in a validation error |
+      | message           | Unexpected query parameters: extra                      |

@@ -5,28 +5,13 @@ from nrlf.core.dynamodb_types import (
     convert_dynamo_value_to_raw_value,
     is_dynamodb_dict,
 )
+from nrlf.core.model import DynamoDbModel
 from nrlf.core.types import DynamoDbClient
-from pydantic import BaseModel, Field, root_validator
+from pydantic import Field, root_validator
 
 
-class DummyModel(BaseModel):
+class DummyModel(DynamoDbModel):
     id: DynamoDbStringType
-    _from_dynamo: bool = Field(
-        default=False,
-        exclude=True,
-        description="internal flag for reading from dynamodb",
-    )
-
-    @root_validator(pre=True)
-    def transform_input_values_if_dynamo_values(cls, values: dict) -> dict:
-        from_dynamo = all(map(is_dynamodb_dict, values.values()))
-
-        if from_dynamo:
-            return {
-                **{k: convert_dynamo_value_to_raw_value(v) for k, v in values.items()},
-                "_from_dynamo": from_dynamo,
-            }
-        return values
 
 
 def create_table(client: DynamoDbClient, item_type_name: str):

@@ -5,7 +5,7 @@ from typing import TypeVar
 from botocore.exceptions import ClientError
 from nrlf.core.dynamodb_types import to_dynamodb_dict
 from nrlf.core.errors import DynamoDbError, ItemNotFound, TooManyItemsError
-from nrlf.core.model import assert_model_has_only_dynamodb_types
+from nrlf.core.model import DynamoDbModel
 from nrlf.core.types import DynamoDbClient, DynamoDbResponse
 from pydantic import BaseModel
 
@@ -13,7 +13,6 @@ PydanticModel = TypeVar("PydanticModel", bound=BaseModel)
 
 MAX_TRANSACT_ITEMS = 100
 MAX_RESULTS = 100
-KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
 ATTRIBUTE_EXISTS_ID = "attribute_exists(id)"
 ATTRIBUTE_NOT_EXISTS_ID = "attribute_not_exists(id)"
 CONDITION_CHECK_CODES = [
@@ -21,10 +20,6 @@ CONDITION_CHECK_CODES = [
     "TransactionCanceledException",
     "ValidationException",
 ]
-
-
-def to_kebab_case(name: str) -> str:
-    return KEBAB_CASE_RE.sub("-", name).lower()
 
 
 def _validate_results_within_limits(results: dict):
@@ -46,7 +41,7 @@ def _handle_dynamodb_errors(function, conditional_check_error_message: str = "")
                 raise DynamoDbError(
                     f"Condition check failed - {conditional_check_error_message or error_code}"
                 )
-            raise Exception("There was an error with the database")
+            raise Exception(f"There was an error with the database: {error}")
 
     return wrapper
 
@@ -60,14 +55,13 @@ def handle_dynamodb_errors(conditional_check_error_message: str = ""):
 class Repository:
     def __init__(
         self,
-        item_type: type[PydanticModel],
+        item_type: type[DynamoDbModel],
         client: DynamoDbClient,
         environment_prefix: str = "",
     ):
         self.dynamodb = client
         self.item_type = item_type
-        self.table_name = environment_prefix + to_kebab_case(item_type.__name__)
-        assert_model_has_only_dynamodb_types(model=item_type)
+        self.table_name = environment_prefix + item_type.kebab()
 
     @handle_dynamodb_errors(conditional_check_error_message="Duplicate rejected")
     def create(self, item: PydanticModel) -> DynamoDbResponse:
@@ -87,7 +81,7 @@ class Repository:
         try:
             (item,) = response["Items"]
         except (KeyError, ValueError):
-            raise ItemNotFound("Item could not be found")
+            raise ItemNotFound("Item could not be found") from None
         return self.item_type(**item)
 
     @handle_dynamodb_errors()

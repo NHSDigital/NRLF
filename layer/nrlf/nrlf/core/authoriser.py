@@ -4,28 +4,15 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.constants import CLIENT_RP_DETAILS, NULL, ApiRequestLevel
+from lambda_utils.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from lambda_utils.header_config import (
     AbstractHeader,
-    AuthHeader,
     ClientRpDetailsHeader,
-    LoggingHeader,
+    ConnectionMetadata,
 )
 from lambda_utils.logging import log_action
-from nrlf.core.errors import ItemNotFound
-from nrlf.core.model import AuthBase, AuthoriserContext
-from nrlf.core.query import create_read_and_filter_query
-from nrlf.core.repository import Repository
-from nrlf.core.validators import requesting_application_is_not_authorised
+from nrlf.core.response import get_error_message
 from pydantic import ValidationError
-
-
-def _authorisation_ok(principal_id, resource, context):
-    return _create_policy(principal_id, resource, "Allow", context)
-
-
-def _authorisation_denied(principal_id, resource, context):
-    return _create_policy(principal_id, resource, "Deny", context)
 
 
 def _create_policy(principal_id, resource, effect, context):
@@ -49,121 +36,53 @@ def parse_headers(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-    headers = AbstractHeader(**event.headers).headers
-    raw_client_rp_details = headers.get(CLIENT_RP_DETAILS, "{}")
+    _headers = AbstractHeader(**event.headers).headers
+    _raw_client_rp_details = _headers.get(CLIENT_RP_DETAILS, "{}")
+    _raw_connection_metadata = _headers.get(CONNECTION_METADATA, "{}")
     try:
-        logging_headers = LoggingHeader(**headers)
-        auth_headers = AuthHeader(**headers)
-        client_rp_details = ClientRpDetailsHeader.parse_raw(raw_client_rp_details)
-    except ValidationError:
-        response = _authorisation_denied(
-            principal_id=NULL, resource=data["method_arn"], context={}
+        connection_metadata = ConnectionMetadata.parse_raw(_raw_connection_metadata)
+        ClientRpDetailsHeader.parse_raw(_raw_client_rp_details)
+    except ValidationError as err:
+        return PipelineData(error={"message": get_error_message(err)}, **data)
+    else:
+        return PipelineData(pointer_types=connection_metadata.pointer_types, **data)
+
+
+@log_action(narrative="Validating pointer types")
+def validate_pointer_types(
+    data: PipelineData,
+    context: LambdaContext,
+    event: APIGatewayProxyEventModel,
+    dependencies: FrozenDict[str, Any],
+    logger: Logger,
+) -> PipelineData:
+    if data.get("pointer_types") == []:
+        return PipelineData(
+            error={"message": "No pointer types have been provided"}, **data
         )
-        return PipelineData(response=response)
-
-    deny_context = AuthoriserContext(
-        correlation_id=logging_headers.correlation_id,
-        nhsd_correlation_id=logging_headers.nhsd_correlation_id,
-        request_type=ApiRequestLevel.APP_RESTRICTED,
-        client_app_name=client_rp_details.developer_app_name,
-        client_app_id=client_rp_details.developer_app_id,
-        organisation_code=auth_headers.organisation_code,
-    )
-
-    deny_response = _authorisation_denied(
-        principal_id=logging_headers.correlation_id,
-        resource=data["method_arn"],
-        context=deny_context.dict(by_alias=True, exclude_none=True),
-    )
-
-    return PipelineData(
-        client_rp_details=client_rp_details,
-        logging_headers=logging_headers,
-        auth_headers=auth_headers,
-        deny_response=deny_response,
-        **data,
-    )
-
-
-@log_action(narrative="Authenticate request")
-def authenticate_request(
-    data: PipelineData,
-    context: LambdaContext,
-    event: APIGatewayProxyEventModel,
-    dependencies: FrozenDict[str, Any],
-    logger: Logger,
-) -> PipelineData:
-    response = data.get("response")
-    if response:
-        return PipelineData(response=response)
-
-    org_code = data["auth_headers"].organisation_code
-    authentication_query = create_read_and_filter_query(id=org_code)
-    repository: Repository = dependencies["repository"]
-    try:
-        authentication_results: AuthBase = repository.read(**authentication_query)
-    except ItemNotFound:
-        return PipelineData(response=data["deny_response"])
-
-    return PipelineData(
-        authentication_results=authentication_results,
-        **data,
-    )
-
-
-@log_action(narrative="Authorise request")
-def authorise_request(
-    data: PipelineData,
-    context: LambdaContext,
-    event: APIGatewayProxyEventModel,
-    dependencies: FrozenDict[str, Any],
-    logger: Logger,
-) -> PipelineData:
-    response = data.get("response")
-    if response:
-        return PipelineData(response=response)
-
-    if requesting_application_is_not_authorised(
-        data["client_rp_details"].developer_app_id,
-        data["authentication_results"].application_id.__root__,
-    ):
-        return PipelineData(response=data["deny_response"])
     return PipelineData(**data)
 
 
-@log_action(narrative="Generate 'Allow' response")
-def generate_allow_response(
+@log_action(narrative="Render authorisation response")
+def generate_response(
     data: PipelineData,
     context: LambdaContext,
     event: APIGatewayProxyEventModel,
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-    response = data.get("response")
-    if response:
-        return PipelineData(response)
-
-    authoriser_context = AuthoriserContext(
-        correlation_id=data["logging_headers"].correlation_id,
-        nhsd_correlation_id=data["logging_headers"].nhsd_correlation_id,
-        request_type=ApiRequestLevel.APP_RESTRICTED,
-        client_app_name=data["client_rp_details"].developer_app_name,
-        client_app_id=data["client_rp_details"].developer_app_id,
-        organisation_code=data["auth_headers"].organisation_code,
-        pointer_types=json.dumps(data["authentication_results"].pointer_types.__root__),
-    )
-
-    response = _authorisation_ok(
-        principal_id=authoriser_context.correlation_id,
+    error = data.get("error")
+    policy = _create_policy(
+        principal_id=logger.transaction_id,
         resource=data["method_arn"],
-        context=authoriser_context.dict(by_alias=True),
+        effect="Deny" if error else "Allow",
+        context={"error": json.dumps(error)} if error else {},
     )
-    return PipelineData(response)
+    return PipelineData(policy)
 
 
 steps = [
     parse_headers,
-    authenticate_request,
-    authorise_request,
-    generate_allow_response,
+    validate_pointer_types,
+    generate_response,
 ]

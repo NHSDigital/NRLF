@@ -1,11 +1,9 @@
 import json
 import logging
-from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING, getLevelName
 from tempfile import NamedTemporaryFile
 
 import pytest
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
-from lambda_utils.constants import LoggingConstants, LogLevel
 from lambda_utils.logging import Logger, log_action
 from lambda_utils.tests.unit.utils import make_aws_event
 from nrlf.core.errors import DynamoDbError
@@ -23,7 +21,7 @@ DUMMY_LOGGER_KWARGS = {
             }
         )
     ),
-    "nrlf_transaction_id": "ABC",
+    "transaction_id": "ABC",
     "aws_environment": "TEST",
 }
 

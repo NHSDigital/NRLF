@@ -7,19 +7,17 @@ from types import FunctionType
 import requests
 from behave.model import Table
 from lambda_pipeline.types import LambdaContext
-from lambda_utils.header_config import AuthHeader, ClientRpDetailsHeader
 from lambda_utils.tests.unit.utils import make_aws_event
 from nrlf.producer.fhir.r4.model import OperationOutcome
 from pydantic import BaseModel
 
 from feature_tests.common.constants import (
-    ALLOWED_APP_IDS,
     DEFAULT_AUTHORIZATION,
-    DEFAULT_CLIENT_RP_DETAILS,
     DEFAULT_METHOD_ARN,
     STATUS_CODE_200,
     Action,
     ActorType,
+    FhirType,
     TestMode,
 )
 from feature_tests.common.repository import FeatureTestRepository
@@ -29,8 +27,8 @@ from feature_tests.common.utils import (
     get_actor_type,
     get_org_id,
     logging_headers,
+    render_document_reference_properties,
     render_regular_properties,
-    render_relatesTo_properties,
 )
 
 
@@ -38,12 +36,13 @@ from feature_tests.common.utils import (
 class Template:
     raw: str
 
-    def render(self, table: Table) -> str:
-        return render_regular_properties(raw=self.raw, table=table)
-
-    def render_fhir(self, table: Table) -> str:
+    def render(self, table: Table, fhir_type: FhirType = None) -> str:
         rendered = render_regular_properties(raw=self.raw, table=table)
-        return render_relatesTo_properties(fhir_json=json.loads(rendered), table=table)
+        if fhir_type is FhirType.DocumentReference:
+            return render_document_reference_properties(
+                document_reference_json=json.loads(rendered), table=table
+            )
+        return rendered
 
 
 @dataclass
@@ -55,7 +54,7 @@ class Response:
         return self.status_code == STATUS_CODE_200
 
     @property
-    def error(self) -> str:
+    def operation_outcome_msg(self) -> str:
         operation_outcome = OperationOutcome.parse_raw(self.body)
         (issue,) = operation_outcome.issue
         return issue.diagnostics
@@ -69,9 +68,6 @@ class Response:
 class BaseRequest:
     endpoint: str = None
     headers: dict = field(default_factory=dict)
-    client_rp_details: ClientRpDetailsHeader = field(
-        default_factory=lambda: ClientRpDetailsHeader(**DEFAULT_CLIENT_RP_DETAILS)
-    )
     scenario_name: str = None
     version: float = None
     sent_documents: list[str] = field(default_factory=list)
@@ -82,26 +78,13 @@ class BaseRequest:
         raise NotImplementedError
 
     def invoke(self, **kwargs) -> Response:
-        client_rp_details = {
-            "NHSD-Client-RP-Details": self.client_rp_details.json(by_alias=True)
-        }
         self.headers["Accept"] = f"version={self.version}"
         self.headers["Authorization"] = DEFAULT_AUTHORIZATION
         self.headers.update(**logging_headers(self.scenario_name))
-        self.headers.update(**client_rp_details)
         raw_response = self._invoke(**kwargs)
         if kwargs.get("body"):
             self.sent_documents.append(kwargs["body"])
         return Response(**raw_response)
-
-    def set_auth_headers(self, org_id: str, app_id: str, app_name: str):
-        if app_id not in ALLOWED_APP_IDS:
-            raise ValueError(f"App ID {app_id} must be one of {ALLOWED_APP_IDS}")
-
-        auth_header = AuthHeader(**{"Organisation-Code": org_id}).dict(by_alias=True)
-        self.client_rp_details.developer_app_id = app_id
-        self.client_rp_details.developer_app_name = app_name
-        self.headers.update(**auth_header)
 
 
 @dataclass
@@ -135,10 +118,7 @@ class LocalApiRequest(BaseRequest):
     handler: FunctionType = None
 
     def _invoke(self, body: dict = None, **kwargs) -> dict:
-        authorizer = {"pointer_types": json.dumps(self.headers.pop("pointer-types"))}
-        event = make_aws_event(
-            body=body, headers=self.headers, authorizer=authorizer, **kwargs
-        )
+        event = make_aws_event(body=body, headers=self.headers, **kwargs)
         response = self.handler(event=event, context=LambdaContext())
         return {"body": response["body"], "status_code": response["statusCode"]}
 

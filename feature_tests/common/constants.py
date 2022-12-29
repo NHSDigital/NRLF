@@ -1,23 +1,15 @@
 from enum import Enum, auto
 
-from nrlf.core.model import AuthConsumer, AuthProducer, DocumentPointer
+from nrlf.core.constants import NHS_NUMBER_INDEX
+from nrlf.core.model import DocumentPointer
 
 DEFAULT_VERSION = 1.0
 STATUS_CODE_200 = 200
-DEFAULT_CLIENT_RP_DETAILS = {
-    "developer.app.id": "application id",
-    "developer.app.name": "application name",
-}
 DUMMY_METHOD_ARN = "dummy_method_arn"
 DEFAULT_AUTHORIZATION = "letmein"
 SNOMED_SYSTEM = "https://snomed.info/ict"
 DEFAULT_METHOD_ARN = "<resource-arn>"
 
-AUTH_TABLE_DEFINITION = {
-    "AttributeDefinitions": [{"AttributeName": "id", "AttributeType": "S"}],
-    "KeySchema": [{"AttributeName": "id", "KeyType": "HASH"}],
-    "BillingMode": "PAY_PER_REQUEST",
-}
 DOCUMENT_POINTER_TABLE_DEFINITION = {
     "AttributeDefinitions": [
         {"AttributeName": "id", "AttributeType": "S"},
@@ -26,7 +18,7 @@ DOCUMENT_POINTER_TABLE_DEFINITION = {
     "KeySchema": [{"AttributeName": "id", "KeyType": "HASH"}],
     "GlobalSecondaryIndexes": [
         {
-            "IndexName": "idx_nhs_number_by_id",
+            "IndexName": NHS_NUMBER_INDEX,
             "KeySchema": [
                 {"AttributeName": "nhs_number", "KeyType": "HASH"},
                 {"AttributeName": "id", "KeyType": "RANGE"},
@@ -45,8 +37,6 @@ DOCUMENT_POINTER_TABLE_DEFINITION = {
 
 TABLE_CONFIG = {
     DocumentPointer: DOCUMENT_POINTER_TABLE_DEFINITION,
-    AuthConsumer: AUTH_TABLE_DEFINITION,
-    AuthProducer: AUTH_TABLE_DEFINITION,
 }
 
 
@@ -75,6 +65,11 @@ class Outcomes(Enum):
     unsuccessful = False
 
 
+class FhirType(Enum):
+    DocumentReference = auto()
+    OperationOutcome = auto()
+
+
 ACTION_ALIASES = {"search by POST for": "searchPost"}
 
 ACTION_SLUG_LOOKUP = {
@@ -86,6 +81,7 @@ ACTION_SLUG_LOOKUP = {
     Action.update: "DocumentReference",
 }
 
+WITH_WITHOUT_ANY = ["with", "without any"]
 
 ALLOWED_TERMS = [
     "actor",
@@ -98,7 +94,9 @@ ALLOWED_TERMS = [
     "message",
     "count",
     "outcome",
-    "has_hasnt",
+    "a_or_an",
+    "fhir_type",
+    "with_without_any",
 ]
 
 ALLOWED_CONSUMERS = ["Yorkshire Ambulance Service"]

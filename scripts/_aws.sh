@@ -101,6 +101,6 @@ function _aws_reset_creds() {
 function _get_aws_info() {
     local profile_name=$1
     local key=$2
-    python -c "import os; from configparser import ConfigParser; parser = ConfigParser(); parser.read(os.environ['HOME'] + '/.aws/config'); print(parser['${profile_name}']['${key}'])"
+    python -c "import os; from configparser import ConfigParser; parser = ConfigParser(); parser.read(os.environ['HOME'] + '/.aws/config'); print(parser['profile ${profile_name}']['${key}'])"
     return $?
 }

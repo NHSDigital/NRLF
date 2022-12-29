@@ -5,28 +5,14 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.header_config import AuthHeader
 from lambda_utils.logging import log_action
+from nrlf.core.common_steps import parse_headers
 from nrlf.core.errors import AuthenticationError
+from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.query import create_read_and_filter_query, hard_delete_query
 from nrlf.core.repository import Repository
+from nrlf.core.response import operation_outcome_ok
 from nrlf.core.validators import generate_producer_id
-
-
-@log_action(narrative="Parsing headers")
-def parse_headers(
-    data: PipelineData,
-    context: LambdaContext,
-    event: APIGatewayProxyEventModel,
-    dependencies: FrozenDict[str, Any],
-    logger: Logger,
-) -> PipelineData:
-    organisation_code = AuthHeader(**event.headers).organisation_code
-
-    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
-    return PipelineData(
-        **data, organisation_code=organisation_code, pointer_types=pointer_types
-    )
 
 
 def _invalid_producer_for_delete(organisation_code, delete_item_id: str):
@@ -91,11 +77,14 @@ def delete_document_reference(
     logger: Logger,
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
-    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
 
-    query = hard_delete_query(id=data["decoded_id"], type=pointer_types)
+    query = hard_delete_query(id=data["decoded_id"], type=data["pointer_types"])
     repository.hard_delete(**query)
-    return PipelineData(message="Resource removed")
+
+    operation_outcome = operation_outcome_ok(
+        transaction_id=logger.transaction_id, coding=NrlfCoding.RESOURCE_REMOVED
+    )
+    return PipelineData(**operation_outcome)
 
 
 steps = [

@@ -44,13 +44,40 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
          "description": "$description"
       }
       """
+    And template OUTCOME
+      """
+      {
+         "resourceType": "OperationOutcome",
+         "id": "<identifier>",
+         "meta": {
+            "profile": [
+               "https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome"
+            ]
+         },
+         "issue": [
+            {
+               "code": "$issue_type",
+               "severity": "$issue_level",
+               "diagnostics": "$message",
+               "details": {
+                  "coding": [
+                     {
+                        "code": "$issue_code",
+                        "display": "$issue_description",
+                        "system": "https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode"
+                     }
+                  ]
+               }
+            }
+         ]
+      }
+      """
 
   Scenario Outline: Successfully update the mutable properties of a Document Pointer with only one change
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
@@ -72,6 +99,13 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
       | contentType | application/pdf |
       | <property>  | <value>         |
     Then the operation is successful
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value            |
+      | issue_type        | informational    |
+      | issue_level       | information      |
+      | issue_code        | RESOURCE_UPDATED |
+      | issue_description | Resource updated |
+      | message           | Resource updated |
     And Document Pointer "8FW23|1234567890" exists
       | property    | value                              |
       | id          | 8FW23\|1234567890                  |
@@ -93,10 +127,9 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
 
   Scenario: Successfully update the mutable properties of a Document Pointer with multiple changes
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
@@ -121,6 +154,13 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
       | description | Therapy Summary Document for Patient 9278693472 |
       | url         | https://example.org/different-doc.pdf           |
     Then the operation is successful
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value            |
+      | issue_type        | informational    |
+      | issue_level       | information      |
+      | issue_code        | RESOURCE_UPDATED |
+      | issue_description | Resource updated |
+      | message           | Resource updated |
     And Document Pointer "8FW23|1234567890" exists
       | property    | value                              |
       | id          | 8FW23\|1234567890                  |

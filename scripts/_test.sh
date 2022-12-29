@@ -5,31 +5,42 @@ function _test_help() {
   echo "nrlf test <command> [options]"
   echo
   echo "commands:"
-  echo "  help                        - this help screen"
-  echo "  unit                        - run unit tests"
-  echo "  integration                 - run integration tests"
-  echo "  feature local               - run local BDD tests"
-  echo "  feature integration         - run integration BDD tests"
+  echo "  help                - this help screen"
+  echo "  unit                - run unit tests"
+  echo "  integration         - run integration tests"
+  echo "  smoke               - run smoke tests"
+  echo "  feature local       - run local BDD tests"
+  echo "  feature integration - run integration BDD tests"
   echo
   return 1
 }
 
 function _test() {
   local command=$1
+  local args=(${@:2})
+
   case $command in
-  "unit") _test_unit "$2" ;;
-  "integration") _test_integration ;;
-  "feature") _test_feature "$2" ;;
+  "unit") _test_unit $args ;;
+  "integration") _test_integration $args ;;
+  "smoke") _test_smoke $args ;;
+  "feature") _test_feature $args ;;
   *) _test_help ;;
   esac
 }
 
 function _test_unit() {
-  python -m pytest -m "not integration and not legacy" "$1"
+  local args=(${@:1})
+  python -m pytest -m "not integration and not legacy and not smoke" $args
 }
 
 function _test_integration() {
-  python -m pytest -m "integration"
+  local args=(${@:1})
+  python -m pytest -m "integration" $args
+}
+
+function _test_smoke() {
+  local args=(${@:1})
+  python -m pytest -m "smoke" $args
 }
 
 function _test_feature() {

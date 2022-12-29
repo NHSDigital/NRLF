@@ -40,10 +40,9 @@ Feature: Success scenarios where producer is able to read a Document Pointer
 
   Scenario: Read an existing current Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to read Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Producer "Aaron Court Mental Health NH" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
@@ -54,7 +53,7 @@ Feature: Success scenarios where producer is able to read a Document Pointer
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "8FW23|1234567890"
     Then the operation is successful
-    And the response is the DOCUMENT template with the below values
+    And the response is a DocumentReference according to the DOCUMENT template with the below values
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |

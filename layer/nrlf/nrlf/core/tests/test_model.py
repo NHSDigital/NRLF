@@ -2,7 +2,6 @@ import json
 from unittest import mock
 
 import pytest
-from nrlf.core.dynamodb_types import convert_value_to_dynamo_format
 from nrlf.core.model import (
     ConsumerRequestParams,
     DocumentPointer,
@@ -44,7 +43,7 @@ def test_fields_are_not_all_dynamo_db_type():
     (message,) = error.value.args
     assert (
         message
-        == "Model contains fields ['bad_field'] that are not of type DynamoDbType"
+        == "Model TestClass contains fields ['bad_field'] that are not of type DynamoDbType"
     )
 
 

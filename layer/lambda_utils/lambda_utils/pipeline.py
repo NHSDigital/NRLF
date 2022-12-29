@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 from pathlib import Path
 from types import FunctionType
 
@@ -11,13 +12,13 @@ from lambda_utils.logging import (
     log_action,
     prepare_default_event_for_logging,
 )
-from lambda_utils.producer.response import bad_request, get_error_msg
+from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.versioning import (
     get_largest_possible_version,
     get_version_from_header,
     get_versioned_steps,
 )
-from nrlf.core.errors import ERROR_SET_4XX
+from nrlf.core.response import operation_outcome_not_ok
 from pydantic import ValidationError
 
 
@@ -30,32 +31,35 @@ def _get_steps(
     return versioned_steps[version]
 
 
-def _function_handler(fn, args, kwargs):
+def _function_handler(fn, transaction_id: str, args, kwargs) -> tuple[HTTPStatus, any]:
     try:
-        return 200, fn(*args, **kwargs)
-    except ValidationError as e:
-        return bad_request(get_error_msg(e))
-    except ERROR_SET_4XX as e:
-        return bad_request(str(e))
-    except Exception as e:
-        return 500, {"message": str(e)}
+        status_code, result = HTTPStatus.OK, fn(*args, **kwargs)
+    except Exception as exception:
+        status_code, result = operation_outcome_not_ok(
+            transaction_id=transaction_id, exception=exception
+        )
+    return status_code, result
 
 
-def _setup_logger(index_path: str, event: dict, **dependencies) -> tuple[int, any]:
+def _setup_logger(
+    index_path: str, transaction_id: str, event: dict, **dependencies
+) -> tuple[int, any]:
     try:
         _event = MinimalEventModelForLogging.parse_obj(event)
     except ValidationError:
         _event = prepare_default_event_for_logging()
+
     lambda_name = Path(index_path).stem
     return Logger(
         logger_name=lambda_name,
         aws_lambda_event=_event,
         aws_environment=dependencies["environment"],
+        transaction_id=transaction_id,
     )
 
 
 @log_action(narrative="Getting version from header", log_fields=["index_path", "event"])
-def _get_steps_for_version_header(index_path: str, event: dict) -> tuple[int, any]:
+def _get_steps_for_version_header(index_path: str, event: dict) -> list[FunctionType]:
     requested_version = get_version_from_header(**event["headers"])
     versioned_steps = get_versioned_steps(index_path)
     return _get_steps(
@@ -71,7 +75,7 @@ def _execute_steps(
     dependencies: dict,
     logger: Logger,
     initial_pipeline_data={},
-) -> tuple[int, any]:
+) -> dict:
     _event = APIGatewayProxyEventModel(**event)
     pipeline = make_pipeline(
         steps=steps,
@@ -88,36 +92,38 @@ def execute_steps(
     event: dict,
     context: LambdaContext,
     initial_pipeline_data={},
-    **dependencies
-) -> tuple[int, any]:
+    **dependencies,
+) -> tuple[HTTPStatus, dict]:
     """
     Executes the handler and wraps it in exception handling
     """
-    # Due to a discrepancy between powertools and the authoriser code with API gateway, this will match the model.
-    requestContext = event.get("requestContext", {})
-    claims = requestContext.pop("authorizer", None)
-    requestContext["authorizer"] = {"claims": claims}
+    transaction_id = generate_transaction_id()
 
     status_code, response = _function_handler(
-        _setup_logger, args=(index_path, event), kwargs=dependencies
+        _setup_logger,
+        transaction_id=transaction_id,
+        args=(index_path, transaction_id, event),
+        kwargs=dependencies,
     )
 
-    if status_code != 200:
+    if status_code is not HTTPStatus.OK:
         return status_code, response
     logger = response
 
     status_code, response = _function_handler(
         _get_steps_for_version_header,
+        transaction_id=transaction_id,
         args=(index_path, event),
         kwargs={"logger": logger},
     )
 
-    if status_code != 200:
+    if status_code is not HTTPStatus.OK:
         return status_code, response
     steps = response
 
     return _function_handler(
         _execute_steps,
+        transaction_id=transaction_id,
         args=(steps, event, context),
         kwargs={
             "logger": logger,
@@ -127,13 +133,13 @@ def execute_steps(
     )
 
 
-def render_response(status_code: int, result: any) -> dict:
+def render_response(status_code: HTTPStatus, result: dict) -> dict:
     """
     Renders the standard http response envelope
     """
     body = json.dumps(result)
     return {
-        "statusCode": status_code,
+        "statusCode": status_code.value,
         "headers": {"Content-Type": "application/json", "Content-Length": len(body)},
         "body": body,
     }

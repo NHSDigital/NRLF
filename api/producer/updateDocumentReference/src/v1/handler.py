@@ -6,12 +6,15 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
-from lambda_utils.header_config import AuthHeader
+from lambda_utils.header_config import ConnectionMetadata
 from lambda_utils.logging import log_action
+from nrlf.core.common_steps import parse_headers
 from nrlf.core.errors import AuthenticationError, ImmutableFieldViolationError
 from nrlf.core.model import DocumentPointer
+from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.query import create_read_and_filter_query, update_and_filter_query
 from nrlf.core.repository import Repository
+from nrlf.core.response import operation_outcome_ok
 from nrlf.core.transform import update_document_pointer_from_fhir_json
 
 from api.producer.updateDocumentReference.src.constants import PersistentDependencies
@@ -31,23 +34,7 @@ def parse_request_body(
 ) -> PipelineData:
     body = fetch_body_from_event(event)
     core_model = update_document_pointer_from_fhir_json(body, API_VERSION)
-    return PipelineData(core_model=core_model)
-
-
-@log_action(narrative="Parsing headers")
-def parse_headers(
-    data: PipelineData,
-    context: LambdaContext,
-    event: APIGatewayProxyEventModel,
-    dependencies: FrozenDict[str, Any],
-    logger: Logger,
-) -> PipelineData:
-    organisation_code = AuthHeader(**event.headers).organisation_code
-
-    pointer_types = json.loads(event.requestContext.authorizer.claims["pointer_types"])
-    return PipelineData(
-        **data, organisation_code=organisation_code, pointer_types=pointer_types
-    )
+    return PipelineData(core_model=core_model, **data)
 
 
 def _invalid_producer_for_update(
@@ -143,12 +130,16 @@ def update_core_model_to_db(
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
     )
     document_pointer_repository.update(**update_query)
-    return PipelineData(message="Resource updated")
+
+    operation_outcome = operation_outcome_ok(
+        transaction_id=logger.transaction_id, coding=NrlfCoding.RESOURCE_UPDATED
+    )
+    return PipelineData(**operation_outcome)
 
 
 steps = [
-    parse_request_body,
     parse_headers,
+    parse_request_body,
     validate_producer_permissions,
     document_pointer_exists,
     compare_immutable_fields,

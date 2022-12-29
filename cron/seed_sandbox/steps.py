@@ -7,8 +7,8 @@ from typing import Any
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import MinimalEventModelForLogging, log_action
 from nrlf.core.dynamodb_types import to_dynamodb_dict
-from nrlf.core.model import AuthConsumer, AuthProducer, DocumentPointer
-from nrlf.core.repository import Repository, to_kebab_case
+from nrlf.core.model import DocumentPointer
+from nrlf.core.repository import Repository
 from pydantic import BaseModel
 
 SANDBOX = "sandbox"
@@ -24,7 +24,7 @@ def _seed_step_factory(
     template_path_to_data: str = TEMPLATE_PATH_TO_DATA,
     log: bool = True,
 ) -> FunctionType:
-    item_type_name = to_kebab_case(item_type.__name__)
+    item_type_name = item_type.kebab()
     path_to_data = template_path_to_data.format(item_type_name=item_type_name)
     with open(path_to_data) as f:
         raw_items = json.load(f)
@@ -70,7 +70,5 @@ def safeguard(
 
 steps = [
     safeguard,
-    _seed_step_factory(item_type=AuthConsumer),
-    _seed_step_factory(item_type=AuthProducer),
     _seed_step_factory(item_type=DocumentPointer),
 ]

@@ -4,7 +4,6 @@ from unittest import mock
 import boto3
 import moto
 from behave import fixture
-from nrlf.core.repository import to_kebab_case
 from nrlf.core.types import DynamoDbClient
 
 from feature_tests.common.constants import TABLE_CONFIG
@@ -20,7 +19,7 @@ def setup_tables():
     client: DynamoDbClient = boto3.client("dynamodb")
     for model, config in TABLE_CONFIG.items():
         client.create_table(
-            TableName=to_kebab_case(model.__name__),
+            TableName=model.kebab(),
             **config,
         )
 

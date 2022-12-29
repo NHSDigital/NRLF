@@ -40,10 +40,9 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
 
   Scenario: Successfully search for a single Document Pointer by NHS number
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -68,10 +67,9 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
 
   Scenario: Successfully search for multiple Document Pointers by NHS number
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -120,10 +118,9 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
 
   Scenario: Empty results when searching for a Document Pointer when the consumer can't access existing document type
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -140,10 +137,9 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
 
   Scenario: Empty results when searching for a Document Pointer when subject has no documents
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") for document types
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And Consumer "Yorkshire Ambulance Service" has authorisation headers for application "DataShare" (ID "z00z-y11y-x22x")
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property | value                                         |
       | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |

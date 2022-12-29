@@ -77,18 +77,18 @@ class Logger(_Logger):
         logger_name: str,
         aws_lambda_event: MinimalEventModelForLogging,
         aws_environment: str,
-        nrlf_transaction_id: str = None,
+        transaction_id: str = None,
         **kwargs,
     ):
-        _logging_header_inputs = aws_lambda_event.dict().get("headers", {})
-        if nrlf_transaction_id:
-            _logging_header_inputs["transaction_id"] = nrlf_transaction_id
-        logging_header = LoggingHeader(**_logging_header_inputs)
+        headers = aws_lambda_event.dict().get("headers", {})
+        logging_header = LoggingHeader(**headers)
 
+        self.transaction_id = transaction_id or generate_transaction_id()
         self._base_message = LogTemplate(
             **logging_header.dict(),
             host=aws_lambda_event.requestContext.accountId,
             environment=aws_environment,
+            transaction_id=transaction_id,
         )
         super().__init__(logger_name, logger_formatter=CustomFormatter(), **kwargs)
 
