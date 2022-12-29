@@ -1,0 +1,123 @@
+# This is an OpenAPI Specification (https://swagger.io/specification/)
+# for the National Record Locator Producer FHIR API
+# owned by NHS Digital (https://digital.nhs.uk/)
+info:
+  version: 1.0.0
+  title: National Record Locator Producer - FHIR API
+  contact:
+    name: NHS Digital API Management
+    url: "https://digital.nhs.uk/developer/help-and-support"
+    email: api.management@nhs.net
+  description: |
+    ## Overview
+    Use this API to locate and access patient information shared by other healthcare organisations, to support the direct care of those patients, using the [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
+
+    For example, an ambulance service treating a patient could access their "mental health crisis plan" (if they have one) as a PDF document directly from their mental health service provider. This would help a patient get more appropriate care from the emergency services.
+
+    As a "provider" who holds information about patients, you can:
+
+    -create a pointer in the NRL to your information
+    -replace your NRL pointer with a newer pointer, superseding the old one
+    -update your NRL pointer status to "entered in error"
+    -delete your NRL pointer to this information
+
+    There is a growing list of health and social care organisations authorised to share records using NRL.
+
+    For more details, see the National Record Locator for developers and the Introduction to the National Record Locator.
+
+    ### Data availability, timing and quality
+    TBC
+
+    ## Who can use this API
+    This API:
+    - is only for use by patient-facing applications
+    - is only for non-clinical use
+    - can only be used where there is a legal basis to do so
+
+    Make sure you have a valid use case before you go too far with your development.
+    To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
+
+    You must do this before you can go live (see ‘Onboarding’ below).
+
+    ## API status and roadmap
+    This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses).
+
+    To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=immunisation-history-api).
+
+    If you have any other queries, [contact us](https://digital.nhs.uk/developer/help-and-support).
+
+    ## Service level
+    This API is a bronze service, meaning it is operational and supported only during business hours (8am to 6pm), Monday to Friday excluding bank holidays.
+
+    For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
+
+    ## Technology
+    This API is [RESTful](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#basic-rest).
+
+    It conforms to the [FHIR](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#fhir) global standard for health care data exchange, specifically to [FHIR R4 (v4.0.1)](https://hl7.org/fhir/r4/), except that it does not support the [capabilities](http://hl7.org/fhir/R4/http.html#capabilities) interaction.
+
+    It includes some country-specific FHIR extensions, which conform to [FHIR UK Core](https://digital.nhs.uk/services/fhir-uk-core), specifically [fhir.r4.ukcore.stu1 0.5.1](https://simplifier.net/packages/fhir.r4.ukcore.stu1/0.5.1).
+
+    You do not need to know much about FHIR to use this API - FHIR APIs are just RESTful APIs that follow specific rules.
+    In particular:
+    - resource names are capitalised and singular, and use US spellings, for example `/Immunization` not `/immunisations`
+    - array names are singular, for example `entry` not `entries` for address lines
+    - data items that are country-specific and thus not included in the FHIR global base resources are usually wrapped in an `extension` object
+
+    There are [libraries and SDKs available](https://digital.nhs.uk/developer/guides-and-documentation/api-technologies-at-nhs-digital#fhir-libraries-and-sdks) to help with FHIR API integration.
+
+    ## Network access
+    This API is available on the internet and, indirectly, on the [Health and Social Care Network (HSCN)](https://digital.nhs.uk/services/health-and-social-care-network).
+
+    For more details see [Network access for APIs](https://digital.nhs.uk/developer/guides-and-documentation/network-access-for-apis).
+
+    ## Security and authorisation
+
+    This API uses the following access modes:
+    * application-restricted access
+
+    ### Application-restricted access
+
+    This access mode is [application-restricted](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation#application-restricted-apis), meaning we authenticate the calling application but not the end user.
+
+    To use this access mode, use the following security pattern:
+    * [Application-restricted RESTful API - signed JWT authentication](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication)
+
+    ## Environments and testing
+    | Environment       | Base URL                                                               |
+    | ----------------- | ---------------------------------------------------------------------- |
+    | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4/`     |
+    | Integration test  | `https://int.api.service.nhs.uk/nrl-producer-api/FHIR/R4/`         |
+    | Production        | `https://api.service.nhs.uk/nrl-producer-api/FHIR/R4/`             |
+
+    ### Sandbox testing
+    Our [sandbox environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#sandbox-testing):
+    * is for early developer testing
+    * only covers a limited set of scenarios
+    * is open access, so does not allow you to test authorisation
+
+    For details of sandbox test scenarios, or to try out the sandbox using our 'Try this API' feature, see the documentation for each endpoint.
+
+    Alternatively, you can try out the sandbox using our Postman collection:
+
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/TBC)
+
+    ### Integration testing
+    Our [integration test environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing):
+    * is for formal integration testing
+    * includes authorisation
+
+    It also includes ready-to-use TBC test data
+
+    For more details see [integration testing with our RESTful APIs](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing-with-our-restful-apis).
+
+    ## Onboarding
+    You need to get your software approved by us before it can go live with this API. We call this onboarding. The onboarding process can sometimes be quite long, so it’s worth planning well ahead.
+
+    This API uses our online digital onboarding process.
+
+    As part of this process, you need to demonstrate that you can manage risks and that your software conforms technically with the requirements for this API.
+
+    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/immunisation-history-fhir/onboarding-support-information).
+
+    To get started, see [digital onboarding](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding#using-the-digital-onboarding-portal).
