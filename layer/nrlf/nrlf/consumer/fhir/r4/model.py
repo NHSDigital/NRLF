@@ -154,7 +154,7 @@ class RequestHeader(BaseModel):
 
 
 class RequestParams(BaseModel):
-    subject: RequestQuerySubject
+    subject: Optional[RequestQuerySubject]
     custodian_identifier: Annotated[
         Optional[RequestQueryCustodian], Field(alias="custodian.identifier")
     ] = None

@@ -1,6 +1,8 @@
 import pytest
+
+from nrlf.core.constants import DbPrefix
 from nrlf.core.errors import ItemNotFound
-from nrlf.core.model import DocumentPointer
+from nrlf.core.model import DocumentPointer, key
 from nrlf.core.query import (
     create_filter_query,
     create_read_and_filter_query,
@@ -9,6 +11,14 @@ from nrlf.core.query import (
     to_dynamodb_dict,
 )
 from nrlf.core.repository import Repository
+from nrlf.core.tests.data_factory import (
+    SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY,
+    SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN,
+    generate_test_document_reference,
+    generate_test_document_type,
+    generate_test_nhs_number,
+    generate_test_subject,
+)
 from nrlf.core.tests.test_document_pointers_repository import mock_dynamodb
 from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
@@ -59,103 +69,113 @@ def test_filter_query_in_db():
     core_model = create_document_pointer_from_fhir_json(
         fhir_json=fhir_json, api_version=1
     )
-    query = create_filter_query(type="https://snomed.info/ict|736253002")
-    query["ExpressionAttributeValues"][":id"] = core_model.id.dict()
-
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        item = repository.read(KeyConditionExpression="id = :id", **query)
+        item = repository.read_item(core_model.pk)
         assert item == core_model
 
 
 def test_filter_query_in_db_not_found():
-    fhir_json = read_test_data("nrlf")
-    core_model = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json, api_version=1
-    )
-    query = create_filter_query(type="123")
-    query["ExpressionAttributeValues"][":id"] = core_model.id.dict()
-
     with pytest.raises(ItemNotFound), mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        repository.create(item=core_model)
-        repository.read(KeyConditionExpression="id = :id", **query)
+        repository.read_item(key(DbPrefix.DocumentPointer, "NOT_FOUND"))
 
 
 def test_create_search_and_filter_query_in_db():
-    nhs_number_index = "idx_nhs_number_by_id"
-    fhir_json = read_test_data("nrlf")
-    core_model = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json, api_version=1
+    nhs_number = generate_test_nhs_number()
+    snomed_code = "736253002"
+    doc = generate_test_document_reference(
+        subject=generate_test_subject(nhs_number),
+        type=generate_test_document_type(snomed_code),
     )
-    query = create_search_and_filter_query(
-        nhs_number=core_model.nhs_number.__root__,
-        id=core_model.id.__root__,
-        type="https://snomed.info/ict|736253002",
-    )
+    model = create_document_pointer_from_fhir_json(doc, 99)
 
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        repository.create(item=core_model)
-        item = repository.search(nhs_number_index, **query)
-        assert item == [core_model]
+        repository.create(item=model)
+        result = repository.query_gsi_1(
+            model.pk_1, type="https://snomed.info/ict|736253002"
+        )
+        assert result == [model]
 
 
-def test_create_read_and_filter_query_in_db():
-    fhir_json = read_test_data("nrlf")
-    core_model = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json, api_version=1
+def test_query_can_filter_results():
+    provider_id = "RX1"
+    nhs_number = generate_test_nhs_number()
+    doc_1 = generate_test_document_reference(
+        provider_id=provider_id,
+        provider_doc_id="OK",
+        type=generate_test_document_type(SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN),
+        subject=generate_test_subject(nhs_number),
     )
-    query = create_read_and_filter_query(
-        id=core_model.id.__root__,
-        producer_id=core_model.producer_id.__root__,
-        type="https://snomed.info/ict|736253002",
+    doc_2 = generate_test_document_reference(
+        provider_id=provider_id,
+        provider_doc_id="Missing",
+        type=generate_test_document_type(
+            SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY
+        ),
+        subject=generate_test_subject(nhs_number),
     )
+    model_1 = create_document_pointer_from_fhir_json(doc_1, 99)
+    model_2 = create_document_pointer_from_fhir_json(doc_2, 99)
 
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        repository.create(item=core_model)
-        item = repository.read(**query)
-        assert item == core_model
+        repository.create(item=model_1)
+        repository.create(item=model_2)
+        results_1 = repository.query_gsi_1(
+            pk=key(DbPrefix.Patient, nhs_number),
+            type=[f"https://snomed.info/ict|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
+        )
+        results_2 = repository.query_gsi_2(
+            pk=key(DbPrefix.Organization, provider_id),
+            type=[f"https://snomed.info/ict|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
+        )
+        assert len(results_1) == 1
+        assert results_1[0] == model_1
+        assert len(results_2) == 1
+        assert results_2[0] == model_1
+
+
+def test_filter_can_find_result():
+    snomed_code = "736253002"
+    doc = generate_test_document_reference(
+        type=generate_test_document_type(snomed_code)
+    )
+    model = create_document_pointer_from_fhir_json(doc, 99)
+
+    with mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        repository.create(item=model)
+        item = repository.read_item(
+            pk=model.pk, type=["https://snomed.info/ict|736253002"]
+        )
+        assert item == model
+
+
+def test_filter_cannot_find_result():
+    snomed_code = "736253002"
+    doc = generate_test_document_reference(
+        type=generate_test_document_type(snomed_code)
+    )
+    model = create_document_pointer_from_fhir_json(doc, 99)
+
+    with mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        repository.create(item=model)
+        with pytest.raises(ItemNotFound):
+            repository.read_item(pk=model.pk, type=["https://snomed.info/ict|WRONG"])
 
 
 def test_create_search_and_filter_query_in_db_returns_empty_bundle():
-    nhs_number_index = "idx_nhs_number_by_id"
-    fhir_json = read_test_data("nrlf")
-    core_model = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json, api_version=1
-    )
-    query = create_search_and_filter_query(
-        nhs_number=core_model.nhs_number.__root__,
-        id=core_model.id.__root__,
-        type="https://snomed.info/ict|736253002",
-    )
-
-    empty_item = []
-
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        item = repository.search(nhs_number_index, **query)
-        assert item == empty_item
-
-
-def test_create_read_and_filter_query_in_db():
-    fhir_json = read_test_data("nrlf")
-    core_model = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json, api_version=1
-    )
-    query = create_read_and_filter_query(
-        id=core_model.id.__root__,
-        producer_id=core_model.producer_id.__root__,
-        type="https://snomed.info/ict|736253002",
-    )
-
-    with mock_dynamodb() as client:
-        repository = Repository(item_type=DocumentPointer, client=client)
-        repository.create(item=core_model)
-        item = repository.read(**query)
-        assert item == core_model
+        items = repository.query_gsi_1(
+            pk=key(DbPrefix.Patient, "EMPTY"),
+            type=["https://snomed.info/ict|736253002"],
+        )
+        assert len(items) == 0
 
 
 @pytest.mark.parametrize(

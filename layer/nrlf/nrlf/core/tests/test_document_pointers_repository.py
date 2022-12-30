@@ -1,3 +1,4 @@
+import json
 import time
 from contextlib import contextmanager
 from copy import deepcopy
@@ -7,19 +8,29 @@ import boto3
 import moto
 import pytest
 from botocore.exceptions import ClientError
+
+from feature_tests.common.constants import DOCUMENT_POINTER_TABLE_DEFINITION
+from nrlf.core.constants import DbPrefix
 from nrlf.core.errors import (
     DuplicateError,
     DynamoDbError,
     ItemNotFound,
     TooManyItemsError,
 )
-from nrlf.core.model import DocumentPointer
+from nrlf.core.model import DocumentPointer, key
 from nrlf.core.query import hard_delete_query, update_and_filter_query
 from nrlf.core.repository import (
     MAX_TRANSACT_ITEMS,
     Repository,
+    _keys,
     _validate_results_within_limits,
     handle_dynamodb_errors,
+)
+from nrlf.core.tests.data_factory import (
+    generate_test_attachment,
+    generate_test_content,
+    generate_test_document_reference,
+    generate_test_subject,
 )
 from nrlf.core.transform import (
     create_document_pointer_from_fhir_json as _create_document_pointer_from_fhir_json,
@@ -29,8 +40,6 @@ from nrlf.core.transform import (
 )
 from nrlf.core.types import DynamoDbClient
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
-
-from feature_tests.common.constants import DOCUMENT_POINTER_TABLE_DEFINITION
 
 API_VERSION = 1
 INDEX_NAME = DOCUMENT_POINTER_TABLE_DEFINITION["GlobalSecondaryIndexes"][0]["IndexName"]
@@ -44,6 +53,11 @@ update_document_pointer_from_fhir_json = (
         *args, api_version=API_VERSION, **kwargs
     )
 )
+
+
+@handle_dynamodb_errors()
+def raise_exception(exception):
+    raise exception
 
 
 @contextmanager
@@ -63,6 +77,11 @@ def test__table_name_prefix():
     assert repository.table_name == "foo-bar-document-pointer"
 
 
+# ------------------------------------------------------------------------------
+# Create
+# ------------------------------------------------------------------------------
+
+
 def test_create_document_pointer():
     fhir_json = read_test_data("nrlf")
     core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
@@ -74,6 +93,7 @@ def test_create_document_pointer():
 
     (item,) = response["Items"]
     recovered_item = DocumentPointer(**item)
+
     assert recovered_item.dict() == core_model.dict()
 
 
@@ -86,16 +106,18 @@ def test_cant_create_if_item_already_exists():
         repository.create(item=core_model)
 
 
+# ------------------------------------------------------------------------------
+# Read
+# ------------------------------------------------------------------------------
+
+
 def test_read_document_pointer():
     fhir_json = read_test_data("nrlf")
     core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        result = repository.read(
-            KeyConditionExpression="id = :id",
-            ExpressionAttributeValues={":id": core_model.id.dict()},
-        )
+        result = repository.read_item(pk=core_model.pk)
     assert core_model == result
 
 
@@ -105,106 +127,78 @@ def test_read_document_pointer_throws_error_when_items_key_missing():
     with pytest.raises(ItemNotFound), mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        repository.read(
-            KeyConditionExpression="id = :id",
-            ExpressionAttributeValues={":id": {"S": "badKey"}},
-        )
+        repository.read_item(key(DbPrefix.DocumentPointer, "BAD_KEY"))
 
 
-def test_update_document_pointer():
-    fhir_json = read_test_data("nrlf")
+# ------------------------------------------------------------------------------
+# Update
+# ------------------------------------------------------------------------------
 
-    updated_fhir_json = deepcopy(fhir_json)
-    updated_fhir_json["content"][0]["attachment"][
-        "url"
-    ] = "https://example.org/different_doc.pdf"
-    core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    time.sleep(1)
-    updated_core_model = update_document_pointer_from_fhir_json(
-        fhir_json=updated_fhir_json
+
+def test_update_document_pointer_success():
+    old_url = "https://example.org/original_doc.pdf"
+    new_url = "https://example.org/different_doc.pdf"
+    doc_1 = generate_test_document_reference(
+        content=generate_test_content(attachment=generate_test_attachment(url=old_url))
     )
-    query_params = update_and_filter_query(**updated_core_model.dict())
+    doc_2 = generate_test_document_reference(
+        content=generate_test_content(attachment=generate_test_attachment(url=new_url))
+    )
+
+    model_1 = create_document_pointer_from_fhir_json(fhir_json=doc_1)
+    time.sleep(1)  # cause times to differ
+    model_2 = update_document_pointer_from_fhir_json(fhir_json=doc_2)
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        repository.create(item=core_model)
-        repository.update(**query_params)
-        response = client.scan(TableName=DocumentPointer.kebab())
+        repository.create(item=model_1)
+        repository.update(item=model_2)
+        items = repository.query(model_1.pk)
 
-    (item,) = response["Items"]
-    recovered_item = DocumentPointer(**item)
-    assert recovered_item.created_on.__root__ == core_model.created_on.__root__
-    assert recovered_item.updated_on.__root__ == updated_core_model.updated_on.__root__
-    assert recovered_item.created_on.__root__ != recovered_item.updated_on.__root__
-    assert "https://example.org/different_doc.pdf" in recovered_item.document.__root__
+    (item,) = items
+    doc = json.loads(item.document.__root__)
+    assert item.created_on.__root__ != model_1.created_on.__root__
+    assert doc["content"][0]["attachment"]["url"] == new_url
 
 
 def test_update_document_pointer_doesnt_update_if_item_doesnt_exist():
-    updated_fhir_json = read_test_data("nrlf")
-    updated_fhir_json["content"][0]["attachment"][
-        "url"
-    ] = "https://example.org/different_doc.pdf"
-
-    updated_core_model = create_document_pointer_from_fhir_json(
-        fhir_json=updated_fhir_json
-    )
-    query_params = update_and_filter_query(**updated_core_model.dict())
-
+    doc_1 = generate_test_document_reference()
+    model_1 = create_document_pointer_from_fhir_json(fhir_json=doc_1)
     with pytest.raises(DynamoDbError), mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        repository.update(**query_params)
+        repository.update(item=model_1)
 
 
-def test_update_document_pointer_doesnt_update_if_producer_didnt_create():
-    fhir_json = read_test_data("nrlf")
-
-    updated_fhir_json = deepcopy(fhir_json)
-    updated_fhir_json["content"][0]["attachment"][
-        "url"
-    ] = "https://example.org/different_doc.pdf"
-
-    core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    updated_core_model = update_document_pointer_from_fhir_json(
-        fhir_json=updated_fhir_json
-    )
-    updated_core_model.producer_id.__root__ = "TEST PRODUCER"
-    query_params = update_and_filter_query(**updated_core_model.dict())
-
-    with pytest.raises(DynamoDbError), mock_dynamodb() as client:
-        repository = Repository(item_type=DocumentPointer, client=client)
-        repository.create(item=core_model)
-        repository.update(**query_params)
+# ------------------------------------------------------------------------------
+# Supersede
+# ------------------------------------------------------------------------------
 
 
 def test_supersede_creates_new_item_and_deletes_existing():
 
-    fhir_json = read_test_data("nrlf")
-    core_model_for_create = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    core_model_for_create.id.__root__ = (
-        "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
+    provider_id = "RJ11"
+    doc_1 = generate_test_document_reference(
+        provider_id=provider_id, provider_doc_id="original"
     )
-    core_model_for_delete = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
+    doc_2 = generate_test_document_reference(
+        provider_id=provider_id, provider_doc_id="replacement"
+    )
+
+    model_1 = create_document_pointer_from_fhir_json(fhir_json=doc_1)
+    model_2 = create_document_pointer_from_fhir_json(fhir_json=doc_2)
 
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        repository.create(item=core_model_for_delete)
+        repository.create(item=model_1)
         repository.supersede(
-            create_item=core_model_for_create,
-            delete_item_ids=[core_model_for_delete.id.__root__],
+            create_item=model_2,
+            delete_pks=[model_1.pk],
         )
 
-        response_for_created_item = repository.read(
-            KeyConditionExpression="id = :id",
-            ExpressionAttributeValues={":id": core_model_for_create.id.dict()},
-        )
+        repository.read_item(model_2.pk)
         try:
-            repository.read(
-                KeyConditionExpression="id = :id",
-                ExpressionAttributeValues={":id": core_model_for_delete.id.dict()},
-            )
+            repository.read_item(model_1.pk)
         except ItemNotFound as error:
-            assert error.args[0] == "Item could not be found"
-
-    assert response_for_created_item == core_model_for_create
+            pass
 
 
 def test_supersede_id_exists_raises_transaction_canceled_exception():
@@ -223,20 +217,8 @@ def test_supersede_id_exists_raises_transaction_canceled_exception():
         repository.create(item=core_model_for_create)
         repository.supersede(
             create_item=core_model_for_create,
-            delete_item_id=core_model_for_delete.id.dict(),
+            delete_pks=[core_model_for_delete.pk],
         )
-
-
-def test_hard_delete():
-    fhir_json = read_test_data("nrlf")
-    core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    query = hard_delete_query(id=core_model.id.__root__)
-    with mock_dynamodb() as client:
-        repository = Repository(item_type=DocumentPointer, client=client)
-        repository.create(item=core_model)
-        repository.hard_delete(**query)
-        response = client.scan(TableName=DocumentPointer.kebab())
-    assert len(response["Items"]) == 0
 
 
 @pytest.mark.parametrize(
@@ -256,20 +238,35 @@ def test_supersede_too_many_items(max_transact_items):
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.supersede(
             create_item=core_model_for_create,
-            delete_item_ids=[core_model_for_delete.id.__root__] * max_transact_items,
+            delete_pks=[core_model_for_delete.pk] * max_transact_items,
         )
+
+
+def test_keys():
+    actual = _keys("abc", "def", "pk_1", "sk_1")
+    expected = {"pk_1": {"S": "abc"}, "sk_1": {"S": "def"}}
+    assert actual == expected
+
+
+# ------------------------------------------------------------------------------
+# Delete
+# ------------------------------------------------------------------------------
+
+
+def test_hard_delete():
+    doc = generate_test_document_reference()
+    model = create_document_pointer_from_fhir_json(fhir_json=doc)
+    with pytest.raises(ItemNotFound), mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        repository.create(item=model)
+        repository.hard_delete(model.pk)
+        repository.read_item(model.pk)
 
 
 def test_wont_hard_delete_if_item_doesnt_exist():
     with pytest.raises(DynamoDbError), mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        query = hard_delete_query(id="no")
-        repository.hard_delete(**query)
-
-
-@handle_dynamodb_errors()
-def raise_exception(exception):
-    raise exception
+        repository.hard_delete(key(DbPrefix.DocumentPointer, "NO"))
 
 
 @pytest.mark.parametrize(
@@ -289,41 +286,50 @@ def test_wrapper_exception_handler(exception_param, expected_exception):
         raise_exception(exception_param)
 
 
+# ------------------------------------------------------------------------------
+# Search
+# ------------------------------------------------------------------------------
+
+
 def test_search_returns_multiple_values_with_same_nhs_number():
-    fhir_json = read_test_data("nrlf")
-    fhir_json_2 = deepcopy(fhir_json)
-    fhir_json_2["id"] = "spam|1243356678"
-    core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    core_model_2 = create_document_pointer_from_fhir_json(fhir_json=fhir_json_2)
+    doc_1 = generate_test_document_reference(provider_doc_id="1234")
+    doc_2 = generate_test_document_reference(provider_doc_id="2345")
+
+    model_1 = create_document_pointer_from_fhir_json(fhir_json=doc_1)
+    model_2 = create_document_pointer_from_fhir_json(fhir_json=doc_2)
+
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        repository.create(item=core_model)
-        repository.create(item=core_model_2)
-        items = repository.search(
-            index_name=INDEX_NAME,
-            KeyConditionExpression="nhs_number = :nhs_number",
-            ExpressionAttributeValues={":nhs_number": {"S": "9278693472"}},
-        )
+        repository.create(item=model_1)
+        repository.create(item=model_2)
+        items = repository.query_gsi_1(model_1.pk_1)
     assert len(items) == 2
 
 
-def test_search_returns_single_value():
-    fhir_json = read_test_data("nrlf")
-    fhir_json_2 = deepcopy(fhir_json)
-    fhir_json_2["subject"]["identifier"]["value"] = "3137554160"
-    fhir_json_2["id"] = "spam|1243356678"
-    core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    core_model_2 = create_document_pointer_from_fhir_json(fhir_json=fhir_json_2)
+def test_search_returns_correct_values():
+    doc_1 = generate_test_document_reference(
+        provider_doc_id="FIRST", subject=generate_test_subject("9278693472")
+    )
+    doc_2 = generate_test_document_reference(
+        provider_doc_id="SECOND", subject=generate_test_subject("3137554160")
+    )
+    model_1 = create_document_pointer_from_fhir_json(fhir_json=doc_1)
+    model_2 = create_document_pointer_from_fhir_json(fhir_json=doc_2)
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        repository.create(item=core_model)
-        repository.create(item=core_model_2)
-        items = repository.search(
-            index_name=INDEX_NAME,
-            KeyConditionExpression="nhs_number = :nhs_number",
-            ExpressionAttributeValues={":nhs_number": {"S": "9278693472"}},
-        )
-    assert len(items) == 1
+        repository.create(item=model_1)
+        repository.create(item=model_2)
+
+        docs_gsi_1 = repository.query_gsi_1(model_1.pk_1)  # NHS Number / Subject
+        docs_gsi_2 = repository.query_gsi_2(model_1.pk_2)  # ODS Code / Custodian
+
+    assert len(docs_gsi_1) == 1, "Partitioned by subject"
+    assert len(docs_gsi_2) == 2, "Partitioned by provider"
+
+
+# ------------------------------------------------------------------------------
+# Utility
+# ------------------------------------------------------------------------------
 
 
 def test_validate_results_less_than_100_items():

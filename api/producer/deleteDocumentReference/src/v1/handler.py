@@ -1,4 +1,3 @@
-import json
 import urllib.parse
 from logging import Logger
 from typing import Any
@@ -6,10 +5,12 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
-from nrlf.core.common_steps import parse_headers
+
+from nrlf.core.common_steps import parse_headers, parse_path_id
 from nrlf.core.errors import AuthenticationError
+from nrlf.core.model import DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
-from nrlf.core.query import create_read_and_filter_query, hard_delete_query
+from nrlf.core.query import hard_delete_query
 from nrlf.core.repository import Repository
 from nrlf.core.response import operation_outcome_ok
 from nrlf.core.validators import generate_producer_id
@@ -51,19 +52,11 @@ def validate_item_exists(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-
-    organisation_code = data["organisation_code"]
     decoded_id = data["decoded_id"]
-    pointer_types = data["pointer_types"]
-
-    read_and_filter_query = create_read_and_filter_query(
-        id=decoded_id,
-        producer_id=organisation_code,
-        type=pointer_types,
-    )
+    pk = DocumentPointer.convert_id_to_pk(decoded_id)
 
     repository: Repository = dependencies["repository"]
-    repository.read(**read_and_filter_query)
+    repository.read_item(pk)
 
     return PipelineData(**data)
 
@@ -77,9 +70,9 @@ def delete_document_reference(
     logger: Logger,
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
+    pk = data["pk"]
 
-    query = hard_delete_query(id=data["decoded_id"], type=data["pointer_types"])
-    repository.hard_delete(**query)
+    repository.hard_delete(pk, pk)
 
     operation_outcome = operation_outcome_ok(
         transaction_id=logger.transaction_id, coding=NrlfCoding.RESOURCE_REMOVED
@@ -89,6 +82,7 @@ def delete_document_reference(
 
 steps = [
     parse_headers,
+    parse_path_id,
     validate_producer_permissions,
     validate_item_exists,
     delete_document_reference,

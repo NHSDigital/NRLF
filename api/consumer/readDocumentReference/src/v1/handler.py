@@ -6,6 +6,8 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
+
+from nrlf.core.common_producer_steps import validate_producer_permissions
 from nrlf.core.common_steps import parse_headers
 from nrlf.core.model import DocumentPointer
 from nrlf.core.query import create_read_and_filter_query
@@ -22,10 +24,11 @@ def read_document_reference(
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
     decoded_id = urllib.parse.unquote(event.pathParameters["id"])
-    read_and_filter_query = create_read_and_filter_query(
-        id=decoded_id, type=data["pointer_types"]
-    )
-    document_pointer: DocumentPointer = repository.read(**read_and_filter_query)
+
+    pk = DocumentPointer.convert_id_to_pk(decoded_id)
+    pointer_types = data["pointer_types"]
+
+    document_pointer: DocumentPointer = repository.read_item(pk, type=pointer_types)
     return PipelineData(**json.loads(document_pointer.document.__root__))
 
 

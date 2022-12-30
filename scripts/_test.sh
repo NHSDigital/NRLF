@@ -45,10 +45,14 @@ function _test_smoke() {
 
 function _test_feature() {
   local command=$1
+  local args=(${@:2})
+  if [ -z $args ]; then
+    args="./feature_tests"
+  fi
 
   case $command in
-  "local") python -m behave feature_tests  ;;
-  "integration") python -m behave --define="integration_test=true" feature_tests ;;
+  "local") python -m behave $args ;;
+  "integration") python -m behave --define="integration_test=true" $args ;;
   *) _test_help ;;
   esac
 }

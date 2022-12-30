@@ -6,6 +6,9 @@ from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventMo
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.logging import log_action
+
+from api.producer.createDocumentReference.src.constants import PersistentDependencies
+from api.producer.createDocumentReference.src.v1.constants import API_VERSION
 from nrlf.core.common_steps import parse_headers
 from nrlf.core.errors import AuthenticationError, DuplicateError
 from nrlf.core.model import DocumentPointer
@@ -20,9 +23,6 @@ from nrlf.core.validators import generate_producer_id
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
-
-from api.producer.createDocumentReference.src.constants import PersistentDependencies
-from api.producer.createDocumentReference.src.v1.constants import API_VERSION
 
 
 def _invalid_producer_for_create(
@@ -120,12 +120,12 @@ def save_core_model_to_db(
     document_pointer_repository: Repository = dependencies.get(
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
     )
-    delete_item_ids: str = data.get("delete_item_ids")
-
-    if delete_item_ids:
+    delete_pks = list(
+        map(DocumentPointer.convert_id_to_pk, data.get("delete_item_ids", []))
+    )
+    if delete_pks:
         document_pointer_repository.supersede(
-            create_item=core_model,
-            delete_item_ids=delete_item_ids,
+            create_item=core_model, delete_pks=delete_pks
         )
         coding = NrlfCoding.RESOURCE_SUPERSEDED
     else:

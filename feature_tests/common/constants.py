@@ -12,16 +12,37 @@ DEFAULT_METHOD_ARN = "<resource-arn>"
 
 DOCUMENT_POINTER_TABLE_DEFINITION = {
     "AttributeDefinitions": [
-        {"AttributeName": "id", "AttributeType": "S"},
-        {"AttributeName": "nhs_number", "AttributeType": "S"},
+        {"AttributeName": "pk", "AttributeType": "S"},
+        {"AttributeName": "sk", "AttributeType": "S"},
+        {"AttributeName": "pk_1", "AttributeType": "S"},
+        {"AttributeName": "sk_1", "AttributeType": "S"},
+        {"AttributeName": "pk_2", "AttributeType": "S"},
+        {"AttributeName": "sk_2", "AttributeType": "S"},
     ],
-    "KeySchema": [{"AttributeName": "id", "KeyType": "HASH"}],
+    "KeySchema": [
+        {"AttributeName": "pk", "KeyType": "HASH"},
+        {"AttributeName": "sk", "KeyType": "HASH"},
+    ],
     "GlobalSecondaryIndexes": [
         {
-            "IndexName": NHS_NUMBER_INDEX,
+            "IndexName": "idx_gsi_1",
             "KeySchema": [
-                {"AttributeName": "nhs_number", "KeyType": "HASH"},
-                {"AttributeName": "id", "KeyType": "RANGE"},
+                {"AttributeName": "pk_1", "KeyType": "HASH"},
+                {"AttributeName": "sk_1", "KeyType": "RANGE"},
+            ],
+            "Projection": {
+                "ProjectionType": "ALL",
+            },
+            "ProvisionedThroughput": {
+                "ReadCapacityUnits": 123,
+                "WriteCapacityUnits": 123,
+            },
+        },
+        {
+            "IndexName": "idx_gsi_2",
+            "KeySchema": [
+                {"AttributeName": "pk_2", "KeyType": "HASH"},
+                {"AttributeName": "sk_2", "KeyType": "RANGE"},
             ],
             "Projection": {
                 "ProjectionType": "ALL",
@@ -99,9 +120,12 @@ ALLOWED_TERMS = [
     "with_without_any",
 ]
 
+ALLOWED_CONSUMER_ORG_IDS = ["RX898"]
 ALLOWED_CONSUMERS = ["Yorkshire Ambulance Service"]
+ALLOWED_PRODUCER_ORG_IDS = ["8FW23"]
 ALLOWED_PRODUCERS = ["Aaron Court Mental Health NH"]
 ALLOWED_APPS = ["DataShare"]
-ALLOWED_APP_IDS = ["z00z-y11y-x22x", "a33a-b22b-c11c"]
-ALLOWED_CONSUMER_ORG_IDS = ["RX898"]
-ALLOWED_PRODUCER_ORG_IDS = ["8FW23"]
+ALLOWED_APP_IDS = [
+    "z00z-y11y-x22x",
+    "a33a-b22b-c11c",
+]
