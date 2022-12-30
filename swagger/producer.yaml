@@ -70,26 +70,6 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
-  /DocumentReference/_search:
-    post:
-      tags:
-        - DocumentReference
-      summary: Search for DocumentReference resources
-      operationId: searchViaPostDocumentReference
-      parameters: []
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              properties: {}
-      responses:
-        "200":
-          description: Search DocumentReference operation successful
-          content:
-            application/fhir+json:
-              schema:
-                $ref: "#/components/schemas/Bundle"
   /DocumentReference/{id}:
     get:
       tags:

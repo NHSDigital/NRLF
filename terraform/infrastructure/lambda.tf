@@ -228,7 +228,7 @@ module "consumer__status" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/_status"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
@@ -250,7 +250,7 @@ module "producer__status" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/_status"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name

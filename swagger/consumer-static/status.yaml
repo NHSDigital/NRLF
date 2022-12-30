@@ -1,0 +1,27 @@
+paths:
+  /_status:
+    get:
+      tags:
+        - NRLF Consumer
+      summary: _status endpoint for APIGEE integration
+      operationId: status
+      responses:
+        "200":
+          description: Consumer API is operational
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum: ["OK"]
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: ${method_status}
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT

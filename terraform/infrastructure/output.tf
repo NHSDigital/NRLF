@@ -32,3 +32,10 @@ output "authoriser_lambda_function_names" {
     consumer = module.consumer__authoriser_lambda.function_name
   }
 }
+
+output "status_lambda_function_names" {
+  value = {
+    producer = module.producer__status.function_name
+    consumer = module.consumer__status.function_name
+  }
+}
