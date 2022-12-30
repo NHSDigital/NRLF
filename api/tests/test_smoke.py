@@ -163,21 +163,6 @@ def _prepare_base_request(actor: str, environment: str) -> tuple[str, dict]:
     ],
 )
 @pytest.mark.smoke
-def test_status_endpoints(environment, actor):
-    base_url, headers = _prepare_base_request(actor=actor, environment=environment)
-
-    url = f"{base_url}/_status"
-    response = requests.get(url=url, headers=headers)
-    assert response.status_code == 200, response.text
-
-
-@pytest.mark.parametrize(
-    "actor",
-    [
-        "producer",
-    ],
-)
-@pytest.mark.smoke
 def test_search_endpoints(environment, actor):
     base_url, headers = _prepare_base_request(actor=actor, environment=environment)
 
