@@ -1,8 +1,121 @@
 openapi: 3.0.0
+# This is an OpenAPI Specification (https://swagger.io/specification/)
+# for the National Record Locator Producer FHIR API
+# owned by NHS Digital (https://digital.nhs.uk/)
 info:
-  title: NRLF Consumer API
-  description: A simplified version of the HL7 FHIR API for DocumentReference resources.
-  version: 0.0.1
+  title: National Record Locator Producer - FHIR API
+  description: |
+    ## Overview
+    Use this API to populate an index of a patient’s shared clinical records.
+
+    You can:
+    - manage pointers to clinical records
+
+    You cannot currently use this API to:
+    - access pointers controlled by other producers
+
+    ### Data availability, timing and quality
+    TBC
+
+    ## Who can use this API
+    This API:
+    - is only for use by patient-facing applications
+    - is only for non-clinical use
+    - can only be used where there is a legal basis to do so
+
+    Make sure you have a valid use case before you go too far with your development.
+    To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
+
+    You must do this before you can go live (see ‘Onboarding’ below).
+
+    ## API status and roadmap
+    This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses).
+
+    To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=immunisation-history-api).
+
+    If you have any other queries, [contact us](https://digital.nhs.uk/developer/help-and-support).
+
+    ## Service level
+
+    This API is a TBC service, meaning it is operational and supported TBC.
+
+    For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
+
+    ## Technology
+    This API is [RESTful](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#basic-rest).
+
+    It conforms to the [FHIR](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#fhir) global standard for health care data exchange, specifically to [FHIR R4 (v4.0.1)](https://hl7.org/fhir/r4/), except that it does not support the [capabilities](http://hl7.org/fhir/R4/http.html#capabilities) interaction.
+
+    It includes some country-specific FHIR extensions, which conform to [FHIR UK Core](https://digital.nhs.uk/services/fhir-uk-core), specifically [fhir.r4.ukcore.stu1 0.5.1](https://simplifier.net/packages/fhir.r4.ukcore.stu1/0.5.1).
+
+    You do not need to know much about FHIR to use this API - FHIR APIs are just RESTful APIs that follow specific rules.
+    In particular:
+    - resource names are capitalised and singular, and use US spellings, for example `/Immunization` not `/immunisations`
+    - array names are singular, for example `entry` not `entries` for address lines
+    - data items that are country-specific and thus not included in the FHIR global base resources are usually wrapped in an `extension` object
+
+    There are [libraries and SDKs available](https://digital.nhs.uk/developer/guides-and-documentation/api-technologies-at-nhs-digital#fhir-libraries-and-sdks) to help with FHIR API integration.
+
+    ## Network access
+    This API is available on the internet and, indirectly, on the [Health and Social Care Network (HSCN)](https://digital.nhs.uk/services/health-and-social-care-network).
+
+    For more details see [Network access for APIs](https://digital.nhs.uk/developer/guides-and-documentation/network-access-for-apis).
+
+    ## Security and authorisation
+
+    This API uses the following access modes:
+    * application-restricted access
+
+    ### Application-restricted access
+
+    This access mode is [application-restricted](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation#application-restricted-apis), meaning we authenticate the calling application but not the end user.
+
+    To use this access mode, use the following security pattern:
+    * [Application-restricted RESTful API - signed JWT authentication](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication)
+
+    ## Environments and testing
+    | Environment       | Base URL                                                               |
+    | ----------------- | ---------------------------------------------------------------------- |
+    | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4/`     |
+    | Integration test  | `https://int.api.service.nhs.uk/nrl-producer-api/FHIR/R4/`         |
+    | Production        | `https://api.service.nhs.uk/nrl-producer-api/FHIR/R4/`             |
+
+    ### Sandbox testing
+    Our [sandbox environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#sandbox-testing):
+    * is for early developer testing
+    * only covers a limited set of scenarios
+    * is open access, so does not allow you to test authorisation
+
+    For details of sandbox test scenarios, or to try out the sandbox using our 'Try this API' feature, see the documentation for each endpoint.
+
+    Alternatively, you can try out the sandbox using our Postman collection:
+
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/TBC)
+
+    ### Integration testing
+    Our [integration test environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing):
+    * is for formal integration testing
+    * includes authorisation
+
+    It also includes ready-to-use TBC test data
+
+    For more details see [integration testing with our RESTful APIs](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing-with-our-restful-apis).
+
+    ## Onboarding
+    You need to get your software approved by us before it can go live with this API. We call this onboarding. The onboarding process can sometimes be quite long, so it’s worth planning well ahead.
+
+    This API uses our online digital onboarding process.
+
+    As part of this process, you need to demonstrate that you can manage risks and that your software conforms technically with the requirements for this API.
+
+    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/immunisation-history-fhir/onboarding-support-information).
+
+    To get started, see [digital onboarding](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding#using-the-digital-onboarding-portal).
+  version: 1.0.0
+  contact:
+    name: NHS Digital API Management
+    url: "https://digital.nhs.uk/developer/help-and-support"
+    email: api.management@nhs.net
 servers:
   - url: /
 tags:
@@ -30,17 +143,6 @@ paths:
             application/fhir+xml:
               schema:
                 $ref: "#/components/schemas/Bundle"
-      security:
-        - ${authoriser_name}: []
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: ${method_searchDocumentReference}
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: when_no_match
-        contentHandling: CONVERT_TO_TEXT
   /DocumentReference/_search:
     post:
       tags:
@@ -66,17 +168,6 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
-      security:
-        - ${authoriser_name}: []
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: ${method_searchPostDocumentReference}
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: when_no_match
-        contentHandling: CONVERT_TO_TEXT
   /DocumentReference/{id}:
     get:
       tags:
@@ -92,17 +183,6 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/DocumentReference"
-      security:
-        - ${authoriser_name}: []
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: ${method_readDocumentReference}
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: when_no_match
-        contentHandling: CONVERT_TO_TEXT
 components:
   requestBodies:
     DocumentReference:
@@ -359,7 +439,7 @@ components:
             relatesTo:
               type: array
               items:
-                $ref: "#/components/schemas/DocumentReference_RelatesTo"
+                $ref: "#/components/schemas/DocumentReferenceRelatesTo"
                 description: Relationships that this document has with other document references that already exist.
             description:
               type: string
@@ -373,11 +453,11 @@ components:
             content:
               type: array
               items:
-                $ref: "#/components/schemas/DocumentReference_Content"
+                $ref: "#/components/schemas/DocumentReferenceContent"
                 description: The document and format referenced. There may be multiple content element repetitions, each with a different format.
               minItems: 1
             context:
-              $ref: "#/components/schemas/DocumentReference_Context"
+              $ref: "#/components/schemas/DocumentReferenceContext"
               description: The clinical context in which the document was prepared.
           required:
             - status
@@ -687,12 +767,12 @@ components:
             link:
               type: array
               items:
-                $ref: "#/components/schemas/Bundle_Link"
+                $ref: "#/components/schemas/BundleLink"
                 description: A series of links that provide context to this bundle.
             entry:
               type: array
               items:
-                $ref: "#/components/schemas/Bundle_Entry"
+                $ref: "#/components/schemas/BundleEntry"
                 description: An entry in a bundle resource &ndash; will either contain a resource or information about a resource (transactions and history only).
             signature:
               $ref: "#/components/schemas/Signature"
@@ -820,7 +900,7 @@ components:
             issue:
               type: array
               items:
-                $ref: "#/components/schemas/OperationOutcome_Issue"
+                $ref: "#/components/schemas/OperationOutcomeIssue"
                 description: An error, warning, or information message that results from a system action.
               minItems: 1
           required:
@@ -867,7 +947,7 @@ components:
               - GK5ihTmfe6
             expression:
               - Uidx_swV4Z
-    Bundle_Entry:
+    BundleEntry:
       allOf:
         - $ref: "#/components/schemas/BackboneElement"
         - type: object
@@ -875,7 +955,7 @@ components:
             link:
               type: array
               items:
-                $ref: "#/components/schemas/Bundle_Link"
+                $ref: "#/components/schemas/BundleLink"
                 description: A series of links that provide context to this entry.
             fullUrl:
               type: string
@@ -885,15 +965,15 @@ components:
               $ref: "#/components/schemas/Resource"
               description: The Resource for the entry. The purpose/meaning of the resource is determined by the Bundle.type.
             search:
-              $ref: "#/components/schemas/Bundle_Entry_Search"
+              $ref: "#/components/schemas/BundleEntrySearch"
               description: Information about the search process that lead to the creation of this entry.
             request:
-              $ref: "#/components/schemas/Bundle_Entry_Request"
+              $ref: "#/components/schemas/BundleEntryRequest"
               description: Additional information about how this entry should be processed as part of a transaction or batch.  For history, it shows how the entry was processed to create the version contained in the entry.
             response:
-              $ref: "#/components/schemas/Bundle_Entry_Response"
+              $ref: "#/components/schemas/BundleEntryResponse"
               description: Indicates the results of processing the corresponding 'request' entry in the batch or transaction being responded to or what the results of an operation where when returning history.
-    Bundle_Entry_Response:
+    BundleEntryResponse:
       allOf:
         - $ref: "#/components/schemas/BackboneElement"
         - type: object
@@ -919,7 +999,7 @@ components:
               description: An OperationOutcome containing hints and warnings produced as part of processing this entry in a batch or transaction.
           required:
             - status
-    Bundle_Entry_Request:
+    BundleEntryRequest:
       allOf:
         - $ref: "#/components/schemas/BackboneElement"
         - type: object
@@ -951,7 +1031,7 @@ components:
           required:
             - method
             - url
-    Bundle_Entry_Search:
+    BundleEntrySearch:
       allOf:
         - $ref: "#/components/schemas/BackboneElement"
         - type: object
@@ -963,7 +1043,7 @@ components:
             score:
               type: number
               description: When searching, the server's search ranking score for the entry.
-    Bundle_Link:
+    BundleLink:
       allOf:
         - $ref: "#/components/schemas/BackboneElement"
         - type: object
@@ -979,7 +1059,7 @@ components:
           required:
             - relation
             - url
-    DocumentReference_Context:
+    DocumentReferenceContext:
       allOf:
         - $ref: "#/components/schemas/BackboneElement"
         - type: object
@@ -1011,7 +1091,7 @@ components:
               items:
                 $ref: "#/components/schemas/Reference"
                 description: Related identifiers or resources associated with the DocumentReference.
-    DocumentReference_Content:
+    DocumentReferenceContent:
       allOf:
         - $ref: "#/components/schemas/BackboneElement"
         - type: object
@@ -1024,7 +1104,7 @@ components:
               description: An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.
           required:
             - attachment
-    DocumentReference_RelatesTo:
+    DocumentReferenceRelatesTo:
       allOf:
         - $ref: "#/components/schemas/BackboneElement"
         - type: object
@@ -1039,7 +1119,7 @@ components:
           required:
             - code
             - target
-    OperationOutcome_Issue:
+    OperationOutcomeIssue:
       allOf:
         - $ref: "#/components/schemas/BackboneElement"
         - type: object
@@ -1542,12 +1622,12 @@ components:
                 pattern: ([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?
                 description: Identifies specific times when the event occurs.
             repeat:
-              $ref: "#/components/schemas/Timing_Repeat"
+              $ref: "#/components/schemas/TimingRepeat"
               description: A set of rules that describe when the event is scheduled.
             code:
               $ref: "#/components/schemas/CodeableConcept"
               description: A code for the timing schedule (or just text in code.text). Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).
-    Timing_Repeat:
+    TimingRepeat:
       allOf:
         - $ref: "#/components/schemas/BackboneElement"
         - type: object

@@ -135,17 +135,27 @@ function _swagger() {
         allowed_types="producer consumer"
         local type=$2
         if [[ " ${allowed_types[*]} " =~ " $2 " ]]; then
-            # Remove the parts we don't want
             cat ./swagger/${type}.yaml |
-                yq e 'del(.x-ibm-configuration)' |
-                yq e 'del(.components.schemas.*.discriminator)' \
+                 # Replace snake case terms, which are invalid in ApiGateway
+                yq 'with(.components.schemas; with_entries(.key |= sub("_","")))' |
+                yq '(.. | select(has("$ref")).$ref) |= sub("_","")' |
+                # Remove the parts we don't want
+                yq 'del(.x-ibm-configuration)' |
+                yq 'del(.components.schemas.*.discriminator)' \
                     > ./swagger/${type}.tmp.yaml
 
-            # Merge in the narrative
+            # Merge in the narrative, and save for internal use (i.e. including status endpoint)
             yq eval-all '. as $item ireduce ({}; . * $item)' \
                 ./swagger/${type}.tmp.yaml \
                 ./swagger/${type}-static/*.yaml \
-                > ./swagger/nrl-${type}-api.yaml
+                > ./api/${type}/swagger.yaml
+
+            # Remove fields not required for public docs (i.e. for the APIM/APIGEE repo)
+            cat ./api/${type}/swagger.yaml |
+                yq 'del(.paths.*.*.x-amazon-apigateway-integration)' |
+                yq 'del(.paths.*.*.security)' |
+                yq 'del(.paths./_status)' \
+                    > ./api/${type}/swagger-public.yaml
 
             rm ./swagger/${type}.tmp.yaml
         else

@@ -8,13 +8,14 @@ from typing import Any, Generator
 import boto3
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.logging import log_action
+from lambda_utils.header_config import LoggingHeader
+from lambda_utils.logging import log_action, prepare_default_event_for_logging
 from lambda_utils.pipeline import render_response
 from nrlf.core.constants import NHS_NUMBER_INDEX
 from nrlf.core.model import DocumentPointer
 from nrlf.core.query import create_search_and_filter_query
 from nrlf.core.repository import Repository
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 
 class Config(BaseModel):
@@ -84,9 +85,23 @@ def _get_steps(*args, **kwargs):
     ]
 
 
+def _set_missing_logging_headers(event: dict) -> dict:
+    headers = event.get("headers", {})
+    try:
+        LoggingHeader.parse_obj(headers)
+    except ValidationError:
+        default_headers = prepare_default_event_for_logging().headers
+        default_headers.update(headers)
+        return default_headers
+    else:
+        return headers
+
+
 def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
     if context is None:
         context = LambdaContext()
+
+    event["headers"] = _set_missing_logging_headers(event=event)
 
     with get_mutable_pipeline() as mutable_pipeline:
         mutable_pipeline._get_steps_for_version_header = _get_steps

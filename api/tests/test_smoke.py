@@ -146,7 +146,7 @@ def _prepare_base_request(actor: str, environment: str) -> tuple[str, dict]:
     apigee_base_url = NRLF_TO_APIGEE_ENV[environment]
     oauth_token = get_oauth_token(environment)
 
-    base_url = f"https://{apigee_base_url}/nrl-{actor}-api/"
+    base_url = f"https://{apigee_base_url}/nrl-{actor}-api"
     headers = {
         "accept": "application/json; version=1.0",
         "authorization": f"Bearer {oauth_token}",
@@ -154,21 +154,6 @@ def _prepare_base_request(actor: str, environment: str) -> tuple[str, dict]:
         "x-request-id": f"{uuid4()}",
     }
     return base_url, headers
-
-
-@pytest.mark.parametrize(
-    "actor",
-    [
-        "producer",
-    ],
-)
-@pytest.mark.smoke
-def test_status_endpoints(environment, actor):
-    base_url, headers = _prepare_base_request(actor=actor, environment=environment)
-
-    url = f"{base_url}/_status"
-    response = requests.get(url=url, headers=headers)
-    assert response.status_code == 200, response.text
 
 
 @pytest.mark.parametrize(
