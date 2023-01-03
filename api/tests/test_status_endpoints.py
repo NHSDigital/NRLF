@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 import requests
-from lambda_utils.tests.unit.test_status import OK
+from lambda_utils.tests.unit.status_test_utils import OK
 from lambda_utils.tests.unit.utils import make_aws_event
 
 from helpers.aws_session import new_aws_session
