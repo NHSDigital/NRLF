@@ -139,9 +139,9 @@ Feature: Failure Scenarios where producer unable to create a Document Pointer
       | url         | https://example.org/my-doc.pdf |
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                          |
-      | issue_type        | processing                                     |
-      | issue_level       | error                                          |
-      | issue_code        | INVALID_RESOURCE_ID                            |
-      | issue_description | Invalid resource ID                            |
-      | message           | Cannot create item because item already exists |
+      | property          | value                                   |
+      | issue_type        | processing                              |
+      | issue_level       | error                                   |
+      | issue_code        | INVALID_RESOURCE_ID                     |
+      | issue_description | Invalid resource ID                     |
+      | message           | Condition check failed - Duplicate item |

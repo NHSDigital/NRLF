@@ -108,31 +108,6 @@ def validate_producer_permissions(
     return PipelineData(**data)
 
 
-@log_action(narrative="Checking document does not already exist")
-def check_item_does_not_exist(
-    data: PipelineData,
-    context: LambdaContext,
-    event: APIGatewayProxyEventModel,
-    dependencies: FrozenDict[str, Any],
-    logger: Logger,
-) -> PipelineData:
-    core_model: DocumentPointer = data["core_model"]
-    id = core_model.id.__root__
-    document_pointer_repository: Repository = dependencies.get(
-        PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
-    )
-
-    delete_item_ids: str = data.get("delete_item_ids")
-
-    if not delete_item_ids:
-        print("I am not a supercede", delete_item_ids)
-        _, exists, _ = document_pointer_repository.item_exists(id=id)
-        if exists:
-            raise DuplicateError("Cannot create item because item already exists")
-
-    return PipelineData(**data)
-
-
 @log_action(narrative="Saving document pointer to db")
 def save_core_model_to_db(
     data: PipelineData,
@@ -167,6 +142,5 @@ steps = [
     parse_request_body,
     mark_as_supersede,
     validate_producer_permissions,
-    check_item_does_not_exist,
     save_core_model_to_db,
 ]
