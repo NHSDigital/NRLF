@@ -10,7 +10,8 @@ from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventMo
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.header_config import LoggingHeader
 from lambda_utils.logging import log_action, prepare_default_event_for_logging
-from lambda_utils.pipeline import render_response
+from lambda_utils.logging_utils import generate_transaction_id
+from lambda_utils.pipeline import _execute_steps, _function_handler, _setup_logger
 from nrlf.core.constants import NHS_NUMBER_INDEX
 from nrlf.core.model import DocumentPointer
 from nrlf.core.query import create_search_and_filter_query
@@ -77,14 +78,6 @@ def _hit_the_database(
     return PipelineData(result=result)
 
 
-def _get_steps(*args, **kwargs):
-    return [
-        _get_config,
-        _get_boto_client,
-        _hit_the_database,
-    ]
-
-
 def _set_missing_logging_headers(event: dict) -> dict:
     headers = event.get("headers", {})
     try:
@@ -97,22 +90,50 @@ def _set_missing_logging_headers(event: dict) -> dict:
         return headers
 
 
-def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
+def _get_steps(*args, **kwargs):
+    return [
+        _get_config,
+        _get_boto_client,
+        _hit_the_database,
+    ]
+
+
+def execute_steps(
+    index_path: str,
+    event: dict,
+    context: LambdaContext,
+    initial_pipeline_data={},
+    **dependencies,
+) -> tuple[HTTPStatus, dict]:
     if context is None:
         context = LambdaContext()
 
+    transaction_id = generate_transaction_id()
     event["headers"] = _set_missing_logging_headers(event=event)
+    dependencies["environment"] = os.environ.get("ENVIRONMENT")
 
-    with get_mutable_pipeline() as mutable_pipeline:
-        mutable_pipeline._get_steps_for_version_header = _get_steps
-        status_code, result = mutable_pipeline.execute_steps(
-            index_path=__file__,
-            event=event,
-            context=context,
-            environment=os.environ.get("ENVIRONMENT"),
-        )
+    status_code, response = _function_handler(
+        _setup_logger,
+        transaction_id=transaction_id,
+        args=(index_path, transaction_id, event),
+        kwargs=dependencies,
+    )
+    if status_code is not HTTPStatus.OK:
+        return status_code, response
+    logger = response
+
+    steps = _get_steps()
+    status_code, response = _function_handler(
+        _execute_steps,
+        transaction_id=transaction_id,
+        args=(steps, event, context),
+        kwargs={
+            "logger": logger,
+            "dependencies": dependencies,
+            "initial_pipeline_data": initial_pipeline_data,
+        },
+    )
+
     if status_code is not HTTPStatus.OK:
         status_code = HTTPStatus.SERVICE_UNAVAILABLE
-    result = {"message": status_code.phrase}
-
-    return render_response(status_code, result)
+    return status_code, {"message": status_code.phrase}
