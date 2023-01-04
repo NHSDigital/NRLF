@@ -7,7 +7,12 @@ import boto3
 import moto
 import pytest
 from botocore.exceptions import ClientError
-from nrlf.core.errors import DynamoDbError, ItemNotFound, TooManyItemsError
+from nrlf.core.errors import (
+    DuplicateError,
+    DynamoDbError,
+    ItemNotFound,
+    TooManyItemsError,
+)
 from nrlf.core.model import DocumentPointer
 from nrlf.core.query import hard_delete_query, update_and_filter_query
 from nrlf.core.repository import (
@@ -75,7 +80,7 @@ def test_create_document_pointer():
 def test_cant_create_if_item_already_exists():
     fhir_json = read_test_data("nrlf")
     core_model = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    with pytest.raises(DynamoDbError), mock_dynamodb() as client:
+    with pytest.raises(DuplicateError), mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
         repository.create(item=core_model)
