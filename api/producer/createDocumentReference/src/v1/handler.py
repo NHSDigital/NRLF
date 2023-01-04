@@ -1,4 +1,3 @@
-import json
 from functools import partial
 from logging import Logger
 from typing import Any
@@ -6,10 +5,9 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
-from lambda_utils.header_config import ConnectionMetadata
 from lambda_utils.logging import log_action
 from nrlf.core.common_steps import parse_headers
-from nrlf.core.errors import AuthenticationError
+from nrlf.core.errors import AuthenticationError, DuplicateError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
@@ -110,6 +108,31 @@ def validate_producer_permissions(
     return PipelineData(**data)
 
 
+@log_action(narrative="Checking document does not already exist")
+def check_item_does_not_exist(
+    data: PipelineData,
+    context: LambdaContext,
+    event: APIGatewayProxyEventModel,
+    dependencies: FrozenDict[str, Any],
+    logger: Logger,
+) -> PipelineData:
+    core_model: DocumentPointer = data["core_model"]
+    id = core_model.id.__root__
+    document_pointer_repository: Repository = dependencies.get(
+        PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
+    )
+
+    delete_item_ids: str = data.get("delete_item_ids")
+
+    if not delete_item_ids:
+        print("I am not a supercede", delete_item_ids)
+        _, exists, _ = document_pointer_repository.item_exists(id=id)
+        if exists:
+            raise DuplicateError("Cannot create item because item already exists")
+
+    return PipelineData(**data)
+
+
 @log_action(narrative="Saving document pointer to db")
 def save_core_model_to_db(
     data: PipelineData,
@@ -144,5 +167,6 @@ steps = [
     parse_request_body,
     mark_as_supersede,
     validate_producer_permissions,
+    check_item_does_not_exist,
     save_core_model_to_db,
 ]

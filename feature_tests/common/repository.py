@@ -42,18 +42,3 @@ class FeatureTestRepository(Repository):
         ]
         for chunk in _chunk_list(transact_items):
             self.dynamodb.transact_write_items(TransactItems=chunk)
-
-    def item_exists(self, id) -> tuple[BaseModel, bool, str]:
-        item = None
-        try:
-            item = self.read(
-                KeyConditionExpression="id = :id",
-                ExpressionAttributeValues={":id": to_dynamodb_dict(id)},
-            )
-            exists = True
-            message = f"Item found {item}"
-        except Exception as e:
-            exists = False
-            message = str(e)
-
-        return item, exists, message

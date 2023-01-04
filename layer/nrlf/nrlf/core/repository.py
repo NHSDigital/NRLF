@@ -63,7 +63,7 @@ class Repository:
         self.item_type = item_type
         self.table_name = environment_prefix + item_type.kebab()
 
-    @handle_dynamodb_errors(conditional_check_error_message="Duplicate rejected")
+    @handle_dynamodb_errors()
     def create(self, item: PydanticModel) -> DynamoDbResponse:
         return self.dynamodb.put_item(
             TableName=self.table_name,
@@ -130,3 +130,19 @@ class Repository:
     @handle_dynamodb_errors(conditional_check_error_message="Forbidden")
     def hard_delete(self, **kwargs: dict[str, str]) -> DynamoDbResponse:
         self.dynamodb.delete_item(TableName=self.table_name, **kwargs)
+
+    @handle_dynamodb_errors()
+    def item_exists(self, id) -> tuple[BaseModel, bool, str]:
+        item = None
+        try:
+            item = self.read(
+                KeyConditionExpression="id = :id",
+                ExpressionAttributeValues={":id": to_dynamodb_dict(id)},
+            )
+            exists = True
+            message = f"Item found {item}"
+        except Exception as e:
+            exists = False
+            message = str(e)
+
+        return item, exists, message

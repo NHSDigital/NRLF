@@ -96,6 +96,9 @@ class SpineCoding(Enum):
         display="Compatible content was not available",
         system=SPINE_SYSTEM,
     )
+    INVALID_RESOURCE_ID = Coding(
+        code="INVALID_RESOURCE_ID", display="Invalid resource ID", system=SPINE_SYSTEM
+    )
 
 
 class NrlfCoding(Enum):
