@@ -8,6 +8,7 @@ from nrlf.core.errors import (
     DuplicateError,
     DynamoDbError,
     ItemNotFound,
+    SupersedeError,
     TooManyItemsError,
 )
 from nrlf.core.model import DynamoDbModel
@@ -113,7 +114,10 @@ class Repository:
     def update(self, **kwargs: dict[str, str]) -> DynamoDbResponse:
         return self.dynamodb.update_item(TableName=self.table_name, **kwargs)
 
-    @handle_dynamodb_errors(conditional_check_error_message="Supersede ID mismatch")
+    @handle_dynamodb_errors(
+        conditional_check_error_message="Supersede ID mismatch",
+        error_type=SupersedeError,
+    )
     def supersede(
         self, create_item: PydanticModel, delete_item_ids: list[str]
     ) -> DynamoDbResponse:
