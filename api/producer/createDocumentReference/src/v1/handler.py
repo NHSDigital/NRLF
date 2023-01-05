@@ -1,4 +1,3 @@
-import json
 from functools import partial
 from logging import Logger
 from typing import Any
@@ -6,10 +5,9 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
-from lambda_utils.header_config import ConnectionMetadata
 from lambda_utils.logging import log_action
 from nrlf.core.common_steps import parse_headers
-from nrlf.core.errors import AuthenticationError
+from nrlf.core.errors import AuthenticationError, DuplicateError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository

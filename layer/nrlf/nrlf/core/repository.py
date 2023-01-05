@@ -4,7 +4,13 @@ from typing import TypeVar
 
 from botocore.exceptions import ClientError
 from nrlf.core.dynamodb_types import to_dynamodb_dict
-from nrlf.core.errors import DynamoDbError, ItemNotFound, TooManyItemsError
+from nrlf.core.errors import (
+    DuplicateError,
+    DynamoDbError,
+    ItemNotFound,
+    SupersedeError,
+    TooManyItemsError,
+)
 from nrlf.core.model import DynamoDbModel
 from nrlf.core.types import DynamoDbClient, DynamoDbResponse
 from pydantic import BaseModel
@@ -30,7 +36,9 @@ def _validate_results_within_limits(results: dict):
     return results
 
 
-def _handle_dynamodb_errors(function, conditional_check_error_message: str = ""):
+def _handle_dynamodb_errors(
+    function, conditional_check_error_message: str = "", error_type=DynamoDbError
+):
     @wraps(function)
     def wrapper(*args, **kwargs):
         try:
@@ -38,7 +46,7 @@ def _handle_dynamodb_errors(function, conditional_check_error_message: str = "")
         except ClientError as error:
             error_code = error.response["Error"]["Code"]
             if error_code in CONDITION_CHECK_CODES:
-                raise DynamoDbError(
+                raise error_type(
                     f"Condition check failed - {conditional_check_error_message or error_code}"
                 )
             raise Exception(f"There was an error with the database: {error}")
@@ -46,9 +54,13 @@ def _handle_dynamodb_errors(function, conditional_check_error_message: str = "")
     return wrapper
 
 
-def handle_dynamodb_errors(conditional_check_error_message: str = ""):
+def handle_dynamodb_errors(
+    conditional_check_error_message: str = "", error_type=DynamoDbError
+):
     return lambda function: _handle_dynamodb_errors(
-        function, conditional_check_error_message
+        function,
+        conditional_check_error_message=conditional_check_error_message,
+        error_type=error_type,
     )
 
 
@@ -63,7 +75,9 @@ class Repository:
         self.item_type = item_type
         self.table_name = environment_prefix + item_type.kebab()
 
-    @handle_dynamodb_errors(conditional_check_error_message="Duplicate rejected")
+    @handle_dynamodb_errors(
+        conditional_check_error_message="Duplicate item", error_type=DuplicateError
+    )
     def create(self, item: PydanticModel) -> DynamoDbResponse:
         return self.dynamodb.put_item(
             TableName=self.table_name,
@@ -100,7 +114,10 @@ class Repository:
     def update(self, **kwargs: dict[str, str]) -> DynamoDbResponse:
         return self.dynamodb.update_item(TableName=self.table_name, **kwargs)
 
-    @handle_dynamodb_errors(conditional_check_error_message="Supersede ID mismatch")
+    @handle_dynamodb_errors(
+        conditional_check_error_message="Supersede ID mismatch",
+        error_type=SupersedeError,
+    )
     def supersede(
         self, create_item: PydanticModel, delete_item_ids: list[str]
     ) -> DynamoDbResponse:

@@ -158,8 +158,8 @@ Feature: Failure Scenarios where producer unable to supersede Document Pointers
       | property          | value                                          |
       | issue_type        | processing                                     |
       | issue_level       | error                                          |
-      | issue_code        | RESOURCE_NOT_FOUND                             |
-      | issue_description | Resource not found                             |
+      | issue_code        | INVALID_RESOURCE_ID                            |
+      | issue_description | Invalid resource ID                            |
       | message           | Condition check failed - Supersede ID mismatch |
 
   Scenario: Targets must be unique
@@ -190,6 +190,6 @@ Feature: Failure Scenarios where producer unable to supersede Document Pointers
       | property          | value                                          |
       | issue_type        | processing                                     |
       | issue_level       | error                                          |
-      | issue_code        | RESOURCE_NOT_FOUND                             |
-      | issue_description | Resource not found                             |
+      | issue_code        | INVALID_RESOURCE_ID                            |
+      | issue_description | Invalid resource ID                            |
       | message           | Condition check failed - Supersede ID mismatch |

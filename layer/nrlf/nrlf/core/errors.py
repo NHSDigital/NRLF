@@ -35,6 +35,14 @@ class UnknownParameterError(Exception):
     pass
 
 
+class DuplicateError(Exception):
+    pass
+
+
+class SupersedeError(Exception):
+    pass
+
+
 NRLF_TO_SPINE_4XX_ERROR = {
     AuthenticationError: SpineCoding.ACCESS_DENIED_LEVEL,
     DynamoDbError: SpineCoding.RESOURCE_NOT_FOUND,
@@ -44,6 +52,8 @@ NRLF_TO_SPINE_4XX_ERROR = {
     TooManyItemsError: SpineCoding.NOT_ACCEPTABLE,
     ValidationError: SpineCoding.VALIDATION_ERROR,
     UnknownParameterError: SpineCoding.VALIDATION_ERROR,
+    DuplicateError: SpineCoding.INVALID_RESOURCE_ID,
+    SupersedeError: SpineCoding.INVALID_RESOURCE_ID,
 }
 
 
