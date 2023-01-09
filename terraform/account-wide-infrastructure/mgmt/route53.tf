@@ -46,13 +46,14 @@ resource "aws_route53_zone" "dev_zone" {
   }
 }
 
-resource "aws_route53_record" "devspine" {
+resource "aws_route53_record" "dev_zone" {
   zone_id = aws_route53_zone.dev_zone.zone_id
-  name    = "dev.internal.record-locator.devspineservices.nhs.uk"
-  records = ["ns-1184.awsdns-20.org.",
-    "ns-658.awsdns-18.net.",
-    "ns-1591.awsdns-06.co.uk.",
-    "ns-304.awsdns-38.com."
+  name    = "api.record-locator.dev.national.nhs.uk"
+  records = [
+    "ns-495.awsdns-61.com.",
+    "ns-610.awsdns-12.net.",
+    "ns-1934.awsdns-49.co.uk.",
+    "ns-1382.awsdns-44.org."
   ]
   ttl  = 300
   type = "NS"
