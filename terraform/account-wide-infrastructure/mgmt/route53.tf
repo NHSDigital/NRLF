@@ -1,5 +1,5 @@
-resource "aws_route53_zone" "prodspine" {
-  name = "record-locator.spineservices.nhs.uk"
+resource "aws_route53_zone" "prod_zone" {
+  name = "record-locator.national.nhs.uk"
 
   tags = {
     Environment = terraform.workspace
@@ -7,7 +7,7 @@ resource "aws_route53_zone" "prodspine" {
 }
 
 resource "aws_route53_record" "prodspine" {
-  zone_id = aws_route53_zone.prodspine.zone_id
+  zone_id = aws_route53_zone.prod_zone.zone_id
   name    = "prod.internal.record-locator.spineservices.nhs.uk"
   records = ["ns-904.awsdns-49.net.",
     "ns-1539.awsdns-00.co.uk.",
@@ -18,8 +18,8 @@ resource "aws_route53_record" "prodspine" {
   type = "NS"
 }
 
-resource "aws_route53_zone" "refspine" {
-  name = "record-locator.refspineservices.nhs.uk"
+resource "aws_route53_zone" "ref_zone" {
+  name = "record-locator.ref.national.nhs.uk"
 
   tags = {
     Environment = terraform.workspace
@@ -27,7 +27,7 @@ resource "aws_route53_zone" "refspine" {
 }
 
 resource "aws_route53_record" "refspine" {
-  zone_id = aws_route53_zone.refspine.zone_id
+  zone_id = aws_route53_zone.ref_zone.zone_id
   name    = "test.internal.record-locator.refspineservices.nhs.uk"
   records = ["ns-397.awsdns-49.com.",
     "ns-880.awsdns-46.net.",
@@ -38,8 +38,8 @@ resource "aws_route53_record" "refspine" {
   type = "NS"
 }
 
-resource "aws_route53_zone" "devspine" {
-  name = "record-locator.devspineservices.nhs.uk"
+resource "aws_route53_zone" "dev_zone" {
+  name = "record-locator.dev.national.nhs.uk"
 
   tags = {
     Environment = terraform.workspace
@@ -47,7 +47,7 @@ resource "aws_route53_zone" "devspine" {
 }
 
 resource "aws_route53_record" "devspine" {
-  zone_id = aws_route53_zone.devspine.zone_id
+  zone_id = aws_route53_zone.dev_zone.zone_id
   name    = "dev.internal.record-locator.devspineservices.nhs.uk"
   records = ["ns-1184.awsdns-20.org.",
     "ns-658.awsdns-18.net.",
