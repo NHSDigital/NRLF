@@ -68,3 +68,52 @@ resource "aws_api_gateway_method_settings" "api_gateway_method_settings" {
     aws_api_gateway_stage.api_gateway_stage
   ]
 }
+
+resource "aws_api_gateway_gateway_response" "api_access_denied" {
+  rest_api_id   = aws_api_gateway_rest_api.api_gateway_rest_api.id
+  response_type = "ACCESS_DENIED"
+  response_templates = {
+    "application/json" = jsonencode({
+      resourceType : "OperationOutcome",
+      issue : [{
+        severity : "error",
+        code : "processing",
+        diagnostics : "Forbidden"
+      }]
+    })
+  }
+  response_parameters = {
+    "gatewayresponse.header.Access-Control-Allow-Origin" = "'*'"
+  }
+}
+
+resource "aws_api_gateway_gateway_response" "api_default_4xx" {
+  rest_api_id   = aws_api_gateway_rest_api.api_gateway_rest_api.id
+  response_type = "DEFAULT_4XX"
+  response_templates = {
+    "application/json" = jsonencode({
+      resourceType : "OperationOutcome",
+      issue : [{
+        severity : "error",
+        code : "processing"
+        diagnostics : "$context.error.message"
+      }]
+  }) }
+  response_parameters = { "gatewayresponse.header.Access-Control-Allow-Origin" = "'*'"
+  }
+}
+
+resource "aws_api_gateway_gateway_response" "api_default_5xx" {
+  rest_api_id   = aws_api_gateway_rest_api.api_gateway_rest_api.id
+  response_type = "DEFAULT_5XX"
+  response_templates = {
+    "application/json" = jsonencode({
+      resourceType : "OperationOutcome",
+      issue : [{
+        severity : "error",
+        code : "exception"
+      }]
+  }) }
+  response_parameters = { "gatewayresponse.header.Access-Control-Allow-Origin" = "'*'"
+  }
+}
