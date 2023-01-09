@@ -154,7 +154,8 @@ function _swagger() {
             cat ./api/${type}/swagger.yaml |
                 yq 'del(.paths.*.*.x-amazon-apigateway-integration)' |
                 yq 'del(.paths.*.*.security)' |
-                yq 'del(.paths./_status)' \
+                yq 'del(.paths./_status)' |
+                yq 'del(.components.securitySchemes."${authoriser_name}")' \
                     > ./api/${type}/nrl-${type}-api.yaml
 
             rm ./swagger/${type}.tmp.yaml

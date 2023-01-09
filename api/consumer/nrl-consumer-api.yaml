@@ -2021,18 +2021,7 @@ components:
       type: string
     RequestHeaderToASID:
       type: string
-  securitySchemes:
-    ${authoriser_name}:
-      type: "apiKey"
-      name: "Authorization"
-      in: "header"
-      x-amazon-apigateway-authtype: "custom"
-      x-amazon-apigateway-authorizer:
-        type: "request"
-        authorizerUri: "${lambda_invoke_arn}"
-        authorizerCredentials: "${authoriser_iam_role}"
-        identitySource: "method.request.header.Authorization"
-        authorizerResultTtlInSeconds: 0
+  securitySchemes: {}
   parameters:
     id:
       name: id
