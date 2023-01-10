@@ -6,13 +6,14 @@ resource "aws_route53_zone" "prod_zone" {
   }
 }
 
-resource "aws_route53_record" "prodspine" {
+resource "aws_route53_record" "prod_zone" {
   zone_id = aws_route53_zone.prod_zone.zone_id
-  name    = "prod.internal.record-locator.spineservices.nhs.uk"
-  records = ["ns-904.awsdns-49.net.",
-    "ns-1539.awsdns-00.co.uk.",
-    "ns-1398.awsdns-46.org.",
-    "ns-300.awsdns-37.com."
+  name    = "api.record-locator.national.nhs.uk"
+  records = [
+    "ns-1269.awsdns-30.org.",
+    "ns-729.awsdns-27.net.",
+    "ns-1680.awsdns-18.co.uk.",
+    "ns-237.awsdns-29.com."
   ]
   ttl  = 300
   type = "NS"
@@ -26,13 +27,14 @@ resource "aws_route53_zone" "ref_zone" {
   }
 }
 
-resource "aws_route53_record" "refspine" {
+resource "aws_route53_record" "ref_zone" {
   zone_id = aws_route53_zone.ref_zone.zone_id
-  name    = "test.internal.record-locator.refspineservices.nhs.uk"
-  records = ["ns-397.awsdns-49.com.",
-    "ns-880.awsdns-46.net.",
-    "ns-1660.awsdns-15.co.uk.",
-    "ns-1446.awsdns-52.org."
+  name    = "api.record-locator.ref.national.nhs.uk"
+  records = [
+    "ns-1982.awsdns-55.co.uk.",
+    "ns-1513.awsdns-61.org.",
+    "ns-765.awsdns-31.net.",
+    "ns-257.awsdns-32.com."
   ]
   ttl  = 300
   type = "NS"
