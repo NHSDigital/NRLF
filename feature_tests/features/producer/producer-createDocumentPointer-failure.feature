@@ -37,6 +37,12 @@ Feature: Failure Scenarios where producer unable to create a Document Pointer
         "status": "current"
       }
       """
+    And template BAD_DOCUMENT
+      """
+      {
+      "bad":$bad
+      }
+      """
     And template OUTCOME
       """
       {
@@ -145,3 +151,21 @@ Feature: Failure Scenarios where producer unable to create a Document Pointer
       | issue_code        | INVALID_RESOURCE_ID                     |
       | issue_description | Invalid resource ID                     |
       | message           | Condition check failed - Duplicate item |
+
+  Scenario: Unable to create a Document Pointer
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from BAD_DOCUMENT template
+      | property | value |
+      | bad      | true  |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                       |
+      | issue_type        | processing                                                  |
+      | issue_level       | error                                                       |
+      | issue_code        | VALIDATION_ERROR                                            |
+      | issue_description | A parameter or value has resulted in a validation error     |
+      | message           | DocumentReference validation failure - Invalid resourceType |
