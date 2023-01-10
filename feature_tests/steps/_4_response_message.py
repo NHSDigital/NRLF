@@ -34,10 +34,12 @@ def the_response_is_the_template_with_values(
     actual = test_config.response.dict
     expected = json.loads(rendered)
 
-    assert actual == expected, {
-        "actual": actual,
-        "expected": asdict(test_config.response),
-    }
+    assert actual == expected, json.dumps(
+        {
+            "actual": actual,
+            "expected": expected,
+        }
+    )
 
 
 @then("the response is a Bundle with {count:d} entries")
