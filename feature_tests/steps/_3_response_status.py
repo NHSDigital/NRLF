@@ -17,3 +17,10 @@ def assert_operation_successful(context: Context, outcome: str):
             f"Outcome must be one of {Outcomes._member_names_}, got {outcome}"
         )
     assert result is expected_result.value, asdict(test_config.response)
+
+
+@then("the status is {outcome:d}")
+def assert_status_outome(context: Context, outcome: int):
+    test_config: TestConfig = context.test_config
+    actual = test_config.response.status_code
+    assert actual == outcome, (actual, outcome)

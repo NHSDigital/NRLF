@@ -91,3 +91,29 @@ Feature: Basic Success Scenarios where consumer is able to search by POST for Do
       | issue_code        | VALIDATION_ERROR                                        |
       | issue_description | A parameter or value has resulted in a validation error |
       | message           | Unexpected query parameters: extra                      |
+
+  Scenario: Search by POST is unable to return Document Pointer
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search by POST for Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Consumer "Yorkshire Ambulance Service" searches by POST for Document References with body parameters:
+      | property | value |
+      | bad      | true  |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                      |
+      | issue_type        | processing                                                 |
+      | issue_level       | error                                                      |
+      | issue_code        | VALIDATION_ERROR                                           |
+      | issue_description | A parameter or value has resulted in a validation error    |
+      | message           | ProducerRequestParams validation failure - Invalid subject |
