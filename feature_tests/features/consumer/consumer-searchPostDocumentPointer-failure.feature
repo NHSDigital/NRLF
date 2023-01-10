@@ -116,4 +116,4 @@ Feature: Basic Success Scenarios where consumer is able to search by POST for Do
       | issue_level       | error                                                      |
       | issue_code        | VALIDATION_ERROR                                           |
       | issue_description | A parameter or value has resulted in a validation error    |
-      | message           | ProducerRequestParams validation failure - Invalid subject |
+      | message           | ConsumerRequestParams validation failure - Invalid subject |
