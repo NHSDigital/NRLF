@@ -1,11 +1,12 @@
 import json
+from dataclasses import asdict
 
 from behave.runner import Context
-from nrlf.producer.fhir.r4.strict_model import Bundle
 
 from feature_tests.common.constants import FhirType
 from feature_tests.common.decorators import then
 from feature_tests.common.models import TestConfig
+from nrlf.producer.fhir.r4.strict_model import Bundle
 
 
 @then(
@@ -30,11 +31,14 @@ def the_response_is_the_template_with_values(
         id = test_config.response.dict["id"]
         rendered = rendered.replace("<identifier>", id)
 
-    fhir_json = json.loads(rendered)
+    actual = test_config.response.dict
+    expected = json.loads(rendered)
 
-    assert test_config.response.dict == fhir_json, (
-        test_config.response.dict,
-        fhir_json,
+    assert actual == expected, json.dumps(
+        {
+            "actual": actual,
+            "expected": expected,
+        }
     )
 
 
@@ -42,8 +46,8 @@ def the_response_is_the_template_with_values(
 def producer_search_document_pointers(context: Context, count: int):
     test_config: TestConfig = context.test_config
     bundle = Bundle.parse_raw(test_config.response.body)
-    assert len(bundle.entry) == count, bundle
-    assert bundle.total == count, bundle
+    assert len(bundle.entry) == count, bundle.dict()
+    assert bundle.total == count, bundle.dict()
 
 
 @then("the Bundle contains an Entry with the below values for {template_name} template")

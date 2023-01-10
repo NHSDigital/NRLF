@@ -13,12 +13,6 @@ module "seed_sandbox_lambda" {
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-write.arn,
     aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn,
-    aws_iam_policy.auth_consumer__dynamodb-read.arn,
-    aws_iam_policy.auth_consumer__dynamodb-write.arn,
-    aws_iam_policy.auth_consumer__kms-read-write.arn,
-    aws_iam_policy.auth_producer__dynamodb-read.arn,
-    aws_iam_policy.auth_producer__dynamodb-write.arn,
-    aws_iam_policy.auth_producer__kms-read-write.arn
+    aws_iam_policy.document-pointer__kms-read-write.arn
   ]
 }

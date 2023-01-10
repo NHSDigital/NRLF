@@ -49,18 +49,18 @@ Feature: Failure scenarios where consumer is unable to read a Document Pointer
         },
         "issue": [
           {
-            "code": "$issue_type",
             "severity": "$issue_level",
-            "diagnostics": "$message",
+            "code": "$issue_type",
             "details": {
               "coding": [
                 {
+                  "system": "https://fhir.nhs.uk/CodeSystem/Spine-ErrorOrWarningCode",
                   "code": "$issue_code",
-                  "display": "$issue_description",
-                  "system": "https://fhir.nhs.uk/CodeSystem/Spine-ErrorOrWarningCode"
+                  "display": "$issue_description"
                 }
               ]
-            }
+            },
+            "diagnostics": "$message"
           }
         ]
       }
