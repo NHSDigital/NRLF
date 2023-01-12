@@ -1,5 +1,5 @@
 import re
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
 
@@ -228,7 +228,9 @@ class DocumentPointer(DynamoDbModel):
 
 class _NhsNumberMixin:
     @property
-    def nhs_number(self) -> str:
+    def nhs_number(self) -> Union[str, None]:
+        if self.subject is None:
+            return None
         nhs_number = self.subject.__root__.split("|")[1]
         validate_nhs_number(nhs_number)
         return nhs_number

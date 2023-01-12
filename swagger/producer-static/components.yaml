@@ -24,7 +24,6 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
-      required: true
     custodian:
       name: custodian.identifier
       in: query
@@ -105,8 +104,6 @@ components:
           $ref: "#/components/schemas/RequestQueryCustodian"
         snomed.identifier:
           $ref: "#/components/schemas/RequestQuerySnomedCode"
-      required:
-        - subject
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$

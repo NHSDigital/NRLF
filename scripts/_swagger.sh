@@ -45,7 +45,7 @@ function _generate_producer_model() {
         mkdir -p ./layer/nrlf/nrlf/producer/fhir/r4
     fi
 
-    datamodel-codegen --input ./api/producer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/producer/fhir/r4/model.py --use-annotated --enum-field-as-literal all
+    datamodel-codegen --input ./api/producer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/producer/fhir/r4/model.py --use-annotated --enum-field-as-literal all --use-double-quotes
 }
 
 function _generate_consumer_model() {
@@ -53,7 +53,7 @@ function _generate_consumer_model() {
         mkdir -p ./layer/nrlf/nrlf/consumer/fhir/r4
     fi
 
-    datamodel-codegen --input ./api/consumer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/consumer/fhir/r4/model.py --use-annotated --enum-field-as-literal all
+    datamodel-codegen --input ./api/consumer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/consumer/fhir/r4/model.py --use-annotated --enum-field-as-literal all --use-double-quotes
 }
 
 function _swagger() {
