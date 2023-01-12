@@ -26,7 +26,7 @@ def search_document_references(
 ) -> PipelineData:
 
     repository: Repository = dependencies["repository"]
-    request_params = ProducerRequestParams(**event.queryStringParameters)
+    request_params = ProducerRequestParams(**event.queryStringParameters or {})
     assert_no_extra_params(
         request_params=request_params, provided_params=event.queryStringParameters
     )
