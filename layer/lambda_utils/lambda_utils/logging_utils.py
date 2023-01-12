@@ -9,8 +9,9 @@ from uuid import uuid4
 from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
 from lambda_utils.constants import LoggingConstants, LoggingOutcomes
 from lambda_utils.errors import LoggingError
-from nrlf.core.errors import ERROR_SET_4XX
 from pydantic import BaseModel
+
+from nrlf.core.errors import ERROR_SET_4XX
 
 
 def generate_transaction_id() -> str:
@@ -78,7 +79,7 @@ def function_handler(fn, args, kwargs) -> tuple[any, str, str]:
     try:
         result = fn(*args, **kwargs)
         outcome = LoggingOutcomes.SUCCESS
-    except ERROR_SET_4XX as error:
+    except ERROR_SET_4XX as error:  # ToDo - This is not true.  Only 400 when validation on input occurs.  Output validation failure is 500.
         result = error
         outcome = LoggingOutcomes.FAILURE
     except Exception as error:

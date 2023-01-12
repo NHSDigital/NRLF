@@ -1,5 +1,7 @@
 import re
-from typing import Optional
+from typing import Optional, Union
+
+from pydantic import BaseModel, Field, root_validator, validator
 
 import nrlf.consumer.fhir.r4.model as consumer_model
 import nrlf.producer.fhir.r4.model as producer_model
@@ -19,7 +21,8 @@ from nrlf.core.validators import (
     validate_timestamp,
     validate_tuple,
 )
-from pydantic import BaseModel, Field, root_validator, validator
+
+from .constants import DbPrefix
 
 KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
 
@@ -71,6 +74,17 @@ class DynamoDbModel(BaseModel):
         return cls.__name__
 
 
+ID_SEPARATOR = "|"
+KEY_SEPARATOR = "#"
+
+
+def key(*args):
+    """
+    standard method for creating PKs/SKs
+    """
+    return KEY_SEPARATOR.join(map(lambda s: str(s), args))
+
+
 class DocumentPointer(DynamoDbModel):
     id: DynamoDbStringType
     nhs_number: DynamoDbStringType
@@ -81,6 +95,81 @@ class DocumentPointer(DynamoDbModel):
     document: DynamoDbStringType
     created_on: DynamoDbStringType
     updated_on: Optional[DynamoDbStringType] = DYNAMODB_NULL
+
+    def dict(self, **kwargs):
+        return {
+            "pk": self.pk.dict(),
+            "sk": self.sk.dict(),
+            "pk_1": self.pk_1.dict(),
+            "sk_1": self.sk_1.dict(),
+            "pk_2": self.pk_2.dict(),
+            "sk_2": self.sk_2.dict(),
+            **super().dict(**kwargs),
+        }
+
+    def super_dict(self):
+        return super().dict()
+
+    @classmethod
+    def generate_pk(cls, provider_id: str, document_id: str) -> str:
+        return f"{DbPrefix.DocumentPointer}{KEY_SEPARATOR}{provider_id}{KEY_SEPARATOR}{document_id}"
+
+    @classmethod
+    def generate_id(cls, provider_id: str, document_id: str) -> str:
+        return f"{provider_id}{ID_SEPARATOR}{document_id}"
+
+    @classmethod
+    def split_id(cls, id: str) -> list[str, str]:
+        return f"{id}".split(ID_SEPARATOR, 1)
+
+    @classmethod
+    def split_pk(cls, pk: str) -> list[str, str]:
+        return f"{pk}".split(KEY_SEPARATOR, 2)[1:]
+
+    @classmethod
+    def convert_id_to_pk(cls, id: str) -> str:
+        (producer_id, document_id) = cls.split_id(id)
+        return cls.generate_pk(producer_id, document_id)
+
+    @classmethod
+    def convert_pk_to_id(cls, pk: str) -> str:
+        (producer_id, document_id) = cls.split_pk(pk)
+        return cls.generate_id(producer_id, document_id)
+
+    @property
+    def doc_id(self) -> str:
+        (_, doc_id) = f"{self.id}".split("|")
+        return doc_id
+
+    @property
+    def pk(self) -> DynamoDbStringType:
+        return DynamoDbStringType(
+            __root__=self.__class__.generate_pk(*self.__class__.split_id(f"{self.id}"))
+        )
+
+    @property
+    def sk(self) -> DynamoDbStringType:
+        return self.pk
+
+    @property
+    def pk_1(self) -> DynamoDbStringType:
+        return DynamoDbStringType(__root__=f"{DbPrefix.Patient}#{self.nhs_number}")
+
+    @property
+    def sk_1(self) -> DynamoDbStringType:
+        return DynamoDbStringType(
+            __root__=f"{DbPrefix.CreatedOn}#{self.created_on}#{self.producer_id}#{self.doc_id}"
+        )
+
+    @property
+    def pk_2(self) -> DynamoDbStringType:
+        return DynamoDbStringType(
+            __root__=f"{DbPrefix.Organization}#{self.producer_id}"
+        )
+
+    @property
+    def sk_2(self) -> DynamoDbStringType:
+        return self.sk_1
 
     @classmethod
     def public_alias(cls) -> str:
@@ -139,7 +228,9 @@ class DocumentPointer(DynamoDbModel):
 
 class _NhsNumberMixin:
     @property
-    def nhs_number(self) -> str:
+    def nhs_number(self) -> Union[str, None]:
+        if self.subject is None:
+            return None
         nhs_number = self.subject.__root__.split("|")[1]
         validate_nhs_number(nhs_number)
         return nhs_number

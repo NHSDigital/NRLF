@@ -16,8 +16,8 @@ def before_scenario(context: Context, scenario: Scenario):
 
 def after_scenario(context: Context, scenario: Scenario):
     test_config: TestConfig = context.test_config
-    for repository in test_config.repositories.values():
-        repository.delete_all()
+    # for repository in test_config.repositories.values():
+    #     repository.delete_all()
 
     try:
         (request,) = test_config.request.sent_requests

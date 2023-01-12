@@ -19,6 +19,13 @@ class DynamoDbType(BaseModel):
     def dict(self, *args, **kwargs):
         return convert_value_to_dynamo_format(self.__root__)
 
+    @property
+    def value(self):
+        return self.__root__
+
+    def __str__(self):
+        return f"{self.__root__}"
+
 
 class DynamoDbStringType(DynamoDbType):
     __root__: StrictStr

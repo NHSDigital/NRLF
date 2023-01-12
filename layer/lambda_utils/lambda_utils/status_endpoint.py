@@ -12,11 +12,10 @@ from lambda_utils.header_config import LoggingHeader
 from lambda_utils.logging import log_action, prepare_default_event_for_logging
 from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _function_handler, _setup_logger
+from pydantic import BaseModel, ValidationError
 from nrlf.core.constants import NHS_NUMBER_INDEX
 from nrlf.core.model import DocumentPointer
-from nrlf.core.query import create_search_and_filter_query
 from nrlf.core.repository import Repository
-from pydantic import BaseModel, ValidationError
 
 
 class Config(BaseModel):
@@ -73,8 +72,7 @@ def _hit_the_database(
         client=data["client"],
         environment_prefix=data["config"].PREFIX,
     )
-    query = create_search_and_filter_query(nhs_number="NULL")
-    result = repository.search(index_name=NHS_NUMBER_INDEX, **query)
+    result = repository.query(pk="D#NULL")
     return PipelineData(result=result)
 
 

@@ -16,7 +16,10 @@ def assert_operation_successful(context: Context, outcome: str):
         raise ValueError(
             f"Outcome must be one of {Outcomes._member_names_}, got {outcome}"
         )
-    assert result is expected_result.value, asdict(test_config.response)
+    assert result is expected_result.value, (
+        asdict(test_config.request),
+        asdict(test_config.response),
+    )
 
 
 @then("the status is {outcome:d}")

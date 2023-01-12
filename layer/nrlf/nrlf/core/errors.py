@@ -1,6 +1,9 @@
+from typing import Union
+
+from pydantic import ValidationError
+
 from nrlf.core.nhsd_codings import SpineCoding
 from nrlf.producer.fhir.r4.model import RequestParams
-from pydantic import ValidationError
 
 
 class ItemNotFound(Exception):
@@ -62,8 +65,10 @@ ERROR_SET_4XX = tuple(NRLF_TO_SPINE_4XX_ERROR.keys())
 
 def assert_no_extra_params(
     request_params: RequestParams,
-    provided_params: list[str],
+    provided_params: Union[list[str], None],
 ):
+    if provided_params is None:
+        return
     expected_params = request_params.dict(by_alias=True).keys()
     unknown_params = set(provided_params) - set(expected_params)
     if unknown_params:

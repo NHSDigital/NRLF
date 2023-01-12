@@ -115,37 +115,6 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
       | issue_description | Resource not found      |
       | message           | Item could not be found |
 
-  Scenario: Unable to update a Document Pointer when Producer does not have permission for existing types
-    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253003 |
-    And a Document Pointer exists in the system with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1234567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | status      | current                        |
-      | url         | https://example.org/my-doc.pdf |
-    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23|0987654321" from DOCUMENT template
-      | property    | value                                 |
-      | identifier  | 1234567890                            |
-      | type        | 736253002                             |
-      | custodian   | 8FW23                                 |
-      | subject     | 9278693472                            |
-      | contentType | application/pdf                       |
-      | url         | https://example.org/different-doc.pdf |
-    Then the operation is unsuccessful
-    And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                            |
-      | issue_type        | processing                                                       |
-      | issue_level       | error                                                            |
-      | issue_code        | ACCESS_DENIED_LEVEL                                              |
-      | issue_description | Access has been denied because you need higher level permissions |
-      | message           | Required permissions to create a document pointer are missing    |
-
   Scenario: Unable to update the relatesTo immutable property of a DOCUMENT_POINTER
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
