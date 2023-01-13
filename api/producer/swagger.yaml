@@ -6,24 +6,37 @@ info:
   title: National Record Locator Producer - FHIR API
   description: |
     ## Overview
-    Use this API to locate and access patient information shared by other healthcare organisations, to support the direct care of those patients, using the [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
+    The National Record Locator (NRL) is a service that holds pointers and enables access to data held in local provider systems.
 
-    For example, an ambulance service treating a patient could access their "mental health crisis plan" (if they have one) as a PDF document directly from their mental health service provider. This would help a patient get more appropriate care from the emergency services.
+    The service facilitates the national sharing, removing the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
+
+    It can be used to store and publish pointers to patient data held in health systems across England, to look up where relevant patient data is held and to retrieve data.
+
+    This service is intended to replace the existing NRL service [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
 
     As a "provider" who holds information about patients, you can:
 
     -create a pointer in the NRL to your information
     -replace your NRL pointer with a newer pointer, superseding the old one
-    -update your NRL pointer status to "entered in error"
-    -delete your NRL pointer to this information
+    -update parts of the meta data associated with a pointer
+    -delete your NRL pointer
+    -search and read the current pointers you own relating to an indiviual patient
+    -search and read all the current pointers you own
+
+    You can not currently use this API to get pointers for;
+
+    -mental health crisis plans
+    -end of care plans
+    -emergency care plans (eRedbags)
+    -national early warning scores (NEWS)
+    -urgent care plan
 
     There is a growing list of health and social care organisations authorised to share records using NRL.
 
-    For more details, see the National Record Locator for developers and the Introduction to the National Record Locator.
-
     ### Data availability, timing and quality
-    TBC
+    There is a risk that pointers for patients with two NHS Numbers are not translated when the NHS Numbers are merged by NBO, it is therefore recomended that this service is used alongside other personal demographic services such as [Personal Demographics Service FHIR API](https://digital.nhs.uk/developer/api-catalogue/personal-demographics-service-fhir).
 
+    Pointers are immediately available to authorised providers and consumers after successful creation.
     ## Who can use this API
     This API:
     - is only for use by patient-facing applications
