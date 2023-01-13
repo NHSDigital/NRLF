@@ -40,6 +40,14 @@ resource "aws_route53_record" "ref_zone" {
   type = "NS"
 }
 
+resource "aws_route53_zone" "int_zone" {
+  name = "record-locator.int.national.nhs.uk"
+
+  tags = {
+    Environment = terraform.workspace
+  }
+}
+
 resource "aws_route53_zone" "dev_zone" {
   name = "record-locator.dev.national.nhs.uk"
 
