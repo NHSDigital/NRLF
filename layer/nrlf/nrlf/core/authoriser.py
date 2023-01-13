@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 from logging import Logger
 from typing import Any
 
@@ -11,8 +12,40 @@ from lambda_utils.header_config import (
     ConnectionMetadata,
 )
 from lambda_utils.logging import log_action
+from lambda_utils.logging_utils import generate_transaction_id
+from lambda_utils.pipeline import _execute_steps, _setup_logger
 from nrlf.core.response import get_error_message
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
+
+
+class Config(BaseModel):
+    """
+    The Config class defines all the Environment Variables that are needed for
+    the business logic to execute successfully.
+    All Environment Variables are validated using pydantic, and will result in
+    a 500 Internal Server Error if validation fails.
+
+    To add a new Environment Variable simply a new pydantic compatible
+    definition below, and pydantic should allow for even complex validation
+    logic to be supported.
+    """
+
+    AWS_REGION: str
+    PREFIX: str
+    ENVIRONMENT: str
+
+
+def build_persistent_dependencies(config: Config) -> dict[str, any]:
+    """
+    AWS Lambdas may be re-used, rather than spinning up a new instance each
+    time.  Doing this we can take advantage of state that persists between
+    executions.  Any dependencies returned by this function will persist
+    between executions and can therefore lead to performance gains.
+    This function will be called ONCE in the lambdas lifecycle, which may or
+    may not be each execution, depending on how busy the API is.
+    These dependencies will be passed through to your `handle` function below.
+    """
+    return {"environment": config.ENVIRONMENT}
 
 
 def _create_policy(principal_id, resource, effect, context):
@@ -86,3 +119,63 @@ steps = [
     validate_pointer_types,
     generate_response,
 ]
+
+
+def _function_handler(
+    fn, transaction_id: str, method_arn: str, args, kwargs
+) -> tuple[HTTPStatus, any]:
+    try:
+        status_code, result = HTTPStatus.OK, fn(*args, **kwargs)
+    except Exception:
+        status_code = None
+        result = _create_policy(
+            principal_id=transaction_id,
+            resource=method_arn,
+            effect="Deny",
+            context={"error": HTTPStatus.INTERNAL_SERVER_ERROR.phrase},
+        )
+    return status_code, result
+
+
+def execute_steps(
+    index_path: str,
+    event: dict,
+    context: LambdaContext,
+    initial_pipeline_data={},
+    **dependencies,
+) -> tuple[HTTPStatus, dict]:
+    """
+    Executes the handler and wraps it in exception handling
+    """
+    if context is None:
+        context = LambdaContext()
+
+    # This field isnt in the event for authoriser requests for some reason
+    # adding it here to pass pydantic validation later
+    event["isBase64Encoded"] = False
+    transaction_id = generate_transaction_id()
+    method_arn = event["methodArn"]
+
+    status_code, response = _function_handler(
+        _setup_logger,
+        transaction_id=transaction_id,
+        method_arn=method_arn,
+        args=(index_path, transaction_id, event),
+        kwargs=dependencies,
+    )
+
+    if status_code is not HTTPStatus.OK:
+        return status_code, response
+    logger = response
+
+    return _function_handler(
+        _execute_steps,
+        transaction_id=transaction_id,
+        method_arn=method_arn,
+        args=(steps, event, context),
+        kwargs={
+            "logger": logger,
+            "dependencies": dependencies,
+            "initial_pipeline_data": {"method_arn": method_arn},
+        },
+    )

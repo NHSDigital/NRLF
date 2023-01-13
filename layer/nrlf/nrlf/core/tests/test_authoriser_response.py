@@ -1,5 +1,8 @@
+from unittest import mock
+
 import pytest
-from nrlf.core.authoriser import _create_policy
+from lambda_utils.tests.unit.utils import make_aws_event
+from nrlf.core.authoriser import Config, _create_policy, execute_steps
 
 
 @pytest.mark.parametrize(
@@ -54,3 +57,37 @@ def test_authorised_denied(principal_id, resource, context):
     }
 
     assert expected == result
+
+
+@mock.patch(
+    "nrlf.core.authoriser.generate_transaction_id", return_value="a-transaction-id"
+)
+def test_execute_steps_yields_deny_on_internal_server_error(
+    mocked_generate_transaction_id,
+):
+    event = make_aws_event(methodArn={"methodArn": "an-arn"})
+    event["headers"] = None  # This will lead to internal server error
+
+    _, result = execute_steps(
+        index_path=__file__,
+        event=event,
+        context=None,
+        config=Config(
+            AWS_REGION="a-region", PREFIX="a-prefix", ENVIRONMENT="an-environment"
+        ),
+    )
+
+    assert result == {
+        "context": {"error": "Internal Server Error"},
+        "policyDocument": {
+            "Statement": [
+                {
+                    "Action": "execute-api:Invoke",
+                    "Effect": "Deny",
+                    "Resource": "an-arn",
+                }
+            ],
+            "Version": "2012-10-17",
+        },
+        "principalId": "a-transaction-id",
+    }
