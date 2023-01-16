@@ -3,5 +3,5 @@ output "api_gateway_id" {
 }
 
 output "api_base_url" {
-  value = aws_api_gateway_stage.api_gateway_stage.invoke_url
+  value = "https://${var.domain}/${var.path}"
 }

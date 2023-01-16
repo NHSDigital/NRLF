@@ -12,6 +12,11 @@ module "consumer__gateway" {
   kms_key_id                   = module.kms__cloudwatch.kms_arn
   authoriser_lambda_invoke_arn = module.consumer__authoriser_lambda.invoke_arn
   authoriser_lambda_arn        = module.consumer__authoriser_lambda.arn
+  domain                       = local.apis.domain
+  path                         = local.apis.consumer.path
+  depends_on = [
+    aws_acm_certificate_validation.validation
+  ]
 }
 
 module "producer__gateway" {
@@ -30,4 +35,9 @@ module "producer__gateway" {
   kms_key_id                   = module.kms__cloudwatch.kms_arn
   authoriser_lambda_invoke_arn = module.producer__authoriser_lambda.invoke_arn
   authoriser_lambda_arn        = module.producer__authoriser_lambda.arn
+  domain                       = local.apis.domain
+  path                         = local.apis.producer.path
+  depends_on = [
+    aws_acm_certificate_validation.validation
+  ]
 }
