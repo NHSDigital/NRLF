@@ -8,6 +8,7 @@ import requests
 from behave.model import Table
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
+from nrlf.core.types import DynamoDbClient
 from nrlf.producer.fhir.r4.model import OperationOutcome
 from pydantic import BaseModel
 
