@@ -3,6 +3,7 @@ from datetime import datetime as dt
 from typing import Union
 
 from nrlf.core.constants import EMPTY_VALUES, ID_SEPARATOR, JSON_TYPES, Source
+from more_itertools import map_except
 from nrlf.core.errors import FhirValidationError
 from nrlf.core.model import DocumentPointer
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
@@ -11,6 +12,7 @@ from nrlf.producer.fhir.r4.model import Bundle, BundleEntry, DocumentReference
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
+from pydantic import ValidationError
 
 
 def make_timestamp() -> str:
@@ -142,8 +144,11 @@ def create_bundle_entries_from_document_pointers(
         lambda document_pointer: json.loads(document_pointer.document.__root__),
         document_pointers,
     )
-    document_references = map(
-        lambda document_json: DocumentReference(**document_json), document_pointer_jsons
+
+    document_references = map_except(
+        lambda document_json: DocumentReference(**document_json),
+        document_pointer_jsons,
+        ValidationError,
     )
 
     return [BundleEntry(resource=reference) for reference in document_references]
