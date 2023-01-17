@@ -71,7 +71,7 @@ jobs:
 
   lint-check:
     needs: [cache]
-    name: Linting check
+    name: Linting check (head)
     runs-on: [self-hosted, ci]
 
     steps:
