@@ -22,7 +22,7 @@ env:
 
 jobs:
   cache-base:
-    name: Create base cache
+    name: Cache (base)
     runs-on: [self-hosted, ci]
 
     steps:
@@ -46,7 +46,7 @@ jobs:
           name: ${{ env.BASE_CACHE_NAME }}
 
   cache:
-    name: Create cache
+    name: Cache (head)
     runs-on: [self-hosted, ci]
 
     steps:
@@ -97,7 +97,7 @@ jobs:
 
   unit-test:
     needs: [cache]
-    name: Unit test
+    name: Unit test (head)
     runs-on: [self-hosted, ci]
 
     steps:
@@ -123,7 +123,7 @@ jobs:
 
   feature-test-local:
     needs: [cache]
-    name: Local Feature Test
+    name: Local Feature Test (head)
     runs-on: [self-hosted, ci]
 
     steps:
@@ -149,7 +149,7 @@ jobs:
 
   build-base:
     needs: [cache-base]
-    name: Build base
+    name: Build (base)
     runs-on: [self-hosted, ci]
 
     steps:
@@ -181,7 +181,7 @@ jobs:
 
   build:
     needs: [cache]
-    name: Build
+    name: Build (head)
     runs-on: [self-hosted, ci]
 
     steps:
@@ -213,7 +213,7 @@ jobs:
 
   terraform-base:
     needs: [build-base, unit-test, feature-test-local, lint-check]
-    name: Terraform base
+    name: Terraform (base)
     runs-on: [self-hosted, ci]
 
     steps:
@@ -245,8 +245,8 @@ jobs:
           nrlf terraform ciapply ${GITHUB_SHA_SHORT}-ci
 
   terraform-apply:
-    needs: [build, terraform-base, unit-test, lint-check, feature-test-local]
-    name: Terraform apply
+    needs: [build, unit-test, lint-check, feature-test-local, terraform-base]
+    name: Terraform (head)
     runs-on: [self-hosted, ci]
 
     steps:
@@ -286,8 +286,8 @@ jobs:
           path: ./terraform/infrastructure/output.json
 
   integration-test:
-    needs: [build, terraform-apply]
-    name: Integration test
+    needs: [terraform-apply]
+    name: Integration test (head)
     runs-on: [self-hosted, ci]
 
     steps:
@@ -304,10 +304,6 @@ jobs:
         with:
           name: ${{ env.TF_ARTIFACT_NAME }}
           path: ./terraform/infrastructure/
-
-      - name: Output
-        run: |
-          cat ./terraform/infrastructure/output.json
 
       - name: Download cache - ${{ env.CACHE_NAME }}
         uses: ./.github/actions/caching/
@@ -363,7 +359,7 @@ jobs:
           nrlf terraform cidestroy ${GITHUB_SHA_SHORT}-ci
 
   clear-cache:
-    name: Clear Cache
+    name: Clear Caches
     needs: [terraform-destroy]
     if: ${{ always() }}
     runs-on: [self-hosted, ci]
