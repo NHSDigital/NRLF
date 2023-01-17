@@ -237,7 +237,6 @@ jobs:
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
           aws-region: eu-west-2
 
-      # TODO - Find out why we run terraform plan/apply 3x times between terraform-base and terraform-apply.  Looks like a bodge.
       - name: Terraform apply
         run: |
           source nrlf.sh
@@ -271,7 +270,6 @@ jobs:
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
           aws-region: eu-west-2
 
-      # TODO - Find out why we run terraform plan/apply 3x times between terraform-base and terraform-apply.  Looks like a bodge.
       - name: Terraform apply
         run: |
           source nrlf.sh
@@ -306,6 +304,10 @@ jobs:
         with:
           name: ${{ env.TF_ARTIFACT_NAME }}
           path: ./terraform/infrastructure/
+
+      - name: Output
+        run: |
+          cat ./terraform/infrastructure/output.json
 
       - name: Download cache - ${{ env.CACHE_NAME }}
         uses: ./.github/actions/caching/
