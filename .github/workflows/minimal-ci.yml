@@ -1,0 +1,81 @@
+name: Minimal CI
+
+on: workflow_dispatch
+
+permissions:
+  id-token: write
+  contents: read
+  actions: write
+
+env:
+  WORKSPACE: CI
+
+jobs:
+  do_it:
+    name: Do It
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download cache
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: minimal
+
+      - name: Install dependencies
+        run: |
+          source nrlf.sh
+          nrlf make install
+
+      - name: Upload Cache
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: minimal
+
+      - name: Unit Tests
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf test unit
+
+      - name: Local Feature Tests
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf test feature local
+
+      - name: Build
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf make build
+
+      - name: Terraform (Apply)
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf terraform init ${env.WORKSPACE}
+          nrlf terraform plan ${env.WORKSPACE}
+          nrlf terraform apply ${env.WORKSPACE}
+
+      - name: Integration Tests
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf test integration
+          nrlf test feature integration
+
+      - name: Terraform (Destroy)
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf terraform destroy
