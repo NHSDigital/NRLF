@@ -94,13 +94,13 @@ def given_invalid_document_pointer_exists(context: Context, template_name: str):
     rendered_template = template.render(
         context.table, fhir_type=FhirType.DocumentReference
     )
-    core_model = _invalidate_document_pointer_object(rendered_template)
+    core_model = _invalidate_author_on_document_pointer_object(rendered_template)
 
     table_name = test_config.environment_prefix + core_model.kebab()
     test_config.dynamodb_client.put_item(TableName=table_name, Item=core_model.dict())
 
 
-def _invalidate_document_pointer_object(rendered_template):
+def _invalidate_author_on_document_pointer_object(rendered_template):
     modify_template = json.loads(rendered_template)
     author = modify_template["author"]
     del modify_template["author"]
