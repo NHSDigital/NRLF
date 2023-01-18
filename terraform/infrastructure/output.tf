@@ -39,3 +39,7 @@ output "status_lambda_function_names" {
     consumer = module.consumer__status.function_name
   }
 }
+
+output "certificate_domain_name" {
+  value = aws_acm_certificate.certificate.domain_name
+}
