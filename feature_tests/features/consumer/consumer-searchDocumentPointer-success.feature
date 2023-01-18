@@ -37,47 +37,6 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
         "status": "current"
       }
       """
-    And template INVALID_DOCUMENT
-      """
-      {
-        "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
-        "author": {
-          "identifier": {
-            "value": "Practitioner/A985657ZA"
-          }
-        },
-        "custodian": {
-          "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
-            "value": "$custodian"
-          }
-        },
-        "subject": {
-          "identifier": {
-            "system": "https://fhir.nhs.uk/Id/nhs-number",
-            "value": "$subject"
-          }
-        },
-        "type": {
-          "coding": [
-            {
-              "system": "https://snomed.info/ict",
-              "code": "$type"
-            }
-          ]
-        },
-        "content": [
-          {
-            "attachment": {
-              "contentType": "$contentType",
-              "url": "$url"
-            }
-          }
-        ],
-        "status": "current"
-      }
-      """
 
   Scenario: Successfully search for a single Document Pointer by NHS number
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
