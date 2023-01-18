@@ -6,13 +6,20 @@ info:
   title: National Record Locator Producer - FHIR API
   description: |
     ## Overview
-    Use this API to populate an index of a patient’s shared clinical records.
+    Use this API to locate and access patient information shared by other healthcare organisations, to support the direct care of those patients, using the [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
 
-    You can:
-    - manage pointers to clinical records
+    For example, an ambulance service treating a patient could access their "mental health crisis plan" (if they have one) as a PDF document directly from their mental health service provider. This would help a patient get more appropriate care from the emergency services.
 
-    You cannot currently use this API to:
-    - access pointers controlled by other producers
+    As a "provider" who holds information about patients, you can:
+
+    -create a pointer in the NRL to your information
+    -replace your NRL pointer with a newer pointer, superseding the old one
+    -update your NRL pointer status to "entered in error"
+    -delete your NRL pointer to this information
+
+    There is a growing list of health and social care organisations authorised to share records using NRL.
+
+    For more details, see the National Record Locator for developers and the Introduction to the National Record Locator.
 
     ### Data availability, timing and quality
     TBC
@@ -36,8 +43,7 @@ info:
     If you have any other queries, [contact us](https://digital.nhs.uk/developer/help-and-support).
 
     ## Service level
-
-    This API is a TBC service, meaning it is operational and supported TBC.
+    This API is a bronze service, meaning it is operational and supported only during business hours (8am to 6pm), Monday to Friday excluding bank holidays.
 
     For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
 
@@ -112,19 +118,40 @@ info:
 
     To get started, see [digital onboarding](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding#using-the-digital-onboarding-portal).
   version: 1.0.0
+  license:
+    name: MIT
   contact:
     name: NHS Digital API Management
     url: "https://digital.nhs.uk/developer/help-and-support"
     email: api.management@nhs.net
 servers:
-  - url: /
+  - url: "https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4"
+    description: Sandbox environment.
+  - url: "https://int.api.service.nhs.uk/nrl-producer-api/FHIR/R4"
+    description: Integration test environment.
+  - url: "https://api.service.nhs.uk/nrl-producer-api/FHIR/R4"
+    description: Production environment.
 tags:
-  - name: NRLF Consumer
+  - name: NRLF Producer
 paths:
   /DocumentReference:
+    post:
+      tags:
+        - NRLF Producer
+      summary: Create a DocumentReference resource
+      operationId: createDocumentReference
+      responses:
+        "201":
+          description: Create DocumentReference operation successful
+          $ref: "#/components/responses/Success"
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentReference"
+      parameters:
+        - $ref: "#/components/parameters/fromASID"
+        - $ref: "#/components/parameters/toASID"
     get:
       tags:
-        - NRLF Consumer
+        - NRLF Producer
       summary: Search for DocumentReference resources
       operationId: searchDocumentReference
       parameters:
@@ -143,35 +170,10 @@ paths:
             application/fhir+xml:
               schema:
                 $ref: "#/components/schemas/Bundle"
-  /DocumentReference/_search:
-    post:
-      tags:
-        - NRLF Consumer
-      summary: Search for DocumentReference resources
-      operationId: searchPostDocumentReference
-      parameters:
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              properties: {}
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RequestParams"
-      responses:
-        "200":
-          description: Search DocumentReference operation successful
-          content:
-            application/fhir+json:
-              schema:
-                $ref: "#/components/schemas/Bundle"
   /DocumentReference/{id}:
     get:
       tags:
-        - NRLF Consumer
+        - NRLF Producer
       summary: Read a DocumentReference resource
       operationId: readDocumentReference
       parameters:
@@ -183,6 +185,39 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/DocumentReference"
+    put:
+      tags:
+        - NRLF Producer
+      summary: Update an existing DocumentReference resource
+      operationId: updateDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/fromASID"
+        - $ref: "#/components/parameters/toASID"
+      responses:
+        "200":
+          description: Update DocumentReference operation successful
+          $ref: "#/components/responses/Success"
+        "201":
+          description: Create DocumentReference operation successful (requires 'updateCreateEnabled' configuration option)
+          $ref: "#/components/responses/Success"
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentReference"
+    delete:
+      tags:
+        - NRLF Producer
+      summary: Delete a DocumentReference resource
+      operationId: deleteDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/fromASID"
+        - $ref: "#/components/parameters/toASID"
+      responses:
+        "204":
+          description: Delete DocumentReference operation successful
+          $ref: "#/components/responses/Success"
+        "200":
+          $ref: "#/components/responses/Success"
 components:
   requestBodies:
     DocumentReference:
@@ -2006,8 +2041,6 @@ components:
           $ref: "#/components/schemas/RequestQueryCustodian"
         snomed.identifier:
           $ref: "#/components/schemas/RequestQuerySnomedCode"
-      required:
-        - subject
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
@@ -2021,18 +2054,7 @@ components:
       type: string
     RequestHeaderToASID:
       type: string
-  securitySchemes:
-    ${authoriser_name}:
-      type: "apiKey"
-      name: "Authorization"
-      in: "header"
-      x-amazon-apigateway-authtype: "custom"
-      x-amazon-apigateway-authorizer:
-        type: "request"
-        authorizerUri: "${lambda_invoke_arn}"
-        authorizerCredentials: "${authoriser_iam_role}"
-        identitySource: "method.request.header.Authorization"
-        authorizerResultTtlInSeconds: 0
+  securitySchemes: {}
   parameters:
     id:
       name: id
@@ -2046,7 +2068,6 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
-      required: true
     custodian:
       name: custodian.identifier
       in: query
@@ -2069,5 +2090,24 @@ components:
       description: The Spine ASID.
       in: header
       schema:
-        $ref: "#/components/schemas/RequestHeaderFromASID"
+        $ref: "#/components/schemas/RequestHeaderToASID"
       required: true
+  responses:
+    Success:
+      description: Success Response
+      content:
+        application/fhir+json:
+          schema:
+            $ref: "#/components/schemas/OperationOutcome"
+        application/fhir+xml:
+          schema:
+            $ref: "#/components/schemas/OperationOutcome"
+    Error:
+      description: Error Response
+      content:
+        application/fhir+json:
+          schema:
+            $ref: "#/components/schemas/OperationOutcome"
+        application/fhir+xml:
+          schema:
+            $ref: "#/components/schemas/OperationOutcome"
