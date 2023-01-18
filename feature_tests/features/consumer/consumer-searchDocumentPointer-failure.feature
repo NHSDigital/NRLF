@@ -5,7 +5,7 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
+        "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/accredited-system-id",

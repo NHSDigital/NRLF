@@ -5,7 +5,7 @@ Feature: Basic failure Scenarios where producer is unable to search for Document
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
+        "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/accredited-system-id",

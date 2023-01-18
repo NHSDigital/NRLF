@@ -5,7 +5,7 @@ Feature: Basic Success Scenarios where producer is able to create a Document Poi
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
+        "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/accredited-system-id",
@@ -80,9 +80,9 @@ Feature: Basic Success Scenarios where producer is able to create a Document Poi
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is successful
-    And Document Pointer "8FW23|1234567890" exists
+    And Document Pointer "8FW23-1234567890" exists
       | property    | value                              |
-      | id          | 8FW23\|1234567890                  |
+      | id          | 8FW23-1234567890                   |
       | nhs_number  | 9278693472                         |
       | producer_id | 8FW23                              |
       | type        | https://snomed.info/ict\|736253002 |
@@ -113,9 +113,9 @@ Feature: Basic Success Scenarios where producer is able to create a Document Poi
       | issue_code        | RESOURCE_CREATED |
       | issue_description | Resource created |
       | message           | Resource created |
-    And Document Pointer "8FW23|1234567891" exists
+    And Document Pointer "8FW23-1234567891" exists
       | property    | value                                    |
-      | id          | 8FW23\|1234567891                        |
+      | id          | 8FW23-1234567891                         |
       | nhs_number  | 2742179658                               |
       | producer_id | 8FW23                                    |
       | type        | https://snomed.info/ict\|861421000000109 |

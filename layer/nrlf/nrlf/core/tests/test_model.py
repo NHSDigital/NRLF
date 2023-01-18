@@ -2,8 +2,7 @@ import json
 from unittest import mock
 
 import pytest
-
-from nrlf.core.constants import DbPrefix
+from nrlf.core.constants import ID_SEPARATOR, DbPrefix
 from nrlf.core.model import (
     ConsumerRequestParams,
     DocumentPointer,
@@ -97,8 +96,8 @@ def test_create_document_pointer_from_fhir_json(mock__make_timestamp):
         fhir_json=fhir_json, api_version=API_VERSION
     )
 
-    id = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"
-    (_, doc_id) = id.split("|")
+    id = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"
+    (_, doc_id) = id.split(ID_SEPARATOR)
     provider_id = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"
     nhs_number = "9278693472"
 
@@ -151,7 +150,7 @@ def test_update_document_pointer_from_fhir_json(mock__make_timestamp):
     actual = core_model.dict()
     expected = {
         **actual,  # we don't test the calculated values here
-        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"},
+        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
         "nhs_number": {"S": "9278693472"},
         "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
         "type": {"S": "https://snomed.info/ict|736253002"},
@@ -168,7 +167,7 @@ def test_reconstruct_document_pointer_from_db():
     document = json.dumps(generate_test_document_reference())
 
     dynamodb_core_model = {
-        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"},
+        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
         "nhs_number": {"S": "9278693472"},
         "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
         "type": {"S": "https://snomed.info/ict|736253002"},
@@ -184,7 +183,7 @@ def test_reconstruct_document_pointer_from_db():
     actual = core_model.dict()
     expected = {
         **actual,  # we don't test the calculated values here
-        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890"},
+        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
         "nhs_number": {"S": "9278693472"},
         "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
         "type": {"S": "https://snomed.info/ict|736253002"},
@@ -217,7 +216,7 @@ def test_create_bundle_from_multiple_document_pointers():
             {
                 "resource": {
                     "resourceType": "DocumentReference",
-                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890",
+                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890",
                     "status": "current",
                     "type": {
                         "coding": [
@@ -249,7 +248,7 @@ def test_create_bundle_from_multiple_document_pointers():
             {
                 "resource": {
                     "resourceType": "DocumentReference",
-                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890",
+                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890",
                     "status": "current",
                     "type": {
                         "coding": [
@@ -301,7 +300,7 @@ def test_create_bundle_from_document_pointer():
             {
                 "resource": {
                     "resourceType": "DocumentReference",
-                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890",
+                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890",
                     "status": "current",
                     "type": {
                         "coding": [

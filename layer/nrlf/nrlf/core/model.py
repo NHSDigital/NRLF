@@ -1,8 +1,6 @@
 import re
 from typing import Optional, Union
 
-from pydantic import BaseModel, Field, root_validator, validator
-
 import nrlf.consumer.fhir.r4.model as consumer_model
 import nrlf.producer.fhir.r4.model as producer_model
 from nrlf.core.dynamodb_types import (
@@ -21,8 +19,9 @@ from nrlf.core.validators import (
     validate_timestamp,
     validate_tuple,
 )
+from pydantic import BaseModel, Field, root_validator, validator
 
-from .constants import DbPrefix
+from .constants import ID_SEPARATOR, DbPrefix
 
 KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
 
@@ -74,7 +73,6 @@ class DynamoDbModel(BaseModel):
         return cls.__name__
 
 
-ID_SEPARATOR = "|"
 KEY_SEPARATOR = "#"
 
 
@@ -138,7 +136,7 @@ class DocumentPointer(DynamoDbModel):
 
     @property
     def doc_id(self) -> str:
-        (_, doc_id) = f"{self.id}".split("|")
+        (_, doc_id) = f"{self.id}".split(ID_SEPARATOR)
         return doc_id
 
     @property
@@ -197,9 +195,14 @@ class DocumentPointer(DynamoDbModel):
         values["type"] = document_type_tuple
         return values
 
-    @validator("id", "type")
-    def validate_tuple(value: any) -> DynamoDbType:
-        validate_tuple(tuple=value.__root__)
+    @validator("id")
+    def validate_id(value: any) -> DynamoDbType:
+        validate_tuple(tuple=value.__root__, separator=ID_SEPARATOR)
+        return value
+
+    @validator("type")
+    def validate_type(value: any) -> DynamoDbType:
+        validate_tuple(tuple=value.__root__, separator="|")
         return value
 
     @validator("nhs_number")

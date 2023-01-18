@@ -5,7 +5,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
+        "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/accredited-system-id",
@@ -54,6 +54,42 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
       "bad":$bad
       }
       """
+    And template DOCUMENT_WITH_INVALID_ID_FORMAT
+      """
+      {
+        "resourceType": "DocumentReference",
+        "id": "$custodian|$identifier",
+        "custodian": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "value": "$custodian"
+          }
+        },
+        "subject": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "$subject"
+          }
+        },
+        "type": {
+          "coding": [
+            {
+              "system": "https://snomed.info/ict",
+              "code": "$type"
+            }
+          ]
+        },
+        "content": [
+          {
+            "attachment": {
+              "contentType": "$contentType",
+              "url": "$url"
+            }
+          }
+        ],
+        "status": "current"
+      }
+      """
     And template OUTCOME
       """
       {
@@ -97,7 +133,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
       | contentType | application/pdf                |
       | status      | current                        |
       | url         | https://example.org/my-doc.pdf |
-    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23|0987654321" from DOCUMENT template
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-0987654321" from DOCUMENT template
       | property    | value                                 |
       | identifier  | 1234567890                            |
       | status      | current                               |
@@ -129,7 +165,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
       | contentType | application/pdf                |
       | status      | current                        |
       | url         | https://example.org/my-doc.pdf |
-    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23|1234567890" from DOCUMENT template
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT template
       | property    | value           |
       | identifier  | 1234567890      |
       | status      | current         |
@@ -161,7 +197,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
       | contentType | application/pdf                |
       | status      | current                        |
       | url         | https://example.org/my-doc.pdf |
-    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23|1234567890" from DOCUMENT template
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT template
       | property    | value           |
       | identifier  | 1234567890      |
       | status      | deleted         |
@@ -192,7 +228,7 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
       | contentType | application/pdf                |
       | status      | current                        |
       | url         | https://example.org/my-doc.pdf |
-    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23|1234567890" from BAD_DOCUMENT template
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from BAD_DOCUMENT template
       | property | value |
       | bad      | true  |
     Then the operation is unsuccessful
@@ -204,3 +240,35 @@ Feature: Failure scenarios where producer is unable to update a Document Pointer
       | issue_code        | VALIDATION_ERROR                                            |
       | issue_description | A parameter or value has resulted in a validation error     |
       | message           | DocumentReference validation failure - Invalid resourceType |
+
+  Scenario: Unable to update Document Pointer with an invalid id format
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | status      | current                        |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT_WITH_INVALID_ID_FORMAT template
+      | property    | value           |
+      | identifier  | 1234567890      |
+      | status      | deleted         |
+      | type        | 736253002       |
+      | custodian   | 8FW23           |
+      | subject     | 9278693472      |
+      | contentType | application/pdf |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                                                               |
+      | issue_type        | processing                                                                                                          |
+      | issue_level       | error                                                                                                               |
+      | issue_code        | VALIDATION_ERROR                                                                                                    |
+      | issue_description | A parameter or value has resulted in a validation error                                                             |
+      | message           | DocumentReference validation failure - Invalid __root__ - Input is not composite of the form a-b: 8FW23\|1234567890 |

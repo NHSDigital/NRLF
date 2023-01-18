@@ -5,7 +5,7 @@ Feature: Basic Success Scenarios where consumer is able to search by POST for Do
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
+        "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/accredited-system-id",

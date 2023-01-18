@@ -32,7 +32,7 @@ def test_strip_none():
 
 def test_id():
     actual = generate_test_id(provider_id="RJ11", local_document_id="999")
-    expected = "RJ11|999"
+    expected = "RJ11-999"
     assert actual == expected
 
 

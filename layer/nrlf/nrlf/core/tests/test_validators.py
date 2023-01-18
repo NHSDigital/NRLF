@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from nrlf.core.constants import ID_SEPARATOR
 from nrlf.core.transform import make_timestamp
 from nrlf.core.validators import (
     requesting_application_is_not_authorised,
@@ -14,15 +15,15 @@ from nrlf.core.validators import (
 @pytest.mark.parametrize(
     ["tuple", "expected_outcome"],
     (
-        ["foo|bar", True],
-        ["foo|bar|baz", False],
+        ["foo-bar", True],
+        ["foo-bar-baz", True],
         ["foo", False],
     ),
 )
 def test_validate_tuple(tuple, expected_outcome):
     outcome = True
     try:
-        validate_tuple(tuple=tuple)
+        validate_tuple(tuple=tuple, separator=ID_SEPARATOR)
     except ValueError:
         outcome = False
     assert expected_outcome == outcome
