@@ -11,6 +11,7 @@ on:
         options:
           - dev
           - ref
+          - int
       branch_name:
         description: Branch to deploy
         required: true
@@ -176,7 +177,7 @@ jobs:
           path: ./terraform/infrastructure/output.json
 
   smoke-test:
-    needs: [build, terraform-apply]
+    needs: [terraform-apply]
     name: Smoke tests
     runs-on: [self-hosted, ci]
 
@@ -216,7 +217,7 @@ jobs:
 
   clear-cache:
     name: Clear Cache
-    needs: [terraform-apply, smoke-test]
+    needs: [smoke-test]
     if: ${{ always() }}
     runs-on: [self-hosted, ci]
 

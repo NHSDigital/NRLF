@@ -17,17 +17,14 @@ from fire import Fire
 from helpers.terraform import get_terraform_json
 
 DEFAULT_WORKSPACE = "dev"
-NRLF_TO_APIGEE_ENV = {
-    DEFAULT_WORKSPACE: "internal-dev.api.service.nhs.uk",
-    "ref": "ref.api.service.nhs.uk",
-    "prod": "api.service.nhs.uk",
+
+# Map an environment to an AWS Account
+AWS_ACCOUNT_FOR_ENV = {
+    DEFAULT_WORKSPACE: "dev",
+    "int": "test",
+    "ref": "test",
+    "prod": "prod",
 }
-
-
-@pytest.fixture
-def environment() -> str:
-    env = os.environ.get("TF_WORKFLOW_ID", DEFAULT_WORKSPACE).strip().lower()
-    return env
 
 
 def generate_jwt(
@@ -78,7 +75,8 @@ def oauth_access_token(api_key, jwt_private_key, oauth_url, kid):
 
 
 def aws_account_id_from_profile(env: str):
-    profile_name = f"nhsd-nrlf-{env}-admin"
+    account = AWS_ACCOUNT_FOR_ENV[env]
+    profile_name = f"nhsd-nrlf-{account}-admin"
 
     session = botocore.session.Session()
     profiles = session.full_config["profiles"]
@@ -88,6 +86,16 @@ def aws_account_id_from_profile(env: str):
     account_id = profile["aws_account_id"]
 
     return account_id
+
+
+def aws_read_ssm_apigee_proxy(session, env: str):
+    ssm_client = session.client("ssm")
+    param_name = f"/nhsd-nrlf--{env}/apigee-proxy"
+    try:
+        param = ssm_client.get_parameter(Name=param_name)
+    except ssm_client.exceptions.ParameterNotFound as e:
+        raise Exception(f"Parameter Not Found: {param_name}") from e
+    return param["Parameter"]["Value"]
 
 
 def aws_read_apigee_app_secrets(session, secret_id: str):
@@ -124,17 +132,14 @@ def aws_session_assume_terraform_role(account_id):
 
 
 @cache
-def get_oauth_token(env: str):
-    if os.environ.get("RUNNING_IN_CI"):
-        account_id = get_terraform_json()["assume_account_id"]["value"]
-    else:
-        account_id = aws_account_id_from_profile(env)
-
-    session = aws_session_assume_terraform_role(account_id)
-    secret_name = f"nrlf-{env}--apigee-app--nrl-{env}"
-    api_key, oauth_url, kid, private_key = aws_read_apigee_app_secrets(
-        session, secret_name
-    )
+def get_oauth_token(session, account: str, env: str):
+    secret_name = f"nhsd-nrlf--{account}--{env}--apigee-app--smoke-test"
+    try:
+        api_key, oauth_url, kid, private_key = aws_read_apigee_app_secrets(
+            session, secret_name
+        )
+    except Exception as e:
+        raise Exception(f"Cannot find secret {secret_name}") from e
 
     success, oauth_token = oauth_access_token(api_key, private_key, oauth_url, kid)
     assert success, oauth_token
@@ -142,9 +147,20 @@ def get_oauth_token(env: str):
     return oauth_token
 
 
-def _prepare_base_request(actor: str, environment: str) -> tuple[str, dict]:
-    apigee_base_url = NRLF_TO_APIGEE_ENV[environment]
-    oauth_token = get_oauth_token(environment)
+def _prepare_base_request(env: str, actor: str) -> tuple[str, dict]:
+    if os.environ.get("RUNNING_IN_CI"):
+        account_id = get_terraform_json()["assume_account_id"]["value"]
+    else:
+        account_id = aws_account_id_from_profile(env)
+    account = AWS_ACCOUNT_FOR_ENV[env]
+
+    session = aws_session_assume_terraform_role(account_id)
+
+    apigee_base_url = aws_read_ssm_apigee_proxy(session, env)
+    if apigee_base_url.strip() == "":
+        pytest.skip("Smoke Test Disabled: No APIGEE Proxy defined")
+
+    oauth_token = get_oauth_token(session, account, env)
 
     base_url = f"https://{apigee_base_url}/nrl-{actor}-api"
     headers = {
@@ -156,6 +172,12 @@ def _prepare_base_request(actor: str, environment: str) -> tuple[str, dict]:
     return base_url, headers
 
 
+@pytest.fixture
+def environment() -> str:
+    env = os.environ.get("TF_WORKFLOW_ID", DEFAULT_WORKSPACE).strip().lower()
+    return env
+
+
 @pytest.mark.parametrize(
     "actor",
     [
@@ -163,8 +185,8 @@ def _prepare_base_request(actor: str, environment: str) -> tuple[str, dict]:
     ],
 )
 @pytest.mark.smoke
-def test_search_endpoints(environment, actor):
-    base_url, headers = _prepare_base_request(actor=actor, environment=environment)
+def test_search_endpoints(actor, environment):
+    base_url, headers = _prepare_base_request(env=environment, actor=actor)
 
     patient_id = urllib.parse.quote(f"https://fhir.nhs.uk/Id/nhs-number|9278693472")
     url = f"{base_url}/FHIR/R4/DocumentReference?subject={patient_id}"

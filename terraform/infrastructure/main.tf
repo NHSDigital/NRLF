@@ -10,7 +10,6 @@ provider "aws" {
       workspace    = terraform.workspace
     }
   }
-
 }
 
 terraform {
