@@ -3,7 +3,7 @@ openapi: 3.0.0
 # for the National Record Locator Producer FHIR API
 # owned by NHS Digital (https://digital.nhs.uk/)
 info:
-  title: National Record Locator Producer - FHIR API
+  title: National Record Locator Consumer - FHIR API
   description: |
     ## Overview
     The National Record Locator (NRL) is a service that holds pointers to data held in local provider systems.
@@ -12,14 +12,10 @@ info:
 
     It can be used to store and publish pointers to patient data held in health systems across England and to look up where relevant patient data is held.
 
-    As a "provider" who holds information about patients, you can:
+    As a "consumer" of pointers relating to citizens, you can:
 
-    -create a pointer in the NRL to your information
-    -replace your NRL pointer with a newer pointer, superseding the old one
-    -update thesome of the meta data associated with your pointer
-    -delete your NRL pointer
-    -Search and read pointers, where your are authorised to do so, for a given patient
-    -Search and read all pointers you have provided
+    -Search a pointer, where your are authorised to do so, for a given patient
+    -Read a pointer, where your are authorised to do so, for a given patient
 
     This service is new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator)."
 
@@ -54,6 +50,7 @@ info:
     If you have any other queries, [contact us](https://digital.nhs.uk/developer/help-and-support).
 
     ## Service level
+
     This API is a bronze service, meaning it is operational and supported only during business hours (8am to 6pm), Monday to Friday excluding bank holidays.
 
     For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
@@ -129,51 +126,19 @@ info:
 
     To get started, see [digital onboarding](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding#using-the-digital-onboarding-portal).
   version: 1.0.0
-  license:
-    name: MIT
   contact:
     name: NHS Digital API Management
     url: "https://digital.nhs.uk/developer/help-and-support"
     email: api.management@nhs.net
 servers:
-  - url: "https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4"
-    description: Sandbox environment.
-  - url: "https://int.api.service.nhs.uk/nrl-producer-api/FHIR/R4"
-    description: Integration test environment.
-  - url: "https://api.service.nhs.uk/nrl-producer-api/FHIR/R4"
-    description: Production environment.
+  - url: /
 tags:
-  - name: NRLF Producer
+  - name: NRLF Consumer
 paths:
   /DocumentReference:
-    post:
-      tags:
-        - NRLF Producer
-      summary: Create a DocumentReference resource
-      operationId: createDocumentReference
-      responses:
-        "201":
-          description: Create DocumentReference operation successful
-          $ref: "#/components/responses/Success"
-      requestBody:
-        $ref: "#/components/requestBodies/DocumentReference"
-      parameters:
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
-      security:
-        - ${authoriser_name}: []
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: ${method_createDocumentReference}
-        responses:
-          default:
-            statusCode: "201"
-        passthroughBehavior: when_no_match
-        contentHandling: CONVERT_TO_TEXT
     get:
       tags:
-        - NRLF Producer
+        - NRLF Consumer
       summary: Search for DocumentReference resources
       operationId: searchDocumentReference
       parameters:
@@ -192,21 +157,35 @@ paths:
             application/fhir+xml:
               schema:
                 $ref: "#/components/schemas/Bundle"
-      security:
-        - ${authoriser_name}: []
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: ${method_searchDocumentReference}
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: when_no_match
-        contentHandling: CONVERT_TO_TEXT
+  /DocumentReference/_search:
+    post:
+      tags:
+        - NRLF Consumer
+      summary: Search for DocumentReference resources
+      operationId: searchPostDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/fromASID"
+        - $ref: "#/components/parameters/toASID"
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties: {}
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestParams"
+      responses:
+        "200":
+          description: Search DocumentReference operation successful
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/Bundle"
   /DocumentReference/{id}:
     get:
       tags:
-        - NRLF Producer
+        - NRLF Consumer
       summary: Read a DocumentReference resource
       operationId: readDocumentReference
       parameters:
@@ -218,98 +197,6 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/DocumentReference"
-      security:
-        - ${authoriser_name}: []
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: ${method_readDocumentReference}
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: when_no_match
-        contentHandling: CONVERT_TO_TEXT
-    put:
-      tags:
-        - NRLF Producer
-      summary: Update an existing DocumentReference resource
-      operationId: updateDocumentReference
-      parameters:
-        - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
-      responses:
-        "200":
-          description: Update DocumentReference operation successful
-          $ref: "#/components/responses/Success"
-        "201":
-          description: Create DocumentReference operation successful (requires 'updateCreateEnabled' configuration option)
-          $ref: "#/components/responses/Success"
-      requestBody:
-        $ref: "#/components/requestBodies/DocumentReference"
-      security:
-        - ${authoriser_name}: []
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: ${method_updateDocumentReference}
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: when_no_match
-        contentHandling: CONVERT_TO_TEXT
-    delete:
-      tags:
-        - NRLF Producer
-      summary: Delete a DocumentReference resource
-      operationId: deleteDocumentReference
-      parameters:
-        - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
-      responses:
-        "204":
-          description: Delete DocumentReference operation successful
-          $ref: "#/components/responses/Success"
-        "200":
-          $ref: "#/components/responses/Success"
-      security:
-        - ${authoriser_name}: []
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: ${method_deleteDocumentReference}
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: when_no_match
-        contentHandling: CONVERT_TO_TEXT
-  /_status:
-    get:
-      tags:
-        - NRLF Producer
-      summary: _status endpoint for APIGEE integration
-      operationId: status
-      responses:
-        "200":
-          description: Producer API is operational
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    enum: ["OK"]
-      x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: ${method_status}
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: when_no_match
-        contentHandling: CONVERT_TO_TEXT
 components:
   requestBodies:
     DocumentReference:
@@ -2133,6 +2020,8 @@ components:
           $ref: "#/components/schemas/RequestQueryCustodian"
         snomed.identifier:
           $ref: "#/components/schemas/RequestQuerySnomedCode"
+      required:
+        - subject
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
@@ -2171,6 +2060,7 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
+      required: true
     custodian:
       name: custodian.identifier
       in: query
@@ -2193,24 +2083,5 @@ components:
       description: The Spine ASID.
       in: header
       schema:
-        $ref: "#/components/schemas/RequestHeaderToASID"
+        $ref: "#/components/schemas/RequestHeaderFromASID"
       required: true
-  responses:
-    Success:
-      description: Success Response
-      content:
-        application/fhir+json:
-          schema:
-            $ref: "#/components/schemas/OperationOutcome"
-        application/fhir+xml:
-          schema:
-            $ref: "#/components/schemas/OperationOutcome"
-    Error:
-      description: Error Response
-      content:
-        application/fhir+json:
-          schema:
-            $ref: "#/components/schemas/OperationOutcome"
-        application/fhir+xml:
-          schema:
-            $ref: "#/components/schemas/OperationOutcome"
