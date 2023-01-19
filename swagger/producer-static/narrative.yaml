@@ -10,29 +10,40 @@ info:
     email: api.management@nhs.net
   description: |
     ## Overview
-    Use this API to locate and access patient information shared by other healthcare organisations, to support the direct care of those patients, using the [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
+    The National Record Locator (NRL) is a service that holds pointers to data held in local provider systems.
 
-    For example, an ambulance service treating a patient could access their "mental health crisis plan" (if they have one) as a PDF document directly from their mental health service provider. This would help a patient get more appropriate care from the emergency services.
+    The service facilitates national sharing, removing the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
+
+    It can be used to store and publish pointers to patient data held in health systems across England and to look up where relevant patient data is held.
 
     As a "provider" who holds information about patients, you can:
 
     -create a pointer in the NRL to your information
     -replace your NRL pointer with a newer pointer, superseding the old one
-    -update your NRL pointer status to "entered in error"
-    -delete your NRL pointer to this information
+    -update thesome of the meta data associated with your pointer
+    -delete your NRL pointer
+    -Search and read pointers, where your are authorised to do so, for a given patient
+    -Search and read all pointers you have provided
+
+    This service is new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator)."
 
     There is a growing list of health and social care organisations authorised to share records using NRL.
 
-    For more details, see the National Record Locator for developers and the Introduction to the National Record Locator.
-
     ### Data availability, timing and quality
-    TBC
+    Pointers are available to be consumed almost imediatley after they have been produced by the provider.
 
     ## Who can use this API
     This API:
     - is only for use by patient-facing applications
     - is only for non-clinical use
     - can only be used where there is a legal basis to do so
+
+    You can not currently use this API to retrieve pointers for:
+    - mental health crisis plans
+    - end of life plans
+    - emergency care plans (eRedbags)
+    - national early warning scores (NEWS)
+    - urgent care plan
 
     Make sure you have a valid use case before you go too far with your development.
     To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
