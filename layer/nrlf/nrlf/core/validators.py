@@ -1,15 +1,17 @@
 from datetime import datetime as dt
 
 from nhs_number import is_valid as is_valid_nhs_number
-from nrlf.core.constants import VALID_SOURCES
+from nrlf.core.constants import ID_SEPARATOR, VALID_SOURCES
 from nrlf.producer.fhir.r4.model import CodeableConcept
 
 
-def _get_tuple_components(tuple: str) -> tuple[str, str]:
+def _get_tuple_components(tuple: str, separator: str) -> tuple[str, str]:
     try:
-        a, b = tuple.split("|")
+        a, b = tuple.split(separator, 1)
     except ValueError:
-        raise ValueError(f"Input is not composite of the form a|b: {tuple}") from None
+        raise ValueError(
+            f"Input is not composite of the form a{separator}b: {tuple}"
+        ) from None
     return a, b
 
 
@@ -19,7 +21,7 @@ def generate_producer_id(id: str, producer_id: str) -> str:
             "producer_id should not be passed to DocumentPointer; "
             "it will be extracted from id."
         )
-    producer_id, _ = _get_tuple_components(tuple=id)
+    producer_id, _ = _get_tuple_components(tuple=id, separator=ID_SEPARATOR)
     return producer_id
 
 
@@ -39,8 +41,8 @@ def validate_nhs_number(nhs_number: str):
         raise ValueError(f"Not a valid NHS Number: {nhs_number}")
 
 
-def validate_tuple(tuple: str):
-    _get_tuple_components(tuple=tuple)
+def validate_tuple(tuple: str, separator: str):
+    _get_tuple_components(tuple=tuple, separator=separator)
 
 
 def validate_source(source: str):

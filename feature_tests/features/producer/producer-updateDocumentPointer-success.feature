@@ -5,7 +5,7 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
       """
       {
          "resourceType": "DocumentReference",
-         "id": "$custodian|$identifier",
+         "id": "$custodian-$identifier",
          "custodian": {
             "identifier": {
                "system": "https://fhir.nhs.uk/Id/accredited-system-id",
@@ -89,7 +89,7 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
       | docStatus   | preliminary                    |
       | author      | Practitioner/xcda1             |
       | description | Physical                       |
-    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23|1234567890" from DOCUMENT template
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT template
       | property    | value           |
       | identifier  | 1234567890      |
       | status      | current         |
@@ -106,9 +106,9 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
       | issue_code        | RESOURCE_UPDATED |
       | issue_description | Resource updated |
       | message           | Resource updated |
-    And Document Pointer "8FW23|1234567890" exists
+    And Document Pointer "8FW23-1234567890" exists
       | property    | value                              |
-      | id          | 8FW23\|1234567890                  |
+      | id          | 8FW23-1234567890                   |
       | nhs_number  | 9278693472                         |
       | producer_id | 8FW23                              |
       | type        | https://snomed.info/ict\|736253002 |
@@ -141,7 +141,7 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
       | docStatus   | preliminary                    |
       | author      | Practitioner/xcda1             |
       | description | Physical                       |
-    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23|1234567890" from DOCUMENT template
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT template
       | property    | value                                           |
       | identifier  | 1234567890                                      |
       | status      | current                                         |
@@ -161,9 +161,9 @@ Feature: Basic Success scenarios where producer is able to update a Document Poi
       | issue_code        | RESOURCE_UPDATED |
       | issue_description | Resource updated |
       | message           | Resource updated |
-    And Document Pointer "8FW23|1234567890" exists
+    And Document Pointer "8FW23-1234567890" exists
       | property    | value                              |
-      | id          | 8FW23\|1234567890                  |
+      | id          | 8FW23-1234567890                   |
       | nhs_number  | 9278693472                         |
       | producer_id | 8FW23                              |
       | type        | https://snomed.info/ict\|736253002 |

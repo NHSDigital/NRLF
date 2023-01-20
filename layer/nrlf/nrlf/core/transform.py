@@ -2,7 +2,7 @@ import json
 from datetime import datetime as dt
 from typing import Union
 
-from nrlf.core.constants import EMPTY_VALUES, JSON_TYPES, Source
+from nrlf.core.constants import EMPTY_VALUES, ID_SEPARATOR, JSON_TYPES, Source
 from nrlf.core.errors import FhirValidationError
 from nrlf.core.model import DocumentPointer
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
@@ -44,7 +44,7 @@ def _create_fhir_model_from_legacy_model(
 ) -> DocumentReference:
     return StrictDocumentReference(
         resourceType=DocumentReference.__name__,
-        id=f"{producer_id}|{legacy_model.logicalIdentifier.logicalId}",
+        id=f"{producer_id}{ID_SEPARATOR}{legacy_model.logicalIdentifier.logicalId}",
         status=legacy_model.status,
         type={"coding": [legacy_model.type.dict()]},
         category=[legacy_model.class_.dict()],

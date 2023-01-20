@@ -5,7 +5,7 @@ Feature: Success scenarios where consumer is able to read a Document Pointer
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
+        "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/accredited-system-id",
@@ -51,7 +51,7 @@ Feature: Success scenarios where consumer is able to read a Document Pointer
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23|1234567890"
+    When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23-1234567890"
     Then the operation is successful
     And the response is a DocumentReference according to the DOCUMENT template with the below values
       | property    | value                          |
