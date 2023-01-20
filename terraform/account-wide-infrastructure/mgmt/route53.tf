@@ -1,3 +1,7 @@
+# ------------------------------------------------------------------------------
+# PROD : record-locator.national.nhs.uk
+# ------------------------------------------------------------------------------
+
 resource "aws_route53_zone" "prod_zone" {
   name = "record-locator.national.nhs.uk"
 
@@ -28,6 +32,10 @@ resource "aws_route53_record" "prod_root" {
     "prod.api.record-locator.national.nhs.uk"
   ]
 }
+
+# ------------------------------------------------------------------------------
+# REF : record-locator.ref.national.nhs.uk
+# ------------------------------------------------------------------------------
 
 resource "aws_route53_zone" "ref_zone" {
   name = "record-locator.ref.national.nhs.uk"
@@ -60,12 +68,29 @@ resource "aws_route53_record" "ref_root" {
   ]
 }
 
+# ------------------------------------------------------------------------------
+# INT : record-locator.int.national.nhs.uk
+# ------------------------------------------------------------------------------
+
 resource "aws_route53_zone" "int_zone" {
   name = "record-locator.int.national.nhs.uk"
 
   tags = {
     Environment = terraform.workspace
   }
+}
+
+resource "aws_route53_record" "int_zone" {
+  zone_id = aws_route53_zone.int_zone.zone_id
+  name    = "api."
+  records = [
+    "ns-1877.awsdns-42.co.uk.",
+    "ns-279.awsdns-34.com.",
+    "ns-789.awsdns-34.net.",
+    "zns-1362.awsdns-42.org. "
+  ]
+  ttl  = 300
+  type = "NS"
 }
 
 resource "aws_route53_record" "int_root" {
@@ -77,6 +102,10 @@ resource "aws_route53_record" "int_root" {
     "int.api.record-locator.int.national.nhs.uk"
   ]
 }
+
+# ------------------------------------------------------------------------------
+# DEV : record-locator.dev.national.nhs.uk
+# ------------------------------------------------------------------------------
 
 resource "aws_route53_zone" "dev_zone" {
   name = "record-locator.dev.national.nhs.uk"
