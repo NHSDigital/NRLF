@@ -19,6 +19,16 @@ resource "aws_route53_record" "prod_zone" {
   type = "NS"
 }
 
+resource "aws_route53_record" "prod_root" {
+  zone_id = aws_route53_zone.prod_zone.zone_id
+  type    = "CNAME"
+  name    = "api.record-locator.national.nhs.uk"
+  ttl     = 300
+  records = [
+    "prod.api.record-locator.national.nhs.uk"
+  ]
+}
+
 resource "aws_route53_zone" "ref_zone" {
   name = "record-locator.ref.national.nhs.uk"
 
@@ -40,12 +50,32 @@ resource "aws_route53_record" "ref_zone" {
   type = "NS"
 }
 
+resource "aws_route53_record" "ref_root" {
+  zone_id = aws_route53_zone.ref_zone.zone_id
+  type    = "CNAME"
+  name    = "api.record-locator.ref.national.nhs.uk"
+  ttl     = 300
+  records = [
+    "ref.api.record-locator.ref.national.nhs.uk"
+  ]
+}
+
 resource "aws_route53_zone" "int_zone" {
   name = "record-locator.int.national.nhs.uk"
 
   tags = {
     Environment = terraform.workspace
   }
+}
+
+resource "aws_route53_record" "int_root" {
+  zone_id = aws_route53_zone.int_zone.zone_id
+  type    = "CNAME"
+  name    = "api.record-locator.int.national.nhs.uk"
+  ttl     = 300
+  records = [
+    "int.api.record-locator.int.national.nhs.uk"
+  ]
 }
 
 resource "aws_route53_zone" "dev_zone" {
@@ -67,4 +97,14 @@ resource "aws_route53_record" "dev_zone" {
   ]
   ttl  = 300
   type = "NS"
+}
+
+resource "aws_route53_record" "dev_root" {
+  zone_id = aws_route53_zone.dev_zone.zone_id
+  type    = "CNAME"
+  name    = "api.record-locator.dev.national.nhs.uk"
+  ttl     = 300
+  records = [
+    "dev.api.record-locator.dev.national.nhs.uk"
+  ]
 }
