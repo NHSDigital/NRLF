@@ -240,9 +240,9 @@ jobs:
       - name: Terraform apply
         run: |
           source nrlf.sh
-          nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
-          nrlf terraform ciplan ${GITHUB_SHA_SHORT}-ci
-          nrlf terraform ciapply ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform ciinit "ci-${GITHUB_SHA_SHORT}"
+          nrlf terraform ciplan "ci-${GITHUB_SHA_SHORT}"
+          nrlf terraform ciapply "ci-${GITHUB_SHA_SHORT}"
 
   terraform-apply:
     needs: [build, unit-test, lint-check, feature-test-local, terraform-base]
@@ -273,11 +273,11 @@ jobs:
       - name: Terraform apply
         run: |
           source nrlf.sh
-          nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
-          nrlf terraform ciplan ${GITHUB_SHA_SHORT}-ci
-          nrlf terraform ciapply ${GITHUB_SHA_SHORT}-ci || echo "ok"
-          nrlf terraform ciplan ${GITHUB_SHA_SHORT}-ci
-          nrlf terraform ciapply ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform ciinit "ci-${GITHUB_SHA_SHORT}"
+          nrlf terraform ciplan "ci-${GITHUB_SHA_SHORT}"
+          nrlf terraform ciapply "ci-${GITHUB_SHA_SHORT}" || echo "ok"
+          nrlf terraform ciplan "ci-${GITHUB_SHA_SHORT}"
+          nrlf terraform ciapply "ci-${GITHUB_SHA_SHORT}"
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact/
@@ -355,12 +355,12 @@ jobs:
       - name: Terraform destroy
         run: |
           source nrlf.sh
-          nrlf terraform ciinit ${GITHUB_SHA_SHORT}-ci
-          nrlf terraform cidestroy ${GITHUB_SHA_SHORT}-ci
+          nrlf terraform ciinit "ci-${GITHUB_SHA_SHORT}"
+          nrlf terraform cidestroy "ci-${GITHUB_SHA_SHORT}"
 
   clear-cache:
     name: Clear Caches
-    needs: [terraform-destroy]
+    needs: [integration-test]
     if: ${{ always() }}
     runs-on: [self-hosted, ci]
     steps:
