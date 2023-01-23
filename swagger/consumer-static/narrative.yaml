@@ -1,5 +1,5 @@
 # This is an OpenAPI Specification (https://swagger.io/specification/)
-# for the National Record Locator Producer FHIR API
+# for the National Record Locator Consumer FHIR API
 # owned by NHS Digital (https://digital.nhs.uk/)
 info:
   version: 1.0.0
@@ -18,15 +18,15 @@ info:
 
     As a "consumer" of pointers relating to citizens, you can:
 
-    -Search a pointer, where your are authorised to do so, for a given patient
-    -Read a pointer, where your are authorised to do so, for a given patient
+    -Search a pointer, where you are authorised to do so, for a given patient
+    -Read a pointer, where you are authorised to do so, for a given patient
 
-    This service is new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator)."
+    This service is a new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
 
     There is a growing list of health and social care organisations authorised to share records using NRL.
 
     ### Data availability, timing and quality
-    Pointers are available to be consumed almost imediatley after they have been produced by the provider.
+    Pointers are available to be consumed almost immediately after they have been produced by the provider.
 
     ## Who can use this API
     This API:
@@ -55,7 +55,7 @@ info:
 
     ## Service level
 
-    This API is a bronze service, meaning it is operational and supported only during business hours (8am to 6pm), Monday to Friday excluding bank holidays.
+    This API is a bronze service, meaning it is operational and supported only during business hours (8am to 6pm), Monday to Friday, excluding bank holidays.
 
     For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
 
@@ -94,9 +94,9 @@ info:
     ## Environments and testing
     | Environment       | Base URL                                                               |
     | ----------------- | ---------------------------------------------------------------------- |
-    | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4/`     |
-    | Integration test  | `https://int.api.service.nhs.uk/nrl-producer-api/FHIR/R4/`         |
-    | Production        | `https://api.service.nhs.uk/nrl-producer-api/FHIR/R4/`             |
+    | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`     |
+    | Integration test  | `https://int.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`         |
+    | Production        | `https://api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`             |
 
     ### Sandbox testing
     Our [sandbox environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#sandbox-testing):

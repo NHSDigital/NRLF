@@ -16,17 +16,17 @@ info:
 
     -create a pointer in the NRL to your information
     -replace your NRL pointer with a newer pointer, superseding the old one
-    -update thesome of the meta data associated with your pointer
+    -update some of the metadata associated with your pointer
     -delete your NRL pointer
-    -Search and read pointers, where your are authorised to do so, for a given patient
+    -Search and read pointers, where you are authorised to do so, for a given patient
     -Search and read all pointers you have provided
 
-    This service is new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator)."
+    This service is a new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
 
     There is a growing list of health and social care organisations authorised to share records using NRL.
 
     ### Data availability, timing and quality
-    Pointers are available to be consumed almost imediatley after they have been produced by the provider.
+    Pointers are available to be consumed almost immediately after they have been produced by the provider.
 
     ## Who can use this API
     This API:
