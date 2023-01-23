@@ -84,7 +84,7 @@ Feature: Success Scenarios where producer unable to supersede Document Pointers
       | https://snomed.info/ict | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 8FW23\|1234567890              |
+      | identifier  | 8FW23-1234567890               |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
@@ -92,7 +92,7 @@ Feature: Success Scenarios where producer unable to supersede Document Pointers
       | url         | https://example.org/my-doc.pdf |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 8FW23\|1234567891              |
+      | identifier  | 8FW23-1234567891               |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
@@ -100,9 +100,9 @@ Feature: Success Scenarios where producer unable to supersede Document Pointers
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
       | property    | value                          |
-      | identifier  | 8FW23\|1234567892              |
-      | target      | 8FW23\|1234567890              |
-      | target      | 8FW23\|1234567891              |
+      | identifier  | 8FW23-1234567892               |
+      | target      | 8FW23-1234567890               |
+      | target      | 8FW23-1234567891               |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
@@ -116,9 +116,9 @@ Feature: Success Scenarios where producer unable to supersede Document Pointers
       | issue_code        | RESOURCE_SUPERSEDED                      |
       | issue_description | Resource created and Resource(s) deleted |
       | message           | Resource created and Resource(s) deleted |
-    And Document Pointer "8FW23|1234567892" exists
+    And Document Pointer "8FW23-1234567892" exists
       | property    | value                              |
-      | id          | 8FW23\|1234567892                  |
+      | id          | 8FW23-1234567892                   |
       | nhs_number  | 9278693472                         |
       | producer_id | 8FW23                              |
       | type        | https://snomed.info/ict\|736253002 |
@@ -127,5 +127,5 @@ Feature: Success Scenarios where producer unable to supersede Document Pointers
       | updated_on  | NULL                               |
       | document    | <document>                         |
       | created_on  | <timestamp>                        |
-    And Document Pointer "8FW23|1234567890" does not exist
-    And Document Pointer "8FW23|1234567891" does not exist
+    And Document Pointer "8FW23-1234567890" does not exist
+    And Document Pointer "8FW23-1234567891" does not exist

@@ -53,6 +53,8 @@ example 3: illegal document id to test validation routines
 
 import random
 
+from nrlf.core.constants import ID_SEPARATOR
+
 SNOMED_SYSTEM = "https://snomed.info/ict"
 SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN = "736253002"
 SNOMED_CODES_EMERGENCY_HEALTH_CARE_PLAN = "887701000000100"
@@ -72,11 +74,10 @@ CONTENT_EXAMPLE_PDF_MIME = "application/pdf"
 CONTENT_EXAMPLE_PDF_URL = "https://example.org/my-doc.pdf"
 
 DOCUMENTS_SUCCESS = "1234567890"
-DOCUMENT_ID_SEPARATOR = "|"
 
 
 def generate_test_id(provider_id: str, local_document_id: str):
-    return f"{provider_id}{DOCUMENT_ID_SEPARATOR}{local_document_id}"
+    return f"{provider_id}{ID_SEPARATOR}{local_document_id}"
 
 
 def generate_test_attachment(

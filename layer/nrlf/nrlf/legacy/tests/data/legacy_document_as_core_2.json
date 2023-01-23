@@ -2,7 +2,7 @@
   "created_on": { "S": "2022-08-23T14:45:17" },
   "document": "<<mocked out>>",
   "id": {
-    "S": "producer_123|34445a1b-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851"
+    "S": "producer_123-34445a1b-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851"
   },
   "nhs_number": { "S": "3006500369" },
   "producer_id": { "S": "producer_123" },

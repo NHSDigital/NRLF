@@ -191,6 +191,8 @@ function _get_account_id_location() {
     echo "${PROD_ACCOUNT_ID_LOCATION}"
   elif [ "$environment" = "ref" ] || [ "$environment" = "test" ] || [ "$environment" = "ref-sandbox" ]; then
     echo "${TEST_ACCOUNT_ID_LOCATION}"
+  elif [ "$environment" = "int" ] || [ "$environment" = "uat" ] || [ "$environment" = "int-sandbox" ]; then
+    echo "${TEST_ACCOUNT_ID_LOCATION}"
   else
     echo "${DEV_ACCOUNT_ID_LOCATION}"
   fi
@@ -214,6 +216,8 @@ function _get_environment_vars_file() {
     vars_prefix="prod"
   elif [ "$environment" = "ref" ] || [ "$environment" = "test" ]; then
     vars_prefix="test"
+  elif [ "$environment" = "int" ] || [ "$environment" = "uat" ]; then
+    vars_prefix="uat"
   fi
 
   echo "./etc/${vars_prefix}.tfvars"
@@ -222,8 +226,9 @@ function _get_environment_vars_file() {
 
 function _terraform_init() {
   local env=$1
+  local args=${@:2}
 
-  terraform init || return 1
+  terraform init $args || return 1
   terraform workspace select "$env" || terraform workspace new "$env" || return 1
 }
 
@@ -233,10 +238,27 @@ function _terraform_plan() {
   local var_file=$2
   local plan_file=$3
   local aws_account_id=$4
+  local args=${@:5}
 
   terraform init || return 1
   terraform workspace select "$env" || terraform workspace new "$env" || return 1
-  terraform plan -var-file="$var_file" -out="$plan_file" -var "assume_account=${aws_account_id}" -var "assume_role=${TERRAFORM_ROLE_NAME}" || return 1
+  terraform plan \
+    -out="$plan_file" \
+    -var-file="$var_file" \
+    -var "assume_account=${aws_account_id}" \
+    -var "assume_role=${TERRAFORM_ROLE_NAME}" \
+    $args || return 1
+}
+
+
+function _terraform_apply() {
+  local env=$1
+  local plan_file=$2
+  local args=${@:4}
+
+  terraform workspace select "$env" || terraform workspace new "$env" || return 1
+  terraform apply $args "$plan_file" || return 1
+  terraform output -json > output.json || return 1
 }
 
 
@@ -244,25 +266,19 @@ function _terraform_destroy() {
   local env=$1
   local var_file=$2
   local aws_account_id=$3
+  local args=${@:4}
 
   terraform workspace select "$env" || terraform workspace new "$env" || return 1
-  terraform destroy -var-file="$var_file" -var "assume_account=${aws_account_id}" -var "assume_role=${TERRAFORM_ROLE_NAME}" "${@:4}" || return 1
+  terraform destroy \
+    -var-file="$var_file" \
+    -var "assume_account=${aws_account_id}" \
+    -var "assume_role=${TERRAFORM_ROLE_NAME}" \
+    $args || return 1
   if [ "$env" != "default" ]; then
     terraform workspace select default || return 1
     terraform workspace delete "$env" || return 1
   fi
 }
-
-
-function _terraform_apply() {
-  local env=$1
-  local plan_file=$2
-
-  terraform workspace select "$env" || terraform workspace new "$env" || return 1
-  terraform apply "$plan_file" || return 1
-  terraform output -json > output.json || return 1
-}
-
 
 function _get_terraform_dir() {
   local env=$1

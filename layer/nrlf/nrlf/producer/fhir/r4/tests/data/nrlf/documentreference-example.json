@@ -1,6 +1,6 @@
 {
   "resourceType": "DocumentReference",
-  "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567890",
+  "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890",
   "custodian": {
     "identifier": {
       "system": "https://fhir.nhs.uk/Id/accredited-system-id",

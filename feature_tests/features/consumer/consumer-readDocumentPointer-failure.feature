@@ -5,7 +5,7 @@ Feature: Failure scenarios where consumer is unable to read a Document Pointer
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
+        "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/accredited-system-id",
@@ -79,7 +79,7 @@ Feature: Failure scenarios where consumer is unable to read a Document Pointer
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23|1234567890"
+    When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23-1234567890"
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                   |
@@ -94,7 +94,7 @@ Feature: Failure scenarios where consumer is unable to read a Document Pointer
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23|1234567890"
+    When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23-1234567890"
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                   |

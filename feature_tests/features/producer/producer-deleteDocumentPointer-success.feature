@@ -5,7 +5,7 @@ Feature: Success scenarios where producer is able to delete a Document Pointer
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
+        "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/accredited-system-id",
@@ -79,7 +79,7 @@ Feature: Success scenarios where producer is able to delete a Document Pointer
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    When Producer "Aaron Court Mental Health NH" deletes an existing Document Reference "8FW23|1234567890"
+    When Producer "Aaron Court Mental Health NH" deletes an existing Document Reference "8FW23-1234567890"
     Then the operation is successful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value            |

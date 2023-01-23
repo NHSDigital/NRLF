@@ -48,6 +48,19 @@ resource "aws_route53_zone" "int_zone" {
   }
 }
 
+resource "aws_route53_record" "int_zone" {
+  zone_id = aws_route53_zone.int_zone.zone_id
+  name    = "api."
+  records = [
+    "ns-1877.awsdns-42.co.uk.",
+    "ns-279.awsdns-34.com.",
+    "ns-789.awsdns-34.net.",
+    "zns-1362.awsdns-42.org. "
+  ]
+  ttl  = 300
+  type = "NS"
+}
+
 resource "aws_route53_zone" "dev_zone" {
   name = "record-locator.dev.national.nhs.uk"
 

@@ -26,6 +26,10 @@ function _nrlf_commands_help() {
 }
 
 function nrlf() {
+  if [ "$RUNNING_IN_CI" = "1" ]; then
+    echo $0 $@
+  fi
+
   local current=$(pwd)
   local command=$1
 
