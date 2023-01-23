@@ -10,35 +10,27 @@ info:
     email: api.management@nhs.net
   description: |
     ## Overview
-    The National Record Locator (NRL) is a service that holds pointers and enables access to data held in local provider systems.
+    The National Record Locator (NRL) is a service that holds pointers to data held in local provider systems.
 
-    The service facilitates the national sharing, removing the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
+    The service facilitates national sharing, removing the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
 
-    It can be used to store and publish pointers to patient data held in health systems across England, to look up where relevant patient data is held and to retrieve data.
-
-    This service is intended to replace the existing NRL service [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
+    It can be used to store and publish pointers to patient data held in health systems across England and to look up where relevant patient data is held.
 
     As a "provider" who holds information about patients, you can:
 
     -create a pointer in the NRL to your information
     -replace your NRL pointer with a newer pointer, superseding the old one
-    -update parts of the meta data associated with a pointer
+    -update some of the metadata associated with your pointer
     -delete your NRL pointer
-    -search and read the current pointers you own relating to an indiviual patient
-    -search and read all the current pointers you own
+    -Search and read pointers, where you are authorised to do so, for a given patient
+    -Search and read all pointers you have provided
 
-    You can not currently use this API to get pointers for;
-
-    -mental health crisis plans
-    -end of care plans
-    -emergency care plans (eRedbags)
-    -national early warning scores (NEWS)
-    -urgent care plan
+    This service is new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
 
     There is a growing list of health and social care organisations authorised to share records using NRL.
 
     ### Data availability, timing and quality
-    There is a risk that pointers for patients with two NHS Numbers are not translated when the NHS Numbers are merged by NBO, it is therefore recomended that this service is used alongside other personal demographic services such as [Personal Demographics Service FHIR API](https://digital.nhs.uk/developer/api-catalogue/personal-demographics-service-fhir).
+    Pointers are available to be consumed almost immediately after they have been produced by the provider.
 
     Pointers are immediately available to authorised providers and consumers after successful creation.
     ## Who can use this API
@@ -46,6 +38,13 @@ info:
     - is only for use by patient-facing applications
     - is only for non-clinical use
     - can only be used where there is a legal basis to do so
+
+    You can not currently use this API to retrieve pointers for:
+    - mental health crisis plans
+    - end of life plans
+    - emergency care plans (eRedbags)
+    - national early warning scores (NEWS)
+    - urgent care plan
 
     Make sure you have a valid use case before you go too far with your development.
     To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
