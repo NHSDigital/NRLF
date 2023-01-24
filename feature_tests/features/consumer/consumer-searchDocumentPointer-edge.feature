@@ -5,7 +5,7 @@ Feature: Edge scenarios when consumer searches for Document Pointers
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
+        "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/accredited-system-id",
@@ -41,7 +41,7 @@ Feature: Edge scenarios when consumer searches for Document Pointers
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
+        "id": "$custodian-$identifier",
         "author": {
           "identifier": {
             "value": "Practitioner/A985657ZA"

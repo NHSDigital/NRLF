@@ -5,7 +5,7 @@ Feature: Edge scenarios when consumer reads Document Pointers
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
+        "id": "$custodian-$identifier",
         "author": {
           "identifier": {
             "value": "Practitioner/A985657ZA"
@@ -84,7 +84,7 @@ Feature: Edge scenarios when consumer reads Document Pointers
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23|1114567891"
+    When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23-1114567891"
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                   |
