@@ -1,7 +1,7 @@
 Feature: Edge scenarios when consumer reads Document Pointers
 
   Background:
-    Given template INVALID_DOCUMENT
+    Given template INVALID_AUTHOR_DOCUMENT
       """
       {
         "resourceType": "DocumentReference",
@@ -76,7 +76,7 @@ Feature: Edge scenarios when consumer reads Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
-    And an invalid Document Pointer exists in the system with the below values for INVALID_DOCUMENT template
+    And an invalid Document Pointer exists in the system with the below values for INVALID_AUTHOR_DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567891                     |
       | type        | 736253002                      |

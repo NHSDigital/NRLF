@@ -37,7 +37,7 @@ Feature: Edge scenarios when consumer searches for Document Pointers
         "status": "current"
       }
       """
-    And template INVALID_DOCUMENT
+    And template INVALID_AUTHOR_DOCUMENT
       """
       {
         "resourceType": "DocumentReference",
@@ -108,7 +108,7 @@ Feature: Edge scenarios when consumer searches for Document Pointers
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
-    And an invalid Document Pointer exists in the system with the below values for INVALID_DOCUMENT template
+    And an invalid Document Pointer exists in the system with the below values for INVALID_AUTHOR_DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567891                     |
       | type        | 736253002                      |
