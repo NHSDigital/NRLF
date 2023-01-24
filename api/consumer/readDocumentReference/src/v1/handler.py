@@ -22,7 +22,7 @@ def read_document_reference(
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
     decoded_id = urllib.parse.unquote(event.pathParameters["id"])
-    print("decoded_id_x", decoded_id)
+
     pk = DocumentPointer.convert_id_to_pk(decoded_id)
     pointer_types = data["pointer_types"]
 
