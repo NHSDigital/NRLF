@@ -9,6 +9,7 @@ from lambda_utils.logging import MinimalEventModelForLogging, log_action
 from nrlf.core.dynamodb_types import to_dynamodb_dict
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
+from nrlf.core.validators import validate_document_reference_string
 from pydantic import BaseModel
 
 SANDBOX = "sandbox"
@@ -43,12 +44,23 @@ def _seed_step_factory(
     ) -> PipelineData:
         repository: Repository = dependencies["repository_factory"](item_type)
         for item in items:
-            repository.create(item)
+            if _is_item_valid(item):
+                repository.create(item)
         return PipelineData(message="ok")
 
     if log:
         seeder = log_action(narrative=f"Seeding {item_type_name} table")(seeder)
     return seeder
+
+
+def _is_item_valid(item: BaseModel):
+    try:
+        if type(item) == DocumentPointer:
+            validate_document_reference_string(item.document.__root__)
+        else:
+            return True
+    except:
+        return False
 
 
 @log_action(narrative="Ensuring that this is a sandbox environment")
