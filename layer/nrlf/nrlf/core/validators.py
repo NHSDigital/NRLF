@@ -73,8 +73,6 @@ def validate_document_reference_string(fhir_json: str):
     try:
         DocumentReference(**json.loads(fhir_json))
     except ValidationError:
-        print("xxx")
         raise DocumentReferenceValidationError("Item could not be found") from None
     except ValueError:
-        print("yyy")
         raise DocumentReferenceValidationError("Item could not be found") from None
