@@ -2,9 +2,11 @@ from unittest import mock
 
 import pytest
 from nrlf.core.constants import ID_SEPARATOR
+from nrlf.core.errors import DocumentReferenceValidationError, ItemNotFound
 from nrlf.core.transform import make_timestamp
 from nrlf.core.validators import (
     requesting_application_is_not_authorised,
+    validate_document_reference_string,
     validate_nhs_number,
     validate_source,
     validate_timestamp,
@@ -98,3 +100,106 @@ def test_requesting_application_is_not_authorised(
     )
 
     assert result == expected_outcome
+
+
+@pytest.mark.parametrize(
+    ["document_reference_string", "expected_outcome"],
+    (
+        ["", DocumentReferenceValidationError],
+        ["{}", DocumentReferenceValidationError],
+        [
+            """
+            {
+                "resourceType": "DocumentReference",
+                "id": "8FW23-1114567891",
+                "custodian": {
+                "identifier": {
+                    "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+                    "value": "8FW23"
+                }
+                },
+                "subject": {
+                "identifier": {
+                    "system": "https://fhir.nhs.uk/Id/nhs-number",
+                    "value": "9278693472"
+                }
+                },
+                "type": {
+                "coding": [
+                    {
+                    "system": "https://snomed.info/ict",
+                    "code": "736253002"
+                    }
+                ]
+                },
+                "content": [
+                {
+                    "attachment": {
+                    "contentType": "application/pdf",
+                    "url": "https://example.org/my-doc.pdf"
+                    }
+                }
+                ],
+                "status": "current",
+                "author": {
+
+                }
+            }
+            """,
+            DocumentReferenceValidationError,
+        ],
+        [
+            """
+            {
+                "resourceType": "DocumentReference",
+                "id": "8FW23-1114567891",
+                "custodian": {
+                "identifier": {
+                    "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+                    "value": "8FW23"
+                }
+                },
+                "subject": {
+                "identifier": {
+                    "system": "https://fhir.nhs.uk/Id/nhs-number",
+                    "value": "9278693472"
+                }
+                },
+                "type": {
+                "coding": [
+                    {
+                    "system": "https://snomed.info/ict",
+                    "code": "736253002"
+                    }
+                ]
+                },
+                "content": [
+                {
+                    "attachment": {
+                    "contentType": "application/pdf",
+                    "url": "https://example.org/my-doc.pdf"
+                    }
+                }
+                ],
+                "status": "current",
+                "author":[
+                    {
+                        "identifier": {
+                            "value": "Practitioner/A985657ZA"
+                            }
+                    }
+                ]
+            }
+            """,
+            None,
+        ],
+    ),
+)
+def test_is_document_reference_string_valid(
+    document_reference_string, expected_outcome
+):
+    if type(expected_outcome) == type and issubclass(expected_outcome, Exception):
+        with pytest.raises(expected_outcome):
+            validate_document_reference_string(document_reference_string)
+    else:
+        assert validate_document_reference_string(document_reference_string) == None

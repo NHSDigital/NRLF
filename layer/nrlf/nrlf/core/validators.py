@@ -1,8 +1,11 @@
+import json
 from datetime import datetime as dt
 
 from nhs_number import is_valid as is_valid_nhs_number
 from nrlf.core.constants import ID_SEPARATOR, VALID_SOURCES
-from nrlf.producer.fhir.r4.model import CodeableConcept
+from nrlf.core.errors import DocumentReferenceValidationError, ItemNotFound
+from nrlf.producer.fhir.r4.model import CodeableConcept, DocumentReference
+from pydantic import ValidationError
 
 
 def _get_tuple_components(tuple: str, separator: str) -> tuple[str, str]:
@@ -62,3 +65,12 @@ def requesting_application_is_not_authorised(
     requesting_application_id, authenticated_application_id
 ):
     return requesting_application_id != authenticated_application_id
+
+
+def validate_document_reference_string(fhir_json: str):
+    try:
+        DocumentReference(**json.loads(fhir_json))
+    except ValidationError:
+        raise DocumentReferenceValidationError("Item could not be found")
+    except ValueError:
+        raise DocumentReferenceValidationError("Item could not be found")

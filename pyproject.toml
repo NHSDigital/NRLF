@@ -16,6 +16,7 @@ pytest = "^7.2.0"
 boto3 = "^1.26.22"
 pyjwt = "^2.6.0"
 cryptography = "^38.0.4"
+more-itertools = "^9.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"
