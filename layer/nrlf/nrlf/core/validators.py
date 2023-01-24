@@ -3,8 +3,6 @@ from datetime import datetime as dt
 
 from nhs_number import is_valid as is_valid_nhs_number
 from nrlf.core.constants import ID_SEPARATOR, VALID_SOURCES
-from nrlf.producer.fhir.r4.model import CodeableConcept
-from nrlf.core.constants import VALID_SOURCES
 from nrlf.core.errors import DocumentReferenceValidationError, ItemNotFound
 from nrlf.producer.fhir.r4.model import CodeableConcept, DocumentReference
 from pydantic import ValidationError
@@ -73,6 +71,6 @@ def validate_document_reference_string(fhir_json: str):
     try:
         DocumentReference(**json.loads(fhir_json))
     except ValidationError:
-        raise DocumentReferenceValidationError("Item could not be found") from None
+        raise DocumentReferenceValidationError("Item could not be found")
     except ValueError:
-        raise DocumentReferenceValidationError("Item could not be found") from None
+        raise DocumentReferenceValidationError("Item could not be found")
