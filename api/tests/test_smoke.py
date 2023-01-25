@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+import sys
 import time
 import urllib.parse
 from datetime import datetime
@@ -196,4 +197,11 @@ def test_search_endpoints(actor, environment):
 
 
 if __name__ == "__main__":
-    Fire(get_oauth_token)
+    env = sys.argv[1]
+    account = sys.argv[2]
+
+    account_id = aws_account_id_from_profile(account)
+
+    session = aws_session_assume_terraform_role(account_id)
+
+    print(get_oauth_token(session, env=env, account=account))
