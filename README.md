@@ -201,10 +201,17 @@ This will run an end-to-end test against the `dev` environment/workspace via Api
 You can get an OAuth token for e.g. Postman requests by doing:
 
 ```
-nrlf oauth dev
+nrlf oauth {env} {account}
 ```
 
-Other valid environments in addition to `dev` are `ref` and `prod`. This command will print
+Some examples:
+
+```
+nrlf oauth dev dev
+nrlf oauth int test
+```
+
+Other valid environments in addition to `dev` are `int`, `uat` and `prod` (reminder that int and uat exist within the test account). This command will print
 out an OAuth `<token>` which can be used in a request to our Apigee endpoint as a header of the form:
 
 ```
