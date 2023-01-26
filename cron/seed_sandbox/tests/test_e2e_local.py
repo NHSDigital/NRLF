@@ -35,7 +35,6 @@ def test_e2e_local(_mocked__is_sandbox_lambda):
     from cron.seed_sandbox.index import handler
 
     response = handler(event=None)
-    assert True == False
     assert response == {
         "body": '{"message": "ok"}',
         "headers": {"Content-Length": 17, "Content-Type": "application/json"},
