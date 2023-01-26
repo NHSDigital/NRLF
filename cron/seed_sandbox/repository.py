@@ -36,7 +36,7 @@ class SandboxRepository(Repository):
             {
                 "Delete": {
                     "TableName": self.table_name,
-                    "Key": {"id": item["id"]},
+                    "Key": {"pk": item["pk"], "sk": item["sk"]},
                 }
             }
             for item in self._scan()
