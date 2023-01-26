@@ -200,7 +200,7 @@ if __name__ == "__main__":
     env = sys.argv[1]
     account = sys.argv[2]
 
-    account_id = aws_account_id_from_profile(account)
+    account_id = aws_account_id_from_profile(env)
 
     session = aws_session_assume_terraform_role(account_id)
 
