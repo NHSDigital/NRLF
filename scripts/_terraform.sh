@@ -119,13 +119,13 @@ function _terraform() {
       _terraform_plan "$env" "$var_file" "$plan_file" "$aws_account_id" |& tee "./${tf_plan_output}" > /dev/null
       local tf_plan_status="${PIPESTATUS[0]}"
       aws s3 cp "./${tf_plan_output}" "s3://${ci_log_bucket}/${env}/${tf_plan_output}"
-      echo "*** Pipeline status $tf_plan_status ***"
+
       echo "Plan complete. Uploaded output output to: s3://${ci_log_bucket}/${env}/${tf_plan_output}"
       return "$tf_plan_status"
     ;;
 
     "ciapply")
-      echo "*** Entered ciapply ***"
+
       if [[ "$RUNNING_IN_CI" != 1 ]]; then
         echo "Command should only be used by CI pipeline" >&2
         return 1
