@@ -36,13 +36,21 @@ class SandboxRepository(Repository):
             {
                 "Delete": {
                     "TableName": self.table_name,
-                    "Key": {"id": item["id"]},
+                    "Key": self._get_key(item=item),
                 }
             }
             for item in self._scan()
         ]
         for chunk in _chunk_list(transact_items):
             self.dynamodb.transact_write_items(TransactItems=chunk)
+
+    def _get_key(self, item):
+        key_schema = None
+        if self.table_name == "dummy-model":
+            key_schema = {"id": item["id"]}
+        else:
+            key_schema = {"pk": item["pk"], "sk": item["sk"]}
+        return key_schema
 
     def create_all(self, items: list):
         transact_items = [

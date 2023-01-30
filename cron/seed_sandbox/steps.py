@@ -11,6 +11,8 @@ from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
 from pydantic import BaseModel
 
+from cron.seed_sandbox.validators import validate_items
+
 SANDBOX = "sandbox"
 TEMPLATE_PATH_TO_DATA = str(Path(__file__).parent / "data" / "{item_type_name}.json")
 
@@ -34,6 +36,8 @@ def _seed_step_factory(
     )
     items = list(map(item_type.parse_obj, dynamodb_items))
 
+    valid_items = validate_items(items=items)
+
     def seeder(
         data: PipelineData,
         context: LambdaContext,
@@ -42,8 +46,8 @@ def _seed_step_factory(
         logger: Logger,
     ) -> PipelineData:
         repository: Repository = dependencies["repository_factory"](item_type)
-        for item in items:
-            repository.create(item)
+        for valid_item in valid_items:
+            repository.create(valid_item)
         return PipelineData(message="ok")
 
     if log:

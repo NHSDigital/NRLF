@@ -6,13 +6,15 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
-
 from nrlf.core.common_steps import parse_headers
 from nrlf.core.errors import AuthenticationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.query import create_read_and_filter_query
 from nrlf.core.repository import Repository
-from nrlf.core.validators import generate_producer_id
+from nrlf.core.validators import (
+    generate_producer_id,
+    validate_document_reference_string,
+)
 
 
 def _invalid_producer_for_read(organisation_code, read_item_id: str):
@@ -57,6 +59,9 @@ def read_document_reference(
     pk = DocumentPointer.convert_id_to_pk(decoded_id)
 
     document_pointer: DocumentPointer = repository.read_item(pk)
+
+    validate_document_reference_string(document_pointer.document.__root__)
+
     return PipelineData(**json.loads(document_pointer.document.__root__))
 
 

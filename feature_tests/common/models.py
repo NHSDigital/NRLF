@@ -8,6 +8,8 @@ import requests
 from behave.model import Table
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
+from nrlf.core.types import DynamoDbClient
+from nrlf.producer.fhir.r4.model import OperationOutcome
 from pydantic import BaseModel
 
 from feature_tests.common.constants import (
@@ -29,7 +31,6 @@ from feature_tests.common.utils import (
     render_document_reference_properties,
     render_regular_properties,
 )
-from nrlf.producer.fhir.r4.model import OperationOutcome
 
 
 @dataclass
@@ -177,3 +178,5 @@ class TestConfig:
     repositories: dict[BaseModel, FeatureTestRepository] = field(default_factory=dict)
     templates: dict[str, Template] = field(default_factory=dict)
     actor_context: ActorContext = None
+    dynamodb_client: DynamoDbClient = None
+    environment_prefix: str = None

@@ -114,11 +114,10 @@ def config_setup(context: Context, scenario_name: str) -> TestConfig:
         )
         for table in TABLE_CONFIG.keys()
     }
-    test_config = TestConfig(
-        mode=test_mode,
-        repositories=repositories,
-    )
+    test_config = TestConfig(mode=test_mode, repositories=repositories)
     test_config.request.scenario_name = scenario_name
+    test_config.dynamodb_client = dynamodb_client
+    test_config.environment_prefix = environment_prefix
     return test_config
 
 
