@@ -214,9 +214,9 @@ function _get_environment_vars_file() {
     vars_prefix="mgmt"
   elif [ "$environment" = "prod" ]; then
     vars_prefix="prod"
-  elif [ "$environment" = "ref" ] || [ "$environment" = "test" ]; then
+  elif [ "$environment" = "ref" ] || [ "$environment" = "test" ] || [ "$environment" = "ref-sandbox" ]; then
     vars_prefix="test"
-  elif [ "$environment" = "int" ] || [ "$environment" = "uat" ]; then
+  elif [ "$environment" = "int" ] || [ "$environment" = "uat" ] || [ "$environment" = "int-sandbox" ]; then
     vars_prefix="uat"
   fi
 
