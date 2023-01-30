@@ -1,4 +1,5 @@
 import json
+import os
 from uuid import uuid4
 
 import pytest
@@ -22,6 +23,16 @@ def get_lambda_name(actor: str) -> str:
 
 def get_api_url(actor: str) -> str:
     return get_terraform_json()["api_base_urls"]["value"][actor]
+
+
+def get_account_name() -> str:
+    return get_terraform_json()["account_name"]["value"]
+
+
+def get_client_cert_dir() -> str:
+    return os.path.normpath(
+        os.path.join(os.path.dirname(f"{__file__}"), "../../truststore/client")
+    )
 
 
 @pytest.mark.parametrize(
@@ -77,8 +88,12 @@ def test_status_lambda(actor, client):
 )
 @pytest.mark.integration
 def test_status_api(actor, headers):
+    account = get_account_name()
+    dir = get_client_cert_dir()
     headers = {k: f"{v}-{actor}" for k, v in headers.items()}
     url = f"{get_api_url(actor=actor)}/_status"
-    response = requests.get(url=url, headers=headers)
+    response = requests.get(
+        url=url, headers=headers, cert=(f"{dir}/{account}.crt", f"{dir}/{account}.key")
+    )
     assert response.status_code == OK["statusCode"], response.text
     assert response.text == OK["body"]

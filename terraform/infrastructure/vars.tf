@@ -1,3 +1,7 @@
+variable "account_name" {
+  type = string
+}
+
 variable "assume_account" {
   sensitive = true
 }

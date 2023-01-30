@@ -6,8 +6,6 @@ from behave import use_fixture
 from behave.runner import Context
 from lambda_utils.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from lambda_utils.header_config import ClientRpDetailsHeader, ConnectionMetadata
-from nrlf.core.errors import ItemNotFound
-from nrlf.core.query import create_read_and_filter_query
 
 from feature_tests.common.constants import (
     ALLOWED_APP_IDS,
@@ -40,7 +38,10 @@ from feature_tests.common.utils import (
     get_lambda_client,
     get_lambda_handler,
     get_test_mode,
+    get_tls_ma_files,
 )
+from nrlf.core.errors import ItemNotFound
+from nrlf.core.query import create_read_and_filter_query
 
 
 def _local_mock(context: Context):
@@ -93,8 +94,9 @@ def request_setup(
             endpoint = get_endpoint(
                 test_mode=test_config.mode, actor_type=actor_context.actor_type
             )
+            cert = get_tls_ma_files(test_mode=test_config.mode)
             request = ApiRequest(
-                **base_request_config, endpoint=endpoint, **api_definition
+                **base_request_config, endpoint=endpoint, cert=cert, **api_definition
             )
     request.version = DEFAULT_VERSION
     return request

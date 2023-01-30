@@ -1,4 +1,5 @@
 import json
+import os
 from copy import copy, deepcopy
 from functools import cache
 from importlib import import_module
@@ -10,7 +11,6 @@ from behave.model import Table
 from behave.runner import Context
 from lambda_utils.header_config import LoggingHeader
 from lambda_utils.logging_utils import generate_transaction_id
-from nrlf.core.types import DynamoDbClient
 
 from feature_tests.common.constants import (
     ACTION_ALIASES,
@@ -24,6 +24,7 @@ from feature_tests.common.constants import (
 )
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
+from nrlf.core.types import DynamoDbClient
 
 RELATES_TO = "relatesTo"
 TARGET = "target"
@@ -107,6 +108,29 @@ def get_endpoint(test_mode: TestMode, actor_type: ActorType) -> str:
         if test_mode is TestMode.LOCAL_TEST
         else get_terraform_json()["api_base_urls"]["value"][actor_type.name.lower()]
     )
+
+
+def get_tls_ma_files(test_mode: TestMode) -> str:
+    """
+    The mTLS certs are stored in /nrlf/truststore/client
+
+    Before running the tests you must download them
+
+    nrlf truststore pull-client <account>
+    """
+    if test_mode == TestMode.LOCAL_TEST:
+        return None
+    account_name = get_terraform_json()["account_name"]["value"]
+    dir = os.path.normpath(
+        os.path.join(os.path.dirname(__file__), "../../truststore/client")
+    )
+    cert = os.path.join(dir, f"{account_name}.crt")
+    key = os.path.join(dir, f"{account_name}.key")
+    if not (os.path.exists(cert) and os.path.exists(key)):
+        raise Exception(
+            f"mTLS certificates not present.\ntry: nrlf truststore pull-client {account_name}"
+        )
+    return (cert, key)
 
 
 def get_lambda_arn(test_mode: TestMode, actor_type: ActorType) -> str:

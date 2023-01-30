@@ -16,7 +16,6 @@ function _terraform_help() {
     return 1
 }
 
-
 function _terraform() {
   local command=$1
   local account_wide=$3
@@ -34,6 +33,7 @@ function _terraform() {
   local ci_log_bucket="${PROFILE_PREFIX}--mgmt--github-ci-logging"
 
   case $command in
+    "truststore") _terraform_truststore $env ;;
     #----------------
     "validate")
       cd "$terraform_dir" || return 1
