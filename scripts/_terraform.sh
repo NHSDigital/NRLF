@@ -125,6 +125,7 @@ function _terraform() {
     ;;
 
     "ciapply")
+
       if [[ "$RUNNING_IN_CI" != 1 ]]; then
         echo "Command should only be used by CI pipeline" >&2
         return 1

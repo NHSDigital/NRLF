@@ -12,6 +12,7 @@ on:
           - dev
           - ref
           - int
+          - prod
       branch_name:
         description: Branch to deploy
         required: true
