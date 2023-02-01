@@ -1,12 +1,10 @@
 {
   "resourceType": "DocumentReference",
   "id": "RYE-423456781055",
-  "masterIdentifier": [
-    {
-      "system": "TBC should be a unique ID for the pointer",
-      "value": "TBC by NRL"
-    }
-  ],
+  "masterIdentifier": {
+    "system": "https://some-bars-uri.org",
+    "value": "TBC by NRL"
+  },
   "identifier": [
     {
       "system": "https://fhir.nhs.uk/Id/BaRS-Identifier",
@@ -95,21 +93,19 @@
         "title": "Physical",
         "creation": "2005-12-24T09:35:00+11:00"
       },
-      "format": [
-        {
-          "coding": [
-            {
-              "system": "https://fhir.nhs.uk/CodeSystem/message-events-bars",
-              "code": "servicerequest-request"
-            },
-            {
-              "system": "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest",
-              "code": "referral",
-              "display": "Transfer of Care"
-            }
-          ]
-        }
-      ]
+      "format": {
+        "coding": [
+          {
+            "system": "https://fhir.nhs.uk/CodeSystem/message-events-bars",
+            "code": "servicerequest-request"
+          },
+          {
+            "system": "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest",
+            "code": "referral",
+            "display": "Transfer of Care"
+          }
+        ]
+      }
     }
   ],
   "context": {

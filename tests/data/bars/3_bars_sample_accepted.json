@@ -1,0 +1,113 @@
+{
+  "resourceType": "DocumentReference",
+  "id": "RYE-4234567810552",
+  "masterIdentifier": {
+    "system": "https://some-bars-uri.org",
+    "value": "TBC by NRL"
+  },
+  "identifier": [
+    {
+      "system": "https://fhir.nhs.uk/Id/BaRS-Identifier",
+      "value": "8c63d621-4d86-4f57-8699-e8e22d49935d"
+    },
+    {
+      "value": "2000072491",
+      "system": "https://fhir.nhs.uk/Id/dos-service-id"
+    },
+    {
+      "system": "https://fhir.nhs.uk/id/ods-organization-code",
+      "value": "RYE"
+    }
+  ],
+  "status": "current",
+  "docStatus": "preliminary",
+  "type": {
+    "coding": [
+      {
+        "system": "https://snomed.info/ict",
+        "code": "749001000000101",
+        "display": "Appointment (booking)"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://ihe.net/xds/connectathon/classCodes",
+          "code": "History and Physical",
+          "display": "History and Physical"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "identifier": {
+      "system": "https://fhir.nhs.uk/Id/nhs-number",
+      "value": "9556274839"
+    }
+  },
+  "author": [
+    {
+      "reference": "Practitioner/11638428",
+      "display": "Model, User 154 Cerner"
+    }
+  ],
+  "authenticator": {
+    "reference": "Organization/RX898"
+  },
+  "custodian": {
+    "identifier": {
+      "system": "https://fhir.nhs.uk/id/ods-organization-code",
+      "value": "RYE"
+    }
+  },
+  "description": "Physical",
+  "securityLabel": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+          "code": "M",
+          "display": "moderate"
+        }
+      ]
+    }
+  ],
+  "content": [
+    {
+      "attachment": {
+        "language": "en-UK",
+        "url": "http://fhir.nhs.uk/Id/dos-service-id|111111111",
+        "title": "Physical",
+        "creation": "2005-12-24T09:35:00+11:00"
+      },
+      "format": {
+        "system": "https://fhir.nhs.uk/CodeSystem/message-events-bars",
+        "code": "servicerequest-request"
+      }
+    }
+  ],
+  "context": {
+    "encounter": [
+      {
+        "reference": "Encounter/xcda"
+      }
+    ],
+    "period": {
+      "start": "2020-11-10T19:57:26.961Z",
+      "end": "2021-11-20T19:57:26.961Z"
+    },
+    "event": [
+      {
+        "coding": [
+          {
+            "system": "http://ihe.net/xds/connectathon/eventCodes",
+            "code": "T-D8200",
+            "display": "Arm"
+          }
+        ]
+      }
+    ]
+  }
+}

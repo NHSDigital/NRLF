@@ -1,6 +1,10 @@
 {
   "resourceType": "DocumentReference",
-  "id": "RYE-423456781055X",
+  "id": "RYE-423456781055",
+  "masterIdentifier": {
+    "system": "https://some-bars-uri.org",
+    "value": "TBC by NRL"
+  },
   "identifier": [
     {
       "system": "https://fhir.nhs.uk/Id/BaRS-Identifier",
@@ -58,6 +62,17 @@
       "value": "RYE"
     }
   },
+  "relatesTo": [
+    {
+      "code": "replaces",
+      "target": {
+        "type": "DocumentReference",
+        "identifier": {
+          "value": "RYE-42345678105"
+        }
+      }
+    }
+  ],
   "description": "Physical",
   "securityLabel": [
     {
@@ -75,7 +90,12 @@
       "attachment": {
         "language": "en-UK",
         "url": "http://fhir.nhs.uk/Id/dos-service-id|111111111",
-        "title": "Physical"
+        "title": "Physical",
+        "creation": "2005-12-24T09:35:00+11:00"
+      },
+      "format": {
+        "system": "https://fhir.nhs.uk/CodeSystem/message-events-bars",
+        "code": "servicerequest-request"
       }
     }
   ],
