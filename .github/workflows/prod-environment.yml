@@ -1,4 +1,4 @@
-name: Persistent Environment Deploy
+name: Deploy to Production
 
 on:
   workflow_dispatch:
@@ -6,20 +6,11 @@ on:
       environment:
         description: Environment to deploy to
         required: true
-        default: "dev"
-        type: choice
-        options:
-          - dev
-          - ref
-          - int
+        default: "prod"
+        type: string
       branch_name:
         description: Branch to deploy
         required: true
-      sandbox_deploy:
-        description: Deploy these changes to the sandbox workspace?
-        required: true
-        default: false
-        type: boolean
 
 permissions:
   id-token: write
@@ -95,7 +86,7 @@ jobs:
 
   terraform-plan:
     needs: [build]
-    name: Terraform plan - ${{ inputs.environment }} (sandbox=${{ inputs.sandbox_deploy }})
+    name: Terraform plan - ${{ inputs.environment }}
     runs-on: [self-hosted, ci]
 
     steps:
@@ -119,11 +110,11 @@ jobs:
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
           aws-region: eu-west-2
 
-      - name: Terraform plan - ${{ env.TF_WORKFLOW_ID }} (sandbox=${{ inputs.sandbox_deploy }})
+      - name: Terraform plan - ${{ env.TF_WORKFLOW_ID }}
         run: |
           source nrlf.sh
-          nrlf terraform ciinit ${TF_WORKFLOW_ID}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
-          nrlf terraform ciplan ${TF_WORKFLOW_ID}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
+          nrlf terraform ciinit ${TF_WORKFLOW_ID}
+          nrlf terraform ciplan ${TF_WORKFLOW_ID}
 
       - name: Upload artifact - ${{ env.TF_ARTIFACT_NAME }}
         uses: ./.github/actions/upload-artifact/
@@ -133,9 +124,9 @@ jobs:
 
   terraform-apply:
     needs: [terraform-plan]
-    name: Terraform apply - ${{ inputs.environment }} (sandbox=${{ inputs.sandbox_deploy }})
+    name: Terraform apply - ${{ inputs.environment }}
     runs-on: [self-hosted, ci]
-    environment: ${{ inputs.environment }}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
+    environment: ${{ inputs.environment }}
 
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
@@ -164,11 +155,11 @@ jobs:
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
           aws-region: eu-west-2
 
-      - name: Terraform apply - ${{ env.TF_WORKFLOW_ID }} (sandbox=${{ inputs.sandbox_deploy }})
+      - name: Terraform apply - ${{ env.TF_WORKFLOW_ID }}
         run: |
           source nrlf.sh
-          nrlf terraform ciinit ${TF_WORKFLOW_ID}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
-          nrlf terraform ciapply ${TF_WORKFLOW_ID}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
+          nrlf terraform ciinit ${TF_WORKFLOW_ID}
+          nrlf terraform ciapply ${TF_WORKFLOW_ID}
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact/
