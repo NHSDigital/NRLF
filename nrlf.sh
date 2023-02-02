@@ -44,6 +44,7 @@ function nrlf() {
     "bootstrap") _bootstrap "${@:2}" ;;
     "lint") _lint "${@:2}" ;;
     "swagger") _swagger "${@:2}" ;;
+    "truststore") echo "placeholder for mTLS work" ;;
     *) _nrlf_commands_help ;;
   esac
 
