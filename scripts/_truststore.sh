@@ -138,7 +138,6 @@ function _truststore_pull_client() {
 function _truststore_pull_server() {
     env=$1
     echo "Pulling truststore/server/${env}.pem"
-    echo aws s3 cp "s3://${BUCKET}/server/${env}.pem" "truststore/server/${env}.pem"
     aws s3 cp "s3://${BUCKET}/server/${env}.pem" "truststore/server/${env}.pem"
 }
 
