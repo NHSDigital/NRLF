@@ -12,15 +12,16 @@ function _nrlf_commands_help() {
   echo "nrlf <command> [options]"
   echo
   echo "commands:"
-  echo "  help      - this help screen"
-  echo "  aws       - aws commands"
-  echo "  bootstrap - bootstrap commands"
-  echo "  lint      - lint commands"
-  echo "  make      - calls the make/build routines"
+  echo "  help        - this help screen"
+  echo "  aws         - aws commands"
+  echo "  bootstrap   - bootstrap commands"
+  echo "  lint        - lint commands"
+  echo "  make        - calls the make/build routines"
   echo "  oauth <env> - Generates an oauth token for the env [dev, ref, prod]"
-  echo "  swagger   - swagger generation commands"
-  echo "  terraform - terraform commands"
-  echo "  test      - run tests"
+  echo "  swagger     - swagger generation commands"
+  echo "  terraform   - terraform commands"
+  echo "  test        - run tests"
+  echo "  truststore  - manage the certificates for the API TLS MA"
   echo
   return 1
 }
@@ -44,7 +45,7 @@ function nrlf() {
     "bootstrap") _bootstrap "${@:2}" ;;
     "lint") _lint "${@:2}" ;;
     "swagger") _swagger "${@:2}" ;;
-    "truststore") echo "placeholder for mTLS work" ;;
+    "truststore") _truststore "${@:2}" ;;
     *) _nrlf_commands_help ;;
   esac
 
