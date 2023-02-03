@@ -31,14 +31,14 @@ function _truststore_help() {
 
 # read an input file and substitute all the ${} entries
 function substitute_env_in_file() {
-infile=$1
-outfile=$2
+    infile=$1
+    outfile=$2
 
-output=$(eval "cat <<EOF
+    output=$(eval "cat <<EOF
 $(cat ${infile})
 EOF"
 )
-cat > ${outfile} <<EOF
+    cat > ${outfile} <<EOF
 ${output}
 EOF
 }
