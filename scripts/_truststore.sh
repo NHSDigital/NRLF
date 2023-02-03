@@ -17,15 +17,13 @@ function _truststore_help() {
     echo "nrlf truststore <command> [options]"
     echo
     echo "commands:"
-    echo "  help                - this help screen"
-    echo "  build-ca            - Build a single CA cert"
-    echo "  build-client        - Build a single client cert + private key"
-    echo "  build-all           - Build the standard trust store certs"
-    echo "  push                - Push the certificates to the management store"
-    echo "  pull                - Pull the certificates from the management store"
-    echo "  pull-ca <ca>        - Pull the certificate authority"
-    echo "  pull-client <env>   - pull the files needed for a client connection"
-    echo "  pull-server <env>   - pull the files needed for a server connection"
+    echo "  help                            - this help screen"
+    echo "  build-ca <name> <fqdn>          - Build a single CA cert"
+    echo "  build-client <name> <ca> <fqdn> - Build a single client cert + private key"
+    echo "  build-all                       - Build the standard trust store certs"
+    echo "  pull-ca <ca>                    - Pull the certificate authority"
+    echo "  pull-client <env>               - pull the files needed for a client connection"
+    echo "  pull-server <env>               - pull the files needed for a server connection"
     echo
 }
 
