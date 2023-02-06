@@ -20,7 +20,7 @@ components:
       schema:
         $ref: "#/components/schemas/DocumentId"
     subject:
-      name: subject
+      name: subject.identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
@@ -29,24 +29,24 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryCustodian"
-    snomedCode:
-      name: snomed.identifier
+    type:
+      name: type.identifier
       in: query
       schema:
-        $ref: "#/components/schemas/RequestQuerySnomedCode"
-    fromASID:
-      name: fromASID
-      description: Client System ASID.
+        $ref: "#/components/schemas/RequestQueryType"
+    odsCode:
+      name: NHSD-End-User-Organisation-ODS
+      description: ODS Code for Organisation
       in: header
       schema:
-        $ref: "#/components/schemas/RequestHeaderFromASID"
+        $ref: "#/components/schemas/RequestHeaderOdsCode"
       required: true
-    toASID:
-      name: toASID
-      description: The Spine ASID.
-      in: header
-      schema:
-        $ref: "#/components/schemas/RequestHeaderToASID"
+  requestBodies:
+    DocumentReference:
+      content:
+        application/fhir+json:
+          schema:
+            $ref: "#/components/schemas/DocumentReference"
       required: true
   responses:
     Success:
@@ -55,29 +55,16 @@ components:
         application/fhir+json:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
-        application/fhir+xml:
-          schema:
-            $ref: "#/components/schemas/OperationOutcome"
     Error:
       description: Error Response
       content:
         application/fhir+json:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
-        application/fhir+xml:
-          schema:
-            $ref: "#/components/schemas/OperationOutcome"
-  requestBodies:
-    DocumentReference:
-      content:
-        application/fhir+json:
-          schema:
-            $ref: "#/components/schemas/DocumentReference"
-      required: true
   schemas:
     DocumentId:
       type: string
-      pattern: '[ \r\n\t\S]+'
+      pattern: '[A-Za-z0-9\-\.]{1,64}' # https://build.fhir.org/datatypes.html#id
     RequestPathParams:
       type: object
       properties:
@@ -88,32 +75,27 @@ components:
     RequestHeader:
       type: object
       properties:
-        fromASID:
-          $ref: "#/components/schemas/RequestHeaderFromASID"
-        toASID:
-          $ref: "#/components/schemas/RequestHeaderToASID"
+        odsCode:
+          $ref: "#/components/schemas/RequestHeaderOdsCode"
       required:
-        - fromASID
-        - toASID
+        - odsCode
     RequestParams:
       type: object
       properties:
-        subject:
+        subject.identifier:
           $ref: "#/components/schemas/RequestQuerySubject"
         custodian.identifier:
           $ref: "#/components/schemas/RequestQueryCustodian"
-        snomed.identifier:
-          $ref: "#/components/schemas/RequestQuerySnomedCode"
+        type.identifier:
+          $ref: "#/components/schemas/RequestQueryType"
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
     RequestQueryCustodian:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
-    RequestQuerySnomedCode:
+    RequestQueryType:
       type: string
-      pattern: (^http\:\/\/snomed\.info\/sct\|(\d+))
-    RequestHeaderFromASID:
-      type: string
-    RequestHeaderToASID:
+      pattern: ^http\:\/\/snomed\.info\/sct\|(\d+)
+    RequestHeaderOdsCode:
       type: string

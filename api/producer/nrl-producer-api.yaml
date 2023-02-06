@@ -6,35 +6,27 @@ info:
   title: National Record Locator Producer - FHIR API
   description: |
     ## Overview
-    The National Record Locator (NRL) is a service that holds pointers to documents held in local provider systems.
+    The National Record Locator (NRL) is a service that holds pointers to data held in local provider systems.
 
-    The service facilitates the national sharing, removing the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
+    The service facilitates national sharing, removing the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
 
-    It can be used to store and publish pointers to patient data held in health systems across England, to look up where relevant patient data is held.
-
-    This service is an updated FHIR R4 version of the existing NRL, more details on the existing service can be found here [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
+    It can be used to store and publish pointers to patient data held in health systems across England and to look up where relevant patient data is held.
 
     As a "provider" who holds information about patients, you can:
 
     -create a pointer in the NRL to your information
     -replace your NRL pointer with a newer pointer, superseding the old one
-    -update parts of the meta data associated with a pointer
+    -update some of the metadata associated with your pointer
     -delete your NRL pointer
-    -search and read the current pointers you own relating to an indiviual patient
-    -search and read all the current pointers you own
+    -Search and read pointers, where you are authorised to do so, for a given patient
+    -Search and read all pointers you have provided
 
-    You can not currently use this API to get pointers for;
-
-    -mental health crisis plans
-    -end of care plans
-    -emergency care plans (eRedbags)
-    -national early warning scores (NEWS)
-    -urgent care plan
+    This service is new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
 
     There is a growing list of health and social care organisations authorised to share records using NRL.
 
     ### Data availability, timing and quality
-    There is a risk that pointers for patients with two NHS Numbers are not translated when the NHS Numbers are merged by NBO, it is therefore recomended that this service is used alongside other personal demographic services such as [Personal Demographics Service FHIR API](https://digital.nhs.uk/developer/api-catalogue/personal-demographics-service-fhir).
+    Pointers are available to be consumed almost immediately after they have been produced by the provider.
 
     Pointers are immediately available to authorised providers and consumers after successful creation.
     ## Who can use this API
@@ -42,6 +34,13 @@ info:
     - is only for use by patient-facing applications
     - is only for non-clinical use
     - can only be used where there is a legal basis to do so
+
+    You can not currently use this API to retrieve pointers for:
+    - mental health crisis plans
+    - end of life plans
+    - emergency care plans (eRedbags)
+    - national early warning scores (NEWS)
+    - urgent care plan
 
     Make sure you have a valid use case before you go too far with your development.
     To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
@@ -51,7 +50,7 @@ info:
     ## API status and roadmap
     This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses).
 
-    To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=immunisation-history-api).
+    To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=national-record-locator-api).
 
     If you have any other queries, [contact us](https://digital.nhs.uk/developer/help-and-support).
 
@@ -127,7 +126,7 @@ info:
 
     As part of this process, you need to demonstrate that you can manage risks and that your software conforms technically with the requirements for this API.
 
-    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/immunisation-history-fhir/onboarding-support-information).
+    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/national-record-locator-producer-api/onboarding-support-information).
 
     To get started, see [digital onboarding](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding#using-the-digital-onboarding-portal).
   version: 1.0.0
@@ -160,8 +159,7 @@ paths:
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
       parameters:
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/odsCode"
     get:
       tags:
         - NRLF Producer
@@ -170,17 +168,13 @@ paths:
       parameters:
         - $ref: "#/components/parameters/subject"
         - $ref: "#/components/parameters/custodian"
-        - $ref: "#/components/parameters/snomedCode"
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/type"
+        - $ref: "#/components/parameters/odsCode"
       responses:
         "200":
           description: Search DocumentReference operation successful
           content:
             application/fhir+json:
-              schema:
-                $ref: "#/components/schemas/Bundle"
-            application/fhir+xml:
               schema:
                 $ref: "#/components/schemas/Bundle"
   /DocumentReference/{id}:
@@ -191,6 +185,7 @@ paths:
       operationId: readDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/odsCode"
       responses:
         "200":
           description: Read DocumentReference operation successful
@@ -205,8 +200,7 @@ paths:
       operationId: updateDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/odsCode"
       responses:
         "200":
           description: Update DocumentReference operation successful
@@ -223,8 +217,7 @@ paths:
       operationId: deleteDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/odsCode"
       responses:
         "204":
           description: Delete DocumentReference operation successful
@@ -2027,7 +2020,7 @@ components:
             - url
     DocumentId:
       type: string
-      pattern: '[ \r\n\t\S]+'
+      pattern: '[A-Za-z0-9\-\.]{1,64}' # https://build.fhir.org/datatypes.html#id
     RequestPathParams:
       type: object
       properties:
@@ -2038,34 +2031,29 @@ components:
     RequestHeader:
       type: object
       properties:
-        fromASID:
-          $ref: "#/components/schemas/RequestHeaderFromASID"
-        toASID:
-          $ref: "#/components/schemas/RequestHeaderToASID"
+        odsCode:
+          $ref: "#/components/schemas/RequestHeaderOdsCode"
       required:
-        - fromASID
-        - toASID
+        - odsCode
     RequestParams:
       type: object
       properties:
-        subject:
+        subject.identifier:
           $ref: "#/components/schemas/RequestQuerySubject"
         custodian.identifier:
           $ref: "#/components/schemas/RequestQueryCustodian"
-        snomed.identifier:
-          $ref: "#/components/schemas/RequestQuerySnomedCode"
+        type.identifier:
+          $ref: "#/components/schemas/RequestQueryType"
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
     RequestQueryCustodian:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
-    RequestQuerySnomedCode:
+    RequestQueryType:
       type: string
-      pattern: (^http\:\/\/snomed\.info\/sct\|(\d+))
-    RequestHeaderFromASID:
-      type: string
-    RequestHeaderToASID:
+      pattern: ^http\:\/\/snomed\.info\/sct\|(\d+)
+    RequestHeaderOdsCode:
       type: string
   securitySchemes: {}
   parameters:
@@ -2077,7 +2065,7 @@ components:
       schema:
         $ref: "#/components/schemas/DocumentId"
     subject:
-      name: subject
+      name: subject.identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
@@ -2086,24 +2074,17 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryCustodian"
-    snomedCode:
-      name: snomed.identifier
+    type:
+      name: type.identifier
       in: query
       schema:
-        $ref: "#/components/schemas/RequestQuerySnomedCode"
-    fromASID:
-      name: fromASID
-      description: Client System ASID.
+        $ref: "#/components/schemas/RequestQueryType"
+    odsCode:
+      name: NHSD-End-User-Organisation-ODS
+      description: ODS Code for Organisation
       in: header
       schema:
-        $ref: "#/components/schemas/RequestHeaderFromASID"
-      required: true
-    toASID:
-      name: toASID
-      description: The Spine ASID.
-      in: header
-      schema:
-        $ref: "#/components/schemas/RequestHeaderToASID"
+        $ref: "#/components/schemas/RequestHeaderOdsCode"
       required: true
   responses:
     Success:
@@ -2112,15 +2093,9 @@ components:
         application/fhir+json:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
-        application/fhir+xml:
-          schema:
-            $ref: "#/components/schemas/OperationOutcome"
     Error:
       description: Error Response
       content:
         application/fhir+json:
-          schema:
-            $ref: "#/components/schemas/OperationOutcome"
-        application/fhir+xml:
           schema:
             $ref: "#/components/schemas/OperationOutcome"

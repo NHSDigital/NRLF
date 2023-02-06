@@ -52,8 +52,8 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
-      | property | value                                         |
-      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | property           | value                                         |
+      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -95,8 +95,8 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
-      | property | value                                         |
-      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | property           | value                                         |
+      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 2 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -130,8 +130,8 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
-      | property | value                                         |
-      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | property           | value                                         |
+      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 0 entries
 
@@ -141,7 +141,7 @@ Feature: Basic Success Scenarios where consumer is able to search for Document P
       | system                  | value     |
       | https://snomed.info/ict | 736253002 |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
-      | property | value                                         |
-      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | property           | value                                         |
+      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 0 entries

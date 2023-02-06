@@ -21,7 +21,7 @@ info:
     -Search and read pointers, where you are authorised to do so, for a given patient
     -Search and read all pointers you have provided
 
-    This service is a new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
+    This service is new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
 
     There is a growing list of health and social care organisations authorised to share records using NRL.
 
@@ -50,7 +50,7 @@ info:
     ## API status and roadmap
     This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses).
 
-    To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=immunisation-history-api).
+    To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=national-record-locator-api).
 
     If you have any other queries, [contact us](https://digital.nhs.uk/developer/help-and-support).
 
@@ -126,7 +126,7 @@ info:
 
     As part of this process, you need to demonstrate that you can manage risks and that your software conforms technically with the requirements for this API.
 
-    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/immunisation-history-fhir/onboarding-support-information).
+    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/national-record-locator-producer-api/onboarding-support-information).
 
     To get started, see [digital onboarding](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding#using-the-digital-onboarding-portal).
   version: 1.0.0
@@ -159,8 +159,7 @@ paths:
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
       parameters:
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/odsCode"
       security:
         - ${authoriser_name}: []
       x-amazon-apigateway-integration:
@@ -180,17 +179,13 @@ paths:
       parameters:
         - $ref: "#/components/parameters/subject"
         - $ref: "#/components/parameters/custodian"
-        - $ref: "#/components/parameters/snomedCode"
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/type"
+        - $ref: "#/components/parameters/odsCode"
       responses:
         "200":
           description: Search DocumentReference operation successful
           content:
             application/fhir+json:
-              schema:
-                $ref: "#/components/schemas/Bundle"
-            application/fhir+xml:
               schema:
                 $ref: "#/components/schemas/Bundle"
       security:
@@ -212,6 +207,7 @@ paths:
       operationId: readDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/odsCode"
       responses:
         "200":
           description: Read DocumentReference operation successful
@@ -237,8 +233,7 @@ paths:
       operationId: updateDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/odsCode"
       responses:
         "200":
           description: Update DocumentReference operation successful
@@ -266,8 +261,7 @@ paths:
       operationId: deleteDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/odsCode"
       responses:
         "204":
           description: Delete DocumentReference operation successful
@@ -2107,7 +2101,7 @@ components:
             - url
     DocumentId:
       type: string
-      pattern: '[ \r\n\t\S]+'
+      pattern: '[A-Za-z0-9\-\.]{1,64}' # https://build.fhir.org/datatypes.html#id
     RequestPathParams:
       type: object
       properties:
@@ -2118,34 +2112,29 @@ components:
     RequestHeader:
       type: object
       properties:
-        fromASID:
-          $ref: "#/components/schemas/RequestHeaderFromASID"
-        toASID:
-          $ref: "#/components/schemas/RequestHeaderToASID"
+        odsCode:
+          $ref: "#/components/schemas/RequestHeaderOdsCode"
       required:
-        - fromASID
-        - toASID
+        - odsCode
     RequestParams:
       type: object
       properties:
-        subject:
+        subject.identifier:
           $ref: "#/components/schemas/RequestQuerySubject"
         custodian.identifier:
           $ref: "#/components/schemas/RequestQueryCustodian"
-        snomed.identifier:
-          $ref: "#/components/schemas/RequestQuerySnomedCode"
+        type.identifier:
+          $ref: "#/components/schemas/RequestQueryType"
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
     RequestQueryCustodian:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
-    RequestQuerySnomedCode:
+    RequestQueryType:
       type: string
-      pattern: (^http\:\/\/snomed\.info\/sct\|(\d+))
-    RequestHeaderFromASID:
-      type: string
-    RequestHeaderToASID:
+      pattern: ^http\:\/\/snomed\.info\/sct\|(\d+)
+    RequestHeaderOdsCode:
       type: string
   securitySchemes:
     ${authoriser_name}:
@@ -2168,7 +2157,7 @@ components:
       schema:
         $ref: "#/components/schemas/DocumentId"
     subject:
-      name: subject
+      name: subject.identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
@@ -2177,24 +2166,17 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryCustodian"
-    snomedCode:
-      name: snomed.identifier
+    type:
+      name: type.identifier
       in: query
       schema:
-        $ref: "#/components/schemas/RequestQuerySnomedCode"
-    fromASID:
-      name: fromASID
-      description: Client System ASID.
+        $ref: "#/components/schemas/RequestQueryType"
+    odsCode:
+      name: NHSD-End-User-Organisation-ODS
+      description: ODS Code for Organisation
       in: header
       schema:
-        $ref: "#/components/schemas/RequestHeaderFromASID"
-      required: true
-    toASID:
-      name: toASID
-      description: The Spine ASID.
-      in: header
-      schema:
-        $ref: "#/components/schemas/RequestHeaderToASID"
+        $ref: "#/components/schemas/RequestHeaderOdsCode"
       required: true
   responses:
     Success:
@@ -2203,15 +2185,9 @@ components:
         application/fhir+json:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
-        application/fhir+xml:
-          schema:
-            $ref: "#/components/schemas/OperationOutcome"
     Error:
       description: Error Response
       content:
         application/fhir+json:
-          schema:
-            $ref: "#/components/schemas/OperationOutcome"
-        application/fhir+xml:
           schema:
             $ref: "#/components/schemas/OperationOutcome"

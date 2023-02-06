@@ -168,17 +168,12 @@ paths:
       parameters:
         - $ref: "#/components/parameters/subject"
         - $ref: "#/components/parameters/custodian"
-        - $ref: "#/components/parameters/snomedCode"
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/type"
       responses:
         "200":
           description: Search DocumentReference operation successful
           content:
             application/fhir+json:
-              schema:
-                $ref: "#/components/schemas/Bundle"
-            application/fhir+xml:
               schema:
                 $ref: "#/components/schemas/Bundle"
   /DocumentReference/{id}:
@@ -2046,19 +2041,19 @@ components:
     RequestParams:
       type: object
       properties:
-        subject:
+        subject.identifier:
           $ref: "#/components/schemas/RequestQuerySubject"
         custodian.identifier:
           $ref: "#/components/schemas/RequestQueryCustodian"
         snomed.identifier:
-          $ref: "#/components/schemas/RequestQuerySnomedCode"
+          $ref: "#/components/schemas/RequestQueryType"
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
     RequestQueryCustodian:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
-    RequestQuerySnomedCode:
+    RequestQueryType:
       type: string
       pattern: (^http\:\/\/snomed\.info\/sct\|(\d+))
     RequestHeaderFromASID:
@@ -2095,11 +2090,11 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryCustodian"
-    snomedCode:
+    type:
       name: snomed.identifier
       in: query
       schema:
-        $ref: "#/components/schemas/RequestQuerySnomedCode"
+        $ref: "#/components/schemas/RequestQuerType"
     fromASID:
       name: fromASID
       description: Client System ASID.
@@ -2121,15 +2116,9 @@ components:
         application/fhir+json:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
-        application/fhir+xml:
-          schema:
-            $ref: "#/components/schemas/OperationOutcome"
     Error:
       description: Error Response
       content:
         application/fhir+json:
-          schema:
-            $ref: "#/components/schemas/OperationOutcome"
-        application/fhir+xml:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
