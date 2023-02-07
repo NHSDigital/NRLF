@@ -170,6 +170,7 @@ jobs:
       - name: Terraform apply - ${{ env.TF_WORKFLOW_ID }} (sandbox=${{ inputs.sandbox_deploy }})
         run: |
           source nrlf.sh
+          nrlf truststore pull-server ${TF_WORKFLOW_ID}
           nrlf terraform ciinit ${TF_WORKFLOW_ID}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
           nrlf terraform ciapply ${TF_WORKFLOW_ID}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
 
