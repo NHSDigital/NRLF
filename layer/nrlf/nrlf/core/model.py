@@ -1,6 +1,8 @@
 import re
 from typing import Optional, Union
 
+from pydantic import BaseModel, Field, root_validator, validator
+
 import nrlf.consumer.fhir.r4.model as consumer_model
 import nrlf.producer.fhir.r4.model as producer_model
 from nrlf.core.dynamodb_types import (
@@ -19,7 +21,6 @@ from nrlf.core.validators import (
     validate_timestamp,
     validate_tuple,
 )
-from pydantic import BaseModel, Field, root_validator, validator
 
 from .constants import ID_SEPARATOR, DbPrefix
 
@@ -232,9 +233,9 @@ class DocumentPointer(DynamoDbModel):
 class _NhsNumberMixin:
     @property
     def nhs_number(self) -> Union[str, None]:
-        if self.subject is None:
+        if self.subject_identifier is None:
             return None
-        nhs_number = self.subject.__root__.split("|")[1]
+        nhs_number = self.subject_identifier.__root__.split("|", 1)[1]
         validate_nhs_number(nhs_number)
         return nhs_number
 

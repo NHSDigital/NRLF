@@ -1,27 +1,41 @@
 openapi: 3.0.0
 # This is an OpenAPI Specification (https://swagger.io/specification/)
-# for the National Record Locator Producer FHIR API
+# for the National Record Locator Consumer FHIR API
 # owned by NHS Digital (https://digital.nhs.uk/)
 info:
-  title: National Record Locator Producer - FHIR API
+  title: National Record Locator Consumer - FHIR API
   description: |
     ## Overview
-    Use this API to populate an index of a patient’s shared clinical records.
+    The National Record Locator (NRL) is a service that holds pointers to data held in local provider systems.
 
-    You can:
-    - manage pointers to clinical records
+    The service facilitates national sharing, removing the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
 
-    You cannot currently use this API to:
-    - access pointers controlled by other producers
+    It can be used to store and publish pointers to patient data held in health systems across England and to look up where relevant patient data is held.
+
+    As a "consumer" of pointers relating to citizens, you can:
+
+    -Search a pointer, where you are authorised to do so, for a given patient
+    -Read a pointer, where you are authorised to do so, for a given patient
+
+    This service is a new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
+
+    There is a growing list of health and social care organisations authorised to share records using NRL.
 
     ### Data availability, timing and quality
-    TBC
+    Pointers are available to be consumed almost immediately after they have been produced by the provider.
 
     ## Who can use this API
     This API:
     - is only for use by patient-facing applications
     - is only for non-clinical use
     - can only be used where there is a legal basis to do so
+
+    You can not currently use this API to retrieve pointers for:
+    - mental health crisis plans
+    - end of life plans
+    - emergency care plans (eRedbags)
+    - national early warning scores (NEWS)
+    - urgent care plan
 
     Make sure you have a valid use case before you go too far with your development.
     To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
@@ -31,13 +45,13 @@ info:
     ## API status and roadmap
     This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses).
 
-    To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=immunisation-history-api).
+    To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=national-record-locator-api).
 
     If you have any other queries, [contact us](https://digital.nhs.uk/developer/help-and-support).
 
     ## Service level
 
-    This API is a TBC service, meaning it is operational and supported TBC.
+    This API is a bronze service, meaning it is operational and supported only during business hours (8am to 6pm), Monday to Friday, excluding bank holidays.
 
     For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
 
@@ -76,9 +90,9 @@ info:
     ## Environments and testing
     | Environment       | Base URL                                                               |
     | ----------------- | ---------------------------------------------------------------------- |
-    | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4/`     |
-    | Integration test  | `https://int.api.service.nhs.uk/nrl-producer-api/FHIR/R4/`         |
-    | Production        | `https://api.service.nhs.uk/nrl-producer-api/FHIR/R4/`             |
+    | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`     |
+    | Integration test  | `https://int.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`         |
+    | Production        | `https://api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`             |
 
     ### Sandbox testing
     Our [sandbox environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#sandbox-testing):
@@ -108,16 +122,23 @@ info:
 
     As part of this process, you need to demonstrate that you can manage risks and that your software conforms technically with the requirements for this API.
 
-    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/immunisation-history-fhir/onboarding-support-information).
+    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/national-record-locator-consumer-api/onboarding-support-information).
 
     To get started, see [digital onboarding](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding#using-the-digital-onboarding-portal).
   version: 1.0.0
+  license:
+    name: MIT
   contact:
     name: NHS Digital API Management
     url: "https://digital.nhs.uk/developer/help-and-support"
     email: api.management@nhs.net
 servers:
-  - url: /
+  - url: "https://sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4"
+    description: Sandbox environment.
+  - url: "https://int.api.service.nhs.uk/nrl-consumer-api/FHIR/R4"
+    description: Integration test environment.
+  - url: "https://api.service.nhs.uk/nrl-consumer-api/FHIR/R4"
+    description: Production environment.
 tags:
   - name: NRLF Consumer
 paths:
@@ -130,17 +151,13 @@ paths:
       parameters:
         - $ref: "#/components/parameters/subject"
         - $ref: "#/components/parameters/custodian"
-        - $ref: "#/components/parameters/snomedCode"
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/type"
+        - $ref: "#/components/parameters/odsCode"
       responses:
         "200":
           description: Search DocumentReference operation successful
           content:
             application/fhir+json:
-              schema:
-                $ref: "#/components/schemas/Bundle"
-            application/fhir+xml:
               schema:
                 $ref: "#/components/schemas/Bundle"
   /DocumentReference/_search:
@@ -150,8 +167,7 @@ paths:
       summary: Search for DocumentReference resources
       operationId: searchPostDocumentReference
       parameters:
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/odsCode"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -176,6 +192,7 @@ paths:
       operationId: readDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/odsCode"
       responses:
         "200":
           description: Read DocumentReference operation successful
@@ -1979,7 +1996,7 @@ components:
             - url
     DocumentId:
       type: string
-      pattern: '[ \r\n\t\S]+'
+      pattern: '[A-Za-z0-9\-\.]{1,64}' # https://build.fhir.org/datatypes.html#id
     RequestPathParams:
       type: object
       properties:
@@ -1990,22 +2007,19 @@ components:
     RequestHeader:
       type: object
       properties:
-        fromASID:
-          $ref: "#/components/schemas/RequestHeaderFromASID"
-        toASID:
-          $ref: "#/components/schemas/RequestHeaderToASID"
+        odsCode:
+          $ref: "#/components/schemas/RequestHeaderOdsCode"
       required:
-        - fromASID
-        - toASID
+        - odsCode
     RequestParams:
       type: object
       properties:
-        subject:
+        subject.identifier:
           $ref: "#/components/schemas/RequestQuerySubject"
         custodian.identifier:
           $ref: "#/components/schemas/RequestQueryCustodian"
-        snomed.identifier:
-          $ref: "#/components/schemas/RequestQuerySnomedCode"
+        type.identifier:
+          $ref: "#/components/schemas/RequestQueryType"
       required:
         - subject
     RequestQuerySubject:
@@ -2014,12 +2028,10 @@ components:
     RequestQueryCustodian:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
-    RequestQuerySnomedCode:
+    RequestQueryType:
       type: string
-      pattern: (^http\:\/\/snomed\.info\/sct\|(\d+))
-    RequestHeaderFromASID:
-      type: string
-    RequestHeaderToASID:
+      pattern: ^http\:\/\/snomed\.info\/sct\|(\d+)
+    RequestHeaderOdsCode:
       type: string
   securitySchemes: {}
   parameters:
@@ -2031,7 +2043,7 @@ components:
       schema:
         $ref: "#/components/schemas/DocumentId"
     subject:
-      name: subject
+      name: subject.identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
@@ -2041,22 +2053,28 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryCustodian"
-    snomedCode:
-      name: snomed.identifier
+    type:
+      name: type.identifier
       in: query
       schema:
-        $ref: "#/components/schemas/RequestQuerySnomedCode"
-    fromASID:
-      name: fromASID
-      description: Client System ASID.
+        $ref: "#/components/schemas/RequestQueryType"
+    odsCode:
+      name: NHSD-End-User-Organisation-ODS
+      description: ODS Code for Organisation
       in: header
       schema:
-        $ref: "#/components/schemas/RequestHeaderFromASID"
+        $ref: "#/components/schemas/RequestHeaderOdsCode"
       required: true
-    toASID:
-      name: toASID
-      description: The Spine ASID.
-      in: header
-      schema:
-        $ref: "#/components/schemas/RequestHeaderFromASID"
-      required: true
+  responses:
+    Success:
+      description: Success Response
+      content:
+        application/fhir+json:
+          schema:
+            $ref: "#/components/schemas/OperationOutcome"
+    Error:
+      description: Error Response
+      content:
+        application/fhir+json:
+          schema:
+            $ref: "#/components/schemas/OperationOutcome"

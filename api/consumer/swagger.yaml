@@ -45,7 +45,7 @@ info:
     ## API status and roadmap
     This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses).
 
-    To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=immunisation-history-api).
+    To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=national-record-locator-api).
 
     If you have any other queries, [contact us](https://digital.nhs.uk/developer/help-and-support).
 
@@ -122,16 +122,23 @@ info:
 
     As part of this process, you need to demonstrate that you can manage risks and that your software conforms technically with the requirements for this API.
 
-    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/immunisation-history-fhir/onboarding-support-information).
+    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/national-record-locator-consumer-api/onboarding-support-information).
 
     To get started, see [digital onboarding](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding#using-the-digital-onboarding-portal).
   version: 1.0.0
+  license:
+    name: MIT
   contact:
     name: NHS Digital API Management
     url: "https://digital.nhs.uk/developer/help-and-support"
     email: api.management@nhs.net
 servers:
-  - url: /
+  - url: "https://sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4"
+    description: Sandbox environment.
+  - url: "https://int.api.service.nhs.uk/nrl-consumer-api/FHIR/R4"
+    description: Integration test environment.
+  - url: "https://api.service.nhs.uk/nrl-consumer-api/FHIR/R4"
+    description: Production environment.
 tags:
   - name: NRLF Consumer
 paths:
@@ -144,17 +151,13 @@ paths:
       parameters:
         - $ref: "#/components/parameters/subject"
         - $ref: "#/components/parameters/custodian"
-        - $ref: "#/components/parameters/snomedCode"
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/type"
+        - $ref: "#/components/parameters/odsCode"
       responses:
         "200":
           description: Search DocumentReference operation successful
           content:
             application/fhir+json:
-              schema:
-                $ref: "#/components/schemas/Bundle"
-            application/fhir+xml:
               schema:
                 $ref: "#/components/schemas/Bundle"
       security:
@@ -175,8 +178,7 @@ paths:
       summary: Search for DocumentReference resources
       operationId: searchPostDocumentReference
       parameters:
-        - $ref: "#/components/parameters/fromASID"
-        - $ref: "#/components/parameters/toASID"
+        - $ref: "#/components/parameters/odsCode"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -212,6 +214,7 @@ paths:
       operationId: readDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/odsCode"
       responses:
         "200":
           description: Read DocumentReference operation successful
@@ -2052,7 +2055,7 @@ components:
             - url
     DocumentId:
       type: string
-      pattern: '[ \r\n\t\S]+'
+      pattern: '[A-Za-z0-9\-\.]{1,64}' # https://build.fhir.org/datatypes.html#id
     RequestPathParams:
       type: object
       properties:
@@ -2063,22 +2066,19 @@ components:
     RequestHeader:
       type: object
       properties:
-        fromASID:
-          $ref: "#/components/schemas/RequestHeaderFromASID"
-        toASID:
-          $ref: "#/components/schemas/RequestHeaderToASID"
+        odsCode:
+          $ref: "#/components/schemas/RequestHeaderOdsCode"
       required:
-        - fromASID
-        - toASID
+        - odsCode
     RequestParams:
       type: object
       properties:
-        subject:
+        subject.identifier:
           $ref: "#/components/schemas/RequestQuerySubject"
         custodian.identifier:
           $ref: "#/components/schemas/RequestQueryCustodian"
-        snomed.identifier:
-          $ref: "#/components/schemas/RequestQuerySnomedCode"
+        type.identifier:
+          $ref: "#/components/schemas/RequestQueryType"
       required:
         - subject
     RequestQuerySubject:
@@ -2087,12 +2087,10 @@ components:
     RequestQueryCustodian:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
-    RequestQuerySnomedCode:
+    RequestQueryType:
       type: string
-      pattern: (^http\:\/\/snomed\.info\/sct\|(\d+))
-    RequestHeaderFromASID:
-      type: string
-    RequestHeaderToASID:
+      pattern: ^http\:\/\/snomed\.info\/sct\|(\d+)
+    RequestHeaderOdsCode:
       type: string
   securitySchemes:
     ${authoriser_name}:
@@ -2115,7 +2113,7 @@ components:
       schema:
         $ref: "#/components/schemas/DocumentId"
     subject:
-      name: subject
+      name: subject.identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
@@ -2125,22 +2123,28 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryCustodian"
-    snomedCode:
-      name: snomed.identifier
+    type:
+      name: type.identifier
       in: query
       schema:
-        $ref: "#/components/schemas/RequestQuerySnomedCode"
-    fromASID:
-      name: fromASID
-      description: Client System ASID.
+        $ref: "#/components/schemas/RequestQueryType"
+    odsCode:
+      name: NHSD-End-User-Organisation-ODS
+      description: ODS Code for Organisation
       in: header
       schema:
-        $ref: "#/components/schemas/RequestHeaderFromASID"
+        $ref: "#/components/schemas/RequestHeaderOdsCode"
       required: true
-    toASID:
-      name: toASID
-      description: The Spine ASID.
-      in: header
-      schema:
-        $ref: "#/components/schemas/RequestHeaderFromASID"
-      required: true
+  responses:
+    Success:
+      description: Success Response
+      content:
+        application/fhir+json:
+          schema:
+            $ref: "#/components/schemas/OperationOutcome"
+    Error:
+      description: Error Response
+      content:
+        application/fhir+json:
+          schema:
+            $ref: "#/components/schemas/OperationOutcome"

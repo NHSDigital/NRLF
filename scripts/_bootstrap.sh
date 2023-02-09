@@ -24,6 +24,7 @@ function _get_mgmt_account(){
 function _bootstrap() {
   local command=$1
   local admin_policy_arn="arn:aws:iam::aws:policy/AdministratorAccess"
+  local truststore_bucket_name="${PROFILE_PREFIX}--truststore"
   local state_bucket_name="${PROFILE_PREFIX}--terraform-state"
   local state_lock_table_name="${PROFILE_PREFIX}--terraform-state-lock"
 
@@ -35,6 +36,7 @@ function _bootstrap() {
       fi
 
       cd $root/terraform/bootstrap/mgmt
+      aws s3api create-bucket --bucket "${truststore_bucket_name}" --region us-east-1 --create-bucket-configuration LocationConstraint="${AWS_REGION_NAME}"
       aws s3api create-bucket --bucket "${state_bucket_name}" --region us-east-1 --create-bucket-configuration LocationConstraint="${AWS_REGION_NAME}"
       aws s3api put-public-access-block --bucket "${state_bucket_name}" --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
       aws dynamodb create-table --cli-input-json file://locktable.json --region "${AWS_REGION_NAME}"

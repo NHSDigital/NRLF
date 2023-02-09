@@ -80,9 +80,9 @@ Feature: Basic failure Scenarios where producer is unable to search for Document
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
-      | property | value                                         |
-      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | extra    | unwanted field                                |
+      | property           | value                                         |
+      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | extra              | unwanted field                                |
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                                   |
