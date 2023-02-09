@@ -90,7 +90,7 @@ components:
         type.identifier:
           $ref: "#/components/schemas/RequestQueryType"
       required:
-        - subject
+        - subject.identifier
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
