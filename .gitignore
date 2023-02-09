@@ -3,6 +3,14 @@
 **/tfplan
 **/terraform/**/output.json
 
+# key & certificate files
+*.pem
+*.key
+*.pub
+*.cer
+*.csr
+*.crt
+
 # .tfstate files
 *.tfstate
 *.tfstate.*

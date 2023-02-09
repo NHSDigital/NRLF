@@ -1,8 +1,9 @@
 locals {
-  region      = "eu-west-2"
-  project     = "nhsd-nrlf"
-  environment = terraform.workspace
-  prefix      = "${local.project}--${local.environment}"
+  region       = "eu-west-2"
+  project      = "nhsd-nrlf"
+  account_name = var.account_name
+  environment  = terraform.workspace
+  prefix       = "${local.project}--${local.environment}"
   kms = {
     deletion_window_in_days = 7
   }

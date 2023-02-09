@@ -3,6 +3,10 @@ output "assume_account_id" {
   sensitive = true
 }
 
+output "account_name" {
+  value = local.account_name
+}
+
 output "workspace" {
   value = terraform.workspace
 }

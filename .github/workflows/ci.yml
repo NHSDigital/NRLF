@@ -240,6 +240,7 @@ jobs:
       - name: Terraform apply
         run: |
           source nrlf.sh
+          nrlf truststore pull-server ref
           nrlf terraform ciinit "ci-${GITHUB_SHA_SHORT}"
           nrlf terraform ciplan "ci-${GITHUB_SHA_SHORT}"
           nrlf terraform ciapply "ci-${GITHUB_SHA_SHORT}"
@@ -273,6 +274,7 @@ jobs:
       - name: Terraform apply
         run: |
           source nrlf.sh
+          nrlf truststore pull-server ref
           nrlf terraform ciinit "ci-${GITHUB_SHA_SHORT}"
           nrlf terraform ciplan "ci-${GITHUB_SHA_SHORT}"
           nrlf terraform ciapply "ci-${GITHUB_SHA_SHORT}" || echo "ok"
@@ -322,6 +324,7 @@ jobs:
         run: |
           source .venv/bin/activate
           source nrlf.sh
+          nrlf truststore pull-client ref
           nrlf test integration
           nrlf test feature integration
 
