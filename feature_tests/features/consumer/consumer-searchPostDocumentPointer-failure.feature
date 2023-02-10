@@ -80,9 +80,9 @@ Feature: Basic Success Scenarios where consumer is able to search by POST for Do
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches by POST for Document References with body parameters:
-      | property | value                                         |
-      | subject  | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | extra    | unwanted field                                |
+      | property           | value                                         |
+      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | extra              | unwanted field                                |
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                                   |
