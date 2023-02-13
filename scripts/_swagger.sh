@@ -143,7 +143,6 @@ function _swagger() {
                 yq 'del(.x-ibm-configuration)' |
                 yq 'del(.components.schemas.*.discriminator)' \
                     > ./swagger/${type}.tmp.yaml
-
             # Merge in the narrative, and save for internal use (i.e. including status endpoint)
             yq eval-all '. as $item ireduce ({}; . * $item)' \
                 ./swagger/${type}.tmp.yaml \

@@ -111,9 +111,9 @@ Feature: Basic Success Scenarios where consumer is able to search by POST for Do
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                   |
-      | issue_type        | processing                                              |
-      | issue_level       | error                                                   |
-      | issue_code        | VALIDATION_ERROR                                        |
-      | issue_description | A parameter or value has resulted in a validation error |
-      | message           | Unexpected query parameters: bad                        |
+      | property          | value                                                                 |
+      | issue_type        | processing                                                            |
+      | issue_level       | error                                                                 |
+      | issue_code        | VALIDATION_ERROR                                                      |
+      | issue_description | A parameter or value has resulted in a validation error               |
+      | message           | ConsumerRequestParams validation failure - Invalid subject.identifier |
