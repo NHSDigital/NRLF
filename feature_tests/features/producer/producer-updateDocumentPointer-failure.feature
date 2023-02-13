@@ -1,4 +1,4 @@
-Feature: Failure scenarios where producer is unable to update a Document Pointer
+Feature: Producer Update Failure scenarios
 
   Background:
     Given template DOCUMENT:

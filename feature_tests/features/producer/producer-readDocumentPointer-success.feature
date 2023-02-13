@@ -1,4 +1,4 @@
-Feature: Success scenarios where producer is able to read a Document Pointer
+Feature: Producer Read Success scenarios
 
   Background:
     Given template DOCUMENT

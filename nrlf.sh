@@ -17,6 +17,7 @@ function _nrlf_commands_help() {
   echo "  bootstrap   - bootstrap commands"
   echo "  lint        - lint commands"
   echo "  make        - calls the make/build routines"
+  echo "  doc         - publish documentation into confluence"
   echo "  oauth <env> - Generates an oauth token for the env [dev, ref, prod]"
   echo "  swagger     - swagger generation commands"
   echo "  terraform   - terraform commands"
@@ -46,6 +47,7 @@ function nrlf() {
     "lint") _lint "${@:2}" ;;
     "swagger") _swagger "${@:2}" ;;
     "truststore") _truststore "${@:2}" ;;
+    "doc") _doc "${@:2}" ;;
     *) _nrlf_commands_help ;;
   esac
 

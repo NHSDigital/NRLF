@@ -1,4 +1,4 @@
-Feature: Success scenarios where consumer is able to read a Document Pointer
+Feature: Consumer Read Success scenarios
 
   Background:
     Given template DOCUMENT

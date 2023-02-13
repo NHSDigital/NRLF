@@ -1,4 +1,4 @@
-Feature: Failure Scenarios where producer unable to create a Document Pointer
+Feature: Producer Create Failure Scenarios
 
   Background:
     Given template DOCUMENT

@@ -1,4 +1,4 @@
-Feature: Edge scenarios when consumer reads Document Pointers
+Feature: Consumer Read Edge Case scenarios
 
   Background:
     Given template INVALID_AUTHOR_DOCUMENT
