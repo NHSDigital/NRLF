@@ -3,6 +3,8 @@
 **/tfplan
 **/terraform/**/output.json
 
+node_modules/
+
 # key & certificate files
 *.pem
 *.key
