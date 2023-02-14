@@ -1,4 +1,4 @@
-Feature: Basic Success Scenarios where consumer is able to search by POST for Document Pointers
+Feature: Consumer POST Search Success scenarios
 
   Background:
     Given template DOCUMENT

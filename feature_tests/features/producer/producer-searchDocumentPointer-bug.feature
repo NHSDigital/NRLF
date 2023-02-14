@@ -1,4 +1,4 @@
-Feature: Feature tests for bugs that were raised
+Feature: Producer Search Bug Fixes
 
   Background:
     Given template DOCUMENT

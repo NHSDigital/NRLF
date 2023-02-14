@@ -1,4 +1,4 @@
-Feature: Success scenarios where request is authorised for consumer
+Feature: Consumer Authorisation Succes scenarios
 
   Background:
     Given template POLICY_RESPONSE

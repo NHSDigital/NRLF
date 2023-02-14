@@ -1,4 +1,4 @@
-Feature: Basic Success Scenarios where producer is able to create a Document Pointer
+Feature: Producer Create Success scenarios
 
   Background:
     Given template DOCUMENT

@@ -1,4 +1,4 @@
-Feature: Failure Scenarios where producer unable to supersede Document Pointers
+Feature: Producer Supersede Failure scenarios
 
   Background:
     Given template DOCUMENT

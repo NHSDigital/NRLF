@@ -1,4 +1,4 @@
-Feature: Failure scenarios where producer is unable to delete a Document Pointer
+Feature: Producer Delete Failure scenarios
 
   Background:
     Given template DOCUMENT

@@ -1,4 +1,4 @@
-Feature: Basic Success Scenarios where producer is able to search for Document Pointers
+Feature: Producer Search Success scenarios
 
   Background:
     Given template DOCUMENT

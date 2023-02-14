@@ -1,4 +1,4 @@
-Feature: Edge scenarios when consumer searches for Document Pointers
+Feature: Producer Search Edge Case scenarios
 
   Background:
     Given template DOCUMENT

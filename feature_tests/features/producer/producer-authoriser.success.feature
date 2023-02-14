@@ -1,4 +1,4 @@
-Feature: Success scenarios where request is authorised for producer
+Feature: Producer Authorisation Success scenarios
 
   Background:
     Given template POLICY_RESPONSE

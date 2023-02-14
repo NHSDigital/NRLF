@@ -1,4 +1,4 @@
-Feature: Basic Success Scenarios where consumer is able to search for Document Pointers
+Feature: Consumer Search Failure scenarios
 
   Background:
     Given template DOCUMENT
