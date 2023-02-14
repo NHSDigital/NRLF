@@ -225,6 +225,12 @@ jobs:
     runs-on: [self-hosted, ci]
 
     steps:
+      - name: Download cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
