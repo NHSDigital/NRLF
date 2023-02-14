@@ -252,7 +252,7 @@ jobs:
 
   clear-cache:
     name: Clear Cache
-    needs: [smoke-test]
+    needs: [documentation]
     if: ${{ always() }}
     runs-on: [self-hosted, ci]
 
