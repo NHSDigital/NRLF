@@ -27,7 +27,7 @@ def push(env_name: str = "dev") -> List[str]:
 
     env_page = _get_or_create_page(
         confluence=confluence,
-        title=env_name,
+        title=f"{env_name} - NRLF",
         parent_id=prod_page["id"],
         representation="wiki",
     )
