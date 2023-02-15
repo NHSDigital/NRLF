@@ -40,6 +40,7 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
 - [pyenv](https://github.com/pyenv/pyenv) (this repository uses python 3.9.15)
 - jq
 - [tfenv](https://github.com/tfutils/tfenv) (this repository uses terraform 1.3.4)
+- coretutils
 
 Swagger generation requirements.
 
