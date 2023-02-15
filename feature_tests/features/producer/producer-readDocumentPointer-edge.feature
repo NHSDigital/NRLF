@@ -71,7 +71,7 @@ Feature: Producer Read Edge Case scenarios
       }
       """
 
-  Scenario: Successfully reads Document Pointers by NHS number and ignores invalid data in results
+  Scenario: Does not return document pointer that has invalid document reference data
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to read Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |

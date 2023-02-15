@@ -35,7 +35,6 @@ def _seed_step_factory(
         raw_items,
     )
     items = list(map(item_type.parse_obj, dynamodb_items))
-
     valid_items = validate_items(items=items)
 
     def seeder(

@@ -27,6 +27,7 @@ def test_parse_request_body_to_core_model(mock__make_timestamp):
             },
             "nhs_number": {"S": "9278693472"},
             "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+            "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
             "source": {"S": "NRLF"},
             "type": {"S": "https://snomed.info/ict|736253002"},
             "updated_on": {"NULL": True},

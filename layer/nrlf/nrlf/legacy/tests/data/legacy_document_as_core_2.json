@@ -6,6 +6,7 @@
   },
   "nhs_number": { "S": "3006500369" },
   "producer_id": { "S": "producer_123" },
+  "custodian": "<<fix in data sync>>",
   "source": { "S": "NRL" },
   "type": { "S": "LEGACY_SYSTEM|718347000" },
   "updated_on": { "S": "2022-08-23T14:45:17" },

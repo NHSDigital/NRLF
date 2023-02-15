@@ -6,11 +6,8 @@ from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventMo
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.logging import log_action
-
-from api.producer.createDocumentReference.src.constants import PersistentDependencies
-from api.producer.createDocumentReference.src.v1.constants import API_VERSION
 from nrlf.core.common_steps import parse_headers
-from nrlf.core.errors import AuthenticationError, DuplicateError
+from nrlf.core.errors import AuthenticationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
@@ -24,14 +21,19 @@ from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
 
+from api.producer.createDocumentReference.src.constants import PersistentDependencies
+from api.producer.createDocumentReference.src.v1.constants import API_VERSION
+
 
 def _invalid_producer_for_create(
     organisation_code,
     core_model: DocumentPointer,
     pointer_types,
 ):
-    return (organisation_code != core_model.producer_id.__root__) or (
-        core_model.type.__root__ not in pointer_types
+    return (
+        (organisation_code != core_model.producer_id.__root__)
+        or (organisation_code != core_model.custodian.__root__)
+        or (core_model.type.__root__ not in pointer_types)
     )
 
 
