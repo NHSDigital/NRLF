@@ -16,7 +16,10 @@ from nrlf.core.transform import (
     create_document_pointer_from_fhir_json,
     create_fhir_model_from_fhir_json,
 )
-from nrlf.core.validators import generate_producer_id
+from nrlf.core.validators import (
+    generate_producer_id,
+    validate_fhir_model_for_required_fields,
+)
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
@@ -53,6 +56,7 @@ def parse_request_body(
     logger: Logger,
 ) -> PipelineData:
     body = fetch_body_from_event(event)
+
     core_model = create_document_pointer_from_fhir_json(body, API_VERSION)
     return PipelineData(**data, body=body, core_model=core_model)
 
