@@ -143,3 +143,34 @@ paths:
             statusCode: "200"
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
+  /DocumentReference/_search:
+    post:
+      tags:
+        - NRLF Producer
+      summary: Search for DocumentReference resources
+      operationId: searchPostDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/odsCode"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestParams"
+      responses:
+        "200":
+          description: Search DocumentReference operation successful
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/Bundle"
+      security:
+        - ${authoriser_name}: []
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: ${method_searchPostDocumentReference}
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
