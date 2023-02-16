@@ -2068,8 +2068,6 @@ components:
           $ref: "#/components/schemas/RequestQueryCustodian"
         type.identifier:
           $ref: "#/components/schemas/RequestQueryType"
-      required:
-        - subject.identifier
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
