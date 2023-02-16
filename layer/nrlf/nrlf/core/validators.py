@@ -82,7 +82,7 @@ def validate_document_reference_string(fhir_json: str):
 def validate_fhir_model_for_required_fields(model: StrictDocumentReference):
 
     if not model.custodian:
-        raise ValidationError("Required custodian data is missing")
+        raise DocumentReferenceValidationError("Required custodian data is missing")
 
     if not model.type:
-        raise ValidationError("Required type data is missing")
+        raise DocumentReferenceValidationError("Required type data is missing")
