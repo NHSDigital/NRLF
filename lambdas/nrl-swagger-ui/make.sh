@@ -10,6 +10,7 @@ function _help() {
 
 function _clean() {
     echo "Cleaning swagger-ui"
+    rm -rf ./api
     rm -rf ./dist
 }
 
@@ -17,7 +18,14 @@ function _build() {
     echo "Building swagger-ui"
     mkdir -p ./dist
     npm install > /dev/null
-    zip -r ./dist/swagger-ui.zip ./src/ ./node_modules/ ./index.js package.json > /dev/null
+    npm run prepare
+    zip -r ./dist/swagger-ui.zip ./src/ ./api ./node_modules/ ./index.js package.json > /dev/null
+}
+
+function _prepare() {
+    mkdir -p ./api
+    cp ../../api/producer/nrl-producer-api.yaml ./api
+    cp ../../api/consumer/nrl-consumer-api.yaml ./api
 }
 
 
@@ -27,5 +35,6 @@ args=(${@:2})
 case $command in
     "clean") _clean $args ;;
     "build") _build $args ;;
+    "prepare") _prepare $args ;;
     *) _help ;;
 esac
