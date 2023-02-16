@@ -1,6 +1,6 @@
 resource "aws_lambda_function" "swagger-ui" {
   function_name    = "${local.prefix}--swagger-ui"
-  runtime          = "nodejs16.x"
+  runtime          = "nodejs14.x"
   handler          = "index.handler"
   role             = aws_iam_role.swagger-ui.arn
   filename         = "../../lambdas/nrl-swagger-ui/dist/swagger-ui.zip"

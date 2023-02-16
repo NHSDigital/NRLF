@@ -1,20 +1,6 @@
-"use strict";
+require("source-map-support/register");
+const serverlessExpress = require("@vendia/serverless-express/src/index.js");
 
-const awsServerlessExpress = require("aws-serverless-express");
 const app = require("./src/app");
-const binaryMimeTypes = [
-  "application/octet-stream",
-  "font/eot",
-  "font/opentype",
-  "font/otf",
-  "image/jpeg",
-  "image/png",
-  "image/svg+xml",
-];
-const server = awsServerlessExpress.createServer(app, null, binaryMimeTypes);
 
-function handler(event, context) {
-  awsServerlessExpress.proxy(server, event, context);
-}
-
-exports.handler = handler;
+exports.handler = serverlessExpress({ app });
