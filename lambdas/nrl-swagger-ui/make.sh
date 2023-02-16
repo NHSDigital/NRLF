@@ -27,6 +27,5 @@ args=(${@:2})
 case $command in
     "clean") _clean $args ;;
     "build") _build $args ;;
-    "install") _install $args ;;
     *) _help ;;
 esac
