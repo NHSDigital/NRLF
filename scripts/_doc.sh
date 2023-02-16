@@ -1,12 +1,14 @@
 function _doc_help() {
     echo
-    echo "nrlf doc <command> [options]"
+    echo "nrlf doc <command>"
     echo
     echo "commands:"
     echo "  help                - this help screen"
     echo "  clean               - delete the generated docs"
-    echo "  generate <style>    - build the documentation from the feature tests"
-    echo "  push <env>          - push the documentation to confluence"
+    echo "  generate [<style>]  - OPTIONAL style to be used ('default' if unspecified)."
+    echo "                        See https://pygments.org/styles/"
+    echo "  push <name>         - push the documentation to confluence, grouped under '<name> - NRLF'"
+    echo "                        e.g. 'dev' => 'dev - NRLF'"
     echo
     return 1
 }

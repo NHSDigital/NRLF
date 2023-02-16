@@ -10,6 +10,7 @@ function _swagger_help() {
     echo "  generate-swagger <options>   - generate all swagger or producer/consumer if specified"
     echo "  generate-model <options>     - generate all models or producer/consumer if specified"
     echo "  merge <options>              - generates the nrl-<type>-api.yml file"
+    echo
 }
 
 function _get_generator() {

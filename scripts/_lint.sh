@@ -8,6 +8,7 @@ function _lint_help() {
   echo "  help          - this help screen"
   echo "  check         - check code linting"
   echo "  fix           - fix code linting"
+  echo
   return 1
 }
 
