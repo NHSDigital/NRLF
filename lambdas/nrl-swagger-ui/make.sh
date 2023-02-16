@@ -18,7 +18,7 @@ function _build() {
     echo "Building swagger-ui"
     mkdir -p ./dist
     npm install > /dev/null
-    npm run prepare
+    _prepare
     zip -r ./dist/swagger-ui.zip ./src/ ./api ./node_modules/ ./index.js package.json > /dev/null
 }
 
