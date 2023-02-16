@@ -51,7 +51,6 @@ def search_document_pointers(context: Context, actor_type: str, actor: str):
     test_config: TestConfig = context.test_config
     body = json.dumps(table_as_dict(table=context.table))
     test_config.response = test_config.request.invoke(body=body)
-    print("response_x", test_config.response)
 
 
 @when(
