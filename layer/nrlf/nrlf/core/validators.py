@@ -3,7 +3,7 @@ from datetime import datetime as dt
 
 from nhs_number import is_valid as is_valid_nhs_number
 from nrlf.core.constants import ID_SEPARATOR, VALID_SOURCES
-from nrlf.core.errors import DocumentReferenceValidationError
+from nrlf.core.errors import DocumentReferenceValidationError, RequestValidationError
 from nrlf.producer.fhir.r4.model import CodeableConcept, DocumentReference
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
@@ -82,7 +82,6 @@ def validate_document_reference_string(fhir_json: str):
 def validate_fhir_model_for_required_fields(model: StrictDocumentReference):
 
     if not model.custodian:
-        raise DocumentReferenceValidationError("Required custodian data is missing")
-
-    if not model.type:
-        raise DocumentReferenceValidationError("Required type data is missing")
+        raise RequestValidationError(
+            "DocumentReference validation failure - Missing custodian"
+        )
