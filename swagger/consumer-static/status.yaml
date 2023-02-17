@@ -9,7 +9,7 @@ paths:
         "200":
           description: Consumer API is operational
           content:
-            application/json:
+            application/fhir+json:
               schema:
                 type: object
                 properties:

@@ -148,7 +148,7 @@ paths:
     get:
       tags:
         - NRLF Consumer
-      summary: Search for DocumentReference resources
+      summary: Search for DocumentReference resources!!
       operationId: searchDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
@@ -176,7 +176,7 @@ paths:
             schema:
               type: object
               properties: {}
-          application/json:
+          application/fhir+json:
             schema:
               $ref: "#/components/schemas/RequestParams"
       responses:

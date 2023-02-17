@@ -148,7 +148,7 @@ paths:
     get:
       tags:
         - NRLF Consumer
-      summary: Search for DocumentReference resources
+      summary: Search for DocumentReference resources!!
       operationId: searchDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
@@ -187,7 +187,7 @@ paths:
             schema:
               type: object
               properties: {}
-          application/json:
+          application/fhir+json:
             schema:
               $ref: "#/components/schemas/RequestParams"
       responses:
@@ -245,7 +245,7 @@ paths:
         "200":
           description: Consumer API is operational
           content:
-            application/json:
+            application/fhir+json:
               schema:
                 type: object
                 properties:

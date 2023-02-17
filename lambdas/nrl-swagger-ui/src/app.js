@@ -23,11 +23,11 @@ var options = {
   swaggerOptions: {
     urls: [
       {
-        url: "../api/producer/swagger.json",
+        url: "/api/producer/swagger.json",
         name: "NRL Producer API",
       },
       {
-        url: "../api/consumer/swagger.json",
+        url: "/api/consumer/swagger.json",
         name: "NRL Consumer API",
       },
     ],

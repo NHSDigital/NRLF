@@ -137,7 +137,7 @@ info:
     url: "https://digital.nhs.uk/developer/help-and-support"
     email: api.management@nhs.net
 servers:
-  - url: "https://internal-dev-sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4"
+  - url: "https://internal-dev-sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4"
     description: Dev Sandbox environment.
   - url: "https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4"
     description: Sandbox environment.
@@ -291,7 +291,7 @@ paths:
         "200":
           description: Producer API is operational
           content:
-            application/json:
+            application/fhir+json:
               schema:
                 type: object
                 properties:

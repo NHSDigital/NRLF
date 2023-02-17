@@ -5,7 +5,7 @@ info:
   license:
     name: MIT
 servers:
-  - url: "https://internal-dev-sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4"
+  - url: "https://internal-dev-sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4"
     description: Dev Sandbox environment.
   - url: "https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4"
     description: Sandbox environment.
