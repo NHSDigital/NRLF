@@ -1,4 +1,4 @@
-Feature: Edge scenarios when producer reads Document Pointers
+Feature: Producer Read Edge Case scenarios
 
   Background:
     Given template INVALID_AUTHOR_DOCUMENT

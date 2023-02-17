@@ -1,4 +1,4 @@
-Feature: Basic Success scenarios where producer is able to update a Document Pointer
+Feature: Producer Update Success scenarios
 
   Background:
     Given template DOCUMENT:

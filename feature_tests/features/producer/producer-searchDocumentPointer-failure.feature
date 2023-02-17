@@ -1,4 +1,4 @@
-Feature: Basic failure Scenarios where producer is unable to search for Document Pointers
+Feature: Producer Search Failure Scenarios
 
   Background:
     Given template DOCUMENT

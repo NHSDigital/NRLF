@@ -1,4 +1,4 @@
-Feature: Failure scenarios where request is authorised for consumer
+Feature: Producer Authorisation Failure scenarios
 
   Background:
     Given template POLICY_RESPONSE

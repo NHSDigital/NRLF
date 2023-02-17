@@ -1,4 +1,4 @@
-Feature: Failure scenarios where consumer is unable to read a Document Pointer
+Feature: Consumer Read Failure scenarios
 
   Background:
     Given template DOCUMENT

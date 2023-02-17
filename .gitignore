@@ -3,6 +3,9 @@
 **/tfplan
 **/terraform/**/output.json
 
+# documentation
+report/
+
 # key & certificate files
 *.pem
 *.key

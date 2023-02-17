@@ -1,0 +1,92 @@
+<div class="container-fluid">
+  {% if cookiecutter.current.description -%}
+  <div class="row">
+    <ac:structured-macro
+      ac:macro-id="c6f1bfa5-e1d6-4538-98ce-7bd14f2f2277"
+      ac:name="info"
+      ac:schema-version="1"
+    >
+      <ac:rich-text-body>
+        <p>{{ cookiecutter.current.description|replace('"""', '') }}</p>
+      </ac:rich-text-body>
+    </ac:structured-macro>
+  </div>
+  {% endif -%} {% for element in cookiecutter.current.display -%} {% if not
+  "@technical" in element.description %} {% if element.keyword == "Background"
+  -%}
+  <ac:structured-macro
+    ac:macro-id="c6f1bfa5-e1d6-4538-98ce-7bd14f2f2277"
+    ac:name="info"
+    ac:schema-version="1"
+  >
+    <ac:rich-text-body>
+      <h3>Background:</h3>
+      {{ element.highlight|safe }}
+    </ac:rich-text-body>
+  </ac:structured-macro>
+  {% else %} {% if element.description -%}
+  <ac:structured-macro
+    ac:macro-id="c6f1bfa5-e1d6-4538-98ce-7bd14f2f2277"
+    ac:name="info"
+    ac:schema-version="1"
+  >
+    <ac:rich-text-body>
+      {{ element.description|replace('"""', '')|replace('\n', '') }}
+    </ac:rich-text-body>
+  </ac:structured-macro>
+  {% endif %}
+  <div
+    class="panel conf-macro output-block"
+    data-hasbody="true"
+    data-macro-name="panel"
+    style="
+      background-color: #f3f3f3;
+      border-color: silver;
+      border-style: solid;
+      border-width: 1px;
+    "
+  >
+    <div
+      class="panelHeader"
+      style="
+        border-bottom-width: 0;
+        border-bottom-style: solid;
+        border-bottom-color: silver;
+        background-color: #ffffff;
+      "
+    >
+      <h3>{{ element.name|title|replace('<', '')|replace('>', '') }}</h3>
+    </div>
+    <div class="panelContent" style="background-color: #f3f3f3">
+      {{ element.highlight|safe }}
+    </div>
+    {% if 'examples' in element.keys() and element.examples -%}
+    <div class="panelContent" style="background-color: #f3f3f3">
+      {% for ex in element.examples -%}
+      <table class="table table-striped" style="background-color: #ffffff">
+        <caption>
+          <h5>Examples:</h5>
+        </caption>
+        <thead>
+          <tr>
+            {% for thead in ex.tableHeader.cells -%}
+            <th scope="col">{{ thead.value }}</th>
+            {% endfor -%}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in ex.tableBody -%}
+          <tr>
+            {%- for col in row.cells %}
+            <td>{{ col.value }}</td>
+            {%- endfor %}
+          </tr>
+          {% endfor -%}
+        </tbody>
+      </table>
+      {% endfor -%}
+    </div>
+    {% endif -%}
+  </div>
+  {% endif -%} {% endif -%} {% endfor %}
+</div>

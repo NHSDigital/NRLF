@@ -1,4 +1,4 @@
-Feature: Failure scenarios where producer is unable to read a Document Pointer
+Feature: Producer Read Failure scenarios
 
   Background:
     Given template DOCUMENT
