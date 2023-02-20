@@ -49,6 +49,10 @@ class DocumentReferenceValidationError(Exception):
     pass
 
 
+class RequestValidationError(Exception):
+    pass
+
+
 NRLF_TO_SPINE_4XX_ERROR = {
     AuthenticationError: SpineCoding.ACCESS_DENIED_LEVEL,
     DynamoDbError: SpineCoding.RESOURCE_NOT_FOUND,
@@ -61,6 +65,7 @@ NRLF_TO_SPINE_4XX_ERROR = {
     DuplicateError: SpineCoding.INVALID_RESOURCE_ID,
     SupersedeError: SpineCoding.INVALID_RESOURCE_ID,
     DocumentReferenceValidationError: SpineCoding.RESOURCE_NOT_FOUND,
+    RequestValidationError: SpineCoding.VALIDATION_ERROR,
 }
 
 

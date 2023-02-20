@@ -3,7 +3,6 @@ from functools import cache
 from pathlib import Path
 
 import pytest
-
 from nrlf.core.transform import (
     _create_fhir_model_from_legacy_model,
     _create_legacy_model_from_legacy_json,
@@ -65,6 +64,7 @@ def test_create_document_pointer_from_legacy_json(filename):
     )
     core_json = core_model.super_dict()
     core_json["document"] = "<<mocked out>>"  # For readability
+    core_json["custodian"] = "<<fix in data sync>>"  # For readability
 
     assert core_json == legacy_json_as_core
 
