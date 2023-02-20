@@ -32,7 +32,6 @@ def search_document_references(
 
     organisation_code = data["organisation_code"]
     pointer_types = data["pointer_types"]
-
     document_pointers: list[DocumentPointer] = repository.query_gsi_2(
         pk=key(DbPrefix.Organization, organisation_code),
         type=pointer_types,
