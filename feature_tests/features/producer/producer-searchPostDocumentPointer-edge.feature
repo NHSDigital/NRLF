@@ -105,7 +105,7 @@ Feature: Producer Search Edge Case scenarios
       | url         | https://example.org/my-doc-2.pdf |
     And an invalid Document Pointer exists in the system with an invalid NHS Number and the below values for INVALID_NHS_NUMBER_DOCUMENT template
       | property    | value                          |
-      | identifier  | 1114567890                     |
+      | identifier  | 4444567890                     |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | subject     | 92786934721                    |

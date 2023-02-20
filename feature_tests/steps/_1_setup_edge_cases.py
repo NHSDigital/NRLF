@@ -87,6 +87,7 @@ def _create_invalid_document_pointer_from_fhir_json(
     core_model = DocumentPointer(
         id=fhir_model.id,
         nhs_number=fhir_model.subject.identifier.value,
+        custodian=fhir_model.custodian.identifier.value,
         type=fhir_model.type,
         version=api_version,
         document=json.dumps(fhir_json),
@@ -107,6 +108,7 @@ def _create_invalid_document_pointer_with_invalid_nhs_number(
     core_model = DocumentPointer(
         id=fhir_model.id,
         nhs_number="9278693472",
+        custodian=fhir_model.custodian.identifier.value,
         type=fhir_model.type,
         version=api_version,
         document=json.dumps(fhir_json),

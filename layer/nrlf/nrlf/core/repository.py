@@ -4,7 +4,6 @@ from functools import reduce, wraps
 from typing import Optional, TypeVar, Union
 
 from botocore.exceptions import ClientError
-from jsonschema import ValidationError
 from lambda_utils.logging import log_action
 from more_itertools import map_except
 from nrlf.core.dynamodb_types import to_dynamodb_dict
@@ -17,7 +16,7 @@ from nrlf.core.errors import (
 )
 from nrlf.core.model import DynamoDbModel
 from nrlf.core.types import DynamoDbClient, DynamoDbResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from .decorators import deprecated
 
@@ -57,7 +56,6 @@ def _valid_results(item_type: type[DynamoDbModel], results: dict):
         try:
             valid_results.append(item_type(**item))
         except (ValueError, ValidationError) as e:
-            print("error_x", e)
             pass
 
     return valid_results
