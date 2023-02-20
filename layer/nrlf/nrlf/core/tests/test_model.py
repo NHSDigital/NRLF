@@ -2,7 +2,6 @@ import json
 from unittest import mock
 
 import pytest
-
 from nrlf.core.constants import ID_SEPARATOR, DbPrefix
 from nrlf.core.model import (
     ConsumerRequestParams,
@@ -100,6 +99,7 @@ def test_create_document_pointer_from_fhir_json(mock__make_timestamp):
     id = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"
     (_, doc_id) = id.split(ID_SEPARATOR)
     provider_id = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"
+    custodian = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"
     nhs_number = "9278693472"
 
     assert core_model.dict() == {
@@ -112,6 +112,7 @@ def test_create_document_pointer_from_fhir_json(mock__make_timestamp):
         "id": {"S": id},
         "nhs_number": {"S": nhs_number},
         "producer_id": {"S": provider_id},
+        "custodian": {"S": custodian},
         "type": {"S": "https://snomed.info/ict|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
@@ -154,6 +155,7 @@ def test_update_document_pointer_from_fhir_json(mock__make_timestamp):
         "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
         "nhs_number": {"S": "9278693472"},
         "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+        "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
         "type": {"S": "https://snomed.info/ict|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
@@ -171,6 +173,7 @@ def test_reconstruct_document_pointer_from_db():
         "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
         "nhs_number": {"S": "9278693472"},
         "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+        "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
         "type": {"S": "https://snomed.info/ict|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
@@ -187,6 +190,7 @@ def test_reconstruct_document_pointer_from_db():
         "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
         "nhs_number": {"S": "9278693472"},
         "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+        "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
         "type": {"S": "https://snomed.info/ict|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
