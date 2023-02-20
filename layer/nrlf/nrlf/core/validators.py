@@ -83,5 +83,5 @@ def validate_fhir_model_for_required_fields(model: StrictDocumentReference):
 
     if not model.custodian:
         raise RequestValidationError(
-            "DocumentReference validation failure - Missing custodian"
+            "DocumentReference validation failure - Invalid custodian"
         )

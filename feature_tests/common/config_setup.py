@@ -1,4 +1,3 @@
-import json
 from dataclasses import asdict
 from typing import Union
 
@@ -40,8 +39,6 @@ from feature_tests.common.utils import (
     get_test_mode,
     get_tls_ma_files,
 )
-from nrlf.core.errors import ItemNotFound
-from nrlf.core.query import create_read_and_filter_query
 
 
 def _local_mock(context: Context):
