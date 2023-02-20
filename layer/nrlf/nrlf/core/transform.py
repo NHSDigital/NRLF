@@ -2,10 +2,11 @@ import json
 from datetime import datetime as dt
 from typing import Union
 
-from nrlf.core.constants import EMPTY_VALUES, ID_SEPARATOR, JSON_TYPES, Source
 from more_itertools import map_except
+from nrlf.core.constants import EMPTY_VALUES, ID_SEPARATOR, JSON_TYPES, Source
 from nrlf.core.errors import FhirValidationError
 from nrlf.core.model import DocumentPointer
+from nrlf.core.validators import validate_fhir_model_for_required_fields
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
 from nrlf.legacy.model import LegacyDocumentPointer
 from nrlf.producer.fhir.r4.model import Bundle, BundleEntry, DocumentReference
@@ -84,9 +85,11 @@ def create_document_pointer_from_fhir_json(
     **kwargs,
 ) -> DocumentPointer:
     fhir_model = create_fhir_model_from_fhir_json(fhir_json=fhir_json)
+    validate_fhir_model_for_required_fields(fhir_model)
     core_model = DocumentPointer(
         id=fhir_model.id,
         nhs_number=fhir_model.subject.identifier.value,
+        custodian=fhir_model.custodian.identifier.value,
         type=fhir_model.type,
         version=api_version,
         document=json.dumps(fhir_json),
