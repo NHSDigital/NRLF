@@ -116,7 +116,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
 
-  Scenario: Successfully search for multiple Document Pointers with no request body
+  Scenario: Successfully search for multiple Document Pointers without the mandatory NHS number
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
@@ -134,21 +134,21 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | identifier  | 2224567890                       |
       | type        | 736253002                        |
       | custodian   | 8FW23                            |
-      | subject     | 9278693472                       |
+      | subject     | 6887473704                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                            |
       | identifier  | 3334567890                       |
-      | type        | 555553002                        |
+      | type        | 736253002                        |
       | custodian   | 8FW23                            |
-      | subject     | 9278693472                       |
+      | subject     | 7736959498                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
-    When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
+    When Producer "Aaron Court Mental Health NH" searches by POST for Document References with body parameters:
       | property | value |
     Then the operation is successful
-    And the response is a Bundle with 2 entries
+    And the response is a Bundle with 3 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -162,7 +162,15 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | identifier  | 2224567890                       |
       | type        | 736253002                        |
       | custodian   | 8FW23                            |
-      | subject     | 9278693472                       |
+      | subject     | 6887473704                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And the Bundle contains an Entry with the below values for DOCUMENT template
+      | property    | value                            |
+      | identifier  | 3334567890                       |
+      | type        | 736253002                        |
+      | custodian   | 8FW23                            |
+      | subject     | 7736959498                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
 
