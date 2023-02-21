@@ -5,8 +5,7 @@ from typing import Optional, TypeVar, Union
 
 from botocore.exceptions import ClientError
 from lambda_utils.logging import log_action
-from pydantic import BaseModel
-
+from more_itertools import map_except
 from nrlf.core.dynamodb_types import to_dynamodb_dict
 from nrlf.core.errors import (
     DuplicateError,
@@ -17,6 +16,7 @@ from nrlf.core.errors import (
 )
 from nrlf.core.model import DynamoDbModel
 from nrlf.core.types import DynamoDbClient, DynamoDbResponse
+from pydantic import BaseModel, ValidationError
 
 from .decorators import deprecated
 
@@ -45,6 +45,20 @@ def _validate_results_within_limits(results: dict):
             "DynamoDB has returned too many results, pagination not implemented yet"
         )
     return results
+
+
+def _valid_results(item_type: type[DynamoDbModel], results: dict):
+    """
+    returns only valid results for the specified type[DynamoDbModel]
+    """
+    valid_results = []
+    for item in results:
+        try:
+            valid_results.append(item_type(**item))
+        except (ValueError, ValidationError) as e:
+            pass
+
+    return valid_results
 
 
 def _handle_dynamodb_errors(
@@ -316,7 +330,8 @@ class Repository:
         )
         results = self.dynamodb.query(**args)
         _validate_results_within_limits(results)
-        return [self.item_type(**item) for item in results["Items"]]
+        valid_results = _valid_results(self.item_type, results["Items"])
+        return valid_results
 
     def query(
         self,

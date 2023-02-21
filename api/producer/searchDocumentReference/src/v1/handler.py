@@ -5,7 +5,6 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
-
 from nrlf.core.common_steps import parse_headers
 from nrlf.core.constants import NHS_NUMBER_INDEX, DbPrefix
 from nrlf.core.errors import assert_no_extra_params
@@ -36,7 +35,7 @@ def search_document_references(
     organisation_code = data["organisation_code"]
     pointer_types = data["pointer_types"]
 
-    document_pointers: list[DocumentPointer] = repository.query_gsi_2(
+    document_pointers = repository.query_gsi_2(
         pk=key(DbPrefix.Organization, organisation_code),
         type=pointer_types,
         nhs_number=nhs_number,
