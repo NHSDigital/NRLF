@@ -137,6 +137,8 @@ function _swagger() {
         local type=$2
         if [[ " ${allowed_types[*]} " =~ " $2 " ]]; then
             cat ./swagger/${type}.yaml |
+                # Remove commented lines
+                grep -v "^\s*#" |
                  # Replace snake case terms, which are invalid in ApiGateway
                 yq 'with(.components.schemas; with_entries(.key |= sub("_","")))' |
                 yq '(.. | select(has("$ref")).$ref) |= sub("_","")' |
