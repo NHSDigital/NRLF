@@ -50,7 +50,6 @@ def producer_searches_existing_document_reference(
 def search_document_pointers(context: Context, actor_type: str, actor: str):
     test_config: TestConfig = context.test_config
     body = json.dumps(table_as_dict(table=context.table))
-    print("request_x", test_config.request)
     test_config.response = test_config.request.invoke(body=body)
 
 
