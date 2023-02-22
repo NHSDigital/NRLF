@@ -39,7 +39,7 @@ def parse_request_body(
 ) -> PipelineData:
     body = fetch_body_from_event(event)
 
-    if body["id"] is not data["id"]:
+    if ("id" in body and "id" in data) and (body["id"] is not data["id"]):
         raise RequestValidationError("The path id and body id must match")
 
     core_model = update_document_pointer_from_fhir_json(body, API_VERSION)
