@@ -30,7 +30,7 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
 5. [Smoke tests and oauth tokens for Postman requests](#smoke-tests-and-oauth-tokens)
 6. [Logging](#logging)
 7. [Route 53 & Hosted zones](#route53--hosted-zones)
-8. [Sandbox][#sandbox]
+8. [Sandbox](#sandbox)
 
 ## Setup
 
@@ -40,6 +40,7 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
 - [pyenv](https://github.com/pyenv/pyenv) (this repository uses python 3.9.15)
 - jq
 - [tfenv](https://github.com/tfutils/tfenv) (this repository uses terraform 1.3.4)
+- coreutils
 
 Swagger generation requirements.
 

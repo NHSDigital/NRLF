@@ -47,7 +47,7 @@ def producer_searches_existing_document_reference(
     '{actor_type} "{actor}" searches by POST for Document References with body parameters',
     action="searchPost",
 )
-def consumer_search_document_pointers(context: Context, actor_type: str, actor: str):
+def search_document_pointers(context: Context, actor_type: str, actor: str):
     test_config: TestConfig = context.test_config
     body = json.dumps(table_as_dict(table=context.table))
     test_config.response = test_config.request.invoke(body=body)
