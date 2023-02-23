@@ -13,6 +13,7 @@ from nrlf.core.common_steps import parse_headers, parse_path_id
 from nrlf.core.errors import (
     AuthenticationError,
     ImmutableFieldViolationError,
+    ItemNotFound,
     RequestValidationError,
 )
 from nrlf.core.model import DocumentPointer
@@ -39,8 +40,8 @@ def parse_request_body(
 ) -> PipelineData:
     body = fetch_body_from_event(event)
 
-    if ("id" in body and "id" in data) and (body["id"] is not data["id"]):
-        raise RequestValidationError("The path id and body id must match")
+    if ("id" in body and "id" in data) and (body["id"] != data["id"]):
+        raise ItemNotFound("Item could not be found")
 
     core_model = update_document_pointer_from_fhir_json(body, API_VERSION)
     return PipelineData(core_model=core_model, **data)
