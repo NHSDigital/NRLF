@@ -55,7 +55,7 @@ components:
       in: header
       required: false
       schema:
-        $ref: "#/components/schemas/X-Request-Id"
+        $ref: "#/components/schemas/RequestId"
     correlationId:
       name: X-Correlation-ID
       description: |
@@ -65,7 +65,7 @@ components:
       in: header
       required: false
       schema:
-        $ref: "#/components/schemas/X-Correlation-ID"
+        $ref: "#/components/schemas/CorrelationID"
   requestBodies:
     DocumentReference:
       content:
@@ -126,11 +126,24 @@ components:
       pattern: ^https\:\/\/snomed\.info\/sct\|(\d+)
     RequestHeaderOdsCode:
       type: string
-    X-Request-Id:
+    RequestId:
       type: string
       pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
       example: 60E0B220-8136-4CA5-AE46-1D97EF59D068
-    X-Correlation-ID:
+    CorrelationID:
       type: string
       example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
-
+  headers:
+    X-Correlation-Id:  
+      schema:
+        type: string
+        example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+        description: |
+          The X-Correlation-ID from the request header, if supplied, mirrored back.
+    X-Request-Id:
+      schema:
+        type: string
+        pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        example: 60E0B220-8136-4CA5-AE46-1D97EF59D068
+        description: |
+          The X-Request-ID from the request header, if supplied, mirrored back.

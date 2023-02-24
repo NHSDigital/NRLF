@@ -160,6 +160,8 @@ paths:
         $ref: "#/components/requestBodies/DocumentReference"
       parameters:
         - $ref: "#/components/parameters/odsCode"
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/correlationId'
     get:
       tags:
         - NRLF Producer
@@ -170,6 +172,8 @@ paths:
         - $ref: "#/components/parameters/custodian"
         - $ref: "#/components/parameters/type"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/correlationId'
       responses:
         "200":
           description: Search DocumentReference operation successful
@@ -177,6 +181,11 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
   /DocumentReference/_search:
     post:
       tags:
@@ -185,6 +194,8 @@ paths:
       operationId: searchPostDocumentReference
       parameters:
         - $ref: "#/components/parameters/odsCode"
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/correlationId'
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -201,6 +212,11 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
   /DocumentReference/{id}:
     get:
       tags:
@@ -210,6 +226,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/correlationId'
       responses:
         "200":
           description: Read DocumentReference operation successful
@@ -217,6 +235,11 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/DocumentReference"
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+            X-Request-Id:
+              $ref: '#/components/headers/X-Request-Id'
     put:
       tags:
         - NRLF Producer
@@ -225,6 +248,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/correlationId'
       responses:
         "200":
           description: Update DocumentReference operation successful
@@ -242,6 +267,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/correlationId'
       responses:
         "204":
           description: Delete DocumentReference operation successful
@@ -909,11 +936,11 @@ components:
       pattern: ^https\:\/\/snomed\.info\/sct\|(\d+)
     RequestHeaderOdsCode:
       type: string
-    X-Request-Id:
+    RequestId:
       type: string
       pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
       example: 60E0B220-8136-4CA5-AE46-1D97EF59D068
-    X-Correlation-ID:
+    CorrelationID:
       type: string
       example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
   securitySchemes: {}
@@ -974,13 +1001,37 @@ components:
   responses:
     Success:
       description: Success Response
+      headers:
+        X-Correlation-Id:
+          $ref: '#/components/headers/X-Correlation-Id'
+        X-Request-Id:
+          $ref: '#/components/headers/X-Request-Id'
       content:
         application/fhir+json:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
     Error:
       description: Error Response
+      headers:
+        X-Correlation-Id:
+          $ref: '#/components/headers/X-Correlation-Id'
+        X-Request-Id:
+          $ref: '#/components/headers/X-Request-Id'
       content:
         application/fhir+json:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
+  headers:
+    X-Correlation-Id:
+      schema:
+        type: string
+        example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+        description: |
+          The X-Correlation-ID from the request header, if supplied, mirrored back.
+    X-Request-Id:
+      schema:
+        type: string
+        pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        example: 60E0B220-8136-4CA5-AE46-1D97EF59D068
+        description: |
+          The X-Request-ID from the request header, if supplied, mirrored back.
