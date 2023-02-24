@@ -33,8 +33,13 @@ def search_document_references(
 
     pk = key("P", nhs_number)
 
-    custodian = custodian_filter(custodian_identifier=request_params.custodian_identifier)
-    pointer_types = type_filter(type_identifier=request_params.type_identifier, pointer_types=data["pointer_types"])
+    custodian = custodian_filter(
+        custodian_identifier=request_params.custodian_identifier
+    )
+    pointer_types = type_filter(
+        type_identifier=request_params.type_identifier,
+        pointer_types=data["pointer_types"],
+    )
 
     document_pointers: list[DocumentPointer] = repository.query_gsi_1(
         pk=pk, type=pointer_types, producer_id=custodian

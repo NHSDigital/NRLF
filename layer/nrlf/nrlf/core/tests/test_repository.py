@@ -185,7 +185,7 @@ def test_decode(input: dict, expected: any):
 def test_custodian_filter():
     queryStringParameters = {
         "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
-        "custodian.identifier": "https://fhir.nhs.uk/Id/ods-code|RY26A"
+        "custodian.identifier": "https://fhir.nhs.uk/Id/ods-code|RY26A",
     }
     request_params = ConsumerRequestParams(**queryStringParameters or {})
 
@@ -193,10 +193,11 @@ def test_custodian_filter():
     expected = "RY26A"
     assert actual == expected
 
+
 def test_custodian_filter_none():
     queryStringParameters = {
         "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
-        "custodian.identifier": None
+        "custodian.identifier": None,
     }
     request_params = ConsumerRequestParams(**queryStringParameters or {})
 
@@ -204,33 +205,40 @@ def test_custodian_filter_none():
     expected = None
     assert actual == expected
 
+
 def test_type_filter():
     queryStringParameters = {
         "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
-        "type.identifier": "https://snomed.info/ict|861421000000109"
+        "type.identifier": "https://snomed.info/ict|861421000000109",
     }
 
-    pointer_types = ["https://snomed.info/ict|861421000000109", "https://snomed.info/ict|861421000000108"]
+    pointer_types = [
+        "https://snomed.info/ict|861421000000109",
+        "https://snomed.info/ict|861421000000108",
+    ]
     request_params = ConsumerRequestParams(**queryStringParameters or {})
 
     actual = type_filter(request_params.type_identifier, pointer_types)
     expected = ["https://snomed.info/ict|861421000000109"]
     assert actual == expected
 
+
 def test_type_filter_none():
     queryStringParameters = {
         "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
     }
-    pointer_types = ["https://snomed.info/ict|861421000000109", "https://snomed.info/ict|861421000000108"]
+    pointer_types = [
+        "https://snomed.info/ict|861421000000109",
+        "https://snomed.info/ict|861421000000108",
+    ]
     request_params = ConsumerRequestParams(**queryStringParameters or {})
 
     actual = type_filter(request_params.type_identifier, pointer_types)
-    expected = ["https://snomed.info/ict|861421000000109", "https://snomed.info/ict|861421000000108"]
+    expected = [
+        "https://snomed.info/ict|861421000000109",
+        "https://snomed.info/ict|861421000000108",
+    ]
     assert actual == expected
-
-
-
-
 
 
 # @pytest.mark.parametrize(

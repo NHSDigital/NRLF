@@ -38,10 +38,12 @@ def _strip_none(d: dict) -> dict:
         return None
     return {k: v for (k, v) in d.items() if f"{v}" != "None"}
 
+
 def custodian_filter(custodian_identifier):
     if custodian_identifier is not None:
         return custodian_identifier.__root__.split("|", 1)[1]
     return None
+
 
 def type_filter(type_identifier, pointer_types):
     if type_identifier is not None:
