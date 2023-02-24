@@ -96,6 +96,6 @@ components:
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
     RequestQueryType:
       type: string
-      pattern: ^http\:\/\/snomed\.info\/sct\|(\d+)
+      pattern: ^https\:\/\/snomed\.info\/sct\|(\d+)
     RequestHeaderOdsCode:
       type: string
