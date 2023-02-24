@@ -22,7 +22,6 @@ def search_document_references(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-
     repository: Repository = dependencies["repository"]
 
     body = fetch_body_from_event(event)
@@ -32,9 +31,15 @@ def search_document_references(
     nhs_number: RequestQuerySubject = request_params.nhs_number
     pk = key(DbPrefix.Patient, nhs_number)
     pointer_types = data["pointer_types"]
+    custodian = None
+
+    if request_params.custodian_identifier is not None:
+        custodian = request_params.custodian_identifier.__root__.split("|", 1)[1]
+    if request_params.type_identifier is not None:
+        pointer_types = [request_params.type_identifier.__root__]
 
     document_pointers: list[DocumentPointer] = repository.query_gsi_1(
-        pk=pk, type=pointer_types
+        pk=pk, type=pointer_types, producer_id=custodian
     )
 
     bundle = create_bundle_from_document_pointers(document_pointers)

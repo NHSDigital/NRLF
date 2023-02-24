@@ -167,7 +167,6 @@ paths:
       operationId: searchDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
-        - $ref: "#/components/parameters/custodian"
         - $ref: "#/components/parameters/type"
       responses:
         "200":

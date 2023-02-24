@@ -26,6 +26,7 @@ def search_document_references(
 
     repository: Repository = dependencies["repository"]
     request_params = ProducerRequestParams(**event.queryStringParameters or {})
+
     assert_no_extra_params(
         request_params=request_params, provided_params=event.queryStringParameters
     )
@@ -35,7 +36,10 @@ def search_document_references(
     organisation_code = data["organisation_code"]
     pointer_types = data["pointer_types"]
 
-    document_pointers = repository.query_gsi_2(
+    if request_params.type_identifier is not None:
+        pointer_types = [request_params.type_identifier.__root__]
+
+    document_pointers: list[DocumentPointer] = repository.query_gsi_2(
         pk=key(DbPrefix.Organization, organisation_code),
         type=pointer_types,
         nhs_number=nhs_number,
