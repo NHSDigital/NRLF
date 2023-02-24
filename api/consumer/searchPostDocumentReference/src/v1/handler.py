@@ -10,9 +10,8 @@ from nrlf.core.common_steps import parse_headers
 from nrlf.core.constants import DbPrefix
 from nrlf.core.errors import assert_no_extra_params
 from nrlf.core.model import ConsumerRequestParams, DocumentPointer, key
-from nrlf.core.repository import Repository
+from nrlf.core.repository import Repository, custodian_filter, type_filter
 from nrlf.core.transform import create_bundle_from_document_pointers
-
 
 @log_action(narrative="Searching for document references")
 def search_document_references(
@@ -30,13 +29,9 @@ def search_document_references(
 
     nhs_number: RequestQuerySubject = request_params.nhs_number
     pk = key(DbPrefix.Patient, nhs_number)
-    pointer_types = data["pointer_types"]
-    custodian = None
 
-    if request_params.custodian_identifier is not None:
-        custodian = request_params.custodian_identifier.__root__.split("|", 1)[1]
-    if request_params.type_identifier is not None:
-        pointer_types = [request_params.type_identifier.__root__]
+    custodian = custodian_filter(custodian_identifier=request_params.custodian_identifier)
+    pointer_types = type_filter(type_identifier=request_params.type_identifier, pointer_types=data["pointer_types"])
 
     document_pointers: list[DocumentPointer] = repository.query_gsi_1(
         pk=pk, type=pointer_types, producer_id=custodian
