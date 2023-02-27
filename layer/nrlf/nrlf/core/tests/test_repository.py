@@ -1,3 +1,4 @@
+from nrlf.core.model import ConsumerRequestParams
 import pytest
 
 from nrlf.core.repository import (
@@ -8,6 +9,8 @@ from nrlf.core.repository import (
     _filter_expression,
     _key_and_filter_clause,
     _key_condition_expression,
+    custodian_filter,
+    type_filter,
 )
 
 
@@ -177,3 +180,74 @@ def test_encode(input: any, expected: str):
 def test_decode(input: dict, expected: any):
     actual = _decode(input)
     assert actual == expected
+
+
+def test_custodian_filter():
+    queryStringParameters = {
+        "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
+        "custodian.identifier": "https://fhir.nhs.uk/Id/ods-code|RY26A",
+    }
+    request_params = ConsumerRequestParams(**queryStringParameters or {})
+
+    actual = custodian_filter(request_params.custodian_identifier)
+    expected = "RY26A"
+    assert actual == expected
+
+
+def test_custodian_filter_none():
+    queryStringParameters = {
+        "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
+        "custodian.identifier": None,
+    }
+    request_params = ConsumerRequestParams(**queryStringParameters or {})
+
+    actual = custodian_filter(request_params.custodian_identifier)
+    expected = None
+    assert actual == expected
+
+
+def test_type_filter():
+    queryStringParameters = {
+        "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
+        "type.identifier": "https://snomed.info/ict|861421000000109",
+    }
+
+    pointer_types = [
+        "https://snomed.info/ict|861421000000109",
+        "https://snomed.info/ict|861421000000108",
+    ]
+    request_params = ConsumerRequestParams(**queryStringParameters or {})
+
+    actual = type_filter(request_params.type_identifier, pointer_types)
+    expected = ["https://snomed.info/ict|861421000000109"]
+    assert actual == expected
+
+
+def test_type_filter_none():
+    queryStringParameters = {
+        "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
+    }
+    pointer_types = [
+        "https://snomed.info/ict|861421000000109",
+        "https://snomed.info/ict|861421000000108",
+    ]
+    request_params = ConsumerRequestParams(**queryStringParameters or {})
+
+    actual = type_filter(request_params.type_identifier, pointer_types)
+    expected = [
+        "https://snomed.info/ict|861421000000109",
+        "https://snomed.info/ict|861421000000108",
+    ]
+    assert actual == expected
+
+
+# @pytest.mark.parametrize(
+#     ["input","pointer_types", "expected"],
+#     [
+#         ["https://snomed.info/ict\|861421000000109",["https://snomed.info/ict\|861421000000109", "https://snomed.info/ict\|861421000000108"], ["https://snomed.info/ict\|861421000000109"]],
+#         [None, ["https://snomed.info/ict\|861421000000109", "https://snomed.info/ict\|861421000000108"], ["https://snomed.info/ict\|861421000000109", "https://snomed.info/ict\|861421000000108"]]
+#     ],
+# )
+# def test_type_filter(input: any, pointer_types: list, expected: any):
+#     actual = type_filter(input, pointer_types)
+#     assert actual == expected

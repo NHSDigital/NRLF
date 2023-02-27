@@ -45,7 +45,7 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
 Swagger generation requirements.
 
 - curl
-- jre
+- java runtime environment (jre) - https://www.oracle.com/java/technologies/downloads/#jdk19-mac
 - yq v4
 
 ### 2. Install python dependencies
