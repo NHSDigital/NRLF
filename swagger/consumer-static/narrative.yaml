@@ -133,30 +133,42 @@ paths:
   /DocumentReference:
     get:
       summary: Search (GET)
-      description: Perform a Search using GET query string parameters
+      description: |
+        Perform a Search using GET query string parameters
       responses:
         "200":
           description: Search successful response
           content:
             application/fhir+json:
-              example: { "TBC": true }
+              example: |
+                {
+                  "TBC": true
+                }
   /DocumentReference/_search:
     post:
       summary: Search (POST)
-      description: Same as above but a POST to avoid URL length limits
+      description: |
+        Same as above but a POST to avoid URL length limits
       responses:
         "200":
           description: Search successful response
           content:
             application/fhir+json:
-              example: { "TBC": true }
+              example: |
+                {
+                  "TBC": true
+                }
   /DocumentReference/{id}:
     get:
       summary: Read
-      description: Read a single DocumentReference record
+      description: |
+        Read a single DocumentReference record
       responses:
         "200":
           description: Search successful response
           content:
             application/fhir+json:
-              example: { "TBC": true }
+              example: |
+                {
+                  "TBC": true
+                }

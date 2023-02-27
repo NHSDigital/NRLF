@@ -160,8 +160,10 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
-              example:
-                "TBC": true
+              example: |
+                {
+                  "TBC": true
+                }
       security:
         - ${authoriser_name}: []
       x-amazon-apigateway-integration:
@@ -173,7 +175,8 @@ paths:
             statusCode: "200"
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
-      description: Perform a Search using GET query string parameters
+      description: |
+        Perform a Search using GET query string parameters
   /DocumentReference/_search:
     post:
       tags:
@@ -198,8 +201,10 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
-              example:
-                "TBC": true
+              example: |
+                {
+                  "TBC": true
+                }
       security:
         - ${authoriser_name}: []
       x-amazon-apigateway-integration:
@@ -211,7 +216,8 @@ paths:
             statusCode: "200"
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
-      description: Same as above but a POST to avoid URL length limits
+      description: |
+        Same as above but a POST to avoid URL length limits
   /DocumentReference/{id}:
     get:
       tags:
@@ -228,8 +234,10 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/DocumentReference"
-              example:
-                "TBC": true
+              example: |
+                {
+                  "TBC": true
+                }
       security:
         - ${authoriser_name}: []
       x-amazon-apigateway-integration:
@@ -241,7 +249,8 @@ paths:
             statusCode: "200"
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
-      description: Read a single DocumentReference record
+      description: |
+        Read a single DocumentReference record
   /_status:
     get:
       tags:
