@@ -180,13 +180,49 @@ components:
           summary: Valid
           value: XYZ|1234567890
         invalid:
-          summary: Invalid
-          value: XYZ-1234567890
+          summary: Unknown
+          value: XYZ|1234567890
     odsCode:
       examples:
         valid:
           summary: Valid
-          value: XYZ
+          value: https://fhir.nhs.uk/Id/ods-organization-code|TBC
         invalid:
-          summary: Invalid
-          value: ^&*
+          summary: Unknown
+          value: https://fhir.nhs.uk/Id/ods-organization-code|TBC
+    subject:
+      examples:
+        valid_1:
+          summary: "Valid #1"
+          value: https://fhir.nhs.uk/Id/nhs-number|TBC
+        valid_2:
+          summary: "Valid #2"
+          value: https://fhir.nhs.uk/Id/nhs-number|TBC
+        invalid:
+          summary: Unknown
+          value: https://fhir.nhs.uk/Id/nhs-number|TBC
+    custodian:
+      examples:
+        valid:
+          summary: Valid
+          value: https://fhir.nhs.uk/Id/ods-organization-code|TBC
+        invalid:
+          summary: Unknown
+          value: https://fhir.nhs.uk/Id/ods-organization-code|TBC
+    type:
+      examples:
+        SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN:
+          summary: Mental Health Crisis Plan
+          value: https://snomed.info/ict|736253002
+        SNOMED_CODES_EMERGENCY_HEALTH_CARE_PLAN:
+          summary: Emergency Healthcare Plan
+          value: https://snomed.info/ict|887701000000100
+        SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY:
+          summary: End of Life Care Coordination Summary
+          value: https://snomed.info/ict|861421000000109
+        SNOMED_CODES_NATIONAL_EARLY_WARNING_SCORE_2:
+          summary: National Early Warning Code 2
+          value: https://snomed.info/ict|1363501000000100
+        invalid:
+          summary: Unknown
+          value: https://snomed.info/ict|410970009
