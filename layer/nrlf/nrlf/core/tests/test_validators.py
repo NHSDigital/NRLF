@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+
 from nrlf.core.constants import ID_SEPARATOR
 from nrlf.core.errors import DocumentReferenceValidationError, ItemNotFound
 from nrlf.core.transform import make_timestamp
@@ -127,7 +128,7 @@ def test_requesting_application_is_not_authorised(
                 "type": {
                 "coding": [
                     {
-                    "system": "https://snomed.info/ict",
+                    "system": "http://snomed.info/sct",
                     "code": "736253002"
                     }
                 ]
@@ -168,7 +169,7 @@ def test_requesting_application_is_not_authorised(
                 "type": {
                 "coding": [
                     {
-                    "system": "https://snomed.info/ict",
+                    "system": "http://snomed.info/sct",
                     "code": "736253002"
                     }
                 ]

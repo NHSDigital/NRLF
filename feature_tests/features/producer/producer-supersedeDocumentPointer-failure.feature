@@ -21,7 +21,7 @@ Feature: Producer Supersede Failure scenarios
         "type": {
           "coding": [
             {
-              "system": "https://snomed.info/ict",
+              "system": "http://snomed.info/sct",
               "code": "$type"
             }
           ]
@@ -74,7 +74,7 @@ Feature: Producer Supersede Failure scenarios
         "type": {
           "coding": [
             {
-              "system": "https://snomed.info/ict",
+              "system": "http://snomed.info/sct",
               "code": "$type"
             }
           ]
@@ -122,8 +122,8 @@ Feature: Producer Supersede Failure scenarios
   Scenario: Producer does not have permission to create the supersede Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 8FW23-1234567890               |
@@ -153,8 +153,8 @@ Feature: Producer Supersede Failure scenarios
   Scenario: Producer does not have permission to delete the superseded Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 734163000 |
+      | system                 | value     |
+      | http://snomed.info/sct | 734163000 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 8FW23-1234567890               |
@@ -184,8 +184,8 @@ Feature: Producer Supersede Failure scenarios
   Scenario: The superseded Document Pointer does not exist                |
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
       | property    | value                          |
       | identifier  | 8FW23-1234567892               |
@@ -207,8 +207,8 @@ Feature: Producer Supersede Failure scenarios
   Scenario: Targets must be unique
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 8FW23-1234567890               |
@@ -239,8 +239,8 @@ Feature: Producer Supersede Failure scenarios
   Scenario: Unable to supersede a Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 8FW23-1234567890               |
@@ -265,8 +265,8 @@ Feature: Producer Supersede Failure scenarios
   Scenario: Unable to supersede a Document Pointer with an invalid id format
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT_WITH_INVALID_ID_FORMAT template
       | property    | value                          |
       | identifier  | 1234567890                     |
@@ -288,8 +288,8 @@ Feature: Producer Supersede Failure scenarios
   Scenario: Unable to supersede Document Pointer if the nhs number does not match
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 8FW23-1234567890               |
@@ -332,9 +332,9 @@ Feature: Producer Supersede Failure scenarios
   Scenario: Unable to supersede Document Pointer if the type does not match
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253001 |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253001 |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 8FW23-1234567890               |

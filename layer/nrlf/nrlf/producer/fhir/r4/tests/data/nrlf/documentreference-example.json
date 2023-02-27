@@ -16,7 +16,7 @@
   "type": {
     "coding": [
       {
-        "system": "https://snomed.info/ict",
+        "system": "http://snomed.info/sct",
         "code": "736253002"
       }
     ]

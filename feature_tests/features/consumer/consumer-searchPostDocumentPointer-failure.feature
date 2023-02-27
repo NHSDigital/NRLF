@@ -21,7 +21,7 @@ Feature: Consumer POST Search Success scenarios
         "type": {
           "coding": [
             {
-              "system": "https://snomed.info/ict",
+              "system": "http://snomed.info/sct",
               "code": "$type"
             }
           ]
@@ -69,8 +69,8 @@ Feature: Consumer POST Search Success scenarios
   Scenario: Search by POST fails to return a bundle when extra parameters are found
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search by POST for Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -96,8 +96,8 @@ Feature: Consumer POST Search Success scenarios
   Scenario: Search by POST is unable to return Document Pointer
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search by POST for Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -122,8 +122,8 @@ Feature: Consumer POST Search Success scenarios
   Scenario: Search by POST with an invalid NHS Number
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search by POST for Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
