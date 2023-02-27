@@ -172,3 +172,21 @@ paths:
                 {
                   "TBC": true
                 }
+components:
+  parameters:
+    id:
+      examples:
+        valid:
+          summary: Valid
+          value: XYZ|1234567890
+        invalid:
+          summary: Invalid
+          value: XYZ-1234567890
+    odsCode:
+      examples:
+        valid:
+          summary: Valid
+          value: XYZ
+        invalid:
+          summary: Invalid
+          value: ^&*

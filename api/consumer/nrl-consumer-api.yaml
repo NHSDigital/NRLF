@@ -890,6 +890,13 @@ components:
       description: logical identifier
       schema:
         $ref: "#/components/schemas/DocumentId"
+      examples:
+        valid:
+          summary: Valid
+          value: XYZ|1234567890
+        invalid:
+          summary: Invalid
+          value: XYZ-1234567890
     subject:
       name: subject.identifier
       in: query
@@ -913,6 +920,13 @@ components:
       schema:
         $ref: "#/components/schemas/RequestHeaderOdsCode"
       required: true
+      examples:
+        valid:
+          summary: Valid
+          value: XYZ
+        invalid:
+          summary: Invalid
+          value: ^&*
   responses:
     Success:
       description: Success Response
