@@ -146,7 +146,7 @@ paths:
     get:
       tags:
         - NRLF Consumer
-      summary: Search for DocumentReference resources
+      summary: Search (GET)
       operationId: searchDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
@@ -155,16 +155,19 @@ paths:
         - $ref: "#/components/parameters/odsCode"
       responses:
         "200":
-          description: Search DocumentReference operation successful
+          description: Search successful response
           content:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
+              example:
+                "TBC": true
+      description: Perform a Search using GET query string parameters
   /DocumentReference/_search:
     post:
       tags:
         - NRLF Consumer
-      summary: Search for DocumentReference resources
+      summary: Search (POST)
       operationId: searchPostDocumentReference
       parameters:
         - $ref: "#/components/parameters/odsCode"
@@ -179,27 +182,33 @@ paths:
               $ref: "#/components/schemas/RequestParams"
       responses:
         "200":
-          description: Search DocumentReference operation successful
+          description: Search successful response
           content:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
+              example:
+                "TBC": true
+      description: Same as above but a POST to avoid URL length limits
   /DocumentReference/{id}:
     get:
       tags:
         - NRLF Consumer
-      summary: Read a DocumentReference resource
+      summary: Read
       operationId: readDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
       responses:
         "200":
-          description: Read DocumentReference operation successful
+          description: Search successful response
           content:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/DocumentReference"
+              example:
+                "TBC": true
+      description: Read a single DocumentReference record
 components:
   requestBodies:
     DocumentReference:
