@@ -8,21 +8,26 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.header_config import ConnectionMetadata
 from lambda_utils.logging import log_action
-
-from api.producer.updateDocumentReference.src.constants import PersistentDependencies
-from api.producer.updateDocumentReference.src.v1.constants import (
-    API_VERSION,
-    IMMUTABLE_FIELDS,
-)
 from nrlf.core.common_producer_steps import validate_producer_permissions
 from nrlf.core.common_steps import parse_headers, parse_path_id
-from nrlf.core.errors import AuthenticationError, ImmutableFieldViolationError
+from nrlf.core.errors import (
+    AuthenticationError,
+    ImmutableFieldViolationError,
+    ItemNotFound,
+    RequestValidationError,
+)
 from nrlf.core.model import DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.query import create_read_and_filter_query, update_and_filter_query
 from nrlf.core.repository import Repository
 from nrlf.core.response import operation_outcome_ok
 from nrlf.core.transform import update_document_pointer_from_fhir_json
+
+from api.producer.updateDocumentReference.src.constants import PersistentDependencies
+from api.producer.updateDocumentReference.src.v1.constants import (
+    API_VERSION,
+    IMMUTABLE_FIELDS,
+)
 
 
 @log_action(narrative="Parsing request body")
@@ -34,6 +39,10 @@ def parse_request_body(
     logger: Logger,
 ) -> PipelineData:
     body = fetch_body_from_event(event)
+
+    if ("id" in body and "id" in data) and (body["id"] != data["id"]):
+        raise ItemNotFound("Item could not be found")
+
     core_model = update_document_pointer_from_fhir_json(body, API_VERSION)
     return PipelineData(core_model=core_model, **data)
 
