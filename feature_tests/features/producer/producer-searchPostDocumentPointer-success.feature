@@ -181,7 +181,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
     Then the operation is successful
     And the response is a Bundle with 0 entries
 
-  Scenario: producer Successfully searches for all documents belonging to the producer when no parameters passed
+  Scenario: Successfully searches for all documents belonging to the producer when no parameters passed
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search by POST for Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |

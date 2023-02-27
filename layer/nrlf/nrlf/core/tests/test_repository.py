@@ -239,15 +239,3 @@ def test_type_filter_none():
         "https://snomed.info/ict|861421000000108",
     ]
     assert actual == expected
-
-
-# @pytest.mark.parametrize(
-#     ["input","pointer_types", "expected"],
-#     [
-#         ["https://snomed.info/ict\|861421000000109",["https://snomed.info/ict\|861421000000109", "https://snomed.info/ict\|861421000000108"], ["https://snomed.info/ict\|861421000000109"]],
-#         [None, ["https://snomed.info/ict\|861421000000109", "https://snomed.info/ict\|861421000000108"], ["https://snomed.info/ict\|861421000000109", "https://snomed.info/ict\|861421000000108"]]
-#     ],
-# )
-# def test_type_filter(input: any, pointer_types: list, expected: any):
-#     actual = type_filter(input, pointer_types)
-#     assert actual == expected
