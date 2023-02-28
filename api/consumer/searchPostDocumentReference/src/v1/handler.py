@@ -12,6 +12,7 @@ from nrlf.core.errors import assert_no_extra_params
 from nrlf.core.model import ConsumerRequestParams, DocumentPointer, key
 from nrlf.core.repository import Repository
 from nrlf.core.transform import create_bundle_from_document_pointers
+from nrlf.core.validators import validate_nhs_number_in_request_params
 
 
 @log_action(narrative="Searching for document references")
@@ -28,7 +29,7 @@ def search_document_references(
     body = fetch_body_from_event(event)
     request_params = ConsumerRequestParams(**body)
     assert_no_extra_params(request_params=request_params, provided_params=body)
-
+    validate_nhs_number_in_request_params(request_params=request_params)
     nhs_number: RequestQuerySubject = request_params.nhs_number
     pk = key(DbPrefix.Patient, nhs_number)
     pointer_types = data["pointer_types"]
