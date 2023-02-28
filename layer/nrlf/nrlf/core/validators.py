@@ -4,11 +4,7 @@ from datetime import datetime as dt
 from nhs_number import is_valid as is_valid_nhs_number
 from nrlf.core.constants import ID_SEPARATOR, VALID_SOURCES
 from nrlf.core.errors import DocumentReferenceValidationError, RequestValidationError
-from nrlf.producer.fhir.r4.model import (
-    CodeableConcept,
-    DocumentReference,
-    RequestParams,
-)
+from nrlf.producer.fhir.r4.model import CodeableConcept, DocumentReference
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
@@ -49,15 +45,6 @@ def create_document_type_tuple(document_type: CodeableConcept):
 def validate_nhs_number(nhs_number: str):
     if not is_valid_nhs_number(nhs_number):
         raise ValueError(f"Not a valid NHS Number: {nhs_number}")
-
-
-def validate_nhs_number_in_request_params(request_params: RequestParams):
-    try:
-        if "subject_identifier" in request_params.dict():
-            nhs_number = request_params.subject_identifier.__root__.split("|", 1)[1]
-            validate_nhs_number(nhs_number=nhs_number)
-    except ValueError as e:
-        raise RequestValidationError(e)
 
 
 def validate_tuple(tuple: str, separator: str):
