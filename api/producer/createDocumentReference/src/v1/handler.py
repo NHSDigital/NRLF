@@ -80,6 +80,25 @@ def mark_as_supersede(
     return PipelineData(**data, **output)
 
 
+@log_action(narrative="Determining whether document reference will supersede")
+def validate_ok_to_supersede(
+    data: PipelineData,
+    context: LambdaContext,
+    event: APIGatewayProxyEventModel,
+    dependencies: FrozenDict[str, Any],
+    logger: Logger,
+) -> PipelineData:
+    document_pointer_repository: Repository = dependencies.get(
+        PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
+    )
+
+    delete_pks = list(
+        map(DocumentPointer.convert_id_to_pk, data.get("delete_item_ids", []))
+    )
+
+    return PipelineData(**data)
+
+
 @log_action(narrative="Validating producer permissions")
 def validate_producer_permissions(
     data: PipelineData,
@@ -144,6 +163,7 @@ steps = [
     parse_headers,
     parse_request_body,
     mark_as_supersede,
+    validate_ok_to_supersede,
     validate_producer_permissions,
     save_core_model_to_db,
 ]
