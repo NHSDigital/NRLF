@@ -11,6 +11,7 @@ from nrlf.core.dynamodb_types import (
     convert_dynamo_value_to_raw_value,
     is_dynamodb_dict,
 )
+from nrlf.core.errors import RequestValidationError
 from nrlf.core.validators import (
     create_document_type_tuple,
     generate_producer_id,
@@ -235,9 +236,12 @@ class _NhsNumberMixin:
     def nhs_number(self) -> Union[str, None]:
         if self.subject_identifier is None:
             return None
-        nhs_number = self.subject_identifier.__root__.split("|", 1)[1]
-        validate_nhs_number(nhs_number)
-        return nhs_number
+        try:
+            nhs_number = self.subject_identifier.__root__.split("|", 1)[1]
+            validate_nhs_number(nhs_number)
+            return nhs_number
+        except ValueError as e:
+            raise RequestValidationError(e)
 
 
 class ProducerRequestParams(producer_model.RequestParams, _NhsNumberMixin):

@@ -27,7 +27,6 @@ def search_document_references(
     body = fetch_body_from_event(event)
     request_params = ProducerRequestParams(**body)
     assert_no_extra_params(request_params=request_params, provided_params=body)
-
     nhs_number: RequestQuerySubject = request_params.nhs_number
     organisation_code = data["organisation_code"]
     pointer_types = type_filter(
