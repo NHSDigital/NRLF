@@ -10,7 +10,7 @@ from nrlf.core.constants import NHS_NUMBER_INDEX, DbPrefix
 from nrlf.core.errors import assert_no_extra_params
 from nrlf.core.model import DocumentPointer, ProducerRequestParams, key
 from nrlf.core.query import create_search_and_filter_query
-from nrlf.core.repository import Repository
+from nrlf.core.repository import Repository, type_filter
 from nrlf.core.transform import create_bundle_from_document_pointers
 from nrlf.producer.fhir.r4.model import RequestQuerySubject
 
@@ -26,6 +26,7 @@ def search_document_references(
 
     repository: Repository = dependencies["repository"]
     request_params = ProducerRequestParams(**event.queryStringParameters or {})
+
     assert_no_extra_params(
         request_params=request_params, provided_params=event.queryStringParameters
     )
@@ -33,9 +34,13 @@ def search_document_references(
     nhs_number: RequestQuerySubject = request_params.nhs_number
 
     organisation_code = data["organisation_code"]
-    pointer_types = data["pointer_types"]
 
-    document_pointers = repository.query_gsi_2(
+    pointer_types = type_filter(
+        type_identifier=request_params.type_identifier,
+        pointer_types=data["pointer_types"],
+    )
+
+    document_pointers: list[DocumentPointer] = repository.query_gsi_2(
         pk=key(DbPrefix.Organization, organisation_code),
         type=pointer_types,
         nhs_number=nhs_number,

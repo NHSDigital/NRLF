@@ -264,11 +264,11 @@ Feature: Producer Update Failure scenarios
       | subject     | 9278693472      |
       | contentType | application/pdf |
     Then the operation is unsuccessful
-    And the status is 400
+    And the status is 404
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                                                                               |
-      | issue_type        | processing                                                                                                          |
-      | issue_level       | error                                                                                                               |
-      | issue_code        | VALIDATION_ERROR                                                                                                    |
-      | issue_description | A parameter or value has resulted in a validation error                                                             |
-      | message           | DocumentReference validation failure - Invalid __root__ - Input is not composite of the form a-b: 8FW23\|1234567890 |
+      | property          | value                   |
+      | issue_type        | processing              |
+      | issue_level       | error                   |
+      | issue_code        | RESOURCE_NOT_FOUND      |
+      | issue_description | Resource not found      |
+      | message           | Item could not be found |
