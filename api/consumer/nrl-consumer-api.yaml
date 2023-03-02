@@ -153,20 +153,20 @@ paths:
         - $ref: "#/components/parameters/custodian"
         - $ref: "#/components/parameters/type"
         - $ref: "#/components/parameters/odsCode"
-        - $ref: '#/components/parameters/requestId'
-        - $ref: '#/components/parameters/correlationId'
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
           description: Search DocumentReference operation successful
           content:
             application/fhir+json:
               schema:
-                $ref: '#/components/schemas/Bundle'
+                $ref: "#/components/schemas/Bundle"
           headers:
             X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
+              $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
-              $ref: '#/components/headers/X-Request-Id'
+              $ref: "#/components/headers/RequestId"
   /DocumentReference/_search:
     post:
       tags:
@@ -175,8 +175,8 @@ paths:
       operationId: searchPostDocumentReference
       parameters:
         - $ref: "#/components/parameters/odsCode"
-        - $ref: '#/components/parameters/requestId'
-        - $ref: '#/components/parameters/correlationId'
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -192,12 +192,12 @@ paths:
           content:
             application/fhir+json:
               schema:
-                $ref: '#/components/schemas/Bundle'
+                $ref: "#/components/schemas/Bundle"
           headers:
             X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
+              $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
-              $ref: '#/components/headers/X-Request-Id'
+              $ref: "#/components/headers/RequestId"
   /DocumentReference/{id}:
     get:
       tags:
@@ -207,27 +207,27 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
-        - $ref: '#/components/parameters/requestId'
-        - $ref: '#/components/parameters/correlationId'
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
           description: Read DocumentReference operation successful
           content:
             application/fhir+json:
               schema:
-                $ref: '#/components/schemas/DocumentReference'
+                $ref: "#/components/schemas/DocumentReference"
           headers:
             X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
+              $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
-              $ref: '#/components/headers/X-Request-Id'
+              $ref: "#/components/headers/RequestId"
 components:
   requestBodies:
     DocumentReference:
       content:
         application/fhir+json:
           schema:
-            $ref: '#/components/schemas/DocumentReference'
+            $ref: "#/components/schemas/DocumentReference"
       required: true
   schemas:
     OperationOutcome:
@@ -242,7 +242,7 @@ components:
           pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.
         meta:
-          $ref: '#/components/schemas/Meta'
+          $ref: "#/components/schemas/Meta"
           description: The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.
         implicitRules:
           type: string
@@ -992,7 +992,7 @@ components:
       in: header
       required: false
       schema:
-        $ref: "#/components/schemas/RequestId"
+        $ref: "#/components/schemas/RequestHeaderRequestId"
     correlationId:
       name: X-Correlation-ID
       description: |
@@ -1002,7 +1002,7 @@ components:
       in: header
       required: false
       schema:
-        $ref: "#/components/schemas/CorrelationID"
+        $ref: "#/components/schemas/RequestHeaderCorrelationId"
   responses:
     Success:
       description: Success Response
@@ -1017,13 +1017,13 @@ components:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
   headers:
-    X-Correlation-Id:
+    CorrelationId:
       schema:
         type: string
         example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
         description: |
           The X-Correlation-ID from the request header, if supplied, mirrored back.
-    X-Request-Id:
+    RequestId:
       schema:
         type: string
         pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"

@@ -55,7 +55,7 @@ components:
       in: header
       required: false
       schema:
-        $ref: "#/components/schemas/RequestId"
+        $ref: "#/components/schemas/RequestHeaderRequestId"
     correlationId:
       name: X-Correlation-ID
       description: |
@@ -65,7 +65,7 @@ components:
       in: header
       required: false
       schema:
-        $ref: "#/components/schemas/CorrelationID"
+        $ref: "#/components/schemas/RequestHeaderCorrelationId"
   requestBodies:
     DocumentReference:
       content:
@@ -134,13 +134,13 @@ components:
       type: string
       example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
   headers:
-    X-Correlation-Id:
+    CorrelationId:
       schema:
         type: string
         example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
         description: |
           The X-Correlation-ID from the request header, if supplied, mirrored back.
-    X-Request-Id:
+    RequestId:
       schema:
         type: string
         pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
