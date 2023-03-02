@@ -25,16 +25,16 @@ paths:
         - $ref: "#/components/parameters/custodian"
         - $ref: "#/components/parameters/type"
         - $ref: "#/components/parameters/odsCode"
-        - $ref: '#/components/parameters/requestId'
-        - $ref: '#/components/parameters/correlationId'
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
           description: Search DocumentReference operation successful
           headers:
             X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
+              $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
-              $ref: '#/components/headers/X-Request-Id'
+              $ref: "#/components/headers/RequestId"
           content:
             application/fhir+json:
               schema:
@@ -57,8 +57,8 @@ paths:
       operationId: createDocumentReference
       parameters:
         - $ref: "#/components/parameters/odsCode"
-        - $ref: '#/components/parameters/requestId'
-        - $ref: '#/components/parameters/correlationId'
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "201":
           $ref: "#/components/responses/Success"
@@ -84,16 +84,16 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
-        - $ref: '#/components/parameters/requestId'
-        - $ref: '#/components/parameters/correlationId'
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
           description: Read DocumentReference operation successful
           headers:
             X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
+              $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
-              $ref: '#/components/headers/X-Request-Id'
+              $ref: "#/components/headers/RequestId"
           content:
             application/fhir+json:
               schema:
@@ -117,8 +117,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
-        - $ref: '#/components/parameters/requestId'
-        - $ref: '#/components/parameters/correlationId'
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
           $ref: "#/components/responses/Success"
@@ -145,8 +145,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
-        - $ref: '#/components/parameters/requestId'
-        - $ref: '#/components/parameters/correlationId'
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
           $ref: "#/components/responses/Success"
@@ -171,8 +171,8 @@ paths:
       operationId: searchPostDocumentReference
       parameters:
         - $ref: "#/components/parameters/odsCode"
-        - $ref: '#/components/parameters/requestId'
-        - $ref: '#/components/parameters/correlationId'
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       requestBody:
         content:
           application/json:
@@ -183,9 +183,9 @@ paths:
           description: Search DocumentReference operation successful
           headers:
             X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
+              $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
-              $ref: '#/components/headers/X-Request-Id'
+              $ref: "#/components/headers/RequestId"
           content:
             application/fhir+json:
               schema:
