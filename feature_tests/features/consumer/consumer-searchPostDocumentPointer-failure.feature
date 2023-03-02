@@ -84,6 +84,7 @@ Feature: Consumer POST Search Success scenarios
       | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | extra              | unwanted field                                |
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                                   |
       | issue_type        | processing                                              |
@@ -117,3 +118,29 @@ Feature: Consumer POST Search Success scenarios
       | issue_code        | VALIDATION_ERROR                                                      |
       | issue_description | A parameter or value has resulted in a validation error               |
       | message           | ConsumerRequestParams validation failure - Invalid subject.identifier |
+
+  Scenario: Search by POST with an invalid NHS Number
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search by POST for Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Consumer "Yorkshire Ambulance Service" searches by POST for Document References with body parameters:
+      | property           | value                                          |
+      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|92786934721 |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                   |
+      | issue_type        | processing                                              |
+      | issue_level       | error                                                   |
+      | issue_code        | VALIDATION_ERROR                                        |
+      | issue_description | A parameter or value has resulted in a validation error |
+      | message           | Not a valid NHS Number: 92786934721                     |
