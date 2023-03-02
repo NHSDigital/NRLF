@@ -285,7 +285,7 @@ Feature: Producer Supersede Failure scenarios
       | issue_description | A parameter or value has resulted in a validation error                                                             |
       | message           | DocumentReference validation failure - Invalid __root__ - Input is not composite of the form a-b: 8FW23\|1234567890 |
 
-  Scenario: Unable to supersede Document Pointer if the nhs number match
+  Scenario: Unable to supersede Document Pointer if the nhs number does not match
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                  | value     |
