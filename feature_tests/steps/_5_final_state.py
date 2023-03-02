@@ -15,7 +15,6 @@ def assert_document_pointer_exists(context: Context, id: str):
     pk = DocumentPointer.convert_id_to_pk(id)
     item, exists, message = repository.exists(pk)
     assert exists, message
-
     (sent_document,) = test_config.request.sent_documents
     for row in context.table:
         dynamo_value = convert_dynamo_value_to_raw_value(getattr(item, row["property"]))
@@ -30,6 +29,15 @@ def assert_document_pointer_exists(context: Context, id: str):
             assert dynamo_value == property_type(
                 row["value"]
             ), f'expected {row["value"]} got {dynamo_value}'
+
+
+@then('Document Pointer "{id}" still exists')
+def assert_document_pointer_exists(context: Context, id: str):
+    test_config: TestConfig = context.test_config
+    repository: FeatureTestRepository = test_config.repositories[DocumentPointer]
+    pk = DocumentPointer.convert_id_to_pk(id)
+    item, exists, message = repository.exists(pk)
+    assert exists, message
 
 
 @then('Document Pointer "{id}" does not exist')
