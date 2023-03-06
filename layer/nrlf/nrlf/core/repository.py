@@ -35,6 +35,10 @@ CONDITION_CHECK_CODES = [
 ]
 
 
+class CorruptDocumentPointer(Exception):
+    pass
+
+
 def _strip_none(d: dict) -> dict:
     if d is None:
         return None
@@ -72,7 +76,7 @@ def _handle_dynamodb_errors(
 
 
 def _valid_results(
-    item_type: type[DynamoDbModel], results: dict
+    item_type: type[DynamoDbModel], results: list[dict]
 ) -> list[DynamoDbModel]:
     """
     returns only valid results for the specified type[DynamoDbModel]
@@ -80,10 +84,23 @@ def _valid_results(
     valid_results = []
     for item in results:
         try:
-            valid_results.append(item_type(**item))
-        except (ValueError, ValidationError):
-            print("A record was corrupt and not returned")
+            valid_item = _is_record_valid(item_type, item)
+        except (CorruptDocumentPointer):
+            pass
+        else:
+            valid_results.append(valid_item)
+
     return valid_results
+
+
+@log_action(narrative="Checking if record is valid", log_fields=["item"])
+def _is_record_valid(item_type: type[DynamoDbModel], item: dict):
+    try:
+        return item_type(**item)
+    except (ValueError, ValidationError):
+        raise CorruptDocumentPointer(
+            f"Document pointer has corrupt data, ignoring ${item}"
+        )
 
 
 def _keys(pk, sk, pk_name="pk", sk_name="sk"):
