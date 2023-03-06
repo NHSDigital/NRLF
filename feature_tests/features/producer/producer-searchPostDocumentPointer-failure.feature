@@ -21,7 +21,7 @@ Feature: Basic failure Scenarios where producer is unable to search for Document
         "type": {
           "coding": [
             {
-              "system": "https://snomed.info/ict",
+              "system": "http://snomed.info/sct",
               "code": "$type"
             }
           ]
@@ -69,8 +69,8 @@ Feature: Basic failure Scenarios where producer is unable to search for Document
   Scenario: Search fails to return a bundle when extra parameters are found
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -95,8 +95,8 @@ Feature: Basic failure Scenarios where producer is unable to search for Document
   Scenario: Search by POST is unable to return Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search by POST for Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -121,8 +121,8 @@ Feature: Basic failure Scenarios where producer is unable to search for Document
   Scenario: Search fails to return a bundle when the next page key is incorrect
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search by POST for Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And 21 Document Pointers exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567800                     |
@@ -147,8 +147,8 @@ Feature: Basic failure Scenarios where producer is unable to search for Document
   Scenario: Search by POST with an invalid NHS Number
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search by POST for Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |

@@ -2187,7 +2187,7 @@ components:
         type.identifier:
           $ref: "#/components/schemas/RequestQueryType"
         next-page-token:
-          $ref: "#/components/schemas/RequestQueryStartKey"
+          $ref: "#/components/schemas/NextPageToken"
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
@@ -2197,7 +2197,7 @@ components:
     RequestQueryType:
       type: string
       pattern: ^https\:\/\/snomed\.info\/ict\|(\d+)$
-    RequestQueryStartKey:
+    NextPageToken:
       type: string
     RequestHeaderOdsCode:
       type: string
@@ -2251,7 +2251,7 @@ components:
 
         This token is returned in the meta.tag field.
       schema:
-        $ref: "#/components/schemas/RequestQueryStartKey"
+        $ref: "#/components/schemas/NextPageToken"
     odsCode:
       name: NHSD-End-User-Organisation-ODS
       description: ODS Code for Organisation

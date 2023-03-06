@@ -26,7 +26,7 @@ Feature: Producer Read Edge Case scenarios
         "type": {
           "coding": [
             {
-              "system": "https://snomed.info/ict",
+              "system": "http://snomed.info/sct",
               "code": "$type"
             }
           ]
@@ -74,8 +74,8 @@ Feature: Producer Read Edge Case scenarios
   Scenario: Does not return document pointer that has invalid document reference data
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to read Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And an invalid Document Pointer exists in the system with the below values for INVALID_AUTHOR_DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |

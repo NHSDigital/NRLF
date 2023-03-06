@@ -115,7 +115,7 @@ def test_create_document_pointer_from_fhir_json(mock__make_timestamp):
         "nhs_number": {"S": nhs_number},
         "producer_id": {"S": provider_id},
         "custodian": {"S": custodian},
-        "type": {"S": "https://snomed.info/ict|736253002"},
+        "type": {"S": "http://snomed.info/sct|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
         "document": {"S": json.dumps(fhir_json)},
@@ -158,7 +158,7 @@ def test_update_document_pointer_from_fhir_json(mock__make_timestamp):
         "nhs_number": {"S": "9278693472"},
         "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
         "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-        "type": {"S": "https://snomed.info/ict|736253002"},
+        "type": {"S": "http://snomed.info/sct|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
         "document": {"S": json.dumps(fhir_json)},
@@ -176,7 +176,7 @@ def test_reconstruct_document_pointer_from_db():
         "nhs_number": {"S": "9278693472"},
         "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
         "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-        "type": {"S": "https://snomed.info/ict|736253002"},
+        "type": {"S": "http://snomed.info/sct|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
         "document": {"S": document},
@@ -193,7 +193,7 @@ def test_reconstruct_document_pointer_from_db():
         "nhs_number": {"S": "9278693472"},
         "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
         "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-        "type": {"S": "https://snomed.info/ict|736253002"},
+        "type": {"S": "http://snomed.info/sct|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
         "document": {"S": document},
@@ -229,7 +229,7 @@ def test_create_bundle_from_paginated_response_returns_populated_bundle_of_2():
                     "status": "current",
                     "type": {
                         "coding": [
-                            {"system": "https://snomed.info/ict", "code": "736253002"}
+                            {"system": "http://snomed.info/sct", "code": "736253002"}
                         ]
                     },
                     "subject": {
@@ -261,7 +261,7 @@ def test_create_bundle_from_paginated_response_returns_populated_bundle_of_2():
                     "status": "current",
                     "type": {
                         "coding": [
-                            {"system": "https://snomed.info/ict", "code": "736253002"}
+                            {"system": "http://snomed.info/sct", "code": "736253002"}
                         ]
                     },
                     "subject": {
@@ -315,7 +315,7 @@ def test_create_bundle_from_paginated_response_returns_populated_bundle_of_1():
                     "status": "current",
                     "type": {
                         "coding": [
-                            {"system": "https://snomed.info/ict", "code": "736253002"}
+                            {"system": "http://snomed.info/sct", "code": "736253002"}
                         ]
                     },
                     "subject": {

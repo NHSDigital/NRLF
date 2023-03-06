@@ -34,7 +34,7 @@ def test_parse_request_body_to_core_model(mock__make_timestamp):
             "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
             "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
             "source": {"S": "NRLF"},
-            "type": {"S": "https://snomed.info/ict|736253002"},
+            "type": {"S": "http://snomed.info/sct|736253002"},
             "updated_on": {"S": "2022-10-25T15:47:49.732Z"},
             "version": {"N": "1"},
         }
@@ -67,7 +67,7 @@ def test_compare_immutable_fields_success(mock__make_timestamp):
             "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
             "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
             "source": {"S": "NRLF"},
-            "type": {"S": "https://snomed.info/ict|736253002"},
+            "type": {"S": "http://snomed.info/sct|736253002"},
             "updated_on": {"S": "2022-10-25T15:47:49.732Z"},
             "version": {"N": "1"},
         }

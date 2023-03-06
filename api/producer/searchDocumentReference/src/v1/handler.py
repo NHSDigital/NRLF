@@ -15,7 +15,7 @@ from nrlf.core.model import (
 )
 from nrlf.core.repository import Repository, type_filter
 from nrlf.core.transform import create_bundle_from_paginated_response
-from nrlf.producer.fhir.r4.model import RequestQueryStartKey, RequestQuerySubject
+from nrlf.producer.fhir.r4.model import NextPageToken, RequestQuerySubject
 
 
 @log_action(narrative="Searching for document references")
@@ -43,7 +43,7 @@ def search_document_references(
         pointer_types=data["pointer_types"],
     )
 
-    next_page_token: RequestQueryStartKey = request_params.next_page_token
+    next_page_token: NextPageToken = request_params.next_page_token
 
     if next_page_token is not None:
         next_page_token = next_page_token.__root__

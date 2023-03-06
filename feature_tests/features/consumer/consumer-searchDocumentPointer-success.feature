@@ -21,7 +21,7 @@ Feature: Consumer Search Success scenarios
         "type": {
           "coding": [
             {
-              "system": "https://snomed.info/ict",
+              "system": "http://snomed.info/sct",
               "code": "$type"
             }
           ]
@@ -41,8 +41,8 @@ Feature: Consumer Search Success scenarios
   Scenario: Successfully search for a single Document Pointer by NHS number
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -68,8 +68,8 @@ Feature: Consumer Search Success scenarios
   Scenario: Successfully search for multiple Document Pointers by NHS number
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -119,8 +119,8 @@ Feature: Consumer Search Success scenarios
   Scenario: Empty results when searching for a Document Pointer when the consumer can't access existing document type
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -138,8 +138,8 @@ Feature: Consumer Search Success scenarios
   Scenario: Empty results when searching for a Document Pointer when subject has no documents
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property           | value                                         |
       | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
@@ -149,8 +149,8 @@ Feature: Consumer Search Success scenarios
   Scenario: Successfully searches for all documents by producer and nhs number for a consumer
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -185,8 +185,8 @@ Feature: Consumer Search Success scenarios
   Scenario: Successfully searches for all documents by type and nhs number for a consumer
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -206,7 +206,7 @@ Feature: Consumer Search Success scenarios
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property           | value                                         |
       | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | type.identifier    | https://snomed.info/ict\|736253002            |
+      | type.identifier    | http://snomed.info/sct\|736253002             |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -221,8 +221,8 @@ Feature: Consumer Search Success scenarios
   Scenario: Successfully searches for all documents by producer and nhs number and type for a consumer
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
@@ -243,7 +243,7 @@ Feature: Consumer Search Success scenarios
       | property             | value                                         |
       | subject.identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | custodian.identifier | https://fhir.nhs.uk/Id/ods-code\|8FW23        |
-      | type.identifier      | https://snomed.info/ict\|736253002            |
+      | type.identifier      | http://snomed.info/sct\|736253002             |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -258,8 +258,8 @@ Feature: Consumer Search Success scenarios
   Scenario: Successfully searches for all documents and provides last evaluated key when above 20 record limit
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And 21 Document Pointers exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567800                     |
@@ -272,7 +272,7 @@ Feature: Consumer Search Success scenarios
       | property             | value                                         |
       | subject.identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | custodian.identifier | https://fhir.nhs.uk/Id/ods-code\|8FW23        |
-      | type.identifier      | https://snomed.info/ict\|736253002            |
+      | type.identifier      | http://snomed.info/sct\|736253002             |
     Then the operation is successful
     And the response is a Bundle with 20 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template

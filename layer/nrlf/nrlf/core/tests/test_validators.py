@@ -127,7 +127,7 @@ def test_requesting_application_is_not_authorised(
                 "type": {
                 "coding": [
                     {
-                    "system": "https://snomed.info/ict",
+                    "system": "http://snomed.info/sct",
                     "code": "736253002"
                     }
                 ]
@@ -168,7 +168,7 @@ def test_requesting_application_is_not_authorised(
                 "type": {
                 "coding": [
                     {
-                    "system": "https://snomed.info/ict",
+                    "system": "http://snomed.info/sct",
                     "code": "736253002"
                     }
                 ]

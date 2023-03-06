@@ -208,17 +208,17 @@ def test_custodian_filter_none():
 def test_type_filter():
     queryStringParameters = {
         "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
-        "type.identifier": "https://snomed.info/ict|861421000000109",
+        "type.identifier": "http://snomed.info/sct|861421000000109",
     }
 
     pointer_types = [
-        "https://snomed.info/ict|861421000000109",
-        "https://snomed.info/ict|861421000000108",
+        "http://snomed.info/sct|861421000000109",
+        "http://snomed.info/sct|861421000000108",
     ]
     request_params = ConsumerRequestParams(**queryStringParameters or {})
 
     actual = type_filter(request_params.type_identifier, pointer_types)
-    expected = ["https://snomed.info/ict|861421000000109"]
+    expected = ["http://snomed.info/sct|861421000000109"]
     assert actual == expected
 
 
@@ -227,14 +227,14 @@ def test_type_filter_none():
         "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
     }
     pointer_types = [
-        "https://snomed.info/ict|861421000000109",
-        "https://snomed.info/ict|861421000000108",
+        "http://snomed.info/sct|861421000000109",
+        "http://snomed.info/sct|861421000000108",
     ]
     request_params = ConsumerRequestParams(**queryStringParameters or {})
 
     actual = type_filter(request_params.type_identifier, pointer_types)
     expected = [
-        "https://snomed.info/ict|861421000000109",
-        "https://snomed.info/ict|861421000000108",
+        "http://snomed.info/sct|861421000000109",
+        "http://snomed.info/sct|861421000000108",
     ]
     assert actual == expected

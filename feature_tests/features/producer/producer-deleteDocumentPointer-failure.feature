@@ -21,7 +21,7 @@ Feature: Producer Delete Failure scenarios
         "type": {
           "coding": [
             {
-              "system": "https://snomed.info/ict",
+              "system": "http://snomed.info/sct",
               "code": "$type"
             }
           ]
@@ -69,8 +69,8 @@ Feature: Producer Delete Failure scenarios
   Scenario: Unable to delete a Document Pointer when the Producer does not have permission
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to delete Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253001 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253001 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
@@ -92,8 +92,8 @@ Feature: Producer Delete Failure scenarios
   Scenario: Unable to delete a non-existing Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to delete Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253001 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253001 |
     When Producer "Aaron Court Mental Health NH" deletes an existing Document Reference "8FW23-1234567890"
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
@@ -107,8 +107,8 @@ Feature: Producer Delete Failure scenarios
   Scenario: Unable to delete another organisations Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to delete Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253001 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253001 |
     When Producer "Aaron Court Mental Health NH" deletes an existing Document Reference "VN6DL-1234567890"
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values

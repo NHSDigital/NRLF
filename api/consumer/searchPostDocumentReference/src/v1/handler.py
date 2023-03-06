@@ -5,7 +5,7 @@ from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventMo
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.logging import log_action
-from nrlf.consumer.fhir.r4.model import RequestQueryStartKey, RequestQuerySubject
+from nrlf.consumer.fhir.r4.model import NextPageToken, RequestQuerySubject
 from nrlf.core.common_steps import parse_headers
 from nrlf.core.constants import DbPrefix
 from nrlf.core.errors import assert_no_extra_params
@@ -38,7 +38,7 @@ def search_document_references(
         pointer_types=data["pointer_types"],
     )
 
-    next_page_token: RequestQueryStartKey = request_params.next_page_token
+    next_page_token: NextPageToken = request_params.next_page_token
 
     if next_page_token is not None:
         next_page_token = next_page_token.__root__

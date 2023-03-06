@@ -21,7 +21,7 @@ Feature: Producer Supersede Success scenarios
         "type": {
           "coding": [
             {
-              "system": "https://snomed.info/ict",
+              "system": "http://snomed.info/sct",
               "code": "$type"
             }
           ]
@@ -80,8 +80,8 @@ Feature: Producer Supersede Success scenarios
   Scenario: Supersede multiple Document Pointers
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 8FW23-1234567890               |
@@ -117,15 +117,15 @@ Feature: Producer Supersede Success scenarios
       | issue_description | Resource created and Resource(s) deleted |
       | message           | Resource created and Resource(s) deleted |
     And Document Pointer "8FW23-1234567892" exists
-      | property    | value                              |
-      | id          | 8FW23-1234567892                   |
-      | nhs_number  | 9278693472                         |
-      | producer_id | 8FW23                              |
-      | type        | https://snomed.info/ict\|736253002 |
-      | source      | NRLF                               |
-      | version     | 1                                  |
-      | updated_on  | NULL                               |
-      | document    | <document>                         |
-      | created_on  | <timestamp>                        |
+      | property    | value                             |
+      | id          | 8FW23-1234567892                  |
+      | nhs_number  | 9278693472                        |
+      | producer_id | 8FW23                             |
+      | type        | http://snomed.info/sct\|736253002 |
+      | source      | NRLF                              |
+      | version     | 1                                 |
+      | updated_on  | NULL                              |
+      | document    | <document>                        |
+      | created_on  | <timestamp>                       |
     And Document Pointer "8FW23-1234567890" does not exist
     And Document Pointer "8FW23-1234567891" does not exist
