@@ -2,11 +2,11 @@ import json
 from dataclasses import asdict
 
 from behave.runner import Context
+from nrlf.producer.fhir.r4.strict_model import Bundle
 
 from feature_tests.common.constants import FhirType
 from feature_tests.common.decorators import then
 from feature_tests.common.models import TestConfig
-from nrlf.producer.fhir.r4.strict_model import Bundle
 
 
 @then(
@@ -64,6 +64,14 @@ def the_response_contains_the_template_with_values(
     )
     fhir_json = json.loads(rendered_template)
     assert fhir_json in document_references, document_references
+
+
+@then("the Bundle contains a next page token")
+def the_response_contains_the_template_with_values(context: Context):
+    test_config: TestConfig = context.test_config
+    bundle = test_config.response.dict
+
+    assert bundle["meta"] is not None
 
 
 @then("the response is the policy from {template_name} template")

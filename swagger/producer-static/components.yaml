@@ -1,15 +1,16 @@
+---
 components:
   securitySchemes:
     ${authoriser_name}:
-      type: "apiKey"
-      name: "Authorization"
-      in: "header"
-      x-amazon-apigateway-authtype: "custom"
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: custom
       x-amazon-apigateway-authorizer:
-        type: "request"
-        authorizerUri: "${lambda_invoke_arn}"
-        authorizerCredentials: "${authoriser_iam_role}"
-        identitySource: "method.request.header.Authorization"
+        type: request
+        authorizerUri: ${lambda_invoke_arn}
+        authorizerCredentials: ${authoriser_iam_role}
+        identitySource: method.request.header.Authorization
         authorizerResultTtlInSeconds: 0
   parameters:
     id:
@@ -34,6 +35,15 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryType"
+    nextPageToken:
+      name: next-page-token
+      in: query
+      description: |
+        A token that can be sent as either a query parameter or in the post body parameter to retrieve the next set of 20 records.
+
+        This token is returned in the meta.tag field.
+      schema:
+        $ref: "#/components/schemas/RequestQueryStartKey"
     odsCode:
       name: NHSD-End-User-Organisation-ODS
       description: ODS Code for Organisation
@@ -120,6 +130,8 @@ components:
           $ref: "#/components/schemas/RequestQuerySubject"
         type.identifier:
           $ref: "#/components/schemas/RequestQueryType"
+        next-page-token:
+          $ref: "#/components/schemas/RequestQueryStartKey"
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
@@ -129,6 +141,8 @@ components:
     RequestQueryType:
       type: string
       pattern: ^https\:\/\/snomed\.info\/ict\|(\d+)$
+    RequestQueryStartKey:
+      type: string
     RequestHeaderOdsCode:
       type: string
     RequestHeaderRequestId:

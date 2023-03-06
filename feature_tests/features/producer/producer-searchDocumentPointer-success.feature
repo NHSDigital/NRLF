@@ -203,7 +203,7 @@ Feature: Producer Search Success scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
-      | property           | value                   |
+      | property | value |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -231,7 +231,7 @@ Feature: Producer Search Success scenarios
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
-      | type        | 861421000000109                      |
+      | type        | 861421000000109                |
       | custodian   | 9QW12                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
@@ -239,7 +239,7 @@ Feature: Producer Search Success scenarios
     When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
       | property           | value                                         |
       | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | type.identifier    | https://snomed.info/ict\|736253002      |
+      | type.identifier    | https://snomed.info/ict\|736253002            |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -273,13 +273,69 @@ Feature: Producer Search Success scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
-      | property           | value                                   |
-      | type.identifier    | https://snomed.info/ict\|736253002      |
+      | property        | value                              |
+      | type.identifier | https://snomed.info/ict\|736253002 |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1114567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+
+  Scenario: Successfully searches for all documents and provides last evaluated key when above 20 record limit
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And 21 Document Pointers exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567800                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
+      | property           | value                                         |
+      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+    Then the operation is successful
+    And the response is a Bundle with 20 entries
+    And the Bundle contains an Entry with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567800                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And the Bundle contains a next page token
+
+  Scenario: Successfully searches for the next page of documents after providing the next page token
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And 21 Document Pointers exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567800                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" searches for Document References with query parameters:
+      | property           | value                                                                                                                                                                |
+      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472                                                                                                                        |
+      | next-page-token    | eyJzayI6IHsiUyI6ICJEIzhGVzIzIzExMTQ1Njc4MTkifSwgInBrXzIiOiB7IlMiOiAiTyM4RlcyMyJ9LCAic2tfMiI6IHsiUyI6ICJDIzIwMjMtMDMtMDJUMTU6MzA6MjYuNDkyWiM4RlcyMyMxMTE0NTY3ODE5In19 |
+    Then the operation is successful
+    And the response is a Bundle with 1 entries
+    And the Bundle contains an Entry with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567820                     |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |

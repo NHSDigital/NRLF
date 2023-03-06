@@ -1,9 +1,11 @@
 import pytest
-from nrlf.core.errors import FhirValidationError
+from nrlf.core.errors import FhirValidationError, NextPageTokenValidationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import (
     create_bundle_entries_from_document_pointers,
     create_document_pointer_from_fhir_json,
+    transform_evaluation_key_to_next_page_token,
+    transform_next_page_token_to_start_key,
     validate_no_extra_fields,
 )
 from nrlf.producer.fhir.r4.model import BundleEntry, DocumentReference
@@ -65,3 +67,10 @@ def test_create_document_references_from_document_pointers_multiple():
     result = create_bundle_entries_from_document_pointers([core_model, core_model_2])
 
     assert result == expected_reference
+
+
+def test_transform_evaluation_key_to_next_page_token_throws_error():
+    next_page_token = "INCORRECT"
+
+    with pytest.raises(NextPageTokenValidationError):
+        transform_next_page_token_to_start_key(next_page_token)

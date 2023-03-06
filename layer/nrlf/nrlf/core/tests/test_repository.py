@@ -1,6 +1,5 @@
-from nrlf.core.model import ConsumerRequestParams
 import pytest
-
+from nrlf.core.model import ConsumerRequestParams, DocumentPointer
 from nrlf.core.repository import (
     _decode,
     _encode,
