@@ -284,3 +284,92 @@ Feature: Producer Supersede Failure scenarios
       | issue_code        | VALIDATION_ERROR                                                                                                    |
       | issue_description | A parameter or value has resulted in a validation error                                                             |
       | message           | DocumentReference validation failure - Invalid __root__ - Input is not composite of the form a-b: 8FW23\|1234567890 |
+
+  Scenario: Unable to supersede Document Pointer if the nhs number does not match
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 8FW23-1234567890               |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 8FW23-1234567891               |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
+      | property    | value                          |
+      | identifier  | 8FW23-1234567892               |
+      | target      | 8FW23-1234567890               |
+      | target      | 8FW23-1234567891               |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 5387015366                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                                |
+      | issue_type        | processing                                                                           |
+      | issue_level       | error                                                                                |
+      | issue_code        | VALIDATION_ERROR                                                                     |
+      | issue_description | A parameter or value has resulted in a validation error                              |
+      | message           | Validation failure - relatesTo target document nhs number does not match the request |
+    And Document Pointer "8FW23-1234567892" does not exist
+    And Document Pointer "8FW23-1234567890" still exists
+    And Document Pointer "8FW23-1234567891" still exists
+
+  Scenario: Unable to supersede Document Pointer if the type does not match
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253001 |
+      | https://snomed.info/ict | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 8FW23-1234567890               |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 8FW23-1234567891               |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
+      | property    | value                          |
+      | identifier  | 8FW23-1234567892               |
+      | target      | 8FW23-1234567890               |
+      | target      | 8FW23-1234567891               |
+      | type        | 736253001                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                          |
+      | issue_type        | processing                                                                     |
+      | issue_level       | error                                                                          |
+      | issue_code        | VALIDATION_ERROR                                                               |
+      | issue_description | A parameter or value has resulted in a validation error                        |
+      | message           | Validation failure - relatesTo target document type does not match the request |
+    And Document Pointer "8FW23-1234567892" does not exist
+    And Document Pointer "8FW23-1234567890" still exists
+    And Document Pointer "8FW23-1234567891" still exists
