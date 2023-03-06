@@ -120,6 +120,7 @@ class DocumentPointer(DynamoDbModel):
 
     @classmethod
     def split_id(cls, id: str) -> list[str, str]:
+        validate_tuple(id, ID_SEPARATOR)
         return f"{id}".split(ID_SEPARATOR, 1)
 
     @classmethod

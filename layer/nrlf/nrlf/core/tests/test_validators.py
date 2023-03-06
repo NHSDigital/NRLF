@@ -3,7 +3,11 @@ from unittest import mock
 import pytest
 
 from nrlf.core.constants import ID_SEPARATOR
-from nrlf.core.errors import DocumentReferenceValidationError, ItemNotFound
+from nrlf.core.errors import (
+    DocumentReferenceValidationError,
+    InvalidTupleError,
+    ItemNotFound,
+)
 from nrlf.core.transform import make_timestamp
 from nrlf.core.validators import (
     requesting_application_is_not_authorised,
@@ -27,7 +31,7 @@ def test_validate_tuple(tuple, expected_outcome):
     outcome = True
     try:
         validate_tuple(tuple=tuple, separator=ID_SEPARATOR)
-    except ValueError:
+    except InvalidTupleError:
         outcome = False
     assert expected_outcome == outcome
 

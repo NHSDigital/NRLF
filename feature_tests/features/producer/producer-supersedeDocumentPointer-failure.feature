@@ -278,12 +278,12 @@ Feature: Producer Supersede Failure scenarios
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                                                                               |
-      | issue_type        | processing                                                                                                          |
-      | issue_level       | error                                                                                                               |
-      | issue_code        | VALIDATION_ERROR                                                                                                    |
-      | issue_description | A parameter or value has resulted in a validation error                                                             |
-      | message           | DocumentReference validation failure - Invalid __root__ - Input is not composite of the form a-b: 8FW23\|1234567890 |
+      | property          | value                                                     |
+      | issue_type        | processing                                                |
+      | issue_level       | error                                                     |
+      | issue_code        | VALIDATION_ERROR                                          |
+      | issue_description | A parameter or value has resulted in a validation error   |
+      | message           | Input is not composite of the form a-b: 8FW23\|1234567890 |
 
   Scenario: Unable to supersede Document Pointer if the nhs number does not match
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers

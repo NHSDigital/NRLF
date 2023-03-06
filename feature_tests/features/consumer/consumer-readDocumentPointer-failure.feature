@@ -103,3 +103,19 @@ Feature: Consumer Read Failure scenarios
       | issue_code        | RESOURCE_NOT_FOUND      |
       | issue_description | Resource not found      |
       | message           | Item could not be found |
+
+  Scenario: Consumer searches for a Document Pointer with an invalid tuple id format
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to read Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                  | value     |
+      | https://snomed.info/ict | 736253002 |
+    When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23|1234567890"
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                     |
+      | issue_type        | processing                                                |
+      | issue_level       | error                                                     |
+      | issue_code        | VALIDATION_ERROR                                          |
+      | issue_description | A parameter or value has resulted in a validation error   |
+      | message           | Input is not composite of the form a-b: 8FW23\|1234567890 |
