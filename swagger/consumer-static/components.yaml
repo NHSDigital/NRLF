@@ -120,10 +120,10 @@ components:
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
     RequestQueryCustodian:
       type: string
-      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
+      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-organization-code\|(\w+)$
     RequestQueryType:
       type: string
-      pattern: ^https\:\/\/snomed\.info\/ict\|(\d+)$
+      pattern: ^http\:\/\/snomed\.info\/sct\|(\d+)$
     RequestHeaderOdsCode:
       type: string
     RequestHeaderRequestId:

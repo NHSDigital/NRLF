@@ -2022,7 +2022,7 @@ components:
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
     RequestQueryCustodian:
       type: string
-      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
+      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-organization-code\|(\w+)$
     RequestQueryType:
       type: string
       pattern: (^http\:\/\/snomed\.info\/sct\|(\d+))
