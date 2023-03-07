@@ -276,8 +276,8 @@ Feature: Producer Update Failure scenarios
   Scenario: Unable to update a Document Pointer with an invalid tuple id format
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |

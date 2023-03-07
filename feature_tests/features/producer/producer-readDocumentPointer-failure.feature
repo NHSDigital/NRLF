@@ -107,8 +107,8 @@ Feature: Producer Read Failure scenarios
   Scenario: Producer searches for a Document Pointer with an invalid tuple id format
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to read Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 734163000 |
+      | system                 | value     |
+      | http://snomed.info/sct | 734163000 |
     When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "8FW23|1234567890"
     Then the operation is unsuccessful
     And the status is 400

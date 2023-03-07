@@ -107,8 +107,8 @@ Feature: Consumer Read Failure scenarios
   Scenario: Consumer searches for a Document Pointer with an invalid tuple id format
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to read Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23|1234567890"
     Then the operation is unsuccessful
     And the status is 400
