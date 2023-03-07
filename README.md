@@ -2,17 +2,9 @@
 
 ## Overview
 
-This project has been given the name `nrlf` which stands for `National Records Locator (Futures)`, inheriting it's name from the existing product (NRL) as well as the Spine Futures programme (Futures).
+This project has been given the name `nrlf` which stands for `National Records Locator (Futures)` as a replacement of the existing NRL.
 
 This project uses the `nrlf.sh` script to build, test and deploy. This script will ensure that a developer can reproduce any operation that the CI/CD pipelines does, meaning they can test the application locally or on their own deployed dev environment.
-
-The deployment cycle looks like this.
-
-```
-install -> unit test -> build -> deploy -> integration test -> tear down
-```
-
-The NRLF uses the following cycle during development, which promotes a "fail fast" methodology by moving unit tests to the front of the process ahead of expensive and slow build/deploy/teardown routines.
 
 ## Table of Contents
 
@@ -60,40 +52,36 @@ pre-commit install
 
 ## Initialise shell environment
 
-To use `nrlf` shell script commands. We must initialise the shell environment. Ensure all packages are installed, run the following commands at the root of the repository.
-
 ```shell
 poetry shell
 source nrlf.sh
 ```
 
-This will enable the `nrlf` commands.
+This will enable the `nrlf` commands assuming all the prerequisites above are installed.
 
 ## Login to AWS
+
+Ensure you have been added to the NRLF accounts!
 
 To login to AWS, use:
 
 ```shell
-nrlf aws login <role alias> <mfa token>
-```
-
-This reads `~/.aws/config` file. You will need to ensure the config file is setup correctly.
-
-Furthermore, prior to running `nrlf aws login` any time you need to ensure that you've logged out of any previous sessions:
-
-```shell
 nrlf aws reset-creds
 ```
+To ensure you werent logged into a previous session
+
+```shell
+nrlf aws login <env> <mfa token>
+```
+The env options are `dev, mgmt, test and prod`
+
+This reads the `~/.aws/config` file. You will need to ensure the config file is setup correctly - see [Developer Onboarding](https://nhsd-confluence.digital.nhs.uk/display/CLP/NRLF+-+Developer+Onboarding).
 
 ## Build, Test & Run the API
 
 Now we have installed the dependencies we're going to need to get the software up and running.
 
-The API is written in Python, so ensure [Initialise shell environment](#initialise-shell-environment) step is completed
-
 ### 1. Run the Unit Tests
-
-The NRLF adopts a "fail fast" methodology, which means that Unit Tests can be run before any expensive operations, such as a complete build or terraform deployment.
 
 ```shell
 nrlf test unit
