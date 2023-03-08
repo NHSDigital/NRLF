@@ -145,18 +145,26 @@ function _swagger() {
                 # Remove the parts we don't want
                 yq 'del(.paths.*.post.requestBody.content."application/x-www-form-urlencoded")' |
                 yq 'del(.x-ibm-configuration)' |
-                yq 'del(.components.schemas.*.discriminator)' \
+                yq 'del(.components.schemas.*.discriminator)' |
+                yq '(.. | select(style == "single")) style |= "double"' \
                     > ./swagger/${type}.tmp.yaml
+
             # Merge in the narrative, and save for internal use (i.e. including status endpoint)
             yq eval-all '. as $item ireduce ({}; . * $item)' \
                 ./swagger/${type}.tmp.yaml \
                 ./swagger/${type}-static/*.yaml \
                 > ./api/${type}/swagger.yaml
 
-            # Remove fields not required for public docs (i.e. for the APIM/APIGEE repo)
+            # Remove fields not required for public docs
+            # * AWS specific stuff, including security & lambdas
+            # * security tags
+            # * API catalogue dislikes tags
+            # * /_status not public
             cat ./api/${type}/swagger.yaml |
                 yq 'del(.paths.*.*.x-amazon-apigateway-integration)' |
                 yq 'del(.paths.*.*.security)' |
+                yq 'del(.tags)' |
+                yq 'del(.paths.*.*.tags)' |
                 yq 'del(.paths./_status)' |
                 yq 'del(.components.securitySchemes."${authoriser_name}")' \
                     > ./api/${type}/nrl-${type}-api.yaml

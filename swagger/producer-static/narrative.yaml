@@ -10,30 +10,47 @@ info:
     email: api.management@nhs.net
   description: |
     ## Overview
-    The National Record Locator (NRL) is a service that holds pointers to data held in local provider systems.
 
-    The service facilitates national sharing, removing the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
+    The National Record Locator (NRL) enables organisations to share Patient data nationwide.  It acts as an Index, or Directory, of patient data.  Rather than handling the data itself it shares pointers held in partner systems, using the FHIR R4 DocumentReference standard.
+
+    Users of the service fall into the categories of:
+
+    * Producers - capable of creating and managing pointers
+    * Consumers - capable of searching and reading pointers
+
+    The service removes the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
 
     It can be used to store and publish pointers to patient data held in health systems across England and to look up where relevant patient data is held.
 
-    As a "provider" who holds information about patients, you can:
-
-    -create a pointer in the NRL to your information
-    -replace your NRL pointer with a newer pointer, superseding the old one
-    -update some of the metadata associated with your pointer
-    -delete your NRL pointer
-    -Search and read pointers, where you are authorised to do so, for a given patient
-    -Search and read all pointers you have provided
-
-    This service is new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
-
     There is a growing list of health and social care organisations authorised to share records using NRL.
 
+    ### As a Producer
+
+    * Create pointers, restricted to document types agreed during the on-boarding process
+    * Replace your pointers with a newer versions, superseding the old one
+    * Update the metadata associated with your pointers
+    * Delete pointers
+    * Search all pointers you created
+    * Read any pointer you created
+
+    ### What has changed?
+
+    This service is a replacement for the existing [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
+
+    * Upgraded from FHIR STU3 to R4.
+    * Improved performance and scalability.
+    * Improved on-boarding experience.
+    * Authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS
+    * Greater flexibility, by wider support of the FHIR R4 DocumentReference resource.
+
     ### Data availability, timing and quality
+
     Pointers are available to be consumed almost immediately after they have been produced by the provider.
 
     Pointers are immediately available to authorised providers and consumers after successful creation.
+
     ## Who can use this API
+
     This API:
     - is only for use by patient-facing applications
     - is only for non-clinical use
@@ -52,6 +69,7 @@ info:
     You must do this before you can go live (see ‘Onboarding’ below).
 
     ## API status and roadmap
+
     This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses).
 
     To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=national-record-locator-api).
@@ -59,11 +77,13 @@ info:
     If you have any other queries, [contact us](https://digital.nhs.uk/developer/help-and-support).
 
     ## Service level
+
     This API is a bronze service, meaning it is operational and supported only during business hours (8am to 6pm), Monday to Friday excluding bank holidays.
 
     For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
 
     ## Technology
+
     This API is [RESTful](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#basic-rest).
 
     It conforms to the [FHIR](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#fhir) global standard for health care data exchange, specifically to [FHIR R4 (v4.0.1)](https://hl7.org/fhir/r4/), except that it does not support the [capabilities](http://hl7.org/fhir/R4/http.html#capabilities) interaction.
@@ -71,14 +91,17 @@ info:
     It includes some country-specific FHIR extensions, which conform to [FHIR UK Core](https://digital.nhs.uk/services/fhir-uk-core), specifically [fhir.r4.ukcore.stu1 0.5.1](https://simplifier.net/packages/fhir.r4.ukcore.stu1/0.5.1).
 
     You do not need to know much about FHIR to use this API - FHIR APIs are just RESTful APIs that follow specific rules.
+
     In particular:
-    - resource names are capitalised and singular, and use US spellings, for example `/Immunization` not `/immunisations`
-    - array names are singular, for example `entry` not `entries` for address lines
-    - data items that are country-specific and thus not included in the FHIR global base resources are usually wrapped in an `extension` object
+
+    * resource names are capitalised and singular, and use US spellings, for example `/Immunization` not `/immunisations`
+    * array names are singular, for example `entry` not `entries` for address lines
+    * data items that are country-specific and thus not included in the FHIR global base resources are usually wrapped in an `extension` object
 
     There are [libraries and SDKs available](https://digital.nhs.uk/developer/guides-and-documentation/api-technologies-at-nhs-digital#fhir-libraries-and-sdks) to help with FHIR API integration.
 
     ## Network access
+
     This API is available on the internet and, indirectly, on the [Health and Social Care Network (HSCN)](https://digital.nhs.uk/services/health-and-social-care-network).
 
     For more details see [Network access for APIs](https://digital.nhs.uk/developer/guides-and-documentation/network-access-for-apis).
@@ -86,16 +109,11 @@ info:
     ## Security and authorisation
 
     This API uses the following access modes:
-    * application-restricted access
 
-    ### Application-restricted access
-
-    This access mode is [application-restricted](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation#application-restricted-apis), meaning we authenticate the calling application but not the end user.
-
-    To use this access mode, use the following security pattern:
     * [Application-restricted RESTful API - signed JWT authentication](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication)
 
     ## Environments and testing
+
     | Environment       | Base URL                                                               |
     | ----------------- | ---------------------------------------------------------------------- |
     | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4/`     |
@@ -103,6 +121,7 @@ info:
     | Production        | `https://api.service.nhs.uk/nrl-producer-api/FHIR/R4/`             |
 
     ### Sandbox testing
+
     Our [sandbox environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#sandbox-testing):
     * is for early developer testing
     * only covers a limited set of scenarios
@@ -115,6 +134,7 @@ info:
     [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/TBC)
 
     ### Integration testing
+
     Our [integration test environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing):
     * is for formal integration testing
     * includes authorisation
@@ -124,6 +144,7 @@ info:
     For more details see [integration testing with our RESTful APIs](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing-with-our-restful-apis).
 
     ## Onboarding
+
     You need to get your software approved by us before it can go live with this API. We call this onboarding. The onboarding process can sometimes be quite long, so it’s worth planning well ahead.
 
     This API uses our online digital onboarding process.
@@ -139,64 +160,513 @@ paths:
     post:
       summary: Create / Supersede
       description: |
-        TBC
+        Create new Pointers, or Supersede existing ones.
+
+        * `id` is a composite of the ODS Code and an identifier that is locally unique to your system.  NRL does not generate globally unique ids, instead relies on producers to provide a locally unique id prefixed with their ODS code, making it globally unique.
+        * `subject` MUST be a `Patient` reference.
+        * `custodian` MUST be an `Organization` reference, and must match the `NHSD-End-User-Organisation-ODS`
+        * `type` MUST match one of the Document Types agreed during on-boarding.
+        * `content` MUST have at least one entry.
+        * `content[].format[]` SHOULD indicate the mechanism for accessing documents, e.g.
+          * `{ "code": "ssp", "display": "Spine Secure Proxy" }`
+          * Further standards to be agreed.
+
+        To supersede existing pointers you must specify:
+        * at least one existing pointer in the `relatesTo` with a `target` or `replaces`.
+        * The following fields MUST match the pointers being superseded:
+          * `subject`
+          * `type`
+
+        This will cause a new pointer to be created and superseded pointers to be deleted.  Multiple documents can
+        be superseded.
+
       responses:
         "200":
           description: Create / Supersede successful response
           content:
             application/fhir+json:
               example:
-                TBC: true
+                resourceType: OperationOutcome
+                id: 76db24dc-324a-468a-bf02-c06e82279488
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_CREATED
+                          display: Resource created
+                    diagnostics: Resource created
 
     get:
       summary: Search (GET)
       description: |
-        Perform a Search using GET query string parameters
+        Perform a Search using GET query string parameters.
+
+        Results are restricted to pointers you created.
+
+        Results are limited to 20 records, further results are
       responses:
         "200":
           description: Search successful response
           content:
             application/fhir+json:
               example:
-                TBC: true
+                resourceType: Bundle
+                type: searchset
+                total: 2
+                entry:
+                  - resource:
+                      resourceType: DocumentReference
+                      id: Y05868-1834567891
+                      meta:
+                        profile:
+                          - http://fhir.nhs.net/StructureDefinition/nrls-documentreference-1-0
+                      masterIdentifier:
+                        system: urn:ietf:rfc:3986
+                        value: urn:oid:1.3.6.1.4.1.21367.2004.3.7
+                      identifier:
+                        - system: urn:ietf:rfc:3986
+                          value: urn:oid:1.3.6.1.4.1.21367.2005.3.7.1134
+                      status: current
+                      docStatus: "preliminary "
+                      type:
+                        coding:
+                          - system: http://snomed.info/sct
+                            code: "1363501000000100"
+                            display:
+                              Royal College of Physicians NEWS2 (National Early Warning Score 2)
+                              chart
+                      category:
+                        - coding:
+                            - system: http://loinc.org
+                              code: 34769-0
+                              display: General medicine Physician attending Note
+                      subject:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/nhs-number
+                          value: "3495456481"
+                      date: "2022-12-22T11:45:41+11:00"
+                      author:
+                        - identifier:
+                            value: Practitioner/A782161SZ
+                      authenticator:
+                        identifier:
+                          value: Organization/Y05868
+                      custodian:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/ods-organization-code
+                          value: Y05868
+                      securityLabel:
+                        - coding:
+                            - system: http://terminology.hl7.org/CodeSystem/v3-Confidentiality
+                              code: V
+                              display: very restricted
+                      content:
+                        - attachment:
+                            contentType: application/pdf
+                            language: en-US
+                            url: https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/EPAACS/PhysicianNote.pdf
+                            creation: "2022-12-22T09:45:41+11:00"
+                          format:
+                            system: urn:oid:1.3.6.1.4.1.19376.1.2.3
+                            code: urn:ihe:pcc:handp:2008
+                            display: History and Physical Specification
+                      context:
+                        encounter:
+                          - identifier:
+                              value: Encounter/3495456481
+                        event:
+                          - coding:
+                              - system: http://snomed.info/sct
+                                code: "445627002"
+                                display: Assessment using adult early warning scoring system
+                        period:
+                          start: "2022-12-20T09:00:41+11:00"
+                          end: "2022-12-20T09:45:41+11:00"
+                        facilityType:
+                          coding:
+                            - system: http://snomed.info/sct
+                              code: "273580000"
+                              display: London hospital pain chart assessment
+                        related:
+                          - identifier:
+                              system: https://fhir.nhs.uk/Id/ods-organization-code
+                              value: ROYAL COLLEGE OF PHYSICIANS OF LONDON
+                  - resource:
+                      resourceType: DocumentReference
+                      id: Y05868-1234567891
+                      meta:
+                        profile:
+                          - http://fhir.nhs.net/StructureDefinition/nrls-documentreference-1-0
+                      masterIdentifier:
+                        system: urn:ietf:rfc:3986
+                        value: urn:oid:1.3.6.1.4.1.21367.2005.3.7
+                      identifier:
+                        - system: urn:ietf:rfc:3986
+                          value: urn:oid:1.3.6.1.4.1.21367.2005.3.7.1234
+                      status: current
+                      docStatus: final
+                      type:
+                        coding:
+                          - system: http://snomed.info/sct
+                            code: "861421000000109"
+                            display: End of life care coordination summary
+                      category:
+                        - coding:
+                            - system: http://loinc.org
+                              code: 55112-7
+                              display: Document summary
+                      subject:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/nhs-number
+                          value: "3495456481"
+                      date: "2022-12-21T10:45:41+11:00"
+                      author:
+                        - identifier:
+                            value: Practitioner/A985657ZA
+                      authenticator:
+                        identifier:
+                          value: Organization/Y05868
+                      custodian:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/ods-organization-code
+                          value: Y05868
+                      description: Physical
+                      securityLabel:
+                        - coding:
+                            - system: http://terminology.hl7.org/CodeSystem/v3-Confidentiality
+                              code: V
+                              display: very restricted
+                      content:
+                        - attachment:
+                            contentType: application/pdf
+                            language: en-US
+                            url: https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/EPAACS/EOLSummaryReport.pdf
+                            size: 3654
+                            hash: 2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+                            title: Physical
+                            creation: "2022-12-21T10:45:41+11:00"
+                          format:
+                            system: urn:oid:1.3.6.1.4.1.19376.1.2.3
+                            code: urn:ihe:pcc:cm:2008
+                            display: Care Management
+                      context:
+                        encounter:
+                          - identifier:
+                              value: Encounter/3495456481
+                        event:
+                          - coding:
+                              - system: http://snomed.info/sct
+                                code: "713058002"
+                                display: End of life care planning
+                        period:
+                          start: "2022-12-21T09:00:41+11:00"
+                          end: "2022-12-21T10:45:41+11:00"
+                        facilityType:
+                          coding:
+                            - system: http://snomed.info/sct
+                              code: "73770003"
+                              display: Hospital-based outpatient emergency care center
+                        sourcePatientInfo:
+                          identifier:
+                            value: Patient/3495456481
+                        related:
+                          - identifier:
+                              system: https://fhir.nhs.uk/Id/ods-organization-code
+                              value: TRAFFORD GENERAL HOSPITAL
 
   /DocumentReference/_search:
     post:
       summary: Search (POST)
       description: |
-        Same as above but a POST to avoid URL length limits
+        Search Producer records, but implemented as a POST operation
+        because of limitations associated with GET:
+
+        * query string parameters are visible on the network and in logs, and may have privacy implications for consumers.
+        * GET operations can be cached by intermediary network infrastructure, such as CDNs, routers and proxies.
+        * URLs have a maximum length of 2,048 characters which complex searches can exceed.  NRL does not currently exceed this limit, but may evolve in the future.
       responses:
         "200":
           description: Search successful response
           content:
             application/fhir+json:
               example:
-                TBC: true
+                resourceType: Bundle
+                type: searchset
+                total: 2
+                entry:
+                  - resource:
+                      resourceType: DocumentReference
+                      id: Y05868-1834567891
+                      meta:
+                        profile:
+                          - http://fhir.nhs.net/StructureDefinition/nrls-documentreference-1-0
+                      masterIdentifier:
+                        system: urn:ietf:rfc:3986
+                        value: urn:oid:1.3.6.1.4.1.21367.2004.3.7
+                      identifier:
+                        - system: urn:ietf:rfc:3986
+                          value: urn:oid:1.3.6.1.4.1.21367.2005.3.7.1134
+                      status: current
+                      docStatus: "preliminary "
+                      type:
+                        coding:
+                          - system: http://snomed.info/sct
+                            code: "1363501000000100"
+                            display:
+                              Royal College of Physicians NEWS2 (National Early Warning Score 2)
+                              chart
+                      category:
+                        - coding:
+                            - system: http://loinc.org
+                              code: 34769-0
+                              display: General medicine Physician attending Note
+                      subject:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/nhs-number
+                          value: "3495456481"
+                      date: "2022-12-22T11:45:41+11:00"
+                      author:
+                        - identifier:
+                            value: Practitioner/A782161SZ
+                      authenticator:
+                        identifier:
+                          value: Organization/Y05868
+                      custodian:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/ods-organization-code
+                          value: Y05868
+                      securityLabel:
+                        - coding:
+                            - system: http://terminology.hl7.org/CodeSystem/v3-Confidentiality
+                              code: V
+                              display: very restricted
+                      content:
+                        - attachment:
+                            contentType: application/pdf
+                            language: en-US
+                            url: https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/EPAACS/PhysicianNote.pdf
+                            creation: "2022-12-22T09:45:41+11:00"
+                          format:
+                            system: urn:oid:1.3.6.1.4.1.19376.1.2.3
+                            code: urn:ihe:pcc:handp:2008
+                            display: History and Physical Specification
+                      context:
+                        encounter:
+                          - identifier:
+                              value: Encounter/3495456481
+                        event:
+                          - coding:
+                              - system: http://snomed.info/sct
+                                code: "445627002"
+                                display: Assessment using adult early warning scoring system
+                        period:
+                          start: "2022-12-20T09:00:41+11:00"
+                          end: "2022-12-20T09:45:41+11:00"
+                        facilityType:
+                          coding:
+                            - system: http://snomed.info/sct
+                              code: "273580000"
+                              display: London hospital pain chart assessment
+                        related:
+                          - identifier:
+                              system: https://fhir.nhs.uk/Id/ods-organization-code
+                              value: ROYAL COLLEGE OF PHYSICIANS OF LONDON
+                  - resource:
+                      resourceType: DocumentReference
+                      id: Y05868-1234567891
+                      meta:
+                        profile:
+                          - http://fhir.nhs.net/StructureDefinition/nrls-documentreference-1-0
+                      masterIdentifier:
+                        system: urn:ietf:rfc:3986
+                        value: urn:oid:1.3.6.1.4.1.21367.2005.3.7
+                      identifier:
+                        - system: urn:ietf:rfc:3986
+                          value: urn:oid:1.3.6.1.4.1.21367.2005.3.7.1234
+                      status: current
+                      docStatus: final
+                      type:
+                        coding:
+                          - system: http://snomed.info/sct
+                            code: "861421000000109"
+                            display: End of life care coordination summary
+                      category:
+                        - coding:
+                            - system: http://loinc.org
+                              code: 55112-7
+                              display: Document summary
+                      subject:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/nhs-number
+                          value: "3495456481"
+                      date: "2022-12-21T10:45:41+11:00"
+                      author:
+                        - identifier:
+                            value: Practitioner/A985657ZA
+                      authenticator:
+                        identifier:
+                          value: Organization/Y05868
+                      custodian:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/ods-organization-code
+                          value: Y05868
+                      description: Physical
+                      securityLabel:
+                        - coding:
+                            - system: http://terminology.hl7.org/CodeSystem/v3-Confidentiality
+                              code: V
+                              display: very restricted
+                      content:
+                        - attachment:
+                            contentType: application/pdf
+                            language: en-US
+                            url: https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/EPAACS/EOLSummaryReport.pdf
+                            size: 3654
+                            hash: 2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+                            title: Physical
+                            creation: "2022-12-21T10:45:41+11:00"
+                          format:
+                            system: urn:oid:1.3.6.1.4.1.19376.1.2.3
+                            code: urn:ihe:pcc:cm:2008
+                            display: Care Management
+                      context:
+                        encounter:
+                          - identifier:
+                              value: Encounter/3495456481
+                        event:
+                          - coding:
+                              - system: http://snomed.info/sct
+                                code: "713058002"
+                                display: End of life care planning
+                        period:
+                          start: "2022-12-21T09:00:41+11:00"
+                          end: "2022-12-21T10:45:41+11:00"
+                        facilityType:
+                          coding:
+                            - system: http://snomed.info/sct
+                              code: "73770003"
+                              display: Hospital-based outpatient emergency care center
+                        sourcePatientInfo:
+                          identifier:
+                            value: Patient/3495456481
+                        related:
+                          - identifier:
+                              system: https://fhir.nhs.uk/Id/ods-organization-code
+                              value: TRAFFORD GENERAL HOSPITAL
 
   /DocumentReference/{id}:
     get:
       summary: Read
       description: |
-        Read a single DocumentReference record
+        Read a single pointer you created
       responses:
         "200":
           description: Read successful response
           content:
             application/fhir+json:
               example:
-                TBC: true
+                resourceType: DocumentReference
+                id: Y05868-1234567892
+                status: current
+                docStatus: final
+                type:
+                  coding:
+                    - system: http://snomed.info/sct
+                      code: "887701000000100"
+                      display: Emergency health care plan
+                category:
+                  - coding:
+                      - system: http://loinc.org
+                        code: 68552-9
+                        display: Emergency medicine Emergency department Admission evaluation note
+                subject:
+                  identifier:
+                    system: https://fhir.nhs.uk/Id/nhs-number
+                    value: "4409815415"
+                date: "2022-12-22T11:45:41+11:00"
+                author:
+                  - identifier:
+                      value: Practitioner/A985657ZA
+                authenticator:
+                  identifier:
+                    value: Organization/Y05868
+                custodian:
+                  identifier:
+                    system: https://fhir.nhs.uk/Id/ods-organization-code
+                    value: Y05868
+                securityLabel:
+                  - coding:
+                      - system: http://terminology.hl7.org/CodeSystem/v3-Confidentiality
+                        code: V
+                        display: very restricted
+                content:
+                  - attachment:
+                      contentType: application/pdf
+                      language: en-US
+                      url: https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/EPAACS/EmergencyCarPlan.pdf
+                      creation: "2022-12-22T09:45:41+11:00"
+                    format:
+                      system: urn:oid:1.3.6.1.4.1.19376.1.2.3
+                      code: urn:ihe:pcc:handp:2008
+                      display: History and Physical Specification
+                context:
+                  encounter:
+                    - identifier:
+                        value: Encounter/4409815415
+                  event:
+                    - coding:
+                        - system: http://snomed.info/sct
+                          code: "702779007"
+                          display: Emergency health care plan agreed
+                  period:
+                    start: "2022-12-20T09:00:41+11:00"
+                    end: "2022-12-20T09:45:41+11:00"
+                  facilityType:
+                    coding:
+                      - system: http://snomed.info/sct
+                        code: "453121000124107"
+                        display: Emergency department healthcare professional
+                  related:
+                    - identifier:
+                        system: https://fhir.nhs.uk/Id/ods-organization-code
+                        value: EMERGENCY DEPT PRIMARY CARE STREAMING
 
     put:
       summary: Update
       description: |
-        Update a single DocumentReference record
+        Update a single pointer you created.
+
+        Note that the following fields are immutable:
+        * `id`
+        * `subject`
+        * `custodian`
+        * `type`
+
       responses:
         "200":
           description: Update successful response
           content:
             application/fhir+json:
               example:
-                TBC: true
+                resourceType: OperationOutcome
+                id: fc39effb-144c-4342-bdf2-4214f0cb728b
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_UPDATED
+                          display: Resource updated
+                    diagnostics: Resource updated
 
     delete:
       summary: Delete
@@ -208,7 +678,20 @@ paths:
           content:
             application/fhir+json:
               example:
-                TBC: true
+                resourceType: OperationOutcome
+                id: c6113a50-70bf-436e-b417-7c8024d2e8bf
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_REMOVED
+                          display: Resource removed
+                    diagnostics: Resource removed
 
 components:
   schemas:
@@ -218,6 +701,10 @@ components:
       example: "https://fhir.nhs.uk/Id/ods-organization-code|Y05868"
     RequestQueryType:
       example: "http://snomed.info/sct|736253002"
+    RequestHeaderRequestId:
+      example: 60E0B220-8136-4CA5-AE46-1D97EF59D068
+    RequestHeaderCorrelationId:
+      example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
 
   parameters:
     id:
@@ -272,3 +759,15 @@ components:
         invalid:
           summary: Unknown
           value: http://snomed.info/sct|410970009
+
+  headers:
+    CorrelationId:
+      schema:
+        example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+        description: |
+          The X-Correlation-ID from the request header, if supplied, mirrored back.
+    RequestId:
+      schema:
+        example: 60E0B220-8136-4CA5-AE46-1D97EF59D068
+        description: |
+          The X-Request-ID from the request header, if supplied, mirrored back.
