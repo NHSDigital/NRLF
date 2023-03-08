@@ -269,10 +269,10 @@ Feature: Consumer Search Success scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
-      | property             | value                                         |
-      | subject.identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | custodian.identifier | https://fhir.nhs.uk/Id/ods-code\|8FW23        |
-      | type.identifier      | http://snomed.info/sct\|736253002             |
+      | property             | value                                               |
+      | subject.identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
+      | custodian.identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
+      | type.identifier      | http://snomed.info/sct\|736253002                   |
     Then the operation is successful
     And the response is a Bundle with 20 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
