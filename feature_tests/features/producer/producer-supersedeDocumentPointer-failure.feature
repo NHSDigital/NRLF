@@ -181,7 +181,7 @@ Feature: Producer Supersede Failure scenarios
       | issue_description | Access has been denied because you need higher level permissions |
       | message           | Required permissions to delete a document pointer are missing    |
 
-  Scenario: The superseded Document Pointer does not exist                |
+  Scenario: The superseded Document Pointer does not exist
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
@@ -197,12 +197,12 @@ Feature: Producer Supersede Failure scenarios
       | url         | https://example.org/my-doc.pdf |
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                          |
-      | issue_type        | processing                                     |
-      | issue_level       | error                                          |
-      | issue_code        | INVALID_RESOURCE_ID                            |
-      | issue_description | Invalid resource ID                            |
-      | message           | Condition check failed - Supersede ID mismatch |
+      | property          | value                                                         |
+      | issue_type        | processing                                                    |
+      | issue_level       | error                                                         |
+      | issue_code        | VALIDATION_ERROR                                              |
+      | issue_description | A parameter or value has resulted in a validation error       |
+      | message           | Validation failure - relatesTo target document does not exist |
 
   Scenario: Targets must be unique
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers

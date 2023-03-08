@@ -115,3 +115,29 @@ Feature: Consumer Search Failure scenarios
       | issue_code        | VALIDATION_ERROR                                                      |
       | issue_description | A parameter or value has resulted in a validation error               |
       | message           | ConsumerRequestParams validation failure - Invalid subject.identifier |
+
+  Scenario: Search fails to return a bundle when the next page key is incorrect
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And 21 Document Pointers exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567800                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
+      | property           | value                                         |
+      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | next-page-token    | INCORRECT                                     |
+    Then the operation is unsuccessful
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                   |
+      | issue_type        | processing                                              |
+      | issue_level       | error                                                   |
+      | issue_code        | VALIDATION_ERROR                                        |
+      | issue_description | A parameter or value has resulted in a validation error |
+      | message           | Unable to decode the next page token                    |

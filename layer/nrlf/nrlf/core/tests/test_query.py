@@ -4,8 +4,6 @@ from nrlf.core.errors import ItemNotFound
 from nrlf.core.model import DocumentPointer, key
 from nrlf.core.query import (
     create_filter_query,
-    create_read_and_filter_query,
-    create_search_and_filter_query,
     create_updated_expression_query,
     to_dynamodb_dict,
 )
@@ -96,7 +94,7 @@ def test_create_search_and_filter_query_in_db():
         result = repository.query_gsi_1(
             model.pk_1, type="http://snomed.info/sct|736253002"
         )
-        assert result == [model]
+        assert result.document_pointers == [model]
 
 
 def test_query_can_filter_results():
@@ -131,10 +129,10 @@ def test_query_can_filter_results():
             pk=key(DbPrefix.Organization, provider_id),
             type=[f"http://snomed.info/sct|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
         )
-        assert len(results_1) == 1
-        assert results_1[0] == model_1
-        assert len(results_2) == 1
-        assert results_2[0] == model_1
+        assert len(results_1.document_pointers) == 1
+        assert results_1.document_pointers[0] == model_1
+        assert len(results_2.document_pointers) == 1
+        assert results_2.document_pointers[0] == model_1
 
 
 def test_filter_can_find_result():
@@ -170,11 +168,11 @@ def test_filter_cannot_find_result():
 def test_create_search_and_filter_query_in_db_returns_empty_bundle():
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        items = repository.query_gsi_1(
+        item = repository.query_gsi_1(
             pk=key(DbPrefix.Patient, "EMPTY"),
             type=["http://snomed.info/sct|736253002"],
         )
-        assert len(items) == 0
+        assert len(item.document_pointers) == 0
 
 
 @pytest.mark.parametrize(

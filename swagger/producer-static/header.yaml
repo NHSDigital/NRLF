@@ -1,3 +1,4 @@
+---
 openapi: 3.0.0
 info:
   title: NRLF Producer API
@@ -5,11 +6,11 @@ info:
   license:
     name: MIT
 servers:
-  - url: "https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4"
+  - url: https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4
     description: Sandbox environment.
-  - url: "https://int.api.service.nhs.uk/nrl-producer-api/FHIR/R4"
+  - url: https://int.api.service.nhs.uk/nrl-producer-api/FHIR/R4
     description: Integration test environment.
-  - url: "https://api.service.nhs.uk/nrl-producer-api/FHIR/R4"
+  - url: https://api.service.nhs.uk/nrl-producer-api/FHIR/R4
     description: Production environment.
 tags:
   - name: NRLF Producer
@@ -24,6 +25,7 @@ paths:
         - $ref: "#/components/parameters/subject"
         - $ref: "#/components/parameters/custodian"
         - $ref: "#/components/parameters/type"
+        - $ref: "#/components/parameters/nextPageToken"
         - $ref: "#/components/parameters/odsCode"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"

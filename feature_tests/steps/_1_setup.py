@@ -83,3 +83,28 @@ def given_document_pointer_exists(context: Context, template_name: str):
         fhir_json=json.loads(rendered_template), api_version=int(DEFAULT_VERSION)
     )
     test_config.repositories[DocumentPointer].create(core_model)
+
+
+@given(
+    "{count:d} Document Pointers exists in the system with the below values for {template_name} template"
+)
+def given_document_pointer_exists(context: Context, count: int, template_name: str):
+    test_config: TestConfig = context.test_config
+    template = test_config.templates[template_name]
+
+    documents_created = 0
+    while documents_created < count:
+        for row in context.table:
+            if row["property"] == "identifier":
+                identifier = row["value"]
+                new_identifier = identifier[:-2] + str(documents_created).zfill(2)
+                row.cells[1] = new_identifier
+
+        rendered_template = template.render(
+            context.table, fhir_type=FhirType.DocumentReference
+        )
+        core_model = create_document_pointer_from_fhir_json(
+            fhir_json=json.loads(rendered_template), api_version=int(DEFAULT_VERSION)
+        )
+        test_config.repositories[DocumentPointer].create(core_model)
+        documents_created += 1
