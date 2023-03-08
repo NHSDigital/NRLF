@@ -21,7 +21,7 @@ Feature: Producer Read Failure scenarios
         "type": {
           "coding": [
             {
-              "system": "https://snomed.info/ict",
+              "system": "http://snomed.info/sct",
               "code": "$type"
             }
           ]
@@ -69,8 +69,8 @@ Feature: Producer Read Failure scenarios
   Scenario: Request comes from a Producer whose ID does not match the Document Pointer's producer ID
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to read Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 734163000 |
+      | system                 | value     |
+      | http://snomed.info/sct | 734163000 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
@@ -92,8 +92,8 @@ Feature: Producer Read Failure scenarios
   Scenario: The Document Pointer does not exist
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to read Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 734163000 |
+      | system                 | value     |
+      | http://snomed.info/sct | 734163000 |
     When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "8FW23-1234567890"
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values

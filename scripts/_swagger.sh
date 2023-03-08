@@ -143,6 +143,7 @@ function _swagger() {
                 yq 'with(.components.schemas; with_entries(.key |= sub("_","")))' |
                 yq '(.. | select(has("$ref")).$ref) |= sub("_","")' |
                 # Remove the parts we don't want
+                yq 'del(.paths.*.post.requestBody.content."application/x-www-form-urlencoded")' |
                 yq 'del(.x-ibm-configuration)' |
                 yq 'del(.components.schemas.*.discriminator)' \
                     > ./swagger/${type}.tmp.yaml

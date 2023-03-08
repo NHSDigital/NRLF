@@ -133,3 +133,142 @@ info:
     Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/national-record-locator-producer-api/onboarding-support-information).
 
     To get started, see [digital onboarding](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding#using-the-digital-onboarding-portal).
+
+paths:
+  /DocumentReference:
+    post:
+      summary: Create / Supersede
+      description: |
+        TBC
+      responses:
+        "200":
+          description: Create / Supersede successful response
+          content:
+            application/fhir+json:
+              example:
+                TBC: true
+
+    get:
+      summary: Search (GET)
+      description: |
+        Perform a Search using GET query string parameters
+      responses:
+        "200":
+          description: Search successful response
+          content:
+            application/fhir+json:
+              example:
+                TBC: true
+
+  /DocumentReference/_search:
+    post:
+      summary: Search (POST)
+      description: |
+        Same as above but a POST to avoid URL length limits
+      responses:
+        "200":
+          description: Search successful response
+          content:
+            application/fhir+json:
+              example:
+                TBC: true
+
+  /DocumentReference/{id}:
+    get:
+      summary: Read
+      description: |
+        Read a single DocumentReference record
+      responses:
+        "200":
+          description: Read successful response
+          content:
+            application/fhir+json:
+              example:
+                TBC: true
+
+    put:
+      summary: Update
+      description: |
+        Update a single DocumentReference record
+      responses:
+        "200":
+          description: Update successful response
+          content:
+            application/fhir+json:
+              example:
+                TBC: true
+
+    delete:
+      summary: Delete
+      description: |
+        Delete a single DocumentReference record
+      responses:
+        "200":
+          description: Delete successful response
+          content:
+            application/fhir+json:
+              example:
+                TBC: true
+
+components:
+  schemas:
+    RequestQuerySubject:
+      example: "https://fhir.nhs.uk/Id/nhs-number|4409815415"
+    RequestQueryCustodian:
+      example: "https://fhir.nhs.uk/Id/ods-organization-code|Y05868"
+    RequestQueryType:
+      example: "http://snomed.info/sct|736253002"
+
+  parameters:
+    id:
+      examples:
+        valid:
+          summary: Valid
+          value: Y05868-1234567892
+        invalid:
+          summary: Unknown
+          value: Y05861-1234567800
+    odsCode:
+      examples:
+        valid:
+          summary: Valid
+          value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
+        invalid:
+          summary: Unknown
+          value: https://fhir.nhs.uk/Id/ods-organization-code|XYZ
+    subject:
+      examples:
+        valid_1:
+          summary: "Valid #1"
+          value: https://fhir.nhs.uk/Id/nhs-number|4409815415
+        valid_2:
+          summary: "Valid #2"
+          value: https://fhir.nhs.uk/Id/nhs-number|3495456481
+        invalid:
+          summary: Unknown
+          value: https://fhir.nhs.uk/Id/nhs-number|3495456001
+    custodian:
+      examples:
+        valid:
+          summary: Valid
+          value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
+        invalid:
+          summary: Unknown
+          value: https://fhir.nhs.uk/Id/ods-organization-code|XYZ
+    type:
+      examples:
+        SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN:
+          summary: Mental Health Crisis Plan
+          value: http://snomed.info/sct|736253002
+        SNOMED_CODES_EMERGENCY_HEALTH_CARE_PLAN:
+          summary: Emergency Healthcare Plan
+          value: http://snomed.info/sct|887701000000100
+        SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY:
+          summary: End of Life Care Coordination Summary
+          value: http://snomed.info/sct|861421000000109
+        SNOMED_CODES_NATIONAL_EARLY_WARNING_SCORE_2:
+          summary: National Early Warning Code 2
+          value: http://snomed.info/sct|1363501000000100
+        invalid:
+          summary: Unknown
+          value: http://snomed.info/sct|410970009

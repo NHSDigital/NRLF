@@ -95,7 +95,7 @@ def test_create_search_and_filter_query_in_db():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model)
         result = repository.query_gsi_1(
-            model.pk_1, type="https://snomed.info/ict|736253002"
+            model.pk_1, type="http://snomed.info/sct|736253002"
         )
         assert result == [model]
 
@@ -126,11 +126,11 @@ def test_query_can_filter_results():
         repository.create(item=model_2)
         results_1 = repository.query_gsi_1(
             pk=key(DbPrefix.Patient, nhs_number),
-            type=[f"https://snomed.info/ict|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
+            type=[f"http://snomed.info/sct|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
         )
         results_2 = repository.query_gsi_2(
             pk=key(DbPrefix.Organization, provider_id),
-            type=[f"https://snomed.info/ict|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
+            type=[f"http://snomed.info/sct|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
         )
         assert len(results_1) == 1
         assert results_1[0] == model_1
@@ -149,7 +149,7 @@ def test_filter_can_find_result():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model)
         item = repository.read_item(
-            pk=model.pk, type=["https://snomed.info/ict|736253002"]
+            pk=model.pk, type=["http://snomed.info/sct|736253002"]
         )
         assert item == model
 
@@ -165,7 +165,7 @@ def test_filter_cannot_find_result():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model)
         with pytest.raises(ItemNotFound):
-            repository.read_item(pk=model.pk, type=["https://snomed.info/ict|WRONG"])
+            repository.read_item(pk=model.pk, type=["http://snomed.info/sct|WRONG"])
 
 
 def test_create_search_and_filter_query_in_db_returns_empty_bundle():
@@ -173,7 +173,7 @@ def test_create_search_and_filter_query_in_db_returns_empty_bundle():
         repository = Repository(item_type=DocumentPointer, client=client)
         items = repository.query_gsi_1(
             pk=key(DbPrefix.Patient, "EMPTY"),
-            type=["https://snomed.info/ict|736253002"],
+            type=["http://snomed.info/sct|736253002"],
         )
         assert len(items) == 0
 

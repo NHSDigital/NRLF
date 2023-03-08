@@ -150,22 +150,30 @@ paths:
     post:
       tags:
         - NRLF Producer
-      summary: Create a DocumentReference resource
+      summary: Create / Supersede
       operationId: createDocumentReference
       responses:
         "201":
           description: Create DocumentReference operation successful
           $ref: "#/components/responses/Success"
+        "200":
+          description: Create / Supersede successful response
+          content:
+            application/fhir+json:
+              example:
+                TBC: true
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
       parameters:
         - $ref: "#/components/parameters/odsCode"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
+      description: |
+        TBC
     get:
       tags:
         - NRLF Producer
-      summary: Search for DocumentReference resources
+      summary: Search (GET)
       operationId: searchDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
@@ -176,21 +184,25 @@ paths:
         - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
-          description: Search DocumentReference operation successful
+          description: Search successful response
           content:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
+              example:
+                TBC: true
           headers:
             X-Correlation-Id:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
+      description: |
+        Perform a Search using GET query string parameters
   /DocumentReference/_search:
     post:
       tags:
         - NRLF Producer
-      summary: Search for DocumentReference resources
+      summary: Search (POST)
       operationId: searchPostDocumentReference
       parameters:
         - $ref: "#/components/parameters/odsCode"
@@ -207,21 +219,25 @@ paths:
               $ref: "#/components/schemas/RequestParams"
       responses:
         "200":
-          description: Search DocumentReference operation successful
+          description: Search successful response
           content:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
+              example:
+                TBC: true
           headers:
             X-Correlation-Id:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
+      description: |
+        Same as above but a POST to avoid URL length limits
   /DocumentReference/{id}:
     get:
       tags:
         - NRLF Producer
-      summary: Read a DocumentReference resource
+      summary: Read
       operationId: readDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
@@ -230,20 +246,24 @@ paths:
         - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
-          description: Read DocumentReference operation successful
+          description: Read successful response
           content:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/DocumentReference"
+              example:
+                TBC: true
           headers:
             X-Correlation-Id:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
+      description: |
+        Read a single DocumentReference record
     put:
       tags:
         - NRLF Producer
-      summary: Update an existing DocumentReference resource
+      summary: Update
       operationId: updateDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
@@ -252,17 +272,23 @@ paths:
         - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
-          description: Update DocumentReference operation successful
+          description: Update successful response
           $ref: "#/components/responses/Success"
+          content:
+            application/fhir+json:
+              example:
+                TBC: true
         "201":
           description: Create DocumentReference operation successful (requires 'updateCreateEnabled' configuration option)
           $ref: "#/components/responses/Success"
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
+      description: |
+        Update a single DocumentReference record
     delete:
       tags:
         - NRLF Producer
-      summary: Delete a DocumentReference resource
+      summary: Delete
       operationId: deleteDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
@@ -275,6 +301,13 @@ paths:
           $ref: "#/components/responses/Success"
         "200":
           $ref: "#/components/responses/Success"
+          description: Delete successful response
+          content:
+            application/fhir+json:
+              example:
+                TBC: true
+      description: |
+        Delete a single DocumentReference record
 components:
   requestBodies:
     DocumentReference:
@@ -982,12 +1015,15 @@ components:
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
+      example: "https://fhir.nhs.uk/Id/nhs-number|4409815415"
     RequestQueryCustodian:
       type: string
-      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
+      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-organization-code\|(\w+)$
+      example: "https://fhir.nhs.uk/Id/ods-organization-code|Y05868"
     RequestQueryType:
       type: string
-      pattern: ^https\:\/\/snomed\.info\/ict\|(\d+)$
+      pattern: ^http\:\/\/snomed\.info\/sct\|(\d+)$
+      example: "http://snomed.info/sct|736253002"
     RequestHeaderOdsCode:
       type: string
     RequestHeaderRequestId:
@@ -1006,21 +1042,61 @@ components:
       description: logical identifier
       schema:
         $ref: "#/components/schemas/DocumentId"
+      examples:
+        valid:
+          summary: Valid
+          value: Y05868-1234567892
+        invalid:
+          summary: Unknown
+          value: Y05861-1234567800
     subject:
       name: subject.identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
+      examples:
+        valid_1:
+          summary: "Valid #1"
+          value: https://fhir.nhs.uk/Id/nhs-number|4409815415
+        valid_2:
+          summary: "Valid #2"
+          value: https://fhir.nhs.uk/Id/nhs-number|3495456481
+        invalid:
+          summary: Unknown
+          value: https://fhir.nhs.uk/Id/nhs-number|3495456001
     custodian:
       name: custodian.identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryCustodian"
+      examples:
+        valid:
+          summary: Valid
+          value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
+        invalid:
+          summary: Unknown
+          value: https://fhir.nhs.uk/Id/ods-organization-code|XYZ
     type:
       name: type.identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryType"
+      examples:
+        SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN:
+          summary: Mental Health Crisis Plan
+          value: http://snomed.info/sct|736253002
+        SNOMED_CODES_EMERGENCY_HEALTH_CARE_PLAN:
+          summary: Emergency Healthcare Plan
+          value: http://snomed.info/sct|887701000000100
+        SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY:
+          summary: End of Life Care Coordination Summary
+          value: http://snomed.info/sct|861421000000109
+        SNOMED_CODES_NATIONAL_EARLY_WARNING_SCORE_2:
+          summary: National Early Warning Code 2
+          value: http://snomed.info/sct|1363501000000100
+        invalid:
+          summary: Unknown
+          value: http://snomed.info/sct|410970009
     odsCode:
       name: NHSD-End-User-Organisation-ODS
       description: ODS Code for Organisation
@@ -1028,6 +1104,13 @@ components:
       schema:
         $ref: "#/components/schemas/RequestHeaderOdsCode"
       required: true
+      examples:
+        valid:
+          summary: Valid
+          value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
+        invalid:
+          summary: Unknown
+          value: https://fhir.nhs.uk/Id/ods-organization-code|XYZ
     requestId:
       name: X-Request-ID
       description: |

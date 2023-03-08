@@ -153,7 +153,7 @@ Scenario: Successfully create a Document Pointer of type Mental health crisis pl
    Given {ACTOR TYPE} "{ACTOR}" (Organisation ID "{ORG_ID}") is requesting to {ACTION} Document Pointers
    And {ACTOR TYPE} "{ACTOR}" is registered in the system for application "APP 1" (ID "{APP ID 1}") for document types
      | system                  | value     |
-     | https://snomed.info/ict | 736253002 |
+     | http://snomed.info/sct | 736253002 |
    And {ACTOR TYPE} "{ACTOR}" has authorisation headers for application "APP 2" (ID "{APP ID 2}")
    When {ACTOR TYPE} "{ACTOR}" {ACTION} a Document Reference from DOCUMENT template
      | property    | value                          |

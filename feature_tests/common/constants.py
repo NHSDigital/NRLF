@@ -7,7 +7,7 @@ DEFAULT_VERSION = 1.0
 STATUS_CODE_200 = 200
 DUMMY_METHOD_ARN = "dummy_method_arn"
 DEFAULT_AUTHORIZATION = "letmein"
-SNOMED_SYSTEM = "https://snomed.info/ict"
+SNOMED_SYSTEM = "http://snomed.info/sct"
 DEFAULT_METHOD_ARN = "<resource-arn>"
 
 DOCUMENT_POINTER_TABLE_DEFINITION = {
