@@ -250,3 +250,8 @@ class ProducerRequestParams(producer_model.RequestParams, _NhsNumberMixin):
 
 class ConsumerRequestParams(consumer_model.RequestParams, _NhsNumberMixin):
     pass
+
+
+class PaginatedResponse(BaseModel):
+    last_evaluated_key: object = None
+    document_pointers: list[DocumentPointer]

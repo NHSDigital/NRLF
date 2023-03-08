@@ -1,4 +1,3 @@
-import json
 from functools import partial
 from logging import Logger
 from typing import Any
@@ -8,7 +7,7 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.logging import log_action
 from nrlf.core.common_steps import parse_headers
-from nrlf.core.errors import AuthenticationError, RequestValidationError
+from nrlf.core.errors import AuthenticationError, ItemNotFound, RequestValidationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
@@ -18,7 +17,6 @@ from nrlf.core.transform import (
     create_fhir_model_from_fhir_json,
 )
 from nrlf.core.validators import generate_producer_id
-from nrlf.producer.fhir.r4.model import DocumentReference
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
@@ -138,36 +136,47 @@ def validate_ok_to_supersede(
     )
 
     source_document_pointer = data["core_model"]
+    delete_item_ids = data.get("delete_item_ids", [])
 
-    delete_pks = list(
-        map(DocumentPointer.convert_id_to_pk, data.get("delete_item_ids", []))
-    )
+    delete_pks = map(DocumentPointer.convert_id_to_pk, delete_item_ids)
 
     for delete_pk in delete_pks:
-        delete_docs: list[DocumentPointer] = document_pointer_repository.query(
-            delete_pk
+        _validate_ok_to_supersede(
+            document_pointer_repository, source_document_pointer, delete_pk
         )
-        if len(delete_docs) > 0:
-
-            document_pointer = delete_docs[0]
-
-            if _invalid_subject_identifier(
-                source_document_pointer=source_document_pointer,
-                target_document_pointer=document_pointer,
-            ):
-                raise RequestValidationError(
-                    "Validation failure - relatesTo target document nhs number does not match the request"
-                )
-
-            if _invalid_type(
-                source_document_pointer=source_document_pointer,
-                target_document_pointer=document_pointer,
-            ):
-                raise RequestValidationError(
-                    "Validation failure - relatesTo target document type does not match the request"
-                )
 
     return PipelineData(**data)
+
+
+def _validate_ok_to_supersede(
+    document_pointer_repository: Repository,
+    source_document_pointer: DocumentPointer,
+    delete_pk: str,
+):
+    try:
+        document_to_delete: DocumentPointer = document_pointer_repository.read_item(
+            delete_pk
+        )
+    except (ItemNotFound):
+        raise RequestValidationError(
+            "Validation failure - relatesTo target document does not exist"
+        )
+
+    if _invalid_subject_identifier(
+        source_document_pointer=source_document_pointer,
+        target_document_pointer=document_to_delete,
+    ):
+        raise RequestValidationError(
+            "Validation failure - relatesTo target document nhs number does not match the request"
+        )
+
+    if _invalid_type(
+        source_document_pointer=source_document_pointer,
+        target_document_pointer=document_to_delete,
+    ):
+        raise RequestValidationError(
+            "Validation failure - relatesTo target document type does not match the request"
+        )
 
 
 @log_action(narrative="Saving document pointer to db")

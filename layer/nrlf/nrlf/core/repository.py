@@ -1,12 +1,8 @@
-import json
-import re
 from functools import reduce, wraps
-from typing import Optional, TypeVar, Union
+from typing import TypeVar, Union
 
 from botocore.exceptions import ClientError
 from lambda_utils.logging import log_action
-from more_itertools import map_except
-from nrlf.core.dynamodb_types import to_dynamodb_dict
 from nrlf.core.errors import (
     DuplicateError,
     DynamoDbError,
@@ -14,16 +10,22 @@ from nrlf.core.errors import (
     SupersedeError,
     TooManyItemsError,
 )
-from nrlf.core.model import DynamoDbModel
+from nrlf.core.model import DynamoDbModel, PaginatedResponse
+from nrlf.core.transform import (
+    transform_evaluation_key_to_next_page_token,
+    transform_next_page_token_to_start_key,
+)
 from nrlf.core.types import DynamoDbClient, DynamoDbResponse
-from pydantic import BaseModel, ValidationError
+from nrlf.producer.fhir.r4.model import RequestQueryCustodian, RequestQueryType
+from pydantic import BaseModel
+from pydantic.error_wrappers import ValidationError
 
 from .decorators import deprecated
 
 PydanticModel = TypeVar("PydanticModel", bound=BaseModel)
 
 MAX_TRANSACT_ITEMS = 100
-MAX_RESULTS = 100
+PAGE_ITEM_LIMIT = 20
 ATTRIBUTE_EXISTS_PK = "attribute_exists(pk)"
 ATTRIBUTE_NOT_EXISTS_PK = "attribute_not_exists(pk)"
 CONDITION_CHECK_CODES = [
@@ -33,44 +35,26 @@ CONDITION_CHECK_CODES = [
 ]
 
 
+class CorruptDocumentPointer(Exception):
+    pass
+
+
 def _strip_none(d: dict) -> dict:
     if d is None:
         return None
     return {k: v for (k, v) in d.items() if f"{v}" != "None"}
 
 
-def custodian_filter(custodian_identifier):
+def custodian_filter(custodian_identifier: RequestQueryCustodian):
     if custodian_identifier is not None:
         return custodian_identifier.__root__.split("|", 1)[1]
     return None
 
 
-def type_filter(type_identifier, pointer_types):
+def type_filter(type_identifier: RequestQueryType, pointer_types):
     if type_identifier is not None:
         return [type_identifier.__root__]
     return pointer_types
-
-
-def _validate_results_within_limits(results: dict):
-    if len(results["Items"]) >= MAX_RESULTS or "LastEvaluatedKey" in results:
-        raise Exception(
-            "DynamoDB has returned too many results, pagination not implemented yet"
-        )
-    return results
-
-
-def _valid_results(item_type: type[DynamoDbModel], results: dict):
-    """
-    returns only valid results for the specified type[DynamoDbModel]
-    """
-    valid_results = []
-    for item in results:
-        try:
-            valid_results.append(item_type(**item))
-        except (ValueError, ValidationError) as e:
-            pass
-
-    return valid_results
 
 
 def _handle_dynamodb_errors(
@@ -89,6 +73,34 @@ def _handle_dynamodb_errors(
             raise Exception(f"There was an error with the database: {error}")
 
     return wrapper
+
+
+def _valid_results(
+    item_type: type[DynamoDbModel], results: list[dict]
+) -> list[DynamoDbModel]:
+    """
+    returns only valid results for the specified type[DynamoDbModel]
+    """
+    valid_results = []
+    for item in results:
+        try:
+            valid_item = _is_record_valid(item_type, item)
+        except (CorruptDocumentPointer):
+            pass
+        else:
+            valid_results.append(valid_item)
+
+    return valid_results
+
+
+@log_action(narrative="Checking if record is valid", log_fields=["item"])
+def _is_record_valid(item_type: type[DynamoDbModel], item: dict):
+    try:
+        return item_type(**item)
+    except (ValueError, ValidationError):
+        raise CorruptDocumentPointer(
+            f"Document pointer has corrupt data, ignoring ${item}"
+        )
 
 
 def _keys(pk, sk, pk_name="pk", sk_name="sk"):
@@ -327,8 +339,10 @@ class Repository:
         pk: str,
         sk_name: str = None,
         sk: str = None,
+        limit: int = PAGE_ITEM_LIMIT,
+        exclusive_start_key: str = None,
         **filter,
-    ) -> list[PydanticModel]:
+    ) -> PaginatedResponse:
         """
         Do not call this method directly, instead use `query` or `query_gsi_#` instead.
         """
@@ -337,20 +351,40 @@ class Repository:
             filter,
         )
 
+        if exclusive_start_key is not None:
+            exclusive_start_key = transform_next_page_token_to_start_key(
+                exclusive_start_key
+            )
+
         args = _strip_none(
-            {"TableName": self.table_name, "IndexName": index_name, **clause}
+            {
+                "TableName": self.table_name,
+                "IndexName": index_name,
+                "Limit": limit,
+                "ExclusiveStartKey": exclusive_start_key,
+                **clause,
+            }
         )
+
         results = self.dynamodb.query(**args)
-        _validate_results_within_limits(results)
-        valid_results = _valid_results(self.item_type, results["Items"])
-        return valid_results
+        document_pointers = _valid_results(self.item_type, results["Items"])
+
+        last_evaluated_key = results.get("LastEvaluatedKey")
+        if last_evaluated_key is not None:
+            last_evaluated_key = transform_evaluation_key_to_next_page_token(
+                last_evaluated_key
+            )
+
+        return PaginatedResponse(
+            last_evaluated_key=last_evaluated_key, document_pointers=document_pointers
+        )
 
     def query(
         self,
         pk,
         sk=None,
         **filter,
-    ) -> list[PydanticModel]:
+    ) -> PaginatedResponse:
         """
         Query records using the main partition key
         """
@@ -361,7 +395,7 @@ class Repository:
         pk,
         sk=None,
         **filter,
-    ) -> list[PydanticModel]:
+    ) -> PaginatedResponse:
         """
         Query records using the Global Secondary Index 'idx_gsi_1'
         """
@@ -372,7 +406,7 @@ class Repository:
         pk,
         sk=None,
         **filter,
-    ) -> list[PydanticModel]:
+    ) -> PaginatedResponse:
         """
         Query records using the Global Secondary Index 'idx_gsi_2'
         """
@@ -383,7 +417,7 @@ class Repository:
         pk,
         sk=None,
         **filter,
-    ) -> list[PydanticModel]:
+    ) -> PaginatedResponse:
         """
         Query records using the Global Secondary Index 'idx_gsi_3'
         """
@@ -394,7 +428,7 @@ class Repository:
         pk,
         sk=None,
         **filter,
-    ) -> list[PydanticModel]:
+    ) -> PaginatedResponse:
         """
         Query records using the Global Secondary Index 'idx_gsi_4'
         """
@@ -405,7 +439,7 @@ class Repository:
         pk,
         sk=None,
         **filter,
-    ) -> list[PydanticModel]:
+    ) -> PaginatedResponse:
         """
         Query records using the index 'idx_gsi_5'
         """

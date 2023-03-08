@@ -254,3 +254,44 @@ Feature: Consumer Search Success scenarios
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
+
+  Scenario: Successfully searches for all documents and provides last evaluated key when above 20 record limit
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And 21 Document Pointers exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567800                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
+      | property             | value                                         |
+      | subject.identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | custodian.identifier | https://fhir.nhs.uk/Id/ods-code\|8FW23        |
+      | type.identifier      | http://snomed.info/sct\|736253002             |
+    Then the operation is successful
+    And the response is a Bundle with 20 entries
+    And the Bundle contains an Entry with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567800                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And the Bundle contains a next page token
+    When Consumer "Yorkshire Ambulance Service" searches for the next page
+    Then the operation is successful
+    And the response is a Bundle with 1 entries
+    And the Bundle contains an Entry with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567820                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
