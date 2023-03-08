@@ -54,6 +54,10 @@ class RequestValidationError(Exception):
     pass
 
 
+class InvalidTupleError(Exception):
+    pass
+
+
 NRLF_TO_SPINE_4XX_ERROR = {
     AuthenticationError: SpineCoding.ACCESS_DENIED_LEVEL,
     DynamoDbError: SpineCoding.RESOURCE_NOT_FOUND,
@@ -67,6 +71,7 @@ NRLF_TO_SPINE_4XX_ERROR = {
     SupersedeError: SpineCoding.INVALID_RESOURCE_ID,
     DocumentReferenceValidationError: SpineCoding.RESOURCE_NOT_FOUND,
     RequestValidationError: SpineCoding.VALIDATION_ERROR,
+    InvalidTupleError: SpineCoding.VALIDATION_ERROR,
 }
 
 

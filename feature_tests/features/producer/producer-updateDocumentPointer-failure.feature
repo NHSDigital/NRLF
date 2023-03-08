@@ -272,3 +272,35 @@ Feature: Producer Update Failure scenarios
       | issue_code        | RESOURCE_NOT_FOUND      |
       | issue_description | Resource not found      |
       | message           | Item could not be found |
+
+  Scenario: Unable to update a Document Pointer with an invalid tuple id format
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | status      | current                        |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23|1234567890" from DOCUMENT template
+      | property    | value           |
+      | identifier  | 1234567890      |
+      | status      | deleted         |
+      | type        | 736253002       |
+      | custodian   | 8FW23           |
+      | subject     | 9278693472      |
+      | contentType | application/pdf |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                     |
+      | issue_type        | processing                                                |
+      | issue_level       | error                                                     |
+      | issue_code        | VALIDATION_ERROR                                          |
+      | issue_description | A parameter or value has resulted in a validation error   |
+      | message           | Input is not composite of the form a-b: 8FW23\|1234567890 |

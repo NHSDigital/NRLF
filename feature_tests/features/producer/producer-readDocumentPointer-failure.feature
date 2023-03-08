@@ -103,3 +103,19 @@ Feature: Producer Read Failure scenarios
       | issue_code        | RESOURCE_NOT_FOUND      |
       | issue_description | Resource not found      |
       | message           | Item could not be found |
+
+  Scenario: Producer searches for a Document Pointer with an invalid tuple id format
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to read Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 734163000 |
+    When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "8FW23|1234567890"
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                     |
+      | issue_type        | processing                                                |
+      | issue_level       | error                                                     |
+      | issue_code        | VALIDATION_ERROR                                          |
+      | issue_description | A parameter or value has resulted in a validation error   |
+      | message           | Input is not composite of the form a-b: 8FW23\|1234567890 |
