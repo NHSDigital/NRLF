@@ -1925,13 +1925,12 @@ components:
           properties:
             coding:
               type: array
-              minLength: 1
               items:
                 $ref: "#/components/schemas/Coding"
                 description: A reference to a code defined by a terminology system.
             text:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.
     Coding:
       allOf:
