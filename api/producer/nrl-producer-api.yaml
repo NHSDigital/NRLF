@@ -1430,7 +1430,6 @@ components:
           properties:
             coding:
               type: array
-              minLength: 1
               items:
                 $ref: "#/components/schemas/Coding"
                 description: A reference to a code defined by a terminology system.
