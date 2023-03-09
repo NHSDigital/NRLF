@@ -119,7 +119,7 @@ jobs:
         run: |
           source .venv/bin/activate
           source nrlf.sh
-          nrlf test unit
+          nrlf test unit --runslow
 
   feature-test-local:
     needs: [cache]
@@ -325,7 +325,7 @@ jobs:
           source .venv/bin/activate
           source nrlf.sh
           nrlf truststore pull-client ref
-          nrlf test integration
+          nrlf test integration --runslow
           nrlf test feature integration
 
   terraform-destroy:

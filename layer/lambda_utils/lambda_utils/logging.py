@@ -2,8 +2,7 @@ from functools import wraps
 from inspect import signature
 from logging import getLevelName
 from timeit import default_timer as timer
-from types import FunctionType
-from typing import Any, Optional
+from typing import Any, Callable, Optional, TypeVar, Union
 
 from aws_lambda_powertools import Logger as _Logger
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
@@ -19,22 +18,30 @@ from lambda_utils.logging_utils import (
 )
 from nrlf.core.transform import make_timestamp
 from pydantic import BaseModel, Field
+from typing_extensions import ParamSpec
 
 
-class LogTemplate(BaseModel):
-    correlation_id: str = None
-    nhsd_correlation_id: str = None
-    transaction_id: str = None
-    request_id: str = None
-    log_level: str = None
-    log_reference: str = None
-    outcome: str = None
-    duration_ms: int = None
-    message: str = None
-    data: dict = None
-    error: Exception = None
+class LogTemplateBase(BaseModel):
+    correlation_id: str
+    nhsd_correlation_id: str
+    request_id: str
+    transaction_id: str
+    host: str
+    environment: str
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class LogTemplate(LogTemplateBase):
+    log_level: str
+    log_reference: str
+    outcome: str
+    duration_ms: int
+    message: str
+    data: dict
+    error: Union[Exception, str, None]
     call_stack: str = None
-    environment: str = None
     timestamp: str = None
     sensitive: bool = True
 
@@ -84,11 +91,11 @@ class Logger(_Logger):
         logging_header = LoggingHeader(**headers)
 
         self.transaction_id = transaction_id or generate_transaction_id()
-        self._base_message = LogTemplate(
+        self._base_message = LogTemplateBase(
             **logging_header.dict(),
             host=aws_lambda_event.requestContext.accountId,
             environment=aws_environment,
-            transaction_id=transaction_id,
+            transaction_id=self.transaction_id,
         )
         super().__init__(logger_name, logger_formatter=CustomFormatter(), **kwargs)
 
@@ -97,13 +104,17 @@ class Logger(_Logger):
         return self._base_message
 
 
+RT = TypeVar("RT")  # for forwarding type-hints of the return type
+P = ParamSpec("P")  # for forwarding type-hints of the decorated kw/args
+
+
 def log_action(
     *,
     narrative: str,
     log_fields: list[str] = [],
     log_result: bool = True,
     sensitive: bool = True,
-):
+) -> Callable[[Callable[P, RT]], Callable[P, RT]]:
     """
     Args:
         narrative:  Verbose description of what this function is doing.
@@ -114,9 +125,9 @@ def log_action(
         sensitive:  Flag for Splunk to categorise this log as sensitive.
     """
 
-    def decorator(fn: FunctionType):
+    def decorator(fn: Callable[P, RT]) -> Callable[P, RT]:
         @wraps(fn)
-        def wrapper(*args, logger: Logger = None, **kwargs):
+        def wrapper(*args: P.args, logger: Logger = None, **kwargs: P.kwargs) -> RT:
             if logger is None:
                 return fn(*args, **kwargs)
 
@@ -156,13 +167,11 @@ def log_action(
                 log_level=getLevelName(level),
                 timestamp=make_timestamp(),
                 sensitive=sensitive,
+                **logger.base_message.dict(),
             )
-            message_json = json_encode_message(
-                message={
-                    **logger.base_message.dict(exclude_none=True),
-                    **_message.dict(exclude_none=True),
-                }
-            )
+
+            message_dict = _message.dict(exclude_none=True)
+            message_json = json_encode_message(message=message_dict)
             logger.log(msg=message_json, level=level)
 
             if isinstance(result, Exception):
