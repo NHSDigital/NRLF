@@ -24,6 +24,8 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
 7. [Route 53 & Hosted zones](#route53--hosted-zones)
 8. [Sandbox](#sandbox)
 
+---
+
 ## Setup
 
 ### 1. Prerequisites
@@ -40,6 +42,44 @@ Swagger generation requirements.
 - java runtime environment (jre) - https://www.oracle.com/java/technologies/downloads/#jdk19-mac
 - yq v4
 
+### 2. Linux set up
+For those on a linux/WSL setup these are some helpful instructions:
+
+Poetry:
+
+```shell
+curl -sSL https://install.python-poetry.org | python3 - --version 1.1.15 (only use --version to specify)
+nano ~/.bashrc
+add to bashrc - export PATH="/yourHomeDirectory/.local/bin:$PATH" spineVM home dir is "/home/spineii-user/"
+source ~/.bashrc
+poetry --version
+```
+
+pyenv:
+
+```shell
+sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
+libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
+libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+
+curl https://pyenv.run | bash
+nano ~/.bashrc
+add to bashrc - export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init --path)" - add to bashrc
+eval "$(pyenv virtualenv-init -)" - add to bashrc
+source ~/.bashrc
+pyenv --version
+```
+
+tfenv:
+
+```shell
+git clone https://github.com/tfutils/tfenv.git ~/.tfenv
+echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> ~/.bash_profile
+sudo ln -s ~/.tfenv/bin/* /usr/local/bin
+tfenv --version
+```
+
 ### 2. Install python dependencies
 
 At the root of the repo, run:
@@ -49,6 +89,31 @@ poetry install
 poetry shell
 pre-commit install
 ```
+
+---
+
+## Quick Run
+
+For those wanting to get up and running quickly can follow this list of instructions which by the end will have given you your own workspace with the current version of NRLF running.
+
+```shell
+poetry shell
+source nrlf.sh
+nrlf aws reset-creds
+-- credentials setup? --
+nrlf aws login mgmt <mfa>
+nrlf make build
+nrlf truststore ????
+nrlf terraform plan <yourname>-test
+nrlf terraform apply <yourname>-test
+nrlf test feature integration
+```
+
+
+
+
+
+
 
 ## Initialise shell environment
 
