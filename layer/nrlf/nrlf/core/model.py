@@ -11,7 +11,7 @@ from nrlf.core.dynamodb_types import (
     convert_dynamo_value_to_raw_value,
     is_dynamodb_dict,
 )
-from nrlf.core.errors import RequestValidationError
+from nrlf.core.errors import InvalidTupleError, RequestValidationError
 from nrlf.core.validators import (
     create_document_type_tuple,
     generate_producer_id,
@@ -139,7 +139,12 @@ class DocumentPointer(DynamoDbModel):
 
     @property
     def doc_id(self) -> str:
-        (_, doc_id) = f"{self.id}".split(ID_SEPARATOR)
+        try:
+            (_, doc_id) = f"{self.id}".split(ID_SEPARATOR)
+        except ValueError:
+            raise InvalidTupleError(
+                f"Input is not composite of the form a{ID_SEPARATOR}b: {self.id.value}"
+            )
         return doc_id
 
     @property
