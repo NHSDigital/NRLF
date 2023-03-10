@@ -3,7 +3,11 @@ from datetime import datetime as dt
 
 from nhs_number import is_valid as is_valid_nhs_number
 from nrlf.core.constants import ID_SEPARATOR, VALID_SOURCES
-from nrlf.core.errors import DocumentReferenceValidationError, RequestValidationError
+from nrlf.core.errors import (
+    DocumentReferenceValidationError,
+    InvalidTupleError,
+    RequestValidationError,
+)
 from nrlf.producer.fhir.r4.model import CodeableConcept, DocumentReference
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
@@ -15,7 +19,7 @@ def _get_tuple_components(tuple: str, separator: str) -> tuple[str, str]:
     try:
         a, b = tuple.split(separator, 1)
     except ValueError:
-        raise ValueError(
+        raise InvalidTupleError(
             f"Input is not composite of the form a{separator}b: {tuple}"
         ) from None
     return a, b

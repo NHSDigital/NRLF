@@ -1,15 +1,16 @@
+import base64
 import json
 from datetime import datetime as dt
 from typing import Union
 
 from more_itertools import map_except
 from nrlf.core.constants import EMPTY_VALUES, ID_SEPARATOR, JSON_TYPES, Source
-from nrlf.core.errors import FhirValidationError
-from nrlf.core.model import DocumentPointer
+from nrlf.core.errors import FhirValidationError, NextPageTokenValidationError
+from nrlf.core.model import DocumentPointer, PaginatedResponse
 from nrlf.core.validators import validate_fhir_model_for_required_fields
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
 from nrlf.legacy.model import LegacyDocumentPointer
-from nrlf.producer.fhir.r4.model import Bundle, BundleEntry, DocumentReference
+from nrlf.producer.fhir.r4.model import Bundle, BundleEntry, DocumentReference, Meta
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
@@ -157,15 +158,42 @@ def create_bundle_entries_from_document_pointers(
     return [BundleEntry(resource=reference) for reference in document_references]
 
 
-def create_bundle_from_document_pointers(
-    document_pointers: list[DocumentPointer],
+def create_bundle_from_paginated_response(
+    paginated_response: PaginatedResponse,
 ) -> Bundle:
 
-    bundleEntryList = create_bundle_entries_from_document_pointers(document_pointers)
+    document_pointers = paginated_response.document_pointers
 
-    return Bundle(
+    bundleEntryList = create_bundle_entries_from_document_pointers(document_pointers)
+    bundle_dict = dict(
         resourceType="Bundle",
         type="searchset",
         total=len(bundleEntryList),
         entry=bundleEntryList,
-    ).dict(exclude_none=True, exclude_defaults=True)
+    )
+
+    if paginated_response.last_evaluated_key is not None:
+        last_evaluated_key = paginated_response.last_evaluated_key
+        bundle_dict["meta"] = create_meta(last_evaluated_key)
+
+    return Bundle(**bundle_dict).dict(exclude_none=True, exclude_defaults=True)
+
+
+def create_meta(last_evaluated_key: object) -> Meta:
+
+    last_key = str(last_evaluated_key)
+
+    coding = {"code": last_key, "display": "next_page_token"}
+
+    return {"tag": [coding]}
+
+
+def transform_evaluation_key_to_next_page_token(last_evaluated_key: dict) -> str:
+    return base64.urlsafe_b64encode(json.dumps(last_evaluated_key).encode()).decode()
+
+
+def transform_next_page_token_to_start_key(exclusive_start_key: str) -> dict:
+    try:
+        return json.loads(base64.urlsafe_b64decode(exclusive_start_key))
+    except Exception:
+        raise NextPageTokenValidationError("Unable to decode the next page token")

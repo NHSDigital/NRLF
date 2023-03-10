@@ -1,15 +1,12 @@
 import json
 import time
 from contextlib import contextmanager
-from copy import deepcopy
 from typing import Generator
 
 import boto3
 import moto
 import pytest
 from botocore.exceptions import ClientError
-
-from feature_tests.common.constants import DOCUMENT_POINTER_TABLE_DEFINITION
 from nrlf.core.constants import DbPrefix
 from nrlf.core.errors import (
     DuplicateError,
@@ -18,12 +15,10 @@ from nrlf.core.errors import (
     TooManyItemsError,
 )
 from nrlf.core.model import DocumentPointer, key
-from nrlf.core.query import hard_delete_query, update_and_filter_query
 from nrlf.core.repository import (
     MAX_TRANSACT_ITEMS,
     Repository,
     _keys,
-    _validate_results_within_limits,
     handle_dynamodb_errors,
 )
 from nrlf.core.tests.data_factory import (
@@ -40,6 +35,8 @@ from nrlf.core.transform import (
 )
 from nrlf.core.types import DynamoDbClient
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
+
+from feature_tests.common.constants import DOCUMENT_POINTER_TABLE_DEFINITION
 
 API_VERSION = 1
 INDEX_NAME = DOCUMENT_POINTER_TABLE_DEFINITION["GlobalSecondaryIndexes"][0]["IndexName"]
@@ -152,9 +149,8 @@ def test_update_document_pointer_success():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model_1)
         repository.update(item=model_2)
-        items = repository.query(model_1.pk)
+        item = repository.read_item(model_1.pk)
 
-    (item,) = items
     doc = json.loads(item.document.__root__)
     assert item.created_on.__root__ != model_1.created_on.__root__
     assert doc["content"][0]["attachment"]["url"] == new_url
@@ -302,8 +298,9 @@ def test_search_returns_multiple_values_with_same_nhs_number():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model_1)
         repository.create(item=model_2)
-        items = repository.query_gsi_1(model_1.pk_1)
-    assert len(items) == 2
+        item = repository.query_gsi_1(model_1.pk_1)
+
+    assert len(item.document_pointers) == 2
 
 
 def test_search_returns_correct_values():
@@ -320,52 +317,35 @@ def test_search_returns_correct_values():
         repository.create(item=model_1)
         repository.create(item=model_2)
 
-        docs_gsi_1 = repository.query_gsi_1(model_1.pk_1)  # NHS Number / Subject
-        docs_gsi_2 = repository.query_gsi_2(model_1.pk_2)  # ODS Code / Custodian
+        docs_gsi_1_response = repository.query_gsi_1(
+            model_1.pk_1
+        )  # NHS Number / Subject
+        docs_gsi_2_response = repository.query_gsi_2(
+            model_1.pk_2
+        )  # ODS Code / Custodian
 
-    assert len(docs_gsi_1) == 1, "Partitioned by subject"
-    assert len(docs_gsi_2) == 2, "Partitioned by provider"
-
-
-# ------------------------------------------------------------------------------
-# Utility
-# ------------------------------------------------------------------------------
-
-
-def test_validate_results_less_than_100_items():
-    array_size = 99
-    items = [""] * array_size
-    request_results = {"Items": items, "Count": array_size, "ScannedCount": array_size}
-    result = _validate_results_within_limits(request_results)
-    assert result == request_results
+    assert len(docs_gsi_1_response.document_pointers) == 1, "Partitioned by subject"
+    assert len(docs_gsi_2_response.document_pointers) == 2, "Partitioned by provider"
 
 
-def test_validate_results_throws_exception_when_more_than_100_items():
-    array_size = 101
-    items = [""] * array_size
-    request_results = {"Items": items, "Count": array_size, "ScannedCount": array_size}
+def test_query_last_evaluated_key_is_returned_in_correct_circumstance():
+    doc_1 = generate_test_document_reference(
+        provider_doc_id="FIRST", subject=generate_test_subject("9278693472")
+    )
+    doc_2 = generate_test_document_reference(
+        provider_doc_id="SECOND", subject=generate_test_subject("9278693472")
+    )
+    model_1 = create_document_pointer_from_fhir_json(fhir_json=doc_1)
+    model_2 = create_document_pointer_from_fhir_json(fhir_json=doc_2)
+    with mock_dynamodb() as client:
+        repository = Repository(item_type=DocumentPointer, client=client)
+        repository.create(item=model_1)
+        repository.create(item=model_2)
 
-    with pytest.raises(Exception) as error:
-        _validate_results_within_limits(request_results)
-        assert (
-            error.value
-            == "DynamoDB has returned too many results, pagination not implemented yet"
-        )
+        response = repository.query_gsi_1(model_1.pk_1, limit=1)  # NHS Number / Subject
+        response2 = repository.query_gsi_1(
+            model_1.pk_1, limit=2
+        )  # NHS Number / Subject
 
-
-def test_validate_results_throws_exception_when_last_evaluated_key_exists():
-    array_size = 98
-    items = [""] * array_size
-    request_results = {
-        "Items": items,
-        "Count": array_size,
-        "ScannedCount": array_size,
-        "LastEvaluatedKey": array_size,
-    }
-
-    with pytest.raises(Exception) as error:
-        _validate_results_within_limits(request_results)
-        assert (
-            error.value
-            == "DynamoDB has returned too many results, pagination not implemented yet"
-        )
+    assert response.last_evaluated_key is not None
+    assert response2.last_evaluated_key is None

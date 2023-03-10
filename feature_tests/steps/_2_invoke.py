@@ -39,8 +39,27 @@ def producer_searches_existing_document_reference(
     context: Context, actor_type: str, actor: str
 ):
     test_config: TestConfig = context.test_config
+
     query_params = table_as_dict(table=context.table)
+    test_config.requestParams = query_params
     test_config.response = test_config.request.invoke(query_params=query_params)
+
+
+@when(
+    '{actor_type} "{actor}" searches for the next page',
+    action="search",
+)
+def producer_searches_existing_document_reference_next_page(
+    context: Context, actor_type: str, actor: str
+):
+    test_config: TestConfig = context.test_config
+    bundle = test_config.response.dict
+    next_page_token = bundle["meta"]["tag"][0]["code"]
+    test_config.requestParams["next-page-token"] = next_page_token
+
+    test_config.response = test_config.request.invoke(
+        query_params=test_config.requestParams
+    )
 
 
 @when(
@@ -49,7 +68,24 @@ def producer_searches_existing_document_reference(
 )
 def search_document_pointers(context: Context, actor_type: str, actor: str):
     test_config: TestConfig = context.test_config
-    body = json.dumps(table_as_dict(table=context.table))
+    table_params = table_as_dict(table=context.table)
+    test_config.requestParams = table_params
+    body = json.dumps(table_params)
+    test_config.response = test_config.request.invoke(body=body)
+
+
+@when(
+    '{actor_type} "{actor}" searches by POST for the next page',
+    action="searchPost",
+)
+def search_document_pointers_next_page(context: Context, actor_type: str, actor: str):
+    test_config: TestConfig = context.test_config
+    bundle = test_config.response.dict
+    next_page_token = bundle["meta"]["tag"][0]["code"]
+
+    test_config.requestParams["next-page-token"] = next_page_token
+
+    body = json.dumps(test_config.requestParams)
     test_config.response = test_config.request.invoke(body=body)
 
 

@@ -11,7 +11,7 @@ from nrlf.core.dynamodb_types import (
     convert_dynamo_value_to_raw_value,
     is_dynamodb_dict,
 )
-from nrlf.core.errors import RequestValidationError
+from nrlf.core.errors import InvalidTupleError, RequestValidationError
 from nrlf.core.validators import (
     create_document_type_tuple,
     generate_producer_id,
@@ -120,6 +120,7 @@ class DocumentPointer(DynamoDbModel):
 
     @classmethod
     def split_id(cls, id: str) -> list[str, str]:
+        validate_tuple(id, ID_SEPARATOR)
         return f"{id}".split(ID_SEPARATOR, 1)
 
     @classmethod
@@ -138,7 +139,12 @@ class DocumentPointer(DynamoDbModel):
 
     @property
     def doc_id(self) -> str:
-        (_, doc_id) = f"{self.id}".split(ID_SEPARATOR)
+        try:
+            (_, doc_id) = f"{self.id}".split(ID_SEPARATOR)
+        except ValueError:
+            raise InvalidTupleError(
+                f"Input is not composite of the form a{ID_SEPARATOR}b: {self.id.value}"
+            )
         return doc_id
 
     @property
@@ -250,3 +256,8 @@ class ProducerRequestParams(producer_model.RequestParams, _NhsNumberMixin):
 
 class ConsumerRequestParams(consumer_model.RequestParams, _NhsNumberMixin):
     pass
+
+
+class PaginatedResponse(BaseModel):
+    last_evaluated_key: object = None
+    document_pointers: list[DocumentPointer]

@@ -8,13 +8,14 @@ from nrlf.core.errors import RequestValidationError
 from nrlf.core.model import (
     ConsumerRequestParams,
     DocumentPointer,
+    PaginatedResponse,
     ProducerRequestParams,
     assert_model_has_only_dynamodb_types,
     create_document_type_tuple,
     key,
 )
 from nrlf.core.transform import (
-    create_bundle_from_document_pointers,
+    create_bundle_from_paginated_response,
     create_document_pointer_from_fhir_json,
     update_document_pointer_from_fhir_json,
 )
@@ -203,7 +204,7 @@ def test_reconstruct_document_pointer_from_db():
     assert actual == expected
 
 
-def test_create_bundle_from_multiple_document_pointers():
+def test_create_bundle_from_paginated_response_returns_populated_bundle_of_2():
     fhir_json = read_test_data("nrlf")
 
     core_model = create_document_pointer_from_fhir_json(
@@ -213,7 +214,9 @@ def test_create_bundle_from_multiple_document_pointers():
         fhir_json=fhir_json, api_version=API_VERSION
     )
 
-    result = create_bundle_from_document_pointers([core_model, core_model_2])
+    paginated_response = PaginatedResponse(document_pointers=[core_model, core_model_2])
+
+    result = create_bundle_from_paginated_response(paginated_response)
 
     expected_result = {
         "resourceType": "Bundle",
@@ -290,14 +293,16 @@ def test_create_bundle_from_multiple_document_pointers():
     assert expected_result == result
 
 
-def test_create_bundle_from_document_pointer():
+def test_create_bundle_from_paginated_response_returns_populated_bundle_of_1():
     fhir_json = read_test_data("nrlf")
 
     core_model = create_document_pointer_from_fhir_json(
         fhir_json=fhir_json, api_version=API_VERSION
     )
 
-    result = create_bundle_from_document_pointers([core_model])
+    paginated_response = PaginatedResponse(document_pointers=[core_model])
+
+    result = create_bundle_from_paginated_response(paginated_response)
 
     expected_result = {
         "resourceType": "Bundle",
@@ -342,9 +347,10 @@ def test_create_bundle_from_document_pointer():
     assert expected_result == result
 
 
-def test_create_bundle_from_document_pointer():
+def test_create_bundle_from_paginated_response_returns_unpopulated_bundle():
 
-    result = create_bundle_from_document_pointers([])
+    paginated_response = PaginatedResponse(document_pointers=[])
+    result = create_bundle_from_paginated_response(paginated_response)
 
     expected_result = {
         "resourceType": "Bundle",
