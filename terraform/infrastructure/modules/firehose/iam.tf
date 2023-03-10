@@ -99,56 +99,6 @@ resource "aws_iam_role_policy_attachment" "firehose" {
   policy_arn = aws_iam_policy.firehose.arn
 }
 
-
-# resource "aws_iam_role" "firehose" {
-#   name        = "${var.prefix}-firehose-${var.apitype}"
-#   description = "Cloudwatch to Firehose Subscription Role"
-#   assume_role_policy = jsonencode({
-#     Version : "2012-10-17",
-#     Statement : [
-#       {
-#         Action : "sts:AssumeRole",
-#         Principal : { Service : "logs.${var.region}.amazonaws.com" },
-#         Effect : "Allow",
-#         Sid : ""
-#       }
-#     ]
-#   })
-# }
-
-# resource "aws_iam_policy" "firehose" {
-#   name        = "${var.prefix}-firehose-${var.apitype}"
-#   description = "Cloudwatch to Firehose Subscription Policy"
-#   policy      = data.aws_iam_policy_document.firehose.json
-# }
-
-# resource "aws_iam_role_policy_attachment" "firehose" {
-#   role       = aws_iam_role.firehose.name
-#   policy_arn = aws_iam_policy.firehose.arn
-# }
-
-# data "aws_iam_policy_document" "firehose" {
-#   statement {
-#     actions = [
-#       "firehose:*",
-#     ]
-
-#     effect = "Allow"
-#     resources = [
-#       aws_kinesis_firehose_delivery_stream.firehose.arn,
-#     ]
-#   }
-#   statement {
-#     actions = [
-#       "iam:PassRole",
-#     ]
-#     effect = "Allow"
-#     resources = [
-#       aws_iam_role.firehose.arn
-#     ]
-#   }
-# }
-
 resource "aws_iam_policy" "lambda" {
   name        = "${var.prefix}-firehose-lambda-${var.apitype}"
   description = "Read from any log, write to firehose, write to own logs"
