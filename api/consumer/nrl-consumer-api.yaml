@@ -178,7 +178,7 @@ paths:
         "200":
           description: Search successful response
           content:
-            application/fhir+json:
+            application/fhir+json;version=1:
               schema:
                 $ref: "#/components/schemas/Bundle"
               example:
@@ -296,7 +296,7 @@ paths:
         "200":
           description: Search successful response
           content:
-            application/fhir+json:
+            application/fhir+json;version=1:
               schema:
                 $ref: "#/components/schemas/Bundle"
               example:
@@ -411,7 +411,7 @@ paths:
         "200":
           description: Search successful response
           content:
-            application/fhir+json:
+            application/fhir+json;version=1:
               schema:
                 $ref: "#/components/schemas/DocumentReference"
               example:
@@ -2357,6 +2357,9 @@ components:
         $ref: "#/components/schemas/RequestQuerySubject"
       required: true
       examples:
+        none:
+          summary: None
+          value: ""
         valid_1:
           summary: "Valid #1"
           value: https://fhir.nhs.uk/Id/nhs-number|4409815415
@@ -2372,6 +2375,9 @@ components:
       schema:
         $ref: "#/components/schemas/RequestQueryCustodian"
       examples:
+        none:
+          summary: None
+          value: ""
         valid:
           summary: Valid
           value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
@@ -2384,6 +2390,9 @@ components:
       schema:
         $ref: "#/components/schemas/RequestQueryType"
       examples:
+        none:
+          summary: None
+          value: ""
         SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN:
           summary: Mental Health Crisis Plan
           value: http://snomed.info/sct|736253002
@@ -2418,10 +2427,10 @@ components:
       examples:
         valid:
           summary: Valid
-          value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
+          value: Y05868
         invalid:
           summary: Unknown
-          value: https://fhir.nhs.uk/Id/ods-organization-code|XYZ
+          value: XYZ
     requestId:
       name: X-Request-ID
       description: |
