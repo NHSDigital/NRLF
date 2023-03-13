@@ -8,11 +8,13 @@ from lambda_utils.logging import Logger, log_action
 from nrlf.core.firehose.model import (
     CloudwatchLogsData,
     FirehoseOutputRecord,
+    FirehoseResult,
     LambdaResult,
 )
 from nrlf.core.firehose.submission import FirehoseClient, resubmit_unprocessed_records
 from nrlf.core.firehose.utils import name_from_arn
 from nrlf.core.firehose.validate import process_cloudwatch_record
+from pydantic import ValidationError
 
 
 @log_action(narrative="Processing all Firehose records", log_result=False)
@@ -22,24 +24,28 @@ def _process_firehose_records(
 ) -> Iterator[FirehoseOutputRecord]:
     total_event_size_bytes = 0
     for record in records:
-        cloudwatch_data = CloudwatchLogsData.parse(
-            data=record.data, record_id=record.recordId
-        )
-        outcome_records: list[FirehoseOutputRecord] = process_cloudwatch_record(
-            cloudwatch_data=cloudwatch_data,
-            partition_key=(
-                record.kinesisRecordMetadata.partitionKey
-                if record.kinesisRecordMetadata
-                else None
-            ),
-            total_event_size_bytes=total_event_size_bytes,
-            logger=logger,
-        )
-        total_event_size_bytes += sum(
-            outcome_record.size_bytes for outcome_record in outcome_records
-        )
-
-        yield from outcome_records
+        try:
+            cloudwatch_data = CloudwatchLogsData.parse(
+                data=record.data, record_id=record.recordId
+            )
+        except ValidationError:
+            yield FirehoseOutputRecord(
+                record_id=record.recordId,
+                result=FirehoseResult.PROCESSING_FAILED,
+            )
+        else:
+            output_record = process_cloudwatch_record(
+                cloudwatch_data=cloudwatch_data,
+                partition_key=(
+                    record.kinesisRecordMetadata.partitionKey
+                    if record.kinesisRecordMetadata
+                    else None
+                ),
+                total_event_size_bytes=total_event_size_bytes,
+                logger=logger,
+            )
+            total_event_size_bytes += output_record.size_bytes
+            yield output_record
 
 
 @log_action(narrative="Executing handler")

@@ -27,35 +27,25 @@ from nrlf.core.firehose.model import (
 )
 from nrlf.core.firehose.validate import MAX_PACKET_SIZE_BYTES
 
-
-def _draw_logs():
-    def _merge_good_and_bad_logs(good_logs, bad_logs):
-        return good_logs + bad_logs
-
-    return builds(
-        _merge_good_and_bad_logs,
-        good_logs=lists(
-            builds(LogTemplate, error=just("oops")),
-            min_size=1,
-            max_size=20,
-        ),
-        bad_logs=lists(
-            dictionaries(
-                keys=sampled_from(["foo", "bar"]), values=just(""), min_size=1
-            ),
-            min_size=1,
-            max_size=2,
-        ),
-    )
+good_logs = lists(
+    builds(LogTemplate, error=just("oops")),
+    min_size=1,
+    max_size=20,
+)
+bad_logs = lists(
+    dictionaries(keys=sampled_from(["foo", "bar"]), values=just(""), min_size=1),
+    min_size=1,
+    max_size=2,
+)
 
 
 @composite
-def _draw_cloudwatch_data(draw: DrawFn) -> bytes:
+def _draw_cloudwatch_data(draw: DrawFn, logs) -> bytes:
     cloudwatch_data = draw(
         builds(
             CloudwatchLogsData,
             recordId=text(min_size=1),
-            logEvents=_draw_logs(),
+            logEvents=logs,
             messageType=just(CloudwatchMessageType.NORMAL_LOG_EVENT),
         )
     )
@@ -64,17 +54,29 @@ def _draw_cloudwatch_data(draw: DrawFn) -> bytes:
 
 @pytest.mark.slow
 @given(
-    records=lists(
+    good_records=lists(
         builds(
             KinesisFirehoseRecord,
-            data=_draw_cloudwatch_data(),
+            data=_draw_cloudwatch_data(logs=good_logs),
         ),
         min_size=1,
         max_size=10,
-    )
+    ),
+    bad_records=lists(
+        builds(
+            KinesisFirehoseRecord,
+            data=_draw_cloudwatch_data(logs=bad_logs),
+        ),
+        min_size=1,
+        max_size=10,
+    ),
 )
-def test__process_firehose_records_normal_records(records: list[KinesisFirehoseRecord]):
-    outcome_records = list(_process_firehose_records(records=records))
+def test__process_firehose_records_normal_records(
+    good_records: list[KinesisFirehoseRecord], bad_records: list[KinesisFirehoseRecord]
+):
+    outcome_records = list(
+        _process_firehose_records(records=good_records + bad_records)
+    )
     total_event_size = sum(
         outcome_record.size_bytes for outcome_record in outcome_records
     )
@@ -86,10 +88,10 @@ def test__process_firehose_records_normal_records(records: list[KinesisFirehoseR
         for outcome_record in outcome_records
     )
 
-    assert len(outcome_records) >= 1
+    assert len(outcome_records) == len(good_records + bad_records)
     assert 0 < total_event_size <= MAX_PACKET_SIZE_BYTES
-    assert number_of_ok_records > 0
-    assert number_of_failed_records > 0
+    assert number_of_ok_records == len(good_records)
+    assert number_of_failed_records == len(bad_records)
 
 
 @mock.patch("nrlf.core.firehose.handler._process_firehose_records")

@@ -62,34 +62,34 @@ def _validate_log_event(log_event: dict):
         raise LogValidationError("Log has fields that are not present in LogTemplate")
 
 
-def _separate_valid_and_invalid_log_events(
-    log_events: list[dict], logger: Logger
-) -> tuple[list[dict], list[dict]]:
-    valid_log_events, invalid_log_events = [], []
-    while log_events:
-        log_event = log_events.pop(-1)
+@log_action(narrative="Are all of the provided log events valid?")
+def _all_log_events_are_valid(log_events: list[dict], logger: Logger = None) -> bool:
+    for log_event in log_events:
         try:
             _validate_log_event(log_event=log_event, logger=logger)
-        except LogValidationError as err:
-            invalid_log_events.append(log_event)
-        else:
-            valid_log_events.append(log_event)
-    return valid_log_events, invalid_log_events
+        except LogValidationError:
+            return False
+    return True
 
 
+@log_action(narrative="Determining outcome base on the size of this record")
 def _determine_outcome_given_record_size(
-    valid_outcome_record: FirehoseOutputRecord,
     cloudwatch_data: CloudwatchLogsData,
     partition_key: str,
     total_event_size_bytes: int,
-    number_of_logs: int,
-    logger: Logger,
-):
+    logger: Logger = None,
+) -> FirehoseOutputRecord:
+    output_record = FirehoseOutputRecord(
+        record_id=cloudwatch_data.record_id,
+        result=FirehoseResult.OK,
+        data=encode_log_events(log_events=cloudwatch_data.log_events),
+    )
+
     try:
         _validate_record_size(
-            record_size_bytes=valid_outcome_record.size_bytes,
+            record_size_bytes=output_record.size_bytes,
             total_event_size_bytes=total_event_size_bytes,
-            number_of_logs=number_of_logs,
+            number_of_logs=len(cloudwatch_data.log_events),
             logger=logger,
         )
     except RecordTooLargeForKinesis:
@@ -123,49 +123,33 @@ def _determine_outcome_given_record_size(
             ],
         )
     else:  # Default case: this record passes the validation
-        return valid_outcome_record
+        return output_record
 
 
 @log_action(
-    narrative="Validating a Cloudwatch Logs record that has been marked as 'DATA_MESSAGE'"
+    narrative="Validating a Cloudwatch Logs record that has been marked as 'DATA_MESSAGE'",
 )
 def _validate_cloudwatch_logs_data(
     cloudwatch_data: CloudwatchLogsData,
     partition_key: str,
     total_event_size_bytes: int,
     logger: Logger = None,
-) -> list[FirehoseOutputRecord]:
-    outcome_records = []
-    valid_log_events, invalid_log_events = _separate_valid_and_invalid_log_events(
+) -> FirehoseOutputRecord:
+
+    if not _all_log_events_are_valid(
         log_events=cloudwatch_data.log_events, logger=logger
+    ):
+        return FirehoseOutputRecord(
+            record_id=cloudwatch_data.record_id,
+            result=FirehoseResult.PROCESSING_FAILED,
+        )
+
+    return _determine_outcome_given_record_size(
+        cloudwatch_data=cloudwatch_data,
+        partition_key=partition_key,
+        total_event_size_bytes=total_event_size_bytes,
+        logger=logger,
     )
-
-    # Reject invalid parts of the record
-    if invalid_log_events:
-        outcome_records.append(
-            FirehoseOutputRecord(
-                record_id=cloudwatch_data.record_id,
-                result=FirehoseResult.PROCESSING_FAILED,
-            )
-        )
-
-    # Keep the valid parts of the record only if pass size requirements
-    if valid_log_events:
-        _outcome_record = _determine_outcome_given_record_size(
-            valid_outcome_record=FirehoseOutputRecord(
-                record_id=cloudwatch_data.record_id,
-                result=FirehoseResult.OK,
-                data=encode_log_events(log_events=valid_log_events),
-            ),
-            cloudwatch_data=cloudwatch_data,
-            partition_key=partition_key,
-            total_event_size_bytes=total_event_size_bytes,
-            number_of_logs=len(valid_log_events),
-            logger=logger,
-        )
-        outcome_records.append(_outcome_record)
-
-    return outcome_records
 
 
 @log_action(
@@ -179,18 +163,15 @@ def process_cloudwatch_record(
     partition_key: str,
     total_event_size_bytes: int,
     logger: Logger = None,
-) -> list[FirehoseOutputRecord]:
+) -> FirehoseOutputRecord:
     if cloudwatch_data.message_type is CloudwatchMessageType.NORMAL_LOG_EVENT:
-        outcome_records = _validate_cloudwatch_logs_data(
+        return _validate_cloudwatch_logs_data(
             cloudwatch_data=cloudwatch_data,
             partition_key=partition_key,
             total_event_size_bytes=total_event_size_bytes,
             logger=logger,
         )
-    else:  # From pydantic validation this must be CloudwatchMessageType.FIREHOSE_HEALTHCHECK_EVENT
-        outcome_records = [
-            FirehoseOutputRecord(
-                record_id=cloudwatch_data.record_id, result=FirehoseResult.DROPPED
-            )
-        ]
-    return outcome_records
+    # From pydantic validation this must be CloudwatchMessageType.FIREHOSE_HEALTHCHECK_EVENT
+    return FirehoseOutputRecord(
+        record_id=cloudwatch_data.record_id, result=FirehoseResult.DROPPED
+    )

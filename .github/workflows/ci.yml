@@ -325,11 +325,91 @@ jobs:
           source .venv/bin/activate
           source nrlf.sh
           nrlf truststore pull-client ref
-          nrlf test integration --runslow
+          nrlf test integration
+
+  feature-test-integration:
+    needs: [terraform-apply]
+    name: Feature integration test (head)
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download artifacts - ${{ env.TF_ARTIFACT_NAME }}
+        uses: ./.github/actions/download-artifact/
+        with:
+          name: ${{ env.TF_ARTIFACT_NAME }}
+          path: ./terraform/infrastructure/
+
+      - name: Download cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
+          aws-region: eu-west-2
+
+      - name: Run test
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf truststore pull-client ref
           nrlf test feature integration
 
+  firehose-integration-test:
+    needs: [terraform-apply]
+    name: Firehose integration test (head)
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download artifacts - ${{ env.TF_ARTIFACT_NAME }}
+        uses: ./.github/actions/download-artifact/
+        with:
+          name: ${{ env.TF_ARTIFACT_NAME }}
+          path: ./terraform/infrastructure/
+
+      - name: Download cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
+          aws-region: eu-west-2
+
+      - name: Run test
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf truststore pull-client ref
+          nrlf test firehose
+
   terraform-destroy:
-    needs: [integration-test]
+    needs:
+      [integration-test, feature-test-integration, firehose-integration-test]
     if: ${{ always() }}
     name: Terraform destroy
     runs-on: [self-hosted, ci]
@@ -363,7 +443,8 @@ jobs:
 
   clear-cache:
     name: Clear Caches
-    needs: [integration-test]
+    needs:
+      [integration-test, feature-test-integration, firehose-integration-test]
     if: ${{ always() }}
     runs-on: [self-hosted, ci]
     steps:

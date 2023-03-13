@@ -1,6 +1,6 @@
 import pytest
 from hypothesis import given
-from hypothesis.strategies import builds, lists
+from hypothesis.strategies import builds, dictionaries, lists, text
 from nrlf.core.firehose.model import (
     CloudwatchLogsData,
     FirehoseOutputRecord,
@@ -61,14 +61,24 @@ def test_processed_record(unprocessed_records, firehose_result, expected_record)
     assert record.dict() == expected_record
 
 
-@given(builds(CloudwatchLogsData))
+@given(
+    builds(
+        CloudwatchLogsData,
+        logEvents=lists(dictionaries(keys=text(), values=text()), min_size=1),
+    )
+)
 def test_CloudwatchLogsData_split_in_two(cloudwatch_data: CloudwatchLogsData):
     first_half, second_half = cloudwatch_data.split_in_two()
     assert len(first_half.log_events) <= len(second_half.log_events)
     assert first_half.log_events + second_half.log_events == cloudwatch_data.log_events
 
 
-@given(builds(CloudwatchLogsData))
+@given(
+    builds(
+        CloudwatchLogsData,
+        logEvents=lists(dictionaries(keys=text(), values=text()), min_size=1),
+    )
+)
 def test_CloudwatchLogsData_parse_and_encode(cloudwatch_data: CloudwatchLogsData):
     cloudwatch_data_encoded = cloudwatch_data.encode()
     new_cloudwatch_data = CloudwatchLogsData.parse(

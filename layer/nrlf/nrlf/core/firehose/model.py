@@ -60,7 +60,7 @@ class CloudwatchLogsData(BaseModel):
 
     # Fields we need
     record_id: str = Field(exclude=True)  # For convenience, not part of the AWS model
-    log_events: list[dict] = Field(alias="logEvents")
+    log_events: conlist(dict, min_items=1) = Field(alias="logEvents")
     message_type: CloudwatchMessageType = Field(alias="messageType")
     # Other fields
     owner: str

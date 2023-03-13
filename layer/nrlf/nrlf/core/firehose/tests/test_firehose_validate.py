@@ -28,8 +28,8 @@ from nrlf.core.firehose.validate import (
     NoSpaceLeftInCurrentEventPacket,
     RecordTooLargeForKinesis,
     RecordTooLargeForKinesisButCanBeSplit,
+    _all_log_events_are_valid,
     _determine_outcome_given_record_size,
-    _separate_valid_and_invalid_log_events,
     _validate_cloudwatch_logs_data,
     _validate_log_event,
     _validate_record_size,
@@ -136,21 +136,21 @@ def _raise(ex):
 
 @pytest.mark.slow
 @settings(deadline=500)  # In milliseconds
-@given(good_log_events=lists(just(True)), bad_log_events=lists(just(False)))
+@given(good_log_events=lists(just(True)), bad_log_events=lists(just(False), min_size=1))
 @mock.patch("nrlf.core.firehose.validate._validate_log_event")
-def test__separate_valid_and_invalid_log_events(
+def test__all_log_events_are_valid(
     mocked__validate_log_event, good_log_events, bad_log_events
 ):
     mocked__validate_log_event.side_effect = (
         lambda log_event, logger: _raise(LogValidationError) if not log_event else None
     )
 
-    valid_log_events, invalid_log_events = _separate_valid_and_invalid_log_events(
-        log_events=good_log_events + bad_log_events, logger="logger"
+    assert (
+        _all_log_events_are_valid(
+            log_events=good_log_events + bad_log_events, logger=None
+        )
+        is False
     )
-
-    assert valid_log_events == good_log_events
-    assert invalid_log_events == bad_log_events
 
 
 @pytest.mark.parametrize(
@@ -223,25 +223,17 @@ def test__determine_outcome_given_record_size(
         _validate_record_size_raises
     )
 
-    valid_outcome_record = FirehoseOutputRecord(
-        record_id=cloudwatch_data.record_id,
-        result=FirehoseResult.OK,
-        data=encode_log_events(log_events=cloudwatch_data.log_events),
-    )
-
     outcome_record = _determine_outcome_given_record_size(
-        valid_outcome_record=valid_outcome_record,
         cloudwatch_data=cloudwatch_data,
         partition_key="baz",
         total_event_size_bytes=None,
-        number_of_logs=None,
         logger=None,
     )
 
     assert outcome_record == expected_outcome_record
 
 
-@mock.patch("nrlf.core.firehose.validate._separate_valid_and_invalid_log_events")
+@mock.patch("nrlf.core.firehose.validate._all_log_events_are_valid", return_value=False)
 @given(
     cloudwatch_data=builds(
         CloudwatchLogsData,
@@ -254,77 +246,44 @@ def test__validate_cloudwatch_logs_record_with_invalid_records(
     cloudwatch_data: CloudwatchLogsData,
     partition_key: str,
     total_event_size_bytes: int,
-    mocked__separate_valid_and_invalid_log_events,
+    mocked__all_log_events_are_valid,
 ):
-    mocked__separate_valid_and_invalid_log_events.return_value = [
-        data.log_events for data in cloudwatch_data.split_in_two()
-    ]
-
-    outcome_records = _validate_cloudwatch_logs_data(
+    outcome_record = _validate_cloudwatch_logs_data(
         cloudwatch_data=cloudwatch_data,
         partition_key=partition_key,
         total_event_size_bytes=total_event_size_bytes,
     )
 
-    assert len(outcome_records) == 2
+    assert outcome_record == FirehoseOutputRecord(
+        record_id=cloudwatch_data.record_id,
+        result=FirehoseResult.PROCESSING_FAILED,
+    )
 
 
-@mock.patch("nrlf.core.firehose.validate._separate_valid_and_invalid_log_events")
+@mock.patch("nrlf.core.firehose.validate._all_log_events_are_valid", return_value=True)
 @given(
     cloudwatch_data=builds(
         CloudwatchLogsData,
         logEvents=lists(dictionaries(keys=text(), values=text()), min_size=1),
     ),
     partition_key=text(),
-    total_event_size_bytes=integers(),
 )
 def test__validate_cloudwatch_logs_record_without_invalid_records(
     cloudwatch_data: CloudwatchLogsData,
     partition_key: str,
-    total_event_size_bytes: int,
-    mocked__separate_valid_and_invalid_log_events,
+    mocked__all_log_events_are_valid,
 ):
-    mocked__separate_valid_and_invalid_log_events.return_value = [
-        cloudwatch_data.log_events,
-        [],
-    ]
-
-    outcome_records = _validate_cloudwatch_logs_data(
+    outcome_record = _validate_cloudwatch_logs_data(
         cloudwatch_data=cloudwatch_data,
         partition_key=partition_key,
-        total_event_size_bytes=total_event_size_bytes,
+        total_event_size_bytes=0,
     )
 
-    assert len(outcome_records) == 1
-
-
-@mock.patch("nrlf.core.firehose.validate._separate_valid_and_invalid_log_events")
-@given(
-    cloudwatch_data=builds(
-        CloudwatchLogsData,
-        logEvents=just([]),
-    ),
-    partition_key=text(),
-    total_event_size_bytes=integers(),
-)
-def test__validate_cloudwatch_logs_record_without_any_records(
-    cloudwatch_data: CloudwatchLogsData,
-    partition_key: str,
-    total_event_size_bytes: int,
-    mocked__separate_valid_and_invalid_log_events,
-):
-    mocked__separate_valid_and_invalid_log_events.return_value = [
-        cloudwatch_data.log_events,
-        [],
-    ]
-
-    outcome_records = _validate_cloudwatch_logs_data(
-        cloudwatch_data=cloudwatch_data,
-        partition_key=partition_key,
-        total_event_size_bytes=total_event_size_bytes,
+    assert outcome_record == FirehoseOutputRecord(
+        record_id=cloudwatch_data.record_id,
+        result=FirehoseResult.OK,
+        data=encode_log_events(log_events=cloudwatch_data.log_events),
     )
-
-    assert len(outcome_records) == 0
 
 
 @mock.patch(
@@ -332,7 +291,9 @@ def test__validate_cloudwatch_logs_record_without_any_records(
 )
 @given(
     cloudwatch_data=builds(
-        CloudwatchLogsData, messageType=just(CloudwatchMessageType.NORMAL_LOG_EVENT)
+        CloudwatchLogsData,
+        messageType=just(CloudwatchMessageType.NORMAL_LOG_EVENT),
+        logEvents=lists(dictionaries(keys=text(), values=text()), min_size=1),
     ),
     partition_key=text(),
     total_event_size_bytes=integers(),
@@ -359,6 +320,7 @@ def test_process_cloudwatch_record_normal_event(
         messageType=sampled_from(CloudwatchMessageType).filter(
             lambda x: x is not CloudwatchMessageType.NORMAL_LOG_EVENT
         ),
+        logEvents=lists(dictionaries(keys=text(), values=text()), min_size=1),
     ),
     partition_key=text(),
     total_event_size_bytes=integers(),
@@ -371,8 +333,6 @@ def test_process_cloudwatch_record_other_event(
         partition_key=partition_key,
         total_event_size_bytes=total_event_size_bytes,
     )
-    assert outcome_records == [
-        FirehoseOutputRecord(
-            record_id=cloudwatch_data.record_id, result=FirehoseResult.DROPPED
-        )
-    ]
+    assert outcome_records == FirehoseOutputRecord(
+        record_id=cloudwatch_data.record_id, result=FirehoseResult.DROPPED
+    )
