@@ -63,3 +63,5 @@ __pycache__
 # build dirs
 build
 dist
+
+.hypothesis
