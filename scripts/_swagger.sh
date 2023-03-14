@@ -161,6 +161,7 @@ function _swagger() {
             # * API catalogue dislikes tags
             # * /_status not public
             cat ./api/${type}/swagger.yaml |
+                yq 'with(.paths.*.*.responses.*.content; with_entries(.key |= . + ";version=1" ))' |
                 yq 'del(.paths.*.*.x-amazon-apigateway-integration)' |
                 yq 'del(.paths.*.*.security)' |
                 yq 'del(.tags)' |

@@ -173,10 +173,8 @@ paths:
       operationId: createDocumentReference
       responses:
         "201":
-          description: Create DocumentReference operation successful
-          $ref: "#/components/responses/Success"
-        "200":
           description: Create / Supersede successful response
+          $ref: "#/components/responses/Success"
           content:
             application/fhir+json:
               example:
@@ -772,8 +770,25 @@ paths:
                           display: Resource updated
                     diagnostics: Resource updated
         "201":
-          description: Create DocumentReference operation successful (requires 'updateCreateEnabled' configuration option)
+          description: Update successful response
           $ref: "#/components/responses/Success"
+          content:
+            application/fhir+json:
+              example:
+                resourceType: OperationOutcome
+                id: fc39effb-144c-4342-bdf2-4214f0cb728b
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_UPDATED
+                          display: Resource updated
+                    diagnostics: Resource updated
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
       security:
@@ -806,8 +821,25 @@ paths:
         - $ref: "#/components/parameters/correlationId"
       responses:
         "204":
-          description: Delete DocumentReference operation successful
+          description: Delete successful response
           $ref: "#/components/responses/Success"
+          content:
+            application/fhir+json:
+              example:
+                resourceType: OperationOutcome
+                id: c6113a50-70bf-436e-b417-7c8024d2e8bf
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_REMOVED
+                          display: Resource removed
+                    diagnostics: Resource removed
         "200":
           $ref: "#/components/responses/Success"
           description: Delete successful response
@@ -1627,6 +1659,9 @@ components:
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
       examples:
+        none:
+          summary: None
+          value: ""
         valid_1:
           summary: "Valid #1"
           value: https://fhir.nhs.uk/Id/nhs-number|4409815415
@@ -1642,6 +1677,9 @@ components:
       schema:
         $ref: "#/components/schemas/RequestQueryCustodian"
       examples:
+        none:
+          summary: None
+          value: ""
         valid:
           summary: Valid
           value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
@@ -1654,6 +1692,9 @@ components:
       schema:
         $ref: "#/components/schemas/RequestQueryType"
       examples:
+        none:
+          summary: None
+          value: ""
         SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN:
           summary: Mental Health Crisis Plan
           value: http://snomed.info/sct|736253002
@@ -1688,10 +1729,10 @@ components:
       examples:
         valid:
           summary: Valid
-          value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
+          value: Y05868
         invalid:
           summary: Unknown
-          value: https://fhir.nhs.uk/Id/ods-organization-code|XYZ
+          value: XYZ
     requestId:
       name: X-Request-ID
       description: |

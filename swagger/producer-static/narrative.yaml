@@ -181,7 +181,7 @@ paths:
         be superseded.
 
       responses:
-        "200":
+        "201":
           description: Create / Supersede successful response
           content:
             application/fhir+json:
@@ -667,6 +667,25 @@ paths:
                           code: RESOURCE_UPDATED
                           display: Resource updated
                     diagnostics: Resource updated
+        "201":
+          description: Update successful response
+          content:
+            application/fhir+json:
+              example:
+                resourceType: OperationOutcome
+                id: fc39effb-144c-4342-bdf2-4214f0cb728b
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_UPDATED
+                          display: Resource updated
+                    diagnostics: Resource updated
 
     delete:
       summary: Delete
@@ -674,6 +693,25 @@ paths:
         Delete a single DocumentReference record
       responses:
         "200":
+          description: Delete successful response
+          content:
+            application/fhir+json:
+              example:
+                resourceType: OperationOutcome
+                id: c6113a50-70bf-436e-b417-7c8024d2e8bf
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_REMOVED
+                          display: Resource removed
+                    diagnostics: Resource removed
+        "204":
           description: Delete successful response
           content:
             application/fhir+json:
@@ -719,12 +757,15 @@ components:
       examples:
         valid:
           summary: Valid
-          value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
+          value: Y05868
         invalid:
           summary: Unknown
-          value: https://fhir.nhs.uk/Id/ods-organization-code|XYZ
+          value: XYZ
     subject:
       examples:
+        none:
+          summary: None
+          value: ""
         valid_1:
           summary: "Valid #1"
           value: https://fhir.nhs.uk/Id/nhs-number|4409815415
@@ -736,6 +777,9 @@ components:
           value: https://fhir.nhs.uk/Id/nhs-number|3495456001
     custodian:
       examples:
+        none:
+          summary: None
+          value: ""
         valid:
           summary: Valid
           value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
@@ -744,6 +788,9 @@ components:
           value: https://fhir.nhs.uk/Id/ods-organization-code|XYZ
     type:
       examples:
+        none:
+          summary: None
+          value: ""
         SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN:
           summary: Mental Health Crisis Plan
           value: http://snomed.info/sct|736253002
