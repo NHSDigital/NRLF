@@ -1,6 +1,8 @@
+import base64
+
 from nrlf.core.firehose.utils import (
     dump_json_gzip,
-    encode_log_events,
+    encode_log_events_as_ndjson,
     list_in_chunks,
     load_json_gzip,
     name_from_arn,
@@ -8,7 +10,10 @@ from nrlf.core.firehose.utils import (
 
 
 def test_encode_log_events():
-    assert encode_log_events(["foo", "bar"]) == "WyJmb28iLCAiYmFyIl0="
+    assert (
+        encode_log_events_as_ndjson(["foo", "bar"])
+        == base64.b64encode(b'"foo"\n"bar"').decode()
+    )
 
 
 def test_name_from_arn():

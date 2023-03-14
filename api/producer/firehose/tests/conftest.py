@@ -15,40 +15,33 @@ def global_event_handler():
     return {}
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def session():
     return new_aws_session()
 
 
-@pytest.fixture(scope="session")
-def stream_arn():
-    firehose_metadata = get_terraform_json()["firehose"]["value"]["producer"][
-        "delivery_stream"
-    ]
+@pytest.fixture
+def firehose_metadata():
+    return get_terraform_json()["firehose"]["value"]["producer"]["delivery_stream"]
+
+
+@pytest.fixture
+def stream_arn(firehose_metadata):
     return firehose_metadata["arn"]
 
 
-@pytest.fixture(scope="session")
-def bucket_name():
-    firehose_metadata = get_terraform_json()["firehose"]["value"]["producer"][
-        "delivery_stream"
-    ]
+@pytest.fixture
+def bucket_name(firehose_metadata):
     return firehose_metadata["s3"]["arn"].replace("arn:aws:s3:::", "")
 
 
-@pytest.fixture(scope="session")
-def prefix_template():
-    firehose_metadata = get_terraform_json()["firehose"]["value"]["producer"][
-        "delivery_stream"
-    ]
+@pytest.fixture
+def prefix_template(firehose_metadata):
     return firehose_metadata["s3"]["prefix"]
 
 
-@pytest.fixture(scope="session")
-def error_prefix_template():
-    firehose_metadata = get_terraform_json()["firehose"]["value"]["producer"][
-        "delivery_stream"
-    ]
+@pytest.fixture
+def error_prefix_template(firehose_metadata):
     return firehose_metadata["s3"]["error_prefix"].replace(
         "!{firehose:error-output-type}", "processing-failed"
     )

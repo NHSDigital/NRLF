@@ -21,7 +21,7 @@ from nrlf.core.firehose.model import (
     FirehoseResult,
     FirehoseSubmissionRecord,
 )
-from nrlf.core.firehose.utils import dump_json_gzip, encode_log_events
+from nrlf.core.firehose.utils import dump_json_gzip, encode_log_events_as_ndjson
 from nrlf.core.firehose.validate import (
     MAX_PACKET_SIZE_BYTES,
     LogValidationError,
@@ -282,7 +282,7 @@ def test__validate_cloudwatch_logs_record_without_invalid_records(
     assert outcome_record == FirehoseOutputRecord(
         record_id=cloudwatch_data.record_id,
         result=FirehoseResult.OK,
-        data=encode_log_events(log_events=cloudwatch_data.log_events),
+        data=encode_log_events_as_ndjson(log_events=cloudwatch_data.log_events),
     )
 
 

@@ -6,7 +6,7 @@ from nrlf.core.firehose.model import (
     FirehoseResult,
     FirehoseSubmissionRecord,
 )
-from nrlf.core.firehose.utils import encode_log_events
+from nrlf.core.firehose.utils import encode_log_events_as_ndjson
 from pydantic import ValidationError
 
 MAX_PACKET_SIZE_BYTES = (
@@ -82,7 +82,7 @@ def _determine_outcome_given_record_size(
     output_record = FirehoseOutputRecord(
         record_id=cloudwatch_data.record_id,
         result=FirehoseResult.OK,
-        data=encode_log_events(log_events=cloudwatch_data.log_events),
+        data=encode_log_events_as_ndjson(log_events=cloudwatch_data.log_events),
     )
 
     try:

@@ -3,21 +3,19 @@ import gzip
 import json
 from typing import Iterator
 
+NEWLINE = "\n"
+
 
 def load_json_gzip(data: bytes) -> dict:
     return json.loads(gzip.decompress(data))
 
 
-def _encoded_json_dumps(obj) -> bytes:
-    return json.dumps(obj).encode()
-
-
 def dump_json_gzip(obj) -> bytes:
-    return gzip.compress(_encoded_json_dumps(obj))
+    return gzip.compress(json.dumps(obj).encode())
 
 
-def encode_log_events(log_events: list[dict]) -> str:
-    return base64.b64encode(_encoded_json_dumps(log_events)).decode()
+def encode_log_events_as_ndjson(log_events: list[dict]) -> str:
+    return base64.b64encode(NEWLINE.join(map(json.dumps, log_events)).encode()).decode()
 
 
 def name_from_arn(arn: str) -> str:

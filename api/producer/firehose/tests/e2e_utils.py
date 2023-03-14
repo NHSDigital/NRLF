@@ -1,8 +1,10 @@
+import base64
 import gzip
 import json
 import time
 from datetime import datetime
 from functools import cache
+from itertools import chain
 from typing import Iterator
 
 from lambda_utils.logging import LogTemplate
@@ -75,33 +77,39 @@ def submit_cloudwatch_data_to_firehose(
     return datetime.utcnow()
 
 
+def _parse_error_event(error_event: dict):
+    cloudwatch_event = json.loads(
+        gzip.decompress(base64.b64decode(error_event["rawData"]))
+    )
+    yield from cloudwatch_event["logEvents"]
+
+
 @cache
-def _parse_file(s3_client, bucket_name, object_key) -> list[dict]:
-    response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
-    print("Retrieving data from ", bucket_name, object_key)
+def _fetch_logs_from_s3(s3_client, bucket_name, file_key) -> list[dict]:
+    response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
+    print("Retrieving data from ", bucket_name, file_key)
     with gzip.open(response["Body"], "rt") as gf:
         data = gf.read()
-        try:
-            result = json.loads(data)
-        except json.JSONDecodeError:
-            result = list(map(json.loads, filter(bool, data.split("\n"))))
+
+    file_lines = filter(bool, data.split("\n"))  # Newline delimited json
+    parsed_lines = map(json.loads, file_lines)
+    if file_key.startswith("error"):
+        _grouped_log_events = map(_parse_error_event, parsed_lines)
+        parsed_lines = chain.from_iterable(_grouped_log_events)  # Flatten list of lists
+
+    result = list(parsed_lines)
     print("Got", result)
     return result
 
 
-def _trawl_s3_for_matching_file(
+def _trawl_s3_for_matching_files(
     s3_client, bucket_name: str, prefix: str, start_time: datetime
-) -> Iterator[tuple[str, list[dict]]]:
+) -> Iterator[list[dict]]:
     response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
     for file_metadata in response.get("Contents", []):
         if file_metadata["LastModified"] < start_time.astimezone():
             continue
-        file_data = _parse_file(
-            s3_client=s3_client,
-            bucket_name=bucket_name,
-            object_key=file_metadata["Key"],
-        )
-        yield (prefix, file_data)
+        yield file_metadata["Key"]
 
 
 def retrieve_firehose_output(
@@ -113,12 +121,19 @@ def retrieve_firehose_output(
     while (datetime.utcnow() - start_time).total_seconds() < MAX_RUNTIME:
         time.sleep(SLEEP_SECONDS)
         for prefix in possible_prefixes:
-            yield from _trawl_s3_for_matching_file(
+            for file_key in _trawl_s3_for_matching_files(
                 s3_client=s3_client,
                 bucket_name=bucket_name,
                 prefix=prefix,
                 start_time=start_time,
-            )
+            ):
+                logs_from_s3 = _fetch_logs_from_s3(
+                    s3_client=s3_client,
+                    bucket_name=bucket_name,
+                    file_key=file_key,
+                )
+                yield logs_from_s3
+
     # If no break by now then assume the search has failed
     raise RuntimeError(
         "\n".join(
@@ -132,3 +147,7 @@ def retrieve_firehose_output(
             )
         )
     )
+
+
+def all_logs_are_on_s3(original_logs: list[dict], logs_from_s3: list[dict]):
+    return all(log in logs_from_s3 for log in original_logs)
