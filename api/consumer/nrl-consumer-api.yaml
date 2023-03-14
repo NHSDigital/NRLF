@@ -6,36 +6,55 @@ info:
   title: National Record Locator Consumer - FHIR API
   description: |
     ## Overview
-    The National Record Locator (NRL) is a service that holds pointers to data held in local provider systems.
 
-    The service facilitates national sharing, removing the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
+    The National Record Locator (NRL) enables organisations to share Patient data nationwide.  It acts as an Index, or Directory, of patient data.  Rather than handling the data itself it shares pointers held in partner systems, using the FHIR R4 DocumentReference standard.
+
+    Users of the service fall into the categories of:
+
+    * Producers - capable of creating and managing pointers
+    * Consumers - capable of searching and reading pointers
+
+    The service removes the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
 
     It can be used to store and publish pointers to patient data held in health systems across England and to look up where relevant patient data is held.
 
-    As a "consumer" of pointers relating to citizens, you can:
-
-    -Search a pointer, where you are authorised to do so, for a given patient
-    -Read a pointer, where you are authorised to do so, for a given patient
-
-    This service is a new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
-
     There is a growing list of health and social care organisations authorised to share records using NRL.
 
+    ### As a Consumer
+
+    * Search for pointers, restricted to a single Patient at a time
+    * Read a specific pointer
+    * Operations are restricted to document types agreed during the on-boarding process
+
+    ### What has changed?
+
+    This service is a replacement for the existing [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
+
+    * Upgraded from FHIR STU3 to R4.
+    * Improved performance and scalability.
+    * Improved on-boarding experience.
+    * Authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS
+    * Greater flexibility, by wider support of the FHIR R4 DocumentReference resource.
+
     ### Data availability, timing and quality
+
     Pointers are available to be consumed almost immediately after they have been produced by the provider.
 
     ## Who can use this API
+
     This API:
-    - is only for use by patient-facing applications
-    - is only for non-clinical use
-    - can only be used where there is a legal basis to do so
+
+    * is only for use by patient-facing applications
+    * is only for non-clinical use
+    * can only be used where there is a legal basis to do so
 
     You can not currently use this API to retrieve pointers for:
-    - mental health crisis plans
-    - end of life plans
-    - emergency care plans (eRedbags)
-    - national early warning scores (NEWS)
-    - urgent care plan
+
+    * mental health crisis plans
+    * end of life plans
+    * emergency care plans (eRedbags)
+    * national early warning scores (NEWS)
+    * urgent care plan
 
     Make sure you have a valid use case before you go too far with your development.
     To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
@@ -43,6 +62,7 @@ info:
     You must do this before you can go live (see ‘Onboarding’ below).
 
     ## API status and roadmap
+
     This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses).
 
     To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=national-record-locator-api).
@@ -56,6 +76,7 @@ info:
     For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
 
     ## Technology
+
     This API is [RESTful](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#basic-rest).
 
     It conforms to the [FHIR](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#fhir) global standard for health care data exchange, specifically to [FHIR R4 (v4.0.1)](https://hl7.org/fhir/r4/), except that it does not support the [capabilities](http://hl7.org/fhir/R4/http.html#capabilities) interaction.
@@ -63,10 +84,12 @@ info:
     It includes some country-specific FHIR extensions, which conform to [FHIR UK Core](https://digital.nhs.uk/services/fhir-uk-core), specifically [fhir.r4.ukcore.stu1 0.5.1](https://simplifier.net/packages/fhir.r4.ukcore.stu1/0.5.1).
 
     You do not need to know much about FHIR to use this API - FHIR APIs are just RESTful APIs that follow specific rules.
+
     In particular:
-    - resource names are capitalised and singular, and use US spellings, for example `/Immunization` not `/immunisations`
-    - array names are singular, for example `entry` not `entries` for address lines
-    - data items that are country-specific and thus not included in the FHIR global base resources are usually wrapped in an `extension` object
+
+    * resource names are capitalised and singular, and use US spellings, for example `/Immunization` not `/immunisations`
+    * array names are singular, for example `entry` not `entries` for address lines
+    * data items that are country-specific and thus not included in the FHIR global base resources are usually wrapped in an `extension` object
 
     There are [libraries and SDKs available](https://digital.nhs.uk/developer/guides-and-documentation/api-technologies-at-nhs-digital#fhir-libraries-and-sdks) to help with FHIR API integration.
 
@@ -78,16 +101,11 @@ info:
     ## Security and authorisation
 
     This API uses the following access modes:
-    * application-restricted access
 
-    ### Application-restricted access
-
-    This access mode is [application-restricted](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation#application-restricted-apis), meaning we authenticate the calling application but not the end user.
-
-    To use this access mode, use the following security pattern:
     * [Application-restricted RESTful API - signed JWT authentication](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication)
 
     ## Environments and testing
+
     | Environment       | Base URL                                                               |
     | ----------------- | ---------------------------------------------------------------------- |
     | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`     |
@@ -95,6 +113,7 @@ info:
     | Production        | `https://api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`             |
 
     ### Sandbox testing
+
     Our [sandbox environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#sandbox-testing):
     * is for early developer testing
     * only covers a limited set of scenarios
@@ -107,7 +126,9 @@ info:
     [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/TBC)
 
     ### Integration testing
+
     Our [integration test environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing):
+
     * is for formal integration testing
     * includes authorisation
 
@@ -116,6 +137,7 @@ info:
     For more details see [integration testing with our RESTful APIs](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing-with-our-restful-apis).
 
     ## Onboarding
+
     You need to get your software approved by us before it can go live with this API. We call this onboarding. The onboarding process can sometimes be quite long, so it’s worth planning well ahead.
 
     This API uses our online digital onboarding process.
@@ -139,13 +161,9 @@ servers:
     description: Integration test environment.
   - url: https://api.service.nhs.uk/nrl-consumer-api/FHIR/R4
     description: Production environment.
-tags:
-  - name: NRLF Consumer
 paths:
   /DocumentReference:
     get:
-      tags:
-        - NRLF Consumer
       summary: Search (GET)
       operationId: searchDocumentReference
       parameters:
@@ -260,11 +278,9 @@ paths:
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
       description: |
-        Perform a Search using GET query string parameters
+        Search a single Patient's records.
   /DocumentReference/_search:
     post:
-      tags:
-        - NRLF Consumer
       summary: Search (POST)
       operationId: searchPostDocumentReference
       parameters:
@@ -376,11 +392,14 @@ paths:
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
       description: |
-        Same as above but a POST to avoid URL length limits
+        Search a single Patient's records, but implemented as a POST operation
+        because of limitations associated with GET:
+
+        * query string parameters are visible on the network and in logs, and may have privacy implications for consumers.
+        * GET operations can be cached by intermediary network infrastructure, such as CDNs, routers and proxies.
+        * URLs have a maximum length of 2,048 characters which complex searches can exceed.  NRL does not currently exceed this limit, but may evolve in the future.
   /DocumentReference/{id}:
     get:
-      tags:
-        - NRLF Consumer
       summary: Read
       operationId: readDocumentReference
       parameters:
@@ -467,7 +486,7 @@ paths:
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
       description: |
-        Read a single DocumentReference record
+        Read a single DocumentReference record using the `DocumentReference.id`
 components:
   requestBodies:
     DocumentReference:
@@ -633,7 +652,7 @@ components:
             - VisionPrescription
         id:
           type: string
-          pattern: '[A-Za-z0-9\-\.]{1,64}'
+          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
           description: The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.
         meta:
           $ref: "#/components/schemas/Meta"
@@ -644,7 +663,7 @@ components:
           description: A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.
         language:
           type: string
-          pattern: '[^\s]+(\s[^\s]+)*'
+          pattern: "[^\\s]+(\\s[^\\s]+)*"
           description: The base language in which the resource is written.
       required:
         - resourceType
@@ -689,11 +708,11 @@ components:
                 description: Other identifiers associated with the document, including version independent identifiers.
             status:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: The status of this document reference.
             docStatus:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: The status of the underlying document.
             type:
               $ref: "#/components/schemas/CodeableConcept"
@@ -728,7 +747,7 @@ components:
                 description: Relationships that this document has with other document references that already exist.
             description:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: Human&ndash;readable description of the source document.
             securityLabel:
               type: array
@@ -1039,7 +1058,7 @@ components:
               description: A persistent identifier for the bundle that won't change as a bundle is copied from server to server.
             type:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: Indicates the purpose of this bundle &ndash; how it is intended to be used.
             timestamp:
               type: string
@@ -1265,7 +1284,7 @@ components:
           properties:
             status:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.
             location:
               type: string
@@ -1273,7 +1292,7 @@ components:
               description: The location header created by processing this operation, populated if the operation returns a location.
             etag:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: The Etag for the resource, if the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
             lastModified:
               type: string
@@ -1291,7 +1310,7 @@ components:
           properties:
             method:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: In a transaction or batch, this is the HTTP action to be executed for this entry. In a history bundle, this indicates the HTTP action that occurred.
             url:
               type: string
@@ -1299,7 +1318,7 @@ components:
               description: The URL for this entry, relative to the root (the address to which the request is posted).
             ifNoneMatch:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: If the ETag values match, return a 304 Not Modified status. See the API documentation for ["Conditional Read"](http.html#cread).
             ifModifiedSince:
               type: string
@@ -1307,11 +1326,11 @@ components:
               description: Only perform the operation if the last updated date matches. See the API documentation for ["Conditional Read"](http.html#cread).
             ifMatch:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: Only perform the operation if the Etag value matches. For more information, see the API section ["Managing Resource Contention"](http.html#concurrency).
             ifNoneExist:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: Instruct the server not to perform the create if a specified resource already exists. For further information, see the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL &ndash; what follows the "?" (not including the "?").
           required:
             - method
@@ -1323,7 +1342,7 @@ components:
           properties:
             mode:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: Why this entry is in the result set &ndash; whether it's included as a match or because of an _include requirement, or to convey information or warning information about the search process.
             score:
               type: number
@@ -1335,7 +1354,7 @@ components:
           properties:
             relation:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: A name which details the functional use for this link &ndash; see [http://www.iana.org/assignments/link&ndash;relations/link&ndash;relations.xhtml#link&ndash;relations&ndash;1](http://www.iana.org/assignments/link&ndash;relations/link&ndash;relations.xhtml#link&ndash;relations&ndash;1).
             url:
               type: string
@@ -1396,7 +1415,7 @@ components:
           properties:
             code:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: The type of relationship that this document has with anther document.
             target:
               $ref: "#/components/schemas/Reference"
@@ -1411,30 +1430,30 @@ components:
           properties:
             severity:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: Indicates whether the issue indicates a variation from successful processing.
             code:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.
             details:
               $ref: "#/components/schemas/CodeableConcept"
               description: Additional details about the error. This may be a text description of the error or a system code that identifies the error.
             diagnostics:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: Additional diagnostic information about the issue.
             location:
               type: array
               items:
                 type: string
-                pattern: '[ \r\n\t\S]+'
+                pattern: "[ \\r\\n\\t\\S]+"
                 description: "This element is deprecated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. \n\nFor resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name."
             expression:
               type: array
               items:
                 type: string
-                pattern: '[ \r\n\t\S]+'
+                pattern: "[ \\r\\n\\t\\S]+"
                 description: A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.
           required:
             - severity
@@ -1444,7 +1463,7 @@ components:
       properties:
         id:
           type: string
-          pattern: '[A-Za-z0-9\-\.]{1,64}'
+          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         extension:
           type: array
@@ -1474,41 +1493,41 @@ components:
           properties:
             use:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: The purpose of this address.
             type:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care&ndash;of addresses). Most addresses are both.
             text:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: Specifies the entire address as it should be displayed e.g. on a postal label. This may be provided instead of or as well as the specific parts.
             line:
               type: array
               items:
                 type: string
-                pattern: '[ \r\n\t\S]+'
+                pattern: "[ \\r\\n\\t\\S]+"
                 description: This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.
             city:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: The name of the city, town, suburb, village or other community or delivery center.
             district:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: The name of the administrative area (county).
             state:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: Sub&ndash;unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (e.g. US 2 letter state codes).
             postalCode:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: A postal code designating a region defined by the postal service.
             country:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: Country &ndash; a nation as commonly understood or generally accepted.
             period:
               $ref: "#/components/schemas/Period"
@@ -1528,7 +1547,7 @@ components:
               description: The individual responsible for making the annotation.
             authorString:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: The individual responsible for making the annotation.
             time:
               type: string
@@ -1536,7 +1555,7 @@ components:
               description: Indicates when this particular annotation was made.
             text:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: The text of the annotation in markdown format.
           required:
             - text
@@ -1547,11 +1566,11 @@ components:
           properties:
             contentType:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate.
             language:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: The human language of the content. The value can be any valid value according to BCP 47.
             data:
               type: string
@@ -1571,7 +1590,7 @@ components:
               description: The calculated hash of the data using SHA&ndash;1. Represented using base64.
             title:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: A label or set of text to display in place of the data.
             creation:
               type: string
@@ -1589,7 +1608,7 @@ components:
                 description: A reference to a code defined by a terminology system.
             text:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.
     Coding:
       allOf:
@@ -1602,15 +1621,15 @@ components:
               description: The identification of the code system that defines the meaning of the symbol in the code.
             version:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: The version of the code system which was used when choosing this code. Note that a well&ndash;maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.
             code:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post&ndash;coordination).
             display:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: A representation of the meaning of the code in the system, following the rules of the system.
             userSelected:
               type: boolean
@@ -1622,15 +1641,15 @@ components:
           properties:
             system:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: Telecommunications form for contact point &ndash; what communications system is required to make use of the contact.
             value:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).
             use:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: Identifies the purpose for the contact point.
             rank:
               type: integer
@@ -1661,33 +1680,33 @@ components:
           properties:
             use:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: Identifies the purpose for this name.
             text:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: Specifies the entire name as it should be displayed e.g. on an application UI. This may be provided instead of or as well as the specific parts.
             family:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.
             given:
               type: array
               items:
                 type: string
-                pattern: '[ \r\n\t\S]+'
+                pattern: "[ \\r\\n\\t\\S]+"
                 description: Given name.
             prefix:
               type: array
               items:
                 type: string
-                pattern: '[ \r\n\t\S]+'
+                pattern: "[ \\r\\n\\t\\S]+"
                 description: Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name.
             suffix:
               type: array
               items:
                 type: string
-                pattern: '[ \r\n\t\S]+'
+                pattern: "[ \\r\\n\\t\\S]+"
                 description: Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name.
             period:
               $ref: "#/components/schemas/Period"
@@ -1699,7 +1718,7 @@ components:
           properties:
             use:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: The purpose of this identifier.
             type:
               $ref: "#/components/schemas/CodeableConcept"
@@ -1710,7 +1729,7 @@ components:
               description: Establishes the namespace for the value &ndash; that is, a URL that describes a set values that are unique.
             value:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: The portion of the identifier typically relevant to the user and which is unique within the context of the system.
             period:
               $ref: "#/components/schemas/Period"
@@ -1732,7 +1751,7 @@ components:
               description: Numerical value (with implicit precision).
             currency:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: ISO 4217 Currency Code.
     MoneyQuantity:
       allOf:
@@ -1762,11 +1781,11 @@ components:
               description: The value of the measured amount. The value includes an implicit precision in the presentation of the value.
             comparator:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: How the value should be understood and represented &ndash; whether the actual value is greater or less than the stated value due to measurement issues; e.g. if the comparator is "<" , then the real value is < stated value.
             unit:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: A human&ndash;readable form of the unit.
             system:
               type: string
@@ -1774,7 +1793,7 @@ components:
               description: The identification of the system that provides the coded form of the unit.
             code:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: A computer processable form of the unit in some unit representation system.
     Range:
       allOf:
@@ -1805,7 +1824,7 @@ components:
           properties:
             reference:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.
             type:
               type: string
@@ -1819,7 +1838,7 @@ components:
               description: An identifier for the target resource. This is used when there is no way to reference the other resource directly, either because the entity it represents is not available through a FHIR server, or because there is no way for the author of the resource to convert a known identifier to an actual location. There is no requirement that a Reference.identifier point to something that is actually exposed as a FHIR instance, but it SHALL point to a business concept that would be expected to be exposed as a FHIR instance, and that instance would need to be of a FHIR resource type allowed by the reference.
             display:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: Plain text narrative that identifies the resource in addition to the resource reference.
     SampledData:
       allOf:
@@ -1847,7 +1866,7 @@ components:
               description: The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced &ndash; all the sample points for a point in time will be recorded at once.
             data:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: A series of data points which are decimal values separated by a single space (character u20). The special values "E" (error), "L" (below detection limit) and "U" (above detection limit) can also be used in place of a decimal value.
           required:
             - origin
@@ -1881,11 +1900,11 @@ components:
               description: A reference to an application&ndash;usable description of the identity that is represented by the signature.
             targetFormat:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: A mime type that indicates the technical format of the target resources signed by the signature.
             sigFormat:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jose for JWS, and image/* for a graphical image of a signature, etc.
             data:
               type: string
@@ -1942,7 +1961,7 @@ components:
               description: If present, indicates that the duration is a range &ndash; so to perform the action between [duration] and [durationMax] time length.
             durationUnit:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: The units of time for the duration, in UCUM units.
             frequency:
               type: integer
@@ -1960,13 +1979,13 @@ components:
               description: If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as "do this once every 3&ndash;5 days.
             periodUnit:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: The units of time for the period in UCUM units.
             dayOfWeek:
               type: array
               items:
                 type: string
-                pattern: '[^\s]+(\s[^\s]+)*'
+                pattern: "[^\\s]+(\\s[^\\s]+)*"
                 description: If one or more days of week is provided, then the action happens only on the specified day(s).
             timeOfDay:
               type: array
@@ -1978,7 +1997,7 @@ components:
               type: array
               items:
                 type: string
-                pattern: '[^\s]+(\s[^\s]+)*'
+                pattern: "[^\\s]+(\\s[^\\s]+)*"
                 description: An approximate time period during the day, potentially linked to an event of daily living that indicates when the action should occur.
             offset:
               type: integer
@@ -1991,7 +2010,7 @@ components:
           properties:
             name:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: The name of an individual to contact.
             telecom:
               type: array
@@ -2005,19 +2024,19 @@ components:
           properties:
             type:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: The type of relationship to the related artifact.
             label:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: A short label that can be used to reference the citation from elsewhere in the containing artifact, such as a footnote index.
             display:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: A brief description of the document or knowledge resource being referenced, suitable for display to a consumer.
             citation:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.
             url:
               type: string
@@ -2061,7 +2080,7 @@ components:
           properties:
             versionId:
               type: string
-              pattern: '[A-Za-z0-9\-\.]{1,64}'
+              pattern: "[A-Za-z0-9\\-\\.]{1,64}"
               description: The version specific identifier, as it appears in the version portion of the URL. This value changes when the resource is created, updated, or deleted.
             lastUpdated:
               type: string
@@ -2094,7 +2113,7 @@ components:
           properties:
             status:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: The status of the narrative &ndash; whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data.
             div:
               type: string
@@ -2124,7 +2143,7 @@ components:
               description: Value of extension &ndash; must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).
             valueCode:
               type: string
-              pattern: '[^\s]+(\s[^\s]+)*'
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
               description: Value of extension &ndash; must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).
             valueDate:
               type: string
@@ -2139,7 +2158,7 @@ components:
               description: Value of extension &ndash; must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).
             valueId:
               type: string
-              pattern: '[A-Za-z0-9\-\.]{1,64}'
+              pattern: "[A-Za-z0-9\\-\\.]{1,64}"
               description: Value of extension &ndash; must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).
             valueInstant:
               type: string
@@ -2151,7 +2170,7 @@ components:
               description: Value of extension &ndash; must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).
             valueMarkdown:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: Value of extension &ndash; must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).
             valueOid:
               type: string
@@ -2163,7 +2182,7 @@ components:
               description: Value of extension &ndash; must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).
             valueString:
               type: string
-              pattern: '[ \r\n\t\S]+'
+              pattern: "[ \\r\\n\\t\\S]+"
               description: Value of extension &ndash; must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).
             valueTime:
               type: string
