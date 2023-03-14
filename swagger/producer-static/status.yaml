@@ -1,8 +1,6 @@
 paths:
   /_status:
     get:
-      tags:
-        - NRLF Producer
       summary: _status endpoint for APIGEE integration
       operationId: status
       responses:

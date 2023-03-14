@@ -10,36 +10,55 @@ info:
     email: api.management@nhs.net
   description: |
     ## Overview
-    The National Record Locator (NRL) is a service that holds pointers to data held in local provider systems.
 
-    The service facilitates national sharing, removing the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
+    The National Record Locator (NRL) enables organisations to share Patient data nationwide.  It acts as an Index, or Directory, of patient data.  Rather than handling the data itself it shares pointers held in partner systems, using the FHIR R4 DocumentReference standard.
+
+    Users of the service fall into the categories of:
+
+    * Producers - capable of creating and managing pointers
+    * Consumers - capable of searching and reading pointers
+
+    The service removes the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
 
     It can be used to store and publish pointers to patient data held in health systems across England and to look up where relevant patient data is held.
 
-    As a "consumer" of pointers relating to citizens, you can:
-
-    -Search a pointer, where you are authorised to do so, for a given patient
-    -Read a pointer, where you are authorised to do so, for a given patient
-
-    This service is a new version of the NRL moving to R4 from STU3, more information on the existing STU3 NRL service can be found on the following page, [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
-
     There is a growing list of health and social care organisations authorised to share records using NRL.
 
+    ### As a Consumer
+
+    * Search for pointers, restricted to a single Patient at a time
+    * Read a specific pointer
+    * Operations are restricted to document types agreed during the on-boarding process
+
+    ### What has changed?
+
+    This service is a replacement for the existing [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
+
+    * Upgraded from FHIR STU3 to R4.
+    * Improved performance and scalability.
+    * Improved on-boarding experience.
+    * Authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS
+    * Greater flexibility, by wider support of the FHIR R4 DocumentReference resource.
+
     ### Data availability, timing and quality
+
     Pointers are available to be consumed almost immediately after they have been produced by the provider.
 
     ## Who can use this API
+
     This API:
-    - is only for use by patient-facing applications
-    - is only for non-clinical use
-    - can only be used where there is a legal basis to do so
+
+    * is only for use by patient-facing applications
+    * is only for non-clinical use
+    * can only be used where there is a legal basis to do so
 
     You can not currently use this API to retrieve pointers for:
-    - mental health crisis plans
-    - end of life plans
-    - emergency care plans (eRedbags)
-    - national early warning scores (NEWS)
-    - urgent care plan
+
+    * mental health crisis plans
+    * end of life plans
+    * emergency care plans (eRedbags)
+    * national early warning scores (NEWS)
+    * urgent care plan
 
     Make sure you have a valid use case before you go too far with your development.
     To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
@@ -47,6 +66,7 @@ info:
     You must do this before you can go live (see ‘Onboarding’ below).
 
     ## API status and roadmap
+
     This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses).
 
     To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=national-record-locator-api).
@@ -60,6 +80,7 @@ info:
     For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
 
     ## Technology
+
     This API is [RESTful](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#basic-rest).
 
     It conforms to the [FHIR](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#fhir) global standard for health care data exchange, specifically to [FHIR R4 (v4.0.1)](https://hl7.org/fhir/r4/), except that it does not support the [capabilities](http://hl7.org/fhir/R4/http.html#capabilities) interaction.
@@ -67,10 +88,12 @@ info:
     It includes some country-specific FHIR extensions, which conform to [FHIR UK Core](https://digital.nhs.uk/services/fhir-uk-core), specifically [fhir.r4.ukcore.stu1 0.5.1](https://simplifier.net/packages/fhir.r4.ukcore.stu1/0.5.1).
 
     You do not need to know much about FHIR to use this API - FHIR APIs are just RESTful APIs that follow specific rules.
+
     In particular:
-    - resource names are capitalised and singular, and use US spellings, for example `/Immunization` not `/immunisations`
-    - array names are singular, for example `entry` not `entries` for address lines
-    - data items that are country-specific and thus not included in the FHIR global base resources are usually wrapped in an `extension` object
+
+    * resource names are capitalised and singular, and use US spellings, for example `/Immunization` not `/immunisations`
+    * array names are singular, for example `entry` not `entries` for address lines
+    * data items that are country-specific and thus not included in the FHIR global base resources are usually wrapped in an `extension` object
 
     There are [libraries and SDKs available](https://digital.nhs.uk/developer/guides-and-documentation/api-technologies-at-nhs-digital#fhir-libraries-and-sdks) to help with FHIR API integration.
 
@@ -82,16 +105,11 @@ info:
     ## Security and authorisation
 
     This API uses the following access modes:
-    * application-restricted access
 
-    ### Application-restricted access
-
-    This access mode is [application-restricted](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation#application-restricted-apis), meaning we authenticate the calling application but not the end user.
-
-    To use this access mode, use the following security pattern:
     * [Application-restricted RESTful API - signed JWT authentication](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication)
 
     ## Environments and testing
+
     | Environment       | Base URL                                                               |
     | ----------------- | ---------------------------------------------------------------------- |
     | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`     |
@@ -99,6 +117,7 @@ info:
     | Production        | `https://api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`             |
 
     ### Sandbox testing
+
     Our [sandbox environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#sandbox-testing):
     * is for early developer testing
     * only covers a limited set of scenarios
@@ -111,7 +130,9 @@ info:
     [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/TBC)
 
     ### Integration testing
+
     Our [integration test environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing):
+
     * is for formal integration testing
     * includes authorisation
 
@@ -120,6 +141,7 @@ info:
     For more details see [integration testing with our RESTful APIs](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing-with-our-restful-apis).
 
     ## Onboarding
+
     You need to get your software approved by us before it can go live with this API. We call this onboarding. The onboarding process can sometimes be quite long, so it’s worth planning well ahead.
 
     This API uses our online digital onboarding process.
@@ -134,7 +156,7 @@ paths:
     get:
       summary: Search (GET)
       description: |
-        Perform a Search using GET query string parameters
+        Search a single Patient's records.
       responses:
         "200":
           description: Search successful response
@@ -236,7 +258,13 @@ paths:
     post:
       summary: Search (POST)
       description: |
-        Same as above but a POST to avoid URL length limits
+        Search a single Patient's records, but implemented as a POST operation
+        because of limitations associated with GET:
+
+        * query string parameters are visible on the network and in logs, and may have privacy implications for consumers.
+        * GET operations can be cached by intermediary network infrastructure, such as CDNs, routers and proxies.
+        * URLs have a maximum length of 2,048 characters which complex searches can exceed.  NRL does not currently exceed this limit, but may evolve in the future.
+
       responses:
         "200":
           description: Search successful response
@@ -334,7 +362,7 @@ paths:
     get:
       summary: Read
       description: |
-        Read a single DocumentReference record
+        Read a single DocumentReference record using the `DocumentReference.id`
       responses:
         "200":
           description: Search successful response

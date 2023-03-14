@@ -134,3 +134,20 @@ module "developer_role_read_tf_log" {
     }
   ]
 }
+
+module "developer_role_read_truststore" {
+  source    = "../modules/role-policy"
+  name      = "${local.prefix}--developer-read-truststore"
+  role_name = aws_iam_role.developer_role.name
+  iam_permissions = [
+    {
+      Action = [
+        "s3:GetObject"
+      ]
+      Effect = "Allow"
+      Resource = [
+        "${data.aws_s3_bucket.truststore.arn}/*"
+      ]
+    }
+  ]
+}
