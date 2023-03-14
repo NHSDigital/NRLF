@@ -13,12 +13,10 @@ servers:
   - url: https://api.service.nhs.uk/nrl-producer-api/FHIR/R4
     description: Production environment.
 tags:
-  - name: NRLF Producer
 paths:
   /DocumentReference:
     get:
       tags:
-        - NRLF Producer
       summary: Search for DocumentReference resources
       operationId: searchDocumentReference
       parameters:
@@ -54,7 +52,6 @@ paths:
         contentHandling: CONVERT_TO_TEXT
     post:
       tags:
-        - NRLF Producer
       summary: Create a DocumentReference resource
       operationId: createDocumentReference
       parameters:
@@ -80,7 +77,6 @@ paths:
   /DocumentReference/{id}:
     get:
       tags:
-        - NRLF Producer
       summary: Read a DocumentReference resource
       operationId: readDocumentReference
       parameters:
@@ -113,7 +109,6 @@ paths:
         contentHandling: CONVERT_TO_TEXT
     put:
       tags:
-        - NRLF Producer
       summary: Update an existing DocumentReference resource
       operationId: updateDocumentReference
       parameters:
@@ -141,7 +136,6 @@ paths:
         contentHandling: CONVERT_TO_TEXT
     delete:
       tags:
-        - NRLF Producer
       summary: Delete a DocumentReference resource
       operationId: deleteDocumentReference
       parameters:
@@ -168,7 +162,6 @@ paths:
   /DocumentReference/_search:
     post:
       tags:
-        - NRLF Producer
       summary: Search for DocumentReference resources
       operationId: searchPostDocumentReference
       parameters:
