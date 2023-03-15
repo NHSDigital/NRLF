@@ -1,4 +1,5 @@
 import os
+from http import HTTPStatus
 
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.pipeline import execute_steps, render_response
@@ -19,6 +20,11 @@ def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
         context = LambdaContext()
 
     status_code, result = execute_steps(
-        index_path=__file__, event=event, context=context, config=config, **dependencies
+        index_path=__file__,
+        event=event,
+        httpStatusOk=HTTPStatus.CREATED,
+        context=context,
+        config=config,
+        **dependencies
     )
     return render_response(status_code, result)

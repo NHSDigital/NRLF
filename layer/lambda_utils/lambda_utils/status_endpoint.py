@@ -13,6 +13,7 @@ from lambda_utils.logging import log_action, prepare_default_event_for_logging
 from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _function_handler, _setup_logger
 from pydantic import BaseModel, ValidationError
+
 from nrlf.core.constants import NHS_NUMBER_INDEX
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
@@ -100,6 +101,7 @@ def execute_steps(
     index_path: str,
     event: dict,
     context: LambdaContext,
+    httpStatus: HTTPStatus = HTTPStatus.OK,
     initial_pipeline_data={},
     **dependencies,
 ) -> tuple[HTTPStatus, dict]:
@@ -112,6 +114,7 @@ def execute_steps(
 
     status_code, response = _function_handler(
         _setup_logger,
+        httpStatus,
         transaction_id=transaction_id,
         args=(index_path, transaction_id, event),
         kwargs=dependencies,
@@ -123,6 +126,7 @@ def execute_steps(
     steps = _get_steps()
     status_code, response = _function_handler(
         _execute_steps,
+        httpStatus,
         transaction_id=transaction_id,
         args=(steps, event, context),
         kwargs={
