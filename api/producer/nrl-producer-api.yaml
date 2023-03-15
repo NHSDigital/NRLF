@@ -1900,6 +1900,7 @@ components:
               description: The actual data of the attachment &ndash; a sequence of bytes, base64 encoded.
             url:
               type: string
+              minLength: 1
               pattern: \S*
               description: A location where the data can be accessed.
             size:
@@ -2047,10 +2048,12 @@ components:
               description: A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.
             system:
               type: string
+              minLength: 1
               pattern: \S*
               description: Establishes the namespace for the value &ndash; that is, a URL that describes a set values that are unique.
             value:
               type: string
+              minLength: 1
               pattern: "[ \\r\\n\\t\\S]+"
               description: The portion of the identifier typically relevant to the user and which is unique within the context of the system.
             period:
@@ -2146,10 +2149,12 @@ components:
           properties:
             reference:
               type: string
+              minLength: 1
               pattern: "[ \\r\\n\\t\\S]+"
               description: A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.
             type:
               type: string
+              minLength: 1
               pattern: \S*
               description: |-
                 The expected type of the target of the reference. If both Reference.type and Reference.reference are populated and Reference.reference is a FHIR URL, both SHALL be consistent.

@@ -82,3 +82,149 @@ components:
           required:
             - status
             - content
+    Reference:
+      allOf:
+        - $ref: "#/components/schemas/Element"
+        - type: object
+          properties:
+            reference:
+              type: string
+              minLength: 1
+              pattern: "[ \\r\\n\\t\\S]+"
+              description: A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.
+            type:
+              type: string
+              minLength: 1
+              pattern: \S*
+              description: |-
+                The expected type of the target of the reference. If both Reference.type and Reference.reference are populated and Reference.reference is a FHIR URL, both SHALL be consistent.
+
+                The type is the Canonical URL of Resource Definition that is the type this reference refers to. References are URLs that are relative to http://hl7.org/fhir/StructureDefinition/ e.g. "Patient" is a reference to http://hl7.org/fhir/StructureDefinition/Patient. Absolute URLs are only allowed for logical models (and can only be used in references in logical models, not resources).
+            identifier:
+              $ref: "#/components/schemas/Identifier"
+              description: An identifier for the target resource. This is used when there is no way to reference the other resource directly, either because the entity it represents is not available through a FHIR server, or because there is no way for the author of the resource to convert a known identifier to an actual location. There is no requirement that a Reference.identifier point to something that is actually exposed as a FHIR instance, but it SHALL point to a business concept that would be expected to be exposed as a FHIR instance, and that instance would need to be of a FHIR resource type allowed by the reference.
+            display:
+              type: string
+              pattern: "[ \\r\\n\\t\\S]+"
+              description: Plain text narrative that identifies the resource in addition to the resource reference.
+    Identifier:
+      allOf:
+        - $ref: "#/components/schemas/Element"
+        - type: object
+          properties:
+            use:
+              type: string
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
+              description: The purpose of this identifier.
+            type:
+              $ref: "#/components/schemas/CodeableConcept"
+              description: A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.
+            system:
+              type: string
+              minLength: 1
+              pattern: \S*
+              description: Establishes the namespace for the value &ndash; that is, a URL that describes a set values that are unique.
+            value:
+              type: string
+              minLength: 1
+              pattern: "[ \\r\\n\\t\\S]+"
+              description: The portion of the identifier typically relevant to the user and which is unique within the context of the system.
+            period:
+              $ref: "#/components/schemas/Period"
+              description: Time period during which identifier is/was valid for use.
+            assigner:
+              $ref: "#/components/schemas/Reference"
+              description: Organization that issued/manages the identifier.
+              example:
+                reference: Organization/123
+                type: Organization
+                display: The Assigning Organization
+    CodeableConcept:
+      allOf:
+        - $ref: "#/components/schemas/Element"
+        - type: object
+          properties:
+            coding:
+              type: array
+              items:
+                $ref: "#/components/schemas/Coding"
+                description: A reference to a code defined by a terminology system.
+            text:
+              type: string
+              pattern: "[ \\r\\n\\t\\S]+"
+              description: A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.
+    Coding:
+      allOf:
+        - $ref: "#/components/schemas/Element"
+        - type: object
+          properties:
+            system:
+              type: string
+              pattern: \S*
+              description: The identification of the code system that defines the meaning of the symbol in the code.
+            version:
+              type: string
+              pattern: "[ \\r\\n\\t\\S]+"
+              description: The version of the code system which was used when choosing this code. Note that a well&ndash;maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.
+            code:
+              type: string
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
+              description: A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post&ndash;coordination).
+            display:
+              type: string
+              pattern: "[ \\r\\n\\t\\S]+"
+              description: A representation of the meaning of the code in the system, following the rules of the system.
+            userSelected:
+              type: boolean
+              description: Indicates that this coding was chosen by a user directly &ndash; e.g. off a pick list of available items (codes or displays).
+    DocumentReferenceContent:
+      allOf:
+        - $ref: "#/components/schemas/BackboneElement"
+        - type: object
+          properties:
+            attachment:
+              $ref: "#/components/schemas/Attachment"
+              description: The document or URL of the document along with critical metadata to prove content has integrity.
+            format:
+              $ref: "#/components/schemas/Coding"
+              description: An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.
+          required:
+            - attachment
+    Attachment:
+      allOf:
+        - $ref: "#/components/schemas/Element"
+        - type: object
+          properties:
+            contentType:
+              type: string
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
+              description: Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate.
+            language:
+              type: string
+              pattern: "[^\\s]+(\\s[^\\s]+)*"
+              description: The human language of the content. The value can be any valid value according to BCP 47.
+            data:
+              type: string
+              pattern: (\s*([0-9a-zA-Z\+/=]){4}\s*)+
+              description: The actual data of the attachment &ndash; a sequence of bytes, base64 encoded.
+            url:
+              type: string
+              minLength: 1
+              pattern: \S*
+              description: A location where the data can be accessed.
+            size:
+              type: integer
+              format: int32
+              description: The number of bytes of data that make up this attachment (before base64 encoding, if that is done).
+            hash:
+              type: string
+              pattern: (\s*([0-9a-zA-Z\+/=]){4}\s*)+
+              description: The calculated hash of the data using SHA&ndash;1. Represented using base64.
+            title:
+              type: string
+              pattern: "[ \\r\\n\\t\\S]+"
+              description: A label or set of text to display in place of the data.
+            creation:
+              type: string
+              pattern: ([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?
+              description: The date that the attachment was first created.
