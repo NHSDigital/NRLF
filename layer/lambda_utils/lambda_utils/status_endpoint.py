@@ -114,7 +114,7 @@ def execute_steps(
 
     status_code, response = _function_handler(
         _setup_logger,
-        httpStatus,
+        http_status,
         transaction_id=transaction_id,
         args=(index_path, transaction_id, event),
         kwargs=dependencies,
