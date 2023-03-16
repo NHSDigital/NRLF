@@ -129,7 +129,7 @@ def execute_steps(
 
     return _function_handler(
         _execute_steps,
-        statusCodeOk=httpStatusOk,
+        status_code_ok=http_status_ok,
         transaction_id=transaction_id,
         args=(steps, event, context),
         kwargs={
