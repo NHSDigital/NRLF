@@ -491,7 +491,7 @@ components:
   requestBodies:
     DocumentReference:
       content:
-        application/fhir+json:
+        application/fhir+json;version=1:
           schema:
             $ref: "#/components/schemas/DocumentReference"
       required: true
@@ -1345,13 +1345,13 @@ components:
     Success:
       description: Success Response
       content:
-        application/fhir+json:
+        application/fhir+json;version=1:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
     Error:
       description: Error Response
       content:
-        application/fhir+json:
+        application/fhir+json;version=1:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
   headers:

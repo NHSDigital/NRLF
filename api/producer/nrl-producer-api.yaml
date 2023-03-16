@@ -804,7 +804,7 @@ components:
   requestBodies:
     DocumentReference:
       content:
-        application/fhir+json:
+        application/fhir+json;version=1:
           schema:
             $ref: "#/components/schemas/DocumentReference"
       required: true
@@ -1658,7 +1658,7 @@ components:
         X-Request-Id:
           $ref: "#/components/headers/RequestId"
       content:
-        application/fhir+json:
+        application/fhir+json;version=1:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
     Error:
@@ -1669,7 +1669,7 @@ components:
         X-Request-Id:
           $ref: "#/components/headers/RequestId"
       content:
-        application/fhir+json:
+        application/fhir+json;version=1:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
   headers:
