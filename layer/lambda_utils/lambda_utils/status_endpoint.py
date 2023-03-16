@@ -101,7 +101,7 @@ def execute_steps(
     index_path: str,
     event: dict,
     context: LambdaContext,
-    httpStatus: HTTPStatus = HTTPStatus.OK,
+    http_status: HTTPStatus = HTTPStatus.OK,
     initial_pipeline_data={},
     **dependencies,
 ) -> tuple[HTTPStatus, dict]:
