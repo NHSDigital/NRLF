@@ -123,7 +123,7 @@ def execute_steps(
         kwargs={"logger": logger},
     )
 
-    if status_code is not httpStatusOk:
+    if status_code is not http_status_ok:
         return status_code, response
     steps = response
 
