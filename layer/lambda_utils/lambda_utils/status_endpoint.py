@@ -126,7 +126,7 @@ def execute_steps(
     steps = _get_steps()
     status_code, response = _function_handler(
         _execute_steps,
-        httpStatus,
+        http_status,
         transaction_id=transaction_id,
         args=(steps, event, context),
         kwargs={
