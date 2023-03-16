@@ -36,7 +36,7 @@ def _function_handler(
     fn, statusCodeOk: HTTPStatus, transaction_id: str, args, kwargs
 ) -> tuple[HTTPStatus, any]:
     try:
-        status_code, result = statusCodeOk, fn(*args, **kwargs)
+        status_code, result = status_code_ok, fn(*args, **kwargs)
     except Exception as exception:
         status_code, result = operation_outcome_not_ok(
             transaction_id=transaction_id, exception=exception
