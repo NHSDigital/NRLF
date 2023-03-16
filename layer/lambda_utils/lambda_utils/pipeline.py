@@ -111,7 +111,7 @@ def execute_steps(
         kwargs=dependencies,
     )
 
-    if status_code is not httpStatusOk:
+    if status_code is not http_status_ok:
         return status_code, response
     logger = response
 
