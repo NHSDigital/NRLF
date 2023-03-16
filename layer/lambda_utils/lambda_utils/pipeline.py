@@ -33,7 +33,7 @@ def _get_steps(
 
 
 def _function_handler(
-    fn, statusCodeOk: HTTPStatus, transaction_id: str, args, kwargs
+    fn, status_code_ok: HTTPStatus, transaction_id: str, args, kwargs
 ) -> tuple[HTTPStatus, any]:
     try:
         status_code, result = status_code_ok, fn(*args, **kwargs)
