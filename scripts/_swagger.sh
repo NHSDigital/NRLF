@@ -162,6 +162,8 @@ function _swagger() {
             # * /_status not public
             cat ./api/${type}/swagger.yaml |
                 yq 'with(.paths.*.*.responses.*.content; with_entries(.key |= . + ";version=1" ))' |
+                yq 'with(.components.requestBodies.*.content; with_entries(.key |= . + ";version=1" ))' |
+                yq 'with(.components.responses.*.content; with_entries(.key |= . + ";version=1" ))' |
                 yq 'del(.paths.*.*.x-amazon-apigateway-integration)' |
                 yq 'del(.paths.*.*.security)' |
                 yq 'del(.tags)' |
