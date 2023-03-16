@@ -2,17 +2,9 @@
 
 ## Overview
 
-This project has been given the name `nrlf` which stands for `National Records Locator (Futures)`, inheriting it's name from the existing product (NRL) as well as the Spine Futures programme (Futures).
+This project has been given the name `nrlf` which stands for `National Records Locator (Futures)` as a replacement of the existing NRL.
 
 This project uses the `nrlf.sh` script to build, test and deploy. This script will ensure that a developer can reproduce any operation that the CI/CD pipelines does, meaning they can test the application locally or on their own deployed dev environment.
-
-The deployment cycle looks like this.
-
-```
-install -> unit test -> build -> deploy -> integration test -> tear down
-```
-
-The NRLF uses the following cycle during development, which promotes a "fail fast" methodology by moving unit tests to the front of the process ahead of expensive and slow build/deploy/teardown routines.
 
 ## Table of Contents
 
@@ -32,6 +24,8 @@ The NRLF uses the following cycle during development, which promotes a "fail fas
 7. [Route 53 & Hosted zones](#route53--hosted-zones)
 8. [Sandbox](#sandbox)
 
+---
+
 ## Setup
 
 ### 1. Prerequisites
@@ -48,6 +42,45 @@ Swagger generation requirements.
 - java runtime environment (jre) - https://www.oracle.com/java/technologies/downloads/#jdk19-mac
 - yq v4
 
+### 2. Linux set up
+
+For those on a linux/WSL setup these are some helpful instructions:
+
+Poetry:
+
+```shell
+curl -sSL https://install.python-poetry.org | python3 - --version 1.1.15 (only use --version to specify)
+nano ~/.bashrc
+add to bashrc - export PATH="/yourHomeDirectory/.local/bin:$PATH" spineVM home dir is "/home/spineii-user/"
+source ~/.bashrc
+poetry --version
+```
+
+pyenv:
+
+```shell
+sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
+libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
+libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+
+curl https://pyenv.run | bash
+nano ~/.bashrc
+add to bashrc - export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init --path)" - add to bashrc
+eval "$(pyenv virtualenv-init -)" - add to bashrc
+source ~/.bashrc
+pyenv --version
+```
+
+tfenv:
+
+```shell
+git clone https://github.com/tfutils/tfenv.git ~/.tfenv
+echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> ~/.bash_profile
+sudo ln -s ~/.tfenv/bin/* /usr/local/bin
+tfenv --version
+```
+
 ### 2. Install python dependencies
 
 At the root of the repo, run:
@@ -58,9 +91,29 @@ poetry shell
 pre-commit install
 ```
 
-## Initialise shell environment
+---
 
-To use `nrlf` shell script commands. We must initialise the shell environment. Ensure all packages are installed, run the following commands at the root of the repository.
+## Quick Run
+
+For those wanting to get up and running quickly can follow this list of instructions which by the end will have given you your own workspace with the current version of NRLF running - you can find more information on steps below this section.
+
+```shell
+poetry shell
+source nrlf.sh
+nrlf make build
+nrlf aws reset-creds
+nrlf aws login mgmt <mfa>
+nrlf truststore pull-server dev
+nrlf truststore pull-client dev
+nrlf terraform plan <yourname>-test
+nrlf terraform apply <yourname>-test
+nrlf test feature integration
+nrlf terraform destroy <yourname>-test
+```
+
+---
+
+## Initialise shell environment
 
 ```shell
 poetry shell
@@ -74,26 +127,24 @@ This will enable the `nrlf` commands.
 To login to AWS, use:
 
 ```shell
-nrlf aws login <role alias> <mfa token>
-```
-
-This reads `~/.aws/config` file. You will need to ensure the config file is setup correctly.
-
-Furthermore, prior to running `nrlf aws login` any time you need to ensure that you've logged out of any previous sessions:
-
-```shell
 nrlf aws reset-creds
 ```
+
+To ensure you werent logged into a previous session
+
+```shell
+nrlf aws login <env> <mfa token>
+```
+
+The env options are `dev, mgmt, test and prod`
+
+This reads the `~/.aws/config` file. You will need to ensure the config file is setup correctly - see [Developer Onboarding](https://nhsd-confluence.digital.nhs.uk/display/CLP/NRLF+-+Developer+Onboarding).
 
 ## Build, Test & Run the API
 
 Now we have installed the dependencies we're going to need to get the software up and running.
 
-The API is written in Python, so ensure [Initialise shell environment](#initialise-shell-environment) step is completed
-
 ### 1. Run the Unit Tests
-
-The NRLF adopts a "fail fast" methodology, which means that Unit Tests can be run before any expensive operations, such as a complete build or terraform deployment.
 
 ```shell
 nrlf test unit
@@ -109,9 +160,9 @@ aws configure set default.region "eu-west-2"
 
 The NRLF is deployed using terraform. The infrastructure is split into two parts.
 
-One part contains the main infrastructure, which contains all AWS resources that are not required to be tied to AWS accounts (e.g. lambdas, api gateways etc.). You can find the terraform for NRLF main infrastructure in `terraform/infrastructure`
+All account wide resources like Route 53 hosted zones or IAM roles are found in `terraform/account-wide-infrastructure`
 
-The second part include resources that should be shared by other resources in the same AWS account. This can include Route 53 hosted zones or IAM roles. You can find the terraform for NRLF account wide infrastructure in `terraform/account-wide-infrastructure`
+All resources that are not account specific (lambdas, API gateways etc) can be found in `terraform/infrastructure`
 
 Information on deploying these two parts:
 
@@ -185,9 +236,13 @@ The following notes should be made:
 7. ”And ... has authorisation headers” sets up
    authorisation headers
 
+---
+
 ## Smoke tests and OAuth tokens
 
 ### Smoke tests
+
+TODO - CURRENTLY DISABLED FOR DEVELOPMENT REASONS, NEEDS DISCUSSION
 
 You can run smoke tests from the CLI using:
 
@@ -197,9 +252,11 @@ nrlf test smoke
 
 This will run an end-to-end test against the `dev` environment/workspace via Apigee.
 
-### Get yourself an OAuth token for Postman requests
+---
 
-You can get an OAuth token for e.g. Postman requests by doing:
+### OAUTH tokens for requests
+
+All clients to the NRLF require tokens to connect through apigee - we can replicate this to test the persistent environments using this command to generate a token:
 
 ```
 nrlf oauth {env} {account}
@@ -212,16 +269,19 @@ nrlf oauth dev dev
 nrlf oauth int test
 ```
 
-Other valid environments in addition to `dev` are `int`, `uat` and `prod` (reminder that int and uat exist within the test account). This command will print
-out an OAuth `<token>` which can be used in a request to our Apigee endpoint as a header of the form:
+Other valid environments in addition to `dev` are `int`, `uat` and `prod` (reminder that int and uat exist within the test account).
+
+This command will print out an OAuth `<token>` which can be used in a request to our Apigee endpoint as a header of the form:
 
 ```
 Authorization: Bearer <token>
 ```
 
+---
+
 ## Logging
 
-This project implements action-based logging. In order to use this, you must decorate any function (i.e. your "action") with the `lambda_utils.logging.log_action` decorator:
+This project implements action-based logging. If you want to log a function you must decorate your function with:
 
 ```python
 from lambda_utils.logging import log_action
@@ -233,20 +293,14 @@ def read_a_document(id, something_i_dont_want_shared):
 
 💡 Only fields specified in `log_fields` will be logged.
 
-To run your decorated function as normal (i.e. without logging) then simply run it is normal:
-
-```python
-read_a_document(id=123, something_i_dont_want_shared="xxxx")
-```
-
-To activate logging for your decorated function you just need to pass in an instance of `lambda_utils.logging.Logger`:
+To activate logging for your decorated function you need to pass in an instance of `lambda_utils.logging.Logger`:
 
 ```python
 logger = Logger(...)  # Read the docs for the required fields
 read_a_document(id=123, something_i_dont_want_shared="xxxx", logger=logger)
 ```
 
-As you can see above, `log_action` has enabled an extra argument `logger` for `read_a_document`, which will be stripped by default before executing your function `read_a_document`.
+`log_action` enables an extra argument `logger` for `read_a_document`, which will be stripped by default before executing your function `read_a_document`.
 
 💡 Don't worry if your function already has an argument named `logger`, it will be retained if you defined it to be there.
 
@@ -280,13 +334,15 @@ Other notes:
 }
 ```
 
+---
+
 ## Route53 & Hosted Zones
 
 There are 2 parts to the Route53 configuration:
 
 ### 1. environment accounts
 
-In `terraform/account-wide-infrastructure/prod/route53.tf`, for example, we have a Hosted Zone:
+In `terraform/account-wide-infrastructure/prod/route53.tf`, we have a Hosted Zone:
 
 ```terraform
 resource "aws_route53_zone" "dev-ns" {
@@ -296,7 +352,7 @@ resource "aws_route53_zone" "dev-ns" {
 
 ### 2. mgmt account
 
-In `terraform/account-wide-infrastructure/mgmt/route53.tf` we have both a Hosted Zone and a Record per environment, for example:
+In `terraform/account-wide-infrastructure/mgmt/route53.tf` we have both a Hosted Zone and a Record per environment:
 
 ```terraform
 resource "aws_route53_zone" "prodspine" {
@@ -322,13 +378,15 @@ resource "aws_route53_record" "prodspine" {
 
 The `records` property is derived by first deploying to a specific environment, in this instance, production, and from the AWS Console navigating to the Route53 Hosted Zone that was just deployed and copying the "Value/Route traffic to" information into the `records` property. Finally, deploy to the mgmt account with the new information.
 
+---
+
 ## Sandbox
 
-The public-facing sandbox is an additional persistent workspace (`ref-sandbox`) deployed in our UAT (`ref` / `test`) environment, alongside the persistent workspace named `ref`. It is identical to our live API, except it is open to the world via Apigee (which implements rate limiting on our behalf).
+The public-facing sandbox is an additional persistent workspace (`int-sandbox`) deployed in our UAT (`int` / `test`) environment, alongside the persistent workspace named `ref`. It is identical to our live API, except it is open to the world via Apigee (which implements rate limiting on our behalf).
 
 ### Sandbox deployment
 
-In order to deploy to a sandbox environment (`dev-sandbox`, `ref-sandbox`, `production-sandbox`) you should use the GitHub Action for persistent environments, where you should select the option to deploy to the sandbox workspace.
+In order to deploy to a sandbox environment (`dev-sandbox`, `ref-sandbox`, `int-sandbox`, `production-sandbox`) you should use the GitHub Action for persistent environments, where you should select the option to deploy to the sandbox workspace.
 
 ### Sandbox database clear and reseed
 
