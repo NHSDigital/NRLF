@@ -182,7 +182,7 @@ paths:
           content:
             application/fhir+json:
               schema:
-                $ref: "#/components/schemas/Bundle"
+                $ref: '#/components/schemas/Bundle'
               example:
                 resourceType: Bundle
                 type: searchset
@@ -312,7 +312,7 @@ paths:
           content:
             application/fhir+json:
               schema:
-                $ref: "#/components/schemas/Bundle"
+                $ref: '#/components/schemas/Bundle'
               example:
                 resourceType: Bundle
                 type: searchset
@@ -439,7 +439,7 @@ paths:
           content:
             application/fhir+json:
               schema:
-                $ref: "#/components/schemas/DocumentReference"
+                $ref: '#/components/schemas/DocumentReference'
               example:
                 resourceType: DocumentReference
                 id: Y05868-1234567892
@@ -555,7 +555,7 @@ components:
       content:
         application/fhir+json:
           schema:
-            $ref: "#/components/schemas/DocumentReference"
+            $ref: '#/components/schemas/DocumentReference'
       required: true
   schemas:
     OperationOutcome:
@@ -567,10 +567,10 @@ components:
             - OperationOutcome
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.
         meta:
-          $ref: "#/components/schemas/Meta"
+          $ref: '#/components/schemas/Meta'
           description: The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.
         implicitRules:
           type: string
@@ -578,7 +578,7 @@ components:
           description: A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.
         language:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: The base language in which the resource is written.
         text:
           $ref: "#/components/schemas/Narrative"
@@ -597,34 +597,34 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         severity:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: Indicates whether the issue indicates a variation from successful processing.
         code:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.
         details:
           $ref: "#/components/schemas/CodeableConcept"
           description: Additional details about the error. This may be a text description of the error or a system code that identifies the error.
         diagnostics:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: Additional diagnostic information about the issue.
         location:
           type: array
           items:
             type: string
-            pattern: "[ \\r\\n\\t\\S]+"
+            pattern: '[ \r\n\t\S]+'
             description: "This element is deprecated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. \n\nFor resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name."
         expression:
           type: array
           items:
             type: string
-            pattern: "[ \\r\\n\\t\\S]+"
+            pattern: '[ \r\n\t\S]+'
             description: A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.
       required:
         - severity
@@ -638,7 +638,7 @@ components:
             - DocumentReference
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.
         meta:
           $ref: "#/components/schemas/Meta"
@@ -649,7 +649,7 @@ components:
           description: A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.
         language:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: The base language in which the resource is written.
         text:
           $ref: "#/components/schemas/Narrative"
@@ -664,11 +664,11 @@ components:
             description: Other identifiers associated with the document, including version independent identifiers.
         status:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: The status of this document reference.
         docStatus:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: The status of the underlying document.
         type:
           $ref: "#/components/schemas/CodeableConcept"
@@ -703,7 +703,7 @@ components:
             description: Relationships that this document has with other document references that already exist.
         description:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: Human&ndash;readable description of the source document.
         securityLabel:
           type: array
@@ -732,7 +732,7 @@ components:
             - Bundle
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.
         meta:
           $ref: "#/components/schemas/Meta"
@@ -743,14 +743,14 @@ components:
           description: A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.
         language:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: The base language in which the resource is written.
         identifier:
           $ref: "#/components/schemas/Identifier"
           description: A persistent identifier for the bundle that won't change as a bundle is copied from server to server.
         type:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: Indicates the purpose of this bundle &ndash; how it is intended to be used.
         timestamp:
           type: string
@@ -781,7 +781,7 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         link:
           type: array
@@ -809,11 +809,11 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         status:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.
         location:
           type: string
@@ -821,7 +821,7 @@ components:
           description: The location header created by processing this operation, populated if the operation returns a location.
         etag:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: The Etag for the resource, if the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
         lastModified:
           type: string
@@ -837,11 +837,11 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         method:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: In a transaction or batch, this is the HTTP action to be executed for this entry. In a history bundle, this indicates the HTTP action that occurred.
         url:
           type: string
@@ -849,7 +849,7 @@ components:
           description: The URL for this entry, relative to the root (the address to which the request is posted).
         ifNoneMatch:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: If the ETag values match, return a 304 Not Modified status. See the API documentation for ["Conditional Read"](http.html#cread).
         ifModifiedSince:
           type: string
@@ -857,11 +857,11 @@ components:
           description: Only perform the operation if the last updated date matches. See the API documentation for ["Conditional Read"](http.html#cread).
         ifMatch:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: Only perform the operation if the Etag value matches. For more information, see the API section ["Managing Resource Contention"](http.html#concurrency).
         ifNoneExist:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: Instruct the server not to perform the create if a specified resource already exists. For further information, see the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL &ndash; what follows the "?" (not including the "?").
       required:
         - method
@@ -871,11 +871,11 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         mode:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: Why this entry is in the result set &ndash; whether it's included as a match or because of an _include requirement, or to convey information or warning information about the search process.
         score:
           type: number
@@ -885,11 +885,11 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         relation:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: A name which details the functional use for this link &ndash; see [http://www.iana.org/assignments/link&ndash;relations/link&ndash;relations.xhtml#link&ndash;relations&ndash;1](http://www.iana.org/assignments/link&ndash;relations/link&ndash;relations.xhtml#link&ndash;relations&ndash;1).
         url:
           type: string
@@ -903,7 +903,7 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         encounter:
           type: array
@@ -937,7 +937,7 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         attachment:
           $ref: "#/components/schemas/Attachment"
@@ -952,11 +952,11 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         code:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: The type of relationship that this document has with anther document.
         target:
           $ref: "#/components/schemas/Reference"
@@ -969,15 +969,15 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         contentType:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate.
         language:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: The human language of the content. The value can be any valid value according to BCP 47.
         data:
           type: string
@@ -997,7 +997,7 @@ components:
           description: The calculated hash of the data using SHA&ndash;1. Represented using base64.
         title:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: A label or set of text to display in place of the data.
         creation:
           type: string
@@ -1008,7 +1008,7 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         coding:
           type: array
@@ -1017,14 +1017,14 @@ components:
             description: A reference to a code defined by a terminology system.
         text:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.
     Coding:
       type: object
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         system:
           type: string
@@ -1032,15 +1032,15 @@ components:
           description: The identification of the code system that defines the meaning of the symbol in the code.
         version:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: The version of the code system which was used when choosing this code. Note that a well&ndash;maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.
         code:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post&ndash;coordination).
         display:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: A representation of the meaning of the code in the system, following the rules of the system.
         userSelected:
           type: boolean
@@ -1050,11 +1050,11 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         use:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: The purpose of this identifier.
         type:
           $ref: "#/components/schemas/CodeableConcept"
@@ -1065,7 +1065,7 @@ components:
           description: Establishes the namespace for the value &ndash; that is, a URL that describes a set values that are unique.
         value:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: The portion of the identifier typically relevant to the user and which is unique within the context of the system.
         period:
           $ref: "#/components/schemas/Period"
@@ -1078,7 +1078,7 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         start:
           type: string
@@ -1093,18 +1093,18 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         value:
           type: number
           description: The value of the measured amount. The value includes an implicit precision in the presentation of the value.
         comparator:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: How the value should be understood and represented &ndash; whether the actual value is greater or less than the stated value due to measurement issues; e.g. if the comparator is "<" , then the real value is < stated value.
         unit:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: A human&ndash;readable form of the unit.
         system:
           type: string
@@ -1112,18 +1112,18 @@ components:
           description: The identification of the system that provides the coded form of the unit.
         code:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: A computer processable form of the unit in some unit representation system.
     Reference:
       type: object
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         reference:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.
         type:
           type: string
@@ -1136,14 +1136,14 @@ components:
           description: An identifier for the target resource. This is used when there is no way to reference the other resource directly, either because the entity it represents is not available through a FHIR server, or because there is no way for the author of the resource to convert a known identifier to an actual location. There is no requirement that a Reference.identifier point to something that is actually exposed as a FHIR instance, but it SHALL point to a business concept that would be expected to be exposed as a FHIR instance, and that instance would need to be of a FHIR resource type allowed by the reference.
         display:
           type: string
-          pattern: "[ \\r\\n\\t\\S]+"
+          pattern: '[ \r\n\t\S]+'
           description: Plain text narrative that identifies the resource in addition to the resource reference.
     Signature:
       type: object
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         type:
           type: array
@@ -1163,11 +1163,11 @@ components:
           description: A reference to an application&ndash;usable description of the identity that is represented by the signature.
         targetFormat:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: A mime type that indicates the technical format of the target resources signed by the signature.
         sigFormat:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jose for JWS, and image/* for a graphical image of a signature, etc.
         data:
           type: string
@@ -1182,11 +1182,11 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         versionId:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: The version specific identifier, as it appears in the version portion of the URL. This value changes when the resource is created, updated, or deleted.
         lastUpdated:
           type: string
@@ -1217,11 +1217,11 @@ components:
       properties:
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: '[A-Za-z0-9\-\.]{1,64}'
           description: Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.
         status:
           type: string
-          pattern: "[^\\s]+(\\s[^\\s]+)*"
+          pattern: '[^\s]+(\s[^\s]+)*'
           description: The status of the narrative &ndash; whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data.
         div:
           type: string
@@ -1269,7 +1269,6 @@ components:
       example: "https://fhir.nhs.uk/Id/ods-organization-code|Y05868"
     RequestQueryType:
       type: string
-      pattern: ^http\:\/\/snomed\.info\/sct\|(\d+)$
       example: "http://snomed.info/sct|736253002"
     NextPageToken:
       type: string

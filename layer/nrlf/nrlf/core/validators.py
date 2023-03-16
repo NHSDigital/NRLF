@@ -8,7 +8,11 @@ from nrlf.core.errors import (
     InvalidTupleError,
     RequestValidationError,
 )
-from nrlf.producer.fhir.r4.model import CodeableConcept, DocumentReference
+from nrlf.producer.fhir.r4.model import (
+    CodeableConcept,
+    DocumentReference,
+    RequestQueryType,
+)
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
@@ -88,4 +92,21 @@ def validate_fhir_model_for_required_fields(model: StrictDocumentReference):
     if not model.custodian:
         raise RequestValidationError(
             "DocumentReference validation failure - Invalid custodian"
+        )
+
+
+def validate_type_system(type_identifier: RequestQueryType, pointer_types: list[str]):
+    if type_identifier is not None:
+        type_system = type_identifier.__root__.split("|", 1)[0]
+
+        pointer_type_systems = map(
+            lambda pointer_type: pointer_type.split("|", 1)[0], pointer_types
+        )
+
+        for pointer_type_system in pointer_type_systems:
+            if type_system == pointer_type_system:
+                return
+
+        raise RequestValidationError(
+            f"The provided query system type value - {type_system} - does not match the allowed types"
         )
