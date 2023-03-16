@@ -105,7 +105,7 @@ def execute_steps(
 
     status_code, response = _function_handler(
         _setup_logger,
-        statusCodeOk=httpStatusOk,
+        status_code_ok=http_status_ok,
         transaction_id=transaction_id,
         args=(index_path, transaction_id, event),
         kwargs=dependencies,
