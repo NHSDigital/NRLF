@@ -117,7 +117,7 @@ def execute_steps(
 
     status_code, response = _function_handler(
         _get_steps_for_version_header,
-        statusCodeOk=httpStatusOk,
+        status_code_ok=http_status_ok,
         transaction_id=transaction_id,
         args=(index_path, event),
         kwargs={"logger": logger},
