@@ -22,7 +22,7 @@ def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
     status_code, result = execute_steps(
         index_path=__file__,
         event=event,
-        httpStatusOk=HTTPStatus.CREATED,
+        http_status_ok=HTTPStatus.CREATED,
         context=context,
         config=config,
         **dependencies
