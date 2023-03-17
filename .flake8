@@ -28,4 +28,5 @@ exclude =
     packages/feature_documentation/*,
     scripts/build_scripts/build_scripts/*,
     layer/third_party/scripts/*
+    api/producer/firehose/tests/*
 max-complexity = 10
