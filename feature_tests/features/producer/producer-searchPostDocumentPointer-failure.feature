@@ -90,7 +90,7 @@ Feature: Basic failure Scenarios where producer is unable to search for Document
       | issue_level       | error                                                   |
       | issue_code        | VALIDATION_ERROR                                        |
       | issue_description | A parameter or value has resulted in a validation error |
-      | message           | Unexpected query parameters: extra                      |
+      | message           | Unexpected request parameters: extra                    |
 
   Scenario: Search by POST is unable to return Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search by POST for Document Pointers
@@ -116,7 +116,7 @@ Feature: Basic failure Scenarios where producer is unable to search for Document
       | issue_level       | error                                                   |
       | issue_code        | VALIDATION_ERROR                                        |
       | issue_description | A parameter or value has resulted in a validation error |
-      | message           | Unexpected query parameters: bad                        |
+      | message           | Unexpected request parameters: bad                      |
 
   Scenario: Search fails to return a bundle when the next page key is incorrect
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search by POST for Document Pointers

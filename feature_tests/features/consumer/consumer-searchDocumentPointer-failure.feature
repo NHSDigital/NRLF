@@ -90,7 +90,7 @@ Feature: Consumer Search Failure scenarios
       | issue_level       | error                                                   |
       | issue_code        | VALIDATION_ERROR                                        |
       | issue_description | A parameter or value has resulted in a validation error |
-      | message           | Unexpected query parameters: extra                      |
+      | message           | Unexpected request parameters: extra                    |
 
   Scenario: Subject is required
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers

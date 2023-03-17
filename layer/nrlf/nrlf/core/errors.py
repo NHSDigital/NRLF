@@ -1,9 +1,10 @@
 from typing import Union
 
 from nhs_number import is_valid as is_valid_nhs_number
+from pydantic import ValidationError
+
 from nrlf.core.nhsd_codings import SpineCoding
 from nrlf.producer.fhir.r4.model import RequestParams
-from pydantic import ValidationError
 
 
 class ItemNotFound(Exception):
@@ -93,5 +94,5 @@ def assert_no_extra_params(
     unknown_params = set(provided_params) - set(expected_params)
     if unknown_params:
         raise UnknownParameterError(
-            f"Unexpected query parameters: {', '.join(unknown_params)}"
+            f"Unexpected request parameters: {', '.join(unknown_params)}"
         )
