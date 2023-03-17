@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -8,11 +9,7 @@ from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.logging import log_action
 from nrlf.core.common_producer_steps import validate_producer_permissions
 from nrlf.core.common_steps import parse_headers, parse_path_id
-from nrlf.core.errors import (
-    ImmutableFieldViolationError,
-    ItemNotFound,
-    RequestValidationError,
-)
+from nrlf.core.errors import ImmutableFieldViolationError, ItemNotFound
 from nrlf.core.model import DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
@@ -26,7 +23,14 @@ from api.producer.updateDocumentReference.src.v1.constants import (
 )
 
 
-@log_action(narrative="Parsing request body")
+class LogReference(Enum):
+    UPDATE001 = "Parsing request body"
+    UPDATE002 = "Determining whether document pointer exists"
+    UPDATE003 = "Comparing immutable fields"
+    UPDATE004 = "Updating document pointer model in db"
+
+
+@log_action(log_reference=LogReference.UPDATE001)
 def parse_request_body(
     data: PipelineData,
     context: LambdaContext,
@@ -43,7 +47,7 @@ def parse_request_body(
     return PipelineData(core_model=core_model, **data)
 
 
-@log_action(narrative="Determining whether document pointer exists")
+@log_action(log_reference=LogReference.UPDATE002)
 def document_pointer_exists(
     data: PipelineData,
     context: LambdaContext,
@@ -63,7 +67,7 @@ def document_pointer_exists(
     )
 
 
-@log_action(narrative="Comparing immutable fields")
+@log_action(log_reference=LogReference.UPDATE003)
 def compare_immutable_fields(
     data: PipelineData,
     context: LambdaContext,
@@ -83,7 +87,7 @@ def compare_immutable_fields(
     return PipelineData(**data)
 
 
-@log_action(narrative="Updating document pointer model in db")
+@log_action(log_reference=LogReference.UPDATE004)
 def update_core_model_to_db(
     data: PipelineData,
     context: LambdaContext,

@@ -1,5 +1,6 @@
 import json
 import urllib.parse
+from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -12,7 +13,11 @@ from nrlf.core.repository import Repository
 from nrlf.core.validators import validate_document_reference_string
 
 
-@log_action(narrative="Reading document reference")
+class LogReference(Enum):
+    READ001 = "Reading document reference"
+
+
+@log_action(log_reference=LogReference.READ001)
 def read_document_reference(
     data: PipelineData,
     context: LambdaContext,

@@ -1,5 +1,6 @@
 import json
 import logging
+from enum import Enum
 from tempfile import NamedTemporaryFile
 
 import pytest
@@ -8,6 +9,11 @@ from lambda_utils.logging import Logger, log_action
 from lambda_utils.tests.unit.utils import make_aws_event
 from nrlf.core.errors import DynamoDbError
 from nrlf.core.validators import validate_timestamp
+
+
+class LogReference(Enum):
+    HELLO001 = "Hello, world!"
+
 
 LOGGER_NAME = __name__
 
@@ -64,7 +70,7 @@ def _standard_test(fn):
 def test_log_with_log_fields_filter(log_fields, expected_data_inputs):
     kwargs = {"log_fields": log_fields} if log_fields is not None else {}
 
-    @log_action(narrative="Hello, world!", **kwargs)
+    @log_action(log_reference=LogReference.HELLO001, **kwargs)
     def _dummy_function(foo: str, bar: str):
         return foo + bar
 
@@ -75,10 +81,14 @@ def test_log_with_log_fields_filter(log_fields, expected_data_inputs):
         "transaction_id": "ABC",
         "request_id": "789",
         "log_level": "INFO",
-        "log_reference": "test_logging._dummy_function",
+        "log_reference": "HELLO001",
         "outcome": "SUCCESS",
         "message": "Hello, world!",
-        "data": {"result": "abcdef", "inputs": expected_data_inputs},
+        "data": {
+            "function": "test_logging._dummy_function",
+            "result": "abcdef",
+            "inputs": expected_data_inputs,
+        },
         "environment": "TEST",
         "host": "123456789012",
         "sensitive": True,
@@ -93,7 +103,7 @@ def test_log_with_log_fields_filter(log_fields, expected_data_inputs):
     ],
 )
 def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
-    @log_action(narrative="Hello, world!", log_fields=["foo", "bar"])
+    @log_action(log_reference=LogReference.HELLO001, log_fields=["foo", "bar"])
     def _dummy_function(foo: str, bar: str):
         raise error("An error message")
 
@@ -127,10 +137,14 @@ def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
         "transaction_id": "ABC",
         "request_id": "789",
         "log_level": expected_log_level,
-        "log_reference": "test_logging._dummy_function",
+        "log_reference": "HELLO001",
         "outcome": outcome,
         "message": "Hello, world!",
-        "data": {"result": result, "inputs": {"foo": "abc", "bar": "def"}},
+        "data": {
+            "function": "test_logging._dummy_function",
+            "result": result,
+            "inputs": {"foo": "abc", "bar": "def"},
+        },
         "environment": "TEST",
         "host": "123456789012",
         "sensitive": True,

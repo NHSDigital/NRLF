@@ -343,9 +343,13 @@ Authorization: Bearer <token>
 This project implements action-based logging. If you want to log a function you must decorate your function with:
 
 ```python
+from enum import Enum
 from lambda_utils.logging import log_action
 
-@log_action(narrative="Reading a document", log_fields=["id"], sensitive=False)
+class LogReference(Enum):
+   READ001 = "Reading a document"
+
+@log_action(log_reference=LogReference.READ001, log_fields=["id"], sensitive=False)
 def read_a_document(id, something_i_dont_want_shared):
     ...
 ```

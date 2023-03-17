@@ -1,3 +1,4 @@
+from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -13,7 +14,11 @@ from nrlf.core.transform import create_bundle_from_paginated_response
 from nrlf.core.validators import validate_type_system
 
 
-@log_action(narrative="Searching for document references")
+class LogReference(Enum):
+    SEARCH001 = "Searching for document references"
+
+
+@log_action(log_reference=LogReference.SEARCH001)
 def search_document_references(
     data: PipelineData,
     context: LambdaContext,

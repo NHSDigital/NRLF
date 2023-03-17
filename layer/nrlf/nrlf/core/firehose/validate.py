@@ -1,4 +1,5 @@
 from lambda_utils.logging import Logger, LogTemplate, log_action
+from nrlf.core.firehose.log_reference import LogReference
 from nrlf.core.firehose.model import (
     CloudwatchLogsData,
     CloudwatchMessageType,
@@ -30,12 +31,7 @@ class LogValidationError(Exception):
     pass
 
 
-@log_action(
-    narrative=(
-        "Verifying that size of the processed record is "
-        "compatible with the maximum packet size for Kinesis"
-    )
-)
+@log_action(log_reference=LogReference.FIREHOSE004)
 def _validate_record_size(
     record_size_bytes: int,
     total_event_size_bytes: int,
@@ -50,10 +46,7 @@ def _validate_record_size(
         raise NoSpaceLeftInCurrentEventPacket
 
 
-@log_action(
-    narrative="Validating that the log structure adheres to the NRLF LogTemplate"
-)
-def _validate_log_event(log_event: dict):
+@log_action(log_reference=LogReference.FIREHOSE005, log_fields=["log"])
     try:
         log = LogTemplate(**log_event)
     except ValidationError as err:
@@ -62,7 +55,7 @@ def _validate_log_event(log_event: dict):
         raise LogValidationError("Log has fields that are not present in LogTemplate")
 
 
-@log_action(narrative="Are all of the provided log events valid?")
+@log_action(log_reference=LogReference.FIREHOSE006)
 def _all_log_events_are_valid(log_events: list[dict], logger: Logger = None) -> bool:
     for log_event in log_events:
         try:
@@ -72,7 +65,7 @@ def _all_log_events_are_valid(log_events: list[dict], logger: Logger = None) -> 
     return True
 
 
-@log_action(narrative="Determining outcome base on the size of this record")
+@log_action(log_reference=LogReference.FIREHOSE007, log_result=False)
 def _determine_outcome_given_record_size(
     cloudwatch_data: CloudwatchLogsData,
     partition_key: str,
@@ -126,9 +119,7 @@ def _determine_outcome_given_record_size(
         return output_record
 
 
-@log_action(
-    narrative="Validating a Cloudwatch Logs record that has been marked as 'DATA_MESSAGE'",
-)
+@log_action(log_reference=LogReference.FIREHOSE008, log_result=False)
 def _validate_cloudwatch_logs_data(
     cloudwatch_data: CloudwatchLogsData,
     partition_key: str,
@@ -152,12 +143,7 @@ def _validate_cloudwatch_logs_data(
     )
 
 
-@log_action(
-    narrative=(
-        "Processing individual Cloudwatch Logs record "
-        "(which may contain multiple log entries)"
-    )
-)
+@log_action(log_reference=LogReference.FIREHOSE009, log_result=False)
 def process_cloudwatch_record(
     cloudwatch_data: CloudwatchLogsData,
     partition_key: str,

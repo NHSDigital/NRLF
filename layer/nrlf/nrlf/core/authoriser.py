@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 from http import HTTPStatus
 from logging import Logger
 from typing import Any
@@ -16,6 +17,12 @@ from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _setup_logger
 from nrlf.core.response import get_error_message
 from pydantic import BaseModel, ValidationError
+
+
+class LogReference(Enum):
+    AUTHORISER001 = "Parsing headers"
+    AUTHORISER002 = "Validating pointer types"
+    AUTHORISER003 = "Render authorisation response"
 
 
 class Config(BaseModel):
@@ -61,7 +68,7 @@ def _create_policy(principal_id, resource, effect, context):
     }
 
 
-@log_action(narrative="Parsing headers")
+@log_action(log_reference=LogReference.AUTHORISER001)
 def parse_headers(
     data: PipelineData,
     context: LambdaContext,
@@ -81,7 +88,7 @@ def parse_headers(
         return PipelineData(pointer_types=connection_metadata.pointer_types, **data)
 
 
-@log_action(narrative="Validating pointer types")
+@log_action(log_reference=LogReference.AUTHORISER002)
 def validate_pointer_types(
     data: PipelineData,
     context: LambdaContext,
@@ -96,7 +103,7 @@ def validate_pointer_types(
     return PipelineData(**data)
 
 
-@log_action(narrative="Render authorisation response")
+@log_action(log_reference=LogReference.AUTHORISER003)
 def generate_response(
     data: PipelineData,
     context: LambdaContext,
