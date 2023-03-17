@@ -11,6 +11,7 @@ from nrlf.core.errors import assert_no_extra_params
 from nrlf.core.model import PaginatedResponse, ProducerRequestParams, key
 from nrlf.core.repository import Repository, type_filter
 from nrlf.core.transform import create_bundle_from_paginated_response
+from nrlf.core.validators import validate_type_system
 from nrlf.producer.fhir.r4.model import NextPageToken, RequestQuerySubject
 
 
@@ -29,6 +30,10 @@ def search_document_references(
     assert_no_extra_params(request_params=request_params, provided_params=body)
     nhs_number: RequestQuerySubject = request_params.nhs_number
     organisation_code = data["organisation_code"]
+
+    validate_type_system(
+        request_params.type_identifier, pointer_types=data["pointer_types"]
+    )
 
     pointer_types = type_filter(
         type_identifier=request_params.type_identifier,

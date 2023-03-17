@@ -1207,7 +1207,6 @@ components:
       example: "https://fhir.nhs.uk/Id/ods-organization-code|Y05868"
     RequestQueryType:
       type: string
-      pattern: ^http\:\/\/snomed\.info\/sct\|(\d+)$
       example: "http://snomed.info/sct|736253002"
     NextPageToken:
       type: string
