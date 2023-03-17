@@ -41,7 +41,7 @@ function _test_integration() {
 
 function _test_integration_firehose() {
   local args=(${@:1})
-  python -m pytest -m "integration and firehose" --runslow $args
+  python -m pytest -m "integration and firehose" --runslow -n 2 $args
 }
 
 function _test_smoke() {
