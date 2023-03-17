@@ -25,6 +25,5 @@ def _is_item_valid(item: BaseModel):
             return True
         else:
             return True
-    except ValidationError as e:
-        print(f"Validation Error for item {item}. Error is {e}")
+    except ValidationError:
         return False

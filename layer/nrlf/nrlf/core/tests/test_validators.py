@@ -1,7 +1,6 @@
 from unittest import mock
 
 import pytest
-
 from nrlf.core.constants import ID_SEPARATOR
 from nrlf.core.errors import (
     DocumentReferenceValidationError,

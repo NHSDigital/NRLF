@@ -7,16 +7,16 @@ import pytest
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import PipelineData
 from lambda_utils.tests.unit.utils import make_aws_event
+from nrlf.core.dynamodb_types import to_dynamodb_dict
+from nrlf.core.errors import ImmutableFieldViolationError
+from nrlf.core.model import DocumentPointer
+from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
 from api.producer.updateDocumentReference.src.v1.handler import (
     compare_immutable_fields,
     document_pointer_exists,
     parse_request_body,
 )
-from nrlf.core.dynamodb_types import to_dynamodb_dict
-from nrlf.core.errors import ImmutableFieldViolationError
-from nrlf.core.model import DocumentPointer
-from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
 
 @mock.patch(
