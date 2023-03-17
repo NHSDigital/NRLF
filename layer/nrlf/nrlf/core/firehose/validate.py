@@ -7,7 +7,7 @@ from nrlf.core.firehose.model import (
     FirehoseResult,
     FirehoseSubmissionRecord,
 )
-from nrlf.core.firehose.utils import encode_log_events_as_ndjson
+from nrlf.core.firehose.utils import encode_logs_as_ndjson
 from pydantic import ValidationError
 
 MAX_PACKET_SIZE_BYTES = (
@@ -47,19 +47,23 @@ def _validate_record_size(
 
 
 @log_action(log_reference=LogReference.FIREHOSE005, log_fields=["log"])
+def _validate_log(log: dict):
     try:
-        log = LogTemplate(**log_event)
+        parsed_log = LogTemplate(**log)
     except ValidationError as err:
         raise LogValidationError(str(err))
-    if log.dict() != log_event:
-        raise LogValidationError("Log has fields that are not present in LogTemplate")
+    rendered_log = parsed_log.dict()
+    if rendered_log != log:
+        raise LogValidationError(
+            f"Field mismatch between parsed and proved logs. Parsed log: {rendered_log}"
+        )
 
 
 @log_action(log_reference=LogReference.FIREHOSE006)
-def _all_log_events_are_valid(log_events: list[dict], logger: Logger = None) -> bool:
-    for log_event in log_events:
+def _all_logs_are_valid(logs: list[dict], logger: Logger = None) -> bool:
+    for log in logs:
         try:
-            _validate_log_event(log_event=log_event, logger=logger)
+            _validate_log(log=log, logger=logger)
         except LogValidationError:
             return False
     return True
@@ -75,7 +79,7 @@ def _determine_outcome_given_record_size(
     output_record = FirehoseOutputRecord(
         record_id=cloudwatch_data.record_id,
         result=FirehoseResult.OK,
-        data=encode_log_events_as_ndjson(log_events=cloudwatch_data.log_events),
+        data=encode_logs_as_ndjson(logs=cloudwatch_data.logs),
     )
 
     try:
@@ -127,9 +131,7 @@ def _validate_cloudwatch_logs_data(
     logger: Logger = None,
 ) -> FirehoseOutputRecord:
 
-    if not _all_log_events_are_valid(
-        log_events=cloudwatch_data.log_events, logger=logger
-    ):
+    if not _all_logs_are_valid(logs=cloudwatch_data.logs, logger=logger):
         return FirehoseOutputRecord(
             record_id=cloudwatch_data.record_id,
             result=FirehoseResult.PROCESSING_FAILED,

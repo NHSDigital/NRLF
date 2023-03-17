@@ -12,6 +12,7 @@ The S3 output file prefix and keys can't be known exactly, even at runtime, and
 so the relevant parts of S3 must be trawled for output files which appear after a
 certain point in time.
 """
+import json
 from datetime import datetime, timedelta
 
 import pytest
@@ -66,12 +67,19 @@ def test_firehose_output(
         start_time=start_time,
         possible_prefixes=possible_s3_key_prefixes,
     ):
+        print("comparing")
+        print(json.dumps(good_logs, indent=4))
+        print("to")
+        print(json.dumps(logs_from_s3, indent=4))
+        print()
         if all_logs_are_on_s3(original_logs=good_logs, logs_from_s3=logs_from_s3):
             verify_good_logs = True
         if all_logs_are_on_s3(original_logs=bad_logs, logs_from_s3=logs_from_s3):
             verify_bad_logs = True
         if all_logs_are_on_s3(original_logs=very_bad_logs, logs_from_s3=logs_from_s3):
             verify_very_bad_logs = True
+        print(verify_good_logs, verify_bad_logs, verify_very_bad_logs)
+        print("------------------")
 
         # The test has passed if all conditions have been met
         if all((verify_good_logs, verify_bad_logs, verify_very_bad_logs)):

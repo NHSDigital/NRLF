@@ -27,7 +27,7 @@ def _process_firehose_records(
     for record in records:
         try:
             cloudwatch_data = CloudwatchLogsData.parse(
-                data=record.data, record_id=record.recordId
+                data=record.data, record_id=record.recordId, logger=logger
             )
         except ValidationError:
             yield FirehoseOutputRecord(
