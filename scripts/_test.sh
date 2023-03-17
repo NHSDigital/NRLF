@@ -24,6 +24,7 @@ function _test() {
   "integration") _test_integration $args ;;
   "smoke") _test_smoke $args ;;
   "feature") _test_feature $args ;;
+  "firehose") _test_integration_firehose $args ;;
   *) _test_help ;;
   esac
 }
@@ -35,7 +36,12 @@ function _test_unit() {
 
 function _test_integration() {
   local args=(${@:1})
-  python -m pytest -m "integration" $args
+  python -m pytest -m "integration and not firehose" $args
+}
+
+function _test_integration_firehose() {
+  local args=(${@:1})
+  python -m pytest -m "integration and firehose" --runslow $args
 }
 
 function _test_smoke() {

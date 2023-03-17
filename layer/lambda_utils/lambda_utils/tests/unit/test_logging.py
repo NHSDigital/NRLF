@@ -80,6 +80,7 @@ def test_log_with_log_fields_filter(log_fields, expected_data_inputs):
         "message": "Hello, world!",
         "data": {"result": "abcdef", "inputs": expected_data_inputs},
         "environment": "TEST",
+        "host": "123456789012",
         "sensitive": True,
     }
 
@@ -131,5 +132,6 @@ def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
         "message": "Hello, world!",
         "data": {"result": result, "inputs": {"foo": "abc", "bar": "def"}},
         "environment": "TEST",
+        "host": "123456789012",
         "sensitive": True,
     }
