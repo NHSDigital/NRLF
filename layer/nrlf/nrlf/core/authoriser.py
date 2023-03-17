@@ -23,6 +23,7 @@ class LogReference(Enum):
     AUTHORISER001 = "Parsing headers"
     AUTHORISER002 = "Validating pointer types"
     AUTHORISER003 = "Render authorisation response"
+    AUTHORISER004 = "Parsing Client RP Details"
 
 
 class Config(BaseModel):
@@ -68,6 +69,11 @@ def _create_policy(principal_id, resource, effect, context):
     }
 
 
+@log_action(log_reference=LogReference.AUTHORISER004, log_result=True)
+def _parse_client_rp_details(raw_client_rp_details: dict):
+    return ClientRpDetailsHeader.parse_raw(raw_client_rp_details)
+
+
 @log_action(log_reference=LogReference.AUTHORISER001)
 def parse_headers(
     data: PipelineData,
@@ -81,7 +87,9 @@ def parse_headers(
     _raw_connection_metadata = _headers.get(CONNECTION_METADATA, "{}")
     try:
         connection_metadata = ConnectionMetadata.parse_raw(_raw_connection_metadata)
-        ClientRpDetailsHeader.parse_raw(_raw_client_rp_details)
+        _parse_client_rp_details(
+            raw_client_rp_details=_raw_client_rp_details, logger=logger
+        )
     except ValidationError as err:
         return PipelineData(error={"message": get_error_message(err)}, **data)
     else:
