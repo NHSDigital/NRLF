@@ -44,6 +44,7 @@ ez-setup = "^0.9"
 pygments = "^2.14.0"
 atlassian-python-api = "^3.32.2"
 hypothesis = "^6.68.2"
+flake8-print = "^5.0.0"
 
 [tool.poetry.group.legacy]
 optional = true

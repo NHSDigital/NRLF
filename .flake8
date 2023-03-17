@@ -1,0 +1,34 @@
+[flake8]
+# We're only checking for "T201 print found" here, we could check others in the future
+extend-ignore =
+    C901,
+    E117,
+    E127,
+    E203,
+    E262,
+    E302,
+    E303,
+    E305,
+    E402,
+    E501,
+    E711,
+    E722,
+    E741,
+    F401,
+    F405,
+    F541,
+    F811,
+    F841,
+    T202,
+    T202,
+    T203
+exclude =
+    .git,
+    __pycache__,
+    dist,
+    .venv,
+    api/tests/test_smoke.py,
+    packages/feature_documentation,
+    scripts/build_scripts/build_scripts,
+    layer/third_party/scripts
+max-complexity = 10
