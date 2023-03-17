@@ -104,7 +104,7 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.PE_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
@@ -150,7 +150,7 @@ jobs:
           path: ./terraform/infrastructure/
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.PE_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
@@ -195,7 +195,7 @@ jobs:
           name: ${{ env.CACHE_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
@@ -219,7 +219,7 @@ jobs:
           name: ${{ env.CACHE_NAME }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}

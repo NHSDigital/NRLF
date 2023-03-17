@@ -231,7 +231,7 @@ jobs:
           name: ${{ env.BASE_ARTIFACT_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
@@ -265,7 +265,7 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
@@ -314,7 +314,7 @@ jobs:
           name: ${{ env.CACHE_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
@@ -354,7 +354,7 @@ jobs:
           name: ${{ env.CACHE_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
@@ -394,7 +394,7 @@ jobs:
           name: ${{ env.CACHE_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
@@ -429,7 +429,7 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
