@@ -75,45 +75,17 @@ version = "2.9.0"
 description = "A suite of utilities for AWS Lambda functions to ease adopting best practices such as tracing, structured logging, custom metrics, batching, idempotency, feature flags, and more."
 category = "main"
 optional = false
-<<<<<<< HEAD
 python-versions = ">=3.7.4,<4.0.0"
-=======
-python-versions = ">=3.6.2,<4.0.0"
-files = [
-    {file = "aws_lambda_powertools-1.29.2-py3-none-any.whl", hash = "sha256:a75bc1985f799a024c9e388d228dff98905caf8dd99cb7634269bee56214bbeb"},
-    {file = "aws_lambda_powertools-1.29.2.tar.gz", hash = "sha256:cd2b8689524b5e5ac5cf79d94423f98e60e140b66f10c19a5c9d2665f45340dd"},
-]
->>>>>>> 878fb08 ([NRLF-368] flake8 for print)
 
 [package.dependencies]
 typing-extensions = ">=4.4.0,<5.0.0"
 
 [package.extras]
-<<<<<<< HEAD
 all = ["aws-xray-sdk (>=2.8.0,<3.0.0)", "fastjsonschema (>=2.14.5,<3.0.0)", "pydantic (>=1.8.2,<2.0.0)"]
 aws-sdk = ["boto3 (>=1.20.32,<2.0.0)"]
 parser = ["pydantic (>=1.8.2,<2.0.0)"]
 tracer = ["aws-xray-sdk (>=2.8.0,<3.0.0)"]
 validation = ["fastjsonschema (>=2.14.5,<3.0.0)"]
-=======
-pydantic = ["email-validator", "pydantic (>=1.8.2,<2.0.0)"]
-
-[[package]]
-name = "aws-xray-sdk"
-version = "2.11.0"
-description = "The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service."
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "aws-xray-sdk-2.11.0.tar.gz", hash = "sha256:78835fc841f03e550858f18a9973eab8618f47f22d2f59edf130578fa545a867"},
-    {file = "aws_xray_sdk-2.11.0-py2.py3-none-any.whl", hash = "sha256:693fa3a4c790e131fe1e20814ede415a9eeeab5c3b7c868686d3e3c696b8524d"},
-]
-
-[package.dependencies]
-botocore = ">=1.11.3"
-wrapt = "*"
->>>>>>> 878fb08 ([NRLF-368] flake8 for print)
 
 [[package]]
 name = "awscli"
@@ -633,24 +605,6 @@ files = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
-name = "fastjsonschema"
-version = "2.16.2"
-description = "Fastest Python implementation of JSON schema"
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "fastjsonschema-2.16.2-py3-none-any.whl", hash = "sha256:21f918e8d9a1a4ba9c22e09574ba72267a6762d47822db9add95f6454e51cc1c"},
-    {file = "fastjsonschema-2.16.2.tar.gz", hash = "sha256:01e366f25d9047816fe3d288cbfc3e10541daf0af2044763f3d0ade42476da18"},
-]
-
-[package.extras]
-devel = ["colorama", "json-spec", "jsonschema", "pylint", "pytest", "pytest-benchmark", "pytest-cache", "validictory"]
-
-[[package]]
->>>>>>> 878fb08 ([NRLF-368] flake8 for print)
 name = "filelock"
 version = "3.8.0"
 description = "A platform independent file lock."
@@ -1927,6 +1881,10 @@ description = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
 category = "dev"
 optional = false
 python-versions = "*"
+files = [
+    {file = "sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0"},
+    {file = "sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88"},
+]
 
 [[package]]
 name = "termcolor"
@@ -2182,7 +2140,6 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-<<<<<<< HEAD
 content-hash = "ba53f54a6034a947f0592ce5b487271a5c85461a52c9666caf25ac6b120febd1"
 
 [metadata.files]
@@ -2951,3 +2908,6 @@ xmltodict = [
 =======
 content-hash = "68a0e46b866901d17f3d181e0f32930046e9d33b70b47ed042854fd556837186"
 >>>>>>> 878fb08 ([NRLF-368] flake8 for print)
+=======
+content-hash = "024287eabb8eef2168d1ff6b0774c36db33b2d7d3ac5af8bda7afb8e26ae08d5"
+>>>>>>> 904fe8e ([NRLF-368] Updated poetry.lock)
