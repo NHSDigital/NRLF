@@ -42,3 +42,9 @@ OK = {
     "headers": {"Content-Type": "application/json", "Content-Length": 17},
     "body": '{"message": "OK"}',
 }
+
+CREATED = {
+    "statusCode": 201,
+    "headers": {"Content-Type": "application/json", "Content-Length": 17},
+    "body": '{"message": "CREATED"}',
+}

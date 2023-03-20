@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import boto3
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
