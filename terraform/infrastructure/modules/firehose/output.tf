@@ -18,7 +18,7 @@ output "firehose_subscription" {
       arn = aws_iam_role.firehose_subscription.arn
     }
     filter = {
-      pattern = "[lambda_log_type != \"INIT_START\" && lambda_log_type != \"START\" && lambda_log_type != \"END\" && lambda_log_type != \"REPORT\", everything_else]"
+      pattern = "[first_item_on_this_log_line != \"INIT_START\" && first_item_on_this_log_line != \"START\" && first_item_on_this_log_line != \"END\" && first_item_on_this_log_line != \"REPORT\", everything_else_on_this_log_line]"
     }
   }
 }

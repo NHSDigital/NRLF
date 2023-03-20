@@ -68,6 +68,7 @@ def test_firehose_output(
         start_time=start_time,
         possible_prefixes=possible_s3_key_prefixes,
     ):
+        # Please keep these log lines: these aid debugging for new firehose errors
         print("comparing")
         print(json.dumps(good_logs, indent=4))
         print("to")
