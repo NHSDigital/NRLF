@@ -122,10 +122,10 @@ steps = [
 
 
 def _function_handler(
-    fn, transaction_id: str, method_arn: str, args, kwargs
+    fn, transaction_id: str, status_code_ok: HTTPStatus, method_arn: str, args, kwargs
 ) -> tuple[HTTPStatus, any]:
     try:
-        status_code, result = HTTPStatus.OK, fn(*args, **kwargs)
+        status_code, result = status_code_ok, fn(*args, **kwargs)
     except Exception:
         status_code = None
         result = _create_policy(
@@ -159,6 +159,7 @@ def execute_steps(
     status_code, response = _function_handler(
         _setup_logger,
         transaction_id=transaction_id,
+        status_code_ok=HTTPStatus.OK,
         method_arn=method_arn,
         args=(index_path, transaction_id, event),
         kwargs=dependencies,
@@ -171,6 +172,7 @@ def execute_steps(
     return _function_handler(
         _execute_steps,
         transaction_id=transaction_id,
+        status_code_ok=HTTPStatus.OK,
         method_arn=method_arn,
         args=(steps, event, context),
         kwargs={
