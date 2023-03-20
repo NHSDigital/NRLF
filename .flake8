@@ -1,0 +1,9 @@
+[flake8]
+select = T201  # Print statement linter
+exclude =
+    .git,
+    __pycache__,
+    dist,
+    .venv,
+    scripts,
+    packages/feature_documentation/*

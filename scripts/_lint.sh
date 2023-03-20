@@ -22,6 +22,8 @@ function _lint() {
 }
 
 function _check_lint() {
+  set -e
+  python -m flake8
   python -m black . --check
   cd $root/terraform/infrastructure
   terraform fmt -check -recursive

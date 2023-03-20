@@ -74,8 +74,6 @@ def _create_legacy_model_from_legacy_json(legacy_json: dict) -> LegacyDocumentPo
 
 def validate_no_extra_fields(input_fhir_json, output_fhir_json):
     if input_fhir_json != output_fhir_json:
-        print("input fhir", input_fhir_json)
-        print("output_fhir_json", output_fhir_json)
         raise FhirValidationError("Input FHIR JSON has additional non-FHIR fields.")
 
 

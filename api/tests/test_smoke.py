@@ -204,4 +204,4 @@ if __name__ == "__main__":
 
     session = aws_session_assume_terraform_role(account_id)
 
-    print(get_oauth_token(session, env=env, account=account))
+    print(get_oauth_token(session, env=env, account=account))  # noqa: T201
