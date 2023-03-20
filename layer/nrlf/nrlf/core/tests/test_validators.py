@@ -1,12 +1,12 @@
 from unittest import mock
 
 import pytest
-
 from nrlf.core.constants import ID_SEPARATOR
 from nrlf.core.errors import (
     DocumentReferenceValidationError,
     InvalidTupleError,
     ItemNotFound,
+    RequestValidationError,
 )
 from nrlf.core.transform import make_timestamp
 from nrlf.core.validators import (
@@ -16,7 +16,9 @@ from nrlf.core.validators import (
     validate_source,
     validate_timestamp,
     validate_tuple,
+    validate_type_system,
 )
+from nrlf.producer.fhir.r4.model import RequestParams
 
 
 @pytest.mark.parametrize(
@@ -207,4 +209,51 @@ def test_is_document_reference_string_valid(
         with pytest.raises(expected_outcome):
             validate_document_reference_string(document_reference_string)
     else:
-        assert validate_document_reference_string(document_reference_string) == None
+        assert validate_document_reference_string(document_reference_string) is None
+
+
+@pytest.mark.parametrize(
+    ["type_identifier", "pointer_types", "expected_outcome"],
+    (
+        [
+            "https://nrl.team/rowan-test|123",
+            ["https://nrl.team/rowan-poo|123"],
+            RequestValidationError,
+        ],
+        [
+            "https://nrl.team/rowan-test|123",
+            ["https://nrl.team/rowan-poo|123", "https://nrl.team/rowan-test|123"],
+            None,
+        ],
+        [
+            "http://snomed.info/sct|861421000000109",
+            [
+                "https://nrl.team/rowan-poo|123",
+                "http://snomed.info/sct|861421000000109",
+            ],
+            None,
+        ],
+        ["https://nrl.team/rowan-test|123", [], RequestValidationError],
+    ),
+)
+def test_validate_type_system(type_identifier, pointer_types, expected_outcome):
+
+    queryStringParameters = {
+        "type.identifier": type_identifier,
+    }
+    request_params = RequestParams(**queryStringParameters or {})
+
+    if expected_outcome is RequestValidationError:
+        with pytest.raises(expected_outcome):
+            validate_type_system(
+                type_identifier=request_params.type_identifier,
+                pointer_types=pointer_types,
+            )
+    else:
+        assert (
+            validate_type_system(
+                type_identifier=request_params.type_identifier,
+                pointer_types=pointer_types,
+            )
+            is None
+        )
