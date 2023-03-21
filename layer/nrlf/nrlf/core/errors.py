@@ -94,5 +94,5 @@ def assert_no_extra_params(
     unknown_params = set(provided_params) - set(expected_params)
     if unknown_params:
         raise UnknownParameterError(
-            f"Unexpected request parameters: {', '.join(unknown_params)}"
+            f"Unexpected parameters: {', '.join(unknown_params)}"
         )
