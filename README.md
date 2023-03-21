@@ -49,7 +49,13 @@ Swagger generation requirements.
 
 For those on a linux/WSL setup these are some helpful instructions:
 
-#### 1. Poetry:
+#### 1. Java:
+
+```shell 
+sudo apt install default-jre
+```
+
+#### 2. Poetry:
 
 ```shell
 curl -sSL https://install.python-poetry.org | python3
@@ -73,7 +79,7 @@ source ~/.bashrc
 poetry --version
 ```
 
-#### 2. pyenv:
+#### 3. pyenv:
 
 ```shell
 sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
@@ -105,13 +111,13 @@ source ~/.bashrc
 pyenv --version
 ```
 
-#### 3. terraform
+#### 4. terraform
 
 ```shell
 wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list sudo apt update && sudo apt install terraform
 ```
 
-#### 4. tfenv:
+#### 5. tfenv:
 
 ```shell
 git clone https://github.com/tfutils/tfenv.git ~/.tfenv
@@ -127,6 +133,11 @@ sudo ln -s ~/.tfenv/bin/* /usr/local/bin
 
 ```shell
 tfenv --version
+```
+
+#### 6. yq:
+```shell
+sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +rx /usr/bin/yq
 ```
 
 ### 2. Install python dependencies
