@@ -80,6 +80,7 @@ Feature: Producer Create Success scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is successful
+    And the status is 201
     And Document Pointer "8FW23-1234567890" exists
       | property    | value                             |
       | id          | 8FW23-1234567890                  |
@@ -106,6 +107,7 @@ Feature: Producer Create Success scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is successful
+    And the status is 201
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value            |
       | issue_type        | informational    |

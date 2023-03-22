@@ -6,11 +6,11 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
 from nrlf.consumer.fhir.r4.model import NextPageToken, RequestQuerySubject
 from nrlf.core.common_steps import parse_headers
-from nrlf.core.constants import NHS_NUMBER_INDEX
 from nrlf.core.errors import assert_no_extra_params
 from nrlf.core.model import ConsumerRequestParams, PaginatedResponse, key
 from nrlf.core.repository import Repository, custodian_filter, type_filter
 from nrlf.core.transform import create_bundle_from_paginated_response
+from nrlf.core.validators import validate_type_system
 
 
 @log_action(narrative="Searching for document references")
@@ -33,6 +33,10 @@ def search_document_references(
 
     custodian = custodian_filter(
         custodian_identifier=request_params.custodian_identifier
+    )
+
+    validate_type_system(
+        request_params.type_identifier, pointer_types=data["pointer_types"]
     )
 
     pointer_types = type_filter(

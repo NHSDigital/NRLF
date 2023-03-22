@@ -28,11 +28,14 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
 
 ## Setup
 
+Before you tackle this guide, there are some more instructions here on the [Developer onboarding guide](https://nhsd-confluence.digital.nhs.uk/pages/viewpage.action?spaceKey=CLP&title=NRLF+-+Developer+Onboarding) in confluence
+
 ### 1. Prerequisites
 
 - [poetry](https://python-poetry.org/docs/)
 - [pyenv](https://github.com/pyenv/pyenv) (this repository uses python 3.9.15)
 - jq
+- terraform
 - [tfenv](https://github.com/tfutils/tfenv) (this repository uses terraform 1.3.4)
 - coreutils
 
@@ -46,39 +49,95 @@ Swagger generation requirements.
 
 For those on a linux/WSL setup these are some helpful instructions:
 
-Poetry:
+#### 1. Java:
+
+```shell 
+sudo apt install default-jre
+```
+
+#### 2. Poetry:
 
 ```shell
-curl -sSL https://install.python-poetry.org | python3 - --version 1.1.15 (only use --version to specify)
+curl -sSL https://install.python-poetry.org | python3
+```
+
+```shell
 nano ~/.bashrc
-add to bashrc - export PATH="/yourHomeDirectory/.local/bin:$PATH" spineVM home dir is "/home/spineii-user/"
+```
+
+add to bashrc - spineVM home dir is "/home/spineii-user/"
+
+```shell
+export PATH="/$HOME/.local/bin:$PATH"
+```
+
+```shell
 source ~/.bashrc
+```
+
+```shell
 poetry --version
 ```
 
-pyenv:
+#### 3. pyenv:
 
 ```shell
 sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
 libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
 libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+```
 
+```shell
 curl https://pyenv.run | bash
+```
+
+```shell
 nano ~/.bashrc
-add to bashrc - export PATH="$HOME/.pyenv/bin:$PATH"
-eval "$(pyenv init --path)" - add to bashrc
-eval "$(pyenv virtualenv-init -)" - add to bashrc
+```
+
+add to bashrc
+
+```shell
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv virtualenv-init -)"
+```
+
+```shell
 source ~/.bashrc
+```
+
+```shell
 pyenv --version
 ```
 
-tfenv:
+#### 4. terraform
+
+```shell
+wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list sudo apt update && sudo apt install terraform
+```
+
+#### 5. tfenv:
 
 ```shell
 git clone https://github.com/tfutils/tfenv.git ~/.tfenv
+```
+
+```shell
 echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> ~/.bash_profile
+```
+
+```shell
 sudo ln -s ~/.tfenv/bin/* /usr/local/bin
+```
+
+```shell
 tfenv --version
+```
+
+#### 6. yq:
+```shell
+sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +rx /usr/bin/yq
 ```
 
 ### 2. Install python dependencies
@@ -102,7 +161,7 @@ poetry shell
 source nrlf.sh
 nrlf make build
 nrlf aws reset-creds
-nrlf aws login mgmt <mfa>
+nrlf aws login mgmt
 nrlf truststore pull-server dev
 nrlf truststore pull-client dev
 nrlf terraform plan <yourname>-test

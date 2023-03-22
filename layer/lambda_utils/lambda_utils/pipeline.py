@@ -31,9 +31,11 @@ def _get_steps(
     return versioned_steps[version]
 
 
-def _function_handler(fn, transaction_id: str, args, kwargs) -> tuple[HTTPStatus, any]:
+def _function_handler(
+    fn, status_code_ok: HTTPStatus, transaction_id: str, args, kwargs
+) -> tuple[HTTPStatus, any]:
     try:
-        status_code, result = HTTPStatus.OK, fn(*args, **kwargs)
+        status_code, result = status_code_ok, fn(*args, **kwargs)
     except Exception as exception:
         status_code, result = operation_outcome_not_ok(
             transaction_id=transaction_id, exception=exception
@@ -91,6 +93,7 @@ def execute_steps(
     index_path: str,
     event: dict,
     context: LambdaContext,
+    http_status_ok: HTTPStatus = HTTPStatus.OK,
     initial_pipeline_data={},
     **dependencies,
 ) -> tuple[HTTPStatus, dict]:
@@ -101,28 +104,31 @@ def execute_steps(
 
     status_code, response = _function_handler(
         _setup_logger,
+        status_code_ok=http_status_ok,
         transaction_id=transaction_id,
         args=(index_path, transaction_id, event),
         kwargs=dependencies,
     )
 
-    if status_code is not HTTPStatus.OK:
+    if status_code is not http_status_ok:
         return status_code, response
     logger = response
 
     status_code, response = _function_handler(
         _get_steps_for_version_header,
+        status_code_ok=http_status_ok,
         transaction_id=transaction_id,
         args=(index_path, event),
         kwargs={"logger": logger},
     )
 
-    if status_code is not HTTPStatus.OK:
+    if status_code is not http_status_ok:
         return status_code, response
     steps = response
 
     return _function_handler(
         _execute_steps,
+        status_code_ok=http_status_ok,
         transaction_id=transaction_id,
         args=(steps, event, context),
         kwargs={

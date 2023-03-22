@@ -95,6 +95,7 @@ def execute_steps(
     index_path: str,
     event: dict,
     context: LambdaContext,
+    http_status: HTTPStatus = HTTPStatus.OK,
     initial_pipeline_data={},
     **dependencies,
 ) -> tuple[HTTPStatus, dict]:
@@ -107,6 +108,7 @@ def execute_steps(
 
     status_code, response = _function_handler(
         _setup_logger,
+        http_status,
         transaction_id=transaction_id,
         args=(index_path, transaction_id, event),
         kwargs=dependencies,
@@ -118,6 +120,7 @@ def execute_steps(
     steps = _get_steps()
     status_code, response = _function_handler(
         _execute_steps,
+        http_status,
         transaction_id=transaction_id,
         args=(steps, event, context),
         kwargs={

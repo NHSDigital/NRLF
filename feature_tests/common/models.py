@@ -52,7 +52,7 @@ class Response:
     status_code: str = STATUS_CODE_200
 
     def success(self):
-        return self.status_code == STATUS_CODE_200
+        return 300 > int(self.status_code) >= int(STATUS_CODE_200)
 
     @property
     def operation_outcome_msg(self) -> str:

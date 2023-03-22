@@ -13,7 +13,6 @@ import botocore.session
 import jwt
 import pytest
 import requests
-from fire import Fire
 
 from helpers.terraform import get_terraform_json
 
@@ -77,16 +76,17 @@ def oauth_access_token(api_key, jwt_private_key, oauth_url, kid):
 
 def aws_account_id_from_profile(env: str):
     account = AWS_ACCOUNT_FOR_ENV[env]
-    profile_name = f"nhsd-nrlf-{account}-admin"
+    profile_names = [f"nhsd-nrlf-{account}-admin", f"nhsd-nrlf-{account}"]
 
     session = botocore.session.Session()
     profiles = session.full_config["profiles"]
 
-    assert profile_name in profiles, f"Missing AWS profile '{profile_name}'"
-    profile = profiles[profile_name]
-    account_id = profile["aws_account_id"]
+    for name in profile_names:
+        account_id = profiles.get(name, {}).get("aws_account_id")
+        if account_id:
+            return account_id
 
-    return account_id
+    raise Exception("No valid profile found")
 
 
 def aws_read_ssm_apigee_proxy(session, env: str):
