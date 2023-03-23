@@ -108,7 +108,7 @@ def retrieve_firehose_output(
                     bucket_name=bucket_name,
                     file_key=file_key,
                 )
-                yield logs_from_s3
+                yield prefix, logs_from_s3
 
     # If no break by now then assume the search has failed
     raise RuntimeError(

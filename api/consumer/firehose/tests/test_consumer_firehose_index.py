@@ -61,7 +61,7 @@ def test_firehose_output(
 
     # NB the following loops for MAX_RUNTIME secs then fails unless
     # the final break statement is executed
-    for logs_from_s3 in retrieve_firehose_output(
+    for prefix, logs_from_s3 in retrieve_firehose_output(
         s3_client=s3_client,
         bucket_name=bucket_name,
         start_time=start_time,
@@ -73,11 +73,17 @@ def test_firehose_output(
         print("to")  # noqa: T201
         print(json.dumps(logs_from_s3, indent=4))  # noqa: T201
         print()  # noqa: T201
-        if all_logs_are_on_s3(original_logs=good_logs, logs_from_s3=logs_from_s3):
+        if prefix.startswith("processed") and all_logs_are_on_s3(
+            original_logs=good_logs, logs_from_s3=logs_from_s3
+        ):
             verify_good_logs = True
-        if all_logs_are_on_s3(original_logs=bad_logs, logs_from_s3=logs_from_s3):
+        if prefix.startswith("errors") and all_logs_are_on_s3(
+            original_logs=bad_logs, logs_from_s3=logs_from_s3
+        ):
             verify_bad_logs = True
-        if all_logs_are_on_s3(original_logs=very_bad_logs, logs_from_s3=logs_from_s3):
+        if prefix.startswith("errors") and all_logs_are_on_s3(
+            original_logs=very_bad_logs, logs_from_s3=logs_from_s3
+        ):
             verify_very_bad_logs = True
         print(verify_good_logs, verify_bad_logs, verify_very_bad_logs)  # noqa: T201
         print("------------------")  # noqa: T201

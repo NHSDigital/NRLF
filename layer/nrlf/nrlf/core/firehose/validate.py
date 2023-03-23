@@ -48,6 +48,9 @@ def _validate_record_size(
 
 @log_action(log_reference=LogReference.FIREHOSE005, log_fields=["log"])
 def _validate_log(log: dict):
+    if type(log) is not dict:
+        raise LogValidationError(f"Log is not of JSON type Object: '{log}'")
+
     try:
         parsed_log = LogTemplate(**log)
     except ValidationError as err:
