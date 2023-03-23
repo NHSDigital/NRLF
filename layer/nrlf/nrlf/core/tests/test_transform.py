@@ -2,6 +2,7 @@ import pytest
 from nrlf.core.errors import FhirValidationError, NextPageTokenValidationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import (
+    _strip_empty_json_paths,
     create_bundle_entries_from_document_pointers,
     create_document_pointer_from_fhir_json,
     transform_evaluation_key_to_next_page_token,
@@ -11,6 +12,54 @@ from nrlf.core.transform import (
 from nrlf.producer.fhir.r4.model import BundleEntry, DocumentReference
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 from pydantic import BaseModel
+
+
+@pytest.mark.parametrize(
+    "input, expected",
+    [
+        (
+            {"foo": "bar", "baz": [{"spam": None, "eggs": ""}, {"bam": "wap"}]},
+            {"foo": "bar", "baz": [{"bam": "wap"}]},
+        ),
+        (
+            {"foo": None, "baz": [{"spam": "eggs"}, {"bam": ""}]},
+            {"baz": [{"spam": "eggs"}]},
+        ),
+        (
+            {"foo": {"spam": None}},
+            None,
+        ),
+    ],
+)
+def test__strip_empty_json_paths(input, expected):
+    assert _strip_empty_json_paths(input) == expected
+
+
+@pytest.mark.parametrize(
+    "input",
+    [
+        {"foo": "bar", "baz": [{"eggs": []}]},
+        {"foo": "bar", "baz": [{"eggs": {}}]},
+        {"foo": "bar", "baz": [{"spam": "SPAM", "eggs": ""}]},
+        {"foo": "bar", "baz": [{"eggs": None}]},
+    ],
+)
+def test__strip_empty_json_paths_raises_exception(input):
+    with pytest.raises(FhirValidationError):
+        _strip_empty_json_paths(input, raise_on_discovery=True)
+
+
+@pytest.mark.parametrize(
+    "input",
+    [
+        {"foo": "bar", "baz": [{"eggs": ["spam"]}]},
+        {"foo": "bar", "baz": [{"eggs": {"bam": "wap"}}]},
+        {"foo": "bar", "baz": [{"eggs": "spam"}]},
+        {"foo": "bar", "baz": [{"eggs": False}]},
+    ],
+)
+def test__strip_empty_json_paths_do_not_raise(input):
+    _strip_empty_json_paths(input, raise_on_discovery=True)
 
 
 class Foo(BaseModel):

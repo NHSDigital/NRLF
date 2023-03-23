@@ -21,26 +21,41 @@ def make_timestamp() -> str:
     return dt.utcnow().isoformat(timespec="milliseconds") + "Z"
 
 
-def _strip_empty_json_paths(json: Union[list[dict], dict]) -> Union[list[dict], dict]:
+def _strip_empty_json_paths(
+    json: Union[list[dict], dict], raise_on_discovery=False
+) -> Union[list[dict], dict]:
     if json in EMPTY_VALUES:
         return None
 
     if type(json) is list:
         if type(json[0]) is dict:
-            return list(filter(None, (_strip_empty_json_paths(item) for item in json)))
+            return list(
+                filter(
+                    None,
+                    (
+                        _strip_empty_json_paths(item, raise_on_discovery)
+                        for item in json
+                    ),
+                )
+            )
         return json
 
     stripped_json = {}
     modified = False
     for key, value in json.items():
         if type(value) in JSON_TYPES:
-            value = _strip_empty_json_paths(value)
+            value = _strip_empty_json_paths(value, raise_on_discovery)
         if value in EMPTY_VALUES:
             modified = True
+            if raise_on_discovery:
+                raise FhirValidationError(f"Empty field '{key}' is not valid FHIR")
             continue
         stripped_json[key] = value
-
-    return _strip_empty_json_paths(stripped_json) if modified else stripped_json
+    return (
+        _strip_empty_json_paths(stripped_json, raise_on_discovery)
+        if modified
+        else stripped_json
+    )
 
 
 def _create_fhir_model_from_legacy_model(
@@ -74,8 +89,6 @@ def _create_legacy_model_from_legacy_json(legacy_json: dict) -> LegacyDocumentPo
 
 def validate_no_extra_fields(input_fhir_json, output_fhir_json):
     if input_fhir_json != output_fhir_json:
-        print("input fhir", input_fhir_json)
-        print("output_fhir_json", output_fhir_json)
         raise FhirValidationError("Input FHIR JSON has additional non-FHIR fields.")
 
 
@@ -108,6 +121,7 @@ def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference
         input_fhir_json=fhir_json,
         output_fhir_json=fhir_strict_model.dict(exclude_none=True),
     )
+    _strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
     return fhir_strict_model
 
 

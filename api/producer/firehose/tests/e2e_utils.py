@@ -87,7 +87,7 @@ def _parse_error_event(error_event: dict):
 @cache
 def _fetch_logs_from_s3(s3_client, bucket_name, file_key) -> list[dict]:
     response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
-    print("Retrieving data from ", bucket_name, file_key)
+    print("Retrieving data from ", bucket_name, file_key)  # noqa: T201
     with gzip.open(response["Body"], "rt") as gf:
         data = gf.read()
 
@@ -98,7 +98,7 @@ def _fetch_logs_from_s3(s3_client, bucket_name, file_key) -> list[dict]:
         parsed_lines = chain.from_iterable(_grouped_log_events)  # Flatten list of lists
 
     result = list(parsed_lines)
-    print("Got", result)
+    print("Got", result)  # noqa: T201
     return result
 
 
