@@ -11,6 +11,7 @@ function _test_help() {
   echo "  smoke               - run smoke tests"
   echo "  feature local       - run local BDD tests"
   echo "  feature integration - run integration BDD tests"
+  echo "  firehose            - run firehose integration tests"
   echo
   return 1
 }

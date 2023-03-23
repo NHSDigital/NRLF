@@ -12,6 +12,7 @@ The S3 output file prefix and keys can't be known exactly, even at runtime, and
 so the relevant parts of S3 must be trawled for output files which appear after a
 certain point in time.
 """
+import json
 from datetime import datetime, timedelta
 
 import pytest
@@ -60,8 +61,6 @@ def test_firehose_output(
 
     # NB the following loops for MAX_RUNTIME secs then fails unless
     # the final break statement is executed
-    import json
-
     for logs_from_s3 in retrieve_firehose_output(
         s3_client=s3_client,
         bucket_name=bucket_name,
