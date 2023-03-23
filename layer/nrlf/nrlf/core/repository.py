@@ -75,22 +75,22 @@ def _handle_dynamodb_errors(
     return wrapper
 
 
-def _valid_results(
-    item_type: type[DynamoDbModel], results: list[dict]
+def _valid_items(
+    item_type: type[DynamoDbModel], items: list[dict]
 ) -> list[DynamoDbModel]:
     """
     returns only valid results for the specified type[DynamoDbModel]
     """
-    valid_results = []
-    for item in results:
+    valid_items = []
+    for item in items:
         try:
             valid_item = _is_record_valid(item_type, item)
         except (CorruptDocumentPointer):
             pass
         else:
-            valid_results.append(valid_item)
+            valid_items.append(valid_item)
 
-    return valid_results
+    return valid_items
 
 
 @log_action(narrative="Checking if record is valid", log_fields=["item"])
@@ -356,7 +356,7 @@ class Repository:
                 exclusive_start_key
             )
 
-        args = _strip_none(
+        query_kwargs = _strip_none(
             {
                 "TableName": self.table_name,
                 "IndexName": index_name,
@@ -366,10 +366,17 @@ class Repository:
             }
         )
 
-        results = self.dynamodb.query(**args)
-        document_pointers = _valid_results(self.item_type, results["Items"])
+        results = self.dynamodb.query(**query_kwargs)
+        items = results["Items"]
+        document_pointers = _valid_items(item_type=self.item_type, items=items)
 
         last_evaluated_key = results.get("LastEvaluatedKey")
+        if last_evaluated_key is not None and len(items) == PAGE_ITEM_LIMIT:
+            query_kwargs["ExclusiveStartKey"] = last_evaluated_key
+            next_results = self.dynamodb.query(**query_kwargs)
+            if not next_results["Items"]:
+                last_evaluated_key = None
+
         if last_evaluated_key is not None:
             last_evaluated_key = transform_evaluation_key_to_next_page_token(
                 last_evaluated_key

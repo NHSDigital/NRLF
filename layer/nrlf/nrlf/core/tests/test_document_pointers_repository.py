@@ -17,6 +17,7 @@ from nrlf.core.errors import (
 from nrlf.core.model import DocumentPointer, key
 from nrlf.core.repository import (
     MAX_TRANSACT_ITEMS,
+    PAGE_ITEM_LIMIT,
     Repository,
     _keys,
     handle_dynamodb_errors,
@@ -37,6 +38,9 @@ from nrlf.core.types import DynamoDbClient
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
 from feature_tests.common.constants import DOCUMENT_POINTER_TABLE_DEFINITION
+from feature_tests.common.repository import FeatureTestRepository
+from helpers.aws_session import new_aws_session
+from helpers.terraform import get_terraform_json
 
 API_VERSION = 1
 INDEX_NAME = DOCUMENT_POINTER_TABLE_DEFINITION["GlobalSecondaryIndexes"][0]["IndexName"]
@@ -50,6 +54,12 @@ update_document_pointer_from_fhir_json = (
         *args, api_version=API_VERSION, **kwargs
     )
 )
+
+
+@pytest.fixture(scope="session")
+def dynamodb_client():
+    session = new_aws_session()
+    return session.client("dynamodb")
 
 
 @handle_dynamodb_errors()
@@ -349,3 +359,79 @@ def test_query_last_evaluated_key_is_returned_in_correct_circumstance():
 
     assert response.last_evaluated_key is not None
     assert response2.last_evaluated_key is None
+
+
+def _create_items_to_scroll(n_pages_of_docs, repository) -> list[DocumentPointer]:
+    items: list[DocumentPointer] = []
+    for i in range(PAGE_ITEM_LIMIT * n_pages_of_docs):
+        doc = generate_test_document_reference(
+            provider_doc_id=f"id{i}", subject=generate_test_subject("9278693472")
+        )
+        item = create_document_pointer_from_fhir_json(fhir_json=doc)
+        repository.create(item=item)
+        items.append(item)
+
+    return items
+
+
+def _query_all_pages(n_pages_of_docs, repository, pk) -> list[DocumentPointer]:
+    retrieved_items = []
+
+    # Scroll first n-1 pages
+    last_evaluated_key = None
+    for _ in range(n_pages_of_docs - 1):
+        response = repository.query_gsi_1(pk, exclusive_start_key=last_evaluated_key)
+        last_evaluated_key = response.last_evaluated_key
+        assert len(response.document_pointers) == PAGE_ITEM_LIMIT
+        assert last_evaluated_key is not None
+        retrieved_items += response.document_pointers
+
+    # Scroll final page
+    response = repository.query_gsi_1(pk, exclusive_start_key=last_evaluated_key)
+    assert len(response.document_pointers) == PAGE_ITEM_LIMIT
+    assert (
+        response.last_evaluated_key is None
+    )  # Note: this is now None, since the last page
+    retrieved_items += response.document_pointers
+    return retrieved_items
+
+
+def document_pointer_collection_are_same(
+    a: list[DocumentPointer], b: list[DocumentPointer]
+):
+    assert len(a) == len(b)
+    assert all(item in a for item in b)
+    assert all(item in b for item in a)
+
+
+def _test_query_last_evaluated_key_is_not_returned_at_page_limit(
+    repository_type, client, n_pages_of_docs, environment_prefix=""
+):
+    repository = repository_type(
+        item_type=DocumentPointer, client=client, environment_prefix=environment_prefix
+    )
+    items = _create_items_to_scroll(n_pages_of_docs, repository)
+    retrieved_items = _query_all_pages(n_pages_of_docs, repository, items[0].pk_1)
+    document_pointer_collection_are_same(a=items, b=retrieved_items)
+
+
+@pytest.mark.parametrize("n_pages_of_docs", range(1, 5))
+def test_query_last_evaluated_key_is_not_returned_at_page_limit(n_pages_of_docs):
+    with mock_dynamodb() as client:
+        _test_query_last_evaluated_key_is_not_returned_at_page_limit(
+            repository_type=Repository, client=client, n_pages_of_docs=n_pages_of_docs
+        )
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("n_pages_of_docs", range(1, 5))
+def test_query_last_evaluated_key_is_not_returned_at_page_limit_integration(
+    n_pages_of_docs, dynamodb_client
+):
+    environment_prefix = f'{get_terraform_json()["prefix"]["value"]}--'
+    _test_query_last_evaluated_key_is_not_returned_at_page_limit(
+        repository_type=FeatureTestRepository,
+        client=dynamodb_client,
+        n_pages_of_docs=n_pages_of_docs,
+        environment_prefix=environment_prefix,
+    )
