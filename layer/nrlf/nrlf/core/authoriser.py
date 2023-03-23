@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 from http import HTTPStatus
 from logging import Logger
 from typing import Any
@@ -16,6 +17,13 @@ from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _setup_logger
 from nrlf.core.response import get_error_message
 from pydantic import BaseModel, ValidationError
+
+
+class LogReference(Enum):
+    AUTHORISER001 = "Parsing headers"
+    AUTHORISER002 = "Validating pointer types"
+    AUTHORISER003 = "Render authorisation response"
+    AUTHORISER004 = "Parsing Client RP Details"
 
 
 class Config(BaseModel):
@@ -61,7 +69,12 @@ def _create_policy(principal_id, resource, effect, context):
     }
 
 
-@log_action(narrative="Parsing headers")
+@log_action(log_reference=LogReference.AUTHORISER004, log_result=True)
+def _parse_client_rp_details(raw_client_rp_details: dict):
+    return ClientRpDetailsHeader.parse_raw(raw_client_rp_details)
+
+
+@log_action(log_reference=LogReference.AUTHORISER001)
 def parse_headers(
     data: PipelineData,
     context: LambdaContext,
@@ -74,14 +87,16 @@ def parse_headers(
     _raw_connection_metadata = _headers.get(CONNECTION_METADATA, "{}")
     try:
         connection_metadata = ConnectionMetadata.parse_raw(_raw_connection_metadata)
-        ClientRpDetailsHeader.parse_raw(_raw_client_rp_details)
+        _parse_client_rp_details(
+            raw_client_rp_details=_raw_client_rp_details, logger=logger
+        )
     except ValidationError as err:
         return PipelineData(error={"message": get_error_message(err)}, **data)
     else:
         return PipelineData(pointer_types=connection_metadata.pointer_types, **data)
 
 
-@log_action(narrative="Validating pointer types")
+@log_action(log_reference=LogReference.AUTHORISER002)
 def validate_pointer_types(
     data: PipelineData,
     context: LambdaContext,
@@ -96,7 +111,7 @@ def validate_pointer_types(
     return PipelineData(**data)
 
 
-@log_action(narrative="Render authorisation response")
+@log_action(log_reference=LogReference.AUTHORISER003)
 def generate_response(
     data: PipelineData,
     context: LambdaContext,

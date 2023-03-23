@@ -48,6 +48,7 @@ function nrlf() {
     "swagger") _swagger "${@:2}" ;;
     "truststore") _truststore "${@:2}" ;;
     "doc") _doc "${@:2}" ;;
+    "firehose") _firehose "${@:2}" ;;
     *) _nrlf_commands_help ;;
   esac
 

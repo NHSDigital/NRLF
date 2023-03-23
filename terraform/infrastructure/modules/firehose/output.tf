@@ -8,3 +8,17 @@ output "delivery_stream" {
     }
   }
 }
+
+output "firehose_subscription" {
+  value = {
+    destination = {
+      arn = aws_kinesis_firehose_delivery_stream.firehose.arn
+    }
+    role = {
+      arn = aws_iam_role.firehose_subscription.arn
+    }
+    filter = {
+      pattern = "[first_item_on_this_log_line != \"INIT_START\" && first_item_on_this_log_line != \"START\" && first_item_on_this_log_line != \"END\" && first_item_on_this_log_line != \"REPORT\", everything_else_on_this_log_line]"
+    }
+  }
+}

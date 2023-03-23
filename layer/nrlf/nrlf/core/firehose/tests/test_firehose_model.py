@@ -1,12 +1,13 @@
 import pytest
 from hypothesis import given
-from hypothesis.strategies import builds, dictionaries, lists, text
+from hypothesis.strategies import builds, lists
 from nrlf.core.firehose.model import (
     CloudwatchLogsData,
     FirehoseOutputRecord,
     FirehoseResult,
     FirehoseSubmissionRecord,
 )
+from nrlf.core.firehose.tests.test_firehose_handler import draw_log_event
 
 ENCODED_LOG_EVENTS = "an encoded event"  # Size = 16
 RECORD_ID = "123"  # Size = 3
@@ -64,7 +65,7 @@ def test_processed_record(unprocessed_records, firehose_result, expected_record)
 @given(
     builds(
         CloudwatchLogsData,
-        logEvents=lists(dictionaries(keys=text(), values=text()), min_size=1),
+        logEvents=lists(draw_log_event(), min_size=1),
     )
 )
 def test_CloudwatchLogsData_split_in_two(cloudwatch_data: CloudwatchLogsData):
@@ -76,7 +77,7 @@ def test_CloudwatchLogsData_split_in_two(cloudwatch_data: CloudwatchLogsData):
 @given(
     builds(
         CloudwatchLogsData,
-        logEvents=lists(dictionaries(keys=text(), values=text()), min_size=1),
+        logEvents=lists(draw_log_event(), min_size=1),
     )
 )
 def test_CloudwatchLogsData_parse_and_encode(cloudwatch_data: CloudwatchLogsData):

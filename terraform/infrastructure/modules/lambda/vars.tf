@@ -21,3 +21,7 @@ variable "additional_policies" {
 }
 
 variable "handler" {}
+
+variable "firehose_subscriptions" {
+  default = []
+}

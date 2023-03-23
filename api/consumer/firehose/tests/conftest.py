@@ -24,7 +24,7 @@ def session():
 
 @pytest.fixture
 def firehose_metadata():
-    return get_terraform_json()["firehose"]["value"]["producer"]["delivery_stream"]
+    return get_terraform_json()["firehose"]["value"]["consumer"]["delivery_stream"]
 
 
 @pytest.fixture

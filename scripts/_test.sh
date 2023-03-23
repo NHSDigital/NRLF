@@ -11,6 +11,7 @@ function _test_help() {
   echo "  smoke               - run smoke tests"
   echo "  feature local       - run local BDD tests"
   echo "  feature integration - run integration BDD tests"
+  echo "  firehose            - run firehose integration tests"
   echo
   return 1
 }
@@ -41,7 +42,7 @@ function _test_integration() {
 
 function _test_integration_firehose() {
   local args=(${@:1})
-  python -m pytest -m "integration and firehose" --runslow $args
+  python -m pytest -m "integration and firehose" --runslow -n 2 $args
 }
 
 function _test_smoke() {

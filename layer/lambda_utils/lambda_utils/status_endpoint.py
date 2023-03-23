@@ -1,5 +1,6 @@
 import os
 from contextlib import contextmanager
+from enum import Enum
 from http import HTTPStatus
 from logging import Logger
 from types import ModuleType
@@ -8,14 +9,18 @@ from typing import Any, Generator
 import boto3
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.header_config import LoggingHeader
 from lambda_utils.logging import log_action, prepare_default_event_for_logging
 from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _function_handler, _setup_logger
-from nrlf.core.constants import NHS_NUMBER_INDEX
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
+
+
+class LogReference(Enum):
+    STATUS001 = "Getting environmental variables config"
+    STATUS002 = "Getting boto3 client"
+    STATUS003 = "Hitting the database"
 
 
 class Config(BaseModel):
@@ -33,7 +38,7 @@ def get_mutable_pipeline() -> Generator[ModuleType, None, None]:
         pipeline.__dict__[k] = v
 
 
-@log_action(narrative="Getting environmental variables config")
+@log_action(log_reference=LogReference.STATUS001)
 def _get_config(
     data: PipelineData,
     context: LambdaContext,
@@ -47,7 +52,7 @@ def _get_config(
     return PipelineData(config=config)
 
 
-@log_action(narrative="Getting boto3 client", log_result=False)
+@log_action(log_reference=LogReference.STATUS002, log_result=False)
 def _get_boto_client(
     data: PipelineData,
     context: LambdaContext,
@@ -59,7 +64,7 @@ def _get_boto_client(
     return PipelineData(client=client, **data)
 
 
-@log_action(narrative="Hitting the database")
+@log_action(log_reference=LogReference.STATUS003)
 def _hit_the_database(
     data: PipelineData,
     context: LambdaContext,

@@ -1,3 +1,4 @@
+from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -14,7 +15,11 @@ from nrlf.core.validators import validate_type_system
 from nrlf.producer.fhir.r4.model import NextPageToken, RequestQuerySubject
 
 
-@log_action(narrative="Searching for document references")
+class LogReference(Enum):
+    SEARCH001 = "Searching for document references"
+
+
+@log_action(log_reference=LogReference.SEARCH001)
 def search_document_references(
     data: PipelineData,
     context: LambdaContext,
