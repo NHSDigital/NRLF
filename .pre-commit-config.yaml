@@ -26,14 +26,6 @@ repos:
         args: [-b, develop, -b, master, -b, main]
         pass_filenames: false
 
-  # Remove unused imports
-  - repo: https://github.com/PyCQA/autoflake
-    rev: v2.0.2
-    hooks:
-      - id: autoflake
-        args:
-          - "--check-diff"
-
   # Flake8 for print only (error code T201)
   - repo: https://github.com/pycqa/flake8
     rev: 6.0.0
@@ -42,7 +34,7 @@ repos:
         additional_dependencies:
           - flake8-print
         args:
-          - "--select=T201"
+          - "--select=T201,F401,F402,F403"
           - "--exclude=.git,__pycache__,dist,.venv,scripts,packages/feature_documentation/*"
 
   - repo: https://github.com/psf/black

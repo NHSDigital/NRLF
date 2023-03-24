@@ -9,9 +9,8 @@ from uuid import uuid4
 from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
 from lambda_utils.constants import LoggingConstants, LoggingOutcomes
 from lambda_utils.errors import LoggingError
-from pydantic import BaseModel
-
 from nrlf.core.errors import ERROR_SET_4XX
+from pydantic import BaseModel
 
 
 def generate_transaction_id() -> str:
