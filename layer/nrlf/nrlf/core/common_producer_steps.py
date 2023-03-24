@@ -1,3 +1,4 @@
+from enum import Enum
 from logging import Logger
 from multiprocessing import AuthenticationError
 from typing import Any
@@ -7,7 +8,11 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
 
 
-@log_action(narrative="Validating producer permissions")
+class LogReference(Enum):
+    COMMONPRODUCER001 = "Validating producer permissions"
+
+
+@log_action(log_reference=LogReference.COMMONPRODUCER001)
 def validate_producer_permissions(
     data: PipelineData,
     context: LambdaContext,

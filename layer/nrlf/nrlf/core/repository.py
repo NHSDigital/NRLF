@@ -1,3 +1,4 @@
+from enum import Enum
 from functools import reduce, wraps
 from typing import TypeVar, Union
 
@@ -33,6 +34,11 @@ CONDITION_CHECK_CODES = [
     "TransactionCanceledException",
     "ValidationException",
 ]
+
+
+class LogReference(Enum):
+    REPOSITORY001 = "Checking if record is valid"
+    REPOSITORY002 = "Querying document"
 
 
 class CorruptDocumentPointer(Exception):
@@ -93,7 +99,7 @@ def _valid_items(
     return valid_items
 
 
-@log_action(narrative="Checking if record is valid", log_fields=["item"])
+@log_action(log_reference=LogReference.REPOSITORY001, log_fields=["item"])
 def _is_record_valid(item_type: type[DynamoDbModel], item: dict):
     try:
         return item_type(**item)
@@ -329,7 +335,7 @@ class Repository:
 
     @handle_dynamodb_errors()
     @log_action(
-        narrative="Querying document",
+        log_reference=LogReference.REPOSITORY002,
         log_fields=["pk", "sk_name", "index_name", "pk_name", "sk"],
     )
     def _query(

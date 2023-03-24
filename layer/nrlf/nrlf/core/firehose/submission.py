@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from lambda_utils.logging import log_action
+from nrlf.core.firehose.log_reference import LogReference
 from nrlf.core.firehose.model import FirehoseSubmissionRecord
 from nrlf.core.firehose.utils import list_in_chunks
 from pydantic import BaseModel, Field
@@ -82,7 +83,7 @@ def _submit_records(
     return response
 
 
-@log_action(narrative="Resubmitting unprocessed records to Kinesis/Firehose")
+@log_action(log_reference=LogReference.FIREHOSE003)
 def resubmit_unprocessed_records(
     firehose_client: FirehoseClient,
     unprocessed_records: list[FirehoseSubmissionRecord],

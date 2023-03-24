@@ -1,3 +1,4 @@
+from enum import Enum
 from functools import partial
 from logging import Logger
 from typing import Any
@@ -23,6 +24,14 @@ from nrlf.producer.fhir.r4.strict_model import (
 
 from api.producer.createDocumentReference.src.constants import PersistentDependencies
 from api.producer.createDocumentReference.src.v1.constants import API_VERSION
+
+
+class LogReference(Enum):
+    CREATE001 = "Parsing request body"
+    CREATE002 = "Determining whether document reference will supersede"
+    CREATE003 = "Validating producer permissions"
+    CREATE004 = "Determining whether document reference will supersede"
+    CREATE005 = "Saving document pointer to db"
 
 
 def _invalid_producer_for_create(
@@ -56,7 +65,7 @@ def _invalid_type(
     return source_document_pointer.type != target_document_pointer.type
 
 
-@log_action(narrative="Parsing request body")
+@log_action(log_reference=LogReference.CREATE001)
 def parse_request_body(
     data: PipelineData,
     context: LambdaContext,
@@ -70,7 +79,7 @@ def parse_request_body(
     return PipelineData(**data, body=body, core_model=core_model)
 
 
-@log_action(narrative="Determining whether document reference will supersede")
+@log_action(log_reference=LogReference.CREATE002)
 def mark_as_supersede(
     data: PipelineData,
     context: LambdaContext,
@@ -92,7 +101,7 @@ def mark_as_supersede(
     return PipelineData(**data, **output)
 
 
-@log_action(narrative="Validating producer permissions")
+@log_action(log_reference=LogReference.CREATE003)
 def validate_producer_permissions(
     data: PipelineData,
     context: LambdaContext,
@@ -123,7 +132,7 @@ def validate_producer_permissions(
     return PipelineData(**data)
 
 
-@log_action(narrative="Determining whether document reference will supersede")
+@log_action(log_reference=LogReference.CREATE004)
 def validate_ok_to_supersede(
     data: PipelineData,
     context: LambdaContext,
@@ -179,7 +188,7 @@ def _validate_ok_to_supersede(
         )
 
 
-@log_action(narrative="Saving document pointer to db")
+@log_action(log_reference=LogReference.CREATE005)
 def save_core_model_to_db(
     data: PipelineData,
     context: LambdaContext,

@@ -1,4 +1,5 @@
 import urllib.parse
+from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -7,11 +8,15 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.constants import CONNECTION_METADATA
 from lambda_utils.header_config import AbstractHeader, ConnectionMetadata
 from lambda_utils.logging import log_action
-
 from nrlf.core.model import DocumentPointer
 
 
-@log_action(narrative="Parsing headers")
+class LogReference(Enum):
+    COMMON001 = "Parsing headers"
+    COMMON002 = "Parse document pointer id"
+
+
+@log_action(log_reference=LogReference.COMMON001)
 def parse_headers(
     data: PipelineData,
     context: LambdaContext,
@@ -29,7 +34,7 @@ def parse_headers(
     )
 
 
-@log_action(narrative="Parse document pointer id")
+@log_action(log_reference=LogReference.COMMON002)
 def parse_path_id(
     data: PipelineData,
     context: LambdaContext,

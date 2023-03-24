@@ -1,9 +1,14 @@
 import json
+from enum import Enum
 
 from lambda_utils.logging import log_action
 from nrlf.core.model import DocumentPointer
 from nrlf.producer.fhir.r4.model import DocumentReference
 from pydantic import BaseModel, ValidationError
+
+
+class LogReference(Enum):
+    SEEDVALIDATE001 = "Validating item"
 
 
 def validate_items(items: list[BaseModel], logger=None):
@@ -19,7 +24,9 @@ def validate_items(items: list[BaseModel], logger=None):
     return valid_items
 
 
-@log_action(narrative="Validating item", log_fields=["item"], log_result=True)
+@log_action(
+    log_reference=LogReference.SEEDVALIDATE001, log_fields=["item"], log_result=True
+)
 def _is_item_valid(item: BaseModel):
     try:
         if type(item) == DocumentPointer:

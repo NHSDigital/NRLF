@@ -16,6 +16,9 @@ module "consumer__readDocumentReference" {
     aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
+  firehose_subscriptions = [
+    module.consumer__firehose.firehose_subscription
+  ]
   handler = "api.consumer.readDocumentReference.index.handler"
 }
 
@@ -37,6 +40,9 @@ module "consumer__searchDocumentReference" {
     aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
+  firehose_subscriptions = [
+    module.consumer__firehose.firehose_subscription
+  ]
   handler = "api.consumer.searchDocumentReference.index.handler"
 }
 
@@ -57,6 +63,9 @@ module "consumer__searchPostDocumentReference" {
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
+  ]
+  firehose_subscriptions = [
+    module.consumer__firehose.firehose_subscription
   ]
   handler = "api.consumer.searchPostDocumentReference.index.handler"
 }
@@ -80,6 +89,9 @@ module "producer__createDocumentReference" {
     aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
+  firehose_subscriptions = [
+    module.producer__firehose.firehose_subscription
+  ]
   handler = "api.producer.createDocumentReference.index.handler"
 }
 
@@ -102,6 +114,9 @@ module "producer__deleteDocumentReference" {
     aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
+  firehose_subscriptions = [
+    module.producer__firehose.firehose_subscription
+  ]
   handler = "api.producer.deleteDocumentReference.index.handler"
 }
 
@@ -122,6 +137,9 @@ module "producer__readDocumentReference" {
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
+  ]
+  firehose_subscriptions = [
+    module.producer__firehose.firehose_subscription
   ]
   handler = "api.producer.readDocumentReference.index.handler"
 }
@@ -145,6 +163,9 @@ module "producer__searchDocumentReference" {
     aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
+  firehose_subscriptions = [
+    module.producer__firehose.firehose_subscription
+  ]
   handler = "api.producer.searchDocumentReference.index.handler"
 }
 
@@ -165,6 +186,9 @@ module "producer__searchPostDocumentReference" {
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
+  ]
+  firehose_subscriptions = [
+    module.producer__firehose.firehose_subscription
   ]
   handler = "api.producer.searchPostDocumentReference.index.handler"
 }
@@ -187,6 +211,9 @@ module "producer__updateDocumentReference" {
     aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__dynamodb-write.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
+  ]
+  firehose_subscriptions = [
+    module.producer__firehose.firehose_subscription
   ]
   handler = "api.producer.updateDocumentReference.index.handler"
 
@@ -211,6 +238,9 @@ module "producer__authoriser_lambda" {
   }
   additional_policies = [
   ]
+  firehose_subscriptions = [
+    module.producer__firehose.firehose_subscription
+  ]
   handler = "api.producer.authoriser.index.handler"
   depends_on = [
   ]
@@ -229,6 +259,9 @@ module "consumer__authoriser_lambda" {
     ENVIRONMENT = local.environment
   }
   additional_policies = [
+  ]
+  firehose_subscriptions = [
+    module.consumer__firehose.firehose_subscription
   ]
   handler = "api.consumer.authoriser.index.handler"
   depends_on = [
@@ -253,6 +286,9 @@ module "consumer__status" {
     aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
+  firehose_subscriptions = [
+    module.consumer__firehose.firehose_subscription
+  ]
   handler = "api.consumer.status.index.handler"
 }
 
@@ -274,6 +310,9 @@ module "producer__status" {
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
     aws_iam_policy.document-pointer__kms-read-write.arn
+  ]
+  firehose_subscriptions = [
+    module.producer__firehose.firehose_subscription
   ]
   handler = "api.producer.status.index.handler"
 }
