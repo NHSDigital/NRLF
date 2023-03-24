@@ -7,34 +7,51 @@ info:
   description: |
     ## Overview
 
-    The National Record Locator (NRL) enables organisations to share Patient data nationwide.  It acts as an Index, or Directory, of patient data.  Rather than handling the data itself it shares pointers held in partner systems, using the FHIR R4 DocumentReference standard.
+    The National Record Locator (NRL) enables organisations to share patient data nationwide.  Rather than storing the
+    data itself, it is used to share pointers to the data, held in provider systems.  It acts as an index and not a data
+    repository.  Each document pointer is defined using the
+    [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) standard.
+
+    ![National Record Locator](https://raw.githubusercontent.com/NHSDigital/nrl-consumer-api/master/specification/nrl.png)
 
     Users of the service fall into the categories of:
 
     * Producers - capable of creating and managing pointers
     * Consumers - capable of searching and reading pointers
 
-    The service removes the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
+    The service removes the need for organisations to create duplicate copies of information across systems and
+    organisations, by enabling access to up-to-date information directly from the source.
 
-    It can be used to store and publish pointers to patient data held in health systems across England and to look up where relevant patient data is held.
+    It can be used to store and publish pointers to patient data held in health systems across England and to look up
+    where relevant patient data is held.
 
-    There is a growing list of health and social care organisations authorised to share records using NRL.
+    There is a growing list of health and social care organisations authorised to share records using NRL, and presently
+    the pointers are classified into the following types.
+
+    * [Mental Health Crisis Plan](http://snomed.info/sct/736253002)
+    * [Emergency Healthcare Plan](http://snomed.info/sct/887701000000100)
+    * [End of Life Care Coordination Summary](http://snomed.info/sct|861421000000109)
+    * [National Early Warning Code 2](http://snomed.info/sct|1363501000000100)
+
+    You can also retrieve booking and referal pointers however you can not currently do this by directly integrating with
+    the National Record Locator, you must instead onboard to the [Booking and Referral - FHIR API](https://digital.nhs.uk/developer/api-catalogue/booking-and-referral-fhir)
 
     ### As a Consumer
 
     * Search for pointers, restricted to a single Patient at a time
     * Read a specific pointer
-    * Operations are restricted to document types agreed during the on-boarding process
+    * Operations are restricted to document types agreed during the [onboarding](#api-description__onboarding) process
 
     ### What has changed?
 
-    This service is a replacement for the existing [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
+    This service is a replacement for the existing [National Record Locator
+    (NRL)](https://digital.nhs.uk/services/national-record-locator).
 
     * Upgraded from FHIR STU3 to R4.
     * Improved performance and scalability.
-    * Improved on-boarding experience.
-    * Authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS
-    * Greater flexibility, by wider support of the FHIR R4 DocumentReference resource.
+    * Improved onboarding experience.
+    * Authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS.
+    * Greater flexibility, by wider support of the [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) resource.
 
     ### Data availability, timing and quality
 
@@ -42,36 +59,33 @@ info:
 
     ## Who can use this API
 
-    This API:
-
-    * is only for use by patient-facing applications
-    * is only for non-clinical use
-    * can only be used where there is a legal basis to do so
-
-    You can not currently use this API to retrieve pointers for:
-
-    * mental health crisis plans
-    * end of life plans
-    * emergency care plans (eRedbags)
-    * national early warning scores (NEWS)
-    * urgent care plan
+    * This API can only be used where there is a legal basis to do so.
+    * You must have the capability to verify NHS numbers by one of the following mechanisms;
+      *  Full PDS Spine compliant system
+      * Spine Mini Service PDS (SMSP)
+    * You can not use this API to retrieve documents, however you should be prepared to retrive in PDF or Unstructured formats.
+    * In order to retrieve a document, consumers must be able to interact with the National Record Locator, the Spine Secure Proxy (SSP), and the Spine Directory Service (SDS) in order to look up the providers ASID. Currently the SDS is not available via the internet and therefore consumers wishing to use the end to end retrieval process, via the SSP, will still need to have an N3 or HSCN connection.
+    * You can only use this API if your consuming  application is only accessible  using a valid NHS Smartcard for all users or a system that uses an authentication method supported by NHS Identity.
+    * Connecting parties must have an appointed Clinical Safety Officer and undertake a Clinical Safety Assessment prior to going live.
 
     Make sure you have a valid use case before you go too far with your development.
     To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
 
-    You must do this before you can go live (see ‘Onboarding’ below).
+    You must do this before you can go live (see ‘[Onboarding](#api-description__onboarding)’ below).
 
     ## API status and roadmap
 
     This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses).
 
-    To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=national-record-locator-api).
+    To see our roadmap, or to suggest, comment or vote on features for this API, see our
+    [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=national-record-locator-api).
 
     If you have any other queries, [contact us](https://digital.nhs.uk/developer/help-and-support).
 
     ## Service level
 
-    This API is a bronze service, meaning it is operational and supported only during business hours (8am to 6pm), Monday to Friday, excluding bank holidays.
+    This API is a bronze service, meaning it is operational and supported only during business hours (8am to 6pm),
+    Monday to Friday, excluding bank holidays.
 
     For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
 
@@ -79,15 +93,19 @@ info:
 
     This API is [RESTful](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#basic-rest).
 
-    It conforms to the [FHIR](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#fhir) global standard for health care data exchange, specifically to [FHIR R4 (v4.0.1)](https://hl7.org/fhir/r4/), except that it does not support the [capabilities](http://hl7.org/fhir/R4/http.html#capabilities) interaction.
+    It conforms to the [FHIR](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#fhir)
+    global standard for health care data exchange, specifically to [FHIR R4 (v4.0.1)](https://hl7.org/fhir/r4/), except
+    that it does not support the [capabilities](http://hl7.org/fhir/R4/http.html#capabilities) interaction.
 
-    It includes some country-specific FHIR extensions, which conform to [FHIR UK Core](https://digital.nhs.uk/services/fhir-uk-core), specifically [fhir.r4.ukcore.stu1 0.5.1](https://simplifier.net/packages/fhir.r4.ukcore.stu1/0.5.1).
+    It includes some country-specific FHIR extensions, which conform to
+    [FHIR UK Core](https://digital.nhs.uk/services/fhir-uk-core), specifically
+    [fhir.r4.ukcore.stu1 0.5.1](https://simplifier.net/packages/fhir.r4.ukcore.stu1/0.5.1).
 
     You do not need to know much about FHIR to use this API - FHIR APIs are just RESTful APIs that follow specific rules.
 
     In particular:
 
-    * resource names are capitalised and singular, and use US spellings, for example `/Immunization` not `/immunisations`
+    * resource names are capitalised and singular, and use US spellings, for example `Organization` not `organisations`
     * array names are singular, for example `entry` not `entries` for address lines
     * data items that are country-specific and thus not included in the FHIR global base resources are usually wrapped in an `extension` object
 
@@ -106,11 +124,10 @@ info:
 
     ## Environments and testing
 
-    | Environment       | Base URL                                                               |
-    | ----------------- | ---------------------------------------------------------------------- |
-    | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`     |
-    | Integration test  | `https://int.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`         |
-    | Production        | `https://api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`             |
+    | Environment       | Base URL                                                       |
+    | ----------------- | -------------------------------------------------------------- |
+    | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/` |
+    | Integration test  | `https://int.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`     |
 
     ### Sandbox testing
 
@@ -119,7 +136,8 @@ info:
     * only covers a limited set of scenarios
     * is open access, so does not allow you to test authorisation
 
-    For details of sandbox test scenarios, or to try out the sandbox using our 'Try this API' feature, see the documentation for each endpoint.
+    For details of sandbox test scenarios, or to try out the sandbox using our 'Try this API' feature, see the
+    documentation for each endpoint.
 
     Alternatively, you can try out the sandbox using our Postman collection:
 
@@ -128,23 +146,24 @@ info:
     ### Integration testing
 
     Our [integration test environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing):
-
     * is for formal integration testing
     * includes authorisation
 
-    It also includes ready-to-use TBC test data
+    It also includes ready-to-use test data and scenarios.  For details please [contact us](https://digital.nhs.uk/developer/help-and-support).
 
     For more details see [integration testing with our RESTful APIs](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing-with-our-restful-apis).
 
     ## Onboarding
 
-    You need to get your software approved by us before it can go live with this API. We call this onboarding. The onboarding process can sometimes be quite long, so it’s worth planning well ahead.
+    You need to get your software approved by us before it can go live with this API. We call this onboarding. The
+    [on-boarding](#api-description__onboarding) process can sometimes be quite long, so it’s worth planning well ahead.
 
-    This API uses our online digital onboarding process.
+    This API uses our online digital [on-boarding](#api-description__onboarding) process.
 
-    As part of this process, you need to demonstrate that you can manage risks and that your software conforms technically with the requirements for this API.
+    As part of this process, you need to demonstrate that you can manage risks and that your software conforms
+    technically with the requirements for this API.
 
-    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/national-record-locator-consumer-api/onboarding-support-information).
+    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding).
 
     To get started, see [digital onboarding](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding#using-the-digital-onboarding-portal).
   version: 1.0.0
@@ -166,7 +185,7 @@ paths:
   /DocumentReference:
     get:
       tags:
-      summary: Search (GET)
+      summary: Retrieve patient's document pointers (GET)
       operationId: searchDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
@@ -178,7 +197,7 @@ paths:
         - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
-          description: Search successful response
+          description: Successful response
           content:
             application/fhir+json:
               schema:
@@ -291,11 +310,15 @@ paths:
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
       description: |
-        Search a single Patient's records.
+        Retrieve the document pointers for a single patient.  Your request is constrained by the document pointer types
+        agreed during onboarding.  The results can also be filtered to return documents by a given `type` and/or created
+        by a given producer (`custodian`).
+
+        This operation is also available as a http POST, which is the preferred method (see below).
   /DocumentReference/_search:
     post:
       tags:
-      summary: Search (POST)
+      summary: Retrieve patient's document pointers (POST)
       operationId: searchPostDocumentReference
       parameters:
         - $ref: "#/components/parameters/odsCode"
@@ -417,16 +440,21 @@ paths:
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
       description: |
-        Search a single Patient's records, but implemented as a POST operation
-        because of limitations associated with GET:
+        Retrieve the document pointers for a single patient.  Your request is constrained by the document pointer types
+        agreed during onboarding.  The results can also be filtered to return documents by a given `type` and/or created
+        by a given `custodian`.
+
+        This operation is also available as a http GET for convenience (see above), but POST is preferred for the
+        following reasons.
 
         * query string parameters are visible on the network and in logs, and may have privacy implications for consumers.
         * GET operations can be cached by intermediary network infrastructure, such as CDNs, routers and proxies.
-        * URLs have a maximum length of 2,048 characters which complex searches can exceed.  NRL does not currently exceed this limit, but may evolve in the future.
+        * URLs have a maximum length of 2,048 characters which complex searches can exceed.  NRL does not currently
+        exceed this limit, but may evolve in the future.
   /DocumentReference/{id}:
     get:
       tags:
-      summary: Read
+      summary: Get a single document pointer
       operationId: readDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
@@ -523,7 +551,8 @@ paths:
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
       description: |
-        Read a single DocumentReference record using the `DocumentReference.id`
+        Read a single document pointer by specifying the `DocumentReference.id`.  Note that you will only be able to
+        retrieve document pointers that have the `type` that was agreed during the [onboarding](#api-description__onboarding) process.
   /_status:
     get:
       tags:

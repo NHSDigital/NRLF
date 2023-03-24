@@ -7,22 +7,38 @@ info:
   description: |
     ## Overview
 
-    The National Record Locator (NRL) enables organisations to share Patient data nationwide.  It acts as an Index, or Directory, of patient data.  Rather than handling the data itself it shares pointers held in partner systems, using the FHIR R4 DocumentReference standard.
+    The National Record Locator (NRL) enables organisations to share patient data nationwide.  Rather than storing the
+    data itself, it is used to share pointers to the data, held in provider systems.  It acts as an index and not a data
+    repository.  Each document pointer is defined using the
+    [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) standard.
+
+    ![National Record Locator](https://raw.githubusercontent.com/NHSDigital/nrl-producer-api/master/specification/nrl.png)
 
     Users of the service fall into the categories of:
 
     * Producers - capable of creating and managing pointers
     * Consumers - capable of searching and reading pointers
 
-    The service removes the need for organisations to create duplicate copies of information across systems and organisations, by enabling access to up-to-date information directly from the source.
+    The service removes the need for organisations to create duplicate copies of information across systems and
+    organisations, by enabling access to up-to-date information directly from the source.
 
-    It can be used to store and publish pointers to patient data held in health systems across England and to look up where relevant patient data is held.
+    It can be used to store and publish pointers to patient data held in health systems across England and to look up
+    where relevant patient data is held.
 
-    There is a growing list of health and social care organisations authorised to share records using NRL.
+    There is a growing list of health and social care organisations authorised to share records using NRL, and presently
+    the pointers are classified into the following types.
+
+    * [Mental Health Crisis Plan](http://snomed.info/sct/736253002)
+    * [Emergency Healthcare Plan](http://snomed.info/sct/887701000000100)
+    * [End of Life Care Coordination Summary](http://snomed.info/sct|861421000000109)
+    * [National Early Warning Code 2](http://snomed.info/sct|1363501000000100)
+
+    You can also retrieve booking and referal pointers however you can not currently do this by directly integrating with
+    the National Record Locator, you must instead onboard to the [Booking and Referral - FHIR API](https://digital.nhs.uk/developer/api-catalogue/booking-and-referral-fhir)
 
     ### As a Producer
 
-    * Create pointers, restricted to document types agreed during the on-boarding process
+    * Create pointers, restricted to document types agreed during the [on-boarding](#api-description__onboarding) process
     * Replace your pointers with a newer versions, superseding the old one
     * Update the metadata associated with your pointers
     * Delete pointers
@@ -35,9 +51,9 @@ info:
 
     * Upgraded from FHIR STU3 to R4.
     * Improved performance and scalability.
-    * Improved on-boarding experience.
+    * Improved onboarding experience.
     * Authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS
-    * Greater flexibility, by wider support of the FHIR R4 DocumentReference resource.
+    * Greater flexibility, by wider support of the [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) resource.
 
     ### Data availability, timing and quality
 
@@ -47,22 +63,16 @@ info:
 
     ## Who can use this API
 
-    This API:
-    - is only for use by patient-facing applications
-    - is only for non-clinical use
-    - can only be used where there is a legal basis to do so
-
-    You can not currently use this API to retrieve pointers for:
-    - mental health crisis plans
-    - end of life plans
-    - emergency care plans (eRedbags)
-    - national early warning scores (NEWS)
-    - urgent care plan
+    * This API can only be used where there is a legal basis to do so.
+    * You must have the capability to verify NHS numbers by one of the following mechanisms;
+      *  Full PDS Spine compliant system
+      * Spine Mini Service PDS (SMSP)
+    * Connecting parties must have an appointed Clinical Safety Officer and undertake a Clinical Safety Assessment prior to going live.
 
     Make sure you have a valid use case before you go too far with your development.
     To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
 
-    You must do this before you can go live (see ‘Onboarding’ below).
+    You must do this before you can go live (see ‘[Onboarding](#api-description__onboarding)’ below).
 
     ## API status and roadmap
 
@@ -90,7 +100,7 @@ info:
 
     In particular:
 
-    * resource names are capitalised and singular, and use US spellings, for example `/Immunization` not `/immunisations`
+    * resource names are capitalised and singular, and use US spellings, for example `Organization` not `organisations`
     * array names are singular, for example `entry` not `entries` for address lines
     * data items that are country-specific and thus not included in the FHIR global base resources are usually wrapped in an `extension` object
 
@@ -110,11 +120,10 @@ info:
 
     ## Environments and testing
 
-    | Environment       | Base URL                                                               |
-    | ----------------- | ---------------------------------------------------------------------- |
-    | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4/`     |
-    | Integration test  | `https://int.api.service.nhs.uk/nrl-producer-api/FHIR/R4/`         |
-    | Production        | `https://api.service.nhs.uk/nrl-producer-api/FHIR/R4/`             |
+    | Environment       | Base URL                                                       |
+    | ----------------- | ---------------------------------------------------------------|
+    | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4/` |
+    | Integration test  | `https://int.api.service.nhs.uk/nrl-producer-api/FHIR/R4/`     |
 
     ### Sandbox testing
 
@@ -135,19 +144,21 @@ info:
     * is for formal integration testing
     * includes authorisation
 
-    It also includes ready-to-use TBC test data
+    It also includes ready-to-use test data and scenarios.  For details please [contact us](https://digital.nhs.uk/developer/help-and-support).
 
     For more details see [integration testing with our RESTful APIs](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing-with-our-restful-apis).
 
     ## Onboarding
 
-    You need to get your software approved by us before it can go live with this API. We call this onboarding. The onboarding process can sometimes be quite long, so it’s worth planning well ahead.
+    You need to get your software approved by us before it can go live with this API. We call this onboarding. The
+    [on-boarding](#api-description__onboarding) process can sometimes be quite long, so it’s worth planning well ahead.
 
-    This API uses our online digital onboarding process.
+    This API uses our online digital [on-boarding](#api-description__onboarding) process.
 
-    As part of this process, you need to demonstrate that you can manage risks and that your software conforms technically with the requirements for this API.
+    As part of this process, you need to demonstrate that you can manage risks and that your software conforms
+    technically with the requirements for this API.
 
-    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/api-catalogue/national-record-locator-producer-api/onboarding-support-information).
+    Information on this page might impact the design of your software. For details, see [Onboarding support information](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding).
 
     To get started, see [digital onboarding](https://digital.nhs.uk/developer/guides-and-documentation/digital-onboarding#using-the-digital-onboarding-portal).
   version: 1.0.0
@@ -167,7 +178,7 @@ servers:
 paths:
   /DocumentReference:
     post:
-      summary: Create / Supersede
+      summary: Create new, or Supersede existing, document pointers
       operationId: createDocumentReference
       responses:
         "201":
@@ -197,19 +208,75 @@ paths:
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       description: |
-        Create new Pointers, or Supersede existing ones.
+        Create new pointers, or Supersede existing ones.
 
-        * `id` is a composite of the ODS Code and an identifier that is locally unique to your system.  NRL does not generate globally unique ids, instead relies on producers to provide a locally unique id prefixed with their ODS code, making it globally unique.
-        * `subject` MUST be a `Patient` reference.
-        * `custodian` MUST be an `Organization` reference, and must match the `NHSD-End-User-Organisation-ODS`
-        * `type` MUST match one of the Document Types agreed during on-boarding.
+        To create a document pointer you must ensure:
+
+        * The body must be a valid [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html)
+        * `id` is a composite of the ODS Code and an identifier that is locally unique to your system.  NRL does not
+          generate globally unique ids, instead relies on producers to provide a locally unique id prefixed with their
+          ODS code, making it globally unique. e.g.
+          ```
+          XYZ-1234567890
+          ```
+        * `subject` MUST be a `Patient` reference using a valid NHS number. e.g.
+          ```
+          "subject": {
+            "identifier": {
+              "system": "https://fhir.nhs.uk/Id/nhs-number",
+              "value": "3495456481"
+            }
+          },
+          ```
+        * `custodian` MUST be an `Organization` reference using a valid ODS code, agreed during [onboarding](#api-description__onboarding). e.g.
+          ```
+          "custodian": {
+            "identifier": {
+              "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+              "value": "Y05868"
+            }
+          }
+          ```
+        * `type` MUST match one of the Document Types agreed during [onboarding](#api-description__onboarding). e.g.
+          ```
+          "type": {
+            "coding\": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "1363501000000100",
+                "display": "Royal College of Physicians NEWS2 (National Early Warning Score 2) chart"
+              }
+            ]
+          }
+          ```
         * `content` MUST have at least one entry.
         * `content[].format[]` SHOULD indicate the mechanism for accessing documents, e.g.
-          * `{ "code": "ssp", "display": "Spine Secure Proxy" }`
-          * Further standards to be agreed.
+          ```
+          "format": [
+            {
+              "code": "ssp",
+              "display": "Spine Secure Proxy"
+            }
+          ]
+          ```
 
-        To supersede existing pointers you must specify:
-        * at least one existing pointer in the `relatesTo` with a `target` or `replaces`.
+        To supersede existing pointers you must further specify:
+
+        * at least one existing pointer in the `relatesTo` with a `code` of `replaces`.
+          ```
+          [
+            {
+              "code": "replaces",
+              "target": {
+                "type": "DocumentReference",
+                "identifier": {
+                  "value": "XYZ-1234567890"
+                }
+              }
+            }
+          ]
+          ```
+
         * The following fields MUST match the pointers being superseded:
           * `subject`
           * `type`
@@ -217,7 +284,7 @@ paths:
         This will cause a new pointer to be created and superseded pointers to be deleted.  Multiple documents can
         be superseded.
     get:
-      summary: Search (GET)
+      summary: Retrieve document pointers (GET)
       operationId: searchDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
@@ -229,7 +296,7 @@ paths:
         - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
-          description: Search successful response
+          description: successful response
           content:
             application/fhir+json;version=1:
               schema:
@@ -402,14 +469,17 @@ paths:
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
       description: |
-        Perform a Search using GET query string parameters.
+        Search through document pointers.
 
-        Results are restricted to pointers you created.
+        Results are restricted to pointers you created, but can be further filtered by `subject` and `type`.
 
-        Results are limited to 20 records, further results are
+        Results are limited to 20 records per request, and further records are available by submitting subsequent
+        requests with the `next-page-token` found in the `meta` portion of the response.
+
+        This operation is also available as a http POST, which is the preferred method (see below).
   /DocumentReference/_search:
     post:
-      summary: Search (POST)
+      summary: Retrieve document pointers (GET)
       operationId: searchPostDocumentReference
       parameters:
         - $ref: "#/components/parameters/odsCode"
@@ -422,7 +492,7 @@ paths:
               $ref: "#/components/schemas/RequestParams"
       responses:
         "200":
-          description: Search successful response
+          description: Successful response
           content:
             application/fhir+json;version=1:
               schema:
@@ -595,15 +665,23 @@ paths:
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
       description: |
-        Search Producer records, but implemented as a POST operation
-        because of limitations associated with GET:
+        Search through document pointers.
+
+        Results are restricted to pointers you created, but can be further filtered by `subject` and `type`.
+
+        Results are limited to 20 records per request, and further records are available by submitting subsequent
+        requests with the `next-page-token` found in the `meta` portion of the response.
+
+        This operation is also available as a http GET for convenience (see above), but POST is preferred for the
+        following reasons.
 
         * query string parameters are visible on the network and in logs, and may have privacy implications for consumers.
         * GET operations can be cached by intermediary network infrastructure, such as CDNs, routers and proxies.
-        * URLs have a maximum length of 2,048 characters which complex searches can exceed.  NRL does not currently exceed this limit, but may evolve in the future.
+        * URLs have a maximum length of 2,048 characters which complex searches can exceed.  NRL does not currently
+        exceed this limit, but may evolve in the future.
   /DocumentReference/{id}:
     get:
-      summary: Read
+      summary: Get a single document pointer
       operationId: readDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
@@ -612,7 +690,7 @@ paths:
         - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
-          description: Read successful response
+          description: Successful response
           content:
             application/fhir+json;version=1:
               schema:
@@ -689,9 +767,11 @@ paths:
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
       description: |
-        Read a single pointer you created
+        Read a single document pointer by specifying the `DocumentReference.id`.  Note that you will only be able to
+        retrieve document pointers that have been created by the organisation specified in the `ODS-End-User-Organisation-ODS`
+        header, and agreed during [onboarding](#onbaroding).
     put:
-      summary: Update
+      summary: Update a single document pointer
       operationId: updateDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
@@ -700,7 +780,7 @@ paths:
         - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
-          description: Update successful response
+          description: Successful response
           $ref: "#/components/responses/Success"
           content:
             application/fhir+json;version=1:
@@ -720,7 +800,7 @@ paths:
                           display: Resource updated
                     diagnostics: Resource updated
         "201":
-          description: Update successful response
+          description: Successful response
           $ref: "#/components/responses/Success"
           content:
             application/fhir+json;version=1:
@@ -749,8 +829,11 @@ paths:
         * `subject`
         * `custodian`
         * `type`
+
+        Note that unlike NRL STU3 changing the `status` field does NOT delete document pointers.  To delete document
+        pointers please use the `DELETE` endpoint.
     delete:
-      summary: Delete
+      summary: Delete a single document pointer
       operationId: deleteDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
@@ -759,7 +842,7 @@ paths:
         - $ref: "#/components/parameters/correlationId"
       responses:
         "204":
-          description: Delete successful response
+          description: Successful response
           $ref: "#/components/responses/Success"
           content:
             application/fhir+json;version=1:
@@ -780,7 +863,7 @@ paths:
                     diagnostics: Resource removed
         "200":
           $ref: "#/components/responses/Success"
-          description: Delete successful response
+          description: Successful response
           content:
             application/fhir+json;version=1:
               example:
@@ -799,7 +882,7 @@ paths:
                           display: Resource removed
                     diagnostics: Resource removed
       description: |
-        Delete a single DocumentReference record
+        Delete a single document pointer that your created.
 components:
   requestBodies:
     DocumentReference:
