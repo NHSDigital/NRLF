@@ -244,7 +244,6 @@ class _NhsNumberMixin:
             return None
         try:
             nhs_number = self.subject_identifier.__root__.split("|", 1)[1]
-            validate_nhs_number(nhs_number)
             return nhs_number
         except ValueError as e:
             raise RequestValidationError(e)
