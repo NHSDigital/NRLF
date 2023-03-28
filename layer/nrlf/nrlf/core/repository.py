@@ -376,7 +376,7 @@ class Repository:
         items = results["Items"]
         document_pointers = _valid_items(item_type=self.item_type, items=items)
 
-        last_evaluated_key = results.get("LastEvaluatedKey")
+        last_evaluated_key = results.get("LastEvaluatedKey") if items else None
         if last_evaluated_key is not None and len(items) == PAGE_ITEM_LIMIT:
             query_kwargs["ExclusiveStartKey"] = last_evaluated_key
             next_results = self.dynamodb.query(**query_kwargs)

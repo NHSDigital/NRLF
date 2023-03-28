@@ -361,11 +361,15 @@ def test_query_last_evaluated_key_is_returned_in_correct_circumstance():
     assert response2.last_evaluated_key is None
 
 
-def _create_items_to_scroll(n_pages_of_docs, repository) -> list[DocumentPointer]:
+def _create_items_to_scroll(
+    n_pages_of_docs, repository, page_size=PAGE_ITEM_LIMIT
+) -> list[DocumentPointer]:
     items: list[DocumentPointer] = []
-    for i in range(PAGE_ITEM_LIMIT * n_pages_of_docs):
+    for i in range(page_size * n_pages_of_docs):
         doc = generate_test_document_reference(
-            provider_doc_id=f"id{i}", subject=generate_test_subject("9278693472")
+            provider_doc_id=f"id{i}",
+            subject=generate_test_subject("9278693472"),
+            custodian={"identifier": {"value": "foo"}},
         )
         item = create_document_pointer_from_fhir_json(fhir_json=doc)
         repository.create(item=item)
@@ -435,3 +439,21 @@ def test_query_last_evaluated_key_is_not_returned_at_page_limit_integration(
         n_pages_of_docs=n_pages_of_docs,
         environment_prefix=environment_prefix,
     )
+
+
+@pytest.mark.integration
+def test_query_last_evaluated_key_is_not_returned_at_page_limit_integration_pk(
+    dynamodb_client,
+):
+    environment_prefix = f'{get_terraform_json()["prefix"]["value"]}--'
+    repository = FeatureTestRepository(
+        item_type=DocumentPointer,
+        client=dynamodb_client,
+        environment_prefix=environment_prefix,
+    )
+    _create_items_to_scroll(1, repository)
+    response = repository.query_gsi_1(
+        pk="P#9278693472", producer_id="bar", type=["http://snomed.info/sct|736253002"]
+    )
+    assert len(response.document_pointers) == 0
+    assert response.last_evaluated_key is None
