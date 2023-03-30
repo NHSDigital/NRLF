@@ -1,4 +1,5 @@
 from lambda_utils.logging import Logger, LogTemplate, log_action
+from nrlf.core.firehose.log_reference import LogReference
 from nrlf.core.firehose.model import (
     CloudwatchLogsData,
     CloudwatchMessageType,
@@ -6,7 +7,7 @@ from nrlf.core.firehose.model import (
     FirehoseResult,
     FirehoseSubmissionRecord,
 )
-from nrlf.core.firehose.utils import encode_log_events_as_ndjson
+from nrlf.core.firehose.utils import encode_logs_as_ndjson
 from pydantic import ValidationError
 
 MAX_PACKET_SIZE_BYTES = (
@@ -30,12 +31,7 @@ class LogValidationError(Exception):
     pass
 
 
-@log_action(
-    narrative=(
-        "Verifying that size of the processed record is "
-        "compatible with the maximum packet size for Kinesis"
-    )
-)
+@log_action(log_reference=LogReference.FIREHOSE004)
 def _validate_record_size(
     record_size_bytes: int,
     total_event_size_bytes: int,
@@ -50,29 +46,33 @@ def _validate_record_size(
         raise NoSpaceLeftInCurrentEventPacket
 
 
-@log_action(
-    narrative="Validating that the log structure adheres to the NRLF LogTemplate"
-)
-def _validate_log_event(log_event: dict):
+@log_action(log_reference=LogReference.FIREHOSE005, log_fields=["log"])
+def _validate_log(log: dict):
+    if type(log) is not dict:
+        raise LogValidationError(f"Log is not of JSON type Object: '{log}'")
+
     try:
-        log = LogTemplate(**log_event)
+        parsed_log = LogTemplate(**log)
     except ValidationError as err:
         raise LogValidationError(str(err))
-    if log.dict() != log_event:
-        raise LogValidationError("Log has fields that are not present in LogTemplate")
+    rendered_log = parsed_log.dict()
+    if rendered_log != log:
+        raise LogValidationError(
+            f"Field mismatch between parsed and proved logs. Parsed log: {rendered_log}"
+        )
 
 
-@log_action(narrative="Are all of the provided log events valid?")
-def _all_log_events_are_valid(log_events: list[dict], logger: Logger = None) -> bool:
-    for log_event in log_events:
+@log_action(log_reference=LogReference.FIREHOSE006)
+def _all_logs_are_valid(logs: list[dict], logger: Logger = None) -> bool:
+    for log in logs:
         try:
-            _validate_log_event(log_event=log_event, logger=logger)
+            _validate_log(log=log, logger=logger)
         except LogValidationError:
             return False
     return True
 
 
-@log_action(narrative="Determining outcome base on the size of this record")
+@log_action(log_reference=LogReference.FIREHOSE007, log_result=False)
 def _determine_outcome_given_record_size(
     cloudwatch_data: CloudwatchLogsData,
     partition_key: str,
@@ -82,7 +82,7 @@ def _determine_outcome_given_record_size(
     output_record = FirehoseOutputRecord(
         record_id=cloudwatch_data.record_id,
         result=FirehoseResult.OK,
-        data=encode_log_events_as_ndjson(log_events=cloudwatch_data.log_events),
+        data=encode_logs_as_ndjson(logs=cloudwatch_data.logs),
     )
 
     try:
@@ -126,9 +126,7 @@ def _determine_outcome_given_record_size(
         return output_record
 
 
-@log_action(
-    narrative="Validating a Cloudwatch Logs record that has been marked as 'DATA_MESSAGE'",
-)
+@log_action(log_reference=LogReference.FIREHOSE008, log_result=False)
 def _validate_cloudwatch_logs_data(
     cloudwatch_data: CloudwatchLogsData,
     partition_key: str,
@@ -136,9 +134,7 @@ def _validate_cloudwatch_logs_data(
     logger: Logger = None,
 ) -> FirehoseOutputRecord:
 
-    if not _all_log_events_are_valid(
-        log_events=cloudwatch_data.log_events, logger=logger
-    ):
+    if not _all_logs_are_valid(logs=cloudwatch_data.logs, logger=logger):
         return FirehoseOutputRecord(
             record_id=cloudwatch_data.record_id,
             result=FirehoseResult.PROCESSING_FAILED,
@@ -152,12 +148,7 @@ def _validate_cloudwatch_logs_data(
     )
 
 
-@log_action(
-    narrative=(
-        "Processing individual Cloudwatch Logs record "
-        "(which may contain multiple log entries)"
-    )
-)
+@log_action(log_reference=LogReference.FIREHOSE009, log_result=False)
 def process_cloudwatch_record(
     cloudwatch_data: CloudwatchLogsData,
     partition_key: str,

@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 from http import HTTPStatus
 from pathlib import Path
 from types import FunctionType
@@ -20,6 +21,11 @@ from lambda_utils.versioning import (
 )
 from nrlf.core.response import operation_outcome_not_ok
 from pydantic import ValidationError
+
+
+class LogReference(Enum):
+    PIPELINE001 = "Getting version from header"
+    PIPELINE002 = "Executing pipeline steps"
 
 
 def _get_steps(
@@ -60,7 +66,7 @@ def _setup_logger(
     )
 
 
-@log_action(narrative="Getting version from header", log_fields=["index_path", "event"])
+@log_action(log_reference=LogReference.PIPELINE001, log_fields=["index_path", "event"])
 def _get_steps_for_version_header(index_path: str, event: dict) -> list[FunctionType]:
     requested_version = get_version_from_header(**event["headers"])
     versioned_steps = get_versioned_steps(index_path)
@@ -69,7 +75,7 @@ def _get_steps_for_version_header(index_path: str, event: dict) -> list[Function
     )
 
 
-@log_action(narrative="Executing pipeline steps", log_fields=["steps", "event"])
+@log_action(log_reference=LogReference.PIPELINE002, log_fields=["steps", "event"])
 def _execute_steps(
     steps: list[FunctionType],
     event: dict,

@@ -1,20 +1,18 @@
-import base64
-import gzip
-import json
 import time
 from datetime import datetime
-from functools import cache
-from itertools import chain
 from typing import Iterator
 
-from lambda_utils.logging import LogTemplate
+from lambda_utils.logging import LogData, LogTemplate
 from nrlf.core.firehose.model import (
     CloudwatchLogsData,
     CloudwatchMessageType,
     FirehoseSubmissionRecord,
+    LogEvent,
 )
 from nrlf.core.firehose.submission import FirehoseClient, _submit_records
 from nrlf.core.firehose.utils import name_from_arn
+
+from helpers.firehose import fetch_logs_from_s3
 
 SLEEP_SECONDS = 15
 MAX_RUNTIME = 400
@@ -29,33 +27,36 @@ def parse_prefix(prefix: str, time: datetime) -> str:
     )
 
 
-def _make_good_logs(transaction_id, n_logs):
-    return [
-        LogTemplate(
-            correlation_id="123",
-            nhsd_correlation_id="abc",
-            transaction_id=transaction_id,
-            host="test",
-            environment="test",
-            request_id="123",
-            log_reference="FOO.BAR",
-            log_level="INFO",
-            outcome="GOOD",
-            duration_ms=123,
-            message="all good",
-            data={"some": "data"},
-            error="oops",
-            call_stack="oops again",
-            timestamp="123",
-            sensitive=True,
-        )
-    ] * n_logs
+def _make_good_log(transaction_id) -> str:
+    return LogTemplate(
+        correlation_id="123",
+        nhsd_correlation_id="abc",
+        transaction_id=transaction_id,
+        host="test",
+        environment="test",
+        request_id="123",
+        log_reference="FOO.BAR",
+        log_level="INFO",
+        outcome="GOOD",
+        duration_ms=123,
+        message="all good",
+        data=LogData(function="foo.bar", inputs={"some": "input"}, result="a result"),
+        error="oops",
+        call_stack="oops again",
+        timestamp="123",
+        sensitive=True,
+    ).json()
 
 
 def make_good_cloudwatch_data(transaction_id, n_logs=10):
+    good_log_event = LogEvent(
+        id="123",
+        timestamp=123,
+        message=_make_good_log(transaction_id=transaction_id),
+    )
     return CloudwatchLogsData(
         record_id="dummy_id",
-        logEvents=_make_good_logs(transaction_id=transaction_id, n_logs=n_logs),
+        logEvents=[good_log_event] * n_logs,
         messageType=CloudwatchMessageType.NORMAL_LOG_EVENT,
         owner="nrlf",
         logGroup="nrlf-test-group",
@@ -75,31 +76,6 @@ def submit_cloudwatch_data_to_firehose(
     response = _submit_records(firehose_client=firehose_client, records=records)
     assert response.failed_put_count == 0, "This is probably a transient error"
     return datetime.utcnow()
-
-
-def _parse_error_event(error_event: dict):
-    cloudwatch_event = json.loads(
-        gzip.decompress(base64.b64decode(error_event["rawData"]))
-    )
-    yield from cloudwatch_event["logEvents"]
-
-
-@cache
-def _fetch_logs_from_s3(s3_client, bucket_name, file_key) -> list[dict]:
-    response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
-    print("Retrieving data from ", bucket_name, file_key)  # noqa: T201
-    with gzip.open(response["Body"], "rt") as gf:
-        data = gf.read()
-
-    file_lines = filter(bool, data.split("\n"))  # Newline delimited json
-    parsed_lines = map(json.loads, file_lines)
-    if file_key.startswith("error"):
-        _grouped_log_events = map(_parse_error_event, parsed_lines)
-        parsed_lines = chain.from_iterable(_grouped_log_events)  # Flatten list of lists
-
-    result = list(parsed_lines)
-    print("Got", result)  # noqa: T201
-    return result
 
 
 def _trawl_s3_for_matching_files(
@@ -127,12 +103,12 @@ def retrieve_firehose_output(
                 prefix=prefix,
                 start_time=start_time,
             ):
-                logs_from_s3 = _fetch_logs_from_s3(
+                logs_from_s3 = fetch_logs_from_s3(
                     s3_client=s3_client,
                     bucket_name=bucket_name,
                     file_key=file_key,
                 )
-                yield logs_from_s3
+                yield prefix, logs_from_s3
 
     # If no break by now then assume the search has failed
     raise RuntimeError(
@@ -149,5 +125,5 @@ def retrieve_firehose_output(
     )
 
 
-def all_logs_are_on_s3(original_logs: list[dict], logs_from_s3: list[dict]):
+def all_logs_are_on_s3(original_logs: list[dict], logs_from_s3: list[dict]) -> bool:
     return all(log in logs_from_s3 for log in original_logs)

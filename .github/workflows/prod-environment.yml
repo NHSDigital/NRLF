@@ -159,6 +159,7 @@ jobs:
       - name: Terraform apply - ${{ env.TF_WORKFLOW_ID }}
         run: |
           source nrlf.sh
+          nrlf truststore pull-server prod
           nrlf terraform ciinit ${TF_WORKFLOW_ID}
           nrlf terraform ciapply ${TF_WORKFLOW_ID}
 

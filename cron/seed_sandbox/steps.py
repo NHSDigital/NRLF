@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 from logging import Logger
 from pathlib import Path
 from types import FunctionType
@@ -15,6 +16,10 @@ from cron.seed_sandbox.validators import validate_items
 
 SANDBOX = "sandbox"
 TEMPLATE_PATH_TO_DATA = str(Path(__file__).parent / "data" / "{item_type_name}.json")
+
+
+class LogReference(Enum):
+    SEED001 = "Ensuring that this is a sandbox environment"
 
 
 def _is_sandbox_lambda(context: LambdaContext, environment: str, prefix: str):
@@ -50,11 +55,15 @@ def _seed_step_factory(
         return PipelineData(message="ok")
 
     if log:
-        seeder = log_action(narrative=f"Seeding {item_type_name} table")(seeder)
+
+        class _LogReference(Enum):
+            SEED00X = f"Seeding {item_type_name} table"
+
+        seeder = log_action(log_reference=_LogReference.SEED00X)(seeder)
     return seeder
 
 
-@log_action(narrative="Ensuring that this is a sandbox environment")
+@log_action(log_reference=LogReference.SEED001)
 def safeguard(
     data: PipelineData,
     context: LambdaContext,

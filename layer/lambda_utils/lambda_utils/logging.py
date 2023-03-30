@@ -1,3 +1,4 @@
+from enum import Enum
 from functools import wraps
 from inspect import signature
 from logging import getLevelName
@@ -29,8 +30,11 @@ class LogTemplateBase(BaseModel):
     host: str
     environment: str
 
-    class Config:
-        arbitrary_types_allowed = True
+
+class LogData(BaseModel):
+    function: str
+    inputs: dict[str, Any]
+    result: Optional[Any]
 
 
 class LogTemplate(LogTemplateBase):
@@ -39,14 +43,24 @@ class LogTemplate(LogTemplateBase):
     outcome: str
     duration_ms: int
     message: str
-    data: dict
+    data: LogData
     error: Union[Exception, str, None]
     call_stack: str = None
-    timestamp: str = None
+    timestamp: str = Field(default_factory=make_timestamp)
     sensitive: bool = True
 
     class Config:
-        arbitrary_types_allowed = True
+        arbitrary_types_allowed = True  # For Exception
+
+    def dict(self, **kwargs):
+        """Force exclude_none"""
+        kwargs["exclude_none"] = True
+        return super().dict(**kwargs)
+
+    def json(self, **kwargs):
+        """Force exclude_none"""
+        kwargs["exclude_none"] = True
+        return super().json(**kwargs)
 
 
 class MinimalRequestContextForLogging(BaseModel):
@@ -110,14 +124,14 @@ P = ParamSpec("P")  # for forwarding type-hints of the decorated kw/args
 
 def log_action(
     *,
-    narrative: str,
+    log_reference: Enum,
     log_fields: list[str] = [],
     log_result: bool = True,
     sensitive: bool = True,
 ) -> Callable[[Callable[P, RT]], Callable[P, RT]]:
     """
     Args:
-        narrative:  Verbose description of what this function is doing.
+        log_reference: Enum mapping to a verbose description of what this function is doing.
         log_fields: Fields to explicitly include. If not provided then
                     no fields are included in the log output.
         log_result: Indicate whether or not to log the function result.
@@ -148,7 +162,10 @@ def log_action(
                 log_fields=log_fields,
             )
 
-            data = {"inputs": function_kwargs}
+            data = {
+                "function": f"{fn.__module__}.{fn.__name__}",
+                "inputs": function_kwargs,
+            }
             if log_result:
                 data["result"] = result
 
@@ -157,20 +174,19 @@ def log_action(
             )
             error = result if outcome == LoggingOutcomes.ERROR else None
             _message = LogTemplate(
-                log_reference=f"{fn.__module__}.{fn.__name__}",
-                message=narrative,
+                log_reference=log_reference.name,
+                message=log_reference.value,
                 data=data,
                 error=error,
                 call_stack=call_stack,
                 outcome=outcome,
                 duration_ms=duration_ms,
                 log_level=getLevelName(level),
-                timestamp=make_timestamp(),
                 sensitive=sensitive,
                 **logger.base_message.dict(),
             )
 
-            message_dict = _message.dict(exclude_none=True)
+            message_dict = _message.dict()
             message_json = json_encode_message(message=message_dict)
             logger.log(msg=message_json, level=level)
 

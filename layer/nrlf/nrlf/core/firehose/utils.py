@@ -14,8 +14,10 @@ def dump_json_gzip(obj) -> bytes:
     return gzip.compress(json.dumps(obj).encode())
 
 
-def encode_log_events_as_ndjson(log_events: list[dict]) -> str:
-    return base64.b64encode(NEWLINE.join(map(json.dumps, log_events)).encode()).decode()
+def encode_logs_as_ndjson(logs: list[dict]) -> str:
+    return base64.b64encode(
+        (NEWLINE.join(map(json.dumps, logs)) + NEWLINE).encode()
+    ).decode()
 
 
 def name_from_arn(arn: str) -> str:

@@ -5,6 +5,7 @@ from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
     KinesisFirehoseRecord,
 )
 from lambda_utils.logging import Logger, log_action
+from nrlf.core.firehose.log_reference import LogReference
 from nrlf.core.firehose.model import (
     CloudwatchLogsData,
     FirehoseOutputRecord,
@@ -17,7 +18,7 @@ from nrlf.core.firehose.validate import process_cloudwatch_record
 from pydantic import ValidationError
 
 
-@log_action(narrative="Processing all Firehose records", log_result=False)
+@log_action(log_reference=LogReference.FIREHOSE001, log_result=False)
 def _process_firehose_records(
     records: list[KinesisFirehoseRecord],
     logger: Logger = None,
@@ -26,7 +27,7 @@ def _process_firehose_records(
     for record in records:
         try:
             cloudwatch_data = CloudwatchLogsData.parse(
-                data=record.data, record_id=record.recordId
+                data=record.data, record_id=record.recordId, logger=logger
             )
         except ValidationError:
             yield FirehoseOutputRecord(
@@ -48,7 +49,7 @@ def _process_firehose_records(
             yield output_record
 
 
-@log_action(narrative="Executing handler")
+@log_action(log_reference=LogReference.FIREHOSE002, log_result=False)
 def firehose_handler(
     event: KinesisFirehoseModel,
     boto3_firehose_client: any,
