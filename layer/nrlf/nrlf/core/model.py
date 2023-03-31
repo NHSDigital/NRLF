@@ -1,5 +1,5 @@
 import re
-from typing import ClassVar, Optional, Union
+from typing import Optional, Union
 
 import nrlf.consumer.fhir.r4.model as consumer_model
 import nrlf.producer.fhir.r4.model as producer_model
@@ -20,7 +20,7 @@ from nrlf.core.validators import (
     validate_timestamp,
     validate_tuple,
 )
-from pydantic import BaseModel, Extra, Field, PrivateAttr, root_validator, validator
+from pydantic import BaseModel, Field, root_validator, validator
 
 from .constants import ID_SEPARATOR, DbPrefix
 
