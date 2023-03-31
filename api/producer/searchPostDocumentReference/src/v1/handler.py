@@ -36,12 +36,10 @@ def search_document_references(
     nhs_number: RequestQuerySubject = request_params.nhs_number
     organisation_code = data["organisation_code"]
 
-    validate_type_system(
-        request_params.type_identifier, pointer_types=data["pointer_types"]
-    )
+    validate_type_system(request_params.type, pointer_types=data["pointer_types"])
 
     pointer_types = type_filter(
-        type_identifier=request_params.type_identifier,
+        type_identifier=request_params.type,
         pointer_types=data["pointer_types"],
     )
 

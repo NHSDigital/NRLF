@@ -53,7 +53,7 @@ Feature: Consumer Search Success scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -96,7 +96,7 @@ Feature: Consumer Search Success scenarios
       | url         | https://example.org/my-doc-2.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 2 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -131,7 +131,7 @@ Feature: Consumer Search Success scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 0 entries
 
@@ -142,7 +142,7 @@ Feature: Consumer Search Success scenarios
       | http://snomed.info/sct | 736253002 |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 0 entries
 
@@ -169,8 +169,8 @@ Feature: Consumer Search Success scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property             | value                                               |
-      | subject.identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
-      | custodian.identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
+      | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
+      | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -205,8 +205,8 @@ Feature: Consumer Search Success scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | type.identifier    | http://snomed.info/sct\|736253002             |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | type               | http://snomed.info/sct\|736253002             |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -241,9 +241,9 @@ Feature: Consumer Search Success scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property             | value                                               |
-      | subject.identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
-      | custodian.identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
-      | type.identifier      | http://snomed.info/sct\|736253002                   |
+      | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
+      | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
+      | type                 | http://snomed.info/sct\|736253002                   |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -270,9 +270,9 @@ Feature: Consumer Search Success scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property             | value                                               |
-      | subject.identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
-      | custodian.identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
-      | type.identifier      | http://snomed.info/sct\|736253002                   |
+      | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
+      | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
+      | type                 | http://snomed.info/sct\|736253002                   |
     Then the operation is successful
     And the response is a Bundle with 20 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template

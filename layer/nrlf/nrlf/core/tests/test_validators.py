@@ -239,20 +239,20 @@ def test_is_document_reference_string_valid(
 def test_validate_type_system(type_identifier, pointer_types, expected_outcome):
 
     queryStringParameters = {
-        "type.identifier": type_identifier,
+        "type": type_identifier,
     }
     request_params = RequestParams(**queryStringParameters or {})
 
     if expected_outcome is RequestValidationError:
         with pytest.raises(expected_outcome):
             validate_type_system(
-                type_identifier=request_params.type_identifier,
+                type_identifier=request_params.type,
                 pointer_types=pointer_types,
             )
     else:
         assert (
             validate_type_system(
-                type_identifier=request_params.type_identifier,
+                type_identifier=request_params.type,
                 pointer_types=pointer_types,
             )
             is None

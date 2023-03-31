@@ -41,6 +41,7 @@ def producer_searches_existing_document_reference(
     test_config: TestConfig = context.test_config
 
     query_params = table_as_dict(table=context.table)
+
     test_config.requestParams = query_params
     test_config.response = test_config.request.invoke(query_params=query_params)
 

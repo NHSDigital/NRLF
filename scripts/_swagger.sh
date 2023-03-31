@@ -47,6 +47,7 @@ function _generate_producer_model() {
     fi
 
     datamodel-codegen --input ./api/producer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/producer/fhir/r4/model.py --use-annotated --enum-field-as-literal all --use-double-quotes
+    datamodel-codegen --input ./api/producer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/producer/fhir/r4/strict_model.py --strict-types {str,bytes,int,float,bool}  --use-annotated --enum-field-as-literal all --use-double-quotes
 }
 
 function _generate_consumer_model() {

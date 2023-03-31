@@ -40,12 +40,10 @@ def search_document_references(
         custodian_identifier=request_params.custodian_identifier
     )
 
-    validate_type_system(
-        request_params.type_identifier, pointer_types=data["pointer_types"]
-    )
+    validate_type_system(request_params.type, pointer_types=data["pointer_types"])
 
     pointer_types = type_filter(
-        type_identifier=request_params.type_identifier,
+        type_identifier=request_params.type,
         pointer_types=data["pointer_types"],
     )
 
