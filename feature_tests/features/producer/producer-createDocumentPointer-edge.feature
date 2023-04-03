@@ -8,7 +8,7 @@ Feature: Producer Create Failure Edge Case Scenarios
         "id": "8FW23-1234567890",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "8FW23"
           }
         },
@@ -39,7 +39,7 @@ Feature: Producer Create Failure Edge Case Scenarios
         "id": "8FW23-1234567890",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "8FW23"
           }
         },

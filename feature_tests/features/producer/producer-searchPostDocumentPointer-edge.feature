@@ -8,7 +8,7 @@ Feature: Producer Search Edge Case scenarios
         "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },
@@ -44,7 +44,7 @@ Feature: Producer Search Edge Case scenarios
         "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },

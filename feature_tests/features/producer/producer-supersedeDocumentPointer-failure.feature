@@ -8,7 +8,7 @@ Feature: Producer Supersede Failure scenarios
         "id": "$identifier",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },
@@ -101,7 +101,7 @@ Feature: Producer Supersede Failure scenarios
         "id": "$custodian|$identifier",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },

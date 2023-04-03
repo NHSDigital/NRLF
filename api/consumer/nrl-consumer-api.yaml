@@ -1297,7 +1297,7 @@ components:
           value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
         invalid:
           summary: Unknown
-          value: https://fhir.nhs.uk/Id/ods-organization-code|XYZ
+          value: https://fhir.nhs.uk/Id/another-code|XYZ
     type:
       name: type
       in: query

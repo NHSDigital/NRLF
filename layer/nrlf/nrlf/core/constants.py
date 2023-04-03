@@ -22,3 +22,4 @@ REQUIRED_CREATE_FIELDS = ["custodian", "id", "type", "status", "subject"]
 JSON_TYPES = {dict, list}
 NHS_NUMBER_INDEX = "idx_nhs_number_by_id"
 ID_SEPARATOR = "-"
+ODS_SYSTEM = "https://fhir.nhs.uk/Id/ods-organization-code"

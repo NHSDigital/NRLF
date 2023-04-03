@@ -1692,7 +1692,6 @@ components:
       example: "https://fhir.nhs.uk/Id/nhs-number|4409815415"
     RequestQueryCustodian:
       type: string
-      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-organization-code\|(\w+)$
       example: "https://fhir.nhs.uk/Id/ods-organization-code|Y05868"
     RequestQueryType:
       type: string
@@ -1764,10 +1763,10 @@ components:
           value: ""
         valid:
           summary: Valid
-          value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
+          value: Y05868
         invalid:
           summary: Unknown
-          value: https://fhir.nhs.uk/Id/ods-organization-code|XYZ
+          value: XYZ
     type:
       name: type
       in: query

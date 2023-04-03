@@ -8,7 +8,7 @@ Feature: Producer Update Success scenarios
         "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },
@@ -51,7 +51,7 @@ Feature: Producer Update Success scenarios
         "id": "8FW23-1234567890",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "8FW23"
           }
         },
@@ -82,7 +82,7 @@ Feature: Producer Update Success scenarios
         "id": "8FW23-1234567890",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "8FW23"
           }
         },

@@ -8,6 +8,7 @@ from nrlf.core.constants import (
     EMPTY_VALUES,
     ID_SEPARATOR,
     JSON_TYPES,
+    ODS_SYSTEM,
     REQUIRED_CREATE_FIELDS,
     Source,
 )
@@ -16,6 +17,7 @@ from nrlf.core.errors import (
     MissingRequiredFieldForCreate,
     NextPageTokenValidationError,
     ProducerCreateValidationError,
+    RequestValidationError,
 )
 from nrlf.core.model import DocumentPointer, PaginatedResponse
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
@@ -131,6 +133,13 @@ def validate_required_create_fields(request_body_json):
             )
 
 
+def validate_custodian_system(fhir_strict_model: StrictDocumentReference):
+    if fhir_strict_model.custodian.identifier.system != ODS_SYSTEM:
+        raise RequestValidationError(
+            "Provided custodian identifier system is not the ODS system"
+        )
+
+
 def create_document_pointer_from_fhir_json(
     fhir_json: dict,
     api_version: int,
@@ -163,6 +172,8 @@ def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference
         input_fhir_json=fhir_json,
         output_fhir_json=fhir_strict_model.dict(exclude_none=True),
     )
+    validate_custodian_system(fhir_strict_model)
+    _strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
     return fhir_strict_model
 
 

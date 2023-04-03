@@ -5,16 +5,21 @@ from nrlf.core.errors import (
     MissingRequiredFieldForCreate,
     NextPageTokenValidationError,
     ProducerCreateValidationError,
+    RequestValidationError,
 )
 from nrlf.core.transform import (
     _strip_empty_json_paths,
     create_bundle_entries_from_document_pointers,
     create_document_pointer_from_fhir_json,
     transform_next_page_token_to_start_key,
+    validate_custodian_system,
     validate_no_extra_fields,
     validate_required_create_fields,
 )
 from nrlf.producer.fhir.r4.model import BundleEntry, DocumentReference
+from nrlf.producer.fhir.r4.strict_model import (
+    DocumentReference as StrictDocumentReference,
+)
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 from pydantic import BaseModel
 
@@ -150,3 +155,19 @@ def test_validate_required_create_fields(field):
 
     with pytest.raises(MissingRequiredFieldForCreate):
         validate_required_create_fields(fhir_json)
+
+
+def test_validate_custodian_system():
+    fhir_json = read_test_data("nrlf")
+    fhir_strict_model = StrictDocumentReference(**fhir_json)
+
+    assert validate_custodian_system(fhir_strict_model) == None
+
+
+def test_validate_custodian_system_fails():
+    fhir_json = read_test_data("nrlf")
+    fhir_json["custodian"]["identifier"]["system"] = "wrong/system"
+    fhir_strict_model = StrictDocumentReference(**fhir_json)
+
+    with pytest.raises(RequestValidationError):
+        validate_custodian_system(fhir_strict_model)
