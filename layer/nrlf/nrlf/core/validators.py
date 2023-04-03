@@ -95,9 +95,9 @@ def validate_fhir_model_for_required_fields(model: StrictDocumentReference):
         )
 
 
-def validate_type_system(type_identifier: RequestQueryType, pointer_types: list[str]):
-    if type_identifier is not None:
-        type_system = type_identifier.__root__.split("|", 1)[0]
+def validate_type_system(type: RequestQueryType, pointer_types: list[str]):
+    if type is not None:
+        type_system = type.__root__.split("|", 1)[0]
 
         pointer_type_systems = map(
             lambda pointer_type: pointer_type.split("|", 1)[0], pointer_types

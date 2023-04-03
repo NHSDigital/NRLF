@@ -212,7 +212,7 @@ def test_is_document_reference_string_valid(
 
 
 @pytest.mark.parametrize(
-    ["type_identifier", "pointer_types", "expected_outcome"],
+    ["type", "pointer_types", "expected_outcome"],
     (
         [
             "https://nrl.team/rowan-test|123",
@@ -235,23 +235,23 @@ def test_is_document_reference_string_valid(
         ["https://nrl.team/rowan-test|123", [], RequestValidationError],
     ),
 )
-def test_validate_type_system(type_identifier, pointer_types, expected_outcome):
+def test_validate_type_system(type, pointer_types, expected_outcome):
 
     queryStringParameters = {
-        "type.identifier": type_identifier,
+        "type": type,
     }
     request_params = RequestParams(**queryStringParameters or {})
 
     if expected_outcome is RequestValidationError:
         with pytest.raises(expected_outcome):
             validate_type_system(
-                type_identifier=request_params.type_identifier,
+                type=request_params.type,
                 pointer_types=pointer_types,
             )
     else:
         assert (
             validate_type_system(
-                type_identifier=request_params.type_identifier,
+                type=request_params.type,
                 pointer_types=pointer_types,
             )
             is None

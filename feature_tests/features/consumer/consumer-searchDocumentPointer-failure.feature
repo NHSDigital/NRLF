@@ -81,7 +81,7 @@ Feature: Consumer Search Failure scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | extra              | unwanted field                                |
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
@@ -114,7 +114,7 @@ Feature: Consumer Search Failure scenarios
       | issue_level       | error                                                                 |
       | issue_code        | VALIDATION_ERROR                                                      |
       | issue_description | A parameter or value has resulted in a validation error               |
-      | message           | ConsumerRequestParams validation failure - Invalid subject.identifier |
+      | message           | ConsumerRequestParams validation failure - Invalid subject:identifier |
 
   Scenario: Search fails to return a bundle when the next page key is incorrect
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
@@ -131,7 +131,7 @@ Feature: Consumer Search Failure scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | next-page-token    | INCORRECT                                     |
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
@@ -157,8 +157,8 @@ Feature: Consumer Search Failure scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | type.identifier    | http://incorrect.info/sct\|736253002          |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | type               | http://incorrect.info/sct\|736253002          |
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                                                                               |

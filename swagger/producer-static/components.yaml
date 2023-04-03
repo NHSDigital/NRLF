@@ -21,17 +21,17 @@ components:
       schema:
         $ref: "#/components/schemas/DocumentId"
     subject:
-      name: subject.identifier
+      name: subject:identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
     custodian:
-      name: custodian.identifier
+      name: custodian:identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryCustodian"
     type:
-      name: type.identifier
+      name: type
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryType"
@@ -126,9 +126,9 @@ components:
     RequestParams:
       type: object
       properties:
-        subject.identifier:
+        subject:identifier:
           $ref: "#/components/schemas/RequestQuerySubject"
-        type.identifier:
+        type:
           $ref: "#/components/schemas/RequestQueryType"
         next-page-token:
           $ref: "#/components/schemas/NextPageToken"
