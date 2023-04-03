@@ -3,6 +3,10 @@ import gzip
 import json
 from typing import Iterator
 
+from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
+    KinesisFirehoseRecord,
+)
+
 NEWLINE = "\n"
 
 
@@ -36,3 +40,11 @@ def list_in_chunks(
             batch = []
     if batch:
         yield batch
+
+
+def get_partition_key(record: KinesisFirehoseRecord):
+    return (
+        record.kinesisRecordMetadata.partitionKey
+        if record.kinesisRecordMetadata
+        else None
+    )

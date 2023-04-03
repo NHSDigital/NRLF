@@ -2,9 +2,12 @@ import json
 from enum import Enum
 from typing import Iterator, Optional, Union
 
-from lambda_utils.logging import log_action
+from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
+    KinesisFirehoseRecord,
+)
+from lambda_utils.logging import LogTemplate, log_action
 from nrlf.core.firehose.utils import dump_json_gzip, load_json_gzip
-from pydantic import BaseModel, Field, Json, conlist
+from pydantic import BaseModel, Field, Json, conlist, constr, root_validator
 
 
 class LogReference(Enum):
@@ -18,8 +21,11 @@ class FirehoseResult(str, Enum):
 
 
 class CloudwatchMessageType(str, Enum):
-    NORMAL_LOG_EVENT = "DATA_MESSAGE"
-    FIREHOSE_HEALTHCHECK_EVENT = "CONTROL_MESSAGE"
+    DATA_MESSAGE = "DATA_MESSAGE"
+    CONTROL_MESSAGE = "CONTROL_MESSAGE"
+
+
+CONTROL_MESSAGE_TEXT = "CWL CONTROL MESSAGE: Checking health of destination Firehose."
 
 
 class FirehoseSubmissionRecord(BaseModel):
@@ -60,19 +66,19 @@ class FirehoseOutputRecord(BaseModel):
 class LogEvent(BaseModel):
     id: str
     timestamp: int
-    message: Union[Json, str]
+    # Read/write to LogTemplate string (see dict method) OR accept the CONTROL_MESSAGE
+    message: Union[
+        LogTemplate, Json[LogTemplate], constr(regex=f"^{CONTROL_MESSAGE_TEXT}$")
+    ]
 
     def dict(self, *args, **kwargs):
         _dict = super().dict(*args, **kwargs)
-        if type(self.message) in (dict, list):
+        # Reserialise to JSON
+        if type(self.message) is LogTemplate:
+            _dict["message"] = self.message.json()
+        elif type(self.message) in (dict, list):
             _dict["message"] = json.dumps(self.message)
         return _dict
-
-
-@log_action(log_reference=LogReference.FIREHOSEMODEL001, log_result=True)
-def parse_cloudwatch_data(data: bytes, record_id: str):
-    obj = load_json_gzip(data=data)
-    return CloudwatchLogsData(**obj, record_id=record_id)
 
 
 class CloudwatchLogsData(BaseModel):
@@ -84,7 +90,7 @@ class CloudwatchLogsData(BaseModel):
 
     # Fields we need
     record_id: str = Field(exclude=True)  # For convenience, not part of the AWS model
-    log_events: conlist(LogEvent, min_items=1) = Field(alias="logEvents")
+    log_events: conlist(item_type=LogEvent, min_items=1) = Field(alias="logEvents")
     message_type: CloudwatchMessageType = Field(alias="messageType")
     # Other fields
     owner: str
@@ -94,9 +100,20 @@ class CloudwatchLogsData(BaseModel):
         default_factory=list, alias="subscriptionFilters"
     )
 
-    @classmethod
-    def parse(cls, data: bytes, record_id: str, logger=None):
-        return parse_cloudwatch_data(data=data, record_id=record_id, logger=logger)
+    @root_validator
+    def validate_control_message_consistency(cls, values):
+        log_events: list[LogEvent] = values.get("log_events", [])
+        message_type = values.get("message_type")
+
+        is_control_message_type = message_type is CloudwatchMessageType.CONTROL_MESSAGE
+        contains_control_message = any(
+            log_event.message == CONTROL_MESSAGE_TEXT for log_event in log_events
+        )
+        if is_control_message_type != contains_control_message:
+            raise ValueError(
+                f"Message type '{message_type}' not consistent with log events '{log_events}'"
+            )
+        return values
 
     def encode(self) -> bytes:
         return dump_json_gzip(self.dict(by_alias=True))
@@ -108,9 +125,17 @@ class CloudwatchLogsData(BaseModel):
         return [first_half, second_half]
 
     @property
-    def logs(self) -> Iterator[LogEvent]:
-        yield from (log_event.message for log_event in self.log_events)
+    def redacted_logs(self) -> Iterator[dict]:
+        for log_event in self.log_events:
+            message: LogTemplate = log_event.message
+            yield message.dict(redact=True)
 
 
 class LambdaResult(BaseModel):
     records: conlist(item_type=FirehoseOutputRecord, min_items=1)
+
+
+@log_action(log_reference=LogReference.FIREHOSEMODEL001, log_result=True)
+def parse_cloudwatch_data(record: KinesisFirehoseRecord) -> CloudwatchLogsData:
+    obj = load_json_gzip(data=record.data)
+    return CloudwatchLogsData(**obj, record_id=record.recordId)

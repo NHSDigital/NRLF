@@ -1,5 +1,6 @@
 import base64
 import json
+from typing import Union
 from unittest import mock
 
 import pytest
@@ -8,19 +9,11 @@ from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
     KinesisFirehoseRecord,
 )
 from hypothesis import given
-from hypothesis.strategies import (
-    DrawFn,
-    builds,
-    composite,
-    dictionaries,
-    just,
-    lists,
-    sampled_from,
-    text,
-)
+from hypothesis.strategies import DrawFn, builds, composite, just, lists
 from lambda_utils.logging import LogData, LogTemplate
 from nrlf.core.firehose.handler import _process_firehose_records, firehose_handler
 from nrlf.core.firehose.model import (
+    CONTROL_MESSAGE_TEXT,
     CloudwatchLogsData,
     CloudwatchMessageType,
     FirehoseOutputRecord,
@@ -30,63 +23,154 @@ from nrlf.core.firehose.model import (
 from nrlf.core.firehose.validate import MAX_PACKET_SIZE_BYTES
 
 
-@composite
-def draw_log_message(draw: DrawFn) -> str:
-    log = draw(
-        builds(
+def _log_events_strategy(min_size=1, max_size=None, sensitive=True, message=None):
+    if message is None:
+        message = builds(
             LogTemplate,
-            data=just(LogData(function="foo.bar", inputs={"foo": "bar"}, result="foo")),
-            error=just("oops"),
+            data=just(LogData(function="foo", inputs={}, result="")),
+            sensitive=just(sensitive),
+            correlation_id=just(""),
+            nhsd_correlation_id=just(""),
+            request_id=just(""),
+            transaction_id=just(""),
+            host=just(""),
+            environment=just(""),
+            log_level=just(""),
+            log_reference=just(""),
+            outcome=just(""),
+            duration_ms=just(1),
+            error=just(""),
+            call_stack=just(""),
+            timestamp=just(""),
         )
+    return lists(
+        builds(
+            LogEvent,
+            id=just(""),
+            timestamp=just(1),
+            message=message,
+        ),
+        min_size=min_size,
+        max_size=max_size,
     )
-    return log.json()
+
+
+def _cloudwatch_data_strategy(
+    message_type,
+    min_size=2,
+    max_size=None,
+    message=None,
+    record_id=just(""),
+    sensitive=True,
+):
+    return builds(
+        CloudwatchLogsData,
+        record_id=record_id,
+        messageType=just(message_type),
+        logEvents=_log_events_strategy(
+            min_size=min_size,
+            max_size=max_size,
+            message=message,
+            sensitive=sensitive,
+        ),
+        owner=just(""),
+        logGroup=just(""),
+        logStream=just(""),
+        subscription_filters=just([]),
+    )
 
 
 @composite
-def draw_json(draw: DrawFn) -> str:
-    log = draw(
-        dictionaries(keys=sampled_from(["foo", "bar"]), values=just(""), min_size=1)
-    )
-    return json.dumps(log)
-
-
-def draw_log_event(message_strategy=draw_json) -> str:
-    return builds(LogEvent, id=just(""), timestamp=just(1), message=message_strategy())
-
-
-good_logs = lists(
-    draw_log_event(message_strategy=draw_log_message),
-    min_size=1,
-    max_size=20,
-)
-bad_logs = lists(
-    draw_log_event(),
-    min_size=1,
-    max_size=2,
-)
+def bad_cloudwatch_data(draw: DrawFn, logs: list[Union[dict, str]]):
+    cloudwatch_data = draw(
+        _cloudwatch_data_strategy(
+            CloudwatchMessageType.DATA_MESSAGE,
+            min_size=len(logs),
+            max_size=len(logs),
+        )
+    ).dict(by_alias=True)
+    for i, log in enumerate(logs):
+        cloudwatch_data["logEvents"][i]["message"] = log
+    return base64.b64encode(CloudwatchLogsData.construct(**cloudwatch_data).encode())
 
 
 @composite
 def _draw_cloudwatch_data(
-    draw: DrawFn, logs, message_type: str = CloudwatchMessageType.NORMAL_LOG_EVENT
+    draw: DrawFn,
+    message_type: str = CloudwatchMessageType.DATA_MESSAGE,
+    message: str = None,
+    sensitive: bool = True,
+    min_size=2,
+    max_size=3,
 ) -> bytes:
     cloudwatch_data = draw(
-        builds(
-            CloudwatchLogsData,
-            record_id=text(min_size=1),
-            logEvents=logs,
-            messageType=just(message_type),
+        _cloudwatch_data_strategy(
+            message_type=message_type,
+            message=message,
+            sensitive=sensitive,
+            min_size=min_size,
+            max_size=max_size,
         )
     )
     return base64.b64encode(cloudwatch_data.encode())
 
 
-@pytest.mark.slow
+@given(
+    sensitive_records=lists(  # Six sensitive logs (3 x 2)
+        builds(
+            KinesisFirehoseRecord,
+            data=_draw_cloudwatch_data(sensitive=True, min_size=2, max_size=2),
+        ),
+        min_size=3,
+        max_size=3,
+    ),
+    non_sensitive_records=lists(  # Nine non-sensitive logs (3 x 3)
+        builds(
+            KinesisFirehoseRecord,
+            data=_draw_cloudwatch_data(sensitive=False, min_size=3, max_size=3),
+        ),
+        min_size=3,
+        max_size=3,
+    ),
+)
+def test__process_firehose_records_normal_including_redacted_records(
+    sensitive_records: list[KinesisFirehoseRecord],
+    non_sensitive_records: list[KinesisFirehoseRecord],
+):
+
+    output_records = list(
+        _process_firehose_records(records=sensitive_records + non_sensitive_records)
+    )
+    assert len(output_records) == len(sensitive_records + non_sensitive_records)
+
+    n_lines, n_sensitive, n_not_sensitive = 0, 0, 0
+    n_redacted_records = 0
+    for record in output_records:
+        record_is_sensitive = False
+
+        lines = base64.b64decode(record.data.encode()).decode().split("\n")
+        for log in map(json.loads, filter(None, lines)):
+            n_lines += 1
+            if log["sensitive"]:
+                record_is_sensitive = True
+                n_sensitive += 1
+                assert log["data"] == "REDACTED"
+            else:
+                n_not_sensitive += 1
+                LogTemplate(**log)
+        n_redacted_records += int(record_is_sensitive)
+
+    assert n_lines == 15
+    assert n_sensitive == 6
+    assert n_not_sensitive == 9
+    assert n_redacted_records == len(sensitive_records) == 3
+
+
 @given(
     good_records=lists(
         builds(
             KinesisFirehoseRecord,
-            data=_draw_cloudwatch_data(logs=good_logs),
+            data=_draw_cloudwatch_data(),
         ),
         min_size=1,
         max_size=1,
@@ -94,7 +178,7 @@ def _draw_cloudwatch_data(
     bad_records=lists(
         builds(
             KinesisFirehoseRecord,
-            data=_draw_cloudwatch_data(logs=bad_logs),
+            data=bad_cloudwatch_data(logs=[{"bad": "log"}]),
         ),
         min_size=1,
         max_size=10,
@@ -103,21 +187,19 @@ def _draw_cloudwatch_data(
 def test__process_firehose_records_normal_records(
     good_records: list[KinesisFirehoseRecord], bad_records: list[KinesisFirehoseRecord]
 ):
-    outcome_records = list(
-        _process_firehose_records(records=good_records + bad_records)
-    )
+    output_records = list(_process_firehose_records(records=good_records + bad_records))
     total_event_size = sum(
-        outcome_record.size_bytes for outcome_record in outcome_records
+        outcome_record.size_bytes for outcome_record in output_records
     )
     number_of_ok_records = sum(
-        outcome_record.result is FirehoseResult.OK for outcome_record in outcome_records
+        outcome_record.result is FirehoseResult.OK for outcome_record in output_records
     )
     number_of_failed_records = sum(
         outcome_record.result is FirehoseResult.PROCESSING_FAILED
-        for outcome_record in outcome_records
+        for outcome_record in output_records
     )
 
-    assert len(outcome_records) == len(good_records + bad_records)
+    assert len(output_records) == len(good_records + bad_records)
     assert 0 < total_event_size <= MAX_PACKET_SIZE_BYTES
     assert number_of_ok_records == len(good_records)
     assert number_of_failed_records == len(bad_records)
@@ -128,50 +210,42 @@ def test__process_firehose_records_normal_records(
     good_records=lists(
         builds(
             KinesisFirehoseRecord,
-            data=_draw_cloudwatch_data(logs=good_logs),
+            data=_draw_cloudwatch_data(),
         ),
-        min_size=1,
-        max_size=1,
+        min_size=2,
+        max_size=4,
     ),
     control_records=lists(
         builds(
             KinesisFirehoseRecord,
             data=_draw_cloudwatch_data(
-                logs=just(
-                    [
-                        LogEvent(
-                            id="",
-                            timestamp=1,
-                            message="CWL CONTROL MESSAGE: Checking health of destination Kinesis stream.",
-                        )
-                    ]
-                ),
-                message_type=CloudwatchMessageType.FIREHOSE_HEALTHCHECK_EVENT,
+                message_type=CloudwatchMessageType.CONTROL_MESSAGE,
+                message=just(CONTROL_MESSAGE_TEXT),
             ),
         ),
         min_size=1,
-        max_size=10,
+        max_size=1,
     ),
 )
 def test__process_firehose_records_control_records(
     good_records: list[KinesisFirehoseRecord],
     control_records: list[KinesisFirehoseRecord],
 ):
-    outcome_records = list(
+    output_records = list(
         _process_firehose_records(records=good_records + control_records)
     )
     total_event_size = sum(
-        outcome_record.size_bytes for outcome_record in outcome_records
+        outcome_record.size_bytes for outcome_record in output_records
     )
     number_of_ok_records = sum(
-        outcome_record.result is FirehoseResult.OK for outcome_record in outcome_records
+        outcome_record.result is FirehoseResult.OK for outcome_record in output_records
     )
     number_of_dropped_records = sum(
         outcome_record.result is FirehoseResult.DROPPED
-        for outcome_record in outcome_records
+        for outcome_record in output_records
     )
 
-    assert len(outcome_records) == len(good_records + control_records)
+    assert len(output_records) == len(good_records + control_records)
     assert 0 < total_event_size <= MAX_PACKET_SIZE_BYTES
     assert number_of_ok_records == len(good_records)
     assert number_of_dropped_records == len(control_records)
@@ -183,18 +257,18 @@ def test__process_firehose_records_control_records(
     event=builds(
         KinesisFirehoseModel, records=just([]), deliveryStreamArn=just("foo/bar")
     ),
-    outcome_records=lists(builds(FirehoseOutputRecord), min_size=10),
+    output_records=lists(builds(FirehoseOutputRecord), min_size=10),
 )
 def test_firehose_handler(
     event,
-    outcome_records,
+    output_records,
     mocked_resubmit_unprocessed_records,
     mocked__process_firehose_records,
 ):
-    mocked__process_firehose_records.return_value = outcome_records
+    mocked__process_firehose_records.return_value = output_records
     result = firehose_handler(
         event=event,
         boto3_firehose_client=None,
     )
 
-    assert result.records == outcome_records
+    assert result.records == output_records
