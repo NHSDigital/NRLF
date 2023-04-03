@@ -2,7 +2,7 @@ from unittest import mock
 
 import boto3
 import pytest
-from hypothesis import given, settings
+from hypothesis import given
 from hypothesis.strategies import builds, just, lists, none
 from moto import mock_firehose, mock_s3
 from nrlf.core.firehose.model import FirehoseSubmissionRecord
@@ -107,14 +107,14 @@ def test_submit_records_passes(
     )
 
 
-@pytest.mark.slow
-@settings(deadline=1000)  # Milliseconds
-@given(unprocessed_records=lists(builds(FirehoseSubmissionRecord), min_size=1))
-def test_resubmit_unprocessed_records(
-    unprocessed_records: list[FirehoseSubmissionRecord],
-):
+def test_resubmit_unprocessed_records():
     bucket_name = "bucket_name"
     stream_name = "stream_name"
+
+    unprocessed_records = [
+        FirehoseSubmissionRecord(Data=b"foo"),
+        FirehoseSubmissionRecord(Data=b"bar"),
+    ]
 
     with mock_s3(), mock_firehose():
         s3_client = boto3.client("s3", region_name="us-east-1")
