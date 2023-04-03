@@ -84,6 +84,7 @@ Feature: Consumer Search Failure scenarios
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | extra              | unwanted field                                |
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                                   |
       | issue_type        | processing                                              |
@@ -108,6 +109,7 @@ Feature: Consumer Search Failure scenarios
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property | value |
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                                                 |
       | issue_type        | processing                                                            |
@@ -134,6 +136,7 @@ Feature: Consumer Search Failure scenarios
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | next-page-token    | INCORRECT                                     |
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                                   |
       | issue_type        | processing                                              |
@@ -160,10 +163,11 @@ Feature: Consumer Search Failure scenarios
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | type               | http://incorrect.info/sct\|736253002          |
     Then the operation is unsuccessful
+    And the status is 403
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                                                               |
-      | issue_type        | processing                                                                                          |
-      | issue_level       | error                                                                                               |
-      | issue_code        | VALIDATION_ERROR                                                                                    |
-      | issue_description | A parameter or value has resulted in a validation error                                             |
-      | message           | The provided query system type value - http://incorrect.info/sct - does not match the allowed types |
+      | property          | value                                                                                         |
+      | issue_type        | processing                                                                                    |
+      | issue_level       | error                                                                                         |
+      | issue_code        | ACCESS_DENIED_LEVEL                                                                           |
+      | issue_description | Access has been denied because you need higher level permissions                              |
+      | message           | The provided system type value - http://incorrect.info/sct - does not match the allowed types |

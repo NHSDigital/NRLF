@@ -81,13 +81,14 @@ Feature: Producer Read Failure scenarios
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "VN6DL-1234567890"
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                            |
-      | issue_type        | processing                                                       |
-      | issue_level       | error                                                            |
-      | issue_code        | ACCESS_DENIED_LEVEL                                              |
-      | issue_description | Access has been denied because you need higher level permissions |
-      | message           | Required permissions to read a document pointer are missing      |
+      | property          | value                                                                                    |
+      | issue_type        | processing                                                                               |
+      | issue_level       | error                                                                                    |
+      | issue_code        | VALIDATION_ERROR                                                                         |
+      | issue_description | A parameter or value has resulted in a validation error                                  |
+      | message           | The requested document pointer cannot be read because it belongs to another organisation |
 
   Scenario: The Document Pointer does not exist
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to read Document Pointers
@@ -96,6 +97,7 @@ Feature: Producer Read Failure scenarios
       | http://snomed.info/sct | 734163000 |
     When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "8FW23-1234567890"
     Then the operation is unsuccessful
+    And the status is 404
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                   |
       | issue_type        | processing              |

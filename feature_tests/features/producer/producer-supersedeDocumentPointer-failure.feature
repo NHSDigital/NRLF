@@ -51,7 +51,47 @@ Feature: Producer Supersede Failure scenarios
     And template BAD_DOCUMENT
       """
       {
-      "bad":$bad
+        "resourceType": "DocumentReference",
+        "custodian": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "value": "$custodian"
+          }
+        },
+        "subject": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "$subject"
+          }
+        },
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "$type"
+            }
+          ]
+        },
+        "content": [
+          {
+            "attachment": {
+              "contentType": "$contentType",
+              "url": "$url"
+            }
+          }
+        ],
+        "status": "current",
+        "relatesTo": [
+          {
+            "code": "replaces",
+            "target": {
+              "type": "DocumentReference",
+              "identifier": {
+                "value": "$target"
+              }
+            }
+          }
+        ]
       }
       """
     And template DOCUMENT_WITH_INVALID_ID_FORMAT
@@ -142,13 +182,14 @@ Feature: Producer Supersede Failure scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                            |
-      | issue_type        | processing                                                       |
-      | issue_level       | error                                                            |
-      | issue_code        | ACCESS_DENIED_LEVEL                                              |
-      | issue_description | Access has been denied because you need higher level permissions |
-      | message           | Required permissions to create a document pointer are missing    |
+      | property          | value                                                                                      |
+      | issue_type        | processing                                                                                 |
+      | issue_level       | error                                                                                      |
+      | issue_code        | VALIDATION_ERROR                                                                           |
+      | issue_description | A parameter or value has resulted in a validation error                                    |
+      | message           | The type of the provided document pointer is not in the list of allowed types for this app |
 
   Scenario: Producer does not have permission to delete the superseded Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
@@ -173,13 +214,14 @@ Feature: Producer Supersede Failure scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                            |
-      | issue_type        | processing                                                       |
-      | issue_level       | error                                                            |
-      | issue_code        | ACCESS_DENIED_LEVEL                                              |
-      | issue_description | Access has been denied because you need higher level permissions |
-      | message           | Required permissions to delete a document pointer are missing    |
+      | property          | value                                                                                      |
+      | issue_type        | processing                                                                                 |
+      | issue_level       | error                                                                                      |
+      | issue_code        | VALIDATION_ERROR                                                                           |
+      | issue_description | A parameter or value has resulted in a validation error                                    |
+      | message           | At least one document pointer cannot be deleted because it belongs to another organisation |
 
   Scenario: The superseded Document Pointer does not exist
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
@@ -196,6 +238,7 @@ Feature: Producer Supersede Failure scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                                         |
       | issue_type        | processing                                                    |
@@ -228,6 +271,7 @@ Feature: Producer Supersede Failure scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                          |
       | issue_type        | processing                                     |
@@ -236,7 +280,7 @@ Feature: Producer Supersede Failure scenarios
       | issue_description | Invalid resource ID                            |
       | message           | Condition check failed - Supersede ID mismatch |
 
-  Scenario: Unable to supersede a Document Pointer
+  Scenario: Unable to supersede a Document Pointer when required field id is missing
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
@@ -250,17 +294,22 @@ Feature: Producer Supersede Failure scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from BAD_DOCUMENT template
-      | property | value |
-      | bad      | true  |
+      | property    | value                          |
+      | identifier  | 8FW23-1234567890               |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                       |
-      | issue_type        | processing                                                  |
-      | issue_level       | error                                                       |
-      | issue_code        | VALIDATION_ERROR                                            |
-      | issue_description | A parameter or value has resulted in a validation error     |
-      | message           | DocumentReference validation failure - Invalid resourceType |
+      | property          | value                                                   |
+      | issue_type        | processing                                              |
+      | issue_level       | error                                                   |
+      | issue_code        | VALIDATION_ERROR                                        |
+      | issue_description | A parameter or value has resulted in a validation error |
+      | message           | The required field id is missing                        |
 
   Scenario: Unable to supersede a Document Pointer with an invalid id format
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers

@@ -81,13 +81,14 @@ Feature: Producer Delete Failure scenarios
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" deletes an existing Document Reference "VLP01-1234567890"
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                            |
-      | issue_type        | processing                                                       |
-      | issue_level       | error                                                            |
-      | issue_code        | ACCESS_DENIED_LEVEL                                              |
-      | issue_description | Access has been denied because you need higher level permissions |
-      | message           | Required permissions to delete a document pointer are missing    |
+      | property          | value                                                                                       |
+      | issue_type        | processing                                                                                  |
+      | issue_level       | error                                                                                       |
+      | issue_code        | VALIDATION_ERROR                                                                            |
+      | issue_description | A parameter or value has resulted in a validation error                                     |
+      | message           | The requested document pointer cannot be deleted because it belongs to another organisation |
 
   Scenario: Unable to delete a non-existing Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to delete Document Pointers
@@ -96,6 +97,7 @@ Feature: Producer Delete Failure scenarios
       | http://snomed.info/sct | 736253001 |
     When Producer "Aaron Court Mental Health NH" deletes an existing Document Reference "8FW23-1234567890"
     Then the operation is unsuccessful
+    And the status is 404
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                   |
       | issue_type        | processing              |
@@ -111,13 +113,14 @@ Feature: Producer Delete Failure scenarios
       | http://snomed.info/sct | 736253001 |
     When Producer "Aaron Court Mental Health NH" deletes an existing Document Reference "VN6DL-1234567890"
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                            |
-      | issue_type        | processing                                                       |
-      | issue_level       | error                                                            |
-      | issue_code        | ACCESS_DENIED_LEVEL                                              |
-      | issue_description | Access has been denied because you need higher level permissions |
-      | message           | Required permissions to delete a document pointer are missing    |
+      | property          | value                                                                                       |
+      | issue_type        | processing                                                                                  |
+      | issue_level       | error                                                                                       |
+      | issue_code        | VALIDATION_ERROR                                                                            |
+      | issue_description | A parameter or value has resulted in a validation error                                     |
+      | message           | The requested document pointer cannot be deleted because it belongs to another organisation |
 
   Scenario: Producer deletes a Document Pointer with an invalid tuple id format
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to delete Document Pointers

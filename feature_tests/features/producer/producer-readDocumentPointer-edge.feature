@@ -86,10 +86,11 @@ Feature: Producer Read Edge Case scenarios
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "8FW23-1234567890"
     Then the operation is unsuccessful
+    And the status is 500
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                   |
-      | issue_type        | processing              |
-      | issue_level       | error                   |
-      | issue_code        | RESOURCE_NOT_FOUND      |
-      | issue_description | Resource not found      |
-      | message           | Item could not be found |
+      | property          | value                                               |
+      | issue_type        | processing                                          |
+      | issue_level       | error                                               |
+      | issue_code        | SERVICE_ERROR                                       |
+      | issue_description | Service failure or unexpected error                 |
+      | message           | There was a problem retrieving the document pointer |

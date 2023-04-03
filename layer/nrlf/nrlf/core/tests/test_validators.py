@@ -3,9 +3,9 @@ from unittest import mock
 import pytest
 from nrlf.core.constants import ID_SEPARATOR
 from nrlf.core.errors import (
+    AuthenticationError,
     DocumentReferenceValidationError,
     InvalidTupleError,
-    RequestValidationError,
 )
 from nrlf.core.transform import make_timestamp
 from nrlf.core.validators import (
@@ -217,7 +217,7 @@ def test_is_document_reference_string_valid(
         [
             "https://nrl.team/rowan-test|123",
             ["https://nrl.team/rowan-poo|123"],
-            RequestValidationError,
+            AuthenticationError,
         ],
         [
             "https://nrl.team/rowan-test|123",
@@ -232,7 +232,7 @@ def test_is_document_reference_string_valid(
             ],
             None,
         ],
-        ["https://nrl.team/rowan-test|123", [], RequestValidationError],
+        ["https://nrl.team/rowan-test|123", [], AuthenticationError],
     ),
 )
 def test_validate_type_system(type, pointer_types, expected_outcome):
@@ -242,7 +242,7 @@ def test_validate_type_system(type, pointer_types, expected_outcome):
     }
     request_params = RequestParams(**queryStringParameters or {})
 
-    if expected_outcome is RequestValidationError:
+    if expected_outcome is AuthenticationError:
         with pytest.raises(expected_outcome):
             validate_type_system(
                 type=request_params.type,

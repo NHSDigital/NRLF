@@ -302,7 +302,7 @@ The following notes should be made:
 
 ### Smoke tests
 
-TODO - CURRENTLY DISABLED FOR DEVELOPMENT REASONS, NEEDS DISCUSSION
+TODO - CURRENTLY DISABLED FOR DEVELOPMENT REASONS, NEEDS DISCUSSION.
 
 You can run smoke tests from the CLI using:
 

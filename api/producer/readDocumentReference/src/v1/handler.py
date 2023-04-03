@@ -8,7 +8,7 @@ from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventMo
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
 from nrlf.core.common_steps import parse_headers
-from nrlf.core.errors import AuthenticationError
+from nrlf.core.errors import RequestValidationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
 from nrlf.core.validators import (
@@ -43,8 +43,8 @@ def validate_producer_permissions(
     if _invalid_producer_for_read(
         organisation_code=organisation_code, read_item_id=decoded_id
     ):
-        raise AuthenticationError(
-            "Required permissions to read a document pointer are missing"
+        raise RequestValidationError(
+            "The requested document pointer cannot be read because it belongs to another organisation"
         )
 
     return PipelineData(decoded_id=decoded_id, **data)
