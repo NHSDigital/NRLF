@@ -170,7 +170,7 @@ Feature: Consumer Search Success scenarios
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property             | value                                               |
       | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
-      | custodian.identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
+      | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -206,7 +206,7 @@ Feature: Consumer Search Success scenarios
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | type.identifier    | http://snomed.info/sct\|736253002             |
+      | type               | http://snomed.info/sct\|736253002             |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -242,8 +242,8 @@ Feature: Consumer Search Success scenarios
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property             | value                                               |
       | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
-      | custodian.identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
-      | type.identifier      | http://snomed.info/sct\|736253002                   |
+      | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
+      | type                 | http://snomed.info/sct\|736253002                   |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -271,8 +271,8 @@ Feature: Consumer Search Success scenarios
     When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
       | property             | value                                               |
       | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
-      | custodian.identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
-      | type.identifier      | http://snomed.info/sct\|736253002                   |
+      | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
+      | type                 | http://snomed.info/sct\|736253002                   |
     Then the operation is successful
     And the response is a Bundle with 20 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
