@@ -6,11 +6,8 @@ import pytest
 from nrlf.core.dynamodb_types import (
     DynamoDbIntType,
     DynamoDbStringType,
-    DynamoDbType,
     convert_dynamo_value_to_raw_value,
-    convert_value_to_dynamo_format,
 )
-from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 from pydantic import ValidationError
 
 DEFAULT_ATTRIBUTE_DEFINITIONS = [{"AttributeName": "id", "AttributeType": "S"}]

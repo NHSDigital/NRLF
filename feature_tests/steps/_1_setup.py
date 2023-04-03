@@ -2,13 +2,8 @@ import json
 
 from behave import given as behave_given
 from behave.runner import Context
-from nrlf.core.constants import Source
 from nrlf.core.model import DocumentPointer
-from nrlf.core.transform import create_document_pointer_from_fhir_json, make_timestamp
-from nrlf.producer.fhir.r4.model import Bundle, BundleEntry, DocumentReference
-from nrlf.producer.fhir.r4.strict_model import (
-    DocumentReference as StrictDocumentReference,
-)
+from nrlf.core.transform import create_document_pointer_from_fhir_json
 
 from feature_tests.common.config_setup import register_application, request_setup
 from feature_tests.common.constants import DEFAULT_VERSION, WITH_WITHOUT_ANY, FhirType

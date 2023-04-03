@@ -2,10 +2,10 @@ import os
 from unittest import mock
 
 import moto
+from lambda_utils.tests.unit.status_test_utils import event  # noqa: F401
 from lambda_utils.tests.unit.status_test_utils import (
     OK,
     SERVICE_UNAVAILABLE,
-    event,
     mock_dynamodb_tables,
 )
 

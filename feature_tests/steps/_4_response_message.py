@@ -1,5 +1,4 @@
 import json
-from dataclasses import asdict
 
 from behave.runner import Context
 from nrlf.producer.fhir.r4.strict_model import Bundle

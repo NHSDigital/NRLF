@@ -1,5 +1,10 @@
 [flake8]
-select = T201  # Print statement linter
+select =
+    T201,  # Print statement linter
+    F401,  # module imported but unused
+    F402,  # import module from line N shadowed by loop variable
+    F403   # ‘from module import *’ used; unable to detect undefined names
+
 exclude =
     .git,
     __pycache__,

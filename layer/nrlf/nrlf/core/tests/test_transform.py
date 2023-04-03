@@ -1,11 +1,9 @@
 import pytest
 from nrlf.core.errors import FhirValidationError, NextPageTokenValidationError
-from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import (
     _strip_empty_json_paths,
     create_bundle_entries_from_document_pointers,
     create_document_pointer_from_fhir_json,
-    transform_evaluation_key_to_next_page_token,
     transform_next_page_token_to_start_key,
     validate_no_extra_fields,
 )

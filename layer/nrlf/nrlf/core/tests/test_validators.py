@@ -5,7 +5,6 @@ from nrlf.core.constants import ID_SEPARATOR
 from nrlf.core.errors import (
     DocumentReferenceValidationError,
     InvalidTupleError,
-    ItemNotFound,
     RequestValidationError,
 )
 from nrlf.core.transform import make_timestamp
