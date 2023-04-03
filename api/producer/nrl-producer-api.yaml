@@ -1583,9 +1583,9 @@ components:
     RequestParams:
       type: object
       properties:
-        subject.identifier:
+        subject:identifier:
           $ref: "#/components/schemas/RequestQuerySubject"
-        type.identifier:
+        type:
           $ref: "#/components/schemas/RequestQueryType"
         next-page-token:
           $ref: "#/components/schemas/NextPageToken"
@@ -1628,7 +1628,7 @@ components:
           summary: Unknown
           value: Y05861-1234567800
     subject:
-      name: subject.identifier
+      name: subject:identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
@@ -1646,7 +1646,7 @@ components:
           summary: Unknown
           value: https://fhir.nhs.uk/Id/nhs-number|3495456001
     custodian:
-      name: custodian.identifier
+      name: custodian:identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryCustodian"
@@ -1661,7 +1661,7 @@ components:
           summary: Unknown
           value: https://fhir.nhs.uk/Id/ods-organization-code|XYZ
     type:
-      name: type.identifier
+      name: type
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryType"

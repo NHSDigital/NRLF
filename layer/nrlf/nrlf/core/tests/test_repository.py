@@ -183,8 +183,8 @@ def test_decode(input: dict, expected: any):
 
 def test_custodian_filter():
     queryStringParameters = {
-        "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
-        "custodian.identifier": "https://fhir.nhs.uk/Id/ods-organization-code|RY26A",
+        "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
+        "custodian:identifier": "https://fhir.nhs.uk/Id/ods-organization-code|RY26A",
     }
     request_params = ConsumerRequestParams(**queryStringParameters or {})
 
@@ -195,8 +195,8 @@ def test_custodian_filter():
 
 def test_custodian_filter_none():
     queryStringParameters = {
-        "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
-        "custodian.identifier": None,
+        "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
+        "custodian:identifier": None,
     }
     request_params = ConsumerRequestParams(**queryStringParameters or {})
 
@@ -207,8 +207,8 @@ def test_custodian_filter_none():
 
 def test_type_filter():
     queryStringParameters = {
-        "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
-        "type.identifier": "http://snomed.info/sct|861421000000109",
+        "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
+        "type": "http://snomed.info/sct|861421000000109",
     }
 
     pointer_types = [
@@ -217,14 +217,14 @@ def test_type_filter():
     ]
     request_params = ConsumerRequestParams(**queryStringParameters or {})
 
-    actual = type_filter(request_params.type_identifier, pointer_types)
+    actual = type_filter(request_params.type, pointer_types)
     expected = ["http://snomed.info/sct|861421000000109"]
     assert actual == expected
 
 
 def test_type_filter_none():
     queryStringParameters = {
-        "subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
+        "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
     }
     pointer_types = [
         "http://snomed.info/sct|861421000000109",
@@ -232,7 +232,7 @@ def test_type_filter_none():
     ]
     request_params = ConsumerRequestParams(**queryStringParameters or {})
 
-    actual = type_filter(request_params.type_identifier, pointer_types)
+    actual = type_filter(request_params.type, pointer_types)
     expected = [
         "http://snomed.info/sct|861421000000109",
         "http://snomed.info/sct|861421000000108",

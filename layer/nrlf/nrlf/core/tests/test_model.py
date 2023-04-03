@@ -2,7 +2,6 @@ import json
 from unittest import mock
 
 import pytest
-
 from nrlf.core.constants import ID_SEPARATOR, DbPrefix
 from nrlf.core.errors import RequestValidationError
 from nrlf.core.model import (
@@ -363,7 +362,7 @@ def test_create_bundle_from_paginated_response_returns_unpopulated_bundle():
 
 
 def test_producer_request_params_splits_nhs_id():
-    queryParams = {"subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|7736959498"}
+    queryParams = {"subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|7736959498"}
 
     request_params = ProducerRequestParams(**queryParams)
     expected = "7736959498"
@@ -371,7 +370,7 @@ def test_producer_request_params_splits_nhs_id():
 
 
 def test_producer_request_params_throws_error_on_invalid_nhs_number():
-    queryParams = {"subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|773695"}
+    queryParams = {"subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|773695"}
 
     with pytest.raises(RequestValidationError):
         request_params = ProducerRequestParams(**queryParams)
@@ -379,7 +378,7 @@ def test_producer_request_params_throws_error_on_invalid_nhs_number():
 
 
 def test_consumer_request_params_splits_nhs_id():
-    queryParams = {"subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|7736959498"}
+    queryParams = {"subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|7736959498"}
 
     request_params = ConsumerRequestParams(**queryParams)
 
@@ -389,7 +388,7 @@ def test_consumer_request_params_splits_nhs_id():
 
 
 def test_consumer_request_params_throws_error_on_invalid_nhs_number():
-    queryParams = {"subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|773695"}
+    queryParams = {"subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|773695"}
 
     with pytest.raises(RequestValidationError):
         request_params = ConsumerRequestParams(**queryParams)

@@ -53,7 +53,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" searches by POST for Document References with body parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -96,7 +96,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | url         | https://example.org/my-doc-2.pdf |
     When Producer "Aaron Court Mental Health NH" searches by POST for Document References with body parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 2 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -131,7 +131,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" searches by POST for Document References with body parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 0 entries
 
@@ -150,7 +150,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | url         | https://example.org/my-doc-2.pdf |
     When Producer "Aaron Court Mental Health NH" searches by POST for Document References with body parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|7736959498 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|7736959498 |
     Then the operation is successful
     And the response is a Bundle with 0 entries
 
@@ -177,7 +177,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | url         | https://example.org/my-doc-2.pdf |
     When Producer "Aaron Court Mental Health NH" searches by POST for Document References with body parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|7736959498 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|7736959498 |
     Then the operation is successful
     And the response is a Bundle with 0 entries
 
@@ -270,8 +270,8 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" searches by POST for Document References with body parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | type.identifier    | http://snomed.info/sct\|736253002             |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | type               | http://snomed.info/sct\|736253002             |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -305,8 +305,8 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" searches by POST for Document References with body parameters:
-      | property        | value                             |
-      | type.identifier | http://snomed.info/sct\|736253002 |
+      | property | value                             |
+      | type     | http://snomed.info/sct\|736253002 |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -340,8 +340,8 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" searches by POST for Document References with body parameters:
-      | property        | value                             |
-      | type.identifier | http://snomed.info/sct\|736253002 |
+      | property | value                             |
+      | type     | http://snomed.info/sct\|736253002 |
     Then the operation is successful
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
@@ -368,7 +368,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" searches by POST for Document References with body parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 20 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
