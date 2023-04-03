@@ -1,10 +1,8 @@
 from typing import Union
 
-from nhs_number import is_valid as is_valid_nhs_number
-from pydantic import ValidationError
-
 from nrlf.core.nhsd_codings import SpineCoding
 from nrlf.producer.fhir.r4.model import RequestParams
+from pydantic import ValidationError
 
 
 class ItemNotFound(Exception):

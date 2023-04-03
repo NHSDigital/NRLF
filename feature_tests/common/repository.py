@@ -1,10 +1,9 @@
 from typing import Generator
 
-from pydantic import BaseModel
-
 from nrlf.core.decorators import deprecated
 from nrlf.core.dynamodb_types import to_dynamodb_dict
 from nrlf.core.repository import Repository
+from pydantic import BaseModel
 
 CHUNK_SIZE = 25
 

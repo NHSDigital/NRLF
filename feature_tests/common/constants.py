@@ -1,6 +1,5 @@
 from enum import Enum, auto
 
-from nrlf.core.constants import NHS_NUMBER_INDEX
 from nrlf.core.model import DocumentPointer
 
 DEFAULT_VERSION = 1.0

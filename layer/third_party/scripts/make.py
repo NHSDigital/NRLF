@@ -21,6 +21,6 @@ if __name__ == "__main__":
     if change_detected("pyproject.toml") or not path_to_zip.exists():
         build_third_party(__file__)
     else:
-        print(
+        print(  # noqa: T201
             f"Skipping rebuild of {path_to_zip} since no changes detected from 'main'"
         )

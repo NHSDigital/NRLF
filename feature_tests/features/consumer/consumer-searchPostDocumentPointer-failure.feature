@@ -81,7 +81,7 @@ Feature: Consumer POST Search Success scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches by POST for Document References with body parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | extra              | unwanted field                                |
     Then the operation is unsuccessful
     And the status is 400
@@ -117,7 +117,7 @@ Feature: Consumer POST Search Success scenarios
       | issue_level       | error                                                                 |
       | issue_code        | VALIDATION_ERROR                                                      |
       | issue_description | A parameter or value has resulted in a validation error               |
-      | message           | ConsumerRequestParams validation failure - Invalid subject.identifier |
+      | message           | ConsumerRequestParams validation failure - Invalid subject:identifier |
 
   Scenario: Search fails to return a bundle when the next page key is incorrect
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search by POST for Document Pointers
@@ -134,7 +134,7 @@ Feature: Consumer POST Search Success scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches by POST for Document References with body parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | next-page-token    | INCORRECT                                     |
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
@@ -160,7 +160,7 @@ Feature: Consumer POST Search Success scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches by POST for Document References with body parameters:
       | property           | value                                          |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|92786934721 |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|92786934721 |
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
@@ -186,8 +186,8 @@ Feature: Consumer POST Search Success scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" searches by POST for Document References with body parameters:
       | property           | value                                         |
-      | subject.identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | type.identifier    | http://incorrect.info/sct\|736253002          |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+      | type               | http://incorrect.info/sct\|736253002          |
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                                                                               |
