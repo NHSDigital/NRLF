@@ -7,13 +7,13 @@ from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
 from lambda_utils.logging import Logger, log_action
 from nrlf.core.firehose.log_reference import LogReference
 from nrlf.core.firehose.model import (
-    CloudwatchLogsData,
     FirehoseOutputRecord,
     FirehoseResult,
     LambdaResult,
+    parse_cloudwatch_data,
 )
 from nrlf.core.firehose.submission import FirehoseClient, resubmit_unprocessed_records
-from nrlf.core.firehose.utils import name_from_arn
+from nrlf.core.firehose.utils import get_partition_key, name_from_arn
 from nrlf.core.firehose.validate import process_cloudwatch_record
 from pydantic import ValidationError
 
@@ -26,27 +26,21 @@ def _process_firehose_records(
     total_event_size_bytes = 0
     for record in records:
         try:
-            cloudwatch_data = CloudwatchLogsData.parse(
-                data=record.data, record_id=record.recordId, logger=logger
-            )
+            cloudwatch_data = parse_cloudwatch_data(record=record, logger=logger)
         except ValidationError:
-            yield FirehoseOutputRecord(
+            output_record = FirehoseOutputRecord(
                 record_id=record.recordId,
                 result=FirehoseResult.PROCESSING_FAILED,
             )
         else:
             output_record = process_cloudwatch_record(
                 cloudwatch_data=cloudwatch_data,
-                partition_key=(
-                    record.kinesisRecordMetadata.partitionKey
-                    if record.kinesisRecordMetadata
-                    else None
-                ),
+                partition_key=get_partition_key(record),
                 total_event_size_bytes=total_event_size_bytes,
                 logger=logger,
             )
             total_event_size_bytes += output_record.size_bytes
-            yield output_record
+        yield output_record
 
 
 @log_action(log_reference=LogReference.FIREHOSE002, log_result=False)

@@ -1,4 +1,4 @@
-from lambda_utils.logging import Logger, LogTemplate, log_action
+from lambda_utils.logging import Logger, log_action
 from nrlf.core.firehose.log_reference import LogReference
 from nrlf.core.firehose.model import (
     CloudwatchLogsData,
@@ -8,7 +8,6 @@ from nrlf.core.firehose.model import (
     FirehoseSubmissionRecord,
 )
 from nrlf.core.firehose.utils import encode_logs_as_ndjson
-from pydantic import ValidationError
 
 MAX_PACKET_SIZE_BYTES = (
     6000000  # 6000000 instead of 6291456 to give headroom (according to AWS's example)
@@ -27,10 +26,6 @@ class NoSpaceLeftInCurrentEventPacket(Exception):
     pass
 
 
-class LogValidationError(Exception):
-    pass
-
-
 @log_action(log_reference=LogReference.FIREHOSE004)
 def _validate_record_size(
     record_size_bytes: int,
@@ -46,43 +41,19 @@ def _validate_record_size(
         raise NoSpaceLeftInCurrentEventPacket
 
 
-@log_action(log_reference=LogReference.FIREHOSE005, log_fields=["log"])
-def _validate_log(log: dict):
-    if type(log) is not dict:
-        raise LogValidationError(f"Log is not of JSON type Object: '{log}'")
-
-    try:
-        parsed_log = LogTemplate(**log)
-    except ValidationError as err:
-        raise LogValidationError(str(err))
-    rendered_log = parsed_log.dict()
-    if rendered_log != log:
-        raise LogValidationError(
-            f"Field mismatch between parsed and proved logs. Parsed log: {rendered_log}"
-        )
-
-
-@log_action(log_reference=LogReference.FIREHOSE006)
-def _all_logs_are_valid(logs: list[dict], logger: Logger = None) -> bool:
-    for log in logs:
-        try:
-            _validate_log(log=log, logger=logger)
-        except LogValidationError:
-            return False
-    return True
-
-
-@log_action(log_reference=LogReference.FIREHOSE007, log_result=False)
+@log_action(log_reference=LogReference.FIREHOSE005, log_result=False)
 def _determine_outcome_given_record_size(
     cloudwatch_data: CloudwatchLogsData,
     partition_key: str,
     total_event_size_bytes: int,
     logger: Logger = None,
 ) -> FirehoseOutputRecord:
+    # Unfortunately we have to create the output record this deep into the code
+    # since we need to validate the output record size of the encoded logs
     output_record = FirehoseOutputRecord(
         record_id=cloudwatch_data.record_id,
         result=FirehoseResult.OK,
-        data=encode_logs_as_ndjson(logs=cloudwatch_data.logs),
+        data=encode_logs_as_ndjson(logs=cloudwatch_data.redacted_logs),
     )
 
     try:
@@ -105,10 +76,10 @@ def _determine_outcome_given_record_size(
             result=FirehoseResult.DROPPED,
             unprocessed_records=[
                 FirehoseSubmissionRecord(
-                    Data=_record.encode(),
+                    Data=_cloudwatch_data.encode(),
                     PartitionKey=partition_key,
                 )
-                for _record in cloudwatch_data.split_in_two()
+                for _cloudwatch_data in cloudwatch_data.split_in_two()
             ],
         )
     except NoSpaceLeftInCurrentEventPacket:
@@ -126,43 +97,21 @@ def _determine_outcome_given_record_size(
         return output_record
 
 
-@log_action(log_reference=LogReference.FIREHOSE008, log_result=False)
-def _validate_cloudwatch_logs_data(
-    cloudwatch_data: CloudwatchLogsData,
-    partition_key: str,
-    total_event_size_bytes: int,
-    logger: Logger = None,
-) -> FirehoseOutputRecord:
-
-    if not _all_logs_are_valid(logs=cloudwatch_data.logs, logger=logger):
-        return FirehoseOutputRecord(
-            record_id=cloudwatch_data.record_id,
-            result=FirehoseResult.PROCESSING_FAILED,
-        )
-
-    return _determine_outcome_given_record_size(
-        cloudwatch_data=cloudwatch_data,
-        partition_key=partition_key,
-        total_event_size_bytes=total_event_size_bytes,
-        logger=logger,
-    )
-
-
-@log_action(log_reference=LogReference.FIREHOSE009, log_result=False)
+@log_action(log_reference=LogReference.FIREHOSE006, log_result=False)
 def process_cloudwatch_record(
     cloudwatch_data: CloudwatchLogsData,
     partition_key: str,
     total_event_size_bytes: int,
     logger: Logger = None,
 ) -> FirehoseOutputRecord:
-    if cloudwatch_data.message_type is CloudwatchMessageType.NORMAL_LOG_EVENT:
-        return _validate_cloudwatch_logs_data(
+    if cloudwatch_data.message_type is CloudwatchMessageType.DATA_MESSAGE:
+        return _determine_outcome_given_record_size(
             cloudwatch_data=cloudwatch_data,
             partition_key=partition_key,
             total_event_size_bytes=total_event_size_bytes,
             logger=logger,
         )
-    # From pydantic validation this must be CloudwatchMessageType.FIREHOSE_HEALTHCHECK_EVENT
+    # From pydantic validation this must be CloudwatchMessageType.CONTROL_MESSAGE
     return FirehoseOutputRecord(
         record_id=cloudwatch_data.record_id, result=FirehoseResult.DROPPED
     )

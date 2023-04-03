@@ -9,13 +9,8 @@ class LogReference(Enum):
         "Verifying that size of the processed record is "
         "compatible with the maximum packet size for Kinesis"
     )
-    FIREHOSE005 = "Validating that the log structure adheres to the NRLF LogTemplate"
-    FIREHOSE006 = "Are all of the provided log events valid?"
-    FIREHOSE007 = "Determining Firehose outcome based on the size of this record"
-    FIREHOSE008 = (
-        "Validating a Cloudwatch Logs record that has been marked as 'DATA_MESSAGE'"
-    )
-    FIREHOSE009 = (
+    FIREHOSE005 = "Determining Firehose outcome based on the size of this record"
+    FIREHOSE006 = (
         "Processing individual Cloudwatch Logs record "
         "(which may contain multiple log entries)"
     )

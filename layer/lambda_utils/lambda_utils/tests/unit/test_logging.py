@@ -5,10 +5,13 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
-from lambda_utils.logging import Logger, log_action
+from hypothesis import given
+from hypothesis.strategies import booleans, builds, dictionaries, just, text
+from lambda_utils.logging import LogData, Logger, LogTemplate, log_action
 from lambda_utils.tests.unit.utils import make_aws_event
 from nrlf.core.errors import DynamoDbError
 from nrlf.core.validators import validate_timestamp
+from pydantic import ValidationError
 
 
 class LogReference(Enum):
@@ -149,3 +152,37 @@ def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
         "host": "123456789012",
         "sensitive": True,
     }
+
+
+_log = builds(
+    LogTemplate,
+    data=just(LogData(function="foo", inputs={}, result=None)),
+)
+
+
+@pytest.mark.parametrize("redact", [True, False])
+@given(log=_log)
+def test_log_template_dict_always_exclude_none(log: LogTemplate, redact: bool):
+    dumped_log = log.dict(redact=redact)
+    assert "result" not in dumped_log["data"]
+    assert None not in dumped_log.values()
+
+    if redact and log.sensitive:
+        assert dumped_log["data"] == "REDACTED"
+
+
+@given(log=_log)
+def test_log_template_json_always_exclude_none(log: LogTemplate):
+    dumped_log = json.loads(log.json())
+    assert "result" not in dumped_log["data"]
+    assert None not in dumped_log.values()
+
+
+@given(
+    log=_log,
+    extra_fields=dictionaries(keys=text(max_size=1), values=booleans(), min_size=1),
+)
+def test_log_template_dict_forbids_extra_fields(log: LogTemplate, extra_fields: dict):
+    good_log_input = log.dict()
+    with pytest.raises(ValidationError):
+        LogTemplate(**good_log_input, **extra_fields)
