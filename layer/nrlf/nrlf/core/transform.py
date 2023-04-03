@@ -4,8 +4,18 @@ from datetime import datetime as dt
 from typing import Union
 
 from more_itertools import map_except
-from nrlf.core.constants import EMPTY_VALUES, ID_SEPARATOR, JSON_TYPES, Source
-from nrlf.core.errors import FhirValidationError, NextPageTokenValidationError
+from nrlf.core.constants import (
+    EMPTY_VALUES,
+    ID_SEPARATOR,
+    JSON_TYPES,
+    ODS_SYSTEM,
+    Source,
+)
+from nrlf.core.errors import (
+    FhirValidationError,
+    NextPageTokenValidationError,
+    RequestValidationError,
+)
 from nrlf.core.model import DocumentPointer, PaginatedResponse
 from nrlf.core.validators import validate_fhir_model_for_required_fields
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
@@ -92,6 +102,13 @@ def validate_no_extra_fields(input_fhir_json, output_fhir_json):
         raise FhirValidationError("Input FHIR JSON has additional non-FHIR fields.")
 
 
+def validate_custodian_system(fhir_strict_model: StrictDocumentReference):
+    if fhir_strict_model.custodian.identifier.system != ODS_SYSTEM:
+        raise RequestValidationError(
+            "Provided custodian identifier system is not the ODS system"
+        )
+
+
 def create_document_pointer_from_fhir_json(
     fhir_json: dict,
     api_version: int,
@@ -121,6 +138,7 @@ def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference
         input_fhir_json=fhir_json,
         output_fhir_json=fhir_strict_model.dict(exclude_none=True),
     )
+    validate_custodian_system(fhir_strict_model)
     _strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
     return fhir_strict_model
 

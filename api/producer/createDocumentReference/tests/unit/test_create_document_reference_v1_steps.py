@@ -22,12 +22,10 @@ def test_parse_request_body_to_core_model(mock__make_timestamp):
         **{
             "created_on": {"S": "2022-10-25T15:47:49.732Z"},
             "document": {"S": fhir_json},
-            "id": {
-                "S": f"ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL{ID_SEPARATOR}1234567890"
-            },
+            "id": {"S": f"Y05868{ID_SEPARATOR}1234567890"},
             "nhs_number": {"S": "9278693472"},
-            "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-            "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+            "producer_id": {"S": "Y05868"},
+            "custodian": {"S": "Y05868"},
             "source": {"S": "NRLF"},
             "type": {"S": "http://snomed.info/sct|736253002"},
             "updated_on": {"NULL": True},

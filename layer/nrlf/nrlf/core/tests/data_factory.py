@@ -121,7 +121,7 @@ def generate_test_subject(
 
 
 def generate_test_custodian(
-    value: str = NRL_ODS_SUCCESS, system: str = FHIR_SYSTEMS_ASID
+    value: str = NRL_ODS_SUCCESS, system: str = FHIR_SYSTEMS_ODS_CODE
 ):
     return {
         "identifier": {

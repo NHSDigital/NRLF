@@ -120,7 +120,7 @@ def test_requesting_application_is_not_authorised(
                 "id": "8FW23-1114567891",
                 "custodian": {
                 "identifier": {
-                    "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+                    "system": "https://fhir.nhs.uk/Id/ods-organization-code",
                     "value": "8FW23"
                 }
                 },
@@ -161,7 +161,7 @@ def test_requesting_application_is_not_authorised(
                 "id": "8FW23-1114567891",
                 "custodian": {
                 "identifier": {
-                    "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+                    "system": "https://fhir.nhs.uk/Id/ods-organization-code",
                     "value": "8FW23"
                 }
                 },

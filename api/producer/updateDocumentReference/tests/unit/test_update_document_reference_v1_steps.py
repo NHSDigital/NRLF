@@ -27,10 +27,10 @@ def test_parse_request_body_to_core_model(mock__make_timestamp):
         **{
             "created_on": {"S": "2022-10-25T15:47:49.732Z"},
             "document": {"S": fhir_json},
-            "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
+            "id": {"S": "Y05868-1234567890"},
             "nhs_number": {"S": "9278693472"},
-            "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-            "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+            "producer_id": {"S": "Y05868"},
+            "custodian": {"S": "Y05868"},
             "source": {"S": "NRLF"},
             "type": {"S": "http://snomed.info/sct|736253002"},
             "updated_on": {"S": "2022-10-25T15:47:49.732Z"},
@@ -60,10 +60,10 @@ def test_compare_immutable_fields_success(mock__make_timestamp):
         **{
             "created_on": {"S": "2022-10-25T15:47:49.732Z"},
             "document": {"S": json.dumps(updated_fhir_json)},
-            "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
+            "id": {"S": "Y05868-1234567890"},
             "nhs_number": {"S": "9278693472"},
-            "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-            "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+            "producer_id": {"S": "Y05868"},
+            "custodian": {"S": "Y05868"},
             "source": {"S": "NRLF"},
             "type": {"S": "http://snomed.info/sct|736253002"},
             "updated_on": {"S": "2022-10-25T15:47:49.732Z"},
@@ -88,9 +88,7 @@ def test_compare_immutable_fields_failure(mock__make_timestamp):
     fhir_json = read_test_data("nrlf")
 
     updated_fhir_json = deepcopy(fhir_json)
-    updated_fhir_json["custodian"]["identifier"][
-        "value"
-    ] = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL / MODIFIED"
+    updated_fhir_json["custodian"]["identifier"]["value"] = "Y05868 / MODIFIED"
 
     with pytest.raises(ImmutableFieldViolationError):
         event = APIGatewayProxyEventModel(
