@@ -9,7 +9,7 @@ import boto3
 import moto
 import pytest
 from botocore.exceptions import ClientError
-from nrlf.core.constants import DbPrefix
+from nrlf.core.constants import ODS_SYSTEM, DbPrefix
 from nrlf.core.errors import (
     DuplicateError,
     DynamoDbError,
@@ -350,7 +350,7 @@ def _create_items(
         doc = generate_test_document_reference(
             provider_doc_id=doc_id,
             subject=generate_test_subject(subject),
-            custodian={"identifier": {"value": custodian}},
+            custodian={"identifier": {"value": custodian, "system": ODS_SYSTEM}},
         )
         item = create_document_pointer_from_fhir_json(fhir_json=doc)
         repository.create(item=item)
