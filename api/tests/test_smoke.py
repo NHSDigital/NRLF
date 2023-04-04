@@ -178,8 +178,6 @@ def _prepare_base_request(env: str, actor: str, sandbox: str) -> tuple[str, dict
 
     oauth_token = get_oauth_token(session, account, env)
 
-    # base_url = f"https://{apigee_env}.{APIGEE_BASE_URL}/record-locator/{actor}"
-
     base_url = create_apigee_url(env, actor, sandbox)
     headers = {
         "accept": "application/json; version=1.0",
