@@ -4,6 +4,7 @@ from typing import Iterator, TypeVar, Union
 
 from botocore.exceptions import ClientError
 from lambda_utils.logging import log_action
+from nrlf.consumer.fhir.r4.model import RequestQueryCustodian
 from nrlf.core.errors import (
     DuplicateError,
     DynamoDbError,
@@ -17,7 +18,7 @@ from nrlf.core.transform import (
     transform_next_page_token_to_start_key,
 )
 from nrlf.core.types import DynamoDbClient, DynamoDbResponse
-from nrlf.producer.fhir.r4.model import RequestQueryCustodian, RequestQueryType
+from nrlf.producer.fhir.r4.model import RequestQueryType
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError
 

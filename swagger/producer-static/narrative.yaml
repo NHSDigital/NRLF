@@ -818,8 +818,6 @@ components:
   schemas:
     RequestQuerySubject:
       example: "https://fhir.nhs.uk/Id/nhs-number|4409815415"
-    RequestQueryCustodian:
-      example: "https://fhir.nhs.uk/Id/ods-organization-code|Y05868"
     RequestQueryType:
       example: "http://snomed.info/sct|736253002"
     RequestHeaderRequestId:
@@ -858,17 +856,6 @@ components:
         invalid:
           summary: Unknown
           value: https://fhir.nhs.uk/Id/nhs-number|3495456001
-    custodian:
-      examples:
-        none:
-          summary: None
-          value: ""
-        valid:
-          summary: Valid
-          value: Y05868
-        invalid:
-          summary: Unknown
-          value: XYZ
     type:
       examples:
         none:

@@ -288,7 +288,6 @@ paths:
       operationId: searchDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
-        - $ref: "#/components/parameters/custodian"
         - $ref: "#/components/parameters/type"
         - $ref: "#/components/parameters/nextPageToken"
         - $ref: "#/components/parameters/odsCode"
@@ -1593,9 +1592,6 @@ components:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
       example: "https://fhir.nhs.uk/Id/nhs-number|4409815415"
-    RequestQueryCustodian:
-      type: string
-      example: "https://fhir.nhs.uk/Id/ods-organization-code|Y05868"
     RequestQueryType:
       type: string
       example: "http://snomed.info/sct|736253002"
@@ -1644,21 +1640,6 @@ components:
         invalid:
           summary: Unknown
           value: https://fhir.nhs.uk/Id/nhs-number|3495456001
-    custodian:
-      name: custodian:identifier
-      in: query
-      schema:
-        $ref: "#/components/schemas/RequestQueryCustodian"
-      examples:
-        none:
-          summary: None
-          value: ""
-        valid:
-          summary: Valid
-          value: Y05868
-        invalid:
-          summary: Unknown
-          value: XYZ
     type:
       name: type
       in: query
