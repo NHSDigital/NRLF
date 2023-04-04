@@ -217,7 +217,7 @@ jobs:
         run: |
           source .venv/bin/activate
           source nrlf.sh
-          nrlf test smoke producer ${{ inputs.environment }}
+          nrlf test smoke producer ${{ inputs.environment }}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
 
   documentation:
     needs: [smoke-test]

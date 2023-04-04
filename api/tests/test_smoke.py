@@ -28,8 +28,11 @@ AWS_ACCOUNT_FOR_ENV = {
 
 APIGEE_PROXY_FOR_ENV = {
     "dev": "internal-dev",
+    "dev-sandbox": "internal-dev-sandbox",
     "ref": "internal-qa",
+    "ref-sandbox": "internal-qa-sandbox",
     "int": "int",
+    "int-sandbox": "sandbox",
     "prod": "",
 }
 
@@ -147,13 +150,15 @@ def get_oauth_token(session, account: str, env: str):
     return oauth_token
 
 
-def create_apigee_url(env, actor):
+def create_apigee_url(env: str, actor: str, sandbox: str):
+    if sandbox:
+        env = f"{env}-{sandbox}"
     apigee_env = APIGEE_PROXY_FOR_ENV[env]
 
     if apigee_env == "":
-        return f"https://{APIGEE_BASE_URL}/nrl-{actor}-api"
+        return f"https://{APIGEE_BASE_URL}/record-locator/{actor}"
 
-    return f"https://{apigee_env}.{APIGEE_BASE_URL}/nrl-{actor}-api"
+    return f"https://{apigee_env}.{APIGEE_BASE_URL}/record-locator/{actor}"
 
 
 def generate_end_user_header(env):
@@ -162,7 +167,7 @@ def generate_end_user_header(env):
     return "RJ11"
 
 
-def _prepare_base_request(env: str, actor: str) -> tuple[str, dict]:
+def _prepare_base_request(env: str, actor: str, sandbox: str) -> tuple[str, dict]:
     if os.environ.get("RUNNING_IN_CI"):
         account_id = get_terraform_json()["assume_account_id"]["value"]
     else:
@@ -174,7 +179,8 @@ def _prepare_base_request(env: str, actor: str) -> tuple[str, dict]:
     oauth_token = get_oauth_token(session, account, env)
 
     # base_url = f"https://{apigee_env}.{APIGEE_BASE_URL}/record-locator/{actor}"
-    base_url = create_apigee_url(env, actor)
+
+    base_url = create_apigee_url(env, actor, sandbox)
     headers = {
         "accept": "application/json; version=1.0",
         "authorization": f"Bearer {oauth_token}",
@@ -191,11 +197,12 @@ def environment() -> str:
 
 
 class Smoketests:
-    def manual_smoke_test(self, actor, environment):
+    def manual_smoke_test(self, actor, environment: str):
         print("🏃 Running 🏃 smoke test - 🤔")  # noqa: T201
-        base_url, headers = _prepare_base_request(env=environment, actor=actor)
+        env, sandbox = environment.split("-", 1)
+        base_url, headers = _prepare_base_request(sandbox=sandbox, env=env, actor=actor)
         patient_id = urllib.parse.quote(f"https://fhir.nhs.uk/Id/nhs-number|9278693472")
-        url = f"{base_url}/FHIR/R4/DocumentReference?subject.identifier={patient_id}"
+        url = f"{base_url}/FHIR/R4/DocumentReference?subject:identifier={patient_id}"
         headers["NHSD-End-User-Organisation-ODS"] = generate_end_user_header(
             environment
         )
