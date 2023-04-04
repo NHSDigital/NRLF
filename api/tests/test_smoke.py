@@ -163,7 +163,7 @@ def _prepare_base_request(env: str, actor: str) -> tuple[str, dict]:
 
     oauth_token = get_oauth_token(session, account, env)
 
-    base_url = f"https://{apigee_base_url}/nrl-{actor}-api"
+    base_url = f"https://{apigee_base_url}/record-locator/{actor}"
     headers = {
         "accept": "application/json; version=1.0",
         "authorization": f"Bearer {oauth_token}",

@@ -477,8 +477,8 @@ nrlf terraform destroy test123-sandbox
 
 The configuration of organisations auth / permissions is dealt with in the "apigee" repos, i.e.
 
-- https://github.com/NHSDigital/nrl-producer-api
-- https://github.com/NHSDigital/nrl-consumer-api
+- https://github.com/NHSDigital/record-locator/producer
+- https://github.com/NHSDigital/record-locator/consumer
 
 Specifically, the configuration can be found in the file proxies/sandbox/apiproxy/resources/jsc/ConnectionMetadata.SetRequestHeaders.js in these repos.
 

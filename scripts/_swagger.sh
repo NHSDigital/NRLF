@@ -9,7 +9,7 @@ function _swagger_help() {
     echo "  generate <options>           - generate all swagger and models or producer/consumer if specified"
     echo "  generate-swagger <options>   - generate all swagger or producer/consumer if specified"
     echo "  generate-model <options>     - generate all models or producer/consumer if specified"
-    echo "  merge <options>              - generates the nrl-<type>-api.yml file"
+    echo "  merge <options>              - generates the record-locator/<type>.yml file"
     echo
 }
 
@@ -171,7 +171,7 @@ function _swagger() {
                 yq 'del(.paths.*.*.tags)' |
                 yq 'del(.paths./_status)' |
                 yq 'del(.components.securitySchemes."${authoriser_name}")' \
-                    > ./api/${type}/nrl-${type}-api.yaml
+                    > ./api/${type}/record-locator/${type}.yaml
 
             rm ./swagger/${type}.tmp.yaml
         else
