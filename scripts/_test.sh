@@ -24,6 +24,7 @@ function _test() {
   "unit") _test_unit $args ;;
   "integration") _test_integration $args ;;
   "smoke") _test_smoke $args ;;
+  "token") _test_token $args ;;
   "feature") _test_feature $args ;;
   "firehose") _test_integration_firehose $args ;;
   *) _test_help ;;
@@ -47,7 +48,7 @@ function _test_integration_firehose() {
 
 function _test_smoke() {
   local args=(${@:1})
-  python -m pytest -m "smoke" $args
+  python api/tests/test_smoke.py manual_smoke_test $args
 }
 
 function _test_feature() {

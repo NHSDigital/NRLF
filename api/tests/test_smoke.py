@@ -1,7 +1,6 @@
 import base64
 import json
 import os
-import sys
 import time
 import urllib.parse
 from datetime import datetime
@@ -10,6 +9,7 @@ from uuid import uuid4
 
 import boto3
 import botocore.session
+import fire
 import jwt
 import pytest
 import requests
@@ -25,6 +25,15 @@ AWS_ACCOUNT_FOR_ENV = {
     "ref": "test",
     "prod": "prod",
 }
+
+APIGEE_PROXY_FOR_ENV = {
+    "dev": "internal-dev",
+    "ref": "internal-qa",
+    "int": "int",
+    "prod": "",
+}
+
+APIGEE_BASE_URL = "api.service.nhs.uk"
 
 
 def generate_jwt(
@@ -89,16 +98,6 @@ def aws_account_id_from_profile(env: str):
     raise Exception("No valid profile found")
 
 
-def aws_read_ssm_apigee_proxy(session, env: str):
-    ssm_client = session.client("ssm")
-    param_name = f"/nhsd-nrlf--{env}/apigee-proxy"
-    try:
-        param = ssm_client.get_parameter(Name=param_name)
-    except ssm_client.exceptions.ParameterNotFound as e:
-        raise Exception(f"Parameter Not Found: {param_name}") from e
-    return param["Parameter"]["Value"]
-
-
 def aws_read_apigee_app_secrets(session, secret_id: str):
     secrets_client = session.client("secretsmanager")
 
@@ -148,6 +147,21 @@ def get_oauth_token(session, account: str, env: str):
     return oauth_token
 
 
+def create_apigee_url(env, actor):
+    apigee_env = APIGEE_PROXY_FOR_ENV[env]
+
+    if apigee_env == "":
+        return f"https://{APIGEE_BASE_URL}/nrl-{actor}-api"
+
+    return f"https://{apigee_env}.{APIGEE_BASE_URL}/nrl-{actor}-api"
+
+
+def generate_end_user_header(env):
+    if env == "prod":
+        return "XXXX"
+    return "RJ11"
+
+
 def _prepare_base_request(env: str, actor: str) -> tuple[str, dict]:
     if os.environ.get("RUNNING_IN_CI"):
         account_id = get_terraform_json()["assume_account_id"]["value"]
@@ -157,13 +171,10 @@ def _prepare_base_request(env: str, actor: str) -> tuple[str, dict]:
 
     session = aws_session_assume_terraform_role(account_id)
 
-    apigee_base_url = aws_read_ssm_apigee_proxy(session, env)
-    if apigee_base_url.strip() == "":
-        pytest.skip("Smoke Test Disabled: No APIGEE Proxy defined")
-
     oauth_token = get_oauth_token(session, account, env)
 
-    base_url = f"https://{apigee_base_url}/nrl-{actor}-api"
+    # base_url = f"https://{apigee_env}.{APIGEE_BASE_URL}/record-locator/{actor}"
+    base_url = create_apigee_url(env, actor)
     headers = {
         "accept": "application/json; version=1.0",
         "authorization": f"Bearer {oauth_token}",
@@ -179,29 +190,26 @@ def environment() -> str:
     return env
 
 
-@pytest.mark.parametrize(
-    "actor",
-    [
-        "producer",
-    ],
-)
-@pytest.mark.smoke
-def test_search_endpoints(actor, environment):
-    base_url, headers = _prepare_base_request(env=environment, actor=actor)
+class Smoketests:
+    def manual_smoke_test(self, actor, environment):
+        print("🏃 Running 🏃 smoke test - 🤔")  # noqa: T201
+        base_url, headers = _prepare_base_request(env=environment, actor=actor)
+        patient_id = urllib.parse.quote(f"https://fhir.nhs.uk/Id/nhs-number|9278693472")
+        url = f"{base_url}/FHIR/R4/DocumentReference?subject.identifier={patient_id}"
+        headers["NHSD-End-User-Organisation-ODS"] = generate_end_user_header(
+            environment
+        )
+        response = requests.get(url=url, headers=headers)
+        if response.status_code == 200:
+            print("🎉🎉 - Your 💨 Smoke 💨 test has passed - 🎉🎉")  # noqa: T201
+        else:
+            raise fire.core.FireError("The smoke test has failed 😭😭")
 
-    patient_id = urllib.parse.quote(f"https://fhir.nhs.uk/Id/nhs-number|9278693472")
-    url = f"{base_url}/FHIR/R4/DocumentReference?subject={patient_id}"
-    headers["NHSD-End-User-Organisation-ODS"] = "RJ11"
-    response = requests.get(url=url, headers=headers)
-    assert response.status_code == 200, response.text
+    def token(self, env, account):
+        account_id = aws_account_id_from_profile(env)
+        session = aws_session_assume_terraform_role(account_id)
+        print(get_oauth_token(session, env=env, account=account))  # noqa: T201
 
 
 if __name__ == "__main__":
-    env = sys.argv[1]
-    account = sys.argv[2]
-
-    account_id = aws_account_id_from_profile(env)
-
-    session = aws_session_assume_terraform_role(account_id)
-
-    print(get_oauth_token(session, env=env, account=account))  # noqa: T201
+    fire.Fire(Smoketests)
