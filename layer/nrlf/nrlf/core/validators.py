@@ -6,9 +6,12 @@ from nrlf.core.constants import ID_SEPARATOR, VALID_SOURCES
 from nrlf.core.errors import (
     AuthenticationError,
     DocumentReferenceValidationError,
+    FhirValidationError,
     InvalidTupleError,
     RequestValidationError,
 )
+from nrlf.legacy.constants import NHS_NUMBER_SYSTEM_URL
+from nrlf.legacy.model import Identifier
 from nrlf.producer.fhir.r4.model import (
     CodeableConcept,
     DocumentReference,
@@ -111,3 +114,8 @@ def validate_type_system(type: RequestQueryType, pointer_types: list[str]):
         raise AuthenticationError(
             f"The provided system type value - {type_system} - does not match the allowed types"
         )
+
+
+def validate_subject_identifier_system(subject_identifier: Identifier):
+    if subject_identifier.system != NHS_NUMBER_SYSTEM_URL:
+        raise FhirValidationError("Input FHIR JSON has an invalid subject:identifier")
