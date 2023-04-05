@@ -91,11 +91,14 @@ def mark_as_supersede(
         fhir_json=data["body"]
     )
     output = {}
-    if fhir_model.relatesTo:
+
+    document_relationships = fhir_model.relatesTo
+
+    if document_relationships:
         output["delete_item_ids"] = [
-            relatesTo.target.identifier.value
-            for relatesTo in fhir_model.relatesTo
-            if relatesTo.code == "replaces"
+            relationship.target.identifier.value
+            for relationship in document_relationships
+            if relationship.code == "replaces"
         ]
 
     return PipelineData(**data, **output)
