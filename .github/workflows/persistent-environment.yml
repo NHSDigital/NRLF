@@ -217,7 +217,7 @@ jobs:
         run: |
           source .venv/bin/activate
           source nrlf.sh
-          nrlf test smoke producer ${WORKSPACE}
+          nrlf test smoke producer ${{ env.WORKSPACE }}
 
   documentation:
     needs: [smoke-test]
