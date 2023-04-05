@@ -4,6 +4,7 @@ import pytest
 from nrlf.core.constants import ID_SEPARATOR
 from nrlf.core.errors import (
     DocumentReferenceValidationError,
+    FhirValidationError,
     InvalidTupleError,
     RequestValidationError,
 )
@@ -13,11 +14,12 @@ from nrlf.core.validators import (
     validate_document_reference_string,
     validate_nhs_number,
     validate_source,
+    validate_subject_identifier_system,
     validate_timestamp,
     validate_tuple,
     validate_type_system,
 )
-from nrlf.producer.fhir.r4.model import RequestParams
+from nrlf.producer.fhir.r4.model import Identifier, RequestParams
 
 
 @pytest.mark.parametrize(
@@ -253,6 +255,35 @@ def test_validate_type_system(type, pointer_types, expected_outcome):
             validate_type_system(
                 type=request_params.type,
                 pointer_types=pointer_types,
+            )
+            is None
+        )
+
+
+@pytest.mark.parametrize(
+    ["system_value", "expected_outcome"],
+    (
+        ["https://fhir.nhs.uk/Id/nhs-number", None],
+        ["http://fhir.nhs.uk/Id/nhs-number", FhirValidationError],
+        ["Test", FhirValidationError],
+    ),
+)
+def test_validate_subject_identifier_system(system_value, expected_outcome):
+    subject_identifier = {
+        "system": f"{system_value}",
+    }
+
+    subject_identifier_object = Identifier(**subject_identifier or {})
+
+    if expected_outcome is FhirValidationError:
+        with pytest.raises(expected_outcome):
+            validate_subject_identifier_system(
+                subject_identifier=subject_identifier_object
+            )
+    else:
+        assert (
+            validate_subject_identifier_system(
+                subject_identifier=subject_identifier_object
             )
             is None
         )
