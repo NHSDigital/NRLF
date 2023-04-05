@@ -23,7 +23,7 @@ function _test() {
   case $command in
   "unit") _test_unit $args ;;
   "integration") _test_integration $args ;;
-  "smoke") _test_smoke $args ;;
+  "smoke") python api/tests/test_smoke.py manual_smoke_test --actor $2 --environment $3 ;;
   "token") _test_token $args ;;
   "feature") _test_feature $args ;;
   "firehose") _test_integration_firehose $args ;;
@@ -44,11 +44,6 @@ function _test_integration() {
 function _test_integration_firehose() {
   local args=(${@:1})
   python -m pytest -m "integration and firehose" --runslow -n 2 $args
-}
-
-function _test_smoke() {
-  local args=(${@:1})
-  python api/tests/test_smoke.py manual_smoke_test $args
 }
 
 function _test_feature() {

@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+import re
 import time
 import urllib.parse
 from datetime import datetime
@@ -17,6 +18,9 @@ import requests
 from helpers.terraform import get_terraform_json
 
 DEFAULT_WORKSPACE = "dev"
+
+ENV_NAME_RE = re.compile("^(?P<env>\w+)(-(?P<sandbox>sandbox)?)?$")
+
 
 # Map an environment to an AWS Account
 AWS_ACCOUNT_FOR_ENV = {
@@ -194,11 +198,20 @@ def environment() -> str:
     return env
 
 
+def split_env_variable(environment):
+
+    result = ENV_NAME_RE.match(environment)
+    if not result or environment.endswith("-"):
+        raise ValueError(f"'{environment}' must be of the form 'env' or 'env-sandbox'")
+    return result.groupdict()
+
+
 class Smoketests:
     def manual_smoke_test(self, actor, environment: str):
         print("🏃 Running 🏃 smoke test - 🤔")  # noqa: T201
-        env, sandbox = environment.split("-", 1)
-        base_url, headers = _prepare_base_request(sandbox=sandbox, env=env, actor=actor)
+
+        env_kwargs = split_env_variable(environment)
+        base_url, headers = _prepare_base_request(**env_kwargs, actor=actor)
         patient_id = urllib.parse.quote(f"https://fhir.nhs.uk/Id/nhs-number|9278693472")
         url = f"{base_url}/FHIR/R4/DocumentReference?subject:identifier={patient_id}"
         headers["NHSD-End-User-Organisation-ODS"] = generate_end_user_header(
