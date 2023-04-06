@@ -25,11 +25,6 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
-    custodian:
-      name: custodian:identifier
-      in: query
-      schema:
-        $ref: "#/components/schemas/RequestQueryCustodian"
     type:
       name: type
       in: query
@@ -133,8 +128,6 @@ components:
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
-    RequestQueryCustodian:
-      type: string
     RequestQueryType:
       type: string
     NextPageToken:
