@@ -5,11 +5,11 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.logging import log_action
 from nrlf.core.common_producer_steps import validate_producer_permissions
 from nrlf.core.common_steps import parse_headers, parse_path_id
 from nrlf.core.errors import ImmutableFieldViolationError, InconsistentUpdateId
+from nrlf.core.event_parsing import fetch_body_from_event
 from nrlf.core.model import DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository

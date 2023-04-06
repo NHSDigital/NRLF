@@ -1,8 +1,8 @@
 import pytest
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
-from lambda_utils.errors import RequestParsingError
-from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.tests.unit.utils import make_aws_event
+from nrlf.core.errors import NRLF_TO_SPINE_4XX_ERROR, RequestValidationError
+from nrlf.core.event_parsing import fetch_body_from_event
 
 
 @pytest.mark.parametrize(
@@ -28,7 +28,8 @@ def test_parsing_body_from_event(event, expected_body):
     ],
 )
 def test_parsing_body_from_event_errors(event):
-    with pytest.raises(RequestParsingError) as e:
+    with pytest.raises(RequestValidationError) as e:
         event_model = APIGatewayProxyEventModel(**event)
-        _body = fetch_body_from_event(event_model)
+        fetch_body_from_event(event_model)
     assert str(e.value) == "Body is not valid json"
+    assert e.type in NRLF_TO_SPINE_4XX_ERROR
