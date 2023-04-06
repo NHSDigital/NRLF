@@ -66,14 +66,12 @@ class FirehoseOutputRecord(BaseModel):
 class LogEvent(BaseModel):
     id: str
     timestamp: int
-    # Read/write to LogTemplate string (see dict method) OR accept the CONTROL_MESSAGE
-    message: Union[
-        LogTemplate, Json[LogTemplate], constr(regex=f"^{CONTROL_MESSAGE_TEXT}$")
-    ]
+    # Read/write to LogTemplate JSON string (see dict method) OR accept the CONTROL_MESSAGE
+    message: Union[Json[LogTemplate], constr(regex=f"^{CONTROL_MESSAGE_TEXT}$")]
 
     def dict(self, *args, **kwargs):
         _dict = super().dict(*args, **kwargs)
-        # Reserialise to JSON
+        # Pydantic doesn't reserialise to JSON[LogTemplate], so we do so here
         if type(self.message) is LogTemplate:
             _dict["message"] = self.message.json()
         elif type(self.message) in (dict, list):

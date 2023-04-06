@@ -3,11 +3,9 @@ import uuid
 
 import pytest
 
-from api.producer.firehose.tests.e2e_utils import (
-    make_good_cloudwatch_data,
-    submit_cloudwatch_data_to_firehose,
-)
+from api.producer.firehose.tests.e2e_utils import make_good_cloudwatch_data
 from helpers.aws_session import new_aws_session
+from helpers.firehose import submit_cloudwatch_data_to_firehose
 from helpers.terraform import get_terraform_json
 
 
@@ -17,8 +15,15 @@ def global_event_handler():
 
 
 @pytest.fixture
-def session():
-    return new_aws_session()
+def s3_client():
+    session = new_aws_session()
+    return session.client("s3")
+
+
+@pytest.fixture
+def firehose_client():
+    session = new_aws_session()
+    return session.client("firehose")
 
 
 @pytest.fixture
@@ -49,11 +54,11 @@ def error_prefix_template(firehose_metadata):
 
 
 @pytest.fixture
-def _submit_good_cloudwatch_data(session, stream_arn, global_event_handler):
+def _submit_good_cloudwatch_data(firehose_client, stream_arn, global_event_handler):
     transaction_id = f"good_cloudwatch_data-{uuid.uuid4()}"
     cloudwatch_data = make_good_cloudwatch_data(transaction_id=transaction_id, n_logs=3)
     submit_cloudwatch_data_to_firehose(
-        session=session,
+        firehose_client=firehose_client,
         stream_arn=stream_arn,
         cloudwatch_data=cloudwatch_data,
     )
@@ -64,7 +69,7 @@ def _submit_good_cloudwatch_data(session, stream_arn, global_event_handler):
 
 
 @pytest.fixture
-def _submit_bad_cloudwatch_data(session, stream_arn, global_event_handler):
+def _submit_bad_cloudwatch_data(firehose_client, stream_arn, global_event_handler):
     transaction_id = f"bad_cloudwatch_data-{uuid.uuid4()}"
     cloudwatch_data = make_good_cloudwatch_data(transaction_id=transaction_id, n_logs=3)
     new_log_event = cloudwatch_data.log_events[0].copy(
@@ -72,7 +77,7 @@ def _submit_bad_cloudwatch_data(session, stream_arn, global_event_handler):
     )
     cloudwatch_data.log_events.append(new_log_event)
     submit_cloudwatch_data_to_firehose(
-        session=session,
+        firehose_client=firehose_client,
         stream_arn=stream_arn,
         cloudwatch_data=cloudwatch_data,
     )
@@ -83,7 +88,7 @@ def _submit_bad_cloudwatch_data(session, stream_arn, global_event_handler):
 
 
 @pytest.fixture
-def _submit_very_bad_cloudwatch_data(session, stream_arn, global_event_handler):
+def _submit_very_bad_cloudwatch_data(firehose_client, stream_arn, global_event_handler):
     transaction_id = f"very_bad_cloudwatch_data-{uuid.uuid4()}"
     cloudwatch_data = make_good_cloudwatch_data(transaction_id=transaction_id, n_logs=3)
     very_bad_logs = [
@@ -99,7 +104,7 @@ def _submit_very_bad_cloudwatch_data(session, stream_arn, global_event_handler):
     very_bad_logs.append(very_bad_message)
 
     submit_cloudwatch_data_to_firehose(
-        session=session,
+        firehose_client=firehose_client,
         stream_arn=stream_arn,
         cloudwatch_data=cloudwatch_data,
     )

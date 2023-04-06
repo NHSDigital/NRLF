@@ -1,17 +1,11 @@
 import time
 from copy import deepcopy
 from datetime import datetime
+from itertools import chain
 from typing import Iterator
 
 from lambda_utils.logging import LogData, LogTemplate
-from nrlf.core.firehose.model import (
-    CloudwatchLogsData,
-    CloudwatchMessageType,
-    FirehoseSubmissionRecord,
-    LogEvent,
-)
-from nrlf.core.firehose.submission import FirehoseClient, _submit_records
-from nrlf.core.firehose.utils import name_from_arn
+from nrlf.core.firehose.model import CloudwatchLogsData, CloudwatchMessageType, LogEvent
 
 from helpers.firehose import fetch_logs_from_s3
 
@@ -46,7 +40,7 @@ def _make_good_log(transaction_id) -> str:
         call_stack="oops again",
         timestamp="123",
         sensitive=True,
-    )
+    ).json()
 
 
 def make_good_cloudwatch_data(transaction_id, n_logs=10):
@@ -63,20 +57,6 @@ def make_good_cloudwatch_data(transaction_id, n_logs=10):
         logGroup="nrlf-test-group",
         logStream="nrlf-test-stream",
     )
-
-
-def submit_cloudwatch_data_to_firehose(
-    session, stream_arn, cloudwatch_data
-) -> datetime:
-    stream_name = name_from_arn(arn=stream_arn)
-    firehose_client = FirehoseClient(
-        client=session.client("firehose"), stream_name=stream_name
-    )
-
-    records = [FirehoseSubmissionRecord(Data=cloudwatch_data.encode())]
-    response = _submit_records(firehose_client=firehose_client, records=records)
-    assert response.failed_put_count == 0, "This is probably a transient error"
-    return datetime.utcnow()
 
 
 def _trawl_s3_for_matching_files(
@@ -109,6 +89,9 @@ def retrieve_firehose_output(
                     bucket_name=bucket_name,
                     file_key=file_key,
                 )
+                if prefix.startswith("error"):
+                    logs_from_s3 = list(chain(logs_from_s3))  # Flatten list of lists
+
                 yield prefix, logs_from_s3
 
     # If no break by now then assume the search has failed

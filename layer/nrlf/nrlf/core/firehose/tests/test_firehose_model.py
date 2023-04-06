@@ -69,7 +69,6 @@ def test_processed_record(unprocessed_records, firehose_result, expected_record)
     assert record.dict() == expected_record
 
 
-@pytest.mark.slow
 @given(cloudwatch_data=_cloudwatch_data_strategy(CloudwatchMessageType.DATA_MESSAGE))
 def test_CloudwatchLogsData_split_in_two(cloudwatch_data: CloudwatchLogsData):
     first_half, second_half = cloudwatch_data.split_in_two()
@@ -77,7 +76,6 @@ def test_CloudwatchLogsData_split_in_two(cloudwatch_data: CloudwatchLogsData):
     assert first_half.log_events + second_half.log_events == cloudwatch_data.log_events
 
 
-@pytest.mark.slow
 @given(cloudwatch_data=_cloudwatch_data_strategy(CloudwatchMessageType.DATA_MESSAGE))
 def test_parse_cloudwatch_data(cloudwatch_data: CloudwatchLogsData):
     record = Mock()
