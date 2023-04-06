@@ -56,6 +56,10 @@ resource "aws_dynamodb_table" "document-pointer" {
     enabled     = true
     kms_key_arn = aws_kms_key.document-pointer.arn
   }
+
+  point_in_time_recovery {
+    enabled = true
+  }
 }
 
 # ------------------------------------------------------------------------------
