@@ -6,7 +6,7 @@ Feature: Consumer Authorisation Failure scenarios
       {
         "principalId": "<transaction-id>",
         "context": {
-          "error": "{\"message\": \"$message\"}"
+          "error": "$message"
         },
         "policyDocument": {
           "Version": "2012-10-17",

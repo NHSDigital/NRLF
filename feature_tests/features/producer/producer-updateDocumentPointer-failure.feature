@@ -8,7 +8,7 @@ Feature: Producer Update Failure scenarios
         "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },
@@ -51,7 +51,40 @@ Feature: Producer Update Failure scenarios
     And template BAD_DOCUMENT
       """
       {
-      "bad":$bad
+        "resourceType": "DocumentReference",
+        "id": "$custodian-$identifier",
+        "custodian": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "value": "$custodian"
+          }
+        },
+        "subject": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "$subject"
+          }
+        },
+        "content": [
+          {
+            "attachment": {
+              "contentType": "$contentType",
+              "url": "$url"
+            }
+          }
+        ],
+        "status": "$status",
+        "relatesTo": [
+          {
+            "code": "replaces",
+            "target": {
+              "type": "DocumentReference",
+              "identifier": {
+                "value": "$target"
+              }
+            }
+          }
+        ]
       }
       """
     And template DOCUMENT_WITH_INVALID_ID_FORMAT
@@ -61,7 +94,7 @@ Feature: Producer Update Failure scenarios
         "id": "$custodian|$identifier",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },
@@ -143,13 +176,14 @@ Feature: Producer Update Failure scenarios
       | contentType | application/pdf                       |
       | url         | https://example.org/different-doc.pdf |
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                   |
-      | issue_type        | processing              |
-      | issue_level       | error                   |
-      | issue_code        | RESOURCE_NOT_FOUND      |
-      | issue_description | Resource not found      |
-      | message           | Item could not be found |
+      | property          | value                                                           |
+      | issue_type        | processing                                                      |
+      | issue_level       | error                                                           |
+      | issue_code        | VALIDATION_ERROR                                                |
+      | issue_description | A parameter or value has resulted in a validation error         |
+      | message           | Existing document id does not match the document id in the body |
 
   Scenario: Unable to update the relatesTo immutable property of a DOCUMENT_POINTER
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
@@ -175,6 +209,7 @@ Feature: Producer Update Failure scenarios
       | contentType | application/pdf |
       | target      | 536941082       |
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                                   |
       | issue_type        | processing                                              |
@@ -206,6 +241,7 @@ Feature: Producer Update Failure scenarios
       | subject     | 9278693472      |
       | contentType | application/pdf |
     Then the operation is unsuccessful
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                                   |
       | issue_type        | processing                                              |
@@ -214,7 +250,7 @@ Feature: Producer Update Failure scenarios
       | issue_description | A parameter or value has resulted in a validation error |
       | message           | Trying to update one or more immutable fields           |
 
-  Scenario: Unable to update Document Pointer
+  Scenario: Unable to update Document Pointer when required type field is missing
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
@@ -229,17 +265,22 @@ Feature: Producer Update Failure scenarios
       | status      | current                        |
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from BAD_DOCUMENT template
-      | property | value |
-      | bad      | true  |
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | status      | current                        |
+      | url         | https://example.org/my-doc.pdf |
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                       |
-      | issue_type        | processing                                                  |
-      | issue_level       | error                                                       |
-      | issue_code        | VALIDATION_ERROR                                            |
-      | issue_description | A parameter or value has resulted in a validation error     |
-      | message           | DocumentReference validation failure - Invalid resourceType |
+      | property          | value                                                   |
+      | issue_type        | processing                                              |
+      | issue_level       | error                                                   |
+      | issue_code        | VALIDATION_ERROR                                        |
+      | issue_description | A parameter or value has resulted in a validation error |
+      | message           | The required field type is missing                      |
 
   Scenario: Unable to update Document Pointer with an invalid id format
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
@@ -264,14 +305,14 @@ Feature: Producer Update Failure scenarios
       | subject     | 9278693472      |
       | contentType | application/pdf |
     Then the operation is unsuccessful
-    And the status is 404
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                   |
-      | issue_type        | processing              |
-      | issue_level       | error                   |
-      | issue_code        | RESOURCE_NOT_FOUND      |
-      | issue_description | Resource not found      |
-      | message           | Item could not be found |
+      | property          | value                                                           |
+      | issue_type        | processing                                                      |
+      | issue_level       | error                                                           |
+      | issue_code        | VALIDATION_ERROR                                                |
+      | issue_description | A parameter or value has resulted in a validation error         |
+      | message           | Existing document id does not match the document id in the body |
 
   Scenario: Unable to update a Document Pointer with an invalid tuple id format
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers

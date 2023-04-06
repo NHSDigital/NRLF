@@ -4,7 +4,6 @@ import uuid
 import pytest
 
 from api.producer.firehose.tests.e2e_utils import (
-    LogEvent,
     make_good_cloudwatch_data,
     submit_cloudwatch_data_to_firehose,
 )
@@ -68,13 +67,10 @@ def _submit_good_cloudwatch_data(session, stream_arn, global_event_handler):
 def _submit_bad_cloudwatch_data(session, stream_arn, global_event_handler):
     transaction_id = f"bad_cloudwatch_data-{uuid.uuid4()}"
     cloudwatch_data = make_good_cloudwatch_data(transaction_id=transaction_id, n_logs=3)
-    cloudwatch_data.log_events.append(
-        LogEvent(
-            id="123",
-            timestamp=123,
-            message=json.dumps({"value": "this is an invalid log event"}),
-        )
+    new_log_event = cloudwatch_data.log_events[0].copy(
+        update={"message": json.dumps({"value": "this is an invalid log event"})}
     )
+    cloudwatch_data.log_events.append(new_log_event)
     submit_cloudwatch_data_to_firehose(
         session=session,
         stream_arn=stream_arn,
@@ -96,13 +92,10 @@ def _submit_very_bad_cloudwatch_data(session, stream_arn, global_event_handler):
     ]
 
     very_bad_message = "this is a very bad log event"
-    cloudwatch_data.log_events.append(
-        LogEvent(
-            id="123",
-            timestamp=123,
-            message=very_bad_message,
-        )
+    new_log_event = cloudwatch_data.log_events[0].copy(
+        update={"message": very_bad_message}
     )
+    cloudwatch_data.log_events.append(new_log_event)
     very_bad_logs.append(very_bad_message)
 
     submit_cloudwatch_data_to_firehose(

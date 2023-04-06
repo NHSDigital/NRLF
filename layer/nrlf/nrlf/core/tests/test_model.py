@@ -98,10 +98,10 @@ def test_create_document_pointer_from_fhir_json(mock__make_timestamp):
         fhir_json=fhir_json, api_version=API_VERSION
     )
 
-    id = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"
+    id = "Y05868-1234567890"
     (_, doc_id) = id.split(ID_SEPARATOR)
-    provider_id = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"
-    custodian = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"
+    provider_id = "Y05868"
+    custodian = "Y05868"
     nhs_number = "9278693472"
 
     assert core_model.dict() == {
@@ -154,10 +154,10 @@ def test_update_document_pointer_from_fhir_json(mock__make_timestamp):
     actual = core_model.dict()
     expected = {
         **actual,  # we don't test the calculated values here
-        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
+        "id": {"S": "Y05868-1234567890"},
         "nhs_number": {"S": "9278693472"},
-        "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-        "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+        "producer_id": {"S": "Y05868"},
+        "custodian": {"S": "Y05868"},
         "type": {"S": "http://snomed.info/sct|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
@@ -172,10 +172,10 @@ def test_reconstruct_document_pointer_from_db():
     document = json.dumps(generate_test_document_reference())
 
     dynamodb_core_model = {
-        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
+        "id": {"S": "Y05868-1234567890"},
         "nhs_number": {"S": "9278693472"},
-        "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-        "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+        "producer_id": {"S": "Y05868"},
+        "custodian": {"S": "Y05868"},
         "type": {"S": "http://snomed.info/sct|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
@@ -189,10 +189,10 @@ def test_reconstruct_document_pointer_from_db():
     actual = core_model.dict()
     expected = {
         **actual,  # we don't test the calculated values here
-        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
+        "id": {"S": "Y05868-1234567890"},
         "nhs_number": {"S": "9278693472"},
-        "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-        "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+        "producer_id": {"S": "Y05868"},
+        "custodian": {"S": "Y05868"},
         "type": {"S": "http://snomed.info/sct|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
@@ -225,7 +225,7 @@ def test_create_bundle_from_paginated_response_returns_populated_bundle_of_2():
             {
                 "resource": {
                     "resourceType": "DocumentReference",
-                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890",
+                    "id": "Y05868-1234567890",
                     "status": "current",
                     "type": {
                         "coding": [
@@ -240,8 +240,8 @@ def test_create_bundle_from_paginated_response_returns_populated_bundle_of_2():
                     },
                     "custodian": {
                         "identifier": {
-                            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
-                            "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL",
+                            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                            "value": "Y05868",
                         }
                     },
                     "content": [
@@ -257,7 +257,7 @@ def test_create_bundle_from_paginated_response_returns_populated_bundle_of_2():
             {
                 "resource": {
                     "resourceType": "DocumentReference",
-                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890",
+                    "id": "Y05868-1234567890",
                     "status": "current",
                     "type": {
                         "coding": [
@@ -272,8 +272,8 @@ def test_create_bundle_from_paginated_response_returns_populated_bundle_of_2():
                     },
                     "custodian": {
                         "identifier": {
-                            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
-                            "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL",
+                            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                            "value": "Y05868",
                         }
                     },
                     "content": [
@@ -311,7 +311,7 @@ def test_create_bundle_from_paginated_response_returns_populated_bundle_of_1():
             {
                 "resource": {
                     "resourceType": "DocumentReference",
-                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890",
+                    "id": "Y05868-1234567890",
                     "status": "current",
                     "type": {
                         "coding": [
@@ -326,8 +326,8 @@ def test_create_bundle_from_paginated_response_returns_populated_bundle_of_1():
                     },
                     "custodian": {
                         "identifier": {
-                            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
-                            "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL",
+                            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                            "value": "Y05868",
                         }
                     },
                     "content": [

@@ -4,10 +4,22 @@ from datetime import datetime as dt
 from typing import Union
 
 from more_itertools import map_except
-from nrlf.core.constants import EMPTY_VALUES, ID_SEPARATOR, JSON_TYPES, Source
-from nrlf.core.errors import FhirValidationError, NextPageTokenValidationError
+from nrlf.core.constants import (
+    EMPTY_VALUES,
+    ID_SEPARATOR,
+    JSON_TYPES,
+    ODS_SYSTEM,
+    REQUIRED_CREATE_FIELDS,
+    Source,
+)
+from nrlf.core.errors import (
+    FhirValidationError,
+    MissingRequiredFieldForCreate,
+    NextPageTokenValidationError,
+    ProducerCreateValidationError,
+    RequestValidationError,
+)
 from nrlf.core.model import DocumentPointer, PaginatedResponse
-from nrlf.core.validators import validate_fhir_model_for_required_fields
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
 from nrlf.legacy.model import LegacyDocumentPointer
 from nrlf.producer.fhir.r4.model import Bundle, BundleEntry, DocumentReference, Meta
@@ -22,9 +34,20 @@ def make_timestamp() -> str:
 
 
 def _strip_empty_json_paths(
-    json: Union[list[dict], dict], raise_on_discovery=False
+    json: Union[list[dict], dict], raise_on_discovery=False, json_path: list = None
 ) -> Union[list[dict], dict]:
+    if json_path is None:
+        json_path = []
+
     if json in EMPTY_VALUES:
+        if raise_on_discovery:
+            if json in REQUIRED_CREATE_FIELDS:
+                raise ProducerCreateValidationError(
+                    f"DocumentReference validation failure - Invalid value '{json}' at {'.'.join(json_path)}"
+                )
+            raise FhirValidationError(
+                f"Empty value '{json}' at '{'.'.join(json_path)}' is not valid FHIR"
+            )
         return None
 
     if type(json) is list:
@@ -33,8 +56,10 @@ def _strip_empty_json_paths(
                 filter(
                     None,
                     (
-                        _strip_empty_json_paths(item, raise_on_discovery)
-                        for item in json
+                        _strip_empty_json_paths(
+                            item, raise_on_discovery, json_path=json_path + [str(i)]
+                        )
+                        for i, item in enumerate(json)
                     ),
                 )
             )
@@ -44,11 +69,19 @@ def _strip_empty_json_paths(
     modified = False
     for key, value in json.items():
         if type(value) in JSON_TYPES:
-            value = _strip_empty_json_paths(value, raise_on_discovery)
+            value = _strip_empty_json_paths(
+                value, raise_on_discovery, json_path=json_path + [key]
+            )
         if value in EMPTY_VALUES:
             modified = True
             if raise_on_discovery:
-                raise FhirValidationError(f"Empty field '{key}' is not valid FHIR")
+                if key in REQUIRED_CREATE_FIELDS:
+                    raise ProducerCreateValidationError(
+                        f"DocumentReference validation failure - Invalid '{value}' at {'.'.join(json_path + [key])} "
+                    )
+                raise FhirValidationError(
+                    f"Empty value '{value}' at '{'.'.join(json_path + [key])}' is not valid FHIR"
+                )
             continue
         stripped_json[key] = value
     return (
@@ -92,14 +125,32 @@ def validate_no_extra_fields(input_fhir_json, output_fhir_json):
         raise FhirValidationError("Input FHIR JSON has additional non-FHIR fields.")
 
 
+def validate_required_create_fields(request_body_json):
+    for field in REQUIRED_CREATE_FIELDS:
+        if field not in request_body_json:
+            raise MissingRequiredFieldForCreate(
+                f"The required field {field} is missing"
+            )
+
+
+def validate_custodian_system(fhir_strict_model: StrictDocumentReference):
+    if fhir_strict_model.custodian.identifier.system != ODS_SYSTEM:
+        raise RequestValidationError(
+            "Provided custodian identifier system is not the ODS system"
+        )
+
+
 def create_document_pointer_from_fhir_json(
     fhir_json: dict,
     api_version: int,
     source: Source = Source.NRLF,
     **kwargs,
 ) -> DocumentPointer:
-    fhir_model = create_fhir_model_from_fhir_json(fhir_json=fhir_json)
-    validate_fhir_model_for_required_fields(fhir_model)
+    validate_required_create_fields(fhir_json)
+    stripped_fhir_json = _strip_empty_json_paths(
+        json=fhir_json, raise_on_discovery=True
+    )
+    fhir_model = create_fhir_model_from_fhir_json(fhir_json=stripped_fhir_json)
     core_model = DocumentPointer(
         id=fhir_model.id,
         nhs_number=fhir_model.subject.identifier.value,
@@ -121,6 +172,7 @@ def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference
         input_fhir_json=fhir_json,
         output_fhir_json=fhir_strict_model.dict(exclude_none=True),
     )
+    validate_custodian_system(fhir_strict_model)
     _strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
     return fhir_strict_model
 

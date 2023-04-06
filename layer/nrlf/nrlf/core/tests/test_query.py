@@ -69,7 +69,7 @@ def test_filter_query_in_db():
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        item = repository.read_item(core_model.pk)
+        item = repository.read_item(core_model.pk.__root__)
         assert item == core_model
 
 
@@ -92,7 +92,7 @@ def test_create_search_and_filter_query_in_db():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model)
         result = repository.query_gsi_1(
-            model.pk_1, type="http://snomed.info/sct|736253002"
+            model.pk_1.__root__, type="http://snomed.info/sct|736253002"
         )
         assert result.document_pointers == [model]
 
@@ -146,7 +146,7 @@ def test_filter_can_find_result():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model)
         item = repository.read_item(
-            pk=model.pk, type=["http://snomed.info/sct|736253002"]
+            pk=model.pk.__root__, type=["http://snomed.info/sct|736253002"]
         )
         assert item == model
 
@@ -162,7 +162,9 @@ def test_filter_cannot_find_result():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model)
         with pytest.raises(ItemNotFound):
-            repository.read_item(pk=model.pk, type=["http://snomed.info/sct|WRONG"])
+            repository.read_item(
+                pk=model.pk.__root__, type=["http://snomed.info/sct|WRONG"]
+            )
 
 
 def test_create_search_and_filter_query_in_db_returns_empty_bundle():

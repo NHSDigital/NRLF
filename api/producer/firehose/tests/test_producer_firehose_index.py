@@ -74,7 +74,7 @@ def test_firehose_output(
         print(json.dumps(logs_from_s3, indent=4))  # noqa: T201
         print()  # noqa: T201
         if prefix.startswith("processed") and all_logs_are_on_s3(
-            original_logs=good_logs, logs_from_s3=logs_from_s3
+            original_logs=good_logs, logs_from_s3=logs_from_s3, redacted=True
         ):
             verify_good_logs = True
         if prefix.startswith("errors") and all_logs_are_on_s3(

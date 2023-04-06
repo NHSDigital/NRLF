@@ -4,11 +4,11 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.logging import log_action
 from nrlf.core.common_steps import parse_headers
 from nrlf.core.constants import DbPrefix
 from nrlf.core.errors import assert_no_extra_params
+from nrlf.core.event_parsing import fetch_body_from_event
 from nrlf.core.model import PaginatedResponse, ProducerRequestParams, key
 from nrlf.core.repository import Repository, type_filter
 from nrlf.core.transform import create_bundle_from_paginated_response

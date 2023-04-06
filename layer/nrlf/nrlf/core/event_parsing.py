@@ -1,7 +1,7 @@
 import json
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
-from lambda_utils.errors import RequestParsingError
+from nrlf.core.errors import RequestValidationError
 from pydantic import BaseModel
 
 
@@ -12,9 +12,9 @@ def fetch_body_from_event(event: APIGatewayProxyEventModel) -> dict:
 
     try:
         if raw_body.isdigit():
-            raise RequestParsingError("Body is not valid json")
+            raise RequestValidationError("Body is not valid json")
         return json.loads(raw_body)
-    except RequestParsingError as e:
+    except RequestValidationError as e:
         raise e
     except:
-        raise RequestParsingError("Body is not valid json")
+        raise RequestValidationError("Body is not valid json")

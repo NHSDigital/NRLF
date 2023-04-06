@@ -23,6 +23,19 @@ def producer_create_document_pointer_from_template(
     test_config.response = test_config.request.invoke(body=rendered_template)
 
 
+@when(
+    '{actor_type} "{actor}" creates a Document Reference with bad json',
+    action="create",
+)
+def producer_create_document_pointer_from_bad_json(
+    context: Context,
+    actor_type: str,
+    actor: str,
+):
+    test_config: TestConfig = context.test_config
+    test_config.response = test_config.request.invoke(body=context.text)
+
+
 @when('{actor_type} "{actor}" {action} an existing Document Reference "{id}"')
 def producer_reads_or_deletes_existing_document_reference(
     context: Context, actor_type: str, actor: str, action: str, id: str

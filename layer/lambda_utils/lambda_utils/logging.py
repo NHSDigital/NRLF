@@ -7,7 +7,7 @@ from typing import Any, Callable, Optional, TypeVar, Union
 
 from aws_lambda_powertools import Logger as _Logger
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
-from lambda_utils.constants import LoggingOutcomes, LogLevel
+from lambda_utils.constants import LoggingConstants, LoggingOutcomes, LogLevel
 from lambda_utils.header_config import LoggingHeader
 from lambda_utils.logging_utils import (
     CustomFormatter,
@@ -18,7 +18,7 @@ from lambda_utils.logging_utils import (
     json_encode_message,
 )
 from nrlf.core.transform import make_timestamp
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Extra, Field
 from typing_extensions import ParamSpec
 
 
@@ -51,11 +51,15 @@ class LogTemplate(LogTemplateBase):
 
     class Config:
         arbitrary_types_allowed = True  # For Exception
+        extra = Extra.forbid
 
-    def dict(self, **kwargs):
-        """Force exclude_none"""
+    def dict(self, redact=False, **kwargs):
+        """Force exclude_none, allow redaction of field `data`"""
         kwargs["exclude_none"] = True
-        return super().dict(**kwargs)
+        log = super().dict(**kwargs)
+        if redact and self.sensitive:
+            log["data"] = LoggingConstants.REDACTED
+        return log
 
     def json(self, **kwargs):
         """Force exclude_none"""

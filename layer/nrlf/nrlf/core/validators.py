@@ -4,6 +4,7 @@ from datetime import datetime as dt
 from nhs_number import is_valid as is_valid_nhs_number
 from nrlf.core.constants import ID_SEPARATOR, VALID_SOURCES
 from nrlf.core.errors import (
+    AuthenticationError,
     DocumentReferenceValidationError,
     InvalidTupleError,
     RequestValidationError,
@@ -81,10 +82,10 @@ def requesting_application_is_not_authorised(
 def validate_document_reference_string(fhir_json: str):
     try:
         DocumentReference(**json.loads(fhir_json))
-    except ValidationError:
-        raise DocumentReferenceValidationError("Item could not be found")
-    except ValueError:
-        raise DocumentReferenceValidationError("Item could not be found")
+    except (ValidationError, ValueError):
+        raise DocumentReferenceValidationError(
+            "There was a problem retrieving the document pointer"
+        ) from None
 
 
 def validate_fhir_model_for_required_fields(model: StrictDocumentReference):
@@ -107,6 +108,6 @@ def validate_type_system(type: RequestQueryType, pointer_types: list[str]):
             if type_system == pointer_type_system:
                 return
 
-        raise RequestValidationError(
-            f"The provided query system type value - {type_system} - does not match the allowed types"
+        raise AuthenticationError(
+            f"The provided system type value - {type_system} - does not match the allowed types"
         )

@@ -13,10 +13,6 @@ class DynamoDbError(Exception):
     pass
 
 
-class AuthenticationError(Exception):
-    pass
-
-
 class FhirValidationError(Exception):
     pass
 
@@ -49,7 +45,23 @@ class DocumentReferenceValidationError(Exception):
     pass
 
 
+class ProducerValidationError(Exception):
+    pass
+
+
+class InconsistentUpdateId(Exception):
+    pass
+
+
 class RequestValidationError(Exception):
+    pass
+
+
+class InconsistentUpdateId(Exception):
+    pass
+
+
+class SupersedeValidationError(Exception):
     pass
 
 
@@ -61,21 +73,39 @@ class NextPageTokenValidationError(Exception):
     pass
 
 
+class AuthenticationError(Exception):
+    pass
+
+
+class ProducerCreateValidationError(Exception):
+    pass
+
+
+class MissingRequiredFieldForCreate(Exception):
+    pass
+
+
 NRLF_TO_SPINE_4XX_ERROR = {
     AuthenticationError: SpineCoding.ACCESS_DENIED_LEVEL,
     DynamoDbError: SpineCoding.RESOURCE_NOT_FOUND,
     FhirValidationError: SpineCoding.VALIDATION_ERROR,
     ImmutableFieldViolationError: SpineCoding.VALIDATION_ERROR,
     ItemNotFound: SpineCoding.RESOURCE_NOT_FOUND,
-    TooManyItemsError: SpineCoding.NOT_ACCEPTABLE,
+    TooManyItemsError: SpineCoding.VALIDATION_ERROR,
     ValidationError: SpineCoding.VALIDATION_ERROR,
     UnknownParameterError: SpineCoding.VALIDATION_ERROR,
     DuplicateError: SpineCoding.INVALID_RESOURCE_ID,
     SupersedeError: SpineCoding.INVALID_RESOURCE_ID,
-    DocumentReferenceValidationError: SpineCoding.RESOURCE_NOT_FOUND,
+    DocumentReferenceValidationError: SpineCoding.SERVICE_ERROR,
     RequestValidationError: SpineCoding.VALIDATION_ERROR,
+    InconsistentUpdateId: SpineCoding.VALIDATION_ERROR,
+    ProducerValidationError: SpineCoding.VALIDATION_ERROR,
+    MissingRequiredFieldForCreate: SpineCoding.VALIDATION_ERROR,
+    InconsistentUpdateId: SpineCoding.VALIDATION_ERROR,
+    SupersedeValidationError: SpineCoding.VALIDATION_ERROR,
     InvalidTupleError: SpineCoding.VALIDATION_ERROR,
     NextPageTokenValidationError: SpineCoding.VALIDATION_ERROR,
+    ProducerCreateValidationError: SpineCoding.VALIDATION_ERROR,
 }
 
 

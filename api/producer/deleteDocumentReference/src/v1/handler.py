@@ -6,8 +6,9 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
+from nrlf.core.common_producer_steps import invalid_producer_for_delete
 from nrlf.core.common_steps import parse_headers, parse_path_id
-from nrlf.core.errors import AuthenticationError
+from nrlf.core.errors import RequestValidationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
@@ -39,11 +40,11 @@ def validate_producer_permissions(
     organisation_code = data["organisation_code"]
     decoded_id = urllib.parse.unquote(event.pathParameters["id"])
 
-    if _invalid_producer_for_delete(
+    if invalid_producer_for_delete(
         organisation_code=organisation_code, delete_item_id=decoded_id
     ):
-        raise AuthenticationError(
-            "Required permissions to delete a document pointer are missing"
+        raise RequestValidationError(
+            "The requested document pointer cannot be deleted because it belongs to another organisation"
         )
 
     return PipelineData(decoded_id=decoded_id, **data)

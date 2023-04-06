@@ -1,13 +1,20 @@
+from unittest.mock import Mock
+
 import pytest
 from hypothesis import given
-from hypothesis.strategies import builds, lists
+from hypothesis.strategies import builds, just, lists
 from nrlf.core.firehose.model import (
+    CONTROL_MESSAGE_TEXT,
     CloudwatchLogsData,
+    CloudwatchMessageType,
     FirehoseOutputRecord,
     FirehoseResult,
     FirehoseSubmissionRecord,
+    LogEvent,
+    parse_cloudwatch_data,
 )
-from nrlf.core.firehose.tests.test_firehose_handler import draw_log_event
+from nrlf.core.firehose.tests.test_firehose_handler import _cloudwatch_data_strategy
+from pydantic import ValidationError
 
 ENCODED_LOG_EVENTS = "an encoded event"  # Size = 16
 RECORD_ID = "123"  # Size = 3
@@ -62,28 +69,56 @@ def test_processed_record(unprocessed_records, firehose_result, expected_record)
     assert record.dict() == expected_record
 
 
-@given(
-    builds(
-        CloudwatchLogsData,
-        logEvents=lists(draw_log_event(), min_size=1),
-    )
-)
+@pytest.mark.slow
+@given(cloudwatch_data=_cloudwatch_data_strategy(CloudwatchMessageType.DATA_MESSAGE))
 def test_CloudwatchLogsData_split_in_two(cloudwatch_data: CloudwatchLogsData):
     first_half, second_half = cloudwatch_data.split_in_two()
     assert len(first_half.log_events) <= len(second_half.log_events)
     assert first_half.log_events + second_half.log_events == cloudwatch_data.log_events
 
 
+@pytest.mark.slow
+@given(cloudwatch_data=_cloudwatch_data_strategy(CloudwatchMessageType.DATA_MESSAGE))
+def test_parse_cloudwatch_data(cloudwatch_data: CloudwatchLogsData):
+    record = Mock()
+    record.data = cloudwatch_data.encode()
+    record.recordId = cloudwatch_data.record_id
+    new_cloudwatch_data = parse_cloudwatch_data(record=record)
+    assert new_cloudwatch_data == cloudwatch_data
+
+
+@pytest.mark.parametrize(
+    "message", ["foo", f"foo{CONTROL_MESSAGE_TEXT}bar", CONTROL_MESSAGE_TEXT[1:4]]
+)
 @given(
-    builds(
+    cloudwatch_data=builds(
         CloudwatchLogsData,
-        logEvents=lists(draw_log_event(), min_size=1),
+        messageType=just(CloudwatchMessageType.CONTROL_MESSAGE),
+        logEvents=just([LogEvent(id="", message=CONTROL_MESSAGE_TEXT, timestamp=0)]),
     )
 )
-def test_CloudwatchLogsData_parse_and_encode(cloudwatch_data: CloudwatchLogsData):
-    cloudwatch_data_encoded = cloudwatch_data.encode()
-    new_cloudwatch_data = CloudwatchLogsData.parse(
-        data=cloudwatch_data_encoded,
-        record_id=cloudwatch_data.record_id,
+def test_control_type_only_works_with_control_message(
+    cloudwatch_data: CloudwatchLogsData, message
+):
+    log_event: LogEvent = cloudwatch_data.log_events[0]
+    _log_event = log_event.copy(update={"message": message})
+    _cloudwatch_data = cloudwatch_data.copy(update={"logEvents": [_log_event]})
+    with pytest.raises(ValidationError):
+        CloudwatchLogsData(**_cloudwatch_data.dict())
+
+
+@given(
+    cloudwatch_data=builds(
+        CloudwatchLogsData,
+        messageType=just(CloudwatchMessageType.CONTROL_MESSAGE),
+        logEvents=just([LogEvent(id="", message=CONTROL_MESSAGE_TEXT, timestamp=0)]),
     )
-    assert new_cloudwatch_data == cloudwatch_data
+)
+def test_control_message_only_works_with_control_type(
+    cloudwatch_data: CloudwatchLogsData,
+):
+    _cloudwatch_data = cloudwatch_data.copy(
+        update={"messageType": CloudwatchMessageType.DATA_MESSAGE}
+    )
+    with pytest.raises(ValidationError):
+        CloudwatchLogsData(**_cloudwatch_data.dict())

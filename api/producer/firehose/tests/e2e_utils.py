@@ -1,4 +1,5 @@
 import time
+from copy import deepcopy
 from datetime import datetime
 from typing import Iterator
 
@@ -45,7 +46,7 @@ def _make_good_log(transaction_id) -> str:
         call_stack="oops again",
         timestamp="123",
         sensitive=True,
-    ).json()
+    )
 
 
 def make_good_cloudwatch_data(transaction_id, n_logs=10):
@@ -57,7 +58,7 @@ def make_good_cloudwatch_data(transaction_id, n_logs=10):
     return CloudwatchLogsData(
         record_id="dummy_id",
         logEvents=[good_log_event] * n_logs,
-        messageType=CloudwatchMessageType.NORMAL_LOG_EVENT,
+        messageType=CloudwatchMessageType.DATA_MESSAGE,
         owner="nrlf",
         logGroup="nrlf-test-group",
         logStream="nrlf-test-stream",
@@ -125,5 +126,13 @@ def retrieve_firehose_output(
     )
 
 
-def all_logs_are_on_s3(original_logs: list[dict], logs_from_s3: list[dict]) -> bool:
-    return all(log in logs_from_s3 for log in original_logs)
+def all_logs_are_on_s3(
+    original_logs: list[dict], logs_from_s3: list[dict], redacted=False
+) -> bool:
+    for log in original_logs:
+        _log = deepcopy(log)
+        if redacted:
+            _log["data"] = "REDACTED"
+        if _log not in logs_from_s3:
+            return False
+    return True
