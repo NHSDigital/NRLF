@@ -313,3 +313,22 @@ Feature: Producer Create Failure Scenarios
       | issue_code        | VALIDATION_ERROR                                                                                          |
       | issue_description | A parameter or value has resulted in a validation error                                                   |
       | message           | The custodian of the provided document pointer does not match the expected organisation code for this app |
+
+  Scenario: Unable to create a Document Pointer when custodian does not match
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference with bad json
+      """
+      {I am bad}
+      """
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                   |
+      | issue_type        | processing                                              |
+      | issue_level       | error                                                   |
+      | issue_code        | VALIDATION_ERROR                                        |
+      | issue_description | A parameter or value has resulted in a validation error |
+      | message           | Body is not valid json                                  |
