@@ -16,8 +16,8 @@ info:
 
     Users of the service fall into the categories of:
 
-    * Producers - capable of creating and managing pointers
-    * Consumers - capable of searching and reading pointers
+    * producers - capable of creating and managing pointers
+    * consumers - capable of searching and reading pointers
 
     The service removes the need for organisations to create duplicate copies of information across systems and
     organisations, by enabling access to up-to-date information directly from the source.
@@ -26,34 +26,38 @@ info:
     where relevant patient data is held.
 
     There is a growing list of health and social care organisations authorised to share records using NRL, and presently
-    the pointers are classified into the following types.
+    the pointers are classified into the following types:
 
     * [Mental Health Crisis Plan](http://snomed.info/sct/736253002)
     * [Emergency Healthcare Plan](http://snomed.info/sct/887701000000100)
     * [End of Life Care Coordination Summary](http://snomed.info/sct|861421000000109)
     * [National Early Warning Code 2](http://snomed.info/sct|1363501000000100)
 
-    You can also retrieve booking and referal pointers however you can not currently do this by directly integrating with
+    You can also retrieve booking and referral pointers however you can not currently do this by directly integrating with
     the National Record Locator, you must instead onboard to the [Booking and Referral - FHIR API](https://digital.nhs.uk/developer/api-catalogue/booking-and-referral-fhir)
 
-    ### As a Producer
+    ### As a producer
 
-    * Create pointers, restricted to document types agreed during the [on-boarding](#api-description__onboarding) process
-    * Replace your pointers with a newer versions, superseding the old one
-    * Update the metadata associated with your pointers
-    * Delete pointers
-    * Search all pointers you created
-    * Read any pointer you created
+    Producers can use this API to:
+
+    * create pointers, restricted to document types agreed during the [onboarding](#api-description__onboarding) process
+    * replace your pointers with a newer versions, superseding the old one
+    * update the metadata associated with your pointers
+    * delete pointers
+    * search all pointers you created
+    * read any pointer you created
 
     ### What has changed?
 
-    This service is a replacement for the existing [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator).
+    This service is a replacement for the existing
+    [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator), and has the following
+    changes:
 
-    * Upgraded from FHIR STU3 to R4.
-    * Improved performance and scalability.
-    * Improved onboarding experience.
-    * Authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS
-    * Greater flexibility, by wider support of the [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) resource.
+    * upgraded from FHIR STU3 to R4.
+    * improved performance and scalability.
+    * improved onboarding experience.
+    * authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS.
+    * greater flexibility, by wider support of the [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) resource.
 
     ### Data availability, timing and quality
 
@@ -63,14 +67,15 @@ info:
 
     ## Who can use this API
 
-    * This API can only be used where there is a legal basis to do so.
-    * You must have the capability to verify NHS numbers by one of the following mechanisms;
-      *  Full PDS Spine compliant system
-      * Spine Mini Service PDS (SMSP)
-    * Connecting parties must have an appointed Clinical Safety Officer and undertake a Clinical Safety Assessment prior to going live.
+    This API can only be used where there is a legal basis to do so. Make sure you have a valid use case before you go
+    too far with your development. You must demonstrate you have a valid use case as part of digital onboarding.
 
-    Make sure you have a valid use case before you go too far with your development.
-    To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
+    You must have the capability to verify NHS numbers by one of the following mechanisms:
+
+      * full PDS Spine compliant system
+      * Spine Mini Service PDS (SMSP)
+
+    Connecting parties must have an appointed Clinical Safety Officer and undertake a Clinical Safety Assessment.
 
     You must do this before you can go live (see ‘[Onboarding](#api-description__onboarding)’ below).
 
@@ -128,6 +133,7 @@ info:
     ### Sandbox testing
 
     Our [sandbox environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#sandbox-testing):
+
     * is for early developer testing
     * only covers a limited set of scenarios
     * is open access, so does not allow you to test authorisation
@@ -141,19 +147,20 @@ info:
     ### Integration testing
 
     Our [integration test environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing):
+
     * is for formal integration testing
     * includes authorisation
 
-    It also includes ready-to-use test data and scenarios.  For details please [contact us](https://digital.nhs.uk/developer/help-and-support).
+    It also includes ready-to-use test data and scenarios.  For details [contact us](https://digital.nhs.uk/developer/help-and-support).
 
     For more details see [integration testing with our RESTful APIs](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing-with-our-restful-apis).
 
     ## Onboarding
 
     You need to get your software approved by us before it can go live with this API. We call this onboarding. The
-    [on-boarding](#api-description__onboarding) process can sometimes be quite long, so it’s worth planning well ahead.
+    [onboarding](#api-description__onboarding) process can sometimes be quite long, so it’s worth planning well ahead.
 
-    This API uses our online digital [on-boarding](#api-description__onboarding) process.
+    This API uses our online digital [onboarding](#api-description__onboarding) process.
 
     As part of this process, you need to demonstrate that you can manage risks and that your software conforms
     technically with the requirements for this API.
@@ -225,7 +232,7 @@ paths:
 
         To create a document pointer you must ensure:
 
-        * The body must be a valid [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html)
+        * the body must be a valid [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html)
         * `id` is a composite of the ODS Code and an identifier that is locally unique to your system.  NRL does not
           generate globally unique ids, instead relies on producers to provide a locally unique id prefixed with their
           ODS code, making it globally unique. e.g.
@@ -290,7 +297,7 @@ paths:
           ]
           ```
 
-        * The following fields MUST match the pointers being superseded:
+        * the following fields MUST match the pointers being superseded:
           * `subject`
           * `type`
 
@@ -505,7 +512,7 @@ paths:
   /DocumentReference/_search:
     post:
       tags:
-      summary: Retrieve document pointers (GET)
+      summary: Retrieve document pointers (POST)
       operationId: searchPostDocumentReference
       parameters:
         - $ref: "#/components/parameters/odsCode"
@@ -710,7 +717,7 @@ paths:
         requests with the `next-page-token` found in the `meta` portion of the response.
 
         This operation is also available as a http GET for convenience (see above), but POST is preferred for the
-        following reasons.
+        following reasons:
 
         * query string parameters are visible on the network and in logs, and may have privacy implications for consumers.
         * GET operations can be cached by intermediary network infrastructure, such as CDNs, routers and proxies.
@@ -885,14 +892,14 @@ paths:
       description: |
         Update a single pointer you created.
 
-        Note that the following fields are immutable:
+        Note that the following fields cannot change:
         * `id`
         * `subject`
         * `custodian`
         * `type`
 
         Note that unlike NRL STU3 changing the `status` field does NOT delete document pointers.  To delete document
-        pointers please use the `DELETE` endpoint.
+        pointers use the `DELETE` endpoint.
     delete:
       tags:
       summary: Delete a single document pointer
@@ -1822,8 +1829,6 @@ components:
         Must be a universally unique identifier (UUID) (ideally version 4).
 
         Mirrored back in a response header.
-
-        If you re-send a failed request, use the same value in this header.
       in: header
       required: false
       schema:
