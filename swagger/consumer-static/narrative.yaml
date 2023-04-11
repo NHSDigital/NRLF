@@ -20,8 +20,8 @@ info:
 
     Users of the service fall into the categories of:
 
-    * Producers - capable of creating and managing pointers
-    * Consumers - capable of searching and reading pointers
+    * producers - capable of creating and managing pointers
+    * consumers - capable of searching and reading pointers
 
     The service removes the need for organisations to create duplicate copies of information across systems and
     organisations, by enabling access to up-to-date information directly from the source.
@@ -30,7 +30,7 @@ info:
     where relevant patient data is held.
 
     There is a growing list of health and social care organisations authorised to share records using NRL, and presently
-    the pointers are classified into the following types.
+    the pointers are classified into the following types:
 
     * [Mental Health Crisis Plan](http://snomed.info/sct/736253002)
     * [Emergency Healthcare Plan](http://snomed.info/sct/887701000000100)
@@ -42,20 +42,23 @@ info:
 
     ### As a Consumer
 
-    * Search for pointers, restricted to a single Patient at a time
-    * Read a specific pointer
-    * Operations are restricted to document types agreed during the [onboarding](#api-description__onboarding) process
+    Consumers can use this API to:
+
+    * search for pointers, restricted to a single Patient at a time
+    * read a specific pointer
+    * operations are restricted to document types agreed during the [onboarding](#api-description__onboarding) process
 
     ### What has changed?
 
-    This service is a replacement for the existing [National Record Locator
-    (NRL)](https://digital.nhs.uk/services/national-record-locator).
+    This service is a replacement for the existing
+    [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator), and has the following
+    changes:
 
-    * Upgraded from FHIR STU3 to R4.
-    * Improved performance and scalability.
-    * Improved onboarding experience.
-    * Authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS.
-    * Greater flexibility, by wider support of the [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) resource.
+    * upgraded from FHIR STU3 to R4.
+    * improved performance and scalability.
+    * improved onboarding experience.
+    * authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS.
+    * greater flexibility, by wider support of the [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) resource.
 
     ### Data availability, timing and quality
 
@@ -63,17 +66,26 @@ info:
 
     ## Who can use this API
 
-    * This API can only be used where there is a legal basis to do so.
-    * You must have the capability to verify NHS numbers by one of the following mechanisms;
-      *  Full PDS Spine compliant system
-      * Spine Mini Service PDS (SMSP)
-    * You can not use this API to retrieve documents, however you should be prepared to retrive in PDF or Unstructured formats.
-    * In order to retrieve a document, consumers must be able to interact with the National Record Locator, the Spine Secure Proxy (SSP), and the Spine Directory Service (SDS) in order to look up the providers ASID. Currently the SDS is not available via the internet and therefore consumers wishing to use the end to end retrieval process, via the SSP, will still need to have an N3 or HSCN connection.
-    * You can only use this API if your consuming  application is only accessible  using a valid NHS Smartcard for all users or a system that uses an authentication method supported by NHS Identity.
-    * Connecting parties must have an appointed Clinical Safety Officer and undertake a Clinical Safety Assessment prior to going live.
+    This API can only be used where there is a legal basis to do so. Make sure you have a valid use case before you go
+    too far with your development. You must demonstrate you have a valid use case as part of digital onboarding.
 
-    Make sure you have a valid use case before you go too far with your development.
-    To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
+    You must have the capability to verify NHS numbers by one of the following mechanisms:
+
+      * full PDS Spine compliant system
+      * Spine Mini Service PDS (SMSP)
+
+    Connecting parties must have an appointed Clinical Safety Officer and undertake a Clinical Safety Assessment.
+
+    You can not use this API to retrieve documents, however you should be prepared to retrieve in PDF or Unstructured
+    formats.
+
+    In order to retrieve a document, consumers must be able to interact with the National Record Locator, the Spine
+    Secure Proxy (SSP), and the Spine Directory Service (SDS) in order to look up the providers ASID. Currently the SDS
+    is not available via the internet and therefore consumers wishing to use the end to end retrieval process, via the
+    SSP, will still need to have an N3 or HSCN connection.
+
+    You can only use this API if your consuming  application is only accessible  using a valid NHS Smartcard for all
+    users or a system that uses an authentication method supported by NHS Identity.
 
     You must do this before you can go live (see ‘[Onboarding](#api-description__onboarding)’ below).
 
@@ -128,10 +140,10 @@ info:
 
     ## Environments and testing
 
-    | Environment       | Base URL                                                       |
-    | ----------------- | -------------------------------------------------------------- |
-    | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/` |
-    | Integration test  | `https://int.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`     |
+    | Environment       | Base URL                                                               |
+    | ----------------- | ---------------------------------------------------------------------- |
+    | Sandbox           | `https://sandbox.api.service.nhs.uk/record-locator/consumer/FHIR/R4/`     |
+    | Integration test  | `https://int.api.service.nhs.uk/record-locator/consumer/FHIR/R4/`         |
 
     ### Sandbox testing
 
@@ -150,19 +162,20 @@ info:
     ### Integration testing
 
     Our [integration test environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing):
+
     * is for formal integration testing
     * includes authorisation
 
-    It also includes ready-to-use test data and scenarios.  For details please [contact us](https://digital.nhs.uk/developer/help-and-support).
+    It also includes ready-to-use test data and scenarios.  For details [contact us](https://digital.nhs.uk/developer/help-and-support).
 
     For more details see [integration testing with our RESTful APIs](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing-with-our-restful-apis).
 
     ## Onboarding
 
     You need to get your software approved by us before it can go live with this API. We call this onboarding. The
-    [on-boarding](#api-description__onboarding) process can sometimes be quite long, so it’s worth planning well ahead.
+    [onboarding](#api-description__onboarding) process can sometimes be quite long, so it’s worth planning well ahead.
 
-    This API uses our online digital [on-boarding](#api-description__onboarding) process.
+    This API uses our online digital [onboarding](#api-description__onboarding) process.
 
     As part of this process, you need to demonstrate that you can manage risks and that your software conforms
     technically with the requirements for this API.

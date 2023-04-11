@@ -25,11 +25,6 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
-    custodian:
-      name: custodian:identifier
-      in: query
-      schema:
-        $ref: "#/components/schemas/RequestQueryCustodian"
     type:
       name: type
       in: query
@@ -59,8 +54,6 @@ components:
         Must be a universally unique identifier (UUID) (ideally version 4).
 
         Mirrored back in a response header.
-
-        If you re-send a failed request, use the same value in this header.
       in: header
       required: false
       schema:
@@ -135,8 +128,6 @@ components:
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
-    RequestQueryCustodian:
-      type: string
     RequestQueryType:
       type: string
     NextPageToken:

@@ -19,6 +19,7 @@ permissions:
 
 env:
   TF_WORKFLOW_ID: ${{ inputs.environment }}
+  ENVIRONMENT: ${{ inputs.environment }}
   CACHE_NAME: ${{ inputs.environment }}-cache
   ARTIFACT_NAME: ${{ inputs.environment }}-artifact
   TF_ARTIFACT_NAME: ${{ inputs.environment }}-terraform-artifact
@@ -206,7 +207,7 @@ jobs:
         run: |
           source .venv/bin/activate
           source nrlf.sh
-          nrlf test smoke
+          nrlf test smoke producer ${{ env.ENVIRONMENT }}
 
   documentation:
     needs: [smoke-test]
