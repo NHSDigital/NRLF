@@ -49,6 +49,7 @@ function nrlf() {
     "truststore") _truststore "${@:2}" ;;
     "doc") _doc "${@:2}" ;;
     "firehose") _firehose "${@:2}" ;;
+    "install") _firehose "${@:2}" ;;
     *) _nrlf_commands_help ;;
   esac
 
