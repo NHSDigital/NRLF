@@ -27,8 +27,8 @@ permissions:
   actions: write
 
 env:
-  ENVIRONMENT: ${inputs.environment}
-  WORKSPACE: ${ENVIRONMENT}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
+  ENVIRONMENT: ${{ inputs.environment }}
+  WORKSPACE: ${{ inputs.environment }}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
   TF_WORKFLOW_ID: ${{ inputs.environment }}
   CACHE_NAME: ${{ inputs.environment }}-cache
   ARTIFACT_NAME: ${{ inputs.environment }}-artifact
@@ -217,7 +217,7 @@ jobs:
         run: |
           source .venv/bin/activate
           source nrlf.sh
-          nrlf test smoke
+          nrlf test smoke producer ${{ env.WORKSPACE }}
 
   documentation:
     needs: [smoke-test]

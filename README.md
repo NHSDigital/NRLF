@@ -302,15 +302,19 @@ The following notes should be made:
 
 ### Smoke tests
 
-TODO - CURRENTLY DISABLED FOR DEVELOPMENT REASONS, NEEDS DISCUSSION.
-
 You can run smoke tests from the CLI using:
 
 ```
-nrlf test smoke
+nrlf test smoke {actor} {env}
 ```
 
-This will run an end-to-end test against the `dev` environment/workspace via Apigee.
+If you want to utilise the sandbox then you need to put that on the end of the env command - example below
+
+```
+nrlf test smoke producer dev-sandbox
+```
+
+This will run an end-to-end test against the environment/workspace via Apigee that you designated.
 
 ---
 
