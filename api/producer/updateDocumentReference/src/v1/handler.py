@@ -69,6 +69,16 @@ def document_pointer_exists(
     )
 
 
+def _validate_immutable_fields(immutable_fields: set, a: dict, b: dict):
+    immutable_keys_in_a = immutable_fields.intersection(a.keys())
+    immutable_keys_in_b = immutable_fields.intersection(b.keys())
+    for k in immutable_keys_in_a | immutable_keys_in_b:
+        if a.get(k) != b.get(k):
+            raise ImmutableFieldViolationError(
+                f"Forbidden to update immutable field '{k}'"
+            )
+
+
 @log_action(log_reference=LogReference.UPDATE003)
 def compare_immutable_fields(
     data: PipelineData,
@@ -78,14 +88,12 @@ def compare_immutable_fields(
     logger: Logger,
 ) -> PipelineData:
     core_model = data["core_model"]
-    original_document = json.loads(data["original_document"])
-    updated_document = json.loads(core_model.document.__root__)
-    for k in IMMUTABLE_FIELDS.intersection(updated_document.keys()):
-        if updated_document[k] != original_document.get(k):
-            raise ImmutableFieldViolationError(
-                "Trying to update one or more immutable fields"
-            )
-
+    raw_original_document = data["original_document"]
+    _validate_immutable_fields(
+        immutable_fields=IMMUTABLE_FIELDS,
+        a=json.loads(raw_original_document),
+        b=json.loads(core_model.document.__root__),
+    )
     return PipelineData(**data)
 
 
