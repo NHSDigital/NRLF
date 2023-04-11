@@ -37,7 +37,7 @@ Feature: Producer Supersede Failure scenarios
         "status": "current",
         "relatesTo": [
           {
-            "code": "replaces",
+            "code": "$code",
             "target": {
               "type": "DocumentReference",
               "identifier": {
@@ -176,6 +176,7 @@ Feature: Producer Supersede Failure scenarios
       | property    | value                          |
       | identifier  | 8FW23-1234567892               |
       | target      | 8FW23-1234567890               |
+      | code        | replaces                       |
       | type        | 734163000                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
@@ -208,6 +209,7 @@ Feature: Producer Supersede Failure scenarios
       | property    | value                          |
       | identifier  | 8FW23-1234567892               |
       | target      | VN6DL-1234567890               |
+      | code        | replaces                       |
       | type        | 734163000                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
@@ -232,6 +234,7 @@ Feature: Producer Supersede Failure scenarios
       | property    | value                          |
       | identifier  | 8FW23-1234567892               |
       | target      | 8FW23-1234567890               |
+      | code        | replaces                       |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
@@ -265,6 +268,7 @@ Feature: Producer Supersede Failure scenarios
       | identifier  | 8FW23-1234567891               |
       | target      | 8FW23-1234567890               |
       | target      | 8FW23-1234567890               |
+      | code        | replaces                       |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
@@ -360,6 +364,7 @@ Feature: Producer Supersede Failure scenarios
       | identifier  | 8FW23-1234567892               |
       | target      | 8FW23-1234567890               |
       | target      | 8FW23-1234567891               |
+      | code        | replaces                       |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | subject     | 5387015366                     |
@@ -405,6 +410,7 @@ Feature: Producer Supersede Failure scenarios
       | identifier  | 8FW23-1234567892               |
       | target      | 8FW23-1234567890               |
       | target      | 8FW23-1234567891               |
+      | code        | replaces                       |
       | type        | 736253001                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
@@ -422,3 +428,36 @@ Feature: Producer Supersede Failure scenarios
     And Document Pointer "8FW23-1234567892" does not exist
     And Document Pointer "8FW23-1234567890" still exists
     And Document Pointer "8FW23-1234567891" still exists
+
+  Scenario: relatesTo code is invalid
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 8FW23-1234567890               |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
+      | property    | value                          |
+      | identifier  | 8FW23-1234567892               |
+      | target      | 8FW23-1234567890               |
+      | code        | something_bad                  |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                                                                               |
+      | issue_type        | processing                                                                                                                          |
+      | issue_level       | error                                                                                                                               |
+      | issue_code        | VALIDATION_ERROR                                                                                                                    |
+      | issue_description | A parameter or value has resulted in a validation error                                                                             |
+      | message           | Provided relatesTo code 'something_bad' must be one of ['appends', 'incorporates', 'replaces', 'signs', 'summarizes', 'transforms'] |
