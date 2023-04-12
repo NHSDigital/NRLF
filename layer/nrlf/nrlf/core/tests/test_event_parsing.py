@@ -24,6 +24,7 @@ def test_parsing_body_from_event(event, expected_body):
         [make_aws_event(body="12345"), "Body is not expected json type"],
         [make_aws_event(body="null"), "Body is not expected json type"],
         [make_aws_event(body="true"), "Body is not expected json type"],
+        [make_aws_event(body="{not json]"), "Body is not valid json"],
     ],
 )
 def test_parsing_body_from_event_errors(event, error_message):

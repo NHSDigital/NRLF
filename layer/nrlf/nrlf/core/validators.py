@@ -114,8 +114,7 @@ def dict_raise_on_duplicates(list_of_pairs):
     for k, v in list_of_pairs:
         if k in checked_pairs:
             raise DuplicateKeyError("Duplicate key: %r" % (k,))
-        else:
-            checked_pairs[k] = v
+        checked_pairs[k] = v
     return checked_pairs
 
 
