@@ -145,7 +145,7 @@ sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd6
 
 #### Automated Install
 
-There is a script file to install the Python dependencies, which is here: `scripts/installation.sh`, this may be extended in the future to include other, non-Python dependencies.
+There is a script file to install the Python dependencies, which is here: `scripts/_install.sh`, this may be extended in the future to include other, non-Python dependencies. To run this, do `. ./_install.sh && _install`.
 
 #### Manual Install
 
