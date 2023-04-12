@@ -104,7 +104,7 @@ def fetch_logs_from_s3(bucket_name: str, file_key: str, s3_client) -> list[dict]
     )
     file_lines = filter(bool, data.split("\n"))  # Newline delimited json
     parsed_lines = map(json.loads, file_lines)
-    if file_key.startswith("error"):
+    if file_key.startswith("error") or file_key.startswith("fixed"):
         _grouped_log_events = map(_get_logs_from_error_event, parsed_lines)
         parsed_lines = chain.from_iterable(_grouped_log_events)  # Flatten list of lists
 
@@ -273,13 +273,15 @@ def validate(local_path: str):
         return FAILED_VALIDATION
 
 
-@log("Copied {bucket_name}/{file_key} to {bucket_name}/fixed/{file_key}")
+@log("Copied {bucket_name}/{file_key} to {bucket_name}/{__result__}")
 def _copy_object(s3_client, bucket_name: str, file_key: str):
+    new_key = file_key.replace("errors/", "fixed/")
     s3_client.copy_object(
         Bucket=bucket_name,
-        Key=f"fixed/{file_key}",
+        Key=new_key,
         CopySource=f"{bucket_name}/{file_key}",
     )
+    return new_key
 
 
 @log("Deleted {bucket_name}/{file_key}")
