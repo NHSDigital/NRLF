@@ -19,17 +19,16 @@ def test_parsing_body_from_event(event, expected_body):
 
 
 @pytest.mark.parametrize(
-    "event",
+    ["event", "error_message"],
     [
-        make_aws_event(body=None),
-        make_aws_event(body=12345),
-        make_aws_event(body="12345"),
-        make_aws_event(body=True),
+        [make_aws_event(body="12345"), "Body is not expected json type"],
+        [make_aws_event(body="null"), "Body is not expected json type"],
+        [make_aws_event(body="true"), "Body is not expected json type"],
     ],
 )
-def test_parsing_body_from_event_errors(event):
+def test_parsing_body_from_event_errors(event, error_message):
     with pytest.raises(RequestValidationError) as e:
         event_model = APIGatewayProxyEventModel(**event)
         fetch_body_from_event(event_model)
-    assert str(e.value) == "Body is not valid json"
+    assert str(e.value) == error_message
     assert e.type in NRLF_TO_SPINE_4XX_ERROR

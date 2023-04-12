@@ -1,6 +1,7 @@
 import json
 
 from behave.runner import Context
+from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.strict_model import Bundle
 
 from feature_tests.common.constants import FhirType
@@ -31,7 +32,7 @@ def the_response_is_the_template_with_values(
         rendered = rendered.replace("<identifier>", id)
 
     actual = test_config.response.dict
-    expected = json.loads(rendered)
+    expected = json_loads(rendered)
 
     assert actual == expected, json.dumps(
         {
@@ -61,7 +62,7 @@ def the_response_contains_the_template_with_values(
     rendered_template = template.render(
         table=context.table, fhir_type=FhirType.DocumentReference
     )
-    fhir_json = json.loads(rendered_template)
+    fhir_json = json_loads(rendered_template)
     assert fhir_json in document_references, document_references
 
 
@@ -77,7 +78,7 @@ def the_response_contains_the_template_with_values(context: Context):
 def response_contains_correct_policy(context: Context, template_name: str):
     test_config: TestConfig = context.test_config
     template = test_config.templates[template_name]
-    template_policy = json.loads(template.render(table=context.table))
+    template_policy = json_loads(template.render(table=context.table))
     response = test_config.response.dict
 
     # principalId is generated from the transaction id, so don't test this

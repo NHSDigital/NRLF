@@ -7,6 +7,7 @@ from nrlf.core.errors import (
     AuthenticationError,
     DocumentReferenceValidationError,
     FhirValidationError,
+    DuplicateKeyError,
     InvalidTupleError,
 )
 from nrlf.legacy.constants import NHS_NUMBER_SYSTEM_URL
@@ -80,7 +81,7 @@ def requesting_application_is_not_authorised(
 
 def validate_document_reference_string(fhir_json: str):
     try:
-        DocumentReference(**json.loads(fhir_json))
+        DocumentReference(**json_loads(fhir_json))
     except (ValidationError, ValueError):
         raise DocumentReferenceValidationError(
             "There was a problem retrieving the document pointer"
@@ -107,3 +108,16 @@ def validate_type_system(type: RequestQueryType, pointer_types: list[str]):
 def validate_subject_identifier_system(subject_identifier: Identifier):
     if subject_identifier.system != NHS_NUMBER_SYSTEM_URL:
         raise FhirValidationError("Input FHIR JSON has an invalid subject:identifier")
+    
+def dict_raise_on_duplicates(list_of_pairs):
+    checked_pairs = {}
+    for k, v in list_of_pairs:
+        if k in checked_pairs:
+            raise DuplicateKeyError("Duplicate key: %r" % (k,))
+        else:
+            checked_pairs[k] = v
+    return checked_pairs
+
+
+def json_loads(json_string):
+    return json.loads(json_string, object_pairs_hook=dict_raise_on_duplicates)

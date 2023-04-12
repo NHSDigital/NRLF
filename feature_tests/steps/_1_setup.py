@@ -1,9 +1,8 @@
-import json
-
 from behave import given as behave_given
 from behave.runner import Context
 from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import create_document_pointer_from_fhir_json
+from nrlf.core.validators import json_loads
 
 from feature_tests.common.config_setup import register_application, request_setup
 from feature_tests.common.constants import DEFAULT_VERSION, WITH_WITHOUT_ANY, FhirType
@@ -75,7 +74,7 @@ def given_document_pointer_exists(context: Context, template_name: str):
         context.table, fhir_type=FhirType.DocumentReference
     )
     core_model = create_document_pointer_from_fhir_json(
-        fhir_json=json.loads(rendered_template), api_version=int(DEFAULT_VERSION)
+        fhir_json=json_loads(rendered_template), api_version=int(DEFAULT_VERSION)
     )
     test_config.repositories[DocumentPointer].create(core_model)
 
@@ -99,7 +98,7 @@ def given_document_pointer_exists(context: Context, count: int, template_name: s
             context.table, fhir_type=FhirType.DocumentReference
         )
         core_model = create_document_pointer_from_fhir_json(
-            fhir_json=json.loads(rendered_template), api_version=int(DEFAULT_VERSION)
+            fhir_json=json_loads(rendered_template), api_version=int(DEFAULT_VERSION)
         )
         test_config.repositories[DocumentPointer].create(core_model)
         documents_created += 1
