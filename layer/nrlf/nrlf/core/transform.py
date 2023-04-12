@@ -20,10 +20,7 @@ from nrlf.core.errors import (
     RequestValidationError,
 )
 from nrlf.core.model import DocumentPointer, PaginatedResponse
-from nrlf.core.validators import (
-    validate_fhir_model_for_required_fields,
-    validate_subject_identifier_system,
-)
+from nrlf.core.validators import validate_subject_identifier_system
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
 from nrlf.legacy.model import LegacyDocumentPointer
 from nrlf.producer.fhir.r4.model import Bundle, BundleEntry, DocumentReference, Meta
@@ -155,8 +152,6 @@ def create_document_pointer_from_fhir_json(
         json=fhir_json, raise_on_discovery=True
     )
     fhir_model = create_fhir_model_from_fhir_json(fhir_json=stripped_fhir_json)
-    validate_fhir_model_for_required_fields(fhir_model)
-    validate_subject_identifier_system(subject_identifier=fhir_model.subject.identifier)
     core_model = DocumentPointer(
         id=fhir_model.id,
         nhs_number=fhir_model.subject.identifier.value,
@@ -179,6 +174,9 @@ def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference
         output_fhir_json=fhir_strict_model.dict(exclude_none=True),
     )
     validate_custodian_system(fhir_strict_model)
+    validate_subject_identifier_system(
+        subject_identifier=fhir_strict_model.subject.identifier
+    )
     _strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
     return fhir_strict_model
 

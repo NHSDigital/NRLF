@@ -8,7 +8,6 @@ from nrlf.core.errors import (
     DocumentReferenceValidationError,
     FhirValidationError,
     InvalidTupleError,
-    RequestValidationError,
 )
 from nrlf.legacy.constants import NHS_NUMBER_SYSTEM_URL
 from nrlf.legacy.model import Identifier
@@ -16,9 +15,6 @@ from nrlf.producer.fhir.r4.model import (
     CodeableConcept,
     DocumentReference,
     RequestQueryType,
-)
-from nrlf.producer.fhir.r4.strict_model import (
-    DocumentReference as StrictDocumentReference,
 )
 from pydantic import ValidationError
 
@@ -89,14 +85,6 @@ def validate_document_reference_string(fhir_json: str):
         raise DocumentReferenceValidationError(
             "There was a problem retrieving the document pointer"
         ) from None
-
-
-def validate_fhir_model_for_required_fields(model: StrictDocumentReference):
-
-    if not model.custodian:
-        raise RequestValidationError(
-            "DocumentReference validation failure - Invalid custodian"
-        )
 
 
 def validate_type_system(type: RequestQueryType, pointer_types: list[str]):
