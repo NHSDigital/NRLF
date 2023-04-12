@@ -6,8 +6,8 @@ function _firehose_help() {
     echo "nrlf firehose <command> [options]"
     echo
     echo "commands:"
-    echo "  help                  - this help screen"
-    echo "  fetch <bucket> <key> <env>  - fetch and parse firehose logs from S3"
+    echo "  help                        - this help screen"
+    echo "  fetch <s3_uri> <env>        - fetch and parse firehose logs from S3"
     echo "  validate <file_path>        - validate firehose logs"
     echo "  resubmit <file_path> <env>  - fetch and parse firehose logs from S3"
     echo
