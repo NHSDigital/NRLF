@@ -28,7 +28,7 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
 
 ## Setup
 
-Before you tackle this guide, there are some more instructions here on the [Developer onboarding guide](https://nhsd-confluence.digital.nhs.uk/pages/viewpage.action?spaceKey=CLP&title=NRLF+-+Developer+Onboarding) in confluence
+Before you tackle this guide, there are some more instructions here on the [Developer onboarding guide](https://nhsd-confluence.digital.nhs.uk/pages/viewpage.action?spaceKey=CLP&title=NRLF+-+Developer+Onboarding) in confluence.
 
 ### 1. Prerequisites
 
@@ -142,6 +142,12 @@ sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd6
 ```
 
 ### 2. Install python dependencies
+
+#### Automated Install
+
+There is a script file to install the Python dependencies, which is here: `scripts/installation.sh`, this may be extended in the future to include other, non-Python dependencies.
+
+#### Manual Install
 
 At the root of the repo, run:
 
