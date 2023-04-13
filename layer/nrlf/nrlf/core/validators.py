@@ -6,16 +6,15 @@ from nrlf.core.constants import ID_SEPARATOR, VALID_SOURCES
 from nrlf.core.errors import (
     AuthenticationError,
     DocumentReferenceValidationError,
+    FhirValidationError,
     InvalidTupleError,
-    RequestValidationError,
 )
+from nrlf.legacy.constants import NHS_NUMBER_SYSTEM_URL
+from nrlf.legacy.model import Identifier
 from nrlf.producer.fhir.r4.model import (
     CodeableConcept,
     DocumentReference,
     RequestQueryType,
-)
-from nrlf.producer.fhir.r4.strict_model import (
-    DocumentReference as StrictDocumentReference,
 )
 from pydantic import ValidationError
 
@@ -88,14 +87,6 @@ def validate_document_reference_string(fhir_json: str):
         ) from None
 
 
-def validate_fhir_model_for_required_fields(model: StrictDocumentReference):
-
-    if not model.custodian:
-        raise RequestValidationError(
-            "DocumentReference validation failure - Invalid custodian"
-        )
-
-
 def validate_type_system(type: RequestQueryType, pointer_types: list[str]):
     if type is not None:
         type_system = type.__root__.split("|", 1)[0]
@@ -111,3 +102,8 @@ def validate_type_system(type: RequestQueryType, pointer_types: list[str]):
         raise AuthenticationError(
             f"The provided system type value - {type_system} - does not match the allowed types"
         )
+
+
+def validate_subject_identifier_system(subject_identifier: Identifier):
+    if subject_identifier.system != NHS_NUMBER_SYSTEM_URL:
+        raise FhirValidationError("Input FHIR JSON has an invalid subject:identifier")
