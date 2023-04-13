@@ -14,7 +14,7 @@ from moto import mock_firehose, mock_s3
 from nrlf.core.firehose.model import CloudwatchMessageType
 from pydantic import ValidationError
 
-from api.producer.firehose.tests.e2e_utils import _make_good_log
+from firehose.processor.tests.e2e_utils import _make_good_log
 from helpers.firehose import (
     DOT_FIREHOSE,
     _CloudwatchLogsData,

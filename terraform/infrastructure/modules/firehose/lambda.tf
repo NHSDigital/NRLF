@@ -1,11 +1,11 @@
 module "lambda" {
-  source     = "../lambda"
-  apitype    = var.apitype
-  name       = "firehose"
-  region     = var.region
-  prefix     = var.prefix
-  layers     = var.layers
-  kms_key_id = var.cloudwatch_kms_arn
+  source      = "../lambda"
+  parent_path = "firehose"
+  name        = "processor"
+  region      = var.region
+  prefix      = var.prefix
+  layers      = var.layers
+  kms_key_id  = var.cloudwatch_kms_arn
   environment_variables = {
     PREFIX      = "${var.prefix}--"
     ENVIRONMENT = var.environment
@@ -13,11 +13,11 @@ module "lambda" {
   additional_policies = [
     aws_iam_policy.lambda.arn,
   ]
-  handler = "api.${var.apitype}.firehose.index.handler"
+  handler = "firehose.processor.index.handler"
 }
 
 resource "aws_iam_policy" "lambda" {
-  name        = "${var.prefix}-firehose-lambda-${var.apitype}"
+  name        = "${var.prefix}-firehose-lambda"
   description = "Read from any log, write to firehose, write to own logs"
   policy = jsonencode({
     Version = "2012-10-17"

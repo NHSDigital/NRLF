@@ -1,5 +1,5 @@
 resource "aws_kinesis_firehose_delivery_stream" "firehose" {
-  name        = "${var.prefix}-cloudwatch-to-splunk-${var.apitype}"
+  name        = "${var.prefix}-cloudwatch-to-splunk"
   destination = "extended_s3"
 
   extended_s3_configuration {

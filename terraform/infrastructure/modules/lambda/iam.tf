@@ -1,5 +1,5 @@
 resource "aws_iam_role" "lambda_role" {
-  name = substr("${var.prefix}--api--${var.apitype}--${var.name}", 0, 64)
+  name = substr("${var.prefix}--${replace(var.parent_path, "/", "--")}--${var.name}", 0, 64)
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
