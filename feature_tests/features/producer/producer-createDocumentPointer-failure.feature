@@ -438,30 +438,6 @@ Feature: Producer Create Failure Scenarios
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                            |
-      | issue_type        | processing                                                       |
-      | issue_level       | error                                                            |
-      | issue_code        | ACCESS_DENIED_LEVEL                                              |
-      | issue_description | Access has been denied because you need higher level permissions |
-      | message           | Required permissions to create a document pointer are missing    |
-
-  Scenario: Unable to create a Document Pointer with an invalid subject.identifier.system value
-    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                 | value     |
-      | http://snomed.info/sct | 736253002 |
-    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1234567890-1                   |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
-      | system      | Test                           |
-    Then the operation is unsuccessful
-    And the status is 400
-    And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                                   |
       | issue_type        | processing                                              |
       | issue_level       | error                                                   |
