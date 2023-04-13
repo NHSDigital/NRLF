@@ -5,6 +5,7 @@ from typing import Union
 
 from more_itertools import map_except
 from nrlf.core.constants import (
+    ALLOWED_RELATES_TO_CODES,
     EMPTY_VALUES,
     ID_SEPARATOR,
     JSON_TYPES,
@@ -23,7 +24,13 @@ from nrlf.core.model import DocumentPointer, PaginatedResponse
 from nrlf.core.validators import validate_subject_identifier_system, json_loads
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
 from nrlf.legacy.model import LegacyDocumentPointer
-from nrlf.producer.fhir.r4.model import Bundle, BundleEntry, DocumentReference, Meta
+from nrlf.producer.fhir.r4.model import (
+    Bundle,
+    BundleEntry,
+    DocumentReference,
+    DocumentReferenceRelatesTo,
+    Meta,
+)
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
@@ -141,6 +148,14 @@ def validate_custodian_system(fhir_strict_model: StrictDocumentReference):
         )
 
 
+def validate_relates_to_code(relates_to: list[DocumentReferenceRelatesTo]):
+    for document_reference_relates_to in relates_to:
+        if document_reference_relates_to.code not in ALLOWED_RELATES_TO_CODES:
+            raise RequestValidationError(
+                f"Provided relatesTo code '{document_reference_relates_to.code}' must be one of {sorted(ALLOWED_RELATES_TO_CODES)}"
+            )
+
+
 def create_document_pointer_from_fhir_json(
     fhir_json: dict,
     api_version: int,
@@ -179,6 +194,8 @@ def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference
     )
 
     _strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
+    if fhir_strict_model.relatesTo:
+        validate_relates_to_code(relates_to=fhir_strict_model.relatesTo)
     return fhir_strict_model
 
 

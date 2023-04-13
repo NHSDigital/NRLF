@@ -24,3 +24,11 @@ NHS_NUMBER_INDEX = "idx_nhs_number_by_id"
 ID_SEPARATOR = "-"
 ODS_SYSTEM = "https://fhir.nhs.uk/Id/ods-organization-code"
 NHS_NUMBER_SYSTEM_URL = "https://fhir.nhs.uk/Id/nhs-number"
+ALLOWED_RELATES_TO_CODES = {
+    "replaces",
+    "transforms",
+    "signs",
+    "appends",
+    "incorporates",
+    "summarizes",
+}
