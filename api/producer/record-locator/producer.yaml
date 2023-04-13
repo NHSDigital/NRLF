@@ -1,9 +1,9 @@
 openapi: 3.0.0
 # This is an OpenAPI Specification (https://swagger.io/specification/)
-# for the National Record Locator Consumer FHIR API
+# for the National Record Locator Producer FHIR API
 # owned by NHS Digital (https://digital.nhs.uk/)
 info:
-  title: National Record Locator Consumer - FHIR API
+  title: National Record Locator Producer - FHIR API
   description: |
     ## Overview
 
@@ -12,12 +12,12 @@ info:
     repository.  Each document pointer is defined using the
     [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) standard.
 
-    ![National Record Locator](https://raw.githubusercontent.com/NHSDigital/nrl-consumer-api/master/specification/nrl.png)
+    ![National Record Locator](https://raw.githubusercontent.com/NHSDigital/nrl-producer-api/master/specification/nrl.png)
 
     Users of the service fall into the categories of:
 
-    * Producers - capable of creating and managing pointers
-    * Consumers - capable of searching and reading pointers
+    * producers - capable of creating and managing pointers
+    * consumers - capable of searching and reading pointers
 
     The service removes the need for organisations to create duplicate copies of information across systems and
     organisations, by enabling access to up-to-date information directly from the source.
@@ -26,50 +26,56 @@ info:
     where relevant patient data is held.
 
     There is a growing list of health and social care organisations authorised to share records using NRL, and presently
-    the pointers are classified into the following types.
+    the pointers are classified into the following types:
 
     * [Mental Health Crisis Plan](http://snomed.info/sct/736253002)
     * [Emergency Healthcare Plan](http://snomed.info/sct/887701000000100)
     * [End of Life Care Coordination Summary](http://snomed.info/sct|861421000000109)
     * [National Early Warning Code 2](http://snomed.info/sct|1363501000000100)
 
-    You can also retrieve booking and referal pointers however you can not currently do this by directly integrating with
+    You can also retrieve booking and referral pointers however you can not currently do this by directly integrating with
     the National Record Locator, you must instead onboard to the [Booking and Referral - FHIR API](https://digital.nhs.uk/developer/api-catalogue/booking-and-referral-fhir)
 
-    ### As a Consumer
+    ### As a producer
 
-    * Search for pointers, restricted to a single Patient at a time
-    * Read a specific pointer
-    * Operations are restricted to document types agreed during the [onboarding](#api-description__onboarding) process
+    Producers can use this API to:
+
+    * create pointers, restricted to document types agreed during the [onboarding](#api-description__onboarding) process
+    * replace your pointers with a newer versions, superseding the old one
+    * update the metadata associated with your pointers
+    * delete pointers
+    * search all pointers you created
+    * read any pointer you created
 
     ### What has changed?
 
-    This service is a replacement for the existing [National Record Locator
-    (NRL)](https://digital.nhs.uk/services/national-record-locator).
+    This service is a replacement for the existing
+    [National Record Locator (NRL)](https://digital.nhs.uk/services/national-record-locator), and has the following
+    changes:
 
-    * Upgraded from FHIR STU3 to R4.
-    * Improved performance and scalability.
-    * Improved onboarding experience.
-    * Authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS.
-    * Greater flexibility, by wider support of the [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) resource.
+    * upgraded from FHIR STU3 to R4.
+    * improved performance and scalability.
+    * improved onboarding experience.
+    * authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS.
+    * greater flexibility, by wider support of the [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) resource.
 
     ### Data availability, timing and quality
 
     Pointers are available to be consumed almost immediately after they have been produced by the provider.
 
+    Pointers are immediately available to authorised providers and consumers after successful creation.
+
     ## Who can use this API
 
-    * This API can only be used where there is a legal basis to do so.
-    * You must have the capability to verify NHS numbers by one of the following mechanisms;
-      *  Full PDS Spine compliant system
-      * Spine Mini Service PDS (SMSP)
-    * You can not use this API to retrieve documents, however you should be prepared to retrive in PDF or Unstructured formats.
-    * In order to retrieve a document, consumers must be able to interact with the National Record Locator, the Spine Secure Proxy (SSP), and the Spine Directory Service (SDS) in order to look up the providers ASID. Currently the SDS is not available via the internet and therefore consumers wishing to use the end to end retrieval process, via the SSP, will still need to have an N3 or HSCN connection.
-    * You can only use this API if your consuming  application is only accessible  using a valid NHS Smartcard for all users or a system that uses an authentication method supported by NHS Identity.
-    * Connecting parties must have an appointed Clinical Safety Officer and undertake a Clinical Safety Assessment prior to going live.
+    This API can only be used where there is a legal basis to do so. Make sure you have a valid use case before you go
+    too far with your development. You must demonstrate you have a valid use case as part of digital onboarding.
 
-    Make sure you have a valid use case before you go too far with your development.
-    To do this, [contact us](https://digital.nhs.uk/developer/help-and-support).
+    You must have the capability to verify NHS numbers by one of the following mechanisms:
+
+      * full PDS Spine compliant system
+      * Spine Mini Service PDS (SMSP)
+
+    Connecting parties must have an appointed Clinical Safety Officer and undertake a Clinical Safety Assessment.
 
     You must do this before you can go live (see ‘[Onboarding](#api-description__onboarding)’ below).
 
@@ -77,15 +83,13 @@ info:
 
     This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses).
 
-    To see our roadmap, or to suggest, comment or vote on features for this API, see our
-    [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=national-record-locator-api).
+    To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=national-record-locator-api).
 
     If you have any other queries, [contact us](https://digital.nhs.uk/developer/help-and-support).
 
     ## Service level
 
-    This API is a bronze service, meaning it is operational and supported only during business hours (8am to 6pm),
-    Monday to Friday, excluding bank holidays.
+    This API is a bronze service, meaning it is operational and supported only during business hours (8am to 6pm), Monday to Friday excluding bank holidays.
 
     For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
 
@@ -93,13 +97,9 @@ info:
 
     This API is [RESTful](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#basic-rest).
 
-    It conforms to the [FHIR](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#fhir)
-    global standard for health care data exchange, specifically to [FHIR R4 (v4.0.1)](https://hl7.org/fhir/r4/), except
-    that it does not support the [capabilities](http://hl7.org/fhir/R4/http.html#capabilities) interaction.
+    It conforms to the [FHIR](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#fhir) global standard for health care data exchange, specifically to [FHIR R4 (v4.0.1)](https://hl7.org/fhir/r4/), except that it does not support the [capabilities](http://hl7.org/fhir/R4/http.html#capabilities) interaction.
 
-    It includes some country-specific FHIR extensions, which conform to
-    [FHIR UK Core](https://digital.nhs.uk/services/fhir-uk-core), specifically
-    [fhir.r4.ukcore.stu1 0.5.1](https://simplifier.net/packages/fhir.r4.ukcore.stu1/0.5.1).
+    It includes some country-specific FHIR extensions, which conform to [FHIR UK Core](https://digital.nhs.uk/services/fhir-uk-core), specifically [fhir.r4.ukcore.stu1 0.5.1](https://simplifier.net/packages/fhir.r4.ukcore.stu1/0.5.1).
 
     You do not need to know much about FHIR to use this API - FHIR APIs are just RESTful APIs that follow specific rules.
 
@@ -112,6 +112,7 @@ info:
     There are [libraries and SDKs available](https://digital.nhs.uk/developer/guides-and-documentation/api-technologies-at-nhs-digital#fhir-libraries-and-sdks) to help with FHIR API integration.
 
     ## Network access
+
     This API is available on the internet and, indirectly, on the [Health and Social Care Network (HSCN)](https://digital.nhs.uk/services/health-and-social-care-network).
 
     For more details see [Network access for APIs](https://digital.nhs.uk/developer/guides-and-documentation/network-access-for-apis).
@@ -124,20 +125,20 @@ info:
 
     ## Environments and testing
 
-    | Environment       | Base URL                                                       |
-    | ----------------- | -------------------------------------------------------------- |
-    | Sandbox           | `https://sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/` |
-    | Integration test  | `https://int.api.service.nhs.uk/nrl-consumer-api/FHIR/R4/`     |
+    | Environment       | Base URL                                                               |
+    | ----------------- | ---------------------------------------------------------------------- |
+    | Sandbox           | `https://sandbox.api.service.nhs.uk/record-locator/producer/FHIR/R4/`     |
+    | Integration test  | `https://int.api.service.nhs.uk/record-locator/producer/FHIR/R4/`         |
 
     ### Sandbox testing
 
     Our [sandbox environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#sandbox-testing):
+
     * is for early developer testing
     * only covers a limited set of scenarios
     * is open access, so does not allow you to test authorisation
 
-    For details of sandbox test scenarios, or to try out the sandbox using our 'Try this API' feature, see the
-    documentation for each endpoint.
+    For details of sandbox test scenarios, or to try out the sandbox using our 'Try this API' feature, see the documentation for each endpoint.
 
     Alternatively, you can try out the sandbox using our Postman collection:
 
@@ -146,19 +147,20 @@ info:
     ### Integration testing
 
     Our [integration test environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing):
+
     * is for formal integration testing
     * includes authorisation
 
-    It also includes ready-to-use test data and scenarios.  For details please [contact us](https://digital.nhs.uk/developer/help-and-support).
+    It also includes ready-to-use test data and scenarios.  For details [contact us](https://digital.nhs.uk/developer/help-and-support).
 
     For more details see [integration testing with our RESTful APIs](https://digital.nhs.uk/developer/guides-and-documentation/testing#integration-testing-with-our-restful-apis).
 
     ## Onboarding
 
     You need to get your software approved by us before it can go live with this API. We call this onboarding. The
-    [on-boarding](#api-description__onboarding) process can sometimes be quite long, so it’s worth planning well ahead.
+    [onboarding](#api-description__onboarding) process can sometimes be quite long, so it’s worth planning well ahead.
 
-    This API uses our online digital [on-boarding](#api-description__onboarding) process.
+    This API uses our online digital [onboarding](#api-description__onboarding) process.
 
     As part of this process, you need to demonstrate that you can manage risks and that your software conforms
     technically with the requirements for this API.
@@ -174,20 +176,125 @@ info:
     url: "https://digital.nhs.uk/developer/help-and-support"
     email: api.management@nhs.net
 servers:
-  - url: https://sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4
+  - url: https://sandbox.api.service.nhs.uk/record-locator/producer/FHIR/R4
     description: Sandbox environment.
-  - url: https://int.api.service.nhs.uk/nrl-consumer-api/FHIR/R4
+  - url: https://int.api.service.nhs.uk/record-locator/producer/FHIR/R4
     description: Integration test environment.
-  - url: https://api.service.nhs.uk/nrl-consumer-api/FHIR/R4
+  - url: https://api.service.nhs.uk/record-locator/producer/FHIR/R4
     description: Production environment.
 paths:
   /DocumentReference:
+    post:
+      summary: Create new, or Supersede existing, document pointers
+      operationId: createDocumentReference
+      responses:
+        "201":
+          description: Create / Supersede successful response
+          $ref: "#/components/responses/Success"
+          content:
+            application/fhir+json;version=1:
+              example:
+                resourceType: OperationOutcome
+                id: 76db24dc-324a-468a-bf02-c06e82279488
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_CREATED
+                          display: Resource created
+                    diagnostics: Resource created
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentReference"
+      parameters:
+        - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
+      description: |
+        Create new pointers, or Supersede existing ones.
+
+        To create a document pointer you must ensure:
+
+        * the body must be a valid [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html)
+        * `id` is a composite of the ODS Code and an identifier that is locally unique to your system.  NRL does not
+          generate globally unique ids, instead relies on producers to provide a locally unique id prefixed with their
+          ODS code, making it globally unique. e.g.
+          ```
+          XYZ-1234567890
+          ```
+        * `subject` MUST be a `Patient` reference using a valid NHS number. e.g.
+          ```
+          "subject": {
+            "identifier": {
+              "system": "https://fhir.nhs.uk/Id/nhs-number",
+              "value": "3495456481"
+            }
+          },
+          ```
+        * `custodian` MUST be an `Organization` reference using a valid ODS code, agreed during [onboarding](#api-description__onboarding). e.g.
+          ```
+          "custodian": {
+            "identifier": {
+              "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+              "value": "Y05868"
+            }
+          }
+          ```
+        * `type` MUST match one of the Document Types agreed during [onboarding](#api-description__onboarding). e.g.
+          ```
+          "type": {
+            "coding\": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "1363501000000100",
+                "display": "Royal College of Physicians NEWS2 (National Early Warning Score 2) chart"
+              }
+            ]
+          }
+          ```
+        * `content` MUST have at least one entry.
+        * `content[].format[]` SHOULD indicate the mechanism for accessing documents, e.g.
+          ```
+          "format": [
+            {
+              "code": "ssp",
+              "display": "Spine Secure Proxy"
+            }
+          ]
+          ```
+
+        To supersede existing pointers you must further specify:
+
+        * at least one existing pointer in the `relatesTo` with a `code` of `replaces`.
+          ```
+          [
+            {
+              "code": "replaces",
+              "target": {
+                "type": "DocumentReference",
+                "identifier": {
+                  "value": "XYZ-1234567890"
+                }
+              }
+            }
+          ]
+          ```
+
+        * the following fields MUST match the pointers being superseded:
+          * `subject`
+          * `type`
+
+        This will cause a new pointer to be created and superseded pointers to be deleted.  Multiple documents can
+        be superseded.
     get:
-      summary: Retrieve patient's document pointers (GET)
+      summary: Retrieve document pointers (GET)
       operationId: searchDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
-        - $ref: "#/components/parameters/custodian"
         - $ref: "#/components/parameters/type"
         - $ref: "#/components/parameters/nextPageToken"
         - $ref: "#/components/parameters/odsCode"
@@ -195,7 +302,7 @@ paths:
         - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
-          description: Successful response
+          description: successful response
           content:
             application/fhir+json;version=1:
               schema:
@@ -203,11 +310,86 @@ paths:
               example:
                 resourceType: Bundle
                 type: searchset
-                total: 1
+                total: 2
                 entry:
                   - resource:
                       resourceType: DocumentReference
-                      id: Y05868-1634567890
+                      id: Y05868-1834567891
+                      meta:
+                        profile:
+                          - http://fhir.nhs.net/StructureDefinition/nrls-documentreference-1-0
+                      masterIdentifier:
+                        system: urn:ietf:rfc:3986
+                        value: urn:oid:1.3.6.1.4.1.21367.2004.3.7
+                      identifier:
+                        - system: urn:ietf:rfc:3986
+                          value: urn:oid:1.3.6.1.4.1.21367.2005.3.7.1134
+                      status: current
+                      docStatus: "preliminary "
+                      type:
+                        coding:
+                          - system: http://snomed.info/sct
+                            code: "1363501000000100"
+                            display: Royal College of Physicians NEWS2 (National Early Warning Score 2) chart
+                      category:
+                        - coding:
+                            - system: http://loinc.org
+                              code: 34769-0
+                              display: General medicine Physician attending Note
+                      subject:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/nhs-number
+                          value: "3495456481"
+                      date: "2022-12-22T11:45:41+11:00"
+                      author:
+                        - identifier:
+                            value: Practitioner/A782161SZ
+                      authenticator:
+                        identifier:
+                          value: Organization/Y05868
+                      custodian:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/ods-organization-code
+                          value: Y05868
+                      securityLabel:
+                        - coding:
+                            - system: http://terminology.hl7.org/CodeSystem/v3-Confidentiality
+                              code: V
+                              display: very restricted
+                      content:
+                        - attachment:
+                            contentType: application/pdf
+                            language: en-US
+                            url: https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/EPAACS/PhysicianNote.pdf
+                            creation: "2022-12-22T09:45:41+11:00"
+                          format:
+                            system: urn:oid:1.3.6.1.4.1.19376.1.2.3
+                            code: urn:ihe:pcc:handp:2008
+                            display: History and Physical Specification
+                      context:
+                        encounter:
+                          - identifier:
+                              value: Encounter/3495456481
+                        event:
+                          - coding:
+                              - system: http://snomed.info/sct
+                                code: "445627002"
+                                display: Assessment using adult early warning scoring system
+                        period:
+                          start: "2022-12-20T09:00:41+11:00"
+                          end: "2022-12-20T09:45:41+11:00"
+                        facilityType:
+                          coding:
+                            - system: http://snomed.info/sct
+                              code: "273580000"
+                              display: London hospital pain chart assessment
+                        related:
+                          - identifier:
+                              system: https://fhir.nhs.uk/Id/ods-organization-code
+                              value: ROYAL COLLEGE OF PHYSICIANS OF LONDON
+                  - resource:
+                      resourceType: DocumentReference
+                      id: Y05868-1234567891
                       meta:
                         profile:
                           - http://fhir.nhs.net/StructureDefinition/nrls-documentreference-1-0
@@ -218,134 +400,12 @@ paths:
                         - system: urn:ietf:rfc:3986
                           value: urn:oid:1.3.6.1.4.1.21367.2005.3.7.1234
                       status: current
-                      docStatus: preliminary
-                      type:
-                        coding:
-                          - system: http://snomed.info/sct
-                            code: "736253002"
-                            display: Mental health crisis plan
-                      category:
-                        - coding:
-                            - system: http://loinc.org
-                              code: 34108-1
-                              display: Outpatient Note
-                      subject:
-                        identifier:
-                          system: https://fhir.nhs.uk/Id/nhs-number
-                          value: "4409815415"
-                      date: "2022-12-20T09:45:41+11:00"
-                      author:
-                        - identifier:
-                            value: Practitioner/A985657ZA
-                      authenticator:
-                        identifier:
-                          value: Organization/Y05868
-                      custodian:
-                        identifier:
-                          system: https://fhir.nhs.uk/Id/ods-organization-code
-                          value: Y05868
-                      description: Physical
-                      securityLabel:
-                        - coding:
-                            - system: http://terminology.hl7.org/CodeSystem/v3-Confidentiality
-                              code: V
-                              display: very restricted
-                      content:
-                        - attachment:
-                            contentType: application/pdf
-                            language: en-US
-                            url: https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/EPAACS/MentalHealthCrisisPlan.pdf
-                            hash: 2jmj7l5rSw0yVb/vlWAYkK/YBwk=
-                            title: Physical
-                            creation: "2022-12-20T09:45:41+11:00"
-                          format:
-                            system: urn:oid:1.3.6.1.4.1.19376.1.2.3
-                            code: urn:ihe:pcc:handp:2008
-                            display: History and Physical Specification
-                      context:
-                        encounter:
-                          - identifier:
-                              value: Encounter/4409815415
-                        event:
-                          - coding:
-                              - system: http://snomed.info/sct
-                                code: "305625009"
-                                display: Seen by mental health counselor
-                        period:
-                          start: "2022-12-20T09:00:41+11:00"
-                          end: "2022-12-20T09:45:41+11:00"
-                        facilityType:
-                          coding:
-                            - system: http://snomed.info/sct
-                              code: "390826005"
-                              display: Mental health caregiver support
-                        practiceSetting:
-                          coding:
-                            - system: http://snomed.info/sct
-                              code: "390826005"
-                              display: Mental health caregiver support
-                        sourcePatientInfo:
-                          identifier:
-                            value: Patient/4409815415
-                        related:
-                          - identifier:
-                              system: https://fhir.nhs.uk/Id/ods-organization-code
-                              value: MENTAL HEALTH OUTREACH
-          headers:
-            X-Correlation-Id:
-              $ref: "#/components/headers/CorrelationId"
-            X-Request-Id:
-              $ref: "#/components/headers/RequestId"
-      description: |
-        Retrieve the document pointers for a single patient.  Your request is constrained by the document pointer types
-        agreed during onboarding.  The results can also be filtered to return documents by a given `type` and/or created
-        by a given producer (`custodian`).
-
-        This operation is also available as a http POST, which is the preferred method (see below).
-  /DocumentReference/_search:
-    post:
-      summary: Retrieve patient's document pointers (POST)
-      operationId: searchPostDocumentReference
-      parameters:
-        - $ref: "#/components/parameters/odsCode"
-        - $ref: "#/components/parameters/requestId"
-        - $ref: "#/components/parameters/correlationId"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RequestParams"
-      responses:
-        "200":
-          description: Search successful response
-          content:
-            application/fhir+json;version=1:
-              schema:
-                $ref: "#/components/schemas/Bundle"
-              example:
-                resourceType: Bundle
-                type: searchset
-                total: 1
-                entry:
-                  - resource:
-                      resourceType: DocumentReference
-                      id: Y05868-1234567895
-                      meta:
-                        profile:
-                          - http://fhir.nhs.net/StructureDefinition/nrls-documentreference-1-0
-                      masterIdentifier:
-                        system: urn:ietf:rfc:3986
-                        value: urn:oid:1.3.6.1.4.1.21367.2005.3.9
-                      identifier:
-                        - system: urn:ietf:rfc:3986
-                          value: urn:oid:1.3.6.1.4.1.21367.2005.3.7.1239
-                      status: current
                       docStatus: final
                       type:
                         coding:
                           - system: http://snomed.info/sct
-                            code: "736253002"
-                            display: Mental Health Crisis Plan
+                            code: "861421000000109"
+                            display: End of life care coordination summary
                       category:
                         - coding:
                             - system: http://loinc.org
@@ -354,7 +414,7 @@ paths:
                       subject:
                         identifier:
                           system: https://fhir.nhs.uk/Id/nhs-number
-                          value: "4409815415"
+                          value: "3495456481"
                       date: "2022-12-21T10:45:41+11:00"
                       author:
                         - identifier:
@@ -377,10 +437,10 @@ paths:
                             contentType: application/pdf
                             language: en-US
                             url: https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/EPAACS/EOLSummaryReport.pdf
-                            size: 4000
+                            size: 3654
                             hash: 2jmj7l5rSw0yVb/vlWAYkK/YBwk=
                             title: Physical
-                            creation: "2021-12-21T10:45:41+11:00"
+                            creation: "2022-12-21T10:45:41+11:00"
                           format:
                             system: urn:oid:1.3.6.1.4.1.19376.1.2.3
                             code: urn:ihe:pcc:cm:2008
@@ -388,23 +448,23 @@ paths:
                       context:
                         encounter:
                           - identifier:
-                              value: Encounter/4409815415
+                              value: Encounter/3495456481
                         event:
                           - coding:
                               - system: http://snomed.info/sct
-                                code: "861421000000109"
-                                display: End of life care coordination summary
+                                code: "713058002"
+                                display: End of life care planning
                         period:
                           start: "2022-12-21T09:00:41+11:00"
                           end: "2022-12-21T10:45:41+11:00"
                         facilityType:
                           coding:
                             - system: http://snomed.info/sct
-                              code: "14866005"
-                              display: Hospital outpatient mental health center
+                              code: "73770003"
+                              display: Hospital-based outpatient emergency care center
                         sourcePatientInfo:
                           identifier:
-                            value: Patient/4409815415
+                            value: Patient/3495456481
                         related:
                           - identifier:
                               system: https://fhir.nhs.uk/Id/ods-organization-code
@@ -415,12 +475,211 @@ paths:
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
       description: |
-        Retrieve the document pointers for a single patient.  Your request is constrained by the document pointer types
-        agreed during onboarding.  The results can also be filtered to return documents by a given `type` and/or created
-        by a given `custodian`.
+        Search through document pointers.
+
+        Results are restricted to pointers you created, but can be further filtered by `subject` and `type`.
+
+        Results are limited to 20 records per request, and further records are available by submitting subsequent
+        requests with the `next-page-token` found in the `meta` portion of the response.
+
+        This operation is also available as a http POST, which is the preferred method (see below).
+  /DocumentReference/_search:
+    post:
+      summary: Retrieve document pointers (POST)
+      operationId: searchPostDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestParams"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/Bundle"
+              example:
+                resourceType: Bundle
+                type: searchset
+                total: 2
+                entry:
+                  - resource:
+                      resourceType: DocumentReference
+                      id: Y05868-1834567891
+                      meta:
+                        profile:
+                          - http://fhir.nhs.net/StructureDefinition/nrls-documentreference-1-0
+                      masterIdentifier:
+                        system: urn:ietf:rfc:3986
+                        value: urn:oid:1.3.6.1.4.1.21367.2004.3.7
+                      identifier:
+                        - system: urn:ietf:rfc:3986
+                          value: urn:oid:1.3.6.1.4.1.21367.2005.3.7.1134
+                      status: current
+                      docStatus: "preliminary "
+                      type:
+                        coding:
+                          - system: http://snomed.info/sct
+                            code: "1363501000000100"
+                            display: Royal College of Physicians NEWS2 (National Early Warning Score 2) chart
+                      category:
+                        - coding:
+                            - system: http://loinc.org
+                              code: 34769-0
+                              display: General medicine Physician attending Note
+                      subject:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/nhs-number
+                          value: "3495456481"
+                      date: "2022-12-22T11:45:41+11:00"
+                      author:
+                        - identifier:
+                            value: Practitioner/A782161SZ
+                      authenticator:
+                        identifier:
+                          value: Organization/Y05868
+                      custodian:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/ods-organization-code
+                          value: Y05868
+                      securityLabel:
+                        - coding:
+                            - system: http://terminology.hl7.org/CodeSystem/v3-Confidentiality
+                              code: V
+                              display: very restricted
+                      content:
+                        - attachment:
+                            contentType: application/pdf
+                            language: en-US
+                            url: https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/EPAACS/PhysicianNote.pdf
+                            creation: "2022-12-22T09:45:41+11:00"
+                          format:
+                            system: urn:oid:1.3.6.1.4.1.19376.1.2.3
+                            code: urn:ihe:pcc:handp:2008
+                            display: History and Physical Specification
+                      context:
+                        encounter:
+                          - identifier:
+                              value: Encounter/3495456481
+                        event:
+                          - coding:
+                              - system: http://snomed.info/sct
+                                code: "445627002"
+                                display: Assessment using adult early warning scoring system
+                        period:
+                          start: "2022-12-20T09:00:41+11:00"
+                          end: "2022-12-20T09:45:41+11:00"
+                        facilityType:
+                          coding:
+                            - system: http://snomed.info/sct
+                              code: "273580000"
+                              display: London hospital pain chart assessment
+                        related:
+                          - identifier:
+                              system: https://fhir.nhs.uk/Id/ods-organization-code
+                              value: ROYAL COLLEGE OF PHYSICIANS OF LONDON
+                  - resource:
+                      resourceType: DocumentReference
+                      id: Y05868-1234567891
+                      meta:
+                        profile:
+                          - http://fhir.nhs.net/StructureDefinition/nrls-documentreference-1-0
+                      masterIdentifier:
+                        system: urn:ietf:rfc:3986
+                        value: urn:oid:1.3.6.1.4.1.21367.2005.3.7
+                      identifier:
+                        - system: urn:ietf:rfc:3986
+                          value: urn:oid:1.3.6.1.4.1.21367.2005.3.7.1234
+                      status: current
+                      docStatus: final
+                      type:
+                        coding:
+                          - system: http://snomed.info/sct
+                            code: "861421000000109"
+                            display: End of life care coordination summary
+                      category:
+                        - coding:
+                            - system: http://loinc.org
+                              code: 55112-7
+                              display: Document summary
+                      subject:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/nhs-number
+                          value: "3495456481"
+                      date: "2022-12-21T10:45:41+11:00"
+                      author:
+                        - identifier:
+                            value: Practitioner/A985657ZA
+                      authenticator:
+                        identifier:
+                          value: Organization/Y05868
+                      custodian:
+                        identifier:
+                          system: https://fhir.nhs.uk/Id/ods-organization-code
+                          value: Y05868
+                      description: Physical
+                      securityLabel:
+                        - coding:
+                            - system: http://terminology.hl7.org/CodeSystem/v3-Confidentiality
+                              code: V
+                              display: very restricted
+                      content:
+                        - attachment:
+                            contentType: application/pdf
+                            language: en-US
+                            url: https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/EPAACS/EOLSummaryReport.pdf
+                            size: 3654
+                            hash: 2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+                            title: Physical
+                            creation: "2022-12-21T10:45:41+11:00"
+                          format:
+                            system: urn:oid:1.3.6.1.4.1.19376.1.2.3
+                            code: urn:ihe:pcc:cm:2008
+                            display: Care Management
+                      context:
+                        encounter:
+                          - identifier:
+                              value: Encounter/3495456481
+                        event:
+                          - coding:
+                              - system: http://snomed.info/sct
+                                code: "713058002"
+                                display: End of life care planning
+                        period:
+                          start: "2022-12-21T09:00:41+11:00"
+                          end: "2022-12-21T10:45:41+11:00"
+                        facilityType:
+                          coding:
+                            - system: http://snomed.info/sct
+                              code: "73770003"
+                              display: Hospital-based outpatient emergency care center
+                        sourcePatientInfo:
+                          identifier:
+                            value: Patient/3495456481
+                        related:
+                          - identifier:
+                              system: https://fhir.nhs.uk/Id/ods-organization-code
+                              value: TRAFFORD GENERAL HOSPITAL
+          headers:
+            X-Correlation-Id:
+              $ref: "#/components/headers/CorrelationId"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+      description: |
+        Search through document pointers.
+
+        Results are restricted to pointers you created, but can be further filtered by `subject` and `type`.
+
+        Results are limited to 20 records per request, and further records are available by submitting subsequent
+        requests with the `next-page-token` found in the `meta` portion of the response.
 
         This operation is also available as a http GET for convenience (see above), but POST is preferred for the
-        following reasons.
+        following reasons:
 
         * query string parameters are visible on the network and in logs, and may have privacy implications for consumers.
         * GET operations can be cached by intermediary network infrastructure, such as CDNs, routers and proxies.
@@ -437,7 +696,7 @@ paths:
         - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
-          description: Search successful response
+          description: Successful response
           content:
             application/fhir+json;version=1:
               schema:
@@ -481,7 +740,7 @@ paths:
                   - attachment:
                       contentType: application/pdf
                       language: en-US
-                      url: https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/EPAACS/EmergencyHealthPlan.pdf
+                      url: https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/EPAACS/EmergencyCarPlan.pdf
                       creation: "2022-12-22T09:45:41+11:00"
                     format:
                       system: urn:oid:1.3.6.1.4.1.19376.1.2.3
@@ -515,7 +774,121 @@ paths:
               $ref: "#/components/headers/RequestId"
       description: |
         Read a single document pointer by specifying the `DocumentReference.id`.  Note that you will only be able to
-        retrieve document pointers that have the `type` that was agreed during the [onboarding](#api-description__onboarding) process.
+        retrieve document pointers that have been created by the organisation specified in the `ODS-End-User-Organisation-ODS`
+        header, and agreed during [onboarding](#onbaroding).
+    put:
+      summary: Update a single document pointer
+      operationId: updateDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
+      responses:
+        "200":
+          description: Successful response
+          $ref: "#/components/responses/Success"
+          content:
+            application/fhir+json;version=1:
+              example:
+                resourceType: OperationOutcome
+                id: fc39effb-144c-4342-bdf2-4214f0cb728b
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_UPDATED
+                          display: Resource updated
+                    diagnostics: Resource updated
+        "201":
+          description: Successful response
+          $ref: "#/components/responses/Success"
+          content:
+            application/fhir+json;version=1:
+              example:
+                resourceType: OperationOutcome
+                id: fc39effb-144c-4342-bdf2-4214f0cb728b
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_UPDATED
+                          display: Resource updated
+                    diagnostics: Resource updated
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentReference"
+      description: |
+        Update a single pointer you created.
+
+        Note that the following fields cannot change:
+        * `id`
+        * `subject`
+        * `custodian`
+        * `type`
+
+        Note that unlike NRL STU3 changing the `status` field does NOT delete document pointers.  To delete document
+        pointers use the `DELETE` endpoint.
+    delete:
+      summary: Delete a single document pointer
+      operationId: deleteDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
+      responses:
+        "204":
+          description: Successful response
+          $ref: "#/components/responses/Success"
+          content:
+            application/fhir+json;version=1:
+              example:
+                resourceType: OperationOutcome
+                id: c6113a50-70bf-436e-b417-7c8024d2e8bf
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_REMOVED
+                          display: Resource removed
+                    diagnostics: Resource removed
+        "200":
+          $ref: "#/components/responses/Success"
+          description: Successful response
+          content:
+            application/fhir+json;version=1:
+              example:
+                resourceType: OperationOutcome
+                id: c6113a50-70bf-436e-b417-7c8024d2e8bf
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_REMOVED
+                          display: Resource removed
+                    diagnostics: Resource removed
+      description: |
+        Delete a single document pointer that your created.
 components:
   requestBodies:
     DocumentReference:
@@ -1218,22 +1591,14 @@ components:
       properties:
         subject:identifier:
           $ref: "#/components/schemas/RequestQuerySubject"
-        custodian:identifier:
-          $ref: "#/components/schemas/RequestQueryCustodian"
         type:
           $ref: "#/components/schemas/RequestQueryType"
         next-page-token:
           $ref: "#/components/schemas/NextPageToken"
-      required:
-        - subject:identifier
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
       example: "https://fhir.nhs.uk/Id/nhs-number|4409815415"
-    RequestQueryCustodian:
-      type: string
-      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-organization-code\|(\w+)$
-      example: "https://fhir.nhs.uk/Id/ods-organization-code|Y05868"
     RequestQueryType:
       type: string
       example: "http://snomed.info/sct|736253002"
@@ -1269,7 +1634,6 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
-      required: true
       examples:
         none:
           summary: None
@@ -1283,21 +1647,6 @@ components:
         invalid:
           summary: Unknown
           value: https://fhir.nhs.uk/Id/nhs-number|3495456001
-    custodian:
-      name: custodian:identifier
-      in: query
-      schema:
-        $ref: "#/components/schemas/RequestQueryCustodian"
-      examples:
-        none:
-          summary: None
-          value: ""
-        valid:
-          summary: Valid
-          value: https://fhir.nhs.uk/Id/ods-organization-code|Y05868
-        invalid:
-          summary: Unknown
-          value: https://fhir.nhs.uk/Id/ods-organization-code|XYZ
     type:
       name: type
       in: query
@@ -1324,11 +1673,11 @@ components:
           value: http://snomed.info/sct|410970009
     nextPageToken:
       name: next-page-token
+      in: query
       description: |
         A token that can be sent as either a query parameter or in the post body parameter to retrieve the next set of 20 records.
 
         This token is returned in the meta.tag field.
-      in: query
       schema:
         $ref: "#/components/schemas/NextPageToken"
     odsCode:
@@ -1353,8 +1702,6 @@ components:
         Must be a universally unique identifier (UUID) (ideally version 4).
 
         Mirrored back in a response header.
-
-        If you re-send a failed request, use the same value in this header.
       in: header
       required: false
       schema:
@@ -1372,12 +1719,22 @@ components:
   responses:
     Success:
       description: Success Response
+      headers:
+        X-Correlation-Id:
+          $ref: "#/components/headers/CorrelationId"
+        X-Request-Id:
+          $ref: "#/components/headers/RequestId"
       content:
         application/fhir+json;version=1:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
     Error:
       description: Error Response
+      headers:
+        X-Correlation-Id:
+          $ref: "#/components/headers/CorrelationId"
+        X-Request-Id:
+          $ref: "#/components/headers/RequestId"
       content:
         application/fhir+json;version=1:
           schema:

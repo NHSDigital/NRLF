@@ -1,38 +1,24 @@
 from unittest import mock
 
 import pytest
-from hypothesis import given, settings
-from hypothesis.strategies import (
-    builds,
-    data,
-    dictionaries,
-    integers,
-    just,
-    lists,
-    sampled_from,
-    text,
-    tuples,
-)
-from lambda_utils.logging import LogData, LogTemplate
+from hypothesis import given
+from hypothesis.strategies import data, integers, just, text, tuples
 from nrlf.core.firehose.model import (
+    CONTROL_MESSAGE_TEXT,
     CloudwatchLogsData,
     CloudwatchMessageType,
     FirehoseOutputRecord,
     FirehoseResult,
     FirehoseSubmissionRecord,
 )
-from nrlf.core.firehose.tests.test_firehose_handler import draw_log_event
-from nrlf.core.firehose.utils import dump_json_gzip, encode_logs_as_ndjson
+from nrlf.core.firehose.tests.test_firehose_handler import _cloudwatch_data_strategy
+from nrlf.core.firehose.utils import dump_json_gzip
 from nrlf.core.firehose.validate import (
     MAX_PACKET_SIZE_BYTES,
-    LogValidationError,
     NoSpaceLeftInCurrentEventPacket,
     RecordTooLargeForKinesis,
     RecordTooLargeForKinesisButCanBeSplit,
-    _all_logs_are_valid,
     _determine_outcome_given_record_size,
-    _validate_cloudwatch_logs_data,
-    _validate_log,
     _validate_record_size,
     process_cloudwatch_record,
 )
@@ -107,54 +93,11 @@ def test__validate_record_size_passes(data, number_of_logs):
     )
 
 
-@given(
-    log=builds(
-        LogTemplate,
-        data=just(LogData(function="foo.bar", inputs={"foo": "bar"}, result="foo")),
-    )
-)
-def test__validate_log(log: LogTemplate):
-    _validate_log(log=log.dict())
-
-
-@given(
-    log=builds(
-        LogTemplate,
-        data=just(LogData(function="foo.bar", inputs={"foo": "bar"}, result="foo")),
-    ),
-    extra_fields=dictionaries(keys=text(min_size=1), values=text(), min_size=1),
-)
-def test__validate_log_fails_with_extra_fields(
-    log: LogTemplate, extra_fields: dict[str, str]
-):
-    with pytest.raises(LogValidationError):
-        _validate_log(log={**log.dict(), **extra_fields})
-
-
-@given(
-    bad_fields=dictionaries(keys=text(min_size=1), values=text(), min_size=0),
-)
-def test__validate_log_fails_with_bad_log(bad_fields: dict[str, str]):
-    with pytest.raises(LogValidationError):
-        _validate_log(log=bad_fields)
-
-
 def _raise(ex):
     raise ex
 
 
 @pytest.mark.slow
-@settings(deadline=500)  # In milliseconds
-@given(good_logs=lists(just(True)), bad_logs=lists(just(False), min_size=1))
-@mock.patch("nrlf.core.firehose.validate._validate_log")
-def test__all_logs_are_valid(mocked__validate_log, good_logs, bad_logs):
-    mocked__validate_log.side_effect = (
-        lambda log, logger: _raise(LogValidationError) if not log else None
-    )
-
-    assert _all_logs_are_valid(logs=good_logs + bad_logs, logger=None) is False
-
-
 @pytest.mark.parametrize(
     ["_validate_record_size_raises", "expected_outcome_record"],
     [
@@ -208,11 +151,8 @@ def test__all_logs_are_valid(mocked__validate_log, good_logs, bad_logs):
 )
 @mock.patch("nrlf.core.firehose.validate._validate_record_size")
 @given(
-    builds(
-        CloudwatchLogsData,
-        logEvents=lists(draw_log_event(), min_size=2),
-        messageType=just(CloudwatchMessageType.NORMAL_LOG_EVENT),
-        record_id=just("record_id"),
+    cloudwatch_data=_cloudwatch_data_strategy(
+        CloudwatchMessageType.DATA_MESSAGE, record_id=just("record_id")
     )
 )
 def test__determine_outcome_given_record_size(
@@ -235,94 +175,31 @@ def test__determine_outcome_given_record_size(
     assert outcome_record == expected_outcome_record
 
 
-@mock.patch("nrlf.core.firehose.validate._all_logs_are_valid", return_value=False)
-@given(
-    cloudwatch_data=builds(
-        CloudwatchLogsData,
-        logEvents=lists(draw_log_event(), min_size=2),
-    ),
-    partition_key=text(),
-    total_event_size_bytes=integers(),
-)
-def test__validate_cloudwatch_logs_record_with_invalid_records(
-    cloudwatch_data: CloudwatchLogsData,
-    partition_key: str,
-    total_event_size_bytes: int,
-    mocked__all_logs_are_valid,
-):
-    outcome_record = _validate_cloudwatch_logs_data(
-        cloudwatch_data=cloudwatch_data,
-        partition_key=partition_key,
-        total_event_size_bytes=total_event_size_bytes,
-    )
-
-    assert outcome_record == FirehoseOutputRecord(
-        record_id=cloudwatch_data.record_id,
-        result=FirehoseResult.PROCESSING_FAILED,
-    )
-
-
-@mock.patch("nrlf.core.firehose.validate._all_logs_are_valid", return_value=True)
-@given(
-    cloudwatch_data=builds(
-        CloudwatchLogsData,
-        logEvents=lists(draw_log_event(), min_size=2),
-    ),
-    partition_key=text(),
-)
-def test__validate_cloudwatch_logs_record_without_invalid_records(
-    cloudwatch_data: CloudwatchLogsData,
-    partition_key: str,
-    mocked__all_logs_are_valid,
-):
-    outcome_record = _validate_cloudwatch_logs_data(
-        cloudwatch_data=cloudwatch_data,
-        partition_key=partition_key,
-        total_event_size_bytes=0,
-    )
-
-    assert outcome_record == FirehoseOutputRecord(
-        record_id=cloudwatch_data.record_id,
-        result=FirehoseResult.OK,
-        data=encode_logs_as_ndjson(logs=cloudwatch_data.logs),
-    )
-
-
-@mock.patch(
-    "nrlf.core.firehose.validate._validate_cloudwatch_logs_data", return_value="foo"
-)
-@given(
-    cloudwatch_data=builds(
-        CloudwatchLogsData,
-        messageType=just(CloudwatchMessageType.NORMAL_LOG_EVENT),
-        logEvents=lists(draw_log_event(), min_size=2),
-    ),
-    partition_key=text(),
-    total_event_size_bytes=integers(),
-)
+@mock.patch("nrlf.core.firehose.validate._determine_outcome_given_record_size")
 def test_process_cloudwatch_record_normal_event(
-    cloudwatch_data: CloudwatchLogsData,
-    partition_key: str,
-    total_event_size_bytes: int,
-    mocked__validate_cloudwatch_logs_data,
+    mocked__determine_outcome_given_record_size,
 ):
+    cloudwatch_data = mock.Mock()
+    cloudwatch_data.message_type = CloudwatchMessageType.DATA_MESSAGE
+
+    return_value = mock.Mock()
+    mocked__determine_outcome_given_record_size.return_value = return_value
     assert (
         process_cloudwatch_record(
             cloudwatch_data=cloudwatch_data,
-            partition_key=partition_key,
-            total_event_size_bytes=total_event_size_bytes,
+            partition_key=None,
+            total_event_size_bytes=None,
         )
-        == "foo"
+        is return_value
     )
 
 
 @given(
-    cloudwatch_data=builds(
-        CloudwatchLogsData,
-        messageType=sampled_from(CloudwatchMessageType).filter(
-            lambda x: x is not CloudwatchMessageType.NORMAL_LOG_EVENT
-        ),
-        logEvents=lists(draw_log_event(), min_size=2),
+    cloudwatch_data=_cloudwatch_data_strategy(
+        message_type=CloudwatchMessageType.CONTROL_MESSAGE,
+        message=just(CONTROL_MESSAGE_TEXT),
+        min_size=1,
+        max_size=1,
     ),
     partition_key=text(),
     total_event_size_bytes=integers(),

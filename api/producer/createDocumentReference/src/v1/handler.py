@@ -5,10 +5,16 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.logging import log_action
+from nrlf.core.common_producer_steps import invalid_producer_for_delete
 from nrlf.core.common_steps import parse_headers
-from nrlf.core.errors import AuthenticationError, ItemNotFound, RequestValidationError
+from nrlf.core.errors import (
+    ItemNotFound,
+    ProducerValidationError,
+    RequestValidationError,
+    SupersedeValidationError,
+)
+from nrlf.core.event_parsing import fetch_body_from_event
 from nrlf.core.model import DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
@@ -17,7 +23,6 @@ from nrlf.core.transform import (
     create_document_pointer_from_fhir_json,
     create_fhir_model_from_fhir_json,
 )
-from nrlf.core.validators import generate_producer_id
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
@@ -32,25 +37,6 @@ class LogReference(Enum):
     CREATE003 = "Validating producer permissions"
     CREATE004 = "Determining whether document reference will supersede"
     CREATE005 = "Saving document pointer to db"
-
-
-def _invalid_producer_for_create(
-    organisation_code,
-    core_model: DocumentPointer,
-    pointer_types,
-):
-    return (
-        (organisation_code != core_model.producer_id.__root__)
-        or (organisation_code != core_model.custodian.__root__)
-        or (core_model.type.__root__ not in pointer_types)
-    )
-
-
-def _invalid_producer_for_delete(organisation_code, delete_item_id: str):
-    producer_id = generate_producer_id(id=delete_item_id, producer_id=None)
-    if not organisation_code == producer_id:
-        return True
-    return False
 
 
 def _invalid_subject_identifier(
@@ -91,11 +77,14 @@ def mark_as_supersede(
         fhir_json=data["body"]
     )
     output = {}
-    if fhir_model.relatesTo:
+
+    document_relationships = fhir_model.relatesTo
+
+    if document_relationships:
         output["delete_item_ids"] = [
-            relatesTo.target.identifier.value
-            for relatesTo in fhir_model.relatesTo
-            if relatesTo.code == "replaces"
+            relationship.target.identifier.value
+            for relationship in document_relationships
+            if relationship.code == "replaces"
         ]
 
     return PipelineData(**data, **output)
@@ -112,21 +101,28 @@ def validate_producer_permissions(
     core_model: DocumentPointer = data["core_model"]
     organisation_code = data["organisation_code"]
     delete_item_ids: list[str] = data.get("delete_item_ids", [])
+    pointer_types = data["pointer_types"]
 
-    if _invalid_producer_for_create(
-        organisation_code=organisation_code,
-        core_model=core_model,
-        pointer_types=data["pointer_types"],
-    ):
-        raise AuthenticationError(
-            "Required permissions to create a document pointer are missing"
+    if organisation_code != core_model.producer_id.__root__:
+        raise ProducerValidationError(
+            "The id of the provided document pointer does not include the expected organisation code for this app"
         )
 
-    __cannot_delete = partial(_invalid_producer_for_delete, organisation_code)
+    if organisation_code != core_model.custodian.__root__:
+        raise ProducerValidationError(
+            "The custodian of the provided document pointer does not match the expected organisation code for this app"
+        )
+
+    if core_model.type.__root__ not in pointer_types:
+        raise ProducerValidationError(
+            "The type of the provided document pointer is not in the list of allowed types for this app"
+        )
+
+    __cannot_delete = partial(invalid_producer_for_delete, organisation_code)
 
     if any(map(__cannot_delete, delete_item_ids)):
-        raise AuthenticationError(
-            "Required permissions to delete a document pointer are missing"
+        raise RequestValidationError(
+            "At least one document pointer cannot be deleted because it belongs to another organisation"
         )
 
     return PipelineData(**data)
@@ -167,7 +163,7 @@ def _validate_ok_to_supersede(
             delete_pk
         )
     except (ItemNotFound):
-        raise RequestValidationError(
+        raise SupersedeValidationError(
             "Validation failure - relatesTo target document does not exist"
         )
 
@@ -175,7 +171,7 @@ def _validate_ok_to_supersede(
         source_document_pointer=source_document_pointer,
         target_document_pointer=document_to_delete,
     ):
-        raise RequestValidationError(
+        raise SupersedeValidationError(
             "Validation failure - relatesTo target document nhs number does not match the request"
         )
 
@@ -183,7 +179,7 @@ def _validate_ok_to_supersede(
         source_document_pointer=source_document_pointer,
         target_document_pointer=document_to_delete,
     ):
-        raise RequestValidationError(
+        raise SupersedeValidationError(
             "Validation failure - relatesTo target document type does not match the request"
         )
 

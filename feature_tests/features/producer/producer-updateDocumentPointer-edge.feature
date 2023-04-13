@@ -8,7 +8,7 @@ Feature: Producer Update Success scenarios
         "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },
@@ -51,7 +51,7 @@ Feature: Producer Update Success scenarios
         "id": "8FW23-1234567890",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "8FW23"
           }
         },
@@ -82,7 +82,7 @@ Feature: Producer Update Success scenarios
         "id": "8FW23-1234567890",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "8FW23"
           }
         },
@@ -169,14 +169,14 @@ Feature: Producer Update Success scenarios
       | description | Therapy Summary Document for Patient 9278693472 |
       | url         | https://example.org/different-doc.pdf           |
     Then the operation is unsuccessful
-    And the status is 404
+    And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                   |
-      | issue_type        | processing              |
-      | issue_level       | error                   |
-      | issue_code        | RESOURCE_NOT_FOUND      |
-      | issue_description | Resource not found      |
-      | message           | Item could not be found |
+      | property          | value                                                           |
+      | issue_type        | processing                                                      |
+      | issue_level       | error                                                           |
+      | issue_code        | VALIDATION_ERROR                                                |
+      | issue_description | A parameter or value has resulted in a validation error         |
+      | message           | Existing document id does not match the document id in the body |
 
   Scenario: Requesting producer provides empty array
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
@@ -200,7 +200,7 @@ Feature: Producer Update Success scenarios
       | issue_level       | error                                                   |
       | issue_code        | VALIDATION_ERROR                                        |
       | issue_description | A parameter or value has resulted in a validation error |
-      | message           | Empty field 'coding' is not valid FHIR                  |
+      | message           | Empty value '[]' at 'type.coding' is not valid FHIR     |
 
   Scenario: Requesting producer provides empty object
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
@@ -219,9 +219,9 @@ Feature: Producer Update Success scenarios
       | property | value |
     Then the operation is unsuccessful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                   |
-      | issue_type        | processing                                              |
-      | issue_level       | error                                                   |
-      | issue_code        | VALIDATION_ERROR                                        |
-      | issue_description | A parameter or value has resulted in a validation error |
-      | message           | Empty field 'url' is not valid FHIR                     |
+      | property          | value                                                          |
+      | issue_type        | processing                                                     |
+      | issue_level       | error                                                          |
+      | issue_code        | VALIDATION_ERROR                                               |
+      | issue_description | A parameter or value has resulted in a validation error        |
+      | message           | Empty value '' at 'content.0.attachment.url' is not valid FHIR |

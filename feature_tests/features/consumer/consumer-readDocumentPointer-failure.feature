@@ -8,7 +8,7 @@ Feature: Consumer Read Failure scenarios
         "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },
@@ -81,6 +81,7 @@ Feature: Consumer Read Failure scenarios
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23-1234567890"
     Then the operation is unsuccessful
+    And the status is 404
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                   |
       | issue_type        | processing              |
@@ -96,6 +97,7 @@ Feature: Consumer Read Failure scenarios
       | http://snomed.info/sct | 736253002 |
     When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23-1234567890"
     Then the operation is unsuccessful
+    And the status is 404
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                   |
       | issue_type        | processing              |

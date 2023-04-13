@@ -13,7 +13,8 @@ resource "aws_api_gateway_deployment" "api_gateway_deployment" {
   rest_api_id = aws_api_gateway_rest_api.api_gateway_rest_api.id
 
   triggers = {
-    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.api_gateway_rest_api.body))
+    redeployment    = sha1(jsonencode(aws_api_gateway_rest_api.api_gateway_rest_api.body))
+    resource_change = "${md5(file("${path.module}/api_gateway.tf"))}"
   }
 
   lifecycle {
@@ -79,7 +80,7 @@ resource "aws_api_gateway_gateway_response" "api_access_denied" {
       issue : [{
         severity : "error",
         code : "processing",
-        diagnostics : "Forbidden"
+        diagnostics : "$context.authorizer.error"
       }]
     })
   }

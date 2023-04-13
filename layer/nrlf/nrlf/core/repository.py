@@ -1,9 +1,10 @@
 from enum import Enum
 from functools import reduce, wraps
-from typing import TypeVar, Union
+from typing import Iterator, TypeVar, Union
 
 from botocore.exceptions import ClientError
 from lambda_utils.logging import log_action
+from nrlf.consumer.fhir.r4.model import RequestQueryCustodian
 from nrlf.core.errors import (
     DuplicateError,
     DynamoDbError,
@@ -17,7 +18,7 @@ from nrlf.core.transform import (
     transform_next_page_token_to_start_key,
 )
 from nrlf.core.types import DynamoDbClient, DynamoDbResponse
-from nrlf.producer.fhir.r4.model import RequestQueryCustodian, RequestQueryType
+from nrlf.producer.fhir.r4.model import RequestQueryType
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError
 
@@ -48,7 +49,7 @@ class CorruptDocumentPointer(Exception):
 def _strip_none(d: dict) -> dict:
     if d is None:
         return None
-    return {k: v for (k, v) in d.items() if f"{v}" != "None"}
+    return {k: v for (k, v) in d.items() if v is not None}
 
 
 def custodian_filter(custodian_identifier: RequestQueryCustodian):
@@ -81,24 +82,6 @@ def _handle_dynamodb_errors(
     return wrapper
 
 
-def _valid_results(
-    item_type: type[DynamoDbModel], results: list[dict]
-) -> list[DynamoDbModel]:
-    """
-    returns only valid results for the specified type[DynamoDbModel]
-    """
-    valid_results = []
-    for item in results:
-        try:
-            valid_item = _is_record_valid(item_type, item)
-        except (CorruptDocumentPointer):
-            pass
-        else:
-            valid_results.append(valid_item)
-
-    return valid_results
-
-
 @log_action(log_reference=LogReference.REPOSITORY001, log_fields=["item"])
 def _is_record_valid(item_type: type[DynamoDbModel], item: dict):
     try:
@@ -111,7 +94,7 @@ def _is_record_valid(item_type: type[DynamoDbModel], item: dict):
 
 def _keys(pk, sk, pk_name="pk", sk_name="sk"):
     keys = {pk_name: {"S": f"{pk}"}}
-    if f"{sk}" != "None":
+    if sk is not None:
         keys[sk_name] = {"S": f"{sk}"}
     return keys
 
@@ -134,7 +117,7 @@ def _encode(v: any) -> dict:
 
     e.g. 123 -> { "N": 123 }
     """
-    k = DYNAMODB_ENCODE_LOOKUP.get(type(v))
+    k = DYNAMODB_ENCODE_LOOKUP[type(v)]
     if k == "NULL":
         return {"NULL": True}
     if k == "M":
@@ -166,7 +149,7 @@ def _decode_number(node) -> Union[int, float]:
 
 
 DYNAMODB_DECODE_LOOKUP = {
-    "NULL": lambda node: None,
+    "NULL": lambda _: None,
     "B": lambda node: bool(node["B"]),
     "S": lambda node: str(node["S"]),
     "N": _decode_number,
@@ -247,21 +230,20 @@ def _expression_attribute_values(d: dict) -> dict:
     )
 
 
-def _key_and_filter_clause(keys: dict, filter: dict = None):
-    keys = _strip_none(keys)
+def _key_and_filter_clause(key_conditions: dict, filter: dict = None):
     filter = _strip_none(filter)
-    if filter is None or filter == {}:
+    if not filter:
         return {
-            "KeyConditionExpression": _key_condition_expression(keys),
-            "ExpressionAttributeValues": _expression_attribute_values(keys),
+            "KeyConditionExpression": _key_condition_expression(key_conditions),
+            "ExpressionAttributeValues": _expression_attribute_values(key_conditions),
         }
     else:
         return {
-            "KeyConditionExpression": _key_condition_expression(keys),
+            "KeyConditionExpression": _key_condition_expression(key_conditions),
             "FilterExpression": _filter_expression(filter),
             "ExpressionAttributeNames": _expression_attribute_names(filter),
             "ExpressionAttributeValues": {
-                **_expression_attribute_values(keys),
+                **_expression_attribute_values(key_conditions),
                 **_expression_attribute_values(filter),
             },
         }
@@ -322,11 +304,9 @@ class Repository:
         """
         Returns a single record from the database
         """
-        clause = _key_and_filter_clause({"pk": f"{pk}", "sk": f"{sk or pk}"}, filter)
-        response = self.dynamodb.query(
-            TableName=self.table_name,
-            **clause,
-        )
+        key_conditions = {"pk": pk, "sk": sk or pk}
+        clause = _key_and_filter_clause(key_conditions=key_conditions, filter=filter)
+        response = self.dynamodb.query(TableName=self.table_name, **clause)
         try:
             (item,) = response["Items"]
         except (KeyError, ValueError):
@@ -347,43 +327,91 @@ class Repository:
         sk: str = None,
         limit: int = PAGE_ITEM_LIMIT,
         exclusive_start_key: str = None,
+        logger=None,
         **filter,
     ) -> PaginatedResponse:
         """
         Do not call this method directly, instead use `query` or `query_gsi_#` instead.
         """
-        clause = _key_and_filter_clause(
-            {pk_name: f"{pk}"} if sk is None else {pk_name: f"{pk}", sk_name: f"{sk}"},
-            filter,
-        )
+        key_conditions = {pk_name: pk}
+        if sk is not None:
+            key_conditions[sk_name] = sk
+
+        index_keys = list(set(("pk", "sk", pk_name)))  # dedupe if pk == pk_name
+        if sk_name is not None:
+            index_keys.append(sk_name)
+
+        clause = _key_and_filter_clause(key_conditions=key_conditions, filter=filter)
+        query_kwargs = {"TableName": self.table_name, "Limit": limit, **clause}
+        if index_name is not None:
+            query_kwargs["IndexName"] = index_name
 
         if exclusive_start_key is not None:
             exclusive_start_key = transform_next_page_token_to_start_key(
                 exclusive_start_key
             )
 
-        args = _strip_none(
-            {
-                "TableName": self.table_name,
-                "IndexName": index_name,
-                "Limit": limit,
-                "ExclusiveStartKey": exclusive_start_key,
-                **clause,
-            }
-        )
+        items, last_evaluated_key = [], None
+        for item in self._scroll(
+            index_keys=index_keys,
+            query_kwargs=query_kwargs,
+            exclusive_start_key=exclusive_start_key,
+            logger=logger,
+        ):
+            if item is not None:  # means we haven't reached the final result yet
+                if len(items) == PAGE_ITEM_LIMIT:
+                    # never evaluated on the final page
+                    last_item = items[-1]
+                    last_evaluated_key = {
+                        idx: getattr(last_item, idx).dict() for idx in index_keys
+                    }
+                    break
+                items.append(item)
 
-        results = self.dynamodb.query(**args)
-        document_pointers = _valid_results(self.item_type, results["Items"])
-
-        last_evaluated_key = results.get("LastEvaluatedKey")
         if last_evaluated_key is not None:
             last_evaluated_key = transform_evaluation_key_to_next_page_token(
                 last_evaluated_key
             )
 
         return PaginatedResponse(
-            last_evaluated_key=last_evaluated_key, document_pointers=document_pointers
+            last_evaluated_key=last_evaluated_key, document_pointers=items
         )
+
+    def _scroll(
+        self,
+        index_keys: str,
+        query_kwargs: dict,
+        exclusive_start_key: str,
+        logger=None,
+    ) -> Iterator[Union[DynamoDbModel, None]]:
+        query_kwargs.pop("ExclusiveStartKey", None)
+        if exclusive_start_key is not None:
+            query_kwargs["ExclusiveStartKey"] = exclusive_start_key
+        results = self.dynamodb.query(**query_kwargs)
+
+        # Yield all valid items
+        items: list[dict] = results["Items"]
+        for item in items:
+            try:
+                _item = _is_record_valid(
+                    item_type=self.item_type, item=item, logger=logger
+                )
+            except (CorruptDocumentPointer):
+                continue
+            yield _item
+
+        # Keep scrolling while there is still a LastEvaluatedKey
+        last_evaluated_key = results.get("LastEvaluatedKey")
+        if last_evaluated_key is not None:
+            yield from self._scroll(
+                index_keys=index_keys,
+                query_kwargs=query_kwargs,
+                exclusive_start_key=last_evaluated_key,
+                logger=logger,
+            )
+        # Our own internal definition of there being no more results
+        else:
+            yield None
 
     def query(
         self,

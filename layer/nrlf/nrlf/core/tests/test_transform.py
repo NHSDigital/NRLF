@@ -1,13 +1,25 @@
 import pytest
-from nrlf.core.errors import FhirValidationError, NextPageTokenValidationError
+from nrlf.core.constants import REQUIRED_CREATE_FIELDS
+from nrlf.core.errors import (
+    FhirValidationError,
+    MissingRequiredFieldForCreate,
+    NextPageTokenValidationError,
+    ProducerCreateValidationError,
+    RequestValidationError,
+)
 from nrlf.core.transform import (
     _strip_empty_json_paths,
     create_bundle_entries_from_document_pointers,
     create_document_pointer_from_fhir_json,
     transform_next_page_token_to_start_key,
+    validate_custodian_system,
     validate_no_extra_fields,
+    validate_required_create_fields,
 )
 from nrlf.producer.fhir.r4.model import BundleEntry, DocumentReference
+from nrlf.producer.fhir.r4.strict_model import (
+    DocumentReference as StrictDocumentReference,
+)
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 from pydantic import BaseModel
 
@@ -58,6 +70,19 @@ def test__strip_empty_json_paths_raises_exception(input):
 )
 def test__strip_empty_json_paths_do_not_raise(input):
     _strip_empty_json_paths(input, raise_on_discovery=True)
+
+
+@pytest.mark.parametrize("field", REQUIRED_CREATE_FIELDS)
+def test_strip_empty_json_paths_throws_error_when_field_missing(field):
+    fhir_json = read_test_data("nrlf")
+    fhir_json[field] = None
+
+    with pytest.raises(ProducerCreateValidationError):
+        _strip_empty_json_paths(fhir_json, raise_on_discovery=True)
+
+
+def test_strip_empty_json_paths_throws_error_when_field_missing():
+    assert REQUIRED_CREATE_FIELDS == ["custodian", "id", "type", "status", "subject"]
 
 
 class Foo(BaseModel):
@@ -121,3 +146,28 @@ def test_transform_evaluation_key_to_next_page_token_throws_error():
 
     with pytest.raises(NextPageTokenValidationError):
         transform_next_page_token_to_start_key(next_page_token)
+
+
+@pytest.mark.parametrize("field", REQUIRED_CREATE_FIELDS)
+def test_validate_required_create_fields(field):
+    fhir_json = read_test_data("nrlf")
+    fhir_json.pop(field)
+
+    with pytest.raises(MissingRequiredFieldForCreate):
+        validate_required_create_fields(fhir_json)
+
+
+def test_validate_custodian_system():
+    fhir_json = read_test_data("nrlf")
+    fhir_strict_model = StrictDocumentReference(**fhir_json)
+
+    assert validate_custodian_system(fhir_strict_model) == None
+
+
+def test_validate_custodian_system_fails():
+    fhir_json = read_test_data("nrlf")
+    fhir_json["custodian"]["identifier"]["system"] = "wrong/system"
+    fhir_strict_model = StrictDocumentReference(**fhir_json)
+
+    with pytest.raises(RequestValidationError):
+        validate_custodian_system(fhir_strict_model)

@@ -4,16 +4,19 @@ import json
 from functools import cache
 from itertools import chain
 
-from nrlf.core.firehose.model import CloudwatchLogsData
+from nrlf.core.firehose.utils import load_json_gzip
 
 from helpers.aws_session import new_aws_session
 
 
 def _parse_error_event(error_event: dict):
-    cloudwatch_event = CloudwatchLogsData.parse(
-        data=base64.b64decode(error_event["rawData"]), record_id=""
-    )
-    yield from cloudwatch_event.logs
+    data = load_json_gzip(base64.b64decode(error_event["rawData"]))
+    for log in data["logEvents"]:
+        msg = log["message"]
+        try:
+            yield json.loads(msg)
+        except:
+            yield msg
 
 
 @cache

@@ -2,8 +2,8 @@ from .data_factory import (
     APIM_PATIENT_SUCCESS,
     CONTENT_EXAMPLE_PDF_MIME,
     CONTENT_EXAMPLE_PDF_URL,
-    FHIR_SYSTEMS_ASID,
     FHIR_SYSTEMS_NHS_NUMBER,
+    FHIR_SYSTEMS_ODS_CODE,
     NRL_ODS_SUCCESS,
     SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN,
     SNOMED_SYSTEM,
@@ -86,7 +86,7 @@ def test_custodian():
     actual = generate_test_custodian()
     expected = {
         "identifier": {
-            "system": FHIR_SYSTEMS_ASID,
+            "system": FHIR_SYSTEMS_ODS_CODE,
             "value": NRL_ODS_SUCCESS,
         }
     }

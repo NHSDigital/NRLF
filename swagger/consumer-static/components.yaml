@@ -60,8 +60,6 @@ components:
         Must be a universally unique identifier (UUID) (ideally version 4).
 
         Mirrored back in a response header.
-
-        If you re-send a failed request, use the same value in this header.
       in: header
       required: false
       schema:
@@ -133,6 +131,7 @@ components:
     RequestQueryCustodian:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-organization-code\|(\w+)$
+      example: "https://fhir.nhs.uk/Id/ods-organization-code|Y05868"
     RequestQueryType:
       type: string
     NextPageToken:

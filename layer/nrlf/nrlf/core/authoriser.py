@@ -1,4 +1,3 @@
-import json
 from enum import Enum
 from http import HTTPStatus
 from logging import Logger
@@ -15,7 +14,6 @@ from lambda_utils.header_config import (
 from lambda_utils.logging import log_action
 from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _setup_logger
-from nrlf.core.response import get_error_message
 from pydantic import BaseModel, ValidationError
 
 
@@ -87,13 +85,23 @@ def parse_headers(
     _raw_connection_metadata = _headers.get(CONNECTION_METADATA, "{}")
     try:
         connection_metadata = ConnectionMetadata.parse_raw(_raw_connection_metadata)
+    except ValidationError:
+        return PipelineData(
+            error="There was an issue parsing the connection metadata, contact onboarding team",
+            **data,
+        )
+
+    try:
         _parse_client_rp_details(
             raw_client_rp_details=_raw_client_rp_details, logger=logger
         )
-    except ValidationError as err:
-        return PipelineData(error={"message": get_error_message(err)}, **data)
-    else:
-        return PipelineData(pointer_types=connection_metadata.pointer_types, **data)
+    except ValidationError:
+        return PipelineData(
+            error="There was an issue parsing the client rp details, contact onboarding team",
+            **data,
+        )
+
+    return PipelineData(pointer_types=connection_metadata.pointer_types, **data)
 
 
 @log_action(log_reference=LogReference.AUTHORISER002)
@@ -124,7 +132,7 @@ def generate_response(
         principal_id=logger.transaction_id,
         resource=data["method_arn"],
         effect="Deny" if error else "Allow",
-        context={"error": json.dumps(error)} if error else {},
+        context={"error": error["message"]} if error else {},
     )
     return PipelineData(policy)
 

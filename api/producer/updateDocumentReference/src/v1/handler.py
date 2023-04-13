@@ -5,11 +5,11 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.event_parsing import fetch_body_from_event
 from lambda_utils.logging import log_action
 from nrlf.core.common_producer_steps import validate_producer_permissions
 from nrlf.core.common_steps import parse_headers, parse_path_id
-from nrlf.core.errors import ImmutableFieldViolationError, ItemNotFound
+from nrlf.core.errors import ImmutableFieldViolationError, InconsistentUpdateId
+from nrlf.core.event_parsing import fetch_body_from_event
 from nrlf.core.model import DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
@@ -41,7 +41,9 @@ def parse_request_body(
     body = fetch_body_from_event(event)
 
     if ("id" in body and "id" in data) and (body["id"] != data["id"]):
-        raise ItemNotFound("Item could not be found")
+        raise InconsistentUpdateId(
+            "Existing document id does not match the document id in the body"
+        )
 
     core_model = update_document_pointer_from_fhir_json(body, API_VERSION)
     return PipelineData(core_model=core_model, **data)
