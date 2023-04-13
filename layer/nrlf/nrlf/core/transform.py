@@ -177,6 +177,7 @@ def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference
     validate_subject_identifier_system(
         subject_identifier=fhir_strict_model.subject.identifier
     )
+
     _strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
     return fhir_strict_model
 
