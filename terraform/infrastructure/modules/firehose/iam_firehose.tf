@@ -1,6 +1,6 @@
 
 resource "aws_iam_role" "firehose" {
-  name        = "${var.prefix}-firehose-${var.apitype}"
+  name        = "${var.prefix}-firehose"
   description = "IAM Role for Kinesis Firehose"
   assume_role_policy = jsonencode({
     Version : "2012-10-17",
@@ -90,7 +90,7 @@ data "aws_iam_policy_document" "firehose" {
 }
 
 resource "aws_iam_policy" "firehose" {
-  name   = "${var.prefix}-firehose-${var.apitype}"
+  name   = "${var.prefix}-firehose"
   policy = data.aws_iam_policy_document.firehose.json
 }
 

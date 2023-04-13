@@ -46,7 +46,6 @@ pygments = "^2.14.0"
 atlassian-python-api = "^3.32.2"
 hypothesis = "^6.68.2"
 flake8-print = "^5.0.0"
-pytest-xdist = "^3.2.1"
 
 [tool.poetry.group.legacy]
 optional = true

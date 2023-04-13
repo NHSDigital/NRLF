@@ -3,7 +3,7 @@ import uuid
 
 import pytest
 
-from api.producer.firehose.tests.e2e_utils import make_good_cloudwatch_data
+from firehose.processor.tests.e2e_utils import make_good_cloudwatch_data
 from helpers.aws_session import new_aws_session
 from helpers.firehose import submit_cloudwatch_data_to_firehose
 from helpers.terraform import get_terraform_json
@@ -28,7 +28,7 @@ def firehose_client():
 
 @pytest.fixture
 def firehose_metadata():
-    return get_terraform_json()["firehose"]["value"]["producer"]["delivery_stream"]
+    return get_terraform_json()["firehose"]["value"]["processor"]["delivery_stream"]
 
 
 @pytest.fixture

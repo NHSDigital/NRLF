@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "firehose" {
-  bucket        = "${var.prefix}-firehose-${var.apitype}"
+  bucket        = "${var.prefix}-firehose"
   force_destroy = true
 }
 
@@ -17,7 +17,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "firehose" {
   bucket = aws_s3_bucket.firehose.id
 
   rule {
-    id     = "FirehoseLifecycle-${var.apitype}"
+    id     = "FirehoseLifecycle"
     status = "Enabled"
 
     transition {

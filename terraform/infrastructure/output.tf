@@ -50,7 +50,6 @@ output "certificate_domain_name" {
 
 output "firehose" {
   value = {
-    producer = module.producer__firehose
-    consumer = module.consumer__firehose
+    processor = module.firehose__processor
   }
 }

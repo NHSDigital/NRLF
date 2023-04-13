@@ -1,6 +1,6 @@
 module "consumer__readDocumentReference" {
   source                 = "./modules/lambda"
-  apitype                = "consumer"
+  parent_path            = "api/consumer"
   name                   = "readDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
@@ -17,14 +17,14 @@ module "consumer__readDocumentReference" {
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   firehose_subscriptions = [
-    module.consumer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.consumer.readDocumentReference.index.handler"
 }
 
 module "consumer__searchDocumentReference" {
   source                 = "./modules/lambda"
-  apitype                = "consumer"
+  parent_path            = "api/consumer"
   name                   = "searchDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
@@ -41,14 +41,14 @@ module "consumer__searchDocumentReference" {
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   firehose_subscriptions = [
-    module.consumer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.consumer.searchDocumentReference.index.handler"
 }
 
 module "consumer__searchPostDocumentReference" {
   source                 = "./modules/lambda"
-  apitype                = "consumer"
+  parent_path            = "api/consumer"
   name                   = "searchPostDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
@@ -65,14 +65,14 @@ module "consumer__searchPostDocumentReference" {
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   firehose_subscriptions = [
-    module.consumer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.consumer.searchPostDocumentReference.index.handler"
 }
 
 module "producer__createDocumentReference" {
   source                 = "./modules/lambda"
-  apitype                = "producer"
+  parent_path            = "api/producer"
   name                   = "createDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
@@ -90,14 +90,14 @@ module "producer__createDocumentReference" {
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   firehose_subscriptions = [
-    module.producer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.producer.createDocumentReference.index.handler"
 }
 
 module "producer__deleteDocumentReference" {
   source                 = "./modules/lambda"
-  apitype                = "producer"
+  parent_path            = "api/producer"
   name                   = "deleteDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
@@ -115,14 +115,14 @@ module "producer__deleteDocumentReference" {
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   firehose_subscriptions = [
-    module.producer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.producer.deleteDocumentReference.index.handler"
 }
 
 module "producer__readDocumentReference" {
   source                 = "./modules/lambda"
-  apitype                = "producer"
+  parent_path            = "api/producer"
   name                   = "readDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
@@ -139,7 +139,7 @@ module "producer__readDocumentReference" {
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   firehose_subscriptions = [
-    module.producer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.producer.readDocumentReference.index.handler"
 }
@@ -147,7 +147,7 @@ module "producer__readDocumentReference" {
 
 module "producer__searchDocumentReference" {
   source                 = "./modules/lambda"
-  apitype                = "producer"
+  parent_path            = "api/producer"
   name                   = "searchDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
@@ -164,14 +164,14 @@ module "producer__searchDocumentReference" {
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   firehose_subscriptions = [
-    module.producer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.producer.searchDocumentReference.index.handler"
 }
 
 module "producer__searchPostDocumentReference" {
   source                 = "./modules/lambda"
-  apitype                = "producer"
+  parent_path            = "api/producer"
   name                   = "searchPostDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
@@ -188,14 +188,14 @@ module "producer__searchPostDocumentReference" {
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   firehose_subscriptions = [
-    module.producer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.producer.searchPostDocumentReference.index.handler"
 }
 
 module "producer__updateDocumentReference" {
   source                 = "./modules/lambda"
-  apitype                = "producer"
+  parent_path            = "api/producer"
   name                   = "updateDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
@@ -213,7 +213,7 @@ module "producer__updateDocumentReference" {
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   firehose_subscriptions = [
-    module.producer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.producer.updateDocumentReference.index.handler"
 
@@ -225,13 +225,13 @@ module "producer__updateDocumentReference" {
 }
 
 module "producer__authoriser_lambda" {
-  source     = "./modules/lambda"
-  apitype    = "producer"
-  name       = "authoriser"
-  region     = local.region
-  prefix     = local.prefix
-  layers     = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  kms_key_id = module.kms__cloudwatch.kms_arn
+  source      = "./modules/lambda"
+  parent_path = "api/producer"
+  name        = "authoriser"
+  region      = local.region
+  prefix      = local.prefix
+  layers      = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  kms_key_id  = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX      = "${local.prefix}--"
     ENVIRONMENT = local.environment
@@ -239,7 +239,7 @@ module "producer__authoriser_lambda" {
   additional_policies = [
   ]
   firehose_subscriptions = [
-    module.producer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.producer.authoriser.index.handler"
   depends_on = [
@@ -247,13 +247,13 @@ module "producer__authoriser_lambda" {
 }
 
 module "consumer__authoriser_lambda" {
-  source     = "./modules/lambda"
-  apitype    = "consumer"
-  name       = "authoriser"
-  region     = local.region
-  prefix     = local.prefix
-  layers     = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  kms_key_id = module.kms__cloudwatch.kms_arn
+  source      = "./modules/lambda"
+  parent_path = "api/consumer"
+  name        = "authoriser"
+  region      = local.region
+  prefix      = local.prefix
+  layers      = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  kms_key_id  = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX      = "${local.prefix}--"
     ENVIRONMENT = local.environment
@@ -261,7 +261,7 @@ module "consumer__authoriser_lambda" {
   additional_policies = [
   ]
   firehose_subscriptions = [
-    module.consumer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.consumer.authoriser.index.handler"
   depends_on = [
@@ -270,7 +270,7 @@ module "consumer__authoriser_lambda" {
 
 module "consumer__status" {
   source                 = "./modules/lambda"
-  apitype                = "consumer"
+  parent_path            = "api/consumer"
   name                   = "status"
   region                 = local.region
   prefix                 = local.prefix
@@ -287,7 +287,7 @@ module "consumer__status" {
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   firehose_subscriptions = [
-    module.consumer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.consumer.status.index.handler"
 }
@@ -295,7 +295,7 @@ module "consumer__status" {
 
 module "producer__status" {
   source                 = "./modules/lambda"
-  apitype                = "producer"
+  parent_path            = "api/producer"
   name                   = "status"
   region                 = local.region
   prefix                 = local.prefix
@@ -312,7 +312,7 @@ module "producer__status" {
     aws_iam_policy.document-pointer__kms-read-write.arn
   ]
   firehose_subscriptions = [
-    module.producer__firehose.firehose_subscription
+    module.firehose__processor.firehose_subscription
   ]
   handler = "api.producer.status.index.handler"
 }
