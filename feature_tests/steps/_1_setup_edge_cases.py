@@ -4,6 +4,7 @@ from behave.runner import Context
 from nrlf.core.constants import Source
 from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import make_timestamp
+from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.model import DocumentReference
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
@@ -49,25 +50,25 @@ def given_invalid_document_pointer_exists_with_invalid_nhs_number(
 
 
 def _invalidate_author_on_document_reference_object(rendered_template):
-    modify_template = json.loads(rendered_template)
+    modify_template = json_loads(rendered_template)
     author = modify_template["author"]
     del modify_template["author"]
 
     core_model = _create_invalid_document_pointer_from_fhir_json(
-        fhir_json=json.loads(json.dumps(modify_template)),
+        fhir_json=json_loads(json.dumps(modify_template)),
         api_version=int(DEFAULT_VERSION),
     )
 
-    document = json.loads(core_model.document.__root__)
+    document = json_loads(core_model.document.__root__)
     document["author"] = author
     core_model.document = {"S": json.dumps(document)}
     return core_model
 
 
 def _invalidate_nhs_number_on_document_pointer_object(rendered_template):
-    modify_template = json.loads(rendered_template)
+    modify_template = json_loads(rendered_template)
     core_model = _create_invalid_document_pointer_with_invalid_nhs_number(
-        fhir_json=json.loads(json.dumps(modify_template)),
+        fhir_json=json_loads(json.dumps(modify_template)),
         api_version=int(DEFAULT_VERSION),
     )
     return core_model

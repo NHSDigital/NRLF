@@ -5,11 +5,13 @@ from nrlf.core.constants import ID_SEPARATOR
 from nrlf.core.errors import (
     AuthenticationError,
     DocumentReferenceValidationError,
+    DuplicateKeyError,
     FhirValidationError,
     InvalidTupleError,
 )
 from nrlf.core.transform import make_timestamp
 from nrlf.core.validators import (
+    json_loads,
     requesting_application_is_not_authorised,
     validate_document_reference_string,
     validate_nhs_number,
@@ -287,3 +289,35 @@ def test_validate_subject_identifier_system(system_value, expected_outcome):
             )
             is None
         )
+
+
+@pytest.mark.parametrize(
+    ["json_string", "expected_outcome"],
+    (
+        [
+            """{
+            "a": 1,
+            "a": 2,
+            "b": [1,2,3],
+            "b": "foo",
+            "c": {"x":1, "y":2, "z":3, "a":4}
+        }""",
+            DuplicateKeyError,
+        ],
+        [
+            """{
+            "a": 1,
+            "b": [1,2,3],
+            "c": {"x":1, "y":2, "z":3, "a":4}
+        }""",
+            {"a": 1, "b": [1, 2, 3], "c": {"x": 1, "y": 2, "z": 3, "a": 4}},
+        ],
+    ),
+)
+def test_json_loads(json_string, expected_outcome):
+
+    if expected_outcome is DuplicateKeyError:
+        with pytest.raises(expected_outcome):
+            json_loads(json_string=json_string)
+    else:
+        assert json_loads(json_string) == expected_outcome

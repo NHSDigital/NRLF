@@ -1,4 +1,3 @@
-import json
 from http import HTTPStatus
 
 from nrlf.core.errors import NRLF_TO_SPINE_4XX_ERROR
@@ -9,6 +8,7 @@ from nrlf.core.nhsd_codings import (
     NrlfCoding,
     SpineCoding,
 )
+from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.model import (
     CodeableConcept,
     Coding,
@@ -74,7 +74,7 @@ def get_error_message(exception: Exception) -> str:
 
 
 def _format_validation_error_message(exception: ValidationError) -> str:
-    errors = json.loads(exception.json())
+    errors = json_loads(exception.json())
     first_error = errors[0]
     model_name = (
         exception.model.public_alias()

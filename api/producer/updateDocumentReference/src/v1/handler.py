@@ -1,4 +1,3 @@
-import json
 from enum import Enum
 from logging import Logger
 from typing import Any
@@ -15,6 +14,7 @@ from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
 from nrlf.core.response import operation_outcome_ok
 from nrlf.core.transform import update_document_pointer_from_fhir_json
+from nrlf.core.validators import json_loads
 
 from api.producer.updateDocumentReference.src.constants import PersistentDependencies
 from api.producer.updateDocumentReference.src.v1.constants import (
@@ -91,8 +91,8 @@ def compare_immutable_fields(
     raw_original_document = data["original_document"]
     _validate_immutable_fields(
         immutable_fields=IMMUTABLE_FIELDS,
-        a=json.loads(raw_original_document),
-        b=json.loads(core_model.document.__root__),
+        a=json_loads(raw_original_document),
+        b=json_loads(core_model.document.__root__),
     )
     return PipelineData(**data)
 

@@ -1,4 +1,3 @@
-import json
 import urllib.parse
 from enum import Enum
 from logging import Logger
@@ -13,6 +12,7 @@ from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
 from nrlf.core.validators import (
     generate_producer_id,
+    json_loads,
     validate_document_reference_string,
 )
 
@@ -67,7 +67,7 @@ def read_document_reference(
 
     validate_document_reference_string(document_pointer.document.__root__)
 
-    return PipelineData(**json.loads(document_pointer.document.__root__))
+    return PipelineData(**json_loads(document_pointer.document.__root__))
 
 
 steps = [

@@ -6,12 +6,13 @@ from typing import Iterator
 from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
     KinesisFirehoseRecord,
 )
+from nrlf.core.validators import json_loads
 
 NEWLINE = "\n"
 
 
 def load_json_gzip(data: bytes) -> dict:
-    return json.loads(gzip.decompress(data))
+    return json_loads(gzip.decompress(data))
 
 
 def dump_json_gzip(obj) -> bytes:
