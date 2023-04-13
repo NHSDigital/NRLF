@@ -5,8 +5,8 @@ from nrlf.core.constants import ID_SEPARATOR
 from nrlf.core.errors import (
     AuthenticationError,
     DocumentReferenceValidationError,
-    FhirValidationError,
     DuplicateKeyError,
+    FhirValidationError,
     InvalidTupleError,
 )
 from nrlf.core.transform import make_timestamp
@@ -289,6 +289,8 @@ def test_validate_subject_identifier_system(system_value, expected_outcome):
             )
             is None
         )
+
+
 @pytest.mark.parametrize(
     ["json_string", "expected_outcome"],
     (

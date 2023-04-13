@@ -6,8 +6,8 @@ from nrlf.core.constants import ID_SEPARATOR, VALID_SOURCES
 from nrlf.core.errors import (
     AuthenticationError,
     DocumentReferenceValidationError,
-    FhirValidationError,
     DuplicateKeyError,
+    FhirValidationError,
     InvalidTupleError,
 )
 from nrlf.legacy.constants import NHS_NUMBER_SYSTEM_URL
@@ -108,7 +108,8 @@ def validate_type_system(type: RequestQueryType, pointer_types: list[str]):
 def validate_subject_identifier_system(subject_identifier: Identifier):
     if subject_identifier.system != NHS_NUMBER_SYSTEM_URL:
         raise FhirValidationError("Input FHIR JSON has an invalid subject:identifier")
-    
+
+
 def dict_raise_on_duplicates(list_of_pairs):
     checked_pairs = {}
     for k, v in list_of_pairs:

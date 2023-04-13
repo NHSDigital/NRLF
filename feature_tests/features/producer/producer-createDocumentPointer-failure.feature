@@ -455,12 +455,12 @@ Feature: Producer Create Failure Scenarios
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                      |
-      | issue_type        | processing                                                 |
-      | issue_level       | error                                                      |
-      | issue_code        | VALIDATION_ERROR                                           |
-      | issue_description | A parameter or value has resulted in a validation error    |
-      | message           | Provided custodian identifier system is not the ODS system |
+      | property          | value                                                   |
+      | issue_type        | processing                                              |
+      | issue_level       | error                                                   |
+      | issue_code        | VALIDATION_ERROR                                        |
+      | issue_description | A parameter or value has resulted in a validation error |
+      | message           | Input FHIR JSON has an invalid subject:identifier       |
 
   Scenario: Unable to create a Document Pointer when json body has multiple keys
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
