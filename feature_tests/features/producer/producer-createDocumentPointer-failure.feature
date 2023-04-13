@@ -14,7 +14,7 @@ Feature: Producer Create Failure Scenarios
         },
         "subject": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "system": "$system",
             "value": "$subject"
           }
         },
@@ -174,14 +174,15 @@ Feature: Producer Create Failure Scenarios
       | system                 | value           |
       | http://snomed.info/sct | 887701000000100 |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1234567892                     |
-      | type        | 887701000000100                |
-      | custodian   | VLP01                          |
-      | producer_id | VLP01                          |
-      | subject     | 2742179658                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+      | property    | value                             |
+      | identifier  | 1234567892                        |
+      | type        | 887701000000100                   |
+      | custodian   | VLP01                             |
+      | producer_id | VLP01                             |
+      | subject     | 2742179658                        |
+      | contentType | application/pdf                   |
+      | url         | https://example.org/my-doc.pdf    |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
@@ -198,14 +199,15 @@ Feature: Producer Create Failure Scenarios
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
-      | property    | value           |
-      | identifier  | <identifier>    |
-      | type        | <type>          |
-      | custodian   | 8FW23           |
-      | producer_id | 8FW23           |
-      | subject     | <subject>       |
-      | contentType | application/pdf |
-      | url         | <url>           |
+      | property    | value                             |
+      | identifier  | <identifier>                      |
+      | type        | <type>                            |
+      | custodian   | 8FW23                             |
+      | producer_id | 8FW23                             |
+      | subject     | <subject>                         |
+      | contentType | application/pdf                   |
+      | url         | <url>                             |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
@@ -228,23 +230,25 @@ Feature: Producer Create Failure Scenarios
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1234567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | producer_id | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+      | property    | value                             |
+      | identifier  | 1234567890                        |
+      | type        | 736253002                         |
+      | custodian   | 8FW23                             |
+      | producer_id | 8FW23                             |
+      | subject     | 9278693472                        |
+      | contentType | application/pdf                   |
+      | url         | https://example.org/my-doc.pdf    |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1234567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | producer_id | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+      | property    | value                             |
+      | identifier  | 1234567890                        |
+      | type        | 736253002                         |
+      | custodian   | 8FW23                             |
+      | producer_id | 8FW23                             |
+      | subject     | 9278693472                        |
+      | contentType | application/pdf                   |
+      | url         | https://example.org/my-doc.pdf    |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
@@ -284,14 +288,15 @@ Feature: Producer Create Failure Scenarios
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT_WITH_INVALID_ID_FORMAT template
-      | property    | value                          |
-      | identifier  | 1234567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | producer_id | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+      | property    | value                             |
+      | identifier  | 1234567890                        |
+      | type        | 736253002                         |
+      | custodian   | 8FW23                             |
+      | producer_id | 8FW23                             |
+      | subject     | 9278693472                        |
+      | contentType | application/pdf                   |
+      | url         | https://example.org/my-doc.pdf    |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
@@ -308,14 +313,15 @@ Feature: Producer Create Failure Scenarios
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1234567890-1                   |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | producer_id | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+      | property    | value                             |
+      | identifier  | 1234567890-1                      |
+      | type        | 736253002                         |
+      | custodian   | 8FW23                             |
+      | producer_id | 8FW23                             |
+      | subject     | 9278693472                        |
+      | contentType | application/pdf                   |
+      | url         | https://example.org/my-doc.pdf    |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
@@ -332,14 +338,15 @@ Feature: Producer Create Failure Scenarios
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1234567890                     |
-      | type        | 736253002                      |
-      | custodian   | WRONG                          |
-      | producer_id | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+      | property    | value                             |
+      | identifier  | 1234567890                        |
+      | type        | 736253002                         |
+      | custodian   | WRONG                             |
+      | producer_id | 8FW23                             |
+      | subject     | 9278693472                        |
+      | contentType | application/pdf                   |
+      | url         | https://example.org/my-doc.pdf    |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
@@ -394,14 +401,15 @@ Feature: Producer Create Failure Scenarios
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT_WITH_INVALID_CUSTODIAN_SYSTEM template
-      | property    | value                          |
-      | identifier  | 1234567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | producer_id | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+      | property    | value                             |
+      | identifier  | 1234567890                        |
+      | type        | 736253002                         |
+      | custodian   | 8FW23                             |
+      | producer_id | 8FW23                             |
+      | subject     | 9278693472                        |
+      | contentType | application/pdf                   |
+      | url         | https://example.org/my-doc.pdf    |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
@@ -411,3 +419,28 @@ Feature: Producer Create Failure Scenarios
       | issue_code        | VALIDATION_ERROR                                           |
       | issue_description | A parameter or value has resulted in a validation error    |
       | message           | Provided custodian identifier system is not the ODS system |
+
+  Scenario: Unable to create a Document Pointer with an invalid subject.identifier.system value
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890-1                   |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+      | system      | Test                           |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                   |
+      | issue_type        | processing                                              |
+      | issue_level       | error                                                   |
+      | issue_code        | VALIDATION_ERROR                                        |
+      | issue_description | A parameter or value has resulted in a validation error |
+      | message           | Input FHIR JSON has an invalid subject:identifier       |
