@@ -3,7 +3,6 @@ import json
 from typing import Union
 from unittest import mock
 
-import pytest
 from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
     KinesisFirehoseModel,
     KinesisFirehoseRecord,
@@ -25,23 +24,25 @@ from nrlf.core.firehose.validate import MAX_PACKET_SIZE_BYTES
 
 def _log_events_strategy(min_size=1, max_size=None, sensitive=True, message=None):
     if message is None:
-        message = builds(
-            LogTemplate,
-            data=just(LogData(function="foo", inputs={}, result="")),
-            sensitive=just(sensitive),
-            correlation_id=just(""),
-            nhsd_correlation_id=just(""),
-            request_id=just(""),
-            transaction_id=just(""),
-            host=just(""),
-            environment=just(""),
-            log_level=just(""),
-            log_reference=just(""),
-            outcome=just(""),
-            duration_ms=just(1),
-            error=just(""),
-            call_stack=just(""),
-            timestamp=just(""),
+        message = just(
+            LogTemplate(
+                data=LogData(function="foo", inputs={}, result=""),
+                sensitive=sensitive,
+                correlation_id="",
+                nhsd_correlation_id="",
+                request_id="",
+                transaction_id="",
+                host="",
+                environment="",
+                log_level="",
+                log_reference="",
+                outcome="",
+                duration_ms=1,
+                error="",
+                call_stack="",
+                timestamp="",
+                message="blah",
+            ).json()
         )
     return lists(
         builds(
@@ -205,7 +206,6 @@ def test__process_firehose_records_normal_records(
     assert number_of_failed_records == len(bad_records)
 
 
-@pytest.mark.slow
 @given(
     good_records=lists(
         builds(

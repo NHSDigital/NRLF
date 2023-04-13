@@ -23,3 +23,4 @@ JSON_TYPES = {dict, list}
 NHS_NUMBER_INDEX = "idx_nhs_number_by_id"
 ID_SEPARATOR = "-"
 ODS_SYSTEM = "https://fhir.nhs.uk/Id/ods-organization-code"
+NHS_NUMBER_SYSTEM_URL = "https://fhir.nhs.uk/Id/nhs-number"

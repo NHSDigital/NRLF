@@ -30,7 +30,7 @@ from api.producer.firehose.tests.e2e_utils import (
 @pytest.mark.firehose
 def test_firehose_output(
     # These are all set in the fixtures in the adjacent conftest.py file
-    session,
+    s3_client,
     bucket_name,
     prefix_template,
     error_prefix_template,
@@ -46,7 +46,6 @@ def test_firehose_output(
     very_bad_logs = global_event_handler["very_bad_logs"]
 
     # Some setup
-    s3_client = session.client("s3")
     start_time = datetime.utcnow()
     possible_s3_key_prefixes = set(
         parse_prefix(prefix=prefix, time=time)

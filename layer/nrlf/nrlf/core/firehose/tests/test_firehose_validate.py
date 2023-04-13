@@ -97,7 +97,6 @@ def _raise(ex):
     raise ex
 
 
-@pytest.mark.slow
 @pytest.mark.parametrize(
     ["_validate_record_size_raises", "expected_outcome_record"],
     [

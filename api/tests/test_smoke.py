@@ -15,6 +15,11 @@ import jwt
 import pytest
 import requests
 
+from helpers.aws_session import (
+    AWS_ACCOUNT_FOR_ENV,
+    DEFAULT_WORKSPACE,
+    aws_account_id_from_profile,
+)
 from helpers.terraform import get_terraform_json
 
 DEFAULT_WORKSPACE = "dev"
@@ -103,6 +108,16 @@ def aws_account_id_from_profile(env: str):
             return account_id
 
     raise Exception("No valid profile found")
+
+
+def aws_read_ssm_apigee_proxy(session, env: str):
+    ssm_client = session.client("ssm")
+    param_name = f"/nhsd-nrlf--{env}/apigee-proxy"
+    try:
+        param = ssm_client.get_parameter(Name=param_name)
+    except ssm_client.exceptions.ParameterNotFound as e:
+        raise Exception(f"Parameter Not Found: {param_name}") from e
+    return param["Parameter"]["Value"]
 
 
 def aws_read_apigee_app_secrets(session, secret_id: str):

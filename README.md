@@ -489,3 +489,32 @@ Specifically, the configuration can be found in the file proxies/sandbox/apiprox
 💡 Developers should make sure that these align between the three repos according to any user journeys that they envisage.
 
 Additionally, and less importantly, there are also fixed organization details in proxies/sandbox/apiproxy/resources/jsc/ClientRPDetailsHeader.SetRequestHeaders.js in these repos.
+
+## Firehose
+
+### tl;dr
+
+- All Firehose errors must be investigated since (in the worst case, but not unlikely scenario) they may block all logs from reaching Splunk.
+- The main NRLF repo contains a tool to help with debugging, but it cannot diagnose the problem for you.
+- Bad logs = bad code: so please fix the code to prevent this from reoccurring
+- Any good logs which have been blocked must be manually resubmitted, we have a tool to help with that too.
+- You may also need to fix bad logs prior to resubmission if required.
+
+### Background
+
+As illustrated in [NRLF - Logging Solution](https://nhsd-confluence.digital.nhs.uk/display/CLP/NRLF+-+Logging+Solution), the API logs are piped from Cloudwatch to Splunk via Firehose. Unfortunately Firehose lambdas are unnecessarily complex, and correspondingly have a complex nested data model as illustrated in Figure X. An individual Firehose Event is composed of Firehose Records, which each Record containing a single Cloudwatch Logs Data object, which contains multiple Log Events. The Firehose Lambda marks Firehose Records as being "OK" or "FAILED", with OK Records being sent to Splunk and FAILED Records landing in the Firehose bucket under the "errors" prefix. Therefore (without the improvement suggested in NRLF-385) any single bad Log Event will cause all Log Events in the Record to be collectively marked as FAILED.
+
+### Resolving failures
+
+In order to understand the debugging lifecycle, please follow this example and then adapt to your real use-case:
+
+1. Run `nrlf test firehose`
+2. wait five minutes until the test is complete
+3. go to s3 and get the s3 URI of the most recent file in the firehose S3 bucket with the prefix `errors/`
+4. Run `nrlf fetch s3_uri <env>` (default <env> is `dev` i.e. don't need to set this if testing in your own workspace)
+5. Follow the instructions from `fetch` in order to resubmit the file
+   1. Run `nrlf validate file_path`
+   2. Remove lines 3 and 7 from the bad file
+   3. Run `nrlf validate file_path`
+   4. Run `nrlf resubmit file_path <env>` (<env> should match the value from line 4)
+6. Verify that the file has been moved from `errors/` to `fixed/` on s3
