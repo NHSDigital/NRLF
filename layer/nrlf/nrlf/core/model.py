@@ -230,7 +230,7 @@ class DocumentPointer(DynamoDbModel):
 
     @validator("updated_on")
     def validate_updated_on(value: any) -> DynamoDbType:
-        if value == None:
+        if value is None:
             return DYNAMODB_NULL
 
         validate_timestamp(date=value.__root__)
