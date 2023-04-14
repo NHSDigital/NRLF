@@ -87,6 +87,12 @@ class MissingRequiredFieldForCreate(Exception):
 
 class DuplicateKeyError(Exception):
     pass
+class MalformedProducerId(ValueError):
+    pass
+
+
+class InconsistentProducerId(ValueError):
+    pass
 
 
 NRLF_TO_SPINE_4XX_ERROR = {

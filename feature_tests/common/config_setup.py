@@ -3,8 +3,8 @@ from typing import Union
 
 from behave import use_fixture
 from behave.runner import Context
-from lambda_utils.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from lambda_utils.header_config import ClientRpDetailsHeader, ConnectionMetadata
+from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 
 from feature_tests.common.constants import (
     ALLOWED_APP_IDS,

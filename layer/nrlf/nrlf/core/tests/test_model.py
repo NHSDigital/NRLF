@@ -33,34 +33,32 @@ TIMESTAMP = "2022-10-18T14:47:22.920Z"
 
 @pytest.mark.parametrize(
     [
-        "provider_id",
         "provider_doc_id",
         "nhs_number",
         "ods_code",
     ],
-    [["XX01", "6789", "0730576353", "RX1"], ["AB12", "9876", "2361846292", "JJ0"]],
+    [["6789", "0730576353", "RX1"], ["9876", "2361846292", "JJ0"]],
 )
 def test_calculated_fields(
-    provider_id: str,
     provider_doc_id: str,
     nhs_number: str,
     ods_code: str,
 ):
     doc = generate_test_document_reference(
-        provider_id=provider_id,
+        provider_id=ods_code,
         provider_doc_id=provider_doc_id,
         subject=generate_test_subject(nhs_number),
         custodian=generate_test_custodian(ods_code),
     )
     model = create_document_pointer_from_fhir_json(doc, 99)
 
-    assert f"{model.pk}" == key(DbPrefix.DocumentPointer, provider_id, provider_doc_id)
+    assert f"{model.pk}" == key(DbPrefix.DocumentPointer, ods_code, provider_doc_id)
     assert f"{model.sk}" == f"{model.pk}"
     assert f"{model.pk_1}" == key(DbPrefix.Patient, nhs_number)
     assert f"{model.sk_1}" == key(
-        DbPrefix.CreatedOn, model.created_on, provider_id, provider_doc_id
+        DbPrefix.CreatedOn, model.created_on, ods_code, provider_doc_id
     )
-    assert f"{model.pk_2}" == key(DbPrefix.Organization, provider_id)
+    assert f"{model.pk_2}" == key(DbPrefix.Organization, ods_code)
     assert f"{model.sk_2}" == f"{model.sk_2}"
 
 
@@ -115,6 +113,7 @@ def test_create_document_pointer_from_fhir_json(mock__make_timestamp):
         "nhs_number": {"S": nhs_number},
         "producer_id": {"S": provider_id},
         "custodian": {"S": custodian},
+        "custodian_suffix": {"NULL": True},
         "type": {"S": "http://snomed.info/sct|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
