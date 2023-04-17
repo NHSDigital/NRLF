@@ -61,3 +61,12 @@ repos:
         args:
           - --args=-write=true
           - --args=-recursive
+
+  - repo: local
+    hooks:
+      - id: forbid_json_loads
+        name: Don't use json.loads - use json_loads instead
+        entry: json\.loads
+        language: pygrep
+        types: [python]
+        exclude: layer/nrlf/nrlf/core/validators.py

@@ -216,7 +216,7 @@ Feature: Producer Update Failure scenarios
       | issue_level       | error                                                   |
       | issue_code        | VALIDATION_ERROR                                        |
       | issue_description | A parameter or value has resulted in a validation error |
-      | message           | Trying to update one or more immutable fields           |
+      | message           | Forbidden to update immutable field 'relatesTo'         |
 
   Scenario: Unable to update the status immutable property of a DOCUMENT_POINTER
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
@@ -248,7 +248,7 @@ Feature: Producer Update Failure scenarios
       | issue_level       | error                                                   |
       | issue_code        | VALIDATION_ERROR                                        |
       | issue_description | A parameter or value has resulted in a validation error |
-      | message           | Trying to update one or more immutable fields           |
+      | message           | Forbidden to update immutable field 'status'            |
 
   Scenario: Unable to update Document Pointer when required type field is missing
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers

@@ -1,5 +1,4 @@
 import base64
-import json
 from typing import Union
 from unittest import mock
 
@@ -20,6 +19,7 @@ from nrlf.core.firehose.model import (
     LogEvent,
 )
 from nrlf.core.firehose.validate import MAX_PACKET_SIZE_BYTES
+from nrlf.core.validators import json_loads
 
 
 def _log_events_strategy(min_size=1, max_size=None, sensitive=True, message=None):
@@ -150,7 +150,7 @@ def test__process_firehose_records_normal_including_redacted_records(
         record_is_sensitive = False
 
         lines = base64.b64decode(record.data.encode()).decode().split("\n")
-        for log in map(json.loads, filter(None, lines)):
+        for log in map(json_loads, filter(None, lines)):
             n_lines += 1
             if log["sensitive"]:
                 record_is_sensitive = True

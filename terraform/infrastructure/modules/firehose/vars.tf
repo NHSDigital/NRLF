@@ -2,8 +2,6 @@ variable "prefix" {}
 
 variable "region" {}
 
-variable "apitype" {}
-
 variable "layers" {}
 
 variable "environment" {}

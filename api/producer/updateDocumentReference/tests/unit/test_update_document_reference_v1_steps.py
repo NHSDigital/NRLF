@@ -12,6 +12,7 @@ from nrlf.core.model import DocumentPointer
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
 from api.producer.updateDocumentReference.src.v1.handler import (
+    _validate_immutable_fields,
     compare_immutable_fields,
     parse_request_body,
 )
@@ -103,3 +104,17 @@ def test_compare_immutable_fields_failure(mock__make_timestamp):
         pipeline_data = compare_immutable_fields(
             PipelineData(output), {}, event, {}, getLogger(__name__)
         )
+
+
+_IMMUTABLE_FIELDS = {"foo", "bar"}
+
+
+@pytest.mark.parametrize("field", _IMMUTABLE_FIELDS)
+def test__validate_immutable_fields(field):
+    a = {_field: f"a{_field}" for _field in _IMMUTABLE_FIELDS}
+    b = {field: f"b{field}"}
+    with pytest.raises(ImmutableFieldViolationError):
+        _validate_immutable_fields(immutable_fields=_IMMUTABLE_FIELDS, a=a, b=b)
+
+    with pytest.raises(ImmutableFieldViolationError):
+        _validate_immutable_fields(immutable_fields=_IMMUTABLE_FIELDS, a=b, b=a)

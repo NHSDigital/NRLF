@@ -1,4 +1,3 @@
-import json
 import urllib.parse
 from enum import Enum
 from logging import Logger
@@ -10,7 +9,7 @@ from lambda_utils.logging import log_action
 from nrlf.core.common_steps import parse_headers
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
-from nrlf.core.validators import validate_document_reference_string
+from nrlf.core.validators import json_loads, validate_document_reference_string
 
 
 class LogReference(Enum):
@@ -35,7 +34,7 @@ def read_document_reference(
 
     validate_document_reference_string(document_pointer.document.__root__)
 
-    return PipelineData(**json.loads(document_pointer.document.__root__))
+    return PipelineData(**json_loads(document_pointer.document.__root__))
 
 
 steps = [

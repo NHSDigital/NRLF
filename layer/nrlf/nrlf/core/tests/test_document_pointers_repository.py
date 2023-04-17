@@ -1,4 +1,3 @@
-import json
 import time
 from contextlib import contextmanager
 from itertools import chain
@@ -37,6 +36,7 @@ from nrlf.core.transform import (
     update_document_pointer_from_fhir_json as _update_document_pointer_from_fhir_json,
 )
 from nrlf.core.types import DynamoDbClient
+from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
 from feature_tests.common.constants import DOCUMENT_POINTER_TABLE_DEFINITION
@@ -165,7 +165,7 @@ def test_update_document_pointer_success():
         repository.update(item=model_2)
         item = repository.read_item(model_1.pk.__root__)
 
-    doc = json.loads(item.document.__root__)
+    doc = json_loads(item.document.__root__)
     assert item.created_on.__root__ != model_1.created_on.__root__
     assert doc["content"][0]["attachment"]["url"] == new_url
 

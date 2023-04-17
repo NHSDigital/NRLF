@@ -1,5 +1,4 @@
 import base64
-import json
 import os
 import re
 import time
@@ -14,6 +13,7 @@ import fire
 import jwt
 import pytest
 import requests
+from nrlf.core.validators import json_loads
 
 from helpers.aws_session import (
     AWS_ACCOUNT_FOR_ENV,
@@ -91,7 +91,7 @@ def oauth_access_token(api_key, jwt_private_key, oauth_url, kid):
     if response.status_code != 200:
         return False, response.text
     assert response.status_code == 200, response.text
-    oauth_token = json.loads(response.text)["access_token"]
+    oauth_token = json_loads(response.text)["access_token"]
     return True, oauth_token
 
 
@@ -124,7 +124,7 @@ def aws_read_apigee_app_secrets(session, secret_id: str):
     secrets_client = session.client("secretsmanager")
 
     response = secrets_client.get_secret_value(SecretId=secret_id)
-    secret = json.loads(response["SecretString"])
+    secret = json_loads(response["SecretString"])
 
     api_key = secret["api_key"]
     oauth_url = secret["oauth_url"]

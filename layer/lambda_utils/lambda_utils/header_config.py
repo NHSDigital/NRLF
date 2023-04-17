@@ -1,5 +1,6 @@
 from typing import Optional
 
+from nrlf.core.validators import json_loads
 from pydantic import BaseModel, Field, StrictStr, root_validator
 
 
@@ -28,6 +29,9 @@ class AcceptHeader(AbstractHeader):
         except Exception:
             raise ValueError("Invalid accept header")
         return {**values, **dict(parts)}
+
+    class Config:
+        json_loads = json_loads
 
 
 class ClientRpDetailsHeader(AbstractHeader):

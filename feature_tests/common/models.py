@@ -9,6 +9,7 @@ from behave.model import Table
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
 from nrlf.core.types import DynamoDbClient
+from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.model import OperationOutcome
 from pydantic import BaseModel
 
@@ -41,7 +42,7 @@ class Template:
         rendered = render_regular_properties(raw=self.raw, table=table)
         if fhir_type is FhirType.DocumentReference:
             return render_document_reference_properties(
-                document_reference_json=json.loads(rendered), table=table
+                document_reference_json=json_loads(rendered), table=table
             )
         return rendered
 
@@ -62,7 +63,7 @@ class Response:
 
     @property
     def dict(self) -> dict:
-        return json.loads(self.body)
+        return json_loads(self.body)
 
 
 @dataclass

@@ -2,7 +2,7 @@ variable "prefix" {}
 
 variable "region" {}
 
-variable "apitype" {}
+variable "parent_path" {}
 
 variable "name" {}
 

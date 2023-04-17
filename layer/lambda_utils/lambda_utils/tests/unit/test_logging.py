@@ -1,4 +1,3 @@
-import json
 import logging
 from enum import Enum
 from tempfile import NamedTemporaryFile
@@ -10,7 +9,7 @@ from hypothesis.strategies import booleans, builds, dictionaries, just, text
 from lambda_utils.logging import LogData, Logger, LogTemplate, log_action
 from lambda_utils.tests.unit.utils import make_aws_event
 from nrlf.core.errors import DynamoDbError
-from nrlf.core.validators import validate_timestamp
+from nrlf.core.validators import json_loads, validate_timestamp
 from pydantic import ValidationError
 
 
@@ -49,7 +48,7 @@ def _standard_test(fn):
         assert result == "abcdef"
 
         # Process the log
-        message = json.loads(temp_file.read())
+        message = json_loads(temp_file.read())
 
     # Validate the time components
     timestamp = message.pop("timestamp")
@@ -122,7 +121,7 @@ def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
             _dummy_function(foo="abc", bar="def", logger=logger)
 
         # Process the log
-        message = json.loads(temp_file.read())
+        message = json_loads(temp_file.read())
 
     # Validate the time components
     timestamp = message.pop("timestamp")
@@ -173,7 +172,7 @@ def test_log_template_dict_always_exclude_none(log: LogTemplate, redact: bool):
 
 @given(log=_log)
 def test_log_template_json_always_exclude_none(log: LogTemplate):
-    dumped_log = json.loads(log.json())
+    dumped_log = json_loads(log.json())
     assert "result" not in dumped_log["data"]
     assert None not in dumped_log.values()
 

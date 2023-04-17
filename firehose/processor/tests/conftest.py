@@ -2,8 +2,9 @@ import json
 import uuid
 
 import pytest
+from nrlf.core.validators import json_loads
 
-from api.producer.firehose.tests.e2e_utils import make_good_cloudwatch_data
+from firehose.processor.tests.e2e_utils import make_good_cloudwatch_data
 from helpers.aws_session import new_aws_session
 from helpers.firehose import submit_cloudwatch_data_to_firehose
 from helpers.terraform import get_terraform_json
@@ -28,7 +29,7 @@ def firehose_client():
 
 @pytest.fixture
 def firehose_metadata():
-    return get_terraform_json()["firehose"]["value"]["producer"]["delivery_stream"]
+    return get_terraform_json()["firehose"]["value"]["processor"]["delivery_stream"]
 
 
 @pytest.fixture
@@ -63,7 +64,7 @@ def _submit_good_cloudwatch_data(firehose_client, stream_arn, global_event_handl
         cloudwatch_data=cloudwatch_data,
     )
     global_event_handler["good_logs"] = [
-        json.loads(log_event["message"])
+        json_loads(log_event["message"])
         for log_event in cloudwatch_data.dict()["log_events"]
     ]
 
@@ -82,7 +83,7 @@ def _submit_bad_cloudwatch_data(firehose_client, stream_arn, global_event_handle
         cloudwatch_data=cloudwatch_data,
     )
     global_event_handler["bad_logs"] = [
-        json.loads(log_event["message"])
+        json_loads(log_event["message"])
         for log_event in cloudwatch_data.dict()["log_events"]
     ]
 
@@ -92,7 +93,7 @@ def _submit_very_bad_cloudwatch_data(firehose_client, stream_arn, global_event_h
     transaction_id = f"very_bad_cloudwatch_data-{uuid.uuid4()}"
     cloudwatch_data = make_good_cloudwatch_data(transaction_id=transaction_id, n_logs=3)
     very_bad_logs = [
-        json.loads(log_event["message"])
+        json_loads(log_event["message"])
         for log_event in cloudwatch_data.dict()["log_events"]
     ]
 

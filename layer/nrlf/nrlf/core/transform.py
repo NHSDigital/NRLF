@@ -5,6 +5,7 @@ from typing import Union
 
 from more_itertools import map_except
 from nrlf.core.constants import (
+    ALLOWED_RELATES_TO_CODES,
     EMPTY_VALUES,
     ID_SEPARATOR,
     JSON_TYPES,
@@ -20,10 +21,16 @@ from nrlf.core.errors import (
     RequestValidationError,
 )
 from nrlf.core.model import DocumentPointer, PaginatedResponse
-from nrlf.core.validators import validate_subject_identifier_system
+from nrlf.core.validators import validate_subject_identifier_system, json_loads
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
 from nrlf.legacy.model import LegacyDocumentPointer
-from nrlf.producer.fhir.r4.model import Bundle, BundleEntry, DocumentReference, Meta
+from nrlf.producer.fhir.r4.model import (
+    Bundle,
+    BundleEntry,
+    DocumentReference,
+    DocumentReferenceRelatesTo,
+    Meta,
+)
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
@@ -141,6 +148,14 @@ def validate_custodian_system(fhir_strict_model: StrictDocumentReference):
         )
 
 
+def validate_relates_to_code(relates_to: list[DocumentReferenceRelatesTo]):
+    for document_reference_relates_to in relates_to:
+        if document_reference_relates_to.code not in ALLOWED_RELATES_TO_CODES:
+            raise RequestValidationError(
+                f"Provided relatesTo code '{document_reference_relates_to.code}' must be one of {sorted(ALLOWED_RELATES_TO_CODES)}"
+            )
+
+
 def create_document_pointer_from_fhir_json(
     fhir_json: dict,
     api_version: int,
@@ -179,6 +194,8 @@ def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference
     )
 
     _strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
+    if fhir_strict_model.relatesTo:
+        validate_relates_to_code(relates_to=fhir_strict_model.relatesTo)
     return fhir_strict_model
 
 
@@ -216,7 +233,7 @@ def create_bundle_entries_from_document_pointers(
     document_pointers: list[DocumentPointer],
 ) -> list[BundleEntry]:
     document_pointer_jsons = map(
-        lambda document_pointer: json.loads(document_pointer.document.__root__),
+        lambda document_pointer: json_loads(document_pointer.document.__root__),
         document_pointers,
     )
 
@@ -265,6 +282,6 @@ def transform_evaluation_key_to_next_page_token(last_evaluated_key: dict) -> str
 
 def transform_next_page_token_to_start_key(exclusive_start_key: str) -> dict:
     try:
-        return json.loads(base64.urlsafe_b64decode(exclusive_start_key))
+        return json_loads(base64.urlsafe_b64decode(exclusive_start_key))
     except Exception:
         raise NextPageTokenValidationError("Unable to decode the next page token")

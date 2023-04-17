@@ -85,6 +85,10 @@ class MissingRequiredFieldForCreate(Exception):
     pass
 
 
+class DuplicateKeyError(Exception):
+    pass
+
+
 NRLF_TO_SPINE_4XX_ERROR = {
     AuthenticationError: SpineCoding.ACCESS_DENIED_LEVEL,
     DynamoDbError: SpineCoding.RESOURCE_NOT_FOUND,
@@ -106,6 +110,7 @@ NRLF_TO_SPINE_4XX_ERROR = {
     InvalidTupleError: SpineCoding.VALIDATION_ERROR,
     NextPageTokenValidationError: SpineCoding.VALIDATION_ERROR,
     ProducerCreateValidationError: SpineCoding.VALIDATION_ERROR,
+    DuplicateKeyError: SpineCoding.VALIDATION_ERROR,
 }
 
 

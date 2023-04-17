@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from api.producer.firehose.tests.e2e_utils import (
+from firehose.processor.tests.e2e_utils import (
     MAX_RUNTIME,
     all_logs_are_on_s3,
     parse_prefix,
