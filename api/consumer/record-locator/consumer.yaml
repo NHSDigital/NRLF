@@ -1361,7 +1361,7 @@ components:
     requestId:
       name: X-Request-ID
       description: |
-        A globally unique identifier (GUID) for the request, which we use to de-duplicate repeated requests and to trace the request if you contact our helpdesk.
+        A globally unique identifier (GUID) for the request, which can be used to trace the request if you contact our helpdesk.
 
         Must be a universally unique identifier (UUID) (ideally version 4).
 
@@ -1373,7 +1373,11 @@ components:
     correlationId:
       name: X-Correlation-ID
       description: |
-        An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters.
+        An optional ID which you can use to track transactions across multiple systems, and we use to de-duplicate repeated requests and to trace the request if you contact our helpdesk.
+
+        If you re-send a failed request please re-send this ID in the header.
+
+        It can take any value, but we recommend avoiding `.` characters.
 
         Mirrored back in a response header.
       in: header
