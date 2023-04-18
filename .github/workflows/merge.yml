@@ -12,6 +12,7 @@ permissions:
   id-token: read|write|none
   issues: read|write|none
   pull-requests: read|write|none
+  repository-projects: read|write|none
   statuses: read|write|none
 
 env:
