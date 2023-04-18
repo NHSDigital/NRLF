@@ -5,11 +5,7 @@ on:
     branches:
       - feature/NRLF-455-slack-integration
 
-permissions:
-  id-token: write
-  contents: read
-  actions: write
-  issues: write
+permissions: write-all
 
 env:
   TF_WORKFLOW_ID: ${{ inputs.environment }}
@@ -43,12 +39,16 @@ jobs:
         run: |
           TAG=${{ steps.extract_branch.outputs.branch }}
           echo "tag=${TAG}" >> $GITHUB_ENV
-      - name: Bump version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.1
+      - name: Create tag
+        uses: actions/github-script@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: ${{ env.tag }}
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ env.tag }}',
+              sha: context.sha
+            })
     outputs:
       tag: ${{ env.tag }}
 
