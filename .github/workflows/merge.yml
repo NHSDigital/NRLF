@@ -67,7 +67,7 @@ jobs:
           payload: |
             {
               "branch": "${{ steps.extract_branch.outputs.branch }}",
-              "tag": "${{ needs.make_tag.tag}}"
+              "tag": "${{ needs.make_tag.outputs.tag}}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.MAIN_MERGE_SLACK_HOOK_URL }}
