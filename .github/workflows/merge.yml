@@ -25,8 +25,10 @@ jobs:
     steps:
       - name: Extract branch name
         shell: bash
-        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
         id: extract_branch
+    outputs:
+      branch: ${{ env.branch }}
 
   make_tag:
     runs-on: ubuntu-latest
