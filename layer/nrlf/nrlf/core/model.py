@@ -181,6 +181,7 @@ class DocumentPointer(DynamoDbModel):
         producer_id, document_id = generate_producer_id(
             id=values.get("id"), producer_id=producer_id
         )
+
         values["producer_id"] = producer_id
         values["document_id"] = document_id
         return values

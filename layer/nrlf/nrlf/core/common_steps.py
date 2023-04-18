@@ -9,6 +9,7 @@ from lambda_utils.header_config import AbstractHeader, ConnectionMetadata
 from lambda_utils.logging import log_action
 from nrlf.core.constants import CONNECTION_METADATA
 from nrlf.core.model import convert_document_pointer_id_to_pk
+from nrlf.core.validators import generate_producer_id
 
 
 class LogReference(Enum):
@@ -48,4 +49,5 @@ def parse_path_id(
     """
     id = urllib.parse.unquote(event.pathParameters["id"])
     pk = convert_document_pointer_id_to_pk(id)
-    return PipelineData(**data, id=id, pk=pk)
+    producer_id, _ = generate_producer_id(id=id, producer_id=None)
+    return PipelineData(**data, producer_id=producer_id, id=id, pk=pk)

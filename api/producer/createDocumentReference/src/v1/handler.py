@@ -63,6 +63,7 @@ def parse_request_body(
     body = fetch_body_from_event(event)
 
     core_model = create_document_pointer_from_fhir_json(body, API_VERSION)
+
     return PipelineData(**data, body=body, core_model=core_model)
 
 
@@ -104,7 +105,9 @@ def validate_producer_permissions(
     delete_item_ids: list[str] = data.get("delete_item_ids", [])
     pointer_types = data["pointer_types"]
 
-    if ods_code_parts != core_model.producer_id.__root__.split(CUSTODIAN_SEPARATOR):
+    if ods_code_parts != tuple(
+        core_model.producer_id.__root__.split(CUSTODIAN_SEPARATOR)
+    ):
         raise ProducerValidationError(
             "The id of the provided document pointer does not include the expected organisation code for this app"
         )

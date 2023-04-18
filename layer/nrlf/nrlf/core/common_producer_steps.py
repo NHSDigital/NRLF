@@ -27,7 +27,7 @@ def validate_producer_permissions(
     producer_id = data["producer_id"]
     ods_code_parts = data["ods_code_parts"]
 
-    if producer_id.split(CUSTODIAN_SEPARATOR) != ods_code_parts:
+    if tuple(producer_id.split(CUSTODIAN_SEPARATOR)) != ods_code_parts:
         raise RequestValidationError(
             "The target document reference does not belong to the requesting organisation"
         )
@@ -36,4 +36,4 @@ def validate_producer_permissions(
 
 def invalid_producer_for_delete(ods_code_parts: tuple[str], delete_item_id: str):
     producer_id, _ = generate_producer_id(id=delete_item_id, producer_id=None)
-    return producer_id.split(CUSTODIAN_SEPARATOR) != ods_code_parts
+    return tuple(producer_id.split(CUSTODIAN_SEPARATOR)) != ods_code_parts

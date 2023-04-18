@@ -121,7 +121,12 @@ def config_setup(context: Context, scenario_name: str) -> TestConfig:
 
 
 def register_application(
-    context: Context, org_id: str, app_name: str, app_id: str, pointer_types: list[str]
+    context: Context,
+    org_id: str,
+    org_id_extension: str,
+    app_name: str,
+    app_id: str,
+    pointer_types: list[str],
 ):
     test_config: TestConfig = context.test_config
     if app_name not in ALLOWED_APPS:
@@ -131,7 +136,11 @@ def register_application(
         raise ValueError(f"App ID {app_id} must be one of {ALLOWED_APP_IDS}")
 
     test_config.request.headers[CONNECTION_METADATA] = ConnectionMetadata(
-        **{"nrl.pointer-types": pointer_types, "nrl.ods-code": org_id}
+        **{
+            "nrl.pointer-types": pointer_types,
+            "nrl.ods-code": org_id,
+            "nrl.ods-code-extension": org_id_extension,
+        }
     ).json(by_alias=True)
 
     test_config.request.headers[CLIENT_RP_DETAILS] = ClientRpDetailsHeader(
