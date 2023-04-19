@@ -16,10 +16,10 @@ function _make_help() {
 function _make() {
   command=$1
   case $command in
-    "build") _build ;;
-    "clean") _clean ;;
-    "install") _install ;;
-    *) _make_help ;;
+  "build") _build ;;
+  "clean") _clean ;;
+  "install") _install ;;
+  *) _make_help ;;
   esac
 }
 
