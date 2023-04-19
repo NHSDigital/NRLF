@@ -87,6 +87,8 @@ class MissingRequiredFieldForCreate(Exception):
 
 class DuplicateKeyError(Exception):
     pass
+
+
 class MalformedProducerId(ValueError):
     pass
 
