@@ -295,7 +295,6 @@ def test_validate_subject_identifier_system(system_value, expected_outcome):
 
 
 @pytest.mark.parametrize(
-<<<<<<< HEAD
     ["json_string", "expected_outcome"],
     (
         [
@@ -325,7 +324,9 @@ def test_json_loads(json_string, expected_outcome):
             json_loads(json_string=json_string)
     else:
         assert json_loads(json_string) == expected_outcome
-=======
+
+
+@pytest.mark.parametrize(
     ["producer_id", "custodian_id", "custodian_suffix", "expected_outcome"],
     (
         ["abc", "abc", None, None],
@@ -360,4 +361,3 @@ def test_validate_producer_id(
             )
             is None
         )
->>>>>>> b85f809 ([NRLF-425] fixed up existing feature tests and created new feature tests)

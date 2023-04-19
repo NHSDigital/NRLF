@@ -111,7 +111,6 @@ def validate_subject_identifier_system(subject_identifier: Identifier):
         raise FhirValidationError("Input FHIR JSON has an invalid subject:identifier")
 
 
-<<<<<<< HEAD
 def dict_raise_on_duplicates(list_of_pairs):
     checked_pairs = {}
     for k, v in list_of_pairs:
@@ -123,7 +122,8 @@ def dict_raise_on_duplicates(list_of_pairs):
 
 def json_loads(json_string):
     return json.loads(json_string, object_pairs_hook=dict_raise_on_duplicates)
-=======
+
+
 def validate_producer_id(
     producer_id: str, custodian_id: str, custodian_suffix: str = None
 ):
@@ -148,4 +148,3 @@ def split_custodian_id(custodian_id: str) -> dict:
     except ValueError:
         pass
     return custodian_id, custodian_id_suffix
->>>>>>> 2b9b195 ([NRLF-425] switch to multiorg custodians)

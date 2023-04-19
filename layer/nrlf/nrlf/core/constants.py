@@ -26,7 +26,6 @@ CUSTODIAN_SEPARATOR = "."
 KEY_SEPARATOR = "#"
 ODS_SYSTEM = "https://fhir.nhs.uk/Id/ods-organization-code"
 NHS_NUMBER_SYSTEM_URL = "https://fhir.nhs.uk/Id/nhs-number"
-<<<<<<< HEAD
 ALLOWED_RELATES_TO_CODES = {
     "replaces",
     "transforms",
@@ -35,7 +34,5 @@ ALLOWED_RELATES_TO_CODES = {
     "incorporates",
     "summarizes",
 }
-=======
 CLIENT_RP_DETAILS = "nhsd-client-rp-details"
 CONNECTION_METADATA = "nhsd-connection-metadata"
->>>>>>> 2b9b195 ([NRLF-425] switch to multiorg custodians)
