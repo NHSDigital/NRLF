@@ -186,6 +186,12 @@ def generate_end_user_header(env):
     return "RJ11"
 
 
+def generate_end_user_receiver_header(env):
+    if env == "prod":
+        return "XXXX"
+    return "DEF"
+
+
 def _prepare_base_request(env: str, actor: str, sandbox: str) -> tuple[str, dict]:
     if os.environ.get("RUNNING_IN_CI"):
         account_id = get_terraform_json()["assume_account_id"]["value"]
@@ -230,6 +236,9 @@ class Smoketests:
         patient_id = urllib.parse.quote(f"https://fhir.nhs.uk/Id/nhs-number|9278693472")
         url = f"{base_url}/FHIR/R4/DocumentReference?subject:identifier={patient_id}"
         headers["NHSD-End-User-Organisation-ODS"] = generate_end_user_header(
+            environment
+        )
+        headers["NHSD-End-User-Organisation"] = generate_end_user_receiver_header(
             environment
         )
         response = requests.get(url=url, headers=headers)
