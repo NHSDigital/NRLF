@@ -46,6 +46,12 @@ components:
       schema:
         $ref: "#/components/schemas/RequestHeaderOdsCode"
       required: true
+    receiverCode:
+      name: NHSD-End-User-Organisation
+      description: Receiver Code for Organisation
+      in: header
+      schema:
+        $ref: "#/components/schemas/RequestHeaderReceiverCode"
     requestId:
       name: X-Request-ID
       description: |
@@ -137,6 +143,8 @@ components:
     NextPageToken:
       type: string
     RequestHeaderOdsCode:
+      type: string
+    RequestHeaderReceiverCode:
       type: string
     RequestHeaderRequestId:
       type: string
