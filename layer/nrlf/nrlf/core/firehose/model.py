@@ -1,6 +1,7 @@
 import json
+import time
 from enum import Enum
-from typing import Iterator, Optional, Union
+from typing import Iterator, Literal, Optional, Union
 
 from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
     KinesisFirehoseRecord,
@@ -26,6 +27,19 @@ class CloudwatchMessageType(str, Enum):
 
 
 CONTROL_MESSAGE_TEXT = "CWL CONTROL MESSAGE: Checking health of destination Firehose."
+
+
+class SplunkEvent(BaseModel):
+    """
+    The model which Splunk's "collector/event" endpoint expects, as described here:
+    https://docs.splunk.com/Documentation/Splunk/latest/Data/FormateventsforHTTPEventCollector
+    """
+
+    time: str = Field(default_factory=time.time)
+    source: str
+    sourcetype: Literal["_json"] = "_json"  # i.e. use the Splunk JSON auto-indexer
+    host: str
+    event: dict
 
 
 class FirehoseSubmissionRecord(BaseModel):
@@ -123,6 +137,12 @@ class CloudwatchLogsData(BaseModel):
         return [first_half, second_half]
 
     @property
+    def logs(self) -> Iterator[LogTemplate]:
+        for log_event in self.log_events:
+            message: LogTemplate = log_event.message
+            yield message
+
+    @property
     def redacted_logs(self) -> Iterator[dict]:
         for log_event in self.log_events:
             message: LogTemplate = log_event.message
@@ -137,3 +157,16 @@ class LambdaResult(BaseModel):
 def parse_cloudwatch_data(record: KinesisFirehoseRecord) -> CloudwatchLogsData:
     obj = load_json_gzip(data=record.data)
     return CloudwatchLogsData(**obj, record_id=record.recordId)
+
+
+def format_cloudwatch_logs_for_splunk(
+    cloudwatch_data: CloudwatchLogsData,
+) -> Iterator[SplunkEvent]:
+    yield from (
+        SplunkEvent(
+            event=redacted_log, source=log.source, host=log.host, index=log.index
+        ).dict()
+        for log, redacted_log in zip(
+            cloudwatch_data.logs, cloudwatch_data.redacted_logs
+        )
+    )

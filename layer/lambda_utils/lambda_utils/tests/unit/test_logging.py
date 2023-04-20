@@ -31,6 +31,7 @@ DUMMY_LOGGER_KWARGS = {
     ),
     "transaction_id": "ABC",
     "aws_environment": "TEST",
+    "splunk_index": "SPLUNK_INDEX",
 }
 
 
@@ -86,8 +87,9 @@ def test_log_with_log_fields_filter(log_fields, expected_data_inputs):
         "log_reference": "HELLO001",
         "outcome": "SUCCESS",
         "message": "Hello, world!",
+        "index": "SPLUNK_INDEX",
+        "source": "test_logging._dummy_function",
         "data": {
-            "function": "test_logging._dummy_function",
             "result": "abcdef",
             "inputs": expected_data_inputs,
         },
@@ -142,8 +144,9 @@ def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
         "log_reference": "HELLO001",
         "outcome": outcome,
         "message": "Hello, world!",
+        "index": "SPLUNK_INDEX",
+        "source": "test_logging._dummy_function",
         "data": {
-            "function": "test_logging._dummy_function",
             "result": result,
             "inputs": {"foo": "abc", "bar": "def"},
         },
@@ -155,7 +158,7 @@ def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
 
 _log = builds(
     LogTemplate,
-    data=just(LogData(function="foo", inputs={}, result=None)),
+    data=just(LogData(inputs={}, result=None)),
 )
 
 

@@ -14,3 +14,4 @@ class LogReference(Enum):
         "Processing individual Cloudwatch Logs record "
         "(which may contain multiple log entries)"
     )
+    FIREHOSE007 = "Joining Splunk logs"

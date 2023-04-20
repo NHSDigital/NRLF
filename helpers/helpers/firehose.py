@@ -18,6 +18,7 @@ from nrlf.core.firehose.model import (
 )
 from nrlf.core.firehose.submission import FirehoseClient, _submit_records
 from nrlf.core.firehose.utils import load_json_gzip, name_from_arn
+from nrlf.core.validators import json_loads
 from pydantic import BaseModel, Extra, Field, Json, ValidationError, conlist
 
 from helpers.aws_session import (
@@ -102,8 +103,10 @@ def fetch_logs_from_s3(bucket_name: str, file_key: str, s3_client) -> list[dict]
     data = _read_gzip_from_s3(
         s3_client=s3_client, bucket_name=bucket_name, file_key=file_key
     )
-    file_lines = filter(bool, data.split("\n"))  # Newline delimited json
-    parsed_lines = map(json.loads, file_lines)
+    file_lines = filter(
+        bool, data.replace("}{", "}\n{").split("\n")
+    )  # Newline delimited json
+    parsed_lines = map(json_loads, file_lines)
     if file_key.startswith("error") or file_key.startswith("fixed"):
         _grouped_log_events = map(_get_logs_from_error_event, parsed_lines)
         parsed_lines = chain.from_iterable(_grouped_log_events)  # Flatten list of lists
