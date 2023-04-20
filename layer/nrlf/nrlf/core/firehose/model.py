@@ -1,5 +1,5 @@
 import json
-import time
+import time  # noqa: F401
 from enum import Enum
 from typing import Iterator, Literal, Optional, Union
 
