@@ -28,6 +28,7 @@ def create_zip_package(
     yield copy_dir
     zip_package(build_dir)
     shutil.move(dist_dir / f"{BUILD_DIR}.zip", dist_dir / f"{package_name}.zip")
+    clean_dir(build_dir)
 
 
 def build(file):
