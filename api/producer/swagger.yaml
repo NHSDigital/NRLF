@@ -1815,7 +1815,7 @@ components:
         invalid:
           summary: Unknown
           value: XYZ
-    receiverCode:
+    odsCodeExtension:
       name: NHSD-End-User-Organisation
       description: Receiver Code for Organisation
       in: header

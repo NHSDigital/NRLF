@@ -46,7 +46,7 @@ components:
       schema:
         $ref: "#/components/schemas/RequestHeaderOdsCode"
       required: true
-    receiverCode:
+    odsCodeExtension:
       name: NHSD-End-User-Organisation
       description: Receiver Code for Organisation
       in: header

@@ -122,7 +122,7 @@ Feature: Producer Read Failure scenarios
       | issue_description | A parameter or value has resulted in a validation error   |
       | message           | Input is not composite of the form a-b: 8FW23\|1234567890 |
 
-  Scenario: Producer searches for another Producer's Document Pointer with the same ODS Code
+  Scenario: Producer under the same ODS code tries to access another producers document pointer
     Given Producer "BaRS (EMIS)" (Organisation ID "V4T0L.YGMMC") is requesting to read Document Pointers
     And Producer "BaRS (EMIS)" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
