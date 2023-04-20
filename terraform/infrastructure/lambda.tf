@@ -11,6 +11,7 @@ module "consumer__readDocumentReference" {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
+    SPLUNK_INDEX                = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -35,6 +36,7 @@ module "consumer__searchDocumentReference" {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
+    SPLUNK_INDEX                = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -59,6 +61,7 @@ module "consumer__searchPostDocumentReference" {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
+    SPLUNK_INDEX                = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -83,6 +86,7 @@ module "producer__createDocumentReference" {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
+    SPLUNK_INDEX                = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-write.arn,
@@ -108,6 +112,7 @@ module "producer__deleteDocumentReference" {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
+    SPLUNK_INDEX                = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-write.arn,
@@ -133,6 +138,7 @@ module "producer__readDocumentReference" {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
+    SPLUNK_INDEX                = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -158,6 +164,7 @@ module "producer__searchDocumentReference" {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
+    SPLUNK_INDEX                = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -182,6 +189,7 @@ module "producer__searchPostDocumentReference" {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
+    SPLUNK_INDEX                = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -206,6 +214,7 @@ module "producer__updateDocumentReference" {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
+    SPLUNK_INDEX                = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -233,8 +242,9 @@ module "producer__authoriser_lambda" {
   layers      = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
   kms_key_id  = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    PREFIX      = "${local.prefix}--"
-    ENVIRONMENT = local.environment
+    PREFIX       = "${local.prefix}--"
+    ENVIRONMENT  = local.environment
+    SPLUNK_INDEX = module.firehose__processor.splunk.index
   }
   additional_policies = [
   ]
@@ -255,8 +265,9 @@ module "consumer__authoriser_lambda" {
   layers      = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
   kms_key_id  = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    PREFIX      = "${local.prefix}--"
-    ENVIRONMENT = local.environment
+    PREFIX       = "${local.prefix}--"
+    ENVIRONMENT  = local.environment
+    SPLUNK_INDEX = module.firehose__processor.splunk.index
   }
   additional_policies = [
   ]
@@ -281,6 +292,7 @@ module "consumer__status" {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
+    SPLUNK_INDEX                = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -306,6 +318,7 @@ module "producer__status" {
     DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
+    SPLUNK_INDEX                = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,

@@ -39,6 +39,7 @@ class Config(BaseModel):
     AWS_REGION: str
     PREFIX: str
     ENVIRONMENT: str
+    SPLUNK_INDEX: str
 
 
 def build_persistent_dependencies(config: Config) -> dict[str, any]:
@@ -51,7 +52,7 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
     may not be each execution, depending on how busy the API is.
     These dependencies will be passed through to your `handle` function below.
     """
-    return {"environment": config.ENVIRONMENT}
+    return {"environment": config.ENVIRONMENT, "splunk_index": config.SPLUNK_INDEX}
 
 
 def _create_policy(principal_id, resource, effect, context):
