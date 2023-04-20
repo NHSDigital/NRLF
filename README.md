@@ -402,6 +402,17 @@ Other notes:
 }
 ```
 
+### Firehose and Splunk
+
+Logs are processed by Firehose and forwarded to:
+
+- S3 for development and CI terraform workspaces (Firehose destination "extended_s3")
+- Splunk for persistent environments workspaces (Firehose destination "splunk")
+
+To enable Splunk for a given workspace, ensure that Splunk connection credentials have been set in the corresponding AWS secret resource (see firehose terraform module for more details). You will also need to set 'destination = "splunk"' in the initialisation of the Firehose terraform module, but do not merge this into production since we don't want all development workspace logs going to Splunk. (Our test suite will anyway reject this in the CI, since it expects that the "extended_s3" has been used for non persistent environments)
+
+More details about Firehose are given below.
+
 ---
 
 ## Route53 & Hosted Zones

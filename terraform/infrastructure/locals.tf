@@ -21,4 +21,5 @@ locals {
       path = var.producer_api_path
     }
   }
+  persistent_environments = ["dev", "dev-sandbox", "ref", "ref-sandbox", "int", "prod"]
 }
