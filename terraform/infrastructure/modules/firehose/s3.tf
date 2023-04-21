@@ -33,8 +33,3 @@ resource "aws_s3_bucket_lifecycle_configuration" "firehose" {
     }
   }
 }
-
-resource "aws_s3_bucket_acl" "firehose" {
-  bucket = aws_s3_bucket.firehose.id
-  acl    = "private"
-}
