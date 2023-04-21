@@ -3,11 +3,6 @@ resource "aws_s3_bucket" "api_truststore" {
   force_destroy = true
 }
 
-resource "aws_s3_bucket_acl" "api_truststore" {
-  bucket = aws_s3_bucket.api_truststore.id
-  acl    = "private"
-}
-
 resource "aws_s3_bucket_server_side_encryption_configuration" "api_truststore" {
   bucket = aws_s3_bucket.api_truststore.bucket
 
