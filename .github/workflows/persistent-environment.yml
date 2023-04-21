@@ -37,6 +37,7 @@ env:
   TF_CLI_ARGS: -no-color
   RUNNING_IN_CI: 1
   CI_DEPLOY_PERSISTENT_ENV: 1
+  SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_ENV_SLACK_HOOK_URL }}
 
 jobs:
   cache:
@@ -250,6 +251,17 @@ jobs:
           source nrlf.sh
           nrlf doc push ${TF_WORKFLOW_ID}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
 
+  set-success:
+    name: Set Success
+    needs: [documentation]
+    runs-on: [self-hosted, ci]
+    steps:
+      - name: Set success env var
+        run: echo "success"
+
+    outputs:
+      success: "succeeded"
+
   clear-cache:
     name: Clear Cache
     needs: [documentation]
@@ -266,3 +278,21 @@ jobs:
         uses: ./.github/actions/clear-cache/
         with:
           name: ${{ env.CACHE_NAME }}
+
+  message-slack:
+    name: Notify slack of deployment
+    needs: [set-success]
+    if: ${{ always() }}
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Send job result to slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "environment": "${{ env.TF_WORKFLOW_ID }}",
+              "result": "${{ needs.set-success.outputs.success && needs.set-success.outputs.success || 'failed' }}",
+              "branch": "${{ inputs.branch_name }}"
+            }
