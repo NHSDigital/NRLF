@@ -21,6 +21,16 @@ env:
   RUNNING_IN_CI: 1
 
 jobs:
+  check-release:
+    name: Check if release branch is correct
+    runs-on: [self-hosted, ci]
+    if: startsWith(${{env.BRANCH_NAME}}, 'release/')
+    steps:
+      - name: Is release branch
+        run: |
+          echo ${{env.BRANCH_NAME}}
+          if [ ${{env.BRANCH_NAME}} startswith release ]; then exit 0; else exit 1; fi
+
   cache-base:
     name: Cache (base)
     runs-on: [self-hosted, ci]
