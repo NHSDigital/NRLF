@@ -56,12 +56,12 @@ jobs:
         uses: actions/checkout@v2
       - name: Verify tag
         run: |
-          git tag -v ${{ env.tag }}
+          git tag -v ${{ needs.make-tag.outputs.tag }}
 
   # comment
   message-slack:
     name: Notify slack of merge to main
-    needs: [verify-tag]
+    needs: [verify-tag, make-tag]
     runs-on: [self-hosted, ci]
     steps:
       - name: Send merge result to slack
@@ -70,7 +70,7 @@ jobs:
         with:
           payload: |
             {
-              "tag": "${{ needs.make-tag.outputs.tag}}"
+              "tag": "${{ needs.make-tag.outputs.tag }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.MAIN_MERGE_SLACK_HOOK_URL }}
