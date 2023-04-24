@@ -49,7 +49,7 @@ jobs:
   # comment
   message-slack:
     name: Notify slack of merge to main
-    needs: [make-tag, extract-branch]
+    needs: [make-tag]
     runs-on: [self-hosted, ci]
     steps:
       - name: Send merge result to slack
