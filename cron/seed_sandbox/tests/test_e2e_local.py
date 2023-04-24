@@ -16,6 +16,8 @@ def mock_environment():
             "AWS_DEFAULT_REGION": "eu-west-2",
             "PREFIX": "",
             "ENVIRONMENT": "",
+            "SPLUNK_INDEX": "",
+            "SOURCE": "",
         },
         clear=True,
     ):

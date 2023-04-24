@@ -22,6 +22,13 @@ locals {
     }
   }
 
-
+  s3_configuration = {
+    # Note could add partition key info to prefix to help debug, requires more investigation
+    prefix              = "!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}/!{timestamp:HH}/"
+    error_output_prefix = "errors/!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}/!{timestamp:HH}/!{firehose:error-output-type}/"
+    buffer_size         = 5
+    buffer_interval     = 300
+    compression_format  = "GZIP"
+  }
 
 }

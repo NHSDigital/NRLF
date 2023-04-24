@@ -26,13 +26,16 @@ def _log_events_strategy(min_size=1, max_size=None, sensitive=True, message=None
     if message is None:
         message = just(
             LogTemplate(
-                data=LogData(function="foo", inputs={}, result=""),
+                data=LogData(inputs={}, result=""),
                 sensitive=sensitive,
                 correlation_id="",
                 nhsd_correlation_id="",
                 request_id="",
                 transaction_id="",
                 host="",
+                index="",
+                source="",
+                function="",
                 environment="",
                 log_level="",
                 log_reference="",
@@ -149,16 +152,21 @@ def test__process_firehose_records_normal_including_redacted_records(
     for record in output_records:
         record_is_sensitive = False
 
-        lines = base64.b64decode(record.data.encode()).decode().split("\n")
+        lines = (
+            base64.b64decode(record.data.encode())
+            .decode()
+            .replace("}{", "}\n{")
+            .split("\n")
+        )
         for log in map(json_loads, filter(None, lines)):
             n_lines += 1
-            if log["sensitive"]:
+            if log["event"]["sensitive"]:
                 record_is_sensitive = True
                 n_sensitive += 1
-                assert log["data"] == "REDACTED"
+                assert log["event"]["data"] == "REDACTED"
             else:
                 n_not_sensitive += 1
-                LogTemplate(**log)
+                LogTemplate(**log["event"])
         n_redacted_records += int(record_is_sensitive)
 
     assert n_lines == 15

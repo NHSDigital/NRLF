@@ -11,20 +11,26 @@ from lambda_utils.tests.unit.status_test_utils import (
 
 from api.producer.status.index import handler
 
+BASE_FIELDS = {"ENVIRONMENT": "", "SPLUNK_INDEX": "", "SOURCE": ""}
 
-@mock.patch.dict(os.environ, {"ENVIRONMENT": ""}, clear=True)
+
+@mock.patch.dict(os.environ, BASE_FIELDS, clear=True)
 def test_status_fails_if_bad_config(event):
     assert handler(event=event) == SERVICE_UNAVAILABLE
 
 
-@mock.patch.dict(os.environ, {"ENVIRONMENT": "", "PREFIX": ""}, clear=True)
+@mock.patch.dict(os.environ, {**BASE_FIELDS, "PREFIX": ""}, clear=True)
 def test_status_fails_if_cant_connect_to_boto(event):
     assert handler(event=event) == SERVICE_UNAVAILABLE
 
 
 @mock.patch.dict(
     os.environ,
-    {"ENVIRONMENT": "", "AWS_DEFAULT_REGION": "eu-west-2", "PREFIX": ""},
+    {
+        **BASE_FIELDS,
+        "AWS_DEFAULT_REGION": "eu-west-2",
+        "PREFIX": "",
+    },
     clear=True,
 )
 def test_status_fails_if_cant_connect_to_db(event):
@@ -36,7 +42,7 @@ def test_status_fails_if_cant_connect_to_db(event):
 @mock.patch.dict(
     os.environ,
     {
-        "ENVIRONMENT": "",
+        **BASE_FIELDS,
         "AWS_DEFAULT_REGION": "eu-west-2",
         "AWS_REGION": "eu-west-2",
         "PREFIX": "",

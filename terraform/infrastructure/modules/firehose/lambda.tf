@@ -7,8 +7,9 @@ module "lambda" {
   layers      = var.layers
   kms_key_id  = var.cloudwatch_kms_arn
   environment_variables = {
-    PREFIX      = "${var.prefix}--"
-    ENVIRONMENT = var.environment
+    PREFIX       = "${var.prefix}--"
+    ENVIRONMENT  = var.environment
+    SPLUNK_INDEX = var.splunk_index
   }
   additional_policies = [
     aws_iam_policy.lambda.arn,

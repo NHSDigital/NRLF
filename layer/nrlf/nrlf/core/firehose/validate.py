@@ -6,8 +6,9 @@ from nrlf.core.firehose.model import (
     FirehoseOutputRecord,
     FirehoseResult,
     FirehoseSubmissionRecord,
+    format_cloudwatch_logs_for_splunk,
 )
-from nrlf.core.firehose.utils import encode_logs_as_ndjson
+from nrlf.core.firehose.utils import encode_as_json_stream
 
 MAX_PACKET_SIZE_BYTES = (
     6000000  # 6000000 instead of 6291456 to give headroom (according to AWS's example)
@@ -50,10 +51,11 @@ def _determine_outcome_given_record_size(
 ) -> FirehoseOutputRecord:
     # Unfortunately we have to create the output record this deep into the code
     # since we need to validate the output record size of the encoded logs
+    splunk_events = format_cloudwatch_logs_for_splunk(cloudwatch_data=cloudwatch_data)
     output_record = FirehoseOutputRecord(
         record_id=cloudwatch_data.record_id,
         result=FirehoseResult.OK,
-        data=encode_logs_as_ndjson(logs=cloudwatch_data.redacted_logs),
+        data=encode_as_json_stream(items=splunk_events, logger=logger),
     )
 
     try:

@@ -9,7 +9,7 @@ resource "aws_lambda_function" "lambda_function" {
   memory_size      = 128
 
   environment {
-    variables = var.environment_variables
+    variables = merge(var.environment_variables, { "SOURCE" : "${var.prefix}--${replace(var.parent_path, "/", "--")}--${var.name}" })
   }
 
   layers = var.layers

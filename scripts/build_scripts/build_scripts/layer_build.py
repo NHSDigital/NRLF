@@ -38,6 +38,8 @@ def create_zip_package(
     zip_package(build_dir)
     shutil.move(dist_dir / f"{BUILD_DIR}.zip", dist_dir / f"{package_name}.zip")
 
+    clean_dir(build_dir)
+
 
 def build(file):
     layer_base_dir = get_base_dir(file)
