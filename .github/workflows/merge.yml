@@ -44,7 +44,7 @@ jobs:
     runs-on: [self-hosted, ci]
     needs: [make-tag]
     permissions: write-all
-    name: Verify tag
+    name: Verify the tag
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v2
