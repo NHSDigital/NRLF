@@ -32,8 +32,6 @@ jobs:
 
       - name: Is release branch
         run: |
-          echo "${{ github.event.pull_request.head.ref }}"
-          echo "$(cat RELEASE)"
           if [[ ${{ github.event.pull_request.head.ref }} == release/* || ${{ github.event.pull_request.head.ref }} == hotfix/* ]];
             then
               echo "Branch is a release branch, checking names match";
