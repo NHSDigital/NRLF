@@ -19,6 +19,8 @@ class Config(BaseModel):
     AWS_REGION: str
     PREFIX: str
     ENVIRONMENT: str
+    SPLUNK_INDEX: str
+    SOURCE: str
 
 
 CONFIG = Config(
@@ -32,6 +34,8 @@ def handler(event, context):
         logger_name=Path(__file__).stem,
         aws_lambda_event=prepare_default_event_for_logging(),
         aws_environment=CONFIG.ENVIRONMENT,
+        splunk_index=CONFIG.SPLUNK_INDEX,
+        source=CONFIG.SOURCE,
     )
     firehose_event = KinesisFirehoseModel(**event)
     lambda_result = firehose_handler(

@@ -29,13 +29,16 @@ def _make_good_log(transaction_id) -> str:
         transaction_id=transaction_id,
         host="test",
         environment="test",
+        index="splunk_index",
+        source="source",
+        function="test.function",
         request_id="123",
         log_reference="FOO.BAR",
         log_level="INFO",
         outcome="GOOD",
         duration_ms=123,
         message="all good",
-        data=LogData(function="foo.bar", inputs={"some": "input"}, result="a result"),
+        data=LogData(inputs={"some": "input"}, result="a result"),
         error="oops",
         call_stack="oops again",
         timestamp="123",
@@ -110,12 +113,19 @@ def retrieve_firehose_output(
 
 
 def all_logs_are_on_s3(
-    original_logs: list[dict], logs_from_s3: list[dict], redacted=False
+    original_logs: list[dict],
+    logs_from_s3: list[dict],
+    good_event=False,
+    redacted=False,
 ) -> bool:
     for log in original_logs:
         _log = deepcopy(log)
+        _logs_from_s3 = logs_from_s3
+        if good_event:
+            # Pull log out from nested Splunk Event
+            _logs_from_s3 = [_log_from_s3["event"] for _log_from_s3 in logs_from_s3]
         if redacted:
             _log["data"] = "REDACTED"
-        if _log not in logs_from_s3:
+        if _log not in _logs_from_s3:
             return False
     return True

@@ -6,9 +6,11 @@ from typing import Iterator
 from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
     KinesisFirehoseRecord,
 )
+from lambda_utils.logging import log_action
+from nrlf.core.firehose.log_reference import LogReference
 from nrlf.core.validators import json_loads
 
-NEWLINE = "\n"
+LOG_SEPARATOR = ""
 
 
 def load_json_gzip(data: bytes) -> dict:
@@ -19,9 +21,14 @@ def dump_json_gzip(obj) -> bytes:
     return gzip.compress(json.dumps(obj).encode())
 
 
-def encode_logs_as_ndjson(logs: list[dict]) -> str:
+@log_action(log_reference=LogReference.FIREHOSE007, log_result=True)
+def _as_json_stream(items: list[dict]) -> str:
+    return LOG_SEPARATOR.join(map(json.dumps, items))
+
+
+def encode_as_json_stream(items: list[dict], logger=None) -> str:
     return base64.b64encode(
-        (NEWLINE.join(map(json.dumps, logs)) + NEWLINE).encode()
+        _as_json_stream(items=items, logger=logger).encode()
     ).decode()
 
 
