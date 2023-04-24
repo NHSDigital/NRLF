@@ -21,8 +21,36 @@ env:
   RUNNING_IN_CI: 1
 
 jobs:
+  check-release:
+    name: Check if release branch
+    runs-on: [self-hosted, ci]
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Is release branch
+        run: |
+          if [[ ${{ github.event.pull_request.head.ref }} == release/* || ${{ github.event.pull_request.head.ref }} == hotfix/* ]];
+            then
+              echo "Branch is a release branch, checking names match";
+            else
+              echo "Regular branch, exiting release check"
+              exit 0;
+          fi
+          if [ "${{ env.BRANCH_NAME }}" == "$(cat RELEASE)" ];
+            then
+              echo "Branch is a release and name matches release name, continuing"
+              exit 0;
+            else
+              echo "Branch name does not match release name in RELEASE file, exiting"
+              exit 1;
+          fi
+
   cache-base:
     name: Cache (base)
+    needs: [check-release]
     runs-on: [self-hosted, ci]
 
     steps:
@@ -47,6 +75,7 @@ jobs:
 
   cache:
     name: Cache (head)
+    needs: [check-release]
     runs-on: [self-hosted, ci]
 
     steps:
