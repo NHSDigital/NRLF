@@ -26,6 +26,11 @@ jobs:
     runs-on: [self-hosted, ci]
     if: startsWith( github.event.pull_request.head.ref, 'release/' )
     steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
       - name: Is release branch
         run: |
           echo "$(cat RELEASE)"
