@@ -34,15 +34,9 @@ jobs:
           TAG=$(cat RELEASE)
           echo "tag=${TAG}" >> $GITHUB_ENV
       - name: Create tag
-        uses: actions/github-script@v5
-        with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ env.tag }}',
-              sha: context.sha
-            })
+        run: |
+          git tag ${{ env.tag }} release/rowan-x
+          git push origin --tags
     outputs:
       tag: ${{ env.tag }}
 
