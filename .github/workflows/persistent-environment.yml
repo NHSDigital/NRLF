@@ -292,7 +292,7 @@ jobs:
         with:
           payload: |
             {
-              "environment": "${{ env.TF_WORKFLOW_ID }}",
+              "environment": "${{ env.WORKSPACE }}",
               "result": "${{ needs.set-success.outputs.success && needs.set-success.outputs.success || 'failed' }}",
               "branch": "${{ inputs.branch_name }}"
             }
