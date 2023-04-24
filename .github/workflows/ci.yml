@@ -28,7 +28,6 @@ jobs:
     steps:
       - name: Is release branch
         run: |
-          echo ${{ env.BRANCH_NAME }}
           if [ "${{ env.BRANCH_NAME }}" == "$(cat RELEASE)" ]; then exit 0; else exit 1; fi
 
   cache-base:
