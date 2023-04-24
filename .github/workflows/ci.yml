@@ -22,7 +22,7 @@ env:
 
 jobs:
   check-release:
-    name: Check if release branch is correct
+    name: Check if release branch
     runs-on: [self-hosted, ci]
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "${{ github.event.pull_request.head.ref }}"
           echo "$(cat RELEASE)"
-          if [ ${{ github.event.pull_request.head.ref }} == release/* ] || ${{ github.event.pull_request.head.ref }} == hotfix/* ];
+          if [ ${{ github.event.pull_request.head.ref }} == release/* ] || [ ${{ github.event.pull_request.head.ref }} == hotfix/* ];
             then
               echo "Branch is a release branch, checking names match";
             else
