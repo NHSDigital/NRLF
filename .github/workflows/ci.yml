@@ -24,7 +24,7 @@ jobs:
   check-release:
     name: Check if release branch is correct
     runs-on: [self-hosted, ci]
-    if: startsWith(env.BRANCH_NAME, 'release/')
+    if: startsWith( github.event.pull_request.head.ref, 'release/' )
     steps:
       - name: Is release branch
         run: |
