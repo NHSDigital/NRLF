@@ -3,7 +3,7 @@ name: Merge to main
 on:
   push:
     branches:
-      - main
+      - release/rowan-x
 
 permissions:
   id-token: write
@@ -58,7 +58,6 @@ jobs:
         with:
           payload: |
             {
-              "branch": "${{ needs.extract-branch.outputs.branch }}",
               "tag": "${{ needs.make-tag.outputs.tag}}"
             }
         env:
