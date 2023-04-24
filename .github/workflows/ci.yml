@@ -24,7 +24,6 @@ jobs:
   check-release:
     name: Check if release branch is correct
     runs-on: [self-hosted, ci]
-    if: startsWith( github.event.pull_request.head.ref, 'release/' )
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
         uses: actions/checkout@v3
@@ -35,6 +34,7 @@ jobs:
         run: |
           echo "$(cat RELEASE)"
           echo "${{ env.BRANCH_NAME }}"
+          if [ ${{ github.event.pull_request.head.ref }} == release/* ]; then :; else exit 1; fi
           if [ "${{ env.BRANCH_NAME }}" == "$(cat RELEASE)" ]; then exit 0; else exit 1; fi
 
   cache-base:
