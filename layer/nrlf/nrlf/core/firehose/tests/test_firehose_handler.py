@@ -35,6 +35,7 @@ def _log_events_strategy(min_size=1, max_size=None, sensitive=True, message=None
                 host="",
                 index="",
                 source="",
+                function="",
                 environment="",
                 log_level="",
                 log_reference="",

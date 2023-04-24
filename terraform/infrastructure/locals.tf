@@ -21,5 +21,9 @@ locals {
       path = var.producer_api_path
     }
   }
+  # Logic / vars for splunk environment
   persistent_environments = ["dev", "dev-sandbox", "ref", "ref-sandbox", "int", "prod"]
+  environment_no_hyphen   = replace(local.environment, "-", "")
+  splunk_environment      = contains(local.persistent_environments, local.environment) ? local.environment_no_hyphen : "dev" # dev is the default splunk env
+  splunk_index            = "aws_recordlocator_${local.splunk_environment}"
 }

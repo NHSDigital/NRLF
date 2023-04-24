@@ -9,6 +9,7 @@ class Config(BaseModel):
     PREFIX: str
     ENVIRONMENT: str
     SPLUNK_INDEX: str
+    SOURCE: str
 
 
 def build_persistent_dependencies(config: Config) -> dict[str, any]:
@@ -20,4 +21,5 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
         "prefix": config.PREFIX,
         "environment": config.ENVIRONMENT,
         "splunk_index": config.SPLUNK_INDEX,
+        "source": config.SOURCE,
     }

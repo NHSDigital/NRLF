@@ -35,6 +35,7 @@ def mock_environmental_variables(context, *args, **kwargs):
             "AWS_DEFAULT_REGION": "eu-west-2",
             "ENVIRONMENT": "__environment__",
             "SPLUNK_INDEX": "__index__",
+            "SOURCE": "__source__",
         },
         clear=True,
     ):

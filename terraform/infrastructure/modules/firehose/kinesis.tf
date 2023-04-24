@@ -1,13 +1,16 @@
 
 
 resource "aws_kinesis_firehose_delivery_stream" "firehose" {
-  name        = "${var.prefix}-cloudwatch--delivery-stream"
+  name        = "${var.prefix}--cloudwatch-delivery-stream"
   destination = var.destination
   dynamic "splunk_configuration" {
     # "splunk_configuration" is only enabled if the below secret has been set by hand in the AWS Console
     #
     # NB: the for_each will not run in the case that 'secret_string' has not been set in the AWS Console, and
     # therefore this block will be omitted for default deployments (e.g. developer and CI workspaces).
+    #
+    # "dummyKey" is required because terraform can't for_each over arrays of values, only over key-value pairs in an object.
+    # "dummyKey" is therefore an unused dummy key pointing to the splunk config secret
     for_each = { for item in data.aws_secretsmanager_secret_version.splunk_configuration.*.secret_string : "dummyKey" => jsondecode(item) }
     content {
       hec_endpoint               = "https://${splunk_configuration.value["nhs_splunk_url"]}/services/collector/event"
@@ -47,6 +50,8 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
     #
     # NB: the for_each will not run in the case that 'secret_string' has not been set in the AWS Console, and
     # therefore this block will be omitted for default deployments (e.g. developer and CI workspaces).
+    #
+    # "dummyKey" and "dummyValue" are unused, they simply enable this feature when 'secret_string' has been defined.
     for_each = { for item in data.aws_secretsmanager_secret_version.splunk_configuration.*.secret_string : "dummyKey" => "dummyValue" }
     content {
       role_arn            = aws_iam_role.firehose.arn

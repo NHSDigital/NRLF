@@ -111,6 +111,7 @@ def execute_steps(
     event["headers"] = _set_missing_logging_headers(event=event)
     dependencies["environment"] = os.environ.get("ENVIRONMENT")
     dependencies["splunk_index"] = os.environ.get("SPLUNK_INDEX")
+    dependencies["source"] = os.environ.get("SOURCE")
 
     status_code, response = _function_handler(
         _setup_logger,

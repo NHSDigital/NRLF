@@ -30,6 +30,7 @@ class LogTemplateBase(BaseModel):
     host: str
     environment: str
     index: str
+    source: str
 
 
 class LogData(BaseModel):
@@ -43,7 +44,7 @@ class LogTemplate(LogTemplateBase):
     outcome: str
     duration_ms: int
     message: str
-    source: str
+    function: str
     data: LogData
     error: Union[Exception, str, None]
     call_stack: str = None
@@ -104,6 +105,7 @@ class Logger(_Logger):
         aws_lambda_event: MinimalEventModelForLogging,
         aws_environment: str,
         splunk_index: str,
+        source: str,
         transaction_id: str = None,
         **kwargs,
     ):
@@ -116,6 +118,7 @@ class Logger(_Logger):
             host=aws_lambda_event.requestContext.accountId,
             environment=aws_environment,
             index=splunk_index,
+            source=source,
             transaction_id=self.transaction_id,
         )
         super().__init__(logger_name, logger_formatter=CustomFormatter(), **kwargs)
@@ -182,7 +185,7 @@ def log_action(
             _message = LogTemplate(
                 log_reference=log_reference.name,
                 message=log_reference.value,
-                source=f"{fn.__module__}.{fn.__name__}",
+                function=f"{fn.__module__}.{fn.__name__}",
                 data=data,
                 error=error,
                 call_stack=call_stack,

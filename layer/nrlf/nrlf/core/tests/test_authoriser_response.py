@@ -77,6 +77,7 @@ def test_execute_steps_yields_deny_on_internal_server_error(
             PREFIX="a-prefix",
             ENVIRONMENT="an-environment",
             SPLUNK_INDEX="an-index",
+            SOURCE="the-lambda-name",
         ),
     )
 

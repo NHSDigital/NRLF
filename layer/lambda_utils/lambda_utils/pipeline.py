@@ -63,6 +63,7 @@ def _setup_logger(
         aws_lambda_event=_event,
         aws_environment=dependencies["environment"],
         splunk_index=dependencies["splunk_index"],
+        source=dependencies["source"],
         transaction_id=transaction_id,
     )
 

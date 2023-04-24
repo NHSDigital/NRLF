@@ -32,6 +32,7 @@ DUMMY_LOGGER_KWARGS = {
     "transaction_id": "ABC",
     "aws_environment": "TEST",
     "splunk_index": "SPLUNK_INDEX",
+    "source": "SOURCE",
 }
 
 
@@ -88,7 +89,8 @@ def test_log_with_log_fields_filter(log_fields, expected_data_inputs):
         "outcome": "SUCCESS",
         "message": "Hello, world!",
         "index": "SPLUNK_INDEX",
-        "source": "test_logging._dummy_function",
+        "source": "SOURCE",
+        "function": "test_logging._dummy_function",
         "data": {
             "result": "abcdef",
             "inputs": expected_data_inputs,
@@ -145,7 +147,8 @@ def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
         "outcome": outcome,
         "message": "Hello, world!",
         "index": "SPLUNK_INDEX",
-        "source": "test_logging._dummy_function",
+        "source": "SOURCE",
+        "function": "test_logging._dummy_function",
         "data": {
             "result": result,
             "inputs": {"foo": "abc", "bar": "def"},

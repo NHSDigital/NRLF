@@ -17,6 +17,7 @@ def mock_environment():
             "PREFIX": "",
             "ENVIRONMENT": "",
             "SPLUNK_INDEX": "",
+            "SOURCE": "",
         },
         clear=True,
     ):
