@@ -23,7 +23,7 @@ env:
 
 jobs:
   make-tag:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ci]
     permissions: write-all
     name: Create a tag from main
     steps:
@@ -45,6 +45,17 @@ jobs:
             })
     outputs:
       tag: ${{ env.tag }}
+
+  verify-tag:
+    runs-on: [self-hosted, ci]
+    permissions: write-all
+    name: Verify tag
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+      - name: Create tag
+        run: |
+          git tag -v ${{ env.tag }}
 
   # comment
   message-slack:
