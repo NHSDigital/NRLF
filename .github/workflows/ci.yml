@@ -32,8 +32,14 @@ jobs:
 
       - name: Is release branch
         run: |
-          if [ ${{ github.event.pull_request.head.ref }} == release/* ] || ${{ github.event.pull_request.head.ref }} == hotfix/* ]; then echo "Branch is a release branch"; else exit 0; fi
-          if [ "${{ env.BRANCH_NAME }}" == "$(cat RELEASE)" ]; then exit 0; else echo "Branch name does not match release name in RELEASE file" exit 1; fi
+          if [ ${{ github.event.pull_request.head.ref }} == release/* ] || ${{ github.event.pull_request.head.ref }} == hotfix/* ];
+            then echo "Branch is a release branch, checking names match";
+            else echo "Regular branch, exiting release check" exit 0;
+          fi
+          if [ "${{ env.BRANCH_NAME }}" == "$(cat RELEASE)" ];
+            then echo "Branch is a release and name matches release name, continuing" exit 0;
+            else echo "Branch name does not match release name in RELEASE file, exiting" exit 1;
+          fi
 
   cache-base:
     name: Cache (base)
