@@ -35,7 +35,7 @@ jobs:
           echo "tag=${TAG}" >> $GITHUB_ENV
       - name: Create tag
         run: |
-          git tag ${{ env.tag }} release/rowan-x
+          git tag ${{ env.tag }} refs/heads/release/rowan-x
           git push origin --tags
     outputs:
       tag: ${{ env.tag }}
