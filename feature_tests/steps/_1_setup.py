@@ -2,7 +2,7 @@ from behave import given as behave_given
 from behave.runner import Context
 from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import create_document_pointer_from_fhir_json
-from nrlf.core.validators import json_loads
+from nrlf.core.validators import json_loads, split_custodian_id
 
 from feature_tests.common.config_setup import register_application, request_setup
 from feature_tests.common.constants import DEFAULT_VERSION, WITH_WITHOUT_ANY, FhirType
@@ -55,9 +55,13 @@ def registered_in_system(
         if with_without_any == "with"
         else []
     )
+
+    org_id, org_id_extension = split_custodian_id(test_config.actor_context.org_id)
+
     register_application(
         context=context,
-        org_id=test_config.actor_context.org_id,
+        org_id=org_id,
+        org_id_extension=org_id_extension,
         app_name=app_name,
         app_id=app_id,
         pointer_types=pointer_types,

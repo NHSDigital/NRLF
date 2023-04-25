@@ -11,6 +11,7 @@ from nrlf.core.repository import Repository
 from nrlf.core.tests.data_factory import (
     SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY,
     SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN,
+    generate_test_custodian,
     generate_test_document_reference,
     generate_test_document_type,
     generate_test_nhs_number,
@@ -105,6 +106,7 @@ def test_query_can_filter_results():
         provider_doc_id="OK",
         type=generate_test_document_type(SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN),
         subject=generate_test_subject(nhs_number),
+        custodian=generate_test_custodian(provider_id),
     )
     doc_2 = generate_test_document_reference(
         provider_id=provider_id,
@@ -113,6 +115,7 @@ def test_query_can_filter_results():
             SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY
         ),
         subject=generate_test_subject(nhs_number),
+        custodian=generate_test_custodian(provider_id),
     )
     model_1 = create_document_pointer_from_fhir_json(doc_1, 99)
     model_2 = create_document_pointer_from_fhir_json(doc_2, 99)

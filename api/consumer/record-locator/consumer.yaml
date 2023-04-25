@@ -1265,6 +1265,8 @@ components:
       type: string
     RequestHeaderOdsCode:
       type: string
+    RequestHeaderReceiverCode:
+      type: string
     RequestHeaderRequestId:
       type: string
       pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
@@ -1369,6 +1371,12 @@ components:
         invalid:
           summary: Unknown
           value: XYZ
+    odsCodeExtension:
+      name: NHSD-End-User-Organisation
+      description: Receiver Code for Organisation
+      in: header
+      schema:
+        $ref: "#/components/schemas/RequestHeaderReceiverCode"
     requestId:
       name: X-Request-ID
       description: |

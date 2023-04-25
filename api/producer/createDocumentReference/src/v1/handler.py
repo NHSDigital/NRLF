@@ -8,6 +8,7 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
 from nrlf.core.common_producer_steps import invalid_producer_for_delete
 from nrlf.core.common_steps import parse_headers
+from nrlf.core.constants import CUSTODIAN_SEPARATOR
 from nrlf.core.errors import (
     ItemNotFound,
     ProducerValidationError,
@@ -15,7 +16,7 @@ from nrlf.core.errors import (
     SupersedeValidationError,
 )
 from nrlf.core.event_parsing import fetch_body_from_event
-from nrlf.core.model import DocumentPointer
+from nrlf.core.model import DocumentPointer, convert_document_pointer_id_to_pk
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
 from nrlf.core.response import operation_outcome_ok
@@ -62,6 +63,7 @@ def parse_request_body(
     body = fetch_body_from_event(event)
 
     core_model = create_document_pointer_from_fhir_json(body, API_VERSION)
+
     return PipelineData(**data, body=body, core_model=core_model)
 
 
@@ -99,16 +101,18 @@ def validate_producer_permissions(
     logger: Logger,
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
-    organisation_code = data["organisation_code"]
+    ods_code_parts = data["ods_code_parts"]
     delete_item_ids: list[str] = data.get("delete_item_ids", [])
     pointer_types = data["pointer_types"]
 
-    if organisation_code != core_model.producer_id.__root__:
+    if ods_code_parts != tuple(
+        core_model.producer_id.__root__.split(CUSTODIAN_SEPARATOR)
+    ):
         raise ProducerValidationError(
             "The id of the provided document pointer does not include the expected organisation code for this app"
         )
 
-    if organisation_code != core_model.custodian.__root__:
+    if ods_code_parts != core_model.custodian_parts:
         raise ProducerValidationError(
             "The custodian of the provided document pointer does not match the expected organisation code for this app"
         )
@@ -118,8 +122,7 @@ def validate_producer_permissions(
             "The type of the provided document pointer is not in the list of allowed types for this app"
         )
 
-    __cannot_delete = partial(invalid_producer_for_delete, organisation_code)
-
+    __cannot_delete = partial(invalid_producer_for_delete, ods_code_parts)
     if any(map(__cannot_delete, delete_item_ids)):
         raise RequestValidationError(
             "At least one document pointer cannot be deleted because it belongs to another organisation"
@@ -139,18 +142,16 @@ def validate_ok_to_supersede(
     document_pointer_repository: Repository = dependencies.get(
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
     )
-
     source_document_pointer = data["core_model"]
-    delete_item_ids = data.get("delete_item_ids", [])
-
-    delete_pks = map(DocumentPointer.convert_id_to_pk, delete_item_ids)
-
+    delete_pks = list(
+        map(convert_document_pointer_id_to_pk, data.get("delete_item_ids", []))
+    )
     for delete_pk in delete_pks:
         _validate_ok_to_supersede(
             document_pointer_repository, source_document_pointer, delete_pk
         )
 
-    return PipelineData(**data)
+    return PipelineData(**data, delete_pks=delete_pks)
 
 
 def _validate_ok_to_supersede(
@@ -196,9 +197,7 @@ def save_core_model_to_db(
     document_pointer_repository: Repository = dependencies.get(
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
     )
-    delete_pks = list(
-        map(DocumentPointer.convert_id_to_pk, data.get("delete_item_ids", []))
-    )
+    delete_pks: list[str] = data.get("delete_pks", [])
     if delete_pks:
         document_pointer_repository.supersede(
             create_item=core_model, delete_pks=delete_pks

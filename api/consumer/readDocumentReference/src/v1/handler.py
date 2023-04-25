@@ -1,4 +1,3 @@
-import urllib.parse
 from enum import Enum
 from logging import Logger
 from typing import Any
@@ -6,7 +5,7 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
-from nrlf.core.common_steps import parse_headers
+from nrlf.core.common_steps import parse_headers, parse_path_id
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
 from nrlf.core.validators import json_loads, validate_document_reference_string
@@ -25,12 +24,11 @@ def read_document_reference(
     logger: Logger,
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
-    decoded_id = urllib.parse.unquote(event.pathParameters["id"])
-
-    pk = DocumentPointer.convert_id_to_pk(decoded_id)
     pointer_types = data["pointer_types"]
 
-    document_pointer: DocumentPointer = repository.read_item(pk, type=pointer_types)
+    document_pointer: DocumentPointer = repository.read_item(
+        data["pk"], type=pointer_types
+    )
 
     validate_document_reference_string(document_pointer.document.__root__)
 
@@ -39,5 +37,6 @@ def read_document_reference(
 
 steps = [
     parse_headers,
+    parse_path_id,
     read_document_reference,
 ]

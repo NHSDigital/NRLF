@@ -5,10 +5,11 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.constants import CONNECTION_METADATA
 from lambda_utils.header_config import AbstractHeader, ConnectionMetadata
 from lambda_utils.logging import log_action
-from nrlf.core.model import DocumentPointer
+from nrlf.core.constants import CONNECTION_METADATA
+from nrlf.core.model import convert_document_pointer_id_to_pk
+from nrlf.core.validators import generate_producer_id
 
 
 class LogReference(Enum):
@@ -29,8 +30,8 @@ def parse_headers(
     connection_metadata = ConnectionMetadata.parse_raw(_raw_connection_metadata)
     return PipelineData(
         **data,
-        organisation_code=connection_metadata.ods_code,
-        pointer_types=connection_metadata.pointer_types
+        ods_code_parts=connection_metadata.ods_code_parts,
+        pointer_types=connection_metadata.pointer_types,
     )
 
 
@@ -47,9 +48,6 @@ def parse_path_id(
     representations.
     """
     id = urllib.parse.unquote(event.pathParameters["id"])
-    (producer_id, document_id) = DocumentPointer.split_id(id)
-    pk = DocumentPointer.convert_id_to_pk(id)
-
-    return PipelineData(
-        **data, id=id, producer_id=producer_id, document_id=document_id, pk=pk
-    )
+    pk = convert_document_pointer_id_to_pk(id)
+    producer_id, _ = generate_producer_id(id=id, producer_id=None)
+    return PipelineData(**data, producer_id=producer_id, id=id, pk=pk)
