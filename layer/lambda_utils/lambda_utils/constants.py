@@ -17,7 +17,3 @@ class LoggingConstants:
 class LogLevel:
     INFO = INFO
     ERROR = ERROR
-
-
-CLIENT_RP_DETAILS = "nhsd-client-rp-details"
-CONNECTION_METADATA = "nhsd-connection-metadata"
