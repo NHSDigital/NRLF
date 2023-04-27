@@ -129,3 +129,56 @@ Feature: Producer Supersede Success scenarios
       | created_on  | <timestamp>                       |
     And Document Pointer "8FW23-1234567890" does not exist
     And Document Pointer "8FW23-1234567891" does not exist
+
+  Scenario: Supersede multiple Document Pointers when the producer has an extension code
+    Given Producer "BaRS (EMIS)" (Organisation ID "V4T0L.YGMMC") is requesting to create Document Pointers
+    And Producer "BaRS (EMIS)" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | V4T0L.YGMMC-1234567890         |
+      | type        | 736253002                      |
+      | custodian   | V4T0L.YGMMC                    |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | V4T0L.YGMMC-1234567891         |
+      | type        | 736253002                      |
+      | custodian   | V4T0L.YGMMC                    |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "BaRS (EMIS)" creates a Document Reference from DOCUMENT template
+      | property    | value                          |
+      | identifier  | V4T0L.YGMMC-1234567892         |
+      | target      | V4T0L.YGMMC-1234567890         |
+      | target      | V4T0L.YGMMC-1234567891         |
+      | type        | 736253002                      |
+      | custodian   | V4T0L.YGMMC                    |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    Then the operation is successful
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                    |
+      | issue_type        | informational                            |
+      | issue_level       | information                              |
+      | issue_code        | RESOURCE_SUPERSEDED                      |
+      | issue_description | Resource created and Resource(s) deleted |
+      | message           | Resource created and Resource(s) deleted |
+    And Document Pointer "V4T0L.YGMMC-1234567892" exists
+      | property    | value                             |
+      | id          | V4T0L.YGMMC-1234567892            |
+      | nhs_number  | 9278693472                        |
+      | producer_id | V4T0L.YGMMC                       |
+      | type        | http://snomed.info/sct\|736253002 |
+      | source      | NRLF                              |
+      | version     | 1                                 |
+      | updated_on  | NULL                              |
+      | document    | <document>                        |
+      | created_on  | <timestamp>                       |
+    And Document Pointer "V4T0L.YGMMC-1234567890" does not exist
+    And Document Pointer "V4T0L.YGMMC-1234567891" does not exist

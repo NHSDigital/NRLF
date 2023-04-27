@@ -5,7 +5,7 @@ Feature: Producer Supersede Failure scenarios
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$identifier",
+        "id": "$producer_id-$identifier",
         "custodian": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/ods-organization-code",
@@ -169,6 +169,7 @@ Feature: Producer Supersede Failure scenarios
       | identifier  | 8FW23-1234567890               |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -179,6 +180,7 @@ Feature: Producer Supersede Failure scenarios
       | code        | replaces                       |
       | type        | 734163000                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -202,6 +204,7 @@ Feature: Producer Supersede Failure scenarios
       | identifier  | 8FW23-1234567890               |
       | type        | 736253002                      |
       | custodian   | VN6DL                          |
+      | producer_id | VN6DL                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -212,6 +215,7 @@ Feature: Producer Supersede Failure scenarios
       | code        | replaces                       |
       | type        | 734163000                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -237,6 +241,7 @@ Feature: Producer Supersede Failure scenarios
       | code        | replaces                       |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -257,9 +262,10 @@ Feature: Producer Supersede Failure scenarios
       | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 8FW23-1234567890               |
+      | identifier  | 1234567890                     |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -271,6 +277,7 @@ Feature: Producer Supersede Failure scenarios
       | code        | replaces                       |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -294,6 +301,7 @@ Feature: Producer Supersede Failure scenarios
       | identifier  | 8FW23-1234567890               |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -302,6 +310,7 @@ Feature: Producer Supersede Failure scenarios
       | identifier  | 8FW23-1234567890               |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -325,6 +334,7 @@ Feature: Producer Supersede Failure scenarios
       | identifier  | 1234567890                     |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -345,17 +355,19 @@ Feature: Producer Supersede Failure scenarios
       | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 8FW23-1234567890               |
+      | identifier  | 1234567890                     |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 8FW23-1234567891               |
+      | identifier  | 1234567891                     |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -367,6 +379,7 @@ Feature: Producer Supersede Failure scenarios
       | code        | replaces                       |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 5387015366                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -391,17 +404,19 @@ Feature: Producer Supersede Failure scenarios
       | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 8FW23-1234567890               |
+      | identifier  | 1234567890                     |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 8FW23-1234567891               |
+      | identifier  | 1234567891                     |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -413,6 +428,7 @@ Feature: Producer Supersede Failure scenarios
       | code        | replaces                       |
       | type        | 736253001                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -439,6 +455,7 @@ Feature: Producer Supersede Failure scenarios
       | identifier  | 8FW23-1234567890               |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
@@ -449,6 +466,7 @@ Feature: Producer Supersede Failure scenarios
       | code        | something_bad                  |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
+      | producer_id | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
