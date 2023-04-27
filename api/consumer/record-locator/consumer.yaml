@@ -1265,7 +1265,7 @@ components:
       type: string
     RequestHeaderOdsCode:
       type: string
-    RequestHeaderReceiverCode:
+    RequestHeaderOrganisationExtensionCode:
       type: string
     RequestHeaderRequestId:
       type: string
@@ -1373,10 +1373,10 @@ components:
           value: XYZ
     odsCodeExtension:
       name: NHSD-End-User-Organisation
-      description: Receiver Code for Organisation
+      description: Organisation extension code
       in: header
       schema:
-        $ref: "#/components/schemas/RequestHeaderReceiverCode"
+        $ref: "#/components/schemas/RequestHeaderOrganisationExtensionCode"
     requestId:
       name: X-Request-ID
       description: |

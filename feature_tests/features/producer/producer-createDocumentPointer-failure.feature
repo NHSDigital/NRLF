@@ -78,12 +78,6 @@ Feature: Producer Create Failure Scenarios
             "value": "$subject"
           }
         },
-        "subject": {
-          "identifier": {
-            "system": "https://fhir.nhs.uk/Id/nhs-number",
-            "value": "$subject"
-          }
-        },
         "type": {
           "coding": [
             {
@@ -411,6 +405,31 @@ Feature: Producer Create Failure Scenarios
       | issue_code        | VALIDATION_ERROR                                           |
       | issue_description | A parameter or value has resulted in a validation error    |
       | message           | Provided custodian identifier system is not the ODS system |
+
+  Scenario: Unable to create a Document Pointer when the producer is not the custodian
+    Given Producer "BaRS (EMIS)" (Organisation ID "V4T0L.YGMMC") is requesting to create Document Pointers
+    And Producer "BaRS (EMIS)" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    When Producer "BaRS (EMIS)" creates a Document Reference from DOCUMENT template
+      | property    | value                             |
+      | identifier  | 1234567890                        |
+      | type        | 736253002                         |
+      | custodian   | V4T0L                             |
+      | producer_id | V4T0L.YGMMC                       |
+      | subject     | 9278693472                        |
+      | contentType | application/pdf                   |
+      | url         | https://example.org/my-doc.pdf    |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                                                     |
+      | issue_type        | processing                                                                                                |
+      | issue_level       | error                                                                                                     |
+      | issue_code        | VALIDATION_ERROR                                                                                          |
+      | issue_description | A parameter or value has resulted in a validation error                                                   |
+      | message           | The custodian of the provided document pointer does not match the expected organisation code for this app |
 
   Scenario: Unable to create a Document Pointer with an invalid subject.identifier.system value
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
