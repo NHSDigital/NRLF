@@ -424,12 +424,12 @@ Feature: Producer Create Failure Scenarios
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                                                                |
-      | issue_type        | processing                                                                                           |
-      | issue_level       | error                                                                                                |
-      | issue_code        | VALIDATION_ERROR                                                                                     |
-      | issue_description | A parameter or value has resulted in a validation error                                              |
-      | message           | The id of the provided document pointer does not include the expected organisation code for this app |
+      | property          | value                                                                                                     |
+      | issue_type        | processing                                                                                                |
+      | issue_level       | error                                                                                                     |
+      | issue_code        | VALIDATION_ERROR                                                                                          |
+      | issue_description | A parameter or value has resulted in a validation error                                                   |
+      | message           | The custodian of the provided document pointer does not match the expected organisation code for this app |
 
   Scenario: Unable to create a Document Pointer with an invalid subject.identifier.system value
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
@@ -464,6 +464,12 @@ Feature: Producer Create Failure Scenarios
     When Producer "Aaron Court Mental Health NH" creates a Document Reference with bad json
       """
       {
+        "subject": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "subjectone"
+          }
+        },
         "subject": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/nhs-number",
