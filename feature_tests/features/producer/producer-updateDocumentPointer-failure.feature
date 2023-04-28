@@ -345,3 +345,41 @@ Feature: Producer Update Failure scenarios
       | issue_code        | VALIDATION_ERROR                                          |
       | issue_description | A parameter or value has resulted in a validation error   |
       | message           | Input is not composite of the form a-b: 8FW23\|1234567890 |
+
+  Scenario: Unable to update a Document Pointer belonging to another organisation
+    Given Producer "BaRS (South Derbyshire Mental Health Unit)" (Organisation ID "V4T0L.CBH") is requesting to update Document Pointers
+    And Producer "BaRS (South Derbyshire Mental Health Unit)" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | V4T0L                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+      | docStatus   | preliminary                    |
+      | author      | Practitioner/xcda1             |
+      | description | Physical                       |
+    When Producer "BaRS (South Derbyshire Mental Health Unit)" updates Document Reference "V4T0L-1234567890" from DOCUMENT template
+      | property    | value                                           |
+      | identifier  | 1234567890                                      |
+      | status      | current                                         |
+      | type        | 736253002                                       |
+      | custodian   | V4T0L                                           |
+      | subject     | 9278693472                                      |
+      | contentType | application/pdf                                 |
+      | docStatus   | amended                                         |
+      | author      | Organization/1XR                                |
+      | description | Therapy Summary Document for Patient 9278693472 |
+      | url         | https://example.org/different-doc.pdf           |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                        |
+      | issue_type        | processing                                                                   |
+      | issue_level       | error                                                                        |
+      | issue_code        | VALIDATION_ERROR                                                             |
+      | issue_description | A parameter or value has resulted in a validation error                      |
+      | message           | The target document reference does not belong to the requesting organisation |
