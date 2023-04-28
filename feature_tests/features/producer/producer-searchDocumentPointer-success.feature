@@ -428,3 +428,39 @@ Feature: Producer Search Success scenarios
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
+
+  Scenario: Producer is unable to search document pointers belonging to another organisation
+    Given Producer "BaRS (EMIS)" (Organisation ID "V4T0L.YGMMC") is requesting to search Document Pointers
+    And Producer "BaRS (EMIS)" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value           |
+      | http://snomed.info/sct | 736253002       |
+      | http://snomed.info/sct | 861421000000109 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567890                     |
+      | type        | 736253002                      |
+      | custodian   | V4T0L                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567891                     |
+      | type        | 861421000000109                |
+      | custodian   | V4T0L                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567892                     |
+      | type        | 861421000000109                |
+      | custodian   | V4T0L                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "BaRS (EMIS)" searches for Document References with query parameters:
+      | property           | value                                         |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+    Then the operation is successful
+    And the response is a Bundle with 0 entries
