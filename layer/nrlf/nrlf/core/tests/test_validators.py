@@ -7,7 +7,9 @@ from nrlf.core.errors import (
     DocumentReferenceValidationError,
     DuplicateKeyError,
     FhirValidationError,
+    InconsistentProducerId,
     InvalidTupleError,
+    MalformedProducerId,
 )
 from nrlf.core.transform import make_timestamp
 from nrlf.core.validators import (
@@ -15,6 +17,7 @@ from nrlf.core.validators import (
     requesting_application_is_not_authorised,
     validate_document_reference_string,
     validate_nhs_number,
+    validate_producer_id,
     validate_source,
     validate_subject_identifier_system,
     validate_timestamp,
@@ -321,3 +324,40 @@ def test_json_loads(json_string, expected_outcome):
             json_loads(json_string=json_string)
     else:
         assert json_loads(json_string) == expected_outcome
+
+
+@pytest.mark.parametrize(
+    ["producer_id", "custodian_id", "custodian_suffix", "expected_outcome"],
+    (
+        ["abc", "abc", None, None],
+        ["abc.123", "def", "123", MalformedProducerId],
+        ["abc", "def", None, InconsistentProducerId],
+    ),
+)
+def test_validate_producer_id(
+    producer_id, custodian_id, custodian_suffix, expected_outcome
+):
+
+    if expected_outcome is MalformedProducerId:
+        with pytest.raises(expected_outcome):
+            validate_producer_id(
+                producer_id=producer_id,
+                custodian_id=custodian_id,
+                custodian_suffix=custodian_suffix,
+            )
+    elif expected_outcome is InconsistentProducerId:
+        with pytest.raises(expected_outcome):
+            validate_producer_id(
+                producer_id=producer_id,
+                custodian_id=custodian_id,
+                custodian_suffix=custodian_suffix,
+            )
+    else:
+        assert (
+            validate_producer_id(
+                producer_id=producer_id,
+                custodian_id=custodian_id,
+                custodian_suffix=custodian_suffix,
+            )
+            is None
+        )

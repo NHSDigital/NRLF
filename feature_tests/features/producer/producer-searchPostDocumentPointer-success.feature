@@ -247,6 +247,72 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
 
+  Scenario: Successfully searches for all documents belonging to the producer when no parameters passed and other producer's documents exist with the same ODS code
+    Given Producer "BaRS (EMIS)" (Organisation ID "V4T0L.YGMMC") is requesting to search by POST for Document Pointers
+    And Producer "BaRS (EMIS)" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567890                     |
+      | type        | 736253002                      |
+      | custodian   | V4T0L.YGMMC                    |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567890                     |
+      | type        | 736253002                      |
+      | custodian   | V4T0L.CBH                      |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                            |
+      | identifier  | 2224567890                       |
+      | type        | 736253002                        |
+      | custodian   | V4T0L.YGMMC                      |
+      | subject     | 6887473704                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                            |
+      | identifier  | 3334567890                       |
+      | type        | 736253002                        |
+      | custodian   | V4T0L.YGMMC                      |
+      | subject     | 7736959498                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    When Producer "BaRS (EMIS)" searches by POST for Document References with body parameters:
+      | property | value |
+    Then the operation is successful
+    And the response is a Bundle with 3 entries
+    And the Bundle contains an Entry with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1114567890                     |
+      | type        | 736253002                      |
+      | custodian   | V4T0L.YGMMC                    |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And the Bundle contains an Entry with the below values for DOCUMENT template
+      | property    | value                            |
+      | identifier  | 2224567890                       |
+      | type        | 736253002                        |
+      | custodian   | V4T0L.YGMMC                      |
+      | subject     | 6887473704                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+    And the Bundle contains an Entry with the below values for DOCUMENT template
+      | property    | value                            |
+      | identifier  | 3334567890                       |
+      | type        | 736253002                        |
+      | custodian   | V4T0L.YGMMC                      |
+      | subject     | 7736959498                       |
+      | contentType | application/pdf                  |
+      | url         | https://example.org/my-doc-2.pdf |
+
   Scenario: Successfully searches for documents by subject and type for a producer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search by POST for Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types

@@ -34,7 +34,7 @@ def search_document_references(
     request_params = ProducerRequestParams(**body)
     assert_no_extra_params(request_params=request_params, provided_params=body)
     nhs_number: RequestQuerySubject = request_params.nhs_number
-    organisation_code = data["organisation_code"]
+    ods_code_parts = data["ods_code_parts"]
 
     validate_type_system(request_params.type, pointer_types=data["pointer_types"])
 
@@ -49,7 +49,7 @@ def search_document_references(
         next_page_token = next_page_token.__root__
 
     response: PaginatedResponse = repository.query_gsi_2(
-        pk=key(DbPrefix.Organization, organisation_code),
+        pk=key(DbPrefix.Organization, *ods_code_parts),
         type=pointer_types,
         nhs_number=nhs_number,
         exclusive_start_key=next_page_token,

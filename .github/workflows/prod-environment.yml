@@ -128,7 +128,7 @@ jobs:
   message-slack-approval:
     name: Notify slack of manual approval
     runs-on: [self-hosted, ci]
-
+    needs: [terraform-plan]
     steps:
       - name: Send approval message to slack
         id: slack
@@ -286,6 +286,8 @@ jobs:
 
   message-slack:
     name: Notify slack of deployment
+    needs: [set-success]
+    if: ${{ always() }}
     runs-on: [self-hosted, ci]
     steps:
       - name: Send job result to slack

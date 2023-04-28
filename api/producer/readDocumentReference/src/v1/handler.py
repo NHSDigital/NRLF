@@ -6,7 +6,8 @@ from typing import Any
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
-from nrlf.core.common_steps import parse_headers
+from nrlf.core.common_steps import parse_headers, parse_path_id
+from nrlf.core.constants import CUSTODIAN_SEPARATOR
 from nrlf.core.errors import RequestValidationError
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
@@ -22,9 +23,9 @@ class LogReference(Enum):
     READ002 = "Reading document reference"
 
 
-def _invalid_producer_for_read(organisation_code, read_item_id: str):
-    producer_id = generate_producer_id(id=read_item_id, producer_id=None)
-    if not organisation_code == producer_id:
+def _invalid_producer_for_read(ods_code_parts, read_item_id: str):
+    producer_id, _ = generate_producer_id(id=read_item_id, producer_id=None)
+    if not ods_code_parts == tuple(producer_id.split(CUSTODIAN_SEPARATOR)):
         return True
     return False
 
@@ -37,11 +38,11 @@ def validate_producer_permissions(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-    organisation_code = data["organisation_code"]
+    ods_code_parts = data["ods_code_parts"]
     decoded_id = urllib.parse.unquote(event.pathParameters["id"])
 
     if _invalid_producer_for_read(
-        organisation_code=organisation_code, read_item_id=decoded_id
+        ods_code_parts=ods_code_parts, read_item_id=decoded_id
     ):
         raise RequestValidationError(
             "The requested document pointer cannot be read because it belongs to another organisation"
@@ -59,11 +60,7 @@ def read_document_reference(
     logger: Logger,
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
-
-    decoded_id = urllib.parse.unquote(event.pathParameters["id"])
-    pk = DocumentPointer.convert_id_to_pk(decoded_id)
-
-    document_pointer: DocumentPointer = repository.read_item(pk)
+    document_pointer: DocumentPointer = repository.read_item(data["pk"])
 
     validate_document_reference_string(document_pointer.document.__root__)
 
@@ -72,6 +69,7 @@ def read_document_reference(
 
 steps = [
     parse_headers,
+    parse_path_id,
     validate_producer_permissions,
     read_document_reference,
 ]

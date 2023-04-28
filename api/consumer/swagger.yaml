@@ -1327,6 +1327,8 @@ components:
       type: string
     RequestHeaderOdsCode:
       type: string
+    RequestHeaderOrganisationExtensionCode:
+      type: string
     RequestHeaderRequestId:
       type: string
       pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
@@ -1442,6 +1444,12 @@ components:
         invalid:
           summary: Unknown
           value: XYZ
+    odsCodeExtension:
+      name: NHSD-End-User-Organisation
+      description: Organisation extension code
+      in: header
+      schema:
+        $ref: "#/components/schemas/RequestHeaderOrganisationExtensionCode"
     requestId:
       name: X-Request-ID
       description: |

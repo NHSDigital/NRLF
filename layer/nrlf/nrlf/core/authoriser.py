@@ -5,7 +5,6 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from lambda_utils.header_config import (
     AbstractHeader,
     ClientRpDetailsHeader,
@@ -14,6 +13,7 @@ from lambda_utils.header_config import (
 from lambda_utils.logging import log_action
 from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _setup_logger
+from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from pydantic import BaseModel, ValidationError
 
 

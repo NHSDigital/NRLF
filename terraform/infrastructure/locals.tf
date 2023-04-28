@@ -22,8 +22,9 @@ locals {
     }
   }
   # Logic / vars for splunk environment
-  persistent_environments = ["dev", "dev-sandbox", "ref", "ref-sandbox", "int", "prod"]
-  environment_no_hyphen   = replace(local.environment, "-", "")
-  splunk_environment      = contains(local.persistent_environments, local.environment) ? local.environment_no_hyphen : "dev" # dev is the default splunk env
-  splunk_index            = "aws_recordlocator_${local.splunk_environment}"
+  persistent_environments = ["dev", "dev-sandbox", "ref", "ref-sandbox", "int", "int-sandbox", "prod"]
+  #environment_no_hyphen   = replace(local.environment, "-", "")
+  environment_no_hyphen = startswith(local.environment, "int") ? local.environment : replace(local.environment, "-", "")
+  splunk_environment    = contains(local.persistent_environments, local.environment) ? local.environment_no_hyphen : "dev" # dev is the default splunk env
+  splunk_index          = "aws_recordlocator_${local.splunk_environment}"
 }

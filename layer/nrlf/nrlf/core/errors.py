@@ -89,6 +89,14 @@ class DuplicateKeyError(Exception):
     pass
 
 
+class MalformedProducerId(ValueError):
+    pass
+
+
+class InconsistentProducerId(ValueError):
+    pass
+
+
 NRLF_TO_SPINE_4XX_ERROR = {
     AuthenticationError: SpineCoding.ACCESS_DENIED_LEVEL,
     DynamoDbError: SpineCoding.RESOURCE_NOT_FOUND,

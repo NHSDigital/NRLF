@@ -223,6 +223,7 @@ paths:
         $ref: "#/components/requestBodies/DocumentReference"
       parameters:
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       description: |
@@ -309,6 +310,7 @@ paths:
         - $ref: "#/components/parameters/type"
         - $ref: "#/components/parameters/nextPageToken"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       responses:
@@ -500,6 +502,7 @@ paths:
       operationId: searchPostDocumentReference
       parameters:
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       requestBody:
@@ -703,6 +706,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       responses:
@@ -793,6 +797,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       responses:
@@ -846,6 +851,11 @@ paths:
         * `subject`
         * `custodian`
         * `type`
+        * `masterIdentifier`
+        * `identifier`
+        * `status`
+        * `date`
+        * `relatesTo`
 
         Note that unlike NRL STU3 changing the `status` field does NOT delete document pointers.  To delete document
         pointers use the `DELETE` endpoint.
@@ -855,6 +865,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       responses:
@@ -1617,6 +1628,8 @@ components:
       type: string
     RequestHeaderOdsCode:
       type: string
+    RequestHeaderOrganisationExtensionCode:
+      type: string
     RequestHeaderRequestId:
       type: string
       pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
@@ -1705,6 +1718,12 @@ components:
         invalid:
           summary: Unknown
           value: XYZ
+    odsCodeExtension:
+      name: NHSD-End-User-Organisation
+      description: Organisation extension code
+      in: header
+      schema:
+        $ref: "#/components/schemas/RequestHeaderOrganisationExtensionCode"
     requestId:
       name: X-Request-ID
       description: |

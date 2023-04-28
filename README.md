@@ -529,3 +529,11 @@ In order to understand the debugging lifecycle, please follow this example and t
    3. Run `nrlf validate file_path`
    4. Run `nrlf resubmit file_path <env>` (<env> should match the value from line 4)
 6. Verify that the file has been moved from `errors/` to `fixed/` on s3
+
+### Release items
+
+When you create a release branch in the form of `release/yyyy-mm-dd` or `hotfix/yyyy-mm-dd` then you need to update the RELEASE file in the top level of the repository to match that release name
+
+The CI pipeline will check to make sure you have done this to prevent any mistakes - if you have made a release or hotfix branch it will check that the value in the RELEASE file matches or not
+
+This is because it will use that value to tag the commit once its been merged into main as a reference point, and this is how it tracks which release it is as github actions struggles with post merge branch identification

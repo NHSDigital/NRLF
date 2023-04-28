@@ -2,13 +2,15 @@ import json
 from datetime import datetime as dt
 
 from nhs_number import is_valid as is_valid_nhs_number
-from nrlf.core.constants import ID_SEPARATOR, VALID_SOURCES
+from nrlf.core.constants import CUSTODIAN_SEPARATOR, ID_SEPARATOR, VALID_SOURCES
 from nrlf.core.errors import (
     AuthenticationError,
     DocumentReferenceValidationError,
     DuplicateKeyError,
     FhirValidationError,
+    InconsistentProducerId,
     InvalidTupleError,
+    MalformedProducerId,
 )
 from nrlf.legacy.constants import NHS_NUMBER_SYSTEM_URL
 from nrlf.legacy.model import Identifier
@@ -36,8 +38,7 @@ def generate_producer_id(id: str, producer_id: str) -> str:
             "producer_id should not be passed to DocumentPointer; "
             "it will be extracted from id."
         )
-    producer_id, _ = _get_tuple_components(tuple=id, separator=ID_SEPARATOR)
-    return producer_id
+    return _get_tuple_components(tuple=id, separator=ID_SEPARATOR)
 
 
 def create_document_type_tuple(document_type: CodeableConcept):
@@ -121,3 +122,29 @@ def dict_raise_on_duplicates(list_of_pairs):
 
 def json_loads(json_string):
     return json.loads(json_string, object_pairs_hook=dict_raise_on_duplicates)
+
+
+def validate_producer_id(
+    producer_id: str, custodian_id: str, custodian_suffix: str = None
+):
+    if custodian_suffix:
+        if producer_id.split(CUSTODIAN_SEPARATOR) != (custodian_id, custodian_suffix):
+            raise MalformedProducerId(
+                f"Producer ID {producer_id} (extracted from '{id}') is not correctly formed. "
+                "It is expected to be composed in the form '<custodian_id>.<custodian_suffix>'"
+            )
+    else:
+        if producer_id != custodian_id:
+            raise InconsistentProducerId(
+                f"Producer ID {producer_id} (extracted from '{id}') "
+                "does not match the Custodian ID."
+            )
+
+
+def split_custodian_id(custodian_id: str) -> dict:
+    custodian_id_suffix = None
+    try:
+        custodian_id, custodian_id_suffix = custodian_id.split(CUSTODIAN_SEPARATOR)
+    except ValueError:
+        pass
+    return custodian_id, custodian_id_suffix

@@ -743,6 +743,11 @@ paths:
         * `subject`
         * `custodian`
         * `type`
+        * `masterIdentifier`
+        * `identifier`
+        * `status`
+        * `date`
+        * `relatesTo`
 
         Note that unlike NRL STU3 changing the `status` field does NOT delete document pointers.  To delete document
         pointers use the `DELETE` endpoint.
