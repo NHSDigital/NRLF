@@ -28,7 +28,7 @@ jobs:
     name: Create a tag from main
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Extract the tag name from the RELEASE file
         run: |
           TAG=$(cat RELEASE)
