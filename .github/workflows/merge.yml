@@ -34,7 +34,7 @@ jobs:
           TAG=$(cat RELEASE)
           echo "tag=${TAG}" >> $GITHUB_ENV
       - name: Create tag
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           script: |
             github.rest.git.createRef({
