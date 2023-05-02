@@ -1,11 +1,11 @@
 ########## Document Type ############
 
 resource "aws_dynamodb_table" "document-type" {
-  name         = "${local.prefix}--document-type"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "pk"
-  range_key    = "sk"
-
+  name                        = "${local.prefix}--document-type"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "pk"
+  range_key                   = "sk"
+  deletion_protection_enabled = local.deletion_protection
   attribute {
     name = "pk"
     type = "S"

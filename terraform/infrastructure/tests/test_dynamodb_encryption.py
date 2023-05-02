@@ -80,3 +80,13 @@ def test_dynamodb_encryption(dynamodb, table_names):
     for table_name in table_names:
         response = dynamodb.describe_table(TableName=table_name)
         assert response["Table"]["SSEDescription"]["Status"] == ENABLED
+
+
+@pytest.mark.integration
+def test_dynamodb_deletion_protection(dynamodb, table_names):
+    for table_name in table_names:
+        response = dynamodb.describe_table(TableName=table_name)
+        if "--prod--" in table_name or "--uat--" in table_name:
+            assert response["Table"]["DeletionProtectionEnabled"] == True
+        else:
+            assert response["Table"]["DeletionProtectionEnabled"] == False
