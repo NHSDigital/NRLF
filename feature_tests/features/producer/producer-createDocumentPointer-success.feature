@@ -34,7 +34,8 @@ Feature: Producer Create Success scenarios
             }
           }
         ],
-        "status": "current"
+        "status": "current",
+        "date": "2023-05-02T12:00:00.000Z"
       }
       """
     And template OUTCOME
@@ -160,3 +161,73 @@ Feature: Producer Create Success scenarios
       | updated_on  | NULL                                    |
       | document    | <document>                              |
       | created_on  | <timestamp>                             |
+
+  Scenario: Successfully create a Document Pointer for one directional data sync when date is provided
+    Given Producer "BaRS (EMIS)" (Organisation ID "V4T0L.YGMMC") is requesting to create Document Pointers
+    And Producer "BaRS (EMIS)" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value           |
+      | http://snomed.info/sct | 861421000000109 |
+    And Producer "BaRS (EMIS)" is one directional data sync
+    When Producer "BaRS (EMIS)" creates a Document Reference from DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567891                     |
+      | type        | 861421000000109                |
+      | custodian   | V4T0L.YGMMC                    |
+      | subject     | 2742179658                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    Then the operation is successful
+    And the status is 201
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value            |
+      | issue_type        | informational    |
+      | issue_level       | information      |
+      | issue_code        | RESOURCE_CREATED |
+      | issue_description | Resource created |
+      | message           | Resource created |
+    And Document Pointer "V4T0L.YGMMC-1234567891" exists
+      | property    | value                                   |
+      | id          | V4T0L.YGMMC-1234567891                  |
+      | nhs_number  | 2742179658                              |
+      | producer_id | V4T0L.YGMMC                             |
+      | type        | http://snomed.info/sct\|861421000000109 |
+      | source      | NRLF                                    |
+      | version     | 1                                       |
+      | updated_on  | NULL                                    |
+      | document    | <document>                              |
+      | created_on  | 2023-05-02T12:00:00.000Z                |
+
+  Scenario: Successfully create a Document Pointer for one directional data sync when no date is provided
+    Given Producer "BaRS (EMIS)" (Organisation ID "V4T0L.YGMMC") is requesting to create Document Pointers
+    And Producer "BaRS (EMIS)" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value           |
+      | http://snomed.info/sct | 861421000000109 |
+    And Producer "BaRS (EMIS)" is one directional data sync
+    When Producer "BaRS (EMIS)" creates a Document Reference from DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567891                     |
+      | type        | 861421000000109                |
+      | custodian   | V4T0L.YGMMC                    |
+      | subject     | 2742179658                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    Then the operation is successful
+    And the status is 201
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value            |
+      | issue_type        | informational    |
+      | issue_level       | information      |
+      | issue_code        | RESOURCE_CREATED |
+      | issue_description | Resource created |
+      | message           | Resource created |
+    And Document Pointer "V4T0L.YGMMC-1234567891" exists
+      | property    | value                                   |
+      | id          | V4T0L.YGMMC-1234567891                  |
+      | nhs_number  | 2742179658                              |
+      | producer_id | V4T0L.YGMMC                             |
+      | type        | http://snomed.info/sct\|861421000000109 |
+      | source      | NRLF                                    |
+      | version     | 1                                       |
+      | updated_on  | NULL                                    |
+      | document    | <document>                              |
+      | created_on  | 2023-05-02T12:00:00.000Z                |

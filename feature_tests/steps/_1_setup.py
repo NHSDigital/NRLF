@@ -4,7 +4,11 @@ from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.core.validators import json_loads, split_custodian_id
 
-from feature_tests.common.config_setup import register_application, request_setup
+from feature_tests.common.config_setup import (
+    register_application,
+    request_setup,
+    set_one_directional_header,
+)
 from feature_tests.common.constants import DEFAULT_VERSION, WITH_WITHOUT_ANY, FhirType
 from feature_tests.common.decorators import given
 from feature_tests.common.models import Template, TestConfig
@@ -66,6 +70,11 @@ def registered_in_system(
         app_id=app_id,
         pointer_types=pointer_types,
     )
+
+
+@given('{actor_type} "{actor}" is one directional data sync')
+def is_one_directional(context: Context, actor_type: str, actor: str):
+    set_one_directional_header(context=context)
 
 
 @given(

@@ -1,3 +1,4 @@
+import json
 from dataclasses import asdict
 from typing import Union
 
@@ -5,6 +6,7 @@ from behave import use_fixture
 from behave.runner import Context
 from lambda_utils.header_config import ClientRpDetailsHeader, ConnectionMetadata
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
+from nrlf.core.validators import json_loads
 
 from feature_tests.common.constants import (
     ALLOWED_APP_IDS,
@@ -146,3 +148,10 @@ def register_application(
     test_config.request.headers[CLIENT_RP_DETAILS] = ClientRpDetailsHeader(
         **{"developer.app.name": app_name, "developer.app.id": app_id}
     ).json(by_alias=True)
+
+
+def set_one_directional_header(context: Context):
+    test_config = context.test_config
+    existing_headers = json_loads(test_config.request.headers[CONNECTION_METADATA])
+    existing_headers["nrl.one-directional-sync"] = True
+    test_config.request.headers[CONNECTION_METADATA] = json.dumps(existing_headers)
