@@ -121,11 +121,12 @@ ALLOWED_TERMS = [
 
 ALLOWED_CONSUMER_ORG_IDS = ["RX898"]
 ALLOWED_CONSUMERS = ["Yorkshire Ambulance Service"]
-ALLOWED_PRODUCER_ORG_IDS = ["8FW23", "V4T0L.YGMMC", "V4T0L.CBH"]
+ALLOWED_PRODUCER_ORG_IDS = ["8FW23", "V4T0L.YGMMC", "V4T0L.CBH", "DS123"]
 ALLOWED_PRODUCERS = [
     "Aaron Court Mental Health NH",
     "BaRS (EMIS)",
     "BaRS (South Derbyshire Mental Health Unit)",
+    "Data Sync",
 ]
 ALLOWED_APPS = ["DataShare"]
 ALLOWED_APP_IDS = [

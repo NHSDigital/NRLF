@@ -36,3 +36,4 @@ ALLOWED_RELATES_TO_CODES = {
 }
 CLIENT_RP_DETAILS = "nhsd-client-rp-details"
 CONNECTION_METADATA = "nhsd-connection-metadata"
+PERMISSION_AUDIT_DATES_FROM_PAYLOAD = "audit-dates-from-payload"

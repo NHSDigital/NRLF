@@ -43,6 +43,7 @@ class ConnectionMetadata(AbstractHeader):
     pointer_types: list[str] = Field(alias="nrl.pointer-types")
     ods_code: str = Field(alias="nrl.ods-code")
     ods_code_extension: str = Field(alias="nrl.ods-code-extension", default=None)
+    permissions: list[str] = Field(alias="nrl.permissions", default=[])
 
     @property
     def ods_code_parts(self):
