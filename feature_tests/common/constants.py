@@ -117,6 +117,7 @@ ALLOWED_TERMS = [
     "a_or_an",
     "fhir_type",
     "with_without_any",
+    "permission",
 ]
 
 ALLOWED_CONSUMER_ORG_IDS = ["RX898"]

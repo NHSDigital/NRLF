@@ -8,8 +8,12 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
 from nrlf.core.common_producer_steps import invalid_producer_for_delete
 from nrlf.core.common_steps import parse_headers
-from nrlf.core.constants import CUSTODIAN_SEPARATOR, PERMISSION_AUDIT_DATES_FROM_PAYLOAD
 from nrlf.core.dynamodb_types import DynamoDbStringType
+from nrlf.core.constants import (
+    CUSTODIAN_SEPARATOR,
+    PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL,
+    PERMISSION_AUDIT_DATES_FROM_PAYLOAD
+)
 from nrlf.core.errors import (
     ItemNotFound,
     ProducerValidationError,
@@ -73,6 +77,7 @@ def parse_request_body(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
+
     body = fetch_body_from_event(event)
 
     core_model = create_document_pointer_from_fhir_json(body, API_VERSION)
@@ -101,7 +106,6 @@ def mark_as_supersede(
             for relationship in document_relationships
             if relationship.code == "replaces"
         ]
-
     return PipelineData(**data, **output)
 
 
@@ -159,27 +163,43 @@ def validate_ok_to_supersede(
     delete_pks = list(
         map(convert_document_pointer_id_to_pk, data.get("delete_item_ids", []))
     )
+
+    confirmed_delete_pks = []
+
     for delete_pk in delete_pks:
-        _validate_ok_to_supersede(
-            document_pointer_repository, source_document_pointer, delete_pk
+        has_delete_target, target_delete_pk = _validate_ok_to_supersede(
+            document_pointer_repository, source_document_pointer, delete_pk, data
         )
 
-    return PipelineData(**data, delete_pks=delete_pks)
+        if has_delete_target:
+            confirmed_delete_pks.append(target_delete_pk)
+
+    return PipelineData(**data, delete_pks=confirmed_delete_pks)
 
 
 def _validate_ok_to_supersede(
     document_pointer_repository: Repository,
     source_document_pointer: DocumentPointer,
     delete_pk: str,
-):
+    data: PipelineData,
+) -> tuple[bool, str]:
+    ignore_delete_error = (
+        PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL in data["nrl_permissions"]
+    )
+    has_delete_target = True
+
     try:
         document_to_delete: DocumentPointer = document_pointer_repository.read_item(
             delete_pk
         )
     except (ItemNotFound):
-        raise SupersedeValidationError(
-            "Validation failure - relatesTo target document does not exist"
-        )
+        if ignore_delete_error:
+            has_delete_target = False
+            return has_delete_target, delete_pk
+        else:
+            raise SupersedeValidationError(
+                "Validation failure - relatesTo target document does not exist"
+            )
 
     if _invalid_subject_identifier(
         source_document_pointer=source_document_pointer,
@@ -196,6 +216,8 @@ def _validate_ok_to_supersede(
         raise SupersedeValidationError(
             "Validation failure - relatesTo target document type does not match the request"
         )
+
+    return has_delete_target, delete_pk
 
 
 @log_action(log_reference=LogReference.CREATE005)
@@ -218,7 +240,7 @@ def save_core_model_to_db(
         )
         coding = NrlfCoding.RESOURCE_SUPERSEDED
     else:
-        if PERMISSION_AUDIT_DATES_FROM_PAYLOAD in data["permissions"]:
+        if PERMISSION_AUDIT_DATES_FROM_PAYLOAD in data["nrl_permissions"]:
             core_model = _override_created_on(data=data, document_pointer=core_model)
         document_pointer_repository.create(item=core_model)
         coding = NrlfCoding.RESOURCE_CREATED

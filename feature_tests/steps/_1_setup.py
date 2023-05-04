@@ -1,5 +1,8 @@
+import json
+
 from behave import given as behave_given
 from behave.runner import Context
+from nrlf.core.constants import CONNECTION_METADATA
 from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.core.validators import json_loads, split_custodian_id
@@ -72,9 +75,17 @@ def registered_in_system(
     )
 
 
-@given('{actor_type} "{actor}" has permissions to set audit date')
-def has_permissions_to_set_audit_date(context: Context, actor_type: str, actor: str):
-    set_audit_date_permission(context=context)
+@given('{actor_type} "{actor}" has the permission "{permission}"')
+def has_permissions(
+    context: Context,
+    actor_type: str,
+    actor: str,
+    permission: str,
+):
+    test_config: TestConfig = context.test_config
+    existing_headers = json_loads(test_config.request.headers[CONNECTION_METADATA])
+    existing_headers["nrl.permissions"] = [permission]
+    test_config.request.headers[CONNECTION_METADATA] = json.dumps(existing_headers)
 
 
 @given(

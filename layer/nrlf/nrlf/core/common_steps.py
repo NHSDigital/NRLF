@@ -15,6 +15,7 @@ from nrlf.core.validators import generate_producer_id
 class LogReference(Enum):
     COMMON001 = "Parsing headers"
     COMMON002 = "Parse document pointer id"
+    COMMON003 = "Checking for extra permissions"
 
 
 @log_action(log_reference=LogReference.COMMON001)
@@ -28,11 +29,12 @@ def parse_headers(
     _headers = AbstractHeader(**event.headers).headers
     _raw_connection_metadata = _headers.get(CONNECTION_METADATA, "{}")
     connection_metadata = ConnectionMetadata.parse_raw(_raw_connection_metadata)
+
     return PipelineData(
         **data,
         ods_code_parts=connection_metadata.ods_code_parts,
         pointer_types=connection_metadata.pointer_types,
-        permissions=connection_metadata.permissions
+        nrl_permissions=connection_metadata.nrl_permissions,
     )
 
 
