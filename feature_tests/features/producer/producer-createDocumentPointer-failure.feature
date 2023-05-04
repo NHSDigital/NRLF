@@ -501,12 +501,18 @@ Feature: Producer Create Failure Scenarios
     When Producer "Aaron Court Mental Health NH" creates a Document Reference with bad json
       """
       {
-        "subject": {
-          "identifier": {
-            "system": "https://fhir.nhs.uk/Id/nhs-number",
-            "value": "subjecttwo"
-          }
-        }
+      "subject": {
+       "identifier": {
+         "system": "https://fhir.nhs.uk/Id/nhs-number",
+         "value": "subjectone"
+       }
+      },
+      "subject": {
+       "identifier": {
+         "system": "https://fhir.nhs.uk/Id/nhs-number",
+         "value": "subjecttwo"
+       }
+      }
       }
       """
     Then the operation is unsuccessful
