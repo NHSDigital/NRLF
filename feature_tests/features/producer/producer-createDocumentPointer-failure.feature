@@ -169,6 +169,43 @@ Feature: Producer Create Failure Scenarios
         "status": "current"
       }
       """
+    And template DOCUMENT_WITH_DATE
+      """
+      {
+        "resourceType": "DocumentReference",
+        "id": "$custodian-$identifier",
+        "custodian": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+            "value": "$custodian"
+          }
+        },
+        "subject": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "$subject"
+          }
+        },
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "$type"
+            }
+          ]
+        },
+        "content": [
+          {
+            "attachment": {
+              "contentType": "$contentType",
+              "url": "$url"
+            }
+          }
+        ],
+        "status": "current",
+        "date": "$date"
+      }
+      """
     And template OUTCOME
       """
       {
@@ -467,12 +504,6 @@ Feature: Producer Create Failure Scenarios
         "subject": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/nhs-number",
-            "value": "subjectone"
-          }
-        },
-        "subject": {
-          "identifier": {
-            "system": "https://fhir.nhs.uk/Id/nhs-number",
             "value": "subjecttwo"
           }
         }
@@ -487,3 +518,28 @@ Feature: Producer Create Failure Scenarios
       | issue_code        | VALIDATION_ERROR                                        |
       | issue_description | A parameter or value has resulted in a validation error |
       | message           | Duplicate key: 'subject'                                |
+
+  Scenario: Unable to create a Document Pointer when has permission to set audit date and no date value provided
+    Given Producer "Data Sync" (Organisation ID "DS123") is requesting to create Document Pointers
+    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value           |
+      | http://snomed.info/sct | 861421000000109 |
+    And Producer "Data Sync" has permissions to set audit date
+    When Producer "Data Sync" creates a Document Reference from DOCUMENT_WITH_DATE template
+      | property    | value                          |
+      | identifier  | 1234567891                     |
+      | type        | 861421000000109                |
+      | custodian   | DS123                          |
+      | subject     | 2742179658                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+      | date        |                                |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                   |
+      | issue_type        | processing                                              |
+      | issue_level       | error                                                   |
+      | issue_code        | VALIDATION_ERROR                                        |
+      | issue_description | A parameter or value has resulted in a validation error |
+      | message           | Empty value '' at 'date' is not valid FHIR              |

@@ -32,7 +32,7 @@ def parse_headers(
         **data,
         ods_code_parts=connection_metadata.ods_code_parts,
         pointer_types=connection_metadata.pointer_types,
-        one_directional_sync=connection_metadata.one_directional_sync
+        permissions=connection_metadata.permissions
     )
 
 

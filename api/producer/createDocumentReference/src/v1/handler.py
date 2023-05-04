@@ -8,7 +8,7 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
 from nrlf.core.common_producer_steps import invalid_producer_for_delete
 from nrlf.core.common_steps import parse_headers
-from nrlf.core.constants import CUSTODIAN_SEPARATOR
+from nrlf.core.constants import CUSTODIAN_SEPARATOR, PERMISSION_AUDIT_DATES_FROM_PAYLOAD
 from nrlf.core.dynamodb_types import to_dynamodb_dict
 from nrlf.core.errors import (
     ItemNotFound,
@@ -217,7 +217,7 @@ def save_core_model_to_db(
         )
         coding = NrlfCoding.RESOURCE_SUPERSEDED
     else:
-        if data["one_directional_sync"] is True:
+        if PERMISSION_AUDIT_DATES_FROM_PAYLOAD in data["permissions"]:
             core_model = _override_created_on(data=data, document_pointer=core_model)
         document_pointer_repository.create(item=core_model)
         coding = NrlfCoding.RESOURCE_CREATED

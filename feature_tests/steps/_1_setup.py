@@ -7,7 +7,7 @@ from nrlf.core.validators import json_loads, split_custodian_id
 from feature_tests.common.config_setup import (
     register_application,
     request_setup,
-    set_one_directional_header,
+    set_audit_date_permission,
 )
 from feature_tests.common.constants import DEFAULT_VERSION, WITH_WITHOUT_ANY, FhirType
 from feature_tests.common.decorators import given
@@ -72,9 +72,9 @@ def registered_in_system(
     )
 
 
-@given('{actor_type} "{actor}" is one directional data sync')
-def is_one_directional(context: Context, actor_type: str, actor: str):
-    set_one_directional_header(context=context)
+@given('{actor_type} "{actor}" has permissions to set audit date')
+def has_permissions_to_set_audit_date(context: Context, actor_type: str, actor: str):
+    set_audit_date_permission(context=context)
 
 
 @given(
