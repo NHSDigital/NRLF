@@ -70,6 +70,8 @@ def test_firehose_alert():
             if message.data.inputs == expected_event:
                 alert_found = True
                 break
+        time.sleep(SLEEP_TIME_SECONDS)
+
     assert (
         alert_found
     ), f"Could not find data\n\n{expected_event}\n\nin log group '{log_group_name}'"
