@@ -9,7 +9,7 @@ from lambda_utils.logging import log_action
 from nrlf.core.common_producer_steps import invalid_producer_for_delete
 from nrlf.core.common_steps import parse_headers
 from nrlf.core.constants import CUSTODIAN_SEPARATOR, PERMISSION_AUDIT_DATES_FROM_PAYLOAD
-from nrlf.core.dynamodb_types import to_dynamodb_dict
+from nrlf.core.dynamodb_types import DynamoDbStringType
 from nrlf.core.errors import (
     ItemNotFound,
     ProducerValidationError,
@@ -60,7 +60,8 @@ def _override_created_on(
         fhir_json=data["body"]
     )
     if fhir_model.date is not None:
-        document_pointer.created_on = to_dynamodb_dict(fhir_model.date)
+        document_pointer.created_on = DynamoDbStringType(__root__=fhir_model.date)
+
     return document_pointer
 
 
