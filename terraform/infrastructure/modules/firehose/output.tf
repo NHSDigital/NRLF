@@ -11,6 +11,10 @@ output "delivery_stream" {
   }
 }
 
+output "alert" {
+  value = module.alert_lambda
+}
+
 output "splunk" {
   value = {
     index = var.splunk_index

@@ -8,7 +8,8 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
 from nrlf.core.common_producer_steps import invalid_producer_for_delete
 from nrlf.core.common_steps import parse_headers
-from nrlf.core.constants import CUSTODIAN_SEPARATOR
+from nrlf.core.constants import CUSTODIAN_SEPARATOR, PERMISSION_AUDIT_DATES_FROM_PAYLOAD
+from nrlf.core.dynamodb_types import DynamoDbStringType
 from nrlf.core.errors import (
     ItemNotFound,
     ProducerValidationError,
@@ -50,6 +51,18 @@ def _invalid_type(
     source_document_pointer: DocumentPointer, target_document_pointer: DocumentPointer
 ):
     return source_document_pointer.type != target_document_pointer.type
+
+
+def _override_created_on(
+    data: PipelineData, document_pointer: DocumentPointer
+) -> DocumentPointer:
+    fhir_model: StrictDocumentReference = create_fhir_model_from_fhir_json(
+        fhir_json=data["body"]
+    )
+    if fhir_model.date is not None:
+        document_pointer.created_on = DynamoDbStringType(__root__=fhir_model.date)
+
+    return document_pointer
 
 
 @log_action(log_reference=LogReference.CREATE001)
@@ -194,6 +207,7 @@ def save_core_model_to_db(
     logger: Logger,
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
+
     document_pointer_repository: Repository = dependencies.get(
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
     )
@@ -204,6 +218,8 @@ def save_core_model_to_db(
         )
         coding = NrlfCoding.RESOURCE_SUPERSEDED
     else:
+        if PERMISSION_AUDIT_DATES_FROM_PAYLOAD in data["permissions"]:
+            core_model = _override_created_on(data=data, document_pointer=core_model)
         document_pointer_repository.create(item=core_model)
         coding = NrlfCoding.RESOURCE_CREATED
     operation_outcome = operation_outcome_ok(

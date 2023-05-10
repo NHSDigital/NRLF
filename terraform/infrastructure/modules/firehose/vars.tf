@@ -1,5 +1,7 @@
 variable "prefix" {}
 
+variable "assume_account" {}
+
 variable "region" {}
 
 variable "layers" {}
@@ -24,5 +26,9 @@ variable "splunk_index" {
     condition     = startswith(var.splunk_index, "aws_recordlocator_")
     error_message = "Splunk Index must start with aws_recordlocator_"
   }
+}
 
+variable "slack_alerts_enabled" {
+  type    = bool
+  default = false
 }
