@@ -33,7 +33,7 @@ Before you tackle this guide, there are some more instructions here on the [Deve
 ### 1. Prerequisites
 
 - [poetry](https://python-poetry.org/docs/)
-- [pyenv](https://github.com/pyenv/pyenv) (this repository uses python 3.9.15)
+- [pyenv](https://github.com/pyenv/pyenv) (this repository uses python ^3.9.15)
 - jq
 - terraform
 - [tfenv](https://github.com/tfutils/tfenv) (this repository uses terraform 1.3.4)
@@ -48,6 +48,9 @@ Swagger generation requirements.
 ### 2. Linux set up
 
 For those on a linux/WSL setup these are some helpful instructions:
+
+- We recommend that you use the NRLF with VSCode and WSL rather than the Spine VM
+- There is also a plugin for VSCode called `WSL` which will help you avoid some terminal issues when opening projects in WSL
 
 #### 1. Java:
 
@@ -114,18 +117,40 @@ pyenv --version
 #### 4. terraform
 
 ```shell
-wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list sudo apt update && sudo apt install terraform
+wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+```
+
+```shell
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+```
+
+```shell
+sudo apt update && sudo apt install terraform
 ```
 
 #### 5. tfenv:
+
+Manual:
 
 ```shell
 git clone https://github.com/tfutils/tfenv.git ~/.tfenv
 ```
 
+---
+
+IF YOU ARE WSL RUN COMMAND BELOW THIS ONE
+
 ```shell
 echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> ~/.bash_profile
 ```
+
+For WSL users
+
+```shell
+echo 'export PATH=$PATH:$HOME/.tfenv/bin' >> ~/.bashrc
+```
+
+---
 
 ```shell
 sudo ln -s ~/.tfenv/bin/* /usr/local/bin
@@ -150,6 +175,13 @@ poetry install
 poetry shell
 pre-commit install
 ```
+
+NOTE
+
+- You will know if you are correctly in the shell when you see the following before your command line prompt `(nrlf-api-py3.11)` (the version may change based on the version of python)
+- If it says (.venv) then you are not using the correct virtual environment
+- As mentioned above you at least need Python 3.9 installed globally to run the project, Poetry will handle the rest
+- The terraform version can be found in the .terraform-version file at the root
 
 ---
 

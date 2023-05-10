@@ -1,8 +1,6 @@
 class DynamoDbResponse(dict):
     """For type-annotating boto3.client('dynamodb') responses"""
 
-    pass
-
 
 class DynamoDbClient:
     """For type-annotating boto3.client('dynamodb')"""
