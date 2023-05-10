@@ -8,12 +8,12 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
 from nrlf.core.common_producer_steps import invalid_producer_for_delete
 from nrlf.core.common_steps import parse_headers
-from nrlf.core.dynamodb_types import DynamoDbStringType
 from nrlf.core.constants import (
     CUSTODIAN_SEPARATOR,
+    PERMISSION_AUDIT_DATES_FROM_PAYLOAD,
     PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL,
-    PERMISSION_AUDIT_DATES_FROM_PAYLOAD
 )
+from nrlf.core.dynamodb_types import DynamoDbStringType
 from nrlf.core.errors import (
     ItemNotFound,
     ProducerValidationError,
