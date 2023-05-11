@@ -1,4 +1,5 @@
 import pytest
+
 from nrlf.core.constants import DbPrefix
 from nrlf.core.errors import ItemNotFound
 from nrlf.core.model import DocumentPointer, key

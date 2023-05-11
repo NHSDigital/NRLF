@@ -11,7 +11,6 @@ from behave.model import Table
 from behave.runner import Context
 from lambda_utils.header_config import LoggingHeader
 from lambda_utils.logging_utils import generate_transaction_id
-from nrlf.core.types import DynamoDbClient
 
 from feature_tests.common.constants import (
     ACTION_ALIASES,
@@ -25,6 +24,7 @@ from feature_tests.common.constants import (
 )
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
+from nrlf.core.types import DynamoDbClient
 
 RELATES_TO = "relatesTo"
 TARGET = "target"

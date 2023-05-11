@@ -2,6 +2,8 @@ import json
 from datetime import datetime as dt
 
 from nhs_number import is_valid as is_valid_nhs_number
+from pydantic import ValidationError
+
 from nrlf.core.constants import CUSTODIAN_SEPARATOR, ID_SEPARATOR, VALID_SOURCES
 from nrlf.core.errors import (
     AuthenticationError,
@@ -19,7 +21,6 @@ from nrlf.producer.fhir.r4.model import (
     DocumentReference,
     RequestQueryType,
 )
-from pydantic import ValidationError
 
 
 def _get_tuple_components(tuple: str, separator: str) -> tuple[str, str]:

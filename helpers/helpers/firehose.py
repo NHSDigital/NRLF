@@ -10,6 +10,14 @@ from uuid import uuid4
 
 from fire import Fire
 from lambda_utils.logging import LogTemplate
+from pydantic import BaseModel, Extra, Field, Json, ValidationError, conlist
+
+from helpers.aws_session import (
+    DEFAULT_WORKSPACE,
+    aws_account_id_from_profile,
+    new_aws_session,
+)
+from helpers.log import log
 from nrlf.core.firehose.model import (
     CloudwatchLogsData,
     CloudwatchMessageType,
@@ -19,14 +27,6 @@ from nrlf.core.firehose.model import (
 from nrlf.core.firehose.submission import FirehoseClient, _submit_records
 from nrlf.core.firehose.utils import load_json_gzip, name_from_arn
 from nrlf.core.validators import json_loads
-from pydantic import BaseModel, Extra, Field, Json, ValidationError, conlist
-
-from helpers.aws_session import (
-    DEFAULT_WORKSPACE,
-    aws_account_id_from_profile,
-    new_aws_session,
-)
-from helpers.log import log
 
 S3_URI_COMPONENTS = re.compile("^s3://(?P<bucket_name>[^/]+)/(?P<file_key>.*?)$")
 DOT_FIREHOSE = ".firehose"

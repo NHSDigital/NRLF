@@ -1,4 +1,5 @@
 import pytest
+
 from nrlf.core.model import ConsumerRequestParams
 from nrlf.core.repository import (
     _decode,

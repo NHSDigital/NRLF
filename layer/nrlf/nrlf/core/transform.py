@@ -4,6 +4,8 @@ from datetime import datetime as dt
 from typing import Union
 
 from more_itertools import map_except
+from pydantic import ValidationError
+
 from nrlf.core.constants import (
     ALLOWED_RELATES_TO_CODES,
     EMPTY_VALUES,
@@ -34,7 +36,6 @@ from nrlf.producer.fhir.r4.model import (
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
-from pydantic import ValidationError
 
 
 def make_timestamp() -> str:
