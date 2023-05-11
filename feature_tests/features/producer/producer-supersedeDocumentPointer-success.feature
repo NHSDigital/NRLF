@@ -109,6 +109,7 @@ Feature: Producer Supersede Success scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is successful
+    And the status is 201
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                    |
       | issue_type        | informational                            |
@@ -162,6 +163,7 @@ Feature: Producer Supersede Success scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is successful
+    And the status is 201
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                    |
       | issue_type        | informational                            |
@@ -199,6 +201,7 @@ Feature: Producer Supersede Success scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is successful
+    And the status is 201
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value            |
       | issue_type        | informational    |
@@ -244,6 +247,7 @@ Feature: Producer Supersede Success scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is successful
+    And the status is 201
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                    |
       | issue_type        | informational                            |

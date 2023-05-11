@@ -106,7 +106,7 @@ NRLF_TO_SPINE_4XX_ERROR = {
     TooManyItemsError: SpineCoding.VALIDATION_ERROR,
     ValidationError: SpineCoding.VALIDATION_ERROR,
     UnknownParameterError: SpineCoding.VALIDATION_ERROR,
-    DuplicateError: SpineCoding.INVALID_RESOURCE_ID,
+    DuplicateError: SpineCoding.INVALID_VALUE,
     SupersedeError: SpineCoding.INVALID_RESOURCE_ID,
     DocumentReferenceValidationError: SpineCoding.SERVICE_ERROR,
     RequestValidationError: SpineCoding.VALIDATION_ERROR,
