@@ -317,13 +317,13 @@ Feature: Producer Create Failure Scenarios
       | url         | https://example.org/my-doc.pdf    |
       | system      | https://fhir.nhs.uk/Id/nhs-number |
     Then the operation is unsuccessful
-    And the status is 400
+    And the status is 409
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value                                   |
       | issue_type        | processing                              |
       | issue_level       | error                                   |
-      | issue_code        | INVALID_RESOURCE_ID                     |
-      | issue_description | Invalid resource ID                     |
+      | issue_code        | INVALID_VALUE                           |
+      | issue_description | Invalid value                           |
       | message           | Condition check failed - Duplicate item |
 
   Scenario: Unable to create a Document Pointer when required field custodian is missing
