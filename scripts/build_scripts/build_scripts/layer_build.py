@@ -63,7 +63,6 @@ def create_temp_path(path: Path, is_dir: bool) -> Generator[Path, None, None]:
     except Exception as err:
         error = err
     finally:
-        pass
         if is_dir:
             shutil.rmtree(path)
         else:

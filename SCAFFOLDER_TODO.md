@@ -1,8 +1,0 @@
-- Don't create aws-accounts.json
-- Maybe: Nest infrastructure under terraform/infrastructure (or ask for a location)
-- Add .yo-rc.json
-- No prefix on terraform state files
-- No mechanism to read aws account info into terraform from aws config
-- Add tags to provider
-- Add special "third party" layer
-- no need to have version v2 from the start in the lambdas

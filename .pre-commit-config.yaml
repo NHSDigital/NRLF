@@ -54,6 +54,7 @@ repos:
     hooks:
       - id: reformat-gherkin
 
+  # This uses the root .terraform-version file, make sure to update it you change the actual terraform versions
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.76.0
     hooks:
