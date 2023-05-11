@@ -530,7 +530,7 @@ Feature: Producer Create Failure Scenarios
     And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value           |
       | http://snomed.info/sct | 861421000000109 |
-    And Producer "Data Sync" has permissions to set audit date
+    And Producer "Data Sync" has the permission "audit-dates-from-payload"
     When Producer "Data Sync" creates a Document Reference from DOCUMENT_WITH_DATE template
       | property    | value                          |
       | identifier  | 1234567891                     |
