@@ -21,7 +21,7 @@ from nrlf.core.errors import (
     RequestValidationError,
 )
 from nrlf.core.model import DocumentPointer, PaginatedResponse
-from nrlf.core.validators import validate_subject_identifier_system, json_loads
+from nrlf.core.validators import json_loads, validate_subject_identifier_system
 from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
 from nrlf.legacy.model import LegacyDocumentPointer
 from nrlf.producer.fhir.r4.model import (

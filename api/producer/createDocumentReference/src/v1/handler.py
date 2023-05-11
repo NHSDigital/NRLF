@@ -234,14 +234,16 @@ def save_core_model_to_db(
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
     )
     delete_pks: list[str] = data.get("delete_pks", [])
+
+    if PERMISSION_AUDIT_DATES_FROM_PAYLOAD in data["nrl_permissions"]:
+        core_model = _override_created_on(data=data, document_pointer=core_model)
+
     if delete_pks:
         document_pointer_repository.supersede(
             create_item=core_model, delete_pks=delete_pks
         )
         coding = NrlfCoding.RESOURCE_SUPERSEDED
     else:
-        if PERMISSION_AUDIT_DATES_FROM_PAYLOAD in data["nrl_permissions"]:
-            core_model = _override_created_on(data=data, document_pointer=core_model)
         document_pointer_repository.create(item=core_model)
         coding = NrlfCoding.RESOURCE_CREATED
     operation_outcome = operation_outcome_ok(
