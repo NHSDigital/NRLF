@@ -93,7 +93,7 @@ def has_permissions(
     test_config: TestConfig = context.test_config
     existing_headers = json_loads(test_config.request.headers[CONNECTION_METADATA])
 
-    permissions = [f'{row["permission"]}' for row in context.table]
+    permissions = [row["permission"] for row in context.table]
 
     existing_headers["nrl.permissions"] = permissions
     test_config.request.headers[CONNECTION_METADATA] = json.dumps(existing_headers)
