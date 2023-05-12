@@ -27,3 +27,13 @@ variable "deletion_protection" {
   type    = bool
   default = false
 }
+
+variable "db_instance_class" {
+  type    = string
+  default = "db.t3.micro"
+}
+
+variable "db_allocated_storage" {
+  type    = number
+  default = 5
+}

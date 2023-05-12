@@ -53,3 +53,10 @@ output "firehose" {
     processor = module.firehose__processor
   }
 }
+
+output "rds" {
+  value = {
+    reporting = module.rds
+  }
+  sensitive = true
+}

@@ -1,6 +1,7 @@
 resource "aws_secretsmanager_secret" "splunk_configuration" {
-  name        = "${var.prefix}--splunk-hec-configuration"
-  description = "HEC URL/Token for forwarding logs to Splunk. 'none' means no forwarding."
+  name                    = "${var.prefix}--splunk-hec-configuration"
+  description             = "HEC URL/Token for forwarding logs to Splunk. 'none' means no forwarding."
+  recovery_window_in_days = var.environment == "prod" ? 30 : 0
 }
 
 data "aws_secretsmanager_secret_version" "splunk_configuration" {
@@ -14,12 +15,12 @@ data "aws_secretsmanager_secret_version" "splunk_configuration" {
   #
   count     = var.destination == "splunk" ? 1 : 0
   secret_id = aws_secretsmanager_secret.splunk_configuration.name
-
 }
 
 resource "aws_secretsmanager_secret" "slack_webhook_url" {
-  name        = "${var.prefix}--firehose-alert--slack-webhook-url"
-  description = "Slack webhook URL for Firehose alerts"
+  name                    = "${var.prefix}--firehose-alert--slack-webhook-url"
+  description             = "Slack webhook URL for Firehose alerts"
+  recovery_window_in_days = var.environment == "prod" ? 30 : 0
 }
 
 data "aws_secretsmanager_secret_version" "slack_webhook_url" {
