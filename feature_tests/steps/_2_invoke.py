@@ -1,10 +1,8 @@
 import json
 
-from behave.runner import Context
-
 from feature_tests.common.constants import FhirType
 from feature_tests.common.decorators import when
-from feature_tests.common.models import TestConfig
+from feature_tests.common.models import Context, TestConfig
 from feature_tests.common.utils import table_as_dict
 
 
@@ -16,10 +14,12 @@ def producer_create_document_pointer_from_template(
     context: Context, actor_type: str, actor: str, template_name: str
 ):
     test_config: TestConfig = context.test_config
-    template = test_config.templates[template_name]
-    rendered_template = template.render(
-        context.table, fhir_type=FhirType.DocumentReference
-    )
+    rendered_template = test_config.rendered_templates.get(template_name)
+    if not rendered_template:
+        template = test_config.templates[template_name]
+        rendered_template = template.render(
+            context.table, fhir_type=FhirType.DocumentReference
+        )
     test_config.response = test_config.request.invoke(body=rendered_template)
 
 

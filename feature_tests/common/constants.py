@@ -118,6 +118,10 @@ ALLOWED_TERMS = [
     "fhir_type",
     "with_without_any",
     "permission",
+    "package",
+    "nrl_template_name",
+    "nhs_number",
+    "error_type",
 ]
 
 ALLOWED_CONSUMER_ORG_IDS = ["RX898"]
