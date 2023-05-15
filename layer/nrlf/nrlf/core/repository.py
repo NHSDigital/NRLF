@@ -396,7 +396,7 @@ class Repository:
                 _item = _is_record_valid(
                     item_type=self.item_type, item=item, logger=logger
                 )
-            except (CorruptDocumentPointer):
+            except CorruptDocumentPointer:
                 continue
             yield _item
 
