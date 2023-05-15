@@ -5,7 +5,7 @@ Feature: Producer Supersede Failure scenarios
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$producer_id-$identifier",
+        "id": "$identifier",
         "custodian": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/ods-organization-code",
@@ -98,7 +98,7 @@ Feature: Producer Supersede Failure scenarios
       """
       {
         "resourceType": "DocumentReference",
-        "id": "$custodian|$identifier",
+        "id": "$identifier",
         "custodian": {
           "identifier": {
             "system": "https://fhir.nhs.uk/Id/ods-organization-code",
@@ -262,7 +262,7 @@ Feature: Producer Supersede Failure scenarios
       | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 1234567890                     |
+      | identifier  | 8FW23-1234567890               |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | producer_id | 8FW23                          |
@@ -331,7 +331,7 @@ Feature: Producer Supersede Failure scenarios
       | http://snomed.info/sct | 736253002 |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT_WITH_INVALID_ID_FORMAT template
       | property    | value                          |
-      | identifier  | 1234567890                     |
+      | identifier  | 8FW23\|1234567890              |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | producer_id | 8FW23                          |
@@ -355,7 +355,7 @@ Feature: Producer Supersede Failure scenarios
       | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 1234567890                     |
+      | identifier  | 8FW23-1234567890               |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | producer_id | 8FW23                          |
@@ -364,7 +364,7 @@ Feature: Producer Supersede Failure scenarios
       | url         | https://example.org/my-doc.pdf |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 1234567891                     |
+      | identifier  | 8FW23-1234567891               |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | producer_id | 8FW23                          |
@@ -404,7 +404,7 @@ Feature: Producer Supersede Failure scenarios
       | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 1234567890                     |
+      | identifier  | 8FW23-1234567890               |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | producer_id | 8FW23                          |
@@ -413,7 +413,7 @@ Feature: Producer Supersede Failure scenarios
       | url         | https://example.org/my-doc.pdf |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 1234567891                     |
+      | identifier  | 8FW23-1234567891               |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | producer_id | 8FW23                          |
@@ -508,12 +508,12 @@ Feature: Producer Supersede Failure scenarios
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                                                                |
-      | issue_type        | processing                                                                                           |
-      | issue_level       | error                                                                                                |
-      | issue_code        | VALIDATION_ERROR                                                                                     |
-      | issue_description | A parameter or value has resulted in a validation error                                              |
-      | message           | The id of the provided document pointer does not include the expected organisation code for this app |
+      | property          | value                                                                                                     |
+      | issue_type        | processing                                                                                                |
+      | issue_level       | error                                                                                                     |
+      | issue_code        | VALIDATION_ERROR                                                                                          |
+      | issue_description | A parameter or value has resulted in a validation error                                                   |
+      | message           | The custodian of the provided document pointer does not match the expected organisation code for this app |
 
   Scenario: Unable to supersede another organisations Document Pointer
     Given Producer "BaRS (EMIS)" (Organisation ID "V4T0L.YGMMC") is requesting to create Document Pointers
@@ -549,3 +549,44 @@ Feature: Producer Supersede Failure scenarios
       | issue_code        | VALIDATION_ERROR                                                                           |
       | issue_description | A parameter or value has resulted in a validation error                                    |
       | message           | At least one document pointer cannot be deleted because it belongs to another organisation |
+
+  Scenario: Supersede throws a duplicate item when target doesnt exist and it tries to create a pointer that already exists
+    Given Producer "Data Sync" (Organisation ID "DS123") is requesting to create Document Pointers
+    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And Producer "Data Sync" has the permission "supersede-ignore-delete-fail"
+      | permission                   |
+      | supersede-ignore-delete-fail |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | DS123-1234567890               |
+      | target      | DS123-1234567893               |
+      | code        | replaces                       |
+      | type        | 736253002                      |
+      | custodian   | DS123                          |
+      | producer_id | DS123                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Data Sync" creates a Document Reference from DOCUMENT template
+      | property    | value                          |
+      | identifier  | DS123-1234567890               |
+      | target      | DS123-1234567893               |
+      | code        | replaces                       |
+      | type        | 736253002                      |
+      | custodian   | DS123                          |
+      | producer_id | DS123                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    Then the operation is unsuccessful
+    And the status is 409
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                   |
+      | issue_type        | processing                              |
+      | issue_level       | error                                   |
+      | issue_code        | INVALID_VALUE                           |
+      | issue_description | Invalid value                           |
+      | message           | Condition check failed - Duplicate item |
+    And Document Pointer "DS123-1234567890" still exists
