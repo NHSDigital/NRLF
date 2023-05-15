@@ -12,6 +12,7 @@ from hypothesis import given, settings
 from hypothesis.strategies import builds, dictionaries, integers, just, lists, text
 from moto import mock_firehose, mock_s3
 from nrlf.core.firehose.model import CloudwatchMessageType
+from nrlf.core.validators import json_loads
 from pydantic import ValidationError
 
 from firehose.processor.tests.e2e_utils import _make_good_log
@@ -190,7 +191,7 @@ def validate_logs(n_good, n_bad, n_v_bad):
 
 
 def test_construct_cloudwatch_logs_data():
-    good_logs = [json.loads(_make_good_log(i)) for i in range(10)]
+    good_logs = [json_loads(_make_good_log(i)) for i in range(10)]
     construct_cloudwatch_logs_data(messages=good_logs)
 
 
