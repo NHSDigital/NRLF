@@ -556,8 +556,6 @@ Feature: Producer Supersede Failure scenarios
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And Producer "Data Sync" has the permission "supersede-ignore-delete-fail"
-      | permission                   |
-      | supersede-ignore-delete-fail |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | DS123-1234567890               |
