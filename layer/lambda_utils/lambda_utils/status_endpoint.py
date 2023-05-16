@@ -6,7 +6,6 @@ from logging import Logger
 from types import ModuleType
 from typing import Any, Generator
 
-import boto3
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action, prepare_default_event_for_logging
@@ -26,6 +25,7 @@ class LogReference(Enum):
 class Config(BaseModel):
     AWS_REGION: str
     PREFIX: str
+    DYNAMODB_TIMEOUT: float
 
 
 @contextmanager
@@ -52,18 +52,6 @@ def _get_config(
     return PipelineData(config=config)
 
 
-@log_action(log_reference=LogReference.STATUS002, log_result=False)
-def _get_boto_client(
-    data: PipelineData,
-    context: LambdaContext,
-    event: APIGatewayProxyEventModel,
-    dependencies: FrozenDict[str, Any],
-    logger: Logger,
-) -> PipelineData:
-    client = boto3.client("dynamodb")
-    return PipelineData(client=client, **data)
-
-
 @log_action(log_reference=LogReference.STATUS003)
 def _hit_the_database(
     data: PipelineData,
@@ -74,7 +62,7 @@ def _hit_the_database(
 ) -> PipelineData:
     repository = Repository(
         item_type=DocumentPointer,
-        client=data["client"],
+        client=dependencies["dynamodb_client"],
         environment_prefix=data["config"].PREFIX,
     )
     result = repository.query(pk="D#NULL")
@@ -91,7 +79,6 @@ def _set_missing_logging_headers(event: dict) -> dict:
 def _get_steps(*args, **kwargs):
     return [
         _get_config,
-        _get_boto_client,
         _hit_the_database,
     ]
 

@@ -36,6 +36,7 @@ def mock_environmental_variables(context, *args, **kwargs):
             "ENVIRONMENT": "__environment__",
             "SPLUNK_INDEX": "__index__",
             "SOURCE": "__source__",
+            "DYNAMODB_TIMEOUT": "30",
         },
         clear=True,
     ):
