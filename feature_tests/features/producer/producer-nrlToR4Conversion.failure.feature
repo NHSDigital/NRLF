@@ -87,7 +87,7 @@ Feature: Producer NRL-to-R4 Conversion Failures
                   }
               ]
           },
-          "status": "current",
+          "status": "$status",
           "type": {
               "code": "$typeCode",
               "display": "$typeDisplay"
@@ -115,6 +115,7 @@ Feature: Producer NRL-to-R4 Conversion Failures
       | relatesToIdentifier    |                                                                                      |
       | relatesToTarget        | <relatesToTarget>                                                                    |
       | relatesToSystem        |                                                                                      |
+      | status                 | <status>                                                                             |
       | typeCode               | 718377777                                                                            |
       | typeDisplay            | Another Test data                                                                    |
     When Producer "Data Sync" uses "nrlf-converter" to convert NRL_DOCUMENT_POINTER with NHS Number "9278693472" into a DocumentReference
@@ -125,9 +126,10 @@ Feature: Producer NRL-to-R4 Conversion Failures
       """
 
     Examples:
-      | custodian                                                      | relatesToCode | relatesToTarget | logicalId                                                 | lastModified                  | error_type      | error_message                                                                                                                                          |
-      | https://directory.spineservices.nhs.uk/STU3/Organization/8FW23 | replaces      |                 | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851 | Tue, 23 Aug 2022 14:45:17 GMT | ValidationError | 'FieldNotFound' encountered on 'DocumentPointer.relatesTo': Field 'RelatesTo.target' was expected but not provided.                                    |
-      | https://directory.spineservices.nhs.uk/STU3/Organization/8FW23 | replaces      | not-a-target    | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851 | Tue, 23 Aug 2022 14:45:17 GMT | BadRelatesTo    | Could not parse an logicalId from 'not-a-target' using pattern '^https://psis-sync.national.ncrs.nhs.uk/DocumentReference/(?P<logical_id>.*)           |
-      | https://directory.spineservices.nhs.uk/STU3/Organization/8FW23 |               |                 |                                                           | Tue, 23 Aug 2022 14:45:17 GMT | ValidationError | Field 'DocumentPointer.logicalIdentifier' was expected but not provided.                                                                               |
-      | https://directory.spineservices.nhs.uk/STU3/Organization/8FW23 |               |                 | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851 | 2021-03-08T15:26:00+01:00     | ValidationError | 'InvalidValue' encountered on 'DocumentPointer.lastModified': Could not parse datetime from '2021-03-08T15:26:00+01:00'.                               |
-      | some/other/prefix/8FW23                                        |               |                 | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851 | Tue, 23 Aug 2022 14:45:17 GMT | CustodianError  | Could not parse an ODS code from 'some/other/prefix/8FW23' using pattern '^https://directory.spineservices.nhs.uk/STU3/Organization/(?P<ods_code>\\w+) |
+      | custodian                                                      | relatesToCode | relatesToTarget | logicalId                                                 | status     | lastModified                  | error_type      | error_message                                                                                                                                          |
+      | https://directory.spineservices.nhs.uk/STU3/Organization/8FW23 | replaces      |                 | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851 | current    | Tue, 23 Aug 2022 14:45:17 GMT | ValidationError | 'FieldNotFound' encountered on 'DocumentPointer.relatesTo': Field 'RelatesTo.target' was expected but not provided.                                    |
+      | https://directory.spineservices.nhs.uk/STU3/Organization/8FW23 | replaces      | not-a-target    | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851 | current    | Tue, 23 Aug 2022 14:45:17 GMT | BadRelatesTo    | Could not parse an logicalId from 'not-a-target' using pattern '^https://psis-sync.national.ncrs.nhs.uk/DocumentReference/(?P<logical_id>.*)           |
+      | https://directory.spineservices.nhs.uk/STU3/Organization/8FW23 |               |                 |                                                           | current    | Tue, 23 Aug 2022 14:45:17 GMT | ValidationError | Field 'DocumentPointer.logicalIdentifier' was expected but not provided.                                                                               |
+      | https://directory.spineservices.nhs.uk/STU3/Organization/8FW23 |               |                 | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851 | current    | 2021-03-08T15:26:00+01:00     | ValidationError | 'InvalidValue' encountered on 'DocumentPointer.lastModified': Could not parse datetime from '2021-03-08T15:26:00+01:00'.                               |
+      | some/other/prefix/8FW23                                        |               |                 | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851 | current    | Tue, 23 Aug 2022 14:45:17 GMT | CustodianError  | Could not parse an ODS code from 'some/other/prefix/8FW23' using pattern '^https://directory.spineservices.nhs.uk/STU3/Organization/(?P<ods_code>\\w+) |
+      | https://directory.spineservices.nhs.uk/STU3/Organization/8FW23 |               |                 | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851 | superseded | Tue, 23 Aug 2022 14:45:17 GMT | ValidationError | 'InvalidValue' encountered on 'DocumentPointer.status': Value 'superseded' was provided, but only 'current' is allowed.                                |
