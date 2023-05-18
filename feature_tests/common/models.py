@@ -6,6 +6,7 @@ from types import FunctionType
 
 import requests
 from behave.model import Table
+from behave.runner import Context as BehaveContext
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
 from nrlf.core.types import DynamoDbClient
@@ -184,3 +185,8 @@ class TestConfig:
     actor_context: ActorContext = None
     dynamodb_client: DynamoDbClient = None
     environment_prefix: str = None
+    rendered_templates: dict = field(default_factory=dict)
+
+
+class Context(BehaveContext):
+    test_config: TestConfig

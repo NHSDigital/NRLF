@@ -1,7 +1,6 @@
 import json
 
 from behave import given as behave_given
-from behave.runner import Context
 from nrlf.core.constants import CONNECTION_METADATA
 from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import create_document_pointer_from_fhir_json
@@ -10,7 +9,7 @@ from nrlf.core.validators import json_loads, split_custodian_id
 from feature_tests.common.config_setup import register_application, request_setup
 from feature_tests.common.constants import DEFAULT_VERSION, WITH_WITHOUT_ANY, FhirType
 from feature_tests.common.decorators import given
-from feature_tests.common.models import Template, TestConfig
+from feature_tests.common.models import Context, Template, TestConfig
 
 
 @behave_given("template {template_name}")

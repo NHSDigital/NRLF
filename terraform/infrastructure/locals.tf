@@ -22,6 +22,7 @@ locals {
       path = var.producer_api_path
     }
   }
+  dynamodb_timeout_seconds = "3"
   # Logic / vars for splunk environment
   persistent_environments = ["dev", "dev-sandbox", "ref", "ref-sandbox", "int", "int-sandbox", "prod"]
   #environment_no_hyphen   = replace(local.environment, "-", "")

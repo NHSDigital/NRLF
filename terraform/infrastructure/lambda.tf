@@ -293,6 +293,7 @@ module "consumer__status" {
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
     SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    DYNAMODB_TIMEOUT            = local.dynamodb_timeout_seconds
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -319,6 +320,7 @@ module "producer__status" {
     PREFIX                      = "${local.prefix}--"
     ENVIRONMENT                 = local.environment
     SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    DYNAMODB_TIMEOUT            = local.dynamodb_timeout_seconds
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,

@@ -14,7 +14,11 @@ from cron.seed_sandbox.config import Config, build_persistent_dependencies
 from cron.seed_sandbox.steps import steps
 
 config = Config(
-    **{env_var: os.environ.get(env_var) for env_var in Config.__fields__.keys()}
+    **{
+        env_var: os.environ.get(env_var)
+        for env_var in Config.__fields__.keys()
+        if os.environ.get(env_var) is not None
+    }
 )
 dependencies = build_persistent_dependencies(config)
 

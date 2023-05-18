@@ -755,6 +755,18 @@ type = "directory"
 url = "layer/nrlf"
 
 [[package]]
+name = "nrlf-converter"
+version = "0.0.2"
+description = "NHS Clinicals Record Locator Document Pointer to HL7 FHIR R4 DocumentReference conversion"
+category = "dev"
+optional = false
+python-versions = ">=3.8,<4.0"
+
+[package.source]
+type = "url"
+url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.2/nrlf_converter-0.0.2-py3-none-any.whl"
+
+[[package]]
 name = "nrlf-lambda-pipeline"
 version = "0.3.0"
 description = "Robust implementation of step chaining for AWS Lambda executions"
@@ -1346,7 +1358,7 @@ python-versions = ">=3.4"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "b00896d7bd26bffdb50cd9696693a3011a664971bc38e13cd9997388e2a27a3b"
+content-hash = "d41e10562c71db47dd207a6a672f71f869490661431710a60fe0ab7f435fafa8"
 
 [metadata.files]
 argcomplete = [
@@ -1779,6 +1791,7 @@ nodeenv = [
     {file = "nodeenv-1.7.0.tar.gz", hash = "sha256:e0e7f7dfb85fc5394c6fe1e8fa98131a2473e04311a45afb6508f7cf1836fa2b"},
 ]
 nrlf = []
+nrlf-converter = []
 nrlf-lambda-pipeline = []
 oauthlib = [
     {file = "oauthlib-3.2.2-py3-none-any.whl", hash = "sha256:8139f29aac13e25d502680e9e19963e83f16838d48a0d71c287fe40e7067fbca"},
