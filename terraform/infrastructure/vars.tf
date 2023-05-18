@@ -28,12 +28,12 @@ variable "deletion_protection" {
   default = false
 }
 
-variable "db_instance_class" {
+variable "rds_instance_class" {
   type    = string
   default = "db.t3.micro"
 }
 
-variable "db_allocated_storage" {
+variable "rds_allocated_storage" {
   type    = number
   default = 5
 }

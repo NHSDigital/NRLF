@@ -23,6 +23,8 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
 6. [Logging](#logging)
 7. [Route 53 & Hosted zones](#route53--hosted-zones)
 8. [Sandbox](#sandbox)
+9. [Firehose](#firehose)
+10. [Bastion](#bastion)
 
 ---
 
@@ -569,3 +571,61 @@ When you create a release branch in the form of `release/yyyy-mm-dd` or `hotfix/
 The CI pipeline will check to make sure you have done this to prevent any mistakes - if you have made a release or hotfix branch it will check that the value in the RELEASE file matches or not
 
 This is because it will use that value to tag the commit once its been merged into main as a reference point, and this is how it tracks which release it is as github actions struggles with post merge branch identification
+
+## Bastion
+
+For Dev and Test there is a bastion in place that can be used to connect to the RDS instance either through the CLI or from your chosen database client for Postgres.
+
+There are a few steps to get this sorted:
+
+1. Create a .pem file and adding it to your ssh agent:
+
+   - For local development, you need to create your own .pem file and upload it to the relevant AWS environment
+   - Run the following command, ensuring you replace `environment` with your local environment name:
+     `ssh-keygen -t rsa -b 4096 -m pem -f environment-bastion-key.pem && openssl rsa -in environment-bastion-key.pem -outform pem && chmod 400 environment-bastion-key.pem`
+   - In AWS Console, go to EC2 > Key Pairs > Actions > Import, then import the `.pub` file, ensure you give it the name `environment-bastion-key`, and again, replace `environment` with your local environment name
+   - Add the `.pem` file to your ssh agent
+     - Mac
+       - `ssh-add -K ~/.ssh/environment-bastion-key.pem`
+   - NOTE - this last step isn't needed if you want to use a client like PGAdmin, this is more for CLI (command line interface) access
+
+1. Add your IP address to the bastion security group inbound rules
+
+   - The bastion requires an inbound rule in its security group in order to allow requests
+   - if you google whatsmyip you can get your own IP address (alternatively, you can let AWS determine your IP address when adding the rule)
+   - when you create a new inbound rule you will to do the following
+     - Go to dev_bastion_SG under the EC2 section on AWS
+     - Select edit inbound rules
+     - make sure the type is `SSH` (so we don't open up too many holes in security)
+     - for source select custom and put your IP in with `/32` at the end (to state its a single IP address)
+     - Give it a description and save rules
+
+1. Connect via PGAdmin
+
+   - Once you have the pem file sorted we can set up the connection
+   - This example is for PGAdmin and dev rds but the steps should be fairly interchangeable with other clients
+   - First set up a new a new server connection
+   - General Tab
+     - Name - whatever you want to call the connection "ODS dev" for example
+   - Connection Tab
+     - This is where you put the DB information
+     - Host - the endpoint name of the RDS database (can be found in AWS under RDS->Databases->dev-rds-db->Connectivity & Security-> Endpoint)
+     - Port - `5432`
+     - Username - `nrlfadmin`
+     - Password - you can obtain this from the secret manager for the particular environment
+   - SSH Tunnel
+     - This is the information needed to connect to the Bastion (this will use the pem file we did in step 1)
+     - Toggle use SSH tunneling
+     - Tunnel host - this is the public ipv4 address of the bastion (found in AWS under EC2->Instances->Bastion-dev->Public IPv4 DNS)
+     - Username - `ec2-user`
+     - Authentication - `Identity file`
+     - Identity file - this needs to be the `environment-bastion-key.pem` file that we stored
+   - SAVE
+   - This should log you into the database
+
+1. Connect via CLI
+   - If you prefer to connect via the CLI, the bastion host has postgres pre installed allowing you to SSH on and then connect manually
+   - you need the Public IPv4 DNS of the bastion (which can change based on deployments)
+     - an example would look like - `ssh -v ec2-user@ec2-13-41-163-42.eu-west-2.compute.amazonaws.com`
+   - Once done you should see a new terminal prompt, from here you can connect to the postgres database for `openods` using the followiung command:
+     `psql --host=<INSERT-ENDPOINT-FOR-RDS-HERE> --port=5432 --username=master --password --dbname=TBD`
