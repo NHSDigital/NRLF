@@ -20,7 +20,7 @@ resource "aws_instance" "bastion" {
 
 
 data "aws_key_pair" "bastion_key" {
-  count              = var.environment == "prod" || length(regexall("--ci-", var.environment)) > 0 ? 0 : 1
+  count              = var.environment == "prod" || length(regexall("ci-", var.environment)) > 0 ? 0 : 1
   key_name           = "${var.environment}-bastion-key"
   include_public_key = true
 }
