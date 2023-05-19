@@ -230,6 +230,7 @@ jobs:
     needs: [smoke-test]
     name: Deploy Documentation
     runs-on: [self-hosted, ci]
+    continue-on-error: true
     steps:
       - name: Download cache - ${{ env.CACHE_NAME }}
         uses: ./.github/actions/caching/
