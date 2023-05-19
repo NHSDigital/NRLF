@@ -26,8 +26,9 @@ CUSTODIAN_SEPARATOR = "."
 KEY_SEPARATOR = "#"
 ODS_SYSTEM = "https://fhir.nhs.uk/Id/ods-organization-code"
 NHS_NUMBER_SYSTEM_URL = "https://fhir.nhs.uk/Id/nhs-number"
+RELATES_TO_REPLACES = "replaces"
 ALLOWED_RELATES_TO_CODES = {
-    "replaces",
+    RELATES_TO_REPLACES,
     "transforms",
     "signs",
     "appends",

@@ -12,6 +12,7 @@ from nrlf.core.constants import (
     CUSTODIAN_SEPARATOR,
     PERMISSION_AUDIT_DATES_FROM_PAYLOAD,
     PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL,
+    RELATES_TO_REPLACES,
 )
 from nrlf.core.dynamodb_types import DynamoDbStringType
 from nrlf.core.errors import (
@@ -77,7 +78,6 @@ def parse_request_body(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-
     body = fetch_body_from_event(event)
 
     core_model = create_document_pointer_from_fhir_json(body, API_VERSION)
@@ -104,7 +104,7 @@ def mark_as_supersede(
         output["delete_item_ids"] = [
             relationship.target.identifier.value
             for relationship in document_relationships
-            if relationship.code == "replaces"
+            if relationship.code == RELATES_TO_REPLACES
         ]
     return PipelineData(**data, **output)
 
@@ -192,7 +192,7 @@ def _validate_ok_to_supersede(
         document_to_delete: DocumentPointer = document_pointer_repository.read_item(
             delete_pk
         )
-    except (ItemNotFound):
+    except ItemNotFound:
         if ignore_delete_error:
             has_delete_target = False
             return has_delete_target, delete_pk
