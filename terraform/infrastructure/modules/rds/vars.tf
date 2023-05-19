@@ -4,6 +4,8 @@ variable "name" {}
 
 variable "environment" {}
 
+variable "bastion_enabled" {}
+
 variable "rds_instance_class" {
   type    = string
   default = "db.t3.micro"

@@ -1,5 +1,5 @@
 resource "aws_instance" "bastion" {
-  count                       = var.environment == "prod" ? 0 : 1
+  count                       = var.bastion_enabled ? 1 : 0
   ami                         = "ami-00785f4835c6acf64"
   instance_type               = "t3.micro"
   subnet_id                   = element(aws_subnet.public_subnet, count.index).id
@@ -20,7 +20,7 @@ resource "aws_instance" "bastion" {
 
 
 data "aws_key_pair" "bastion_key" {
-  count              = var.environment == "prod" || length(regexall("ci-", var.environment)) > 0 ? 0 : 1
+  count              = var.bastion_enabled ? 1 : 0
   key_name           = "${var.environment}-bastion-key"
   include_public_key = true
 }
