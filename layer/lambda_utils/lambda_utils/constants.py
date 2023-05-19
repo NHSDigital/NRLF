@@ -1,4 +1,4 @@
-from logging import ERROR, INFO
+from logging import DEBUG, ERROR, INFO
 
 
 class LoggingOutcomes:
@@ -17,3 +17,4 @@ class LoggingConstants:
 class LogLevel:
     INFO = INFO
     ERROR = ERROR
+    DEBUG = DEBUG

@@ -1,10 +1,10 @@
 from importlib.metadata import version
 
 from behave import given as behave_given
-from nrlf.core.validators import json_loads
 
 from feature_tests.common.decorators import given
 from feature_tests.common.models import Context
+from nrlf.core.validators import json_loads
 
 
 @behave_given('version "{version_number}" of "{package_name}" has been installed')

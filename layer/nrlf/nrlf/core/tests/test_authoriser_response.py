@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 from lambda_utils.tests.unit.utils import make_aws_event
+
 from nrlf.core.authoriser import Config, _create_policy, execute_steps
 
 

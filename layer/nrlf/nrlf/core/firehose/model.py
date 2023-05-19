@@ -7,8 +7,9 @@ from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
     KinesisFirehoseRecord,
 )
 from lambda_utils.logging import LogTemplate, log_action
-from nrlf.core.firehose.utils import dump_json_gzip, load_json_gzip
 from pydantic import BaseModel, Field, Json, conlist, constr, root_validator
+
+from nrlf.core.firehose.utils import dump_json_gzip, load_json_gzip
 
 
 class LogReference(Enum):

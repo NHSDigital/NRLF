@@ -9,6 +9,7 @@ from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
 from hypothesis import given
 from hypothesis.strategies import DrawFn, builds, composite, just, lists
 from lambda_utils.logging import LogData, LogTemplate
+
 from nrlf.core.firehose.handler import _process_firehose_records, firehose_handler
 from nrlf.core.firehose.model import (
     CONTROL_MESSAGE_TEXT,

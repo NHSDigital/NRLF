@@ -2,6 +2,7 @@ import json
 from unittest import mock
 
 import pytest
+
 from nrlf.core.constants import ID_SEPARATOR, DbPrefix
 from nrlf.core.errors import RequestValidationError
 from nrlf.core.model import (

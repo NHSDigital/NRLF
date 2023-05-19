@@ -7,6 +7,7 @@ from types import FunctionType
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.pipeline import make_pipeline
 from lambda_pipeline.types import LambdaContext, PipelineData
+from lambda_utils.constants import LogLevel
 from lambda_utils.logging import (
     Logger,
     MinimalEventModelForLogging,
@@ -19,13 +20,14 @@ from lambda_utils.versioning import (
     get_version_from_header,
     get_versioned_steps,
 )
-from nrlf.core.response import operation_outcome_not_ok
 from pydantic import ValidationError
+
+from nrlf.core.response import operation_outcome_not_ok
 
 
 class LogReference(Enum):
-    PIPELINE001 = "Getting version from header"
-    PIPELINE002 = "Executing pipeline steps"
+    OPERATION = "Executing pipeline steps"
+    VERSION_CHECK = "Getting version from header"
 
 
 def _get_steps(
@@ -68,7 +70,11 @@ def _setup_logger(
     )
 
 
-@log_action(log_reference=LogReference.PIPELINE001, log_fields=["index_path", "event"])
+@log_action(
+    log_reference=LogReference.VERSION_CHECK,
+    log_level=LogLevel.DEBUG,
+    log_fields=["index_path", "event"],
+)
 def _get_steps_for_version_header(index_path: str, event: dict) -> list[FunctionType]:
     requested_version = get_version_from_header(**event["headers"])
     versioned_steps = get_versioned_steps(index_path)
@@ -77,7 +83,11 @@ def _get_steps_for_version_header(index_path: str, event: dict) -> list[Function
     )
 
 
-@log_action(log_reference=LogReference.PIPELINE002, log_fields=["steps", "event"])
+@log_action(
+    log_reference=LogReference.OPERATION,
+    log_level=LogLevel.INFO,
+    log_fields=["steps", "event"],
+)
 def _execute_steps(
     steps: list[FunctionType],
     event: dict,

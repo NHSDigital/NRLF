@@ -3,6 +3,7 @@ from typing import List
 
 import boto3
 from atlassian import Confluence
+
 from nrlf.core.validators import json_loads
 
 SECRET_NAME = "confluence/credentials"  # pragma: allowlist secret
