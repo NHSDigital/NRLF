@@ -12,7 +12,7 @@ module "alert_lambda" {
     SPLUNK_INDEX      = var.splunk_index
     SLACK_WEBHOOK_URL = jsonencode(data.aws_secretsmanager_secret_version.slack_webhook_url.*.secret_string)
   }
-  additional_policies = []
+  additional_policies = [aws_iam_policy.firehose-alert--s3-read.arn]
   handler             = "firehose.alert.index.handler"
 }
 

@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 from itertools import chain
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 from uuid import uuid4
 
 from fire import Fire
@@ -56,7 +56,9 @@ class FirehoseErrorEvent(BaseModel):
     error_message: str
     attempt_ending_timestamp: int
     raw_data: Union[str, bytes]
-    lambda_arn: str
+    lambda_arn: Optional[str] = None
+    event_id: Optional[str] = Field(default=None, alias="EventId")
+    subsequence_number: Optional[int] = None
 
     class Config:
         allow_population_by_field_name = True
@@ -67,17 +69,31 @@ class FirehoseErrorEvent(BaseModel):
         extra = Extra.forbid
 
     def __str__(self):
-        return "\n".join(
-            [
-                f"\terror_code: {self.error_code}",
-                f"\terror_message: {self.error_message}",
-            ]
-        )
+        message = [
+            "",
+            f"\terror_code: {self.error_code}",
+            f"\terror_message: {self.error_message}",
+        ]
+
+        if self.subsequence_number is not None:
+            message.append(f"\tsubsequence_number: {self.subsequence_number}")
+
+        if self.lambda_arn is not None:
+            message.append(f"\tlambda_arn: {self.lambda_arn}")
+
+        return "\n".join(message)
 
     @property
     def cloudwatch_logs_data(self) -> _CloudwatchLogsData:
         data = load_json_gzip(base64.b64decode(self.raw_data))
         return _CloudwatchLogsData(**data)
+
+    @property
+    def json_lines(self) -> list[dict]:
+        return map(
+            json_loads,
+            base64.b64decode(self.raw_data).replace(b"}{", b"}\n{").split(b"\n"),
+        )
 
 
 @log("\nError metadata directly from Firehose: {__result__}\n")
@@ -87,8 +103,11 @@ def _parse_error_event(error_event: dict):
 
 def _get_logs_from_error_event(error_event: dict):
     _error_event = _parse_error_event(error_event=error_event)
-    log_events: list[_LogEvent] = _error_event.cloudwatch_logs_data.log_events
-    yield from (log_event.message for log_event in log_events)
+    if _error_event.lambda_arn:
+        log_events: list[_LogEvent] = _error_event.cloudwatch_logs_data.log_events
+        yield from (log_event.message for log_event in log_events)
+    else:
+        yield from _error_event.json_lines
 
 
 def _read_gzip_from_s3(s3_client, bucket_name, file_key):
