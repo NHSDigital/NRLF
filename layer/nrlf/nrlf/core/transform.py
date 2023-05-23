@@ -7,9 +7,9 @@ from more_itertools import map_except
 from nrlf.core.constants import (
     ALLOWED_RELATES_TO_CODES,
     EMPTY_VALUES,
-    ID_SEPARATOR,
     JSON_TYPES,
     ODS_SYSTEM,
+    RELATES_TO_REPLACES,
     REQUIRED_CREATE_FIELDS,
     Source,
 )
@@ -22,8 +22,6 @@ from nrlf.core.errors import (
 )
 from nrlf.core.model import DocumentPointer, PaginatedResponse
 from nrlf.core.validators import json_loads, validate_subject_identifier_system
-from nrlf.legacy.constants import LEGACY_SYSTEM, LEGACY_VERSION, NHS_NUMBER_SYSTEM_URL
-from nrlf.legacy.model import LegacyDocumentPointer
 from nrlf.producer.fhir.r4.model import (
     Bundle,
     BundleEntry,
@@ -99,35 +97,6 @@ def _strip_empty_json_paths(
     )
 
 
-def _create_fhir_model_from_legacy_model(
-    legacy_model: LegacyDocumentPointer, producer_id: str, nhs_number: str
-) -> DocumentReference:
-    return StrictDocumentReference(
-        resourceType=DocumentReference.__name__,
-        id=f"{producer_id}{ID_SEPARATOR}{legacy_model.logicalIdentifier.logicalId}",
-        status=legacy_model.status,
-        type={"coding": [legacy_model.type.dict()]},
-        category=[legacy_model.class_.dict()],
-        subject={"identifier": {"system": NHS_NUMBER_SYSTEM_URL, "value": nhs_number}},
-        date=legacy_model.indexed.isoformat(),
-        author=[legacy_model.author],
-        custodian={
-            "identifier": {
-                "system": LEGACY_SYSTEM,
-                "value": legacy_model.custodian.reference,
-            }
-        },
-        relatesTo=[legacy_model.relatesTo] if legacy_model.relatesTo else [],
-        content=legacy_model.content,
-        context=legacy_model.context,
-    )
-
-
-def _create_legacy_model_from_legacy_json(legacy_json: dict) -> LegacyDocumentPointer:
-    stripped_legacy_json = _strip_empty_json_paths(legacy_json)
-    return LegacyDocumentPointer(**stripped_legacy_json)
-
-
 def validate_no_extra_fields(input_fhir_json, output_fhir_json):
     if input_fhir_json != output_fhir_json:
         raise FhirValidationError("Input FHIR JSON has additional non-FHIR fields.")
@@ -148,11 +117,19 @@ def validate_custodian_system(fhir_strict_model: StrictDocumentReference):
         )
 
 
-def validate_relates_to_code(relates_to: list[DocumentReferenceRelatesTo]):
+def validate_relates_to(relates_to: list[DocumentReferenceRelatesTo]):
     for document_reference_relates_to in relates_to:
         if document_reference_relates_to.code not in ALLOWED_RELATES_TO_CODES:
             raise RequestValidationError(
                 f"Provided relatesTo code '{document_reference_relates_to.code}' must be one of {sorted(ALLOWED_RELATES_TO_CODES)}"
+            )
+        if document_reference_relates_to.code == RELATES_TO_REPLACES and not (
+            document_reference_relates_to.target.identifier
+            and document_reference_relates_to.target.identifier.value
+        ):
+            raise RequestValidationError(
+                "'relatesTo.target.identifier.value' must be specified when "
+                f"relatesTo.code is '{RELATES_TO_REPLACES}'"
             )
 
 
@@ -162,7 +139,6 @@ def create_document_pointer_from_fhir_json(
     source: Source = Source.NRLF,
     **kwargs,
 ) -> DocumentPointer:
-    validate_required_create_fields(fhir_json)
     stripped_fhir_json = _strip_empty_json_paths(
         json=fhir_json, raise_on_discovery=True
     )
@@ -184,6 +160,7 @@ def create_document_pointer_from_fhir_json(
 def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference:
     DocumentReference(**fhir_json)
     fhir_strict_model = StrictDocumentReference(**fhir_json)
+    validate_required_create_fields(fhir_json)
     validate_no_extra_fields(
         input_fhir_json=fhir_json,
         output_fhir_json=fhir_strict_model.dict(exclude_none=True),
@@ -195,7 +172,7 @@ def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference
 
     _strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
     if fhir_strict_model.relatesTo:
-        validate_relates_to_code(relates_to=fhir_strict_model.relatesTo)
+        validate_relates_to(relates_to=fhir_strict_model.relatesTo)
     return fhir_strict_model
 
 
@@ -208,23 +185,6 @@ def update_document_pointer_from_fhir_json(
         source=source,
         created_on=kwargs.pop("created_on", make_timestamp()),
         updated_on=kwargs.pop("updated_on", make_timestamp()),
-    )
-    return core_model
-
-
-def create_document_pointer_from_legacy_json(
-    legacy_json: dict, producer_id: str, nhs_number: str
-) -> DocumentPointer:
-    legacy_model = _create_legacy_model_from_legacy_json(legacy_json=legacy_json)
-    fhir_model = _create_fhir_model_from_legacy_model(
-        legacy_model=legacy_model, producer_id=producer_id, nhs_number=nhs_number
-    )
-    core_model = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_model.dict(exclude_none=True),
-        api_version=LEGACY_VERSION,
-        source=Source.LEGACY,
-        created_on=legacy_model.lastModified.isoformat(),
-        updated_on=legacy_model.lastModified.isoformat(),
     )
     return core_model
 
@@ -249,7 +209,6 @@ def create_bundle_entries_from_document_pointers(
 def create_bundle_from_paginated_response(
     paginated_response: PaginatedResponse,
 ) -> Bundle:
-
     document_pointers = paginated_response.document_pointers
 
     bundleEntryList = create_bundle_entries_from_document_pointers(document_pointers)
@@ -268,7 +227,6 @@ def create_bundle_from_paginated_response(
 
 
 def create_meta(last_evaluated_key: object) -> Meta:
-
     last_key = str(last_evaluated_key)
 
     coding = {"code": last_key, "display": "next_page_token"}

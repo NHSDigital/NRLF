@@ -57,7 +57,8 @@ def render_document_reference_properties(
             if row["property"] != TARGET:
                 continue
             relatesTo = deepcopy(_relatesTo)
-            relatesTo["target"]["identifier"]["value"] = row["value"]
+            if relatesTo["target"].get("identifier"):
+                relatesTo["target"]["identifier"]["value"] = row["value"]
             relatesTo_collection.append(relatesTo)
     if relatesTo_collection:  # Empty fields aren't valid FHIR
         document_reference_json[RELATES_TO] = relatesTo_collection
