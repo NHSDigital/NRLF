@@ -7,6 +7,7 @@ from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
     KinesisFirehoseRecord,
 )
 from lambda_utils.logging import log_action
+
 from nrlf.core.firehose.log_reference import LogReference
 from nrlf.core.validators import json_loads
 

@@ -3,6 +3,8 @@ from unittest.mock import Mock
 import pytest
 from hypothesis import given
 from hypothesis.strategies import builds, just, lists
+from pydantic import ValidationError
+
 from nrlf.core.firehose.model import (
     CONTROL_MESSAGE_TEXT,
     CloudwatchLogsData,
@@ -14,7 +16,6 @@ from nrlf.core.firehose.model import (
     parse_cloudwatch_data,
 )
 from nrlf.core.firehose.tests.test_firehose_handler import _cloudwatch_data_strategy
-from pydantic import ValidationError
 
 ENCODED_LOG_EVENTS = "an encoded event"  # Size = 16
 RECORD_ID = "123"  # Size = 3

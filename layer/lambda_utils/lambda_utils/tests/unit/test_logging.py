@@ -8,9 +8,10 @@ from hypothesis import given
 from hypothesis.strategies import booleans, builds, dictionaries, just, text
 from lambda_utils.logging import LogData, Logger, LogTemplate, log_action
 from lambda_utils.tests.unit.utils import make_aws_event
+from pydantic import ValidationError
+
 from nrlf.core.errors import DynamoDbError
 from nrlf.core.validators import json_loads, validate_timestamp
-from pydantic import ValidationError
 
 
 class LogReference(Enum):

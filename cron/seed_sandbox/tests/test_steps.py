@@ -5,8 +5,6 @@ from unittest import mock
 import boto3
 import moto
 import pytest
-from nrlf.core.model import DocumentPointer
-from nrlf.core.types import DynamoDbClient
 
 from cron.seed_sandbox.repository import SandboxRepository
 from cron.seed_sandbox.steps import _is_sandbox_lambda, _seed_step_factory
@@ -15,6 +13,8 @@ from cron.seed_sandbox.tests.utils import (
     create_dummy_model_json_file,
     create_table,
 )
+from nrlf.core.model import DocumentPointer
+from nrlf.core.types import DynamoDbClient
 
 
 @pytest.fixture

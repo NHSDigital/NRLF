@@ -1,5 +1,5 @@
 from enum import Enum
-from functools import wraps
+from functools import partial, wraps
 from inspect import signature
 from logging import getLevelName
 from timeit import default_timer as timer
@@ -17,9 +17,10 @@ from lambda_utils.logging_utils import (
     generate_transaction_id,
     json_encode_message,
 )
-from nrlf.core.transform import make_timestamp
 from pydantic import BaseModel, Extra, Field
 from typing_extensions import ParamSpec
+
+from nrlf.core.transform import make_timestamp
 
 
 class LogTemplateBase(BaseModel):
@@ -39,6 +40,11 @@ class LogData(BaseModel):
 
 
 class LogTemplate(LogTemplateBase):
+    caller: Union[str, None]  # Identity of the caller
+    root: Union[str, None]  # The id of root object that triggered the request
+    subject: Union[
+        str, None
+    ]  # The id of the object being operated on, which normally matches the root but can be a child.
     log_level: str
     log_reference: str
     outcome: str
@@ -135,18 +141,27 @@ P = ParamSpec("P")  # for forwarding type-hints of the decorated kw/args
 def log_action(
     *,
     log_reference: Enum,
+    log_level: LogLevel = LogLevel.INFO,
     log_fields: list[str] = [],
     log_result: bool = True,
     sensitive: bool = True,
+    errors_only: bool = False,
+    scope_fn: Union[Callable[P, dict[str, str]], None] = None,
 ) -> Callable[[Callable[P, RT]], Callable[P, RT]]:
     """
     Args:
-        log_reference: Enum mapping to a verbose description of what this function is doing.
-        log_fields: Fields to explicitly include. If not provided then
-                    no fields are included in the log output.
-        log_result: Indicate whether or not to log the function result.
-        level:      logging level for this log.
-        sensitive:  Flag for Splunk to categorise this log as sensitive.
+        log_reference:  Enum mapping to a verbose description of what this
+                        function is doing.
+        log_level:      Enum indicating which logging level to be used if the
+                        operation successfully completes.  Failed operations
+                        will be logged as LogLevel.Error
+        log_fields:     Fields to explicitly include. If not provided then no
+                        fields are included in the log output.
+        log_result:     Indicate whether or not to log the function result.
+        level:          logging level for this log.
+        sensitive:      Flag for Splunk to categorise this log as sensitive.
+        errors_only:    Indicates that successful operations should not be
+                        logged, only errors.
     """
 
     def decorator(fn: Callable[P, RT]) -> Callable[P, RT]:
@@ -178,27 +193,28 @@ def log_action(
             if log_result:
                 data["result"] = result
 
-            level = (
-                LogLevel.ERROR if outcome == LoggingOutcomes.ERROR else LogLevel.INFO
-            )
+            level = LogLevel.ERROR if outcome == LoggingOutcomes.ERROR else log_level
             error = result if outcome == LoggingOutcomes.ERROR else None
-            _message = LogTemplate(
-                log_reference=log_reference.name,
-                message=log_reference.value,
-                function=f"{fn.__module__}.{fn.__name__}",
-                data=data,
-                error=error,
-                call_stack=call_stack,
-                outcome=outcome,
-                duration_ms=duration_ms,
-                log_level=getLevelName(level),
-                sensitive=sensitive,
-                **logger.base_message.dict(),
-            )
 
-            message_dict = _message.dict()
-            message_json = json_encode_message(message=message_dict)
-            logger.log(msg=message_json, level=level)
+            if not errors_only or level == LogLevel.ERROR:
+                scoped_values = {} if scope_fn is None else scope_fn(*args, **kwargs)
+                _message = LogTemplate(
+                    log_reference=log_reference.name,
+                    message=log_reference.value,
+                    function=f"{fn.__module__}.{fn.__name__}",
+                    data=data,
+                    error=error,
+                    call_stack=call_stack,
+                    outcome=outcome,
+                    duration_ms=duration_ms,
+                    log_level=getLevelName(level),
+                    sensitive=sensitive,
+                    **logger.base_message.dict(),
+                    **scoped_values,
+                )
+                message_dict = _message.dict()
+                message_json = json_encode_message(message=message_dict)
+                logger.log(msg=message_json, level=level)
 
             if isinstance(result, Exception):
                 raise result
@@ -207,3 +223,17 @@ def log_action(
         return wrapper
 
     return decorator
+
+
+def make_scoped_log_action(
+    scope_fn,
+    *args,
+    **kwargs,
+):
+    """
+    Uses a partial to define the request scoped values once, rather than each
+    @log_action.
+    """
+    _kwargs: dict[str, Any] = {**kwargs}
+    _kwargs["scope_fn"] = scope_fn
+    return partial(log_action, *args, **_kwargs)

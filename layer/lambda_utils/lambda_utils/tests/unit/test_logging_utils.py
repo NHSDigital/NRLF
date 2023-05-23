@@ -14,8 +14,9 @@ from lambda_utils.logging_utils import (
     generate_transaction_id,
     json_encode_message,
 )
-from nrlf.core.errors import ItemNotFound
 from pydantic import BaseModel
+
+from nrlf.core.errors import ItemNotFound
 
 
 def test_generate_transaction_id_unique():

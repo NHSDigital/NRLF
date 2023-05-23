@@ -13,8 +13,9 @@ from lambda_utils.header_config import (
 from lambda_utils.logging import log_action
 from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _setup_logger
-from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from pydantic import BaseModel, ValidationError
+
+from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 
 
 class LogReference(Enum):

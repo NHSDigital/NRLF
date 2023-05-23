@@ -4,14 +4,16 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.logging import log_action
+
 from nrlf.consumer.fhir.r4.model import NextPageToken, RequestQuerySubject
-from nrlf.core.common_steps import parse_headers
+from nrlf.core.common_steps import make_common_log_action, parse_headers
 from nrlf.core.errors import assert_no_extra_params
 from nrlf.core.model import ConsumerRequestParams, PaginatedResponse, key
 from nrlf.core.repository import Repository, custodian_filter, type_filter
 from nrlf.core.transform import create_bundle_from_paginated_response
 from nrlf.core.validators import validate_type_system
+
+log_action = make_common_log_action()
 
 
 class LogReference(Enum):

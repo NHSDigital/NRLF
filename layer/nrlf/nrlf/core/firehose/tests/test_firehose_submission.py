@@ -5,6 +5,7 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import builds, just, lists, none
 from moto import mock_firehose, mock_s3
+
 from nrlf.core.firehose.model import FirehoseSubmissionRecord
 from nrlf.core.firehose.submission import (
     FirehoseClient,

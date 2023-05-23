@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+from pydantic import BaseModel, ValidationError
+
 from nrlf.core.errors import NRLF_TO_SPINE_4XX_ERROR
 from nrlf.core.nhsd_codings import (
     META,
@@ -15,7 +17,6 @@ from nrlf.producer.fhir.r4.model import (
     OperationOutcome,
     OperationOutcomeIssue,
 )
-from pydantic import BaseModel, ValidationError
 
 HTTP_STATUS_CODE_MAPPING = {
     SpineCoding.RESOURCE_NOT_FOUND: HTTPStatus.NOT_FOUND,

@@ -8,6 +8,11 @@ import boto3
 import moto
 import pytest
 from botocore.exceptions import ClientError
+
+from feature_tests.common.constants import DOCUMENT_POINTER_TABLE_DEFINITION
+from feature_tests.common.repository import FeatureTestRepository
+from helpers.aws_session import new_aws_session
+from helpers.terraform import get_terraform_json
 from nrlf.core.constants import ODS_SYSTEM, DbPrefix
 from nrlf.core.errors import (
     DuplicateError,
@@ -38,11 +43,6 @@ from nrlf.core.transform import (
 from nrlf.core.types import DynamoDbClient
 from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
-
-from feature_tests.common.constants import DOCUMENT_POINTER_TABLE_DEFINITION
-from feature_tests.common.repository import FeatureTestRepository
-from helpers.aws_session import new_aws_session
-from helpers.terraform import get_terraform_json
 
 API_VERSION = 1
 INDEX_NAME = DOCUMENT_POINTER_TABLE_DEFINITION["GlobalSecondaryIndexes"][0]["IndexName"]
