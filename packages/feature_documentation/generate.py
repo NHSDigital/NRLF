@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterable, List
+from typing import Dict, Iterable, List
 
 from cookiecutter.main import cookiecutter
 from gherkin.parser import Parser
@@ -32,9 +32,21 @@ def _get_feature_filenames() -> Iterable[Path]:
     yield from Path(".").glob("feature_tests/features/**/*.feature")
 
 
+def _html_encode(v: any, k: str = "") -> str:
+    if k == "value":
+        return v.replace("<", "&lt;").replace(">", "&gt;")
+    elif type(v) == dict:
+        return {kk: _html_encode(vv, kk) for kk, vv in v.items()}
+    elif type(v) == list:
+        return [_html_encode(vv) for vv in v]
+    else:
+        return v
+
+
 def _generate_documentation(feature_file_path: Path, style: str) -> bool:
     raw_lines = _read_raw_feature_doc_lines(feature_file_path)
     feature_doc = _parse_gherkin_features(feature_file_path)
+    feature_doc = _html_encode(feature_doc)
     if _is_technical(feature_doc):
         return False
 
