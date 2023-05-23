@@ -5,10 +5,10 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
+from lambda_utils.constants import LogLevel
 
 from api.producer.createDocumentReference.src.constants import PersistentDependencies
 from api.producer.createDocumentReference.src.v1.constants import API_VERSION
-from layer.lambda_utils.lambda_utils.constants import LogLevel
 from nrlf.core.common_producer_steps import invalid_producer_for_delete
 from nrlf.core.common_steps import (
     make_common_log_action,
