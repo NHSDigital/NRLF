@@ -8,6 +8,7 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 
 from api.producer.createDocumentReference.src.constants import PersistentDependencies
 from api.producer.createDocumentReference.src.v1.constants import API_VERSION
+from layer.lambda_utils.lambda_utils.constants import LogLevel
 from nrlf.core.common_producer_steps import invalid_producer_for_delete
 from nrlf.core.common_steps import (
     make_common_log_action,
@@ -74,7 +75,7 @@ def _override_created_on(
     return document_pointer
 
 
-@log_action(log_reference=LogReference.CREATE_REQUEST)
+@log_action(log_reference=LogReference.CREATE_REQUEST, log_level=LogLevel.DEBUG)
 def parse_request_body(
     data: PipelineData,
     context: LambdaContext,
@@ -90,7 +91,7 @@ def parse_request_body(
     return PipelineData(**data, body=body, core_model=core_model)
 
 
-@log_action(log_reference=LogReference.CREATE_SUPERSEDING)
+@log_action(log_reference=LogReference.CREATE_SUPERSEDING, log_level=LogLevel.DEBUG)
 def mark_as_supersede(
     data: PipelineData,
     context: LambdaContext,
@@ -114,7 +115,7 @@ def mark_as_supersede(
     return PipelineData(**data, **output)
 
 
-@log_action(log_reference=LogReference.CREATE_PERMISSIONS)
+@log_action(log_reference=LogReference.CREATE_PERMISSIONS, log_level=LogLevel.DEBUG)
 def validate_producer_permissions(
     data: PipelineData,
     context: LambdaContext,
@@ -153,7 +154,7 @@ def validate_producer_permissions(
     return PipelineData(**data)
 
 
-@log_action(log_reference=LogReference.CREATE_SUPERSEDE_CHECK)
+@log_action(log_reference=LogReference.CREATE_SUPERSEDE_CHECK, log_level=LogLevel.DEBUG)
 def validate_ok_to_supersede(
     data: PipelineData,
     context: LambdaContext,
@@ -225,7 +226,7 @@ def _validate_ok_to_supersede(
     return has_delete_target, delete_pk
 
 
-@log_action(log_reference=LogReference.CREATE_DB)
+@log_action(log_reference=LogReference.CREATE_DB, log_level=LogLevel.DEBUG)
 def save_core_model_to_db(
     data: PipelineData,
     context: LambdaContext,

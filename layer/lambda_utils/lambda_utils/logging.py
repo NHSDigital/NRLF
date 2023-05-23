@@ -127,7 +127,9 @@ class Logger(_Logger):
             source=source,
             transaction_id=self.transaction_id,
         )
-        super().__init__(logger_name, logger_formatter=CustomFormatter(), **kwargs)
+        super().__init__(
+            logger_name, level="DEBUG", logger_formatter=CustomFormatter(), **kwargs
+        )
 
     @property
     def base_message(self) -> LogTemplate:
