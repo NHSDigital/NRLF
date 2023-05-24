@@ -3,4 +3,4 @@ domain              = "api.record-locator.national.nhs.uk"
 deletion_protection = true
 
 # RDS
-rds_instance_class = "db.t3.micro"
+rds_instance_class = "db.t3.2xlarge"

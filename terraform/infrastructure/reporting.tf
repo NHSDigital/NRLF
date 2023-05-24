@@ -1,5 +1,5 @@
 module "rds" {
-  source                = "./modules/rds"
+  source                = "./modules/reporting"
   name                  = "reporting"
   prefix                = local.prefix
   environment           = local.environment
