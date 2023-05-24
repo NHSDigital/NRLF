@@ -67,6 +67,7 @@ class TestMode(Enum):
 
 class Action(Enum):
     read = auto()
+    count = auto()
     search = auto()
     searchPost = auto()
     create = auto()
@@ -96,6 +97,7 @@ ACTION_SLUG_LOOKUP = {
     Action.read: "DocumentReference",
     Action.search: "DocumentReference",
     Action.searchPost: "DocumentReference/_search",
+    Action.count: "DocumentReference/_count",
     Action.create: "DocumentReference",
     Action.delete: "DocumentReference",
     Action.update: "DocumentReference",

@@ -215,6 +215,7 @@ paths:
         - $ref: "#/components/parameters/type"
         - $ref: "#/components/parameters/nextPageToken"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       responses:
@@ -457,6 +458,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       responses:

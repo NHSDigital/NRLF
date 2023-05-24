@@ -150,6 +150,30 @@ module "producer__readDocumentReference" {
   handler = "api.producer.readDocumentReference.index.handler"
 }
 
+module "producer__countDocumentReference" {
+  source                 = "./modules/lambda"
+  parent_path            = "api/producer"
+  name                   = "countDocumentReference"
+  region                 = local.region
+  prefix                 = local.prefix
+  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference/_count"]
+  kms_key_id             = module.kms__cloudwatch.kms_arn
+  environment_variables = {
+    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
+    PREFIX                      = "${local.prefix}--"
+    ENVIRONMENT                 = local.environment
+    SPLUNK_INDEX                = module.firehose__processor.splunk.index
+  }
+  additional_policies = [
+    aws_iam_policy.document-pointer__dynamodb-read.arn,
+    aws_iam_policy.document-pointer__kms-read-write.arn
+  ]
+  firehose_subscriptions = [
+    module.firehose__processor.firehose_subscription
+  ]
+  handler = "api.producer.countDocumentReference.index.handler"
+}
 
 module "producer__searchDocumentReference" {
   source                 = "./modules/lambda"

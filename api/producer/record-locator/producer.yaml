@@ -911,6 +911,29 @@ paths:
                     diagnostics: Resource removed
       description: |
         Delete a single document pointer that your created.
+  /DocumentReference/_count:
+    get:
+      summary: Count document pointers
+      operationId: countDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/subject"
+        - $ref: "#/components/parameters/type"
+        - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
+      responses:
+        "200":
+          description: Count DocumentReference operation successful
+          headers:
+            X-Correlation-Id:
+              $ref: "#/components/headers/CorrelationId"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/Bundle"
 components:
   requestBodies:
     DocumentReference:

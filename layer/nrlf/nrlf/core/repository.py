@@ -29,6 +29,7 @@ PydanticModel = TypeVar("PydanticModel", bound=BaseModel)
 
 MAX_TRANSACT_ITEMS = 100
 PAGE_ITEM_LIMIT = 20
+COUNT_ITEM_LIMIT = 100  # Larger paging size for _count endpoint for performance
 ATTRIBUTE_EXISTS_PK = "attribute_exists(pk)"
 ATTRIBUTE_NOT_EXISTS_PK = "attribute_not_exists(pk)"
 CONDITION_CHECK_CODES = [

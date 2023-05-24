@@ -426,7 +426,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
       | http://snomed.info/sct | 736253002 |
     And 21 Document Pointers exists in the system with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 1114567800                     |
+      | identifier  | 11145678______                 |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
@@ -439,7 +439,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
     And the response is a Bundle with 20 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 1114567800                     |
+      | identifier  | 11145678000000                 |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
@@ -451,7 +451,7 @@ Feature: Basic Success Scenarios where producer is able to search for Document P
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
       | property    | value                          |
-      | identifier  | 1114567820                     |
+      | identifier  | 11145678000020                 |
       | type        | 736253002                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |

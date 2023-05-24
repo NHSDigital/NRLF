@@ -25,6 +25,7 @@ module "producer__gateway" {
   prefix  = local.prefix
   lambdas = {
     environment                        = terraform.workspace
+    method_countDocumentReference      = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${substr("${local.prefix}--api--producer--countDocumentReference", 0, 64)}/invocations"
     method_searchDocumentReference     = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${substr("${local.prefix}--api--producer--searchDocumentReference", 0, 64)}/invocations"
     method_searchPostDocumentReference = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${substr("${local.prefix}--api--producer--searchPostDocumentReference", 0, 64)}/invocations"
     method_readDocumentReference       = "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:${var.assume_account}:function:${substr("${local.prefix}--api--producer--readDocumentReference", 0, 64)}/invocations"

@@ -47,6 +47,12 @@ def producer_search_document_pointers(context: Context, count: int):
     test_config: TestConfig = context.test_config
     bundle = Bundle.parse_raw(test_config.response.body)
     assert len(bundle.entry) == count, bundle.dict()
+
+
+@then("the response has {count:d} total")
+def producer_search_document_pointers(context: Context, count: int):
+    test_config: TestConfig = context.test_config
+    bundle = Bundle.parse_raw(test_config.response.body)
     assert bundle.total == count, bundle.dict()
 
 
