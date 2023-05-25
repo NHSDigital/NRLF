@@ -100,7 +100,7 @@ def make_common_log_action():
         * subject - Normally a copy of the root
     """
     return make_scoped_log_action(
-        lambda **kwargs: (
+        lambda *args, **kwargs: (
             {
                 "caller": kwargs.get("data", {}).get("developer_app_id", "unknown"),
                 "root": kwargs.get("data", {}).get("root", "unknown"),
