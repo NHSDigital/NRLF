@@ -1,7 +1,7 @@
 Feature: Producer Create NRL-to-R4 Conversion
 
   Background:
-    Given version "0.0.2" of "nrlf-converter" has been installed
+    Given version "0.0.3" of "nrlf-converter" has been installed
     And template NRL_DOCUMENT_POINTER
       """
       {
@@ -128,6 +128,12 @@ Feature: Producer Create NRL-to-R4 Conversion
           "date": "$indexed",
           "author": [
               {
+                  "identifier": {
+                      "value": "$asid",
+                      "system": "https://fhir.nhs.uk/Id/nhsSpineASID"
+                  }
+              },
+              {
                   "reference": "$author"
               }
           ],
@@ -230,10 +236,11 @@ Feature: Producer Create NRL-to-R4 Conversion
       | relatesToSystem        |                                                                                      |
       | typeCode               | 718377777                                                                            |
       | typeDisplay            | Another Test data                                                                    |
-    When Producer "Data Sync" uses "nrlf-converter" to convert NRL_DOCUMENT_POINTER with NHS Number "9278693472" into a DocumentReference according to the DOCUMENT_REFERENCE template
+    When Producer "Data Sync" uses "nrlf-converter" to convert NRL_DOCUMENT_POINTER with NHS Number "9278693472" and ASID "230811201350" into a DocumentReference according to the DOCUMENT_REFERENCE template
       | property               | value                                                                                |
       | id                     | 8FW23-341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851                      |
       | nhsNumber              | 9278693472                                                                           |
+      | asid                   | 230811201350                                                                         |
       | attachmentContentType  | application/pdf                                                                      |
       | attachmentCreation     | 2021-03-08T15:26:00+01:00                                                            |
       | attachmentUrl          | https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf |
@@ -316,10 +323,11 @@ Feature: Producer Create NRL-to-R4 Conversion
       | relatesToSystem        |                                                                                                                    |
       | typeCode               | 718377777                                                                                                          |
       | typeDisplay            | Another Test data                                                                                                  |
-    When Producer "Data Sync" uses "nrl-to-r4" to convert NRL_DOCUMENT_POINTER with NHS Number "9278693472" into a DocumentReference according to the DOCUMENT_REFERENCE template
+    When Producer "Data Sync" uses "nrl-to-r4" to convert NRL_DOCUMENT_POINTER with NHS Number "9278693472" and ASID "230811201350" into a DocumentReference according to the DOCUMENT_REFERENCE template
       | property               | value                                                                                |
       | id                     | 8FW23-341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851                      |
       | nhsNumber              | 9278693472                                                                           |
+      | asid                   | 230811201350                                                                         |
       | attachmentContentType  | application/pdf                                                                      |
       | attachmentCreation     | 2021-03-08T15:26:00+01:00                                                            |
       | attachmentUrl          | https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf |
@@ -386,10 +394,11 @@ Feature: Producer Create NRL-to-R4 Conversion
       | relatesToSystem        |                                                                                                                    |
       | typeCode               | 718377777                                                                                                          |
       | typeDisplay            | Another Test data                                                                                                  |
-    When Producer "Data Sync" uses "nrl-to-r4" to convert NRL_DOCUMENT_POINTER with NHS Number "9278693472" into a DocumentReference according to the DOCUMENT_REFERENCE template
+    When Producer "Data Sync" uses "nrl-to-r4" to convert NRL_DOCUMENT_POINTER with NHS Number "9278693472" and ASID "230811201350" into a DocumentReference according to the DOCUMENT_REFERENCE template
       | property               | value                                                                                |
       | id                     | 8FW23-341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851                      |
       | nhsNumber              | 9278693472                                                                           |
+      | asid                   | 230811201350                                                                         |
       | attachmentContentType  | application/pdf                                                                      |
       | attachmentCreation     | 2021-03-08T15:26:00+01:00                                                            |
       | attachmentUrl          | https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf |
