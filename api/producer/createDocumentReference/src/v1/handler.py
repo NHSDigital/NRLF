@@ -92,6 +92,16 @@ def parse_request_body(
 
 
 @log_action(log_reference=LogReference.CREATE_SUPERSEDING, log_level=LogLevel.DEBUG)
+def log_superseded(
+    data: PipelineData,
+    context: LambdaContext,
+    event: APIGatewayProxyEventModel,
+    dependencies: FrozenDict[str, Any],
+    logger: Logger,
+) -> PipelineData:
+    pass
+
+
 def mark_as_supersede(
     data: PipelineData,
     context: LambdaContext,
@@ -112,6 +122,9 @@ def mark_as_supersede(
             for relationship in document_relationships
             if relationship.code == RELATES_TO_REPLACES
         ]
+        for id in output["delete_item_ids"]:
+            d = {**data, "subject": id}
+            log_superseded(d, context, event, dependencies, logger=logger)
     return PipelineData(**data, **output)
 
 
