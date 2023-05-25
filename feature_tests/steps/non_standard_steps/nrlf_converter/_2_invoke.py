@@ -13,7 +13,7 @@ GHERKIN_STRIPS_THIS_CHARACTER_SEQUENCE_FOR_SOME_REASON = "$'"
 GHERKIN_LINTER_REPLACES_THIS_CHARACTER = ("\\", "\\\\")
 
 
-def run_nrl_to_r4(document_pointer, nhs_number):
+def run_nrl_to_r4(document_pointer, nhs_number, asid):
     from nrlf_converter import BadRelatesTo, CustodianError, ValidationError, nrl_to_r4
 
     document_reference, response = None, Response(body="")
@@ -21,6 +21,7 @@ def run_nrl_to_r4(document_pointer, nhs_number):
         document_reference = nrl_to_r4(
             document_pointer=document_pointer,
             nhs_number=nhs_number,
+            asid=asid,
         )
     except (ValidationError, CustodianError, BadRelatesTo) as error:
         response = Response(
@@ -40,7 +41,7 @@ def run_nrl_to_r4(document_pointer, nhs_number):
 
 @when(
     '{actor_type} "{actor}" uses {package} to convert {nrl_template_name} '
-    'with NHS Number "{nhs_number}" into a DocumentReference according to '
+    'with NHS Number "{nhs_number}" and ASID "{asid}" into a DocumentReference according to '
     "the {template_name} template",
 )
 def producers_converts_nrl_to_r4(
@@ -50,11 +51,13 @@ def producers_converts_nrl_to_r4(
     package: str,
     nrl_template_name: str,
     nhs_number: str,
+    asid: str,
     template_name: str,
 ):
     document_reference, context.test_config.response = run_nrl_to_r4(
         document_pointer=context.test_config.rendered_templates[nrl_template_name],
         nhs_number=nhs_number,
+        asid=asid,
     )
     if document_reference:
         rendered_doc_ref = context.test_config.templates[template_name].render(
@@ -72,7 +75,7 @@ def producers_converts_nrl_to_r4(
 
 @when(
     '{actor_type} "{actor}" uses {package} to convert {template_name} '
-    'with NHS Number "{nhs_number}" into a DocumentReference',
+    'with NHS Number "{nhs_number}" and ASID "{asid}" into a DocumentReference',
 )
 def producers_converts_nrl_to_r4(
     context: Context,
@@ -81,8 +84,10 @@ def producers_converts_nrl_to_r4(
     package: str,
     template_name: str,
     nhs_number: str,
+    asid: str,
 ):
     _, context.test_config.response = run_nrl_to_r4(
         document_pointer=context.test_config.rendered_templates[template_name],
         nhs_number=nhs_number,
+        asid=asid,
     )

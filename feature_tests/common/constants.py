@@ -122,6 +122,7 @@ ALLOWED_TERMS = [
     "nrl_template_name",
     "nhs_number",
     "error_type",
+    "asid",
 ]
 
 ALLOWED_CONSUMER_ORG_IDS = ["RX898"]

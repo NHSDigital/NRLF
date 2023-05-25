@@ -1,7 +1,7 @@
 Feature: Producer NRL-to-R4 Conversion Failures
 
   Background:
-    Given version "0.0.2" of "nrlf-converter" has been installed
+    Given version "0.0.3" of "nrlf-converter" has been installed
     And template NRL_DOCUMENT_POINTER
       """
       {
@@ -118,7 +118,7 @@ Feature: Producer NRL-to-R4 Conversion Failures
       | status                 | <status>                                                                             |
       | typeCode               | 718377777                                                                            |
       | typeDisplay            | Another Test data                                                                    |
-    When Producer "Data Sync" uses "nrlf-converter" to convert NRL_DOCUMENT_POINTER with NHS Number "9278693472" into a DocumentReference
+    When Producer "Data Sync" uses "nrlf-converter" to convert NRL_DOCUMENT_POINTER with NHS Number "9278693472" and ASID "230811201350" into a DocumentReference
     Then the operation is unsuccessful
     And the response is a "nrlf_converter.<error_type>" with error message
       """
