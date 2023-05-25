@@ -49,12 +49,13 @@ def test__parse_error_event(cloudwatch_log_data: _CloudwatchLogsData):
         "errorMessage": "oops message",
         "attemptEndingTimestamp": 123,
         "rawData": raw_data,
-        "lambdaArn": "oops",
+        "lambdaArn": "oops lambda",
     }
     firehose_error_event = _parse_error_event(error_event=error_event)
     assert firehose_error_event.cloudwatch_logs_data == cloudwatch_log_data
     assert (
-        str(firehose_error_event) == "\terror_code: oops\n\terror_message: oops message"
+        str(firehose_error_event)
+        == "\n\terror_code: oops\n\terror_message: oops message\n\tlambda_arn: oops lambda"
     )
 
 

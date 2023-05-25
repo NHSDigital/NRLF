@@ -32,3 +32,8 @@ variable "slack_alerts_enabled" {
   type    = bool
   default = false
 }
+
+variable "error_prefix" {
+  type    = string
+  default = "errors"
+}
