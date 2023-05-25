@@ -24,7 +24,11 @@ class TrueErrorEvent(BaseModel):
 
 
 class NotTrueErrorEvent(BaseModel):
-    errorCode: Literal["Splunk.ConnectionClosed", "Splunk.ProxyWithoutStickySessions"]
+    errorCode: Literal[
+        "Splunk.ConnectionClosed",
+        "Splunk.ProxyWithoutStickySessions",
+        "Splunk.IndexerBusy",
+    ]
     subsequenceNumber: Literal[0]
 
 
@@ -90,11 +94,19 @@ def logs_client(session):
             True,
         ),
         (
+            {"errorCode": "Splunk.IndexerBusy", "subsequenceNumber": 1},
+            True,
+        ),
+        (
             {"errorCode": "Splunk.ConnectionClosed", "subsequenceNumber": 0},
             False,
         ),
         (
             {"errorCode": "Splunk.ProxyWithoutStickySessions", "subsequenceNumber": 0},
+            False,
+        ),
+        (
+            {"errorCode": "Splunk.IndexerBusy", "subsequenceNumber": 0},
             False,
         ),
     ),
