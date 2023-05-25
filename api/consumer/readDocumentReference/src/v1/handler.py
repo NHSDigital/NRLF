@@ -4,11 +4,18 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.logging import log_action
-from nrlf.core.common_steps import parse_headers, parse_path_id
+
+from nrlf.core.common_steps import (
+    make_common_log_action,
+    parse_headers,
+    parse_path_id,
+    read_subject_from_path,
+)
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
 from nrlf.core.validators import json_loads, validate_document_reference_string
+
+log_action = make_common_log_action()
 
 
 class LogReference(Enum):
@@ -36,6 +43,7 @@ def read_document_reference(
 
 
 steps = [
+    read_subject_from_path,
     parse_headers,
     parse_path_id,
     read_document_reference,

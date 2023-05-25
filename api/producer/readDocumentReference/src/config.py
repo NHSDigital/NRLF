@@ -1,7 +1,8 @@
 import boto3
+from pydantic import BaseModel
+
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
-from pydantic import BaseModel
 
 
 class Config(BaseModel):

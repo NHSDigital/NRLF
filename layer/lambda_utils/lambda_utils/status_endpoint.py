@@ -11,9 +11,10 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action, prepare_default_event_for_logging
 from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _function_handler, _setup_logger
+from pydantic import BaseModel
+
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
-from pydantic import BaseModel
 
 
 class LogReference(Enum):
@@ -38,7 +39,7 @@ def get_mutable_pipeline() -> Generator[ModuleType, None, None]:
         pipeline.__dict__[k] = v
 
 
-@log_action(log_reference=LogReference.STATUS001)
+@log_action(log_reference=LogReference.STATUS001, errors_only=True)
 def _get_config(
     data: PipelineData,
     context: LambdaContext,
@@ -52,7 +53,19 @@ def _get_config(
     return PipelineData(config=config)
 
 
-@log_action(log_reference=LogReference.STATUS003)
+@log_action(log_reference=LogReference.STATUS002, log_result=False, errors_only=True)
+def _get_boto_client(
+    data: PipelineData,
+    context: LambdaContext,
+    event: APIGatewayProxyEventModel,
+    dependencies: FrozenDict[str, Any],
+    logger: Logger,
+) -> PipelineData:
+    client = boto3.client("dynamodb")
+    return PipelineData(client=client, **data)
+
+
+@log_action(log_reference=LogReference.STATUS003, errors_only=True)
 def _hit_the_database(
     data: PipelineData,
     context: LambdaContext,

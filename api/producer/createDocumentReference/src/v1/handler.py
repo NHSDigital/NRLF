@@ -5,13 +5,21 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.logging import log_action
+from lambda_utils.constants import LogLevel
+
+from api.producer.createDocumentReference.src.constants import PersistentDependencies
+from api.producer.createDocumentReference.src.v1.constants import API_VERSION
 from nrlf.core.common_producer_steps import invalid_producer_for_delete
-from nrlf.core.common_steps import parse_headers
+from nrlf.core.common_steps import (
+    make_common_log_action,
+    parse_headers,
+    read_subject_from_body,
+)
 from nrlf.core.constants import (
     CUSTODIAN_SEPARATOR,
     PERMISSION_AUDIT_DATES_FROM_PAYLOAD,
     PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL,
+    RELATES_TO_REPLACES,
 )
 from nrlf.core.dynamodb_types import DynamoDbStringType
 from nrlf.core.errors import (
@@ -33,16 +41,15 @@ from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
 
-from api.producer.createDocumentReference.src.constants import PersistentDependencies
-from api.producer.createDocumentReference.src.v1.constants import API_VERSION
+log_action = make_common_log_action()
 
 
 class LogReference(Enum):
-    CREATE001 = "Parsing request body"
-    CREATE002 = "Determining whether document reference will supersede"
-    CREATE003 = "Validating producer permissions"
-    CREATE004 = "Determining whether document reference will supersede"
-    CREATE005 = "Saving document pointer to db"
+    CREATE_REQUEST = "Parsing request body"
+    CREATE_SUPERSEDE_CHECK = "Determining whether document reference will supersede"
+    CREATE_SUPERSEDING = "Mark the document for superseding"
+    CREATE_PERMISSIONS = "Validating producer permissions"
+    CREATE_DB = "Saving document pointer to db"
 
 
 def _invalid_subject_identifier(
@@ -69,7 +76,7 @@ def _override_created_on(
     return document_pointer
 
 
-@log_action(log_reference=LogReference.CREATE001)
+@log_action(log_reference=LogReference.CREATE_REQUEST, log_level=LogLevel.DEBUG)
 def parse_request_body(
     data: PipelineData,
     context: LambdaContext,
@@ -77,7 +84,6 @@ def parse_request_body(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-
     body = fetch_body_from_event(event)
 
     core_model = create_document_pointer_from_fhir_json(body, API_VERSION)
@@ -85,7 +91,17 @@ def parse_request_body(
     return PipelineData(**data, body=body, core_model=core_model)
 
 
-@log_action(log_reference=LogReference.CREATE002)
+@log_action(log_reference=LogReference.CREATE_SUPERSEDING, log_level=LogLevel.DEBUG)
+def log_superseded(
+    data: PipelineData,
+    context: LambdaContext,
+    event: APIGatewayProxyEventModel,
+    dependencies: FrozenDict[str, Any],
+    logger: Logger,
+) -> PipelineData:
+    pass
+
+
 def mark_as_supersede(
     data: PipelineData,
     context: LambdaContext,
@@ -104,12 +120,15 @@ def mark_as_supersede(
         output["delete_item_ids"] = [
             relationship.target.identifier.value
             for relationship in document_relationships
-            if relationship.code == "replaces"
+            if relationship.code == RELATES_TO_REPLACES
         ]
+        for id in output["delete_item_ids"]:
+            d = {**data, "subject": id}
+            log_superseded(d, context, event, dependencies, logger=logger)
     return PipelineData(**data, **output)
 
 
-@log_action(log_reference=LogReference.CREATE003)
+@log_action(log_reference=LogReference.CREATE_PERMISSIONS, log_level=LogLevel.DEBUG)
 def validate_producer_permissions(
     data: PipelineData,
     context: LambdaContext,
@@ -148,7 +167,7 @@ def validate_producer_permissions(
     return PipelineData(**data)
 
 
-@log_action(log_reference=LogReference.CREATE004)
+@log_action(log_reference=LogReference.CREATE_SUPERSEDE_CHECK, log_level=LogLevel.DEBUG)
 def validate_ok_to_supersede(
     data: PipelineData,
     context: LambdaContext,
@@ -192,7 +211,7 @@ def _validate_ok_to_supersede(
         document_to_delete: DocumentPointer = document_pointer_repository.read_item(
             delete_pk
         )
-    except (ItemNotFound):
+    except ItemNotFound:
         if ignore_delete_error:
             has_delete_target = False
             return has_delete_target, delete_pk
@@ -220,7 +239,7 @@ def _validate_ok_to_supersede(
     return has_delete_target, delete_pk
 
 
-@log_action(log_reference=LogReference.CREATE005)
+@log_action(log_reference=LogReference.CREATE_DB, log_level=LogLevel.DEBUG)
 def save_core_model_to_db(
     data: PipelineData,
     context: LambdaContext,
@@ -253,6 +272,7 @@ def save_core_model_to_db(
 
 
 steps = [
+    read_subject_from_body,
     parse_headers,
     parse_request_body,
     mark_as_supersede,

@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 from hypothesis import given
 from hypothesis.strategies import data, integers, just, text, tuples
+
 from nrlf.core.firehose.model import (
     CONTROL_MESSAGE_TEXT,
     CloudwatchLogsData,

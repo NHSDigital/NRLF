@@ -4,9 +4,9 @@ from unittest import mock
 import boto3
 import moto
 from behave import fixture
-from nrlf.core.types import DynamoDbClient
 
 from feature_tests.common.constants import TABLE_CONFIG
+from nrlf.core.types import DynamoDbClient
 
 
 @fixture(name="fixture.mock.dynamodb")

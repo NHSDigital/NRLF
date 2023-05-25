@@ -1,4 +1,6 @@
 import pytest
+from pydantic import BaseModel
+
 from nrlf.core.constants import REQUIRED_CREATE_FIELDS
 from nrlf.core.errors import (
     FhirValidationError,
@@ -21,7 +23,6 @@ from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
-from pydantic import BaseModel
 
 
 @pytest.mark.parametrize(

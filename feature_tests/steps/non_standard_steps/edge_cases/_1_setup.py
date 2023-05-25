@@ -1,6 +1,10 @@
 import json
 
 from behave.runner import Context
+
+from feature_tests.common.constants import DEFAULT_VERSION, FhirType
+from feature_tests.common.decorators import given
+from feature_tests.common.models import TestConfig
 from nrlf.core.constants import Source
 from nrlf.core.model import DocumentPointer
 from nrlf.core.transform import make_timestamp
@@ -9,10 +13,6 @@ from nrlf.producer.fhir.r4.model import DocumentReference
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
-
-from feature_tests.common.constants import DEFAULT_VERSION, FhirType
-from feature_tests.common.decorators import given
-from feature_tests.common.models import TestConfig
 
 
 @given(

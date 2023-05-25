@@ -1,4 +1,5 @@
 from lambda_utils.logging import Logger, log_action
+
 from nrlf.core.firehose.log_reference import LogReference
 from nrlf.core.firehose.model import (
     CloudwatchLogsData,

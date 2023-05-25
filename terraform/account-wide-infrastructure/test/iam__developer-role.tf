@@ -8,7 +8,7 @@ resource "aws_iam_role" "developer_role" {
         Principal : {
           AWS : "arn:aws:iam::${data.aws_secretsmanager_secret_version.identities_account_id.secret_string}:root"
         },
-        Effect : "Allow"
+        Effect : "Allow",
         Condition : {
           Bool : {
             "aws:MultiFactorAuthPresent" : true

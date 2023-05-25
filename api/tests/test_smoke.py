@@ -13,7 +13,6 @@ import fire
 import jwt
 import pytest
 import requests
-from nrlf.core.validators import json_loads
 
 from helpers.aws_session import (
     AWS_ACCOUNT_FOR_ENV,
@@ -21,6 +20,7 @@ from helpers.aws_session import (
     aws_account_id_from_profile,
 )
 from helpers.terraform import get_terraform_json
+from nrlf.core.validators import json_loads
 
 DEFAULT_WORKSPACE = "dev"
 

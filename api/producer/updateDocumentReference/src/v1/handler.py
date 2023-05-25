@@ -4,9 +4,19 @@ from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.logging import log_action
+
+from api.producer.updateDocumentReference.src.constants import PersistentDependencies
+from api.producer.updateDocumentReference.src.v1.constants import (
+    API_VERSION,
+    IMMUTABLE_FIELDS,
+)
 from nrlf.core.common_producer_steps import validate_producer_permissions
-from nrlf.core.common_steps import parse_headers, parse_path_id
+from nrlf.core.common_steps import (
+    make_common_log_action,
+    parse_headers,
+    parse_path_id,
+    read_subject_from_path,
+)
 from nrlf.core.errors import ImmutableFieldViolationError, InconsistentUpdateId
 from nrlf.core.event_parsing import fetch_body_from_event
 from nrlf.core.model import DocumentPointer
@@ -16,11 +26,7 @@ from nrlf.core.response import operation_outcome_ok
 from nrlf.core.transform import update_document_pointer_from_fhir_json
 from nrlf.core.validators import json_loads
 
-from api.producer.updateDocumentReference.src.constants import PersistentDependencies
-from api.producer.updateDocumentReference.src.v1.constants import (
-    API_VERSION,
-    IMMUTABLE_FIELDS,
-)
+log_action = make_common_log_action()
 
 
 class LogReference(Enum):
@@ -118,6 +124,7 @@ def update_core_model_to_db(
 
 
 steps = [
+    read_subject_from_path,
     parse_headers,
     parse_path_id,
     parse_request_body,

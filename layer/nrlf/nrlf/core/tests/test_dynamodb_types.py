@@ -3,12 +3,13 @@ from contextlib import contextmanager
 import boto3
 import moto
 import pytest
+from pydantic import ValidationError
+
 from nrlf.core.dynamodb_types import (
     DynamoDbIntType,
     DynamoDbStringType,
     convert_dynamo_value_to_raw_value,
 )
-from pydantic import ValidationError
 
 DEFAULT_ATTRIBUTE_DEFINITIONS = [{"AttributeName": "id", "AttributeType": "S"}]
 DEFAULT_KEY_SCHEMA = [{"AttributeName": "id", "KeyType": "HASH"}]

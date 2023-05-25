@@ -1,7 +1,8 @@
 from typing import Optional
 
-from nrlf.core.validators import json_loads
 from pydantic import BaseModel, Field, StrictStr, root_validator
+
+from nrlf.core.validators import json_loads
 
 
 class AbstractHeader(BaseModel):

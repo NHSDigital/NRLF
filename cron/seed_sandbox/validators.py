@@ -1,10 +1,11 @@
 from enum import Enum
 
 from lambda_utils.logging import log_action
+from pydantic import BaseModel, ValidationError
+
 from nrlf.core.model import DocumentPointer
 from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.model import DocumentReference
-from pydantic import BaseModel, ValidationError
 
 
 class LogReference(Enum):
