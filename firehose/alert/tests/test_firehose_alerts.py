@@ -25,8 +25,11 @@ class TrueErrorEvent(BaseModel):
 
 class NotTrueErrorEvent(BaseModel):
     errorCode: Literal[
-        "Splunk.ConnectionClosed",
         "Splunk.ProxyWithoutStickySessions",
+        "Splunk.ServerError",
+        "Splunk.AckTimeout",
+        "Splunk.ConnectionTimeout",
+        "Splunk.ConnectionClosed",
         "Splunk.IndexerBusy",
     ]
     subsequenceNumber: Literal[0]
