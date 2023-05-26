@@ -75,10 +75,8 @@ info:
     You can not use this API to retrieve documents, however you should be prepared to retrieve in PDF or Unstructured
     formats.
 
-    In order to retrieve a document, consumers must be able to interact with the National Record Locator, the Spine
-    Secure Proxy (SSP), and the Spine Directory Service (SDS) in order to look up the providers ASID. Currently the SDS
-    is not available via the internet and therefore consumers wishing to use the end to end retrieval process, via the
-    SSP, will still need to have an N3 or HSCN connection.
+    In order to retrieve a document, consumers must be able to interact with the National Record Locator and the Spine
+    Secure Proxy (SSP).
 
     You can only use this API if your consuming  application is only accessible  using a valid NHS Smartcard for all
     users or a system that uses an authentication method supported by NHS Identity.
@@ -215,6 +213,7 @@ paths:
         - $ref: "#/components/parameters/type"
         - $ref: "#/components/parameters/nextPageToken"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       responses:
@@ -457,6 +456,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       responses:
