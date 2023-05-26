@@ -11,16 +11,4 @@ resource "aws_db_instance" "rds" {
 
   db_subnet_group_name   = aws_db_subnet_group.rds.name
   vpc_security_group_ids = [aws_security_group.rds.id]
-  parameter_group_name   = aws_db_parameter_group.rds.name
-
-}
-
-resource "aws_db_parameter_group" "rds" {
-  name   = "rds"
-  family = "postgres14"
-
-  parameter {
-    name  = "log_connections"
-    value = "1"
-  }
 }
