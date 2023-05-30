@@ -29,9 +29,13 @@ jobs:
     name: Set a uniquish ID
     runs-on: [self-hosted, ci]
     steps:
-      - run: |
+      - name: Set a uniquish ID
+        id: set_uniqish_id
+        run: |
           TIME_IN_SECONDS_SINCE_MIDNIGHT=$(date -d "1970-01-01 UTC $(date +%T)" +%s)
-          echo "uniqish_id=${GITHUB_SHA_SHORT}-{TIME_IN_SECONDS_SINCE_MIDNIGHT}" >> $GITHUB_OUTPUT
+          echo "uniqish_id=${GITHUB_SHA::7}-${TIME_IN_SECONDS_SINCE_MIDNIGHT}" >> $GITHUB_OUTPUT
+    outputs:
+      uniqish_id: ${{ steps.set_uniqish_id.outputs.uniqish_id }}
 
   check-release:
     name: Check if release branch
@@ -283,12 +287,20 @@ jobs:
         run: |
           source nrlf.sh
           nrlf truststore pull-server ref
-          echo nrlf terraform ciinit "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
-          echo nrlf terraform ciplan "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
-          echo nrlf terraform ciapply "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciinit "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciplan "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciapply "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
 
   terraform-apply:
-    needs: [build, unit-test, lint-check, feature-test-local, terraform-base]
+    needs:
+      [
+        build,
+        unit-test,
+        lint-check,
+        feature-test-local,
+        terraform-base,
+        set-uniquish-id,
+      ]
     name: Terraform (head)
     runs-on: [self-hosted, ci]
 
@@ -317,11 +329,11 @@ jobs:
         run: |
           source nrlf.sh
           nrlf truststore pull-server ref
-          echo nrlf terraform ciinit "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
-          echo nrlf terraform ciplan "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
-          echo nrlf terraform ciapply "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}" || echo "ok"
-          echo nrlf terraform ciplan "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
-          echo nrlf terraform ciapply "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciinit "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciplan "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciapply "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}" || echo "ok"
+          nrlf terraform ciplan "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciapply "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact/
@@ -330,7 +342,7 @@ jobs:
           path: ./terraform/infrastructure/output.json
 
   integration-test:
-    needs: [terraform-apply]
+    needs: [terraform-apply, set-uniquish-id]
     name: Integration test (head)
     runs-on: [self-hosted, ci]
 
@@ -370,7 +382,7 @@ jobs:
           nrlf test integration
 
   feature-test-integration:
-    needs: [integration-test]
+    needs: [integration-test, set-uniquish-id]
     name: Feature integration test (head)
     runs-on: [self-hosted, ci]
 
@@ -410,7 +422,7 @@ jobs:
           nrlf test feature integration
 
   firehose-integration-test:
-    needs: [terraform-apply]
+    needs: [terraform-apply, set-uniquish-id]
     name: Firehose integration test (head)
     runs-on: [self-hosted, ci]
 
@@ -450,7 +462,8 @@ jobs:
           nrlf test firehose
 
   terraform-destroy:
-    needs: [feature-test-integration, firehose-integration-test]
+    needs:
+      [feature-test-integration, firehose-integration-test, set-uniquish-id]
     if: ${{ always() }}
     name: Terraform destroy
     runs-on: [self-hosted, ci]
@@ -479,8 +492,8 @@ jobs:
       - name: Terraform destroy
         run: |
           source nrlf.sh
-          echo nrlf terraform ciinit "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
-          echo nrlf terraform cidestroy "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciinit "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform cidestroy "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
 
   clear-cache:
     name: Clear Caches
