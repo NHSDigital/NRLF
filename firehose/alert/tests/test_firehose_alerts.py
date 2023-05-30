@@ -1,16 +1,48 @@
+import gzip
+import json
 import time
-from typing import Iterator
+from typing import Iterator, Literal
 
 import pytest
+from hypothesis import given
+from hypothesis.strategies import builds
 from lambda_utils.logging import LogTemplate
-from pydantic import ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
+from firehose.alert.steps import is_true_error_event
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
 
 SECONDS_TO_MILLISECONDS = 1000
 LAMBDA_EXECUTION_TIME = 20 * SECONDS_TO_MILLISECONDS
 SLEEP_TIME_SECONDS = 5
+
+
+class TrueErrorEvent(BaseModel):
+    errorCode: str
+    subsequenceNumber: int = Field(min=1)
+
+
+class NotTrueErrorEvent(BaseModel):
+    errorCode: Literal[
+        "Splunk.ProxyWithoutStickySessions",
+        "Splunk.ServerError",
+        "Splunk.AckTimeout",
+        "Splunk.ConnectionTimeout",
+        "Splunk.ConnectionClosed",
+        "Splunk.IndexerBusy",
+    ]
+    subsequenceNumber: Literal[0]
+
+
+@given(error_event=builds(TrueErrorEvent))
+def test_is_true_error_event(error_event: TrueErrorEvent):
+    assert is_true_error_event(error_event=error_event.dict()), error_event
+
+
+@given(error_event=builds(NotTrueErrorEvent))
+def test_is_not_true_error_event(error_event: NotTrueErrorEvent):
+    assert not is_true_error_event(error_event=error_event.dict()), error_event
 
 
 def trawl_logs(
@@ -33,8 +65,59 @@ def trawl_logs(
                 pass
 
 
+@pytest.fixture(scope="session")
+def session():
+    tf_json = get_terraform_json()
+    return new_aws_session(account_id=tf_json["assume_account_id"]["value"])
+
+
+@pytest.fixture(scope="session")
+def s3_client(session):
+    return session.client("s3")
+
+
+@pytest.fixture(scope="session")
+def logs_client(session):
+    return session.client("logs")
+
+
+@pytest.mark.parametrize(
+    ("error_event", "should_raise_alert"),
+    (
+        (
+            {"errorCode": "foo"},
+            True,
+        ),
+        (
+            {"errorCode": "Splunk.ConnectionClosed", "subsequenceNumber": 1},
+            True,
+        ),
+        (
+            {"errorCode": "Splunk.ProxyWithoutStickySessions", "subsequenceNumber": 1},
+            True,
+        ),
+        (
+            {"errorCode": "Splunk.IndexerBusy", "subsequenceNumber": 1},
+            True,
+        ),
+        (
+            {"errorCode": "Splunk.ConnectionClosed", "subsequenceNumber": 0},
+            False,
+        ),
+        (
+            {"errorCode": "Splunk.ProxyWithoutStickySessions", "subsequenceNumber": 0},
+            False,
+        ),
+        (
+            {"errorCode": "Splunk.IndexerBusy", "subsequenceNumber": 0},
+            False,
+        ),
+    ),
+)
 @pytest.mark.integration
-def test_firehose_alert():
+def test_firehose_alert(
+    error_event: dict, should_raise_alert: bool, s3_client, logs_client
+):
     # Setup
     start_time = int(time.time() * SECONDS_TO_MILLISECONDS)
     end_time = start_time + LAMBDA_EXECUTION_TIME
@@ -44,12 +127,15 @@ def test_firehose_alert():
     s3_metadata = firehose_metadata["delivery_stream"]["s3"]
     log_group_name = firehose_metadata["alert"]["log_group_name"]
     workspace = tf_json["workspace"]["value"]
-    session = new_aws_session(account_id=tf_json["assume_account_id"]["value"])
 
     # Trigger an alert by creating a file with prefix "errors" in the firehose bucket
     bucket_name = s3_metadata["arn"].replace("arn:aws:s3:::", "")
     file_key = f"errors/test-{start_time}"
-    session.client("s3").put_object(Bucket=bucket_name, Key=file_key)
+    s3_client.put_object(
+        Bucket=bucket_name,
+        Key=file_key,
+        Body=gzip.compress(json.dumps(error_event).encode()),
+    )
 
     # Find evidence that the alert lambda was triggered by scanning the logs
     expected_event = {
@@ -59,7 +145,6 @@ def test_firehose_alert():
         "env": workspace,
     }
 
-    logs_client = session.client("logs")
     alert_found = False
     while (time.time() * SECONDS_TO_MILLISECONDS < end_time) and not alert_found:
         for message in trawl_logs(
@@ -72,6 +157,11 @@ def test_firehose_alert():
                 break
         time.sleep(SLEEP_TIME_SECONDS)
 
-    assert (
-        alert_found
-    ), f"Could not find data\n\n{expected_event}\n\nin log group '{log_group_name}'"
+    if should_raise_alert:
+        assert (
+            alert_found
+        ), f"Could not find data\n\n{expected_event}\n\nin log group '{log_group_name}'"
+    else:
+        assert (
+            not alert_found
+        ), f"Unexpectedly found data\n\n{expected_event}\n\nin log group '{log_group_name}'"

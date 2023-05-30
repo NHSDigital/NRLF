@@ -33,3 +33,33 @@ resource "aws_s3_bucket_lifecycle_configuration" "firehose" {
     }
   }
 }
+
+
+resource "aws_iam_policy" "firehose-alert--s3-read" {
+  name        = "${var.prefix}--firehose-alert--s3-read"
+  description = "Read errors files from the Firehose S3 bucket"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "kms:Decrypt",
+          "kms:DescribeKey"
+        ]
+        Effect = "Allow"
+        Resource = [
+          aws_kms_key.firehose.arn
+        ]
+      },
+      {
+        Action = [
+          "s3:GetObject"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "${aws_s3_bucket.firehose.arn}/${var.error_prefix}/*"
+        ]
+      }
+    ]
+  })
+}
