@@ -6,12 +6,11 @@ from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventMo
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
 
-from layer.nrlf.nrlf.core.repository import COUNT_ITEM_LIMIT
 from nrlf.core.common_steps import parse_headers
 from nrlf.core.constants import DbPrefix
 from nrlf.core.errors import assert_no_extra_params
 from nrlf.core.model import PaginatedResponse, ProducerRequestParams, key
-from nrlf.core.repository import Repository, type_filter
+from nrlf.core.repository import COUNT_ITEM_LIMIT, Repository, type_filter
 from nrlf.core.transform import create_bundle_count
 from nrlf.core.validators import validate_type_system
 from nrlf.producer.fhir.r4.model import NextPageToken, RequestQuerySubject
