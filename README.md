@@ -574,6 +574,8 @@ This is because it will use that value to tag the commit once its been merged in
 
 ## Bastion
 
+N.B. You may not want to deploy the bastion for local development, if this is the case, then simply set the `bastion_enabled` variable to `false`, this will mean you don't have to create a key pair in the instructions below.
+
 For Dev and Test there is a bastion in place that can be used to connect to the RDS instance either through the CLI or from your chosen database client for Postgres.
 
 There are a few steps to get this sorted:
