@@ -579,6 +579,42 @@ paths:
       description: |
         Read a single document pointer by specifying the `DocumentReference.id`.  Note that you will only be able to
         retrieve document pointers that have the `type` that was agreed during the [onboarding](#api-description__onboarding) process.
+  /DocumentReference/_count:
+    get:
+      tags:
+        - DocumentReference
+      summary: Count document pointers
+      operationId: countDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/subject"
+        - $ref: "#/components/parameters/type"
+        - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
+      responses:
+        "200":
+          description: Count DocumentReference operation successful
+          headers:
+            X-Correlation-Id:
+              $ref: "#/components/headers/CorrelationId"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/Bundle"
+      security:
+        - ${authoriser_name}: []
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: ${method_countDocumentReference}
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
   /_status:
     get:
       tags:

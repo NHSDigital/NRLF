@@ -150,9 +150,9 @@ module "producer__readDocumentReference" {
   handler = "api.producer.readDocumentReference.index.handler"
 }
 
-module "producer__countDocumentReference" {
+module "consumer__countDocumentReference" {
   source                 = "./modules/lambda"
-  parent_path            = "api/producer"
+  parent_path            = "api/consumer"
   name                   = "countDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
@@ -172,7 +172,7 @@ module "producer__countDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.countDocumentReference.index.handler"
+  handler = "api.consumer.countDocumentReference.index.handler"
 }
 
 module "producer__searchDocumentReference" {
