@@ -1,12 +1,11 @@
 import os
 
-from lambda_pipeline.types import LambdaContext
-from lambda_utils.pipeline import execute_steps, render_response
-
 from api.producer.countDocumentReference.src.config import (
     Config,
     build_persistent_dependencies,
 )
+from lambda_pipeline.types import LambdaContext
+from lambda_utils.pipeline import execute_steps, render_response
 
 config = Config(
     **{env_var: os.environ.get(env_var) for env_var in Config.__fields__.keys()}

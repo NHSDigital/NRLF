@@ -1,4 +1,4 @@
-Feature: Producer Count Failure Scenarios
+Feature: Consumer Count Failure Scenarios
 
   Background:
     Given template DOCUMENT
@@ -67,8 +67,8 @@ Feature: Producer Count Failure Scenarios
       """
 
   Scenario: Count fails to return a bundle when extra parameters are found
-    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to count Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+    Given Consumer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to count Document Pointers
+    And Consumer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
@@ -94,8 +94,8 @@ Feature: Producer Count Failure Scenarios
       | message           | Unexpected parameters: extra                            |
 
   Scenario: Count rejects request with type system they are not allowed to use
-    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to count Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+    Given Consumer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to count Document Pointers
+    And Consumer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
@@ -121,8 +121,8 @@ Feature: Producer Count Failure Scenarios
       | message           | The provided system type value - http://incorrect.info/sct - does not match the allowed types |
 
   Scenario: Count rejects request with incorrect subject system identifier value
-    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to count Document Pointers
-    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+    Given Consumer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to count Document Pointers
+    And Consumer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template

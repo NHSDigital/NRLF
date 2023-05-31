@@ -1,4 +1,4 @@
-Feature: Producer Count Success scenarios
+Feature: Consumer Count Success scenarios
 
   Background:
     Given template DOCUMENT
