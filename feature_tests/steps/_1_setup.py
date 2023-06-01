@@ -1,7 +1,6 @@
 import json
 
 from behave import given as behave_given
-from behave.runner import Context
 
 from feature_tests.common.config_setup import register_application, request_setup
 from feature_tests.common.constants import DEFAULT_VERSION, WITH_WITHOUT_ANY, FhirType
@@ -126,7 +125,7 @@ def given_document_pointer_exists(context: Context, count: int, template_name: s
         for row in context.table:
             if row["property"] == "identifier":
                 identifier = row["value"]
-                new_identifier = identifier[:-2] + str(documents_created).zfill(2)
+                new_identifier = identifier[:-6] + str(documents_created).zfill(6)
                 row.cells[1] = new_identifier
 
         rendered_template = template.render(

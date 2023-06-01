@@ -59,6 +59,20 @@ def producer_searches_existing_document_reference(
 
 
 @when(
+    '{actor_type} "{actor}" counts Document References with query parameters',
+    action="count",
+)
+def producer_searches_existing_document_reference(
+    context: Context, actor_type: str, actor: str
+):
+    test_config: TestConfig = context.test_config
+
+    query_params = table_as_dict(table=context.table)
+    test_config.requestParams = query_params
+    test_config.response = test_config.request.invoke(query_params=query_params)
+
+
+@when(
     '{actor_type} "{actor}" searches for the next page',
     action="search",
 )

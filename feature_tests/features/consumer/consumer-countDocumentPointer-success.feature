@@ -39,7 +39,7 @@ Feature: Consumer Search Success scenarios
       """
 
   Scenario: Successfully search for a single Document Pointer by NHS number
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to count Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
@@ -51,22 +51,15 @@ Feature: Consumer Search Success scenarios
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
+    When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
-    And the response is a Bundle with 1 entries
-    And the Bundle contains an Entry with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1114567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+    And the response is a Bundle with 0 entries
+    And the response has 1 total
 
   Scenario: Successfully search for multiple Document Pointers by NHS number
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to count Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
@@ -94,30 +87,15 @@ Feature: Consumer Search Success scenarios
       | subject     | 9278693472                       |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc-2.pdf |
-    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
+    When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
-    And the response is a Bundle with 2 entries
-    And the Bundle contains an Entry with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1114567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
-    And the Bundle contains an Entry with the below values for DOCUMENT template
-      | property    | value                            |
-      | identifier  | 2224567890                       |
-      | type        | 736253002                        |
-      | custodian   | 8HX13                            |
-      | subject     | 9278693472                       |
-      | contentType | application/pdf                  |
-      | url         | https://example.org/my-doc-2.pdf |
+    And the response is a Bundle with 0 entries
+    And the response has 2 total
 
   Scenario: Empty results when searching for a Document Pointer when the consumer can't access existing document type
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to count Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
@@ -129,25 +107,27 @@ Feature: Consumer Search Success scenarios
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
+    When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 0 entries
+    And the response has 0 total
 
   Scenario: Empty results when searching for a Document Pointer when subject has no documents
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to count Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
-    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
+    When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response is a Bundle with 0 entries
+    And the response has 0 total
 
   Scenario: Successfully searches for all documents by producer and nhs number for a consumer
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to count Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
@@ -167,23 +147,16 @@ Feature: Consumer Search Success scenarios
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
+    When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
       | property             | value                                               |
       | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
       | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
     Then the operation is successful
-    And the response is a Bundle with 1 entries
-    And the Bundle contains an Entry with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1114567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+    And the response is a Bundle with 0 entries
+    And the response has 1 total
 
   Scenario: Successfully searches for all documents by type and nhs number for a consumer
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to count Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
@@ -203,23 +176,16 @@ Feature: Consumer Search Success scenarios
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
+    When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | type               | http://snomed.info/sct\|736253002             |
     Then the operation is successful
-    And the response is a Bundle with 1 entries
-    And the Bundle contains an Entry with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1114567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+    And the response is a Bundle with 0 entries
+    And the response has 1 total
 
   Scenario: Successfully searches for all documents by producer and nhs number and type for a consumer
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to count Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
@@ -239,28 +205,21 @@ Feature: Consumer Search Success scenarios
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
+    When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
       | property             | value                                               |
       | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
       | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
       | type                 | http://snomed.info/sct\|736253002                   |
     Then the operation is successful
-    And the response is a Bundle with 1 entries
-    And the Bundle contains an Entry with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1114567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+    And the response is a Bundle with 0 entries
+    And the response has 1 total
 
-  Scenario: Successfully searches for all documents and provides last evaluated key when above 20 record limit
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
+  Scenario: Successfully searches for all documents and provides last evaluated key when above 100 record limit
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to count Document Pointers
     And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
-    And 21 Document Pointers exists in the system with the below values for DOCUMENT template
+    And 201 Document Pointers exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 11145678______                 |
       | type        | 736253002                      |
@@ -268,30 +227,11 @@ Feature: Consumer Search Success scenarios
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
-    When Consumer "Yorkshire Ambulance Service" searches for Document References with query parameters:
+    When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
       | property             | value                                               |
       | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
       | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
       | type                 | http://snomed.info/sct\|736253002                   |
     Then the operation is successful
-    And the response is a Bundle with 20 entries
-    And the Bundle contains an Entry with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 11145678000000                 |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
-    And the Bundle contains a next page token
-    When Consumer "Yorkshire Ambulance Service" searches for the next page
-    Then the operation is successful
-    And the response is a Bundle with 1 entries
-    And the Bundle contains an Entry with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 11145678000020                 |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+    And the response is a Bundle with 0 entries
+    And the response has 201 total

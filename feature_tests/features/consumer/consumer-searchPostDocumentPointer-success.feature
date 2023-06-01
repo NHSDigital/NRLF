@@ -296,7 +296,7 @@ Feature: Consumer Search Success scenarios
       | http://snomed.info/sct | 736253002 |
     And 21 Document Pointers exists in the system with the below values for DOCUMENT template
       | property    | value                                        |
-      | identifier  | 1114567800                                   |
+      | identifier  | 11145678______                               |
       | type        | 736253002                                    |
       | producer    | https://fhir.nhs.uk/Id/ods-organization-code |
       | system      | https://fhir.nhs.uk/Id/ods-organization-code |
@@ -313,7 +313,7 @@ Feature: Consumer Search Success scenarios
     And the response is a Bundle with 20 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
       | property    | value                                        |
-      | identifier  | 1114567800                                   |
+      | identifier  | 11145678000000                               |
       | type        | 736253002                                    |
       | producer    | https://fhir.nhs.uk/Id/ods-organization-code |
       | system      | https://fhir.nhs.uk/Id/ods-organization-code |
@@ -327,7 +327,7 @@ Feature: Consumer Search Success scenarios
     And the response is a Bundle with 1 entries
     And the Bundle contains an Entry with the below values for DOCUMENT template
       | property    | value                                        |
-      | identifier  | 1114567820                                   |
+      | identifier  | 11145678000020                               |
       | type        | 736253002                                    |
       | producer    | https://fhir.nhs.uk/Id/ods-organization-code |
       | system      | https://fhir.nhs.uk/Id/ods-organization-code |

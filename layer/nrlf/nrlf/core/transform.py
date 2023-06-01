@@ -207,6 +207,16 @@ def create_bundle_entries_from_document_pointers(
     return [BundleEntry(resource=reference) for reference in document_references]
 
 
+def create_bundle_count(count: int) -> Bundle:
+    bundle_dict = dict(
+        resourceType="Bundle",
+        type="searchset",
+        total=count,
+        entry=[],
+    )
+    return Bundle(**bundle_dict).dict(exclude_none=True, exclude_defaults=True)
+
+
 def create_bundle_from_paginated_response(
     paginated_response: PaginatedResponse,
 ) -> Bundle:
