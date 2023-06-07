@@ -16,8 +16,8 @@ class Outcome(Enum):
 
 class Query(BaseModel, extra=Extra.forbid):
     statement: str
-    identifiers: dict = Field(default_factory=dict)
-    params: dict = Field(default_factory=dict)
+    identifiers: Optional[dict] = Field(default_factory=dict)
+    params: Optional[dict] = Field(default_factory=dict)
 
 
 class QueryEvent(BaseModel, extra=Extra.forbid):
