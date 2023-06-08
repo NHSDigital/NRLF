@@ -1,4 +1,4 @@
-resource "aws_rds_cluster" "rds-cluster" {
+resource "aws_rds_cluster" "rds-cluster-dev" {
   cluster_identifier          = "nhsd-nrlf-dev-aurora-cluster"
   engine                      = var.engine
   engine_version              = var.engine_version
@@ -10,7 +10,7 @@ resource "aws_rds_cluster" "rds-cluster" {
   vpc_security_group_ids = [
     aws_security_group.rds-cluster-sg-dev.id
   ]
-  db_subnet_group_name = aws_db_subnet_group.rds-cluster-subnet-group.name
+  db_subnet_group_name = aws_db_subnet_group.rds-cluster-subnet-group-dev.name
 
   lifecycle {
     ignore_changes = [availability_zones]
@@ -22,13 +22,13 @@ resource "aws_rds_cluster" "rds-cluster" {
   }
 }
 
-resource "aws_rds_cluster_instance" "rds-instance" {
+resource "aws_rds_cluster_instance" "rds-instance-dev" {
   identifier           = "nhsd-nrlf-dev-instance-aurora"
-  cluster_identifier   = aws_rds_cluster.rds-cluster.id
+  cluster_identifier   = aws_rds_cluster.rds-cluster-dev.id
   instance_class       = var.instance_type
-  engine               = aws_rds_cluster.rds-cluster.engine
-  engine_version       = aws_rds_cluster.rds-cluster.engine_version
-  db_subnet_group_name = aws_db_subnet_group.rds-cluster-subnet-group.name
+  engine               = aws_rds_cluster.rds-cluster-dev.engine
+  engine_version       = aws_rds_cluster.rds-cluster-dev.engine_version
+  db_subnet_group_name = aws_db_subnet_group.rds-cluster-subnet-group-dev.name
 
   tags = {
     Name        = "nhsd-nrlf-dev-instance-aurora"

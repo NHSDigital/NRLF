@@ -28,3 +28,27 @@ variable "vpc_cidr_block" {
   type        = string
   default     = "10.0.0.0/16"
 }
+
+variable "engine_version" {
+  description = "engine version for rds cluster"
+  type        = string
+  default     = "15.2"
+}
+
+variable "engine" {
+  description = "enginer for the rds cluster"
+  type        = string
+  default     = "aurora-postgresql"
+}
+
+variable "user_name" {
+  description = "user name for the database cluster"
+  type        = string
+  default     = "nrlf"
+}
+
+variable "instance_type" {
+  description = "Instance type for the database instance"
+  type        = string
+  default     = "db.t3.medium"
+}

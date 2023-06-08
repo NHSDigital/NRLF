@@ -20,7 +20,7 @@ resource "aws_vpc" "rds-cluster-vpc-dev" {
 # Subnets
 #------------------------------------------------------------------------------
 
-resource "aws_subnet" "private_subnet-dev" {
+resource "aws_subnet" "private-subnet-dev" {
   count             = var.subnet_count.private
   vpc_id            = aws_vpc.rds-cluster-vpc-dev.id
   cidr_block        = element(var.private_subnet_cidr_blocks, count.index)
@@ -34,9 +34,9 @@ resource "aws_subnet" "private_subnet-dev" {
 }
 
 
-resource "aws_db_subnet_group" "rds-cluster-subnet-group" {
+resource "aws_db_subnet_group" "rds-cluster-subnet-group-dev" {
   name       = "nhsd-nrlf-private-subnet-group-dev"
-  subnet_ids = aws_subnet.private_subnet-dev.*.id
+  subnet_ids = aws_subnet.private-subnet-dev.*.id
 
   tags = {
     Name = "nhsd-nrlf-private-subnet-group-dev"
@@ -48,12 +48,12 @@ resource "aws_db_subnet_group" "rds-cluster-subnet-group" {
 # Route Table
 #------------------------------------------------------------------------------
 
-resource "aws_route_table" "private_route_table-dev" {
+resource "aws_route_table" "private-route-table-dev" {
   vpc_id = aws_vpc.rds-cluster-vpc-dev.id
 }
 
 resource "aws_route_table_association" "private-dev" {
   count          = var.subnet_count.private
-  subnet_id      = element(aws_subnet.private_subnet-dev, count.index).id
-  route_table_id = aws_route_table.private_route_table-dev.id
+  subnet_id      = element(aws_subnet.private-subnet-dev, count.index).id
+  route_table_id = aws_route_table.private-route-table-dev.id
 }

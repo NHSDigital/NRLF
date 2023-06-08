@@ -1,4 +1,4 @@
-resource "aws_iam_role" "rds-cluster" {
+resource "aws_iam_role" "rds-cluster-dev" {
   name        = "nhsd-nrlf-dev-rds-cluster"
   description = "Role for RDS cluster"
   assume_role_policy = jsonencode({
