@@ -25,3 +25,7 @@ variable "handler" {}
 variable "firehose_subscriptions" {
   default = []
 }
+
+variable "vpc" {
+  default = {}
+}

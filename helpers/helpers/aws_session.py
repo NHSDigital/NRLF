@@ -61,3 +61,8 @@ def new_aws_session(account_id: str = None) -> boto3.Session:
         aws_secret_access_key=secret_access_key,
         aws_session_token=session_token,
     )
+
+
+def new_session_from_env(env: str) -> boto3.Session:
+    account_id = aws_account_id_from_profile(env=env)
+    return new_aws_session(account_id=account_id)
