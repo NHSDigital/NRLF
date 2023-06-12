@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-aws-lambda-powertools = "^2.9.0"
+aws-lambda-powertools = "^2.15.0"
 nhs-number = "==1.2.1"
 pydantic = "==1.10.2"
 nrlf-lambda-pipeline = {git = "https://github.com/NHSDigital/nrlf-lambda-pipeline.git", tag = "v0.4.0"}
