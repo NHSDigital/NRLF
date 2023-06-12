@@ -19,7 +19,7 @@ cryptography = "^38.0.4"
 more-itertools = "^9.0.0"
 typing-extensions = "^4.5.0"
 flake8-print = "^5.0.0"
-requests = "^2.28.2"
+requests = "^2.31.0"
 nrlf-converter = {url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.4/nrlf_converter-0.0.4-py3-none-any.whl"}
 
 [tool.poetry.group.dev.dependencies]
