@@ -12,7 +12,7 @@ aws-lambda-powertools = "^2.9.0"
 nhs-number = "==1.2.1"
 pydantic = "==1.10.2"
 nrlf-lambda-pipeline = {git = "https://github.com/NHSDigital/nrlf-lambda-pipeline.git", tag = "v0.4.0"}
-pytest = "^7.2.0"
+pytest = "^7.3.2"
 boto3 = "^1.26.22"
 pyjwt = "^2.6.0"
 cryptography = "^38.0.4"
@@ -23,7 +23,7 @@ requests = "^2.28.2"
 nrlf-converter = {url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.4/nrlf_converter-0.0.4-py3-none-any.whl"}
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.2.0"
+pytest = "^7.3.2"
 sh = "^1.14.3"
 awscli = "^1.27.3"
 moto = "^4.0.9"
