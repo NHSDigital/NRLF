@@ -26,7 +26,7 @@ nrlf-converter = {url = "https://github.com/NHSDigital/nrlf-converter/releases/d
 pytest = "^7.2.0"
 sh = "^1.14.3"
 awscli = "^1.27.3"
-moto = "^4.0.9"
+moto = "^4.1.11"
 behave = "^1.2.6"
 datamodel-code-generator = "^0.13.5"
 pyyaml = "^5.4"
