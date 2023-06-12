@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from helpers.aws_session import aws_account_id_from_profile, new_aws_session
+from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
 from mi.sql_query.model import Response, Sql, SqlQueryEvent, Status
 from nrlf.core.validators import json_loads
@@ -13,15 +13,14 @@ DELETE_SQL = Sql(statement="DELETE FROM my_table WHERE id=1;")
 
 
 @pytest.fixture(scope="session")
-def account_name():
+def assume_account_id():
     tf_json = get_terraform_json()
-    return tf_json["account_name"]["value"]
+    return tf_json["assume_account_id"]["value"]
 
 
 @pytest.fixture(scope="session")
-def session(account_name):
-    account_id = aws_account_id_from_profile(env=account_name)
-    return new_aws_session(account_id=account_id)
+def session(assume_account_id):
+    return new_aws_session(account_id=assume_account_id)
 
 
 @pytest.fixture(scope="session")
