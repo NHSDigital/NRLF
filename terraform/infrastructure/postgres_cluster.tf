@@ -1,6 +1,6 @@
-module "mi_rds_cluster_adapter" {
-  source             = "./modules/rds_cluster_adapter_with_schema"
-  create_sql_path    = "../../mi/sql/mi-create.sql"
+module "mi" {
+  source             = "./modules/postgres_cluster"
+  schema_path        = "../../mi/schema/schema.sql"
   name               = "mi"
   prefix             = local.prefix
   environment        = local.environment

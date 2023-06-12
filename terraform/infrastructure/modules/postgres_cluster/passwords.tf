@@ -3,7 +3,7 @@ resource "random_password" "write_password" {
 }
 
 resource "aws_secretsmanager_secret" "write_password" {
-  name = "${var.prefix}-${var.environment}--write_password"
+  name = "${var.prefix}--${var.environment}--write_password"
 }
 
 resource "aws_secretsmanager_secret_version" "write_password" {
@@ -17,7 +17,7 @@ resource "random_password" "read_password" {
 }
 
 resource "aws_secretsmanager_secret" "read_password" {
-  name = "${var.prefix}-${var.environment}--read_password"
+  name = "${var.prefix}--${var.environment}--read_password"
 }
 
 resource "aws_secretsmanager_secret_version" "read_password" {

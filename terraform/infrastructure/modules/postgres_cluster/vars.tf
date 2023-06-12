@@ -5,5 +5,5 @@ variable "region" {}
 variable "cloudwatch_kms_arn" {}
 variable "account_name" {}
 variable "layers" {}
-variable "create_sql_path" {}
+variable "schema_path" {}
 variable "assume_account" {}

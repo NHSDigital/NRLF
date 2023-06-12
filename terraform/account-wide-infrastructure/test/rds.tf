@@ -1,12 +1,12 @@
 resource "aws_rds_cluster" "rds-cluster-ref" {
-  cluster_identifier          = "nhsd-nrlf-ref-aurora-cluster"
+  cluster_identifier          = "${local.project}-ref-aurora-cluster"
   engine                      = var.engine
   engine_version              = var.engine_version
   availability_zones          = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
   database_name               = "nhsd_nrlf_ref"
   master_username             = var.user_name
   manage_master_user_password = true
-  final_snapshot_identifier   = "nhsd-nrlf-ref-aurora-cluster-final-snapshot-${formatdate("YYYYMMDDhhmmss", timestamp())}"
+  final_snapshot_identifier   = "${local.project}-ref-aurora-cluster-final-snapshot-${formatdate("YYYYMMDDhhmmss", timestamp())}"
   vpc_security_group_ids = [
     aws_security_group.rds-cluster-sg-ref.id
   ]
@@ -17,13 +17,13 @@ resource "aws_rds_cluster" "rds-cluster-ref" {
   }
 
   tags = {
-    Name        = "nhsd-nrlf-ref-aurora-cluster"
+    Name        = "${local.project}-ref-aurora-cluster"
     Environment = "ref"
   }
 }
 
 resource "aws_rds_cluster_instance" "rds-instance-ref" {
-  identifier           = "nhsd-nrlf-ref-instance-aurora"
+  identifier           = "${local.project}-ref-instance-aurora"
   cluster_identifier   = aws_rds_cluster.rds-cluster-ref.id
   instance_class       = var.instance_type
   engine               = aws_rds_cluster.rds-cluster-ref.engine
@@ -31,20 +31,20 @@ resource "aws_rds_cluster_instance" "rds-instance-ref" {
   db_subnet_group_name = aws_db_subnet_group.rds-cluster-subnet-group-ref.name
 
   tags = {
-    Name        = "nhsd-nrlf-ref-instance-aurora"
+    Name        = "${local.project}-ref-instance-aurora"
     Environment = "ref"
   }
 }
 
 resource "aws_rds_cluster" "rds-cluster-int" {
-  cluster_identifier          = "nhsd-nrlf-int-aurora-cluster"
+  cluster_identifier          = "${local.project}-int-aurora-cluster"
   engine                      = var.engine
   engine_version              = var.engine_version
   availability_zones          = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
   database_name               = "nhsd_nrlf_int"
   master_username             = var.user_name
   manage_master_user_password = true
-  final_snapshot_identifier   = "nhsd-nrlf-int-aurora-cluster-final-snapshot-${formatdate("YYYYMMDDhhmmss", timestamp())}"
+  final_snapshot_identifier   = "${local.project}-int-aurora-cluster-final-snapshot-${formatdate("YYYYMMDDhhmmss", timestamp())}"
   vpc_security_group_ids = [
     aws_security_group.rds-cluster-sg-int.id
   ]
@@ -55,13 +55,13 @@ resource "aws_rds_cluster" "rds-cluster-int" {
   }
 
   tags = {
-    Name        = "nhsd-nrlf-int-aurora-cluster"
+    Name        = "${local.project}-int-aurora-cluster"
     Environment = "int"
   }
 }
 
 resource "aws_rds_cluster_instance" "rds-instance-int" {
-  identifier           = "nhsd-nrlf-int-instance-aurora"
+  identifier           = "${local.project}-int-instance-aurora"
   cluster_identifier   = aws_rds_cluster.rds-cluster-int.id
   instance_class       = var.instance_type
   engine               = aws_rds_cluster.rds-cluster-int.engine
@@ -69,7 +69,7 @@ resource "aws_rds_cluster_instance" "rds-instance-int" {
   db_subnet_group_name = aws_db_subnet_group.rds-cluster-subnet-group-int.name
 
   tags = {
-    Name        = "nhsd-nrlf-int-instance-aurora"
+    Name        = "${local.project}-int-instance-aurora"
     Environment = "int"
   }
 }

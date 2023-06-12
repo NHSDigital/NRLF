@@ -11,8 +11,8 @@ resource "aws_vpc" "rds-cluster-vpc-dev" {
   enable_dns_hostnames = true
 
   tags = {
-    Name        = "nhsd-nrlf-rds-cluster-vpc-dev"
-    Environment = "dev"
+    Name        = "${local.project}-rds-cluster-vpc-${local.environment}"
+    Environment = local.environment
   }
 }
 
@@ -27,19 +27,19 @@ resource "aws_subnet" "private-subnet-dev" {
   availability_zone = element(data.aws_availability_zones.available.names, count.index)
 
   tags = {
-    Name        = "nhsd-nrlf-private-subnet-${count.index}-dev"
-    Environment = "dev"
+    Name        = "${local.project}-private-subnet-${count.index}-${local.environment}"
+    Environment = local.environment
     Tier        = "private"
   }
 }
 
 
 resource "aws_db_subnet_group" "rds-cluster-subnet-group-dev" {
-  name       = "nhsd-nrlf-private-subnet-group-dev"
+  name       = "${local.project}-private-subnet-group-${local.environment}"
   subnet_ids = aws_subnet.private-subnet-dev.*.id
 
   tags = {
-    Name = "nhsd-nrlf-private-subnet-group-dev"
+    Name = "${local.project}-private-subnet-group-${local.environment}"
   }
 }
 

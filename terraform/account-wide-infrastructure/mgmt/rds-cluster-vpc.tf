@@ -11,8 +11,8 @@ resource "aws_vpc" "rds-cluster-vpc-mgmt" {
   enable_dns_hostnames = true
 
   tags = {
-    Name        = "nhsd-nrlf-rds-cluster-vpc-mgmt"
-    Environment = "mgmt"
+    Name        = "${local.project}-rds-cluster-vpc-${local.environment}"
+    Environment = local.environment
   }
 }
 
@@ -27,19 +27,19 @@ resource "aws_subnet" "private_subnet-mgmt" {
   availability_zone = element(data.aws_availability_zones.available.names, count.index)
 
   tags = {
-    Name        = "nhsd-nrlf-private-subnet-${count.index}-mgmt"
-    Environment = "mgmt"
+    Name        = "${local.project}-private-subnet-${count.index}-${local.environment}"
+    Environment = local.environment
     Tier        = "private"
   }
 }
 
 
 resource "aws_db_subnet_group" "rds-cluster-subnet-group" {
-  name       = "nhsd-nrlf-private-subnet-group-mgmt"
+  name       = "${local.project}-private-subnet-group-${local.environment}"
   subnet_ids = aws_subnet.private_subnet-mgmt.*.id
 
   tags = {
-    Name = "nhsd-nrlf-private-subnet-group-mgmt"
+    Name = "${local.project}-private-subnet-group-${local.environment}"
   }
 }
 
@@ -63,8 +63,8 @@ resource "aws_route_table_association" "private-mgmt" {
 #------------------------------------------------------------------------------
 
 resource "aws_security_group" "rds-cluster-vpc-sg" {
-  name        = "nhsd-nrlf-rds-cluster-sg-mgmt"
-  description = "Security group for nhsd-nrlf-rds-cluster-vpc"
+  name        = "${local.project}-rds-cluster-sg-${local.environment}"
+  description = "Security group for ${local.project}-rds-cluster-vpc"
   vpc_id      = aws_vpc.rds-cluster-vpc-mgmt.id
 
   ingress {
@@ -82,7 +82,7 @@ resource "aws_security_group" "rds-cluster-vpc-sg" {
   }
 
   tags = {
-    Name        = "nhsd-nrlf-rds-cluster-sg-mgmt"
-    Environment = "mgmt"
+    Name        = "${local.project}-rds-cluster-sg-${local.environment}"
+    Environment = local.environment
   }
 }

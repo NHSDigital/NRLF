@@ -53,3 +53,7 @@ output "firehose" {
     processor = module.firehose__processor
   }
 }
+
+output "mi" {
+  value = module.mi
+}
