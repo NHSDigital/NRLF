@@ -337,8 +337,10 @@ The following notes should be made:
 You can run smoke tests from the CLI using:
 
 ```
-nrlf test smoke {actor} {env}
+nrlf test smoke {actor} {env} {app_alias}
 ```
+
+where `app_alias` is either `default` or `nrl_sync`. If you omit `app_alias`, it will anyway default to `default`.
 
 If you want to utilise the sandbox then you need to put that on the end of the env command - example below
 
@@ -355,17 +357,22 @@ This will run an end-to-end test against the environment/workspace via Apigee th
 All clients to the NRLF require tokens to connect through apigee - we can replicate this to test the persistent environments using this command to generate a token:
 
 ```
-nrlf oauth {env} {account}
+nrlf oauth {env} {app_alias}
 ```
+
+where `app_alias` is either `default` or `nrl_sync`. If you omit `app_alias`, it will anyway default to `default`.
 
 Some examples:
 
 ```
-nrlf oauth dev dev
-nrlf oauth int test
+nrlf oauth dev
+nrlf oauth dev default  # Note: this is the same as above
+nrlf oauth dev nrl_sync
+nrlf oauth int
+nrlf oauth int nrl_sync
 ```
 
-Other valid environments in addition to `dev` are `int`, `uat` and `prod` (reminder that int and uat exist within the test account).
+Other valid environments in addition to `dev` are `int`, `ref` and `prod` (reminder that int and ref exist within the test account).
 
 This command will print out an OAuth `<token>` which can be used in a request to our Apigee endpoint as a header of the form:
 

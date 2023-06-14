@@ -41,7 +41,7 @@ def _get_access_token(account_id: str = None):
     current_time = datetime.utcnow().timestamp()
     response = sts_client.assume_role(
         RoleArn=f"arn:aws:iam::{account_id}:role/terraform",
-        RoleSessionName=f"nrlf-feature-test-{current_time}",
+        RoleSessionName=f"nrlf-test-{current_time}",
     )
 
     access_key_id = response["Credentials"]["AccessKeyId"]
