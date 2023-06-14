@@ -13,7 +13,7 @@ nhs-number = "==1.2.1"
 pydantic = "==1.10.9"
 nrlf-lambda-pipeline = {git = "https://github.com/NHSDigital/nrlf-lambda-pipeline.git", tag = "v0.4.0"}
 pytest = "^7.3.2"
-boto3 = "^1.26.151"
+boto3 = "^1.26.153"
 pyjwt = "^2.7.0"
 cryptography = "^41.0.1"
 more-itertools = "^9.0.0"
