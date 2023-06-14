@@ -53,18 +53,6 @@ def _get_config(
     return PipelineData(config=config)
 
 
-@log_action(log_reference=LogReference.STATUS002, log_result=False, errors_only=True)
-def _get_boto_client(
-    data: PipelineData,
-    context: LambdaContext,
-    event: APIGatewayProxyEventModel,
-    dependencies: FrozenDict[str, Any],
-    logger: Logger,
-) -> PipelineData:
-    client = boto3.client("dynamodb")
-    return PipelineData(client=client, **data)
-
-
 @log_action(log_reference=LogReference.STATUS003, errors_only=True)
 def _hit_the_database(
     data: PipelineData,
