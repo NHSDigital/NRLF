@@ -11,7 +11,8 @@ def make_report(env: str, workspace: str = None):
     session = new_session_from_env(env=env)
     event = make_query_event(session=session, workspace=workspace, env=env)
     data = perform_query(session=session, workspace=workspace, event=event)
-    write_csv(data=data, workspace=workspace, env=env)
+    out_path = write_csv(data=data, workspace=workspace, env=env)
+    return out_path
 
 
 if __name__ == "__main__":

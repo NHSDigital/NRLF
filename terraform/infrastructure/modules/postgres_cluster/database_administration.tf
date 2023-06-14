@@ -86,7 +86,9 @@ data "aws_lambda_invocation" "grant-permissions" {
 
         GRANT CONNECT ON DATABASE {database_name} TO {write_user};
         GRANT USAGE ON SCHEMA public TO {write_user};
+        GRANT SELECT ON ALL TABLES IN SCHEMA public TO {write_user};
         GRANT INSERT ON ALL TABLES IN SCHEMA public TO {write_user};
+        GRANT UPDATE ON ALL TABLES IN SCHEMA public TO {write_user};
       EOT
       "identifiers" : {
         "database_name" : var.environment

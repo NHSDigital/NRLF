@@ -1,6 +1,7 @@
-import datetime
-import json
-from datetime import date
+import re
+from datetime import date, datetime
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from moto import mock_rds, mock_secretsmanager
 
@@ -9,6 +10,7 @@ from mi.reporting.resources import (
     get_endpoint,
     get_sql_identifiers,
     get_sql_statement,
+    make_report_path,
 )
 
 
@@ -16,13 +18,13 @@ from mi.reporting.resources import (
 def test_get_credentials():
     import boto3
 
-    _creds = {"user": "foo", "password": "bar"}  # pragma: allowlist secret
     client = boto3.client("secretsmanager")
     client.create_secret(
-        Name="nrlf-nhsd-FOO--mi--schema_lambda", SecretString=json.dumps(_creds)
+        Name="nhsd-nrlf--FOO--FOO--bar_password",  # pragma: allowlist secret
+        SecretString="BAR",  # pragma: allowlist secret
     )
-    creds = get_credentials(session=client, workspace="FOO")
-    assert creds == _creds
+    creds = get_credentials(session=boto3, workspace="FOO", operation="bar")
+    assert creds == {"user": "FOO-bar", "password": "BAR"}  # pragma: allowlist secret
 
 
 def test_get_sql_statement():
@@ -30,35 +32,44 @@ def test_get_sql_statement():
 
 
 def test_get_sql_identifiers():
-    identifiers = get_sql_identifiers(workspace="FOO")
-    assert identifiers == {"table_name": "nrlf-nhsd-FOO-mi"}
+    identifiers = get_sql_identifiers()
+    assert identifiers == {}
 
 
 @mock_rds
 def test_get_endpoint():
     import boto3
 
+    db_id = "nhsd-nrlf-FOO-aurora-cluster"
+
     client = boto3.client("rds")
     client.create_db_cluster(
-        DBClusterIdentifier="nrlf-nhsd-FOO-aurora-cluster",
+        DBClusterIdentifier=db_id,
         Engine="aurora",
         MasterUsername="root",
-        MasterUserPassword="pwd",  # pragma: allowlist secret
+        MasterUserPassword="the_password",  # pragma: allowlist secret
     )
+    endpoint = get_endpoint(session=boto3, env="FOO")
     assert (
-        get_endpoint(session=client, env="FOO")
-        == "nrlf-nhsd-FOO-aurora-cluster.cluster-12345678910-ro.eu-west-2.rds.amazonaws.com"
+        re.match(
+            rf"{db_id}.cluster-ro-(\w{{12}}).eu-west-2.rds.amazonaws.com",
+            endpoint,
+        )
+        is not None
     )
 
 
 def test_make_report_path():
-    assert (
-        test_make_report_path(
-            path="FOO",
-            env="BAR",
-            workspace="BAZ",
-            today=date(day=1, month=2, year=2000),
-            now=datetime(second=30, minute=2, hour=3, day=1, month=2, year=2000),
+    with TemporaryDirectory() as path:
+        expected = f"{path}/2000/02/01/mi-report-BAR-BAZ-2000-02-01T03-02-30.csv"
+        assert (
+            make_report_path(
+                path=path,
+                env="BAR",
+                workspace="BAZ",
+                today=date(day=1, month=2, year=2000),
+                now=datetime(second=30, minute=2, hour=3, day=1, month=2, year=2000),
+            )
+            == expected
         )
-        == "FOO/2000/2/1/mi-report-BAR-BAZ-1-2-2000:030230"
-    )
+        assert Path(expected).parent.exists()

@@ -8,7 +8,9 @@ from mi.sql_query.model import Response, Sql, SqlQueryEvent, Status
 from nrlf.core.validators import json_loads
 
 SELECT_SQL = Sql(statement="SELECT * FROM my_table;")
-INSERT_SQL = Sql(statement="INSERT INTO my_table (id, num, data) VALUES (1, 2.3, 'a');")
+INSERT_SQL = Sql(
+    statement="INSERT INTO my_table (id, num, data) VALUES (1, 2.3, 'a') ON CONFLICT (id) DO NOTHING;"
+)
 DELETE_SQL = Sql(statement="DELETE FROM my_table WHERE id=1;")
 
 
@@ -91,8 +93,6 @@ def invoke_lambda(
 ) -> Response:
     event = SqlQueryEvent(user=user, password=password, endpoint=endpoint, sql=sql)
     _event = event.dict()
-    _event["user"] = event.user.get_secret_value()
-    _event["password"] = event.password.get_secret_value()
     _response = client.invoke(FunctionName=function_name, Payload=json.dumps(_event))
     _response_body = json_loads(_response["Payload"].read())
     return Response(**_response_body)
@@ -131,7 +131,7 @@ def test_read_user_permissions(
 @pytest.mark.parametrize(
     ("sql", "expected_response"),
     (
-        [SELECT_SQL, Status.ERROR],
+        [SELECT_SQL, Status.OK],
         [INSERT_SQL, Status.OK],
         [DELETE_SQL, Status.ERROR],
     ),

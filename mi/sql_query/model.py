@@ -1,3 +1,4 @@
+import json
 import os
 from enum import Enum
 from typing import Optional
@@ -42,6 +43,18 @@ class SqlQueryEvent(BaseModel, extra=Extra.forbid):
     raise_on_sql_error: Optional[bool] = False
     autocommit: Optional[bool] = False
 
+    def dict(self, *args, **kwargs):
+        _dict = super().dict(*args, **kwargs)
+        _dict.update(
+            user=self.user.get_secret_value(),
+            password=self.password.get_secret_value(),
+        )
+        return _dict
+
+    def json(self):
+        _dict = self.dict()
+        return json.dumps(_dict)
+
 
 class Environment(BaseModel):
     POSTGRES_DATABASE_NAME: str
@@ -56,4 +69,4 @@ class Environment(BaseModel):
 class Response(BaseModel):
     status: Status
     outcome: str
-    results: list = None
+    results: list[tuple[object, ...]] = None

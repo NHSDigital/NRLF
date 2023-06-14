@@ -1,9 +1,0 @@
-variable "name" {}
-variable "prefix" {}
-variable "environment" {}
-variable "region" {}
-variable "cloudwatch_kms_arn" {}
-variable "account_name" {}
-variable "layers" {}
-variable "create_sql_path" {}
-variable "assume_account" {}
