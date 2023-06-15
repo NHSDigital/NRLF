@@ -2,7 +2,7 @@ from csv import QUOTE_NONNUMERIC, DictReader
 
 import pytest
 
-from helpers.aws_session import new_session_from_env
+from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
 from mi.reporting.report import make_report
 from mi.reporting.resources import get_credentials, get_endpoint, get_lambda_name
@@ -40,8 +40,8 @@ def get_seed_sql_statement(data: list[dict]) -> Sql:
     return Sql(statement=statement, identifiers=identifiers, params=params)
 
 
-def seed_database(data: list[dict], workspace: str, environment: str):
-    session = new_session_from_env(env=environment)
+def seed_database(data: list[dict], workspace: str, environment: str, account_id: str):
+    session = new_aws_session(account_id=account_id)
     credentials = get_credentials(
         session=session, workspace=workspace, operation="write"
     )
@@ -65,11 +65,17 @@ def test_make_report():
     tf_json = get_terraform_json()
     environment = tf_json["account_name"]["value"]
     workspace = tf_json["workspace"]["value"]
+    account_id = tf_json["assume_account_id"]["value"]
 
     input_data = [{"id": 12345, "num": 34567, "data": "foo"}]
     report_aliases = {"id": "Identifier", "data": "Data"}
 
-    seed_database(data=input_data, workspace=workspace, environment=environment)
+    seed_database(
+        data=input_data,
+        workspace=workspace,
+        environment=environment,
+        account_id=account_id,
+    )
     out_path = make_report(env=environment, workspace=workspace)
     with open(out_path) as f:
         out_data = list(DictReader(f=f, quoting=QUOTE_NONNUMERIC))
