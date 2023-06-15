@@ -1,11 +1,12 @@
 from enum import Enum
 from functools import partial, wraps
 from inspect import signature
+from logging import Logger as CoreLogger
 from logging import getLevelName
 from timeit import default_timer as timer
 from typing import Any, Callable, Optional, TypeVar, Union
 
-from aws_lambda_powertools import Logger as _Logger
+from aws_lambda_powertools import Logger as AwsLogger
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_utils.constants import LoggingConstants, LoggingOutcomes, LogLevel
 from lambda_utils.header_config import LoggingHeader
@@ -35,8 +36,8 @@ class LogTemplateBase(BaseModel):
 
 
 class LogData(BaseModel):
-    inputs: dict[str, Any]
-    result: Optional[Any]
+    inputs: dict[str, object]
+    result: Optional[object]
 
 
 class LogTemplate(LogTemplateBase):
@@ -103,7 +104,7 @@ def prepare_default_event_for_logging() -> MinimalEventModelForLogging:
     )
 
 
-class Logger(_Logger):
+class Logger(AwsLogger, CoreLogger):
     def __init__(
         self,
         *,
