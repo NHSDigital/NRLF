@@ -55,7 +55,7 @@ Feature: Producer Update Failure scenarios
         "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },
