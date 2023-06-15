@@ -576,3 +576,37 @@ When you create a release branch in the form of `release/yyyy-mm-dd` or `hotfix/
 The CI pipeline will check to make sure you have done this to prevent any mistakes - if you have made a release or hotfix branch it will check that the value in the RELEASE file matches or not
 
 This is because it will use that value to tag the commit once its been merged into main as a reference point, and this is how it tracks which release it is as github actions struggles with post merge branch identification
+
+### Feature tests
+
+You can run feature tests using the command:
+
+```shell
+nrlf test feature <enviroment>
+```
+
+If you want to run all the tests on your local machine, for example, you can use the command:
+
+```shell
+nrlf test feature local
+```
+
+You can also run individual tests by getting the Scenario name of the feature test and inserting it in the following command:
+
+```shell
+python -m behave feature_tests -n '<feature test name>' -D "integration_test=true"
+```
+
+It is also possible to run a suite of tests by using the `-i` command:
+
+```shell
+python -m behave  --define="integration_test=true" -i '<name of feature test suite file>' ./feature_tests/
+```
+
+you can also use the `-i` command for fuzzy matching like so:
+
+```shell
+python -m behave --define="integration_test=true" -i '.*producer*' ./feature_tests/
+```
+
+this will run all the producer integration tests.
