@@ -7,14 +7,23 @@ If you need to manually generate the swagger after making a change then the foll
 ## Command order
 
 ```shell
-nrlf swagger generate
 nrlf swagger merge producer
 nrlf swagger merge consumer
+nrlf swagger generate-model producer
+nrlf swagger generate-model consumer
 ```
 
-## Generate
+## Generate - DO NOT DO THIS UNLESS EXPLICITLY TOLD TO
+
+PLEASE DO NOT USE THIS COMMAND UNLESS EXPLICITLY TOLD TO DO SO. This command was useful when NRLF was in it's infancy, but since then the generated swagger files have been manually modified, so running this command will lose ALL of that that information! instead please use generate-model steps as mentioned above.
 
 The generate command recreates the two swagger files for the consumer and producer using the fhir swagger generator - it will then use that `./api/*/swagger.yaml` file to generate the pydantic models using the datamodel-codegen package
+
+you can run the swagger generate using the below command:
+
+```shell
+nrlf swagger generate
+```
 
 ## Merge
 

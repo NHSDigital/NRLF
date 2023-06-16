@@ -275,6 +275,12 @@ This executes any tests that have been marked with `@pytest.mark.integration`
 
 Feature tests are environment agnostic. They can either be run against local code or against the deployed infrastructure.
 
+You can run feature tests using the command:
+
+```shell
+nrlf test feature <enviroment>
+```
+
 To run feature tests locally
 
 ```shell
@@ -286,6 +292,26 @@ To run feature tests against deployed infrastructure
 ```shell
 nrlf test feature integration
 ```
+
+You can also run individual tests by getting the Scenario name of the feature test and inserting it in the following command:
+
+```shell
+python -m behave feature_tests -n '<feature test name>' -D "integration_test=true"
+```
+
+It is also possible to run a suite of tests by using the `-i` command:
+
+```shell
+python -m behave  --define="integration_test=true" -i '<name of feature test suite file>' ./feature_tests/
+```
+
+you can also use the `-i` command for fuzzy matching like so:
+
+```shell
+python -m behave --define="integration_test=true" -i '.*producer*' ./feature_tests/
+```
+
+this will run all the producer integration tests.
 
 ### 5. Feature test rules
 
