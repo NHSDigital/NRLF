@@ -595,7 +595,6 @@ paths:
       operationId: countDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
-        - $ref: "#/components/parameters/type"
         - $ref: "#/components/parameters/odsCode"
         - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
