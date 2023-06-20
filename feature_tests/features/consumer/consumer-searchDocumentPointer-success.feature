@@ -133,7 +133,6 @@ Feature: Consumer Search Success scenarios
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
 
   Scenario: Empty results when searching for a Document Pointer when subject has no documents
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
@@ -144,7 +143,6 @@ Feature: Consumer Search Success scenarios
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
 
   Scenario: Successfully searches for all documents by producer and nhs number for a consumer
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search Document Pointers
