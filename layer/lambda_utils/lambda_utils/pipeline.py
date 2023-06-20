@@ -23,6 +23,7 @@ from lambda_utils.versioning import (
 from pydantic import ValidationError
 
 from nrlf.core.response import operation_outcome_not_ok
+from nrlf.core.transform import strip_empty_json_paths
 
 
 class LogReference(Enum):
@@ -161,7 +162,7 @@ def render_response(status_code: HTTPStatus, result: dict) -> dict:
     """
     Renders the standard http response envelope
     """
-    body = json.dumps(result)
+    body = json.dumps(strip_empty_json_paths(result))
     return {
         "statusCode": status_code.value,
         "headers": {"Content-Type": "application/json", "Content-Length": len(body)},
