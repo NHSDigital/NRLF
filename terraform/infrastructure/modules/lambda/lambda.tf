@@ -17,7 +17,16 @@ resource "aws_lambda_function" "lambda_function" {
   depends_on = [
     aws_iam_role.lambda_role
   ]
+
+  dynamic "vpc_config" {
+    for_each = length(var.vpc) > 0 ? toset([1]) : toset([])
+    content {
+      subnet_ids         = var.vpc.subnet_ids
+      security_group_ids = var.vpc.security_group_ids
+    }
+  }
 }
+
 
 resource "aws_lambda_permission" "lambda_permission" {
   count         = length(var.api_gateway_source_arn)

@@ -54,7 +54,7 @@ Feature: Producer Supersede Failure scenarios
         "resourceType": "DocumentReference",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },

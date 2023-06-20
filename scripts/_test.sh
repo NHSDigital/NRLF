@@ -23,7 +23,7 @@ function _test() {
   case $command in
   "unit") _test_unit $args ;;
   "integration") _test_integration $args ;;
-  "smoke") python api/tests/test_smoke.py manual_smoke_test --actor $2 --environment $3 ;;
+  "smoke") python api/tests/test_smoke.py manual_smoke_test --actor $2 --environment $3 $4 ;;
   "token") _test_token $args ;;
   "feature") _test_feature $args ;;
   "firehose") _test_integration_firehose $args ;;

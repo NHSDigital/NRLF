@@ -219,6 +219,7 @@ jobs:
           source .venv/bin/activate
           source nrlf.sh
           nrlf test smoke producer ${{ env.WORKSPACE }}
+          if [[ ${{ env.WORKSPACE }} != *sandbox ]]; then nrlf test smoke producer ${{ env.WORKSPACE }} nrl_sync; fi
 
   documentation:
     needs: [smoke-test]
