@@ -25,6 +25,8 @@ function _aws() {
 }
 
 function _aws_login() {
+    _aws_reset_creds
+
     local profile_name=${PROFILE_PREFIX}-$1
     if [[ -z ${profile_name} ]]; then
         echo "Profile name is required." >&2

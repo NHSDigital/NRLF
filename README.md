@@ -23,6 +23,9 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
 6. [Logging](#logging)
 7. [Route 53 & Hosted zones](#route53--hosted-zones)
 8. [Sandbox](#sandbox)
+9. [Firehose](#firehose)
+10. [Releases](#releases)
+11. [MI reporting](#mi-reporting)
 
 ---
 
@@ -595,10 +598,39 @@ In order to understand the debugging lifecycle, please follow this example and t
    4. Run `nrlf resubmit file_path <env>` (<env> should match the value from line 4)
 6. Verify that the file has been moved from `errors/` to `fixed/` on s3
 
-### Release items
+## Releases
 
 When you create a release branch in the form of `release/yyyy-mm-dd` or `hotfix/yyyy-mm-dd` then you need to update the RELEASE file in the top level of the repository to match that release name
 
 The CI pipeline will check to make sure you have done this to prevent any mistakes - if you have made a release or hotfix branch it will check that the value in the RELEASE file matches or not
 
 This is because it will use that value to tag the commit once its been merged into main as a reference point, and this is how it tracks which release it is as github actions struggles with post merge branch identification
+
+## Generating MI reports
+
+MI reports can be generated in CSV format by running:
+
+```
+nrlf mi report <env> <?workspace> <?partition_key>
+```
+
+For standard reports, both `workspace` and `partition_key` can be omitted, however for testing purposes you should `workspace`. If you would like to use test data (found in `mi/reporting/tests/test_data/test_data.json`) then you can do:
+
+```
+nrlf mi seed-db <partition_key>
+```
+
+which will seed an amended version of the test data into the database for your current workspace, which uses the `partition_key` to make the test data unique. You can then run the previous `nrlf mi report` command with your `workspace` and `partition_key` to build reports based on the test data.
+
+All reports, test or otherwise, are saved to `mi/reporting/report`.
+
+### Creating or amending report queries
+
+Report queries are SQL files that can be found in `mi/reporting/queries`. The standard (pytest, i.e. not gherkin) integration tests will test all reports based on the test data, and will also provide regex validation using matching files found under `mi/reporting/queries/test_validation`.
+
+For example, if a report query file `mi/reporting/queries/my_report.sql` exists, then a corresponding validation file is also expected to exist called `mi/reporting/queries/test_validation/my_report.yaml` with the form:
+
+```yaml
+field_1: ^\w+$ # field called "field_1" which contains alphanumeric string
+field_2: ^\d+$ # field called "field_2" which contains a positive integer
+```
