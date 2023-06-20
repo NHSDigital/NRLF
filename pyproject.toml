@@ -60,3 +60,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
 profile = "black"
+
+[tool.sqlfluff.core]
+dialect = "postgres"
+
+[tool.sqlfluff.rules.capitalisation.identifiers]
+capitalisation_policy = "consistent"
