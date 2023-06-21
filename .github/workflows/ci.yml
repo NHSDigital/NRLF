@@ -55,13 +55,12 @@ jobs:
               echo "Regular branch, exiting release check"
               exit 0;
           fi
-          releasedate=$(date -d 2020-01-01)
+          releasedate=${2020-01-01}
           for pathname in changelog/*.md; do
             name=$(basename "$pathname" .md)
-            filedate=$(date -d "$name")
-            if [ $filedate -ge $releasedate ];
+            if [[ "${name}" > "${releasedate}" ]];
             then
-                releasedate=$filedate
+                releasedate=${name}
             fi
           done
           releasebranch="release/$releasedate"
