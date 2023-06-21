@@ -12,7 +12,6 @@ from nrlf.core.errors import (
     DuplicateError,
     DynamoDbError,
     ItemNotFound,
-    SupersedeError,
     TooManyItemsError,
 )
 from nrlf.core.model import DynamoDbModel, PaginatedResponse
@@ -494,8 +493,8 @@ class Repository:
         return self.dynamodb.put_item(**args)
 
     @handle_dynamodb_errors(
-        conditional_check_error_message="Supersede ID mismatch",
-        error_type=SupersedeError,
+        conditional_check_error_message="Duplicate item",
+        error_type=DuplicateError,
     )
     def supersede(
         self, create_item: PydanticModel, delete_pks: list[str]
