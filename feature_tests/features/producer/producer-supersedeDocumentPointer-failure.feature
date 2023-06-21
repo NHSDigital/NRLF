@@ -282,14 +282,14 @@ Feature: Producer Supersede Failure scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     Then the operation is unsuccessful
-    And the status is 400
+    And the status is 409
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                          |
-      | issue_type        | processing                                     |
-      | issue_level       | error                                          |
-      | issue_code        | INVALID_RESOURCE_ID                            |
-      | issue_description | Invalid resource ID                            |
-      | message           | Condition check failed - Supersede ID mismatch |
+      | property          | value                                   |
+      | issue_type        | processing                              |
+      | issue_level       | error                                   |
+      | issue_code        | INVALID_VALUE                           |
+      | issue_description | Invalid value                           |
+      | message           | Condition check failed - Duplicate item |
 
   Scenario: Unable to supersede a Document Pointer when required field id is missing
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
