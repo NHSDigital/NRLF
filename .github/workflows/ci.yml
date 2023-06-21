@@ -58,7 +58,7 @@ jobs:
           releasedate=$(date -d 2020-01-01)
           for pathname in changelog/*.md; do
             name=$(basename "$pathname" .md)
-            filedate=$(date -d "$pathname")
+            filedate=$(date -d "$name")
             if [ $filedate -ge $releasedate ];
             then
                 releasedate=$filedate
