@@ -135,6 +135,13 @@ components:
           $ref: "#/components/schemas/NextPageToken"
       required:
         - subject:identifier
+    CountRequestParams:
+      type: object
+      properties:
+        subject:identifier:
+          $ref: "#/components/schemas/RequestQuerySubject"
+      required:
+        - subject:identifier
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$

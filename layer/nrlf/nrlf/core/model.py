@@ -267,6 +267,10 @@ class ConsumerRequestParams(consumer_model.RequestParams, _NhsNumberMixin):
     pass
 
 
+class CountRequestParams(consumer_model.CountRequestParams, _NhsNumberMixin):
+    pass
+
+
 class PaginatedResponse(BaseModel):
     last_evaluated_key: str = None
     document_pointers: list[DocumentPointer]
