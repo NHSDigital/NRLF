@@ -2,13 +2,17 @@ from enum import Enum
 from logging import Logger
 from typing import Any
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 
 from nrlf.consumer.fhir.r4.model import NextPageToken, RequestQuerySubject
 from nrlf.core.common_steps import make_common_log_action, parse_headers
 from nrlf.core.errors import assert_no_extra_params
-from nrlf.core.model import ConsumerRequestParams, PaginatedResponse, key
+from nrlf.core.model import (
+    APIGatewayProxyEventModel,
+    ConsumerRequestParams,
+    PaginatedResponse,
+    key,
+)
 from nrlf.core.repository import (
     COUNT_ITEM_LIMIT,
     Repository,

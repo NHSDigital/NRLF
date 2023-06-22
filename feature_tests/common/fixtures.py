@@ -5,13 +5,19 @@ import boto3
 import moto
 from behave import fixture
 
-from feature_tests.common.constants import TABLE_CONFIG
-from nrlf.core.types import DynamoDbClient
+from feature_tests.common.constants import BUCKETS, PERMISSIONS_BUCKET, TABLE_CONFIG
+from nrlf.core.types import DynamoDbClient, S3Client
 
 
 @fixture(name="fixture.mock.dynamodb")
 def mock_dynamodb(context, *args, **kwargs):
     with moto.mock_dynamodb():
+        yield
+
+
+@fixture(name="fixture.mock.s3")
+def mock_s3(context, *args, **kwargs):
+    with moto.mock_s3():
         yield
 
 
@@ -21,6 +27,17 @@ def setup_tables():
         client.create_table(
             TableName=model.kebab(),
             **config,
+        )
+
+
+def setup_buckets():
+    client: S3Client = boto3.client("s3")
+    for bucket in BUCKETS:
+        client.create_bucket(
+            Bucket=bucket,
+            CreateBucketConfiguration={
+                "LocationConstraint": "eu-west-2",
+            },
         )
 
 
@@ -37,6 +54,7 @@ def mock_environmental_variables(context, *args, **kwargs):
             "SPLUNK_INDEX": "__index__",
             "SOURCE": "__source__",
             "DYNAMODB_TIMEOUT": "30",
+            "PERMISSIONS_LOOKUP_BUCKET": PERMISSIONS_BUCKET,
         },
         clear=True,
     ):

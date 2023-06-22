@@ -6,14 +6,13 @@ from logging import Logger
 from types import ModuleType
 from typing import Any, Generator
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action, prepare_default_event_for_logging
 from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _function_handler, _setup_logger
 from pydantic import BaseModel
 
-from nrlf.core.model import DocumentPointer
+from nrlf.core.model import APIGatewayProxyEventModel, DocumentPointer
 from nrlf.core.repository import Repository
 
 

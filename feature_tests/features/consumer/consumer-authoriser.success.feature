@@ -5,7 +5,9 @@ Feature: Consumer Authorisation Success scenarios
       """
       {
         "principalId": "<transaction-id>",
-        "context": {},
+        "context": {
+          "pointer-types": "$pointer-types"
+        },
         "policyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -27,3 +29,5 @@ Feature: Consumer Authorisation Success scenarios
       | http://snomed.info/sct | 861421000000108 |
     When Consumer "Yorkshire Ambulance Service" has their authorisation evaluated
     Then the response is the policy from POLICY_RESPONSE template
+      | property      | value                                                                                  |
+      | pointer-types | ["http://snomed.info/sct\|861421000000109", "http://snomed.info/sct\|861421000000108"] |

@@ -50,7 +50,7 @@ Feature: Producer Supersede Success scenarios
       """
     And template DOCUMENT_WITH_DATE
       """
-            {
+      {
         "resourceType": "DocumentReference",
         "id": "$identifier",
         "custodian": {
@@ -235,7 +235,7 @@ Feature: Producer Supersede Success scenarios
 
   Scenario: Superseding a document when calling app has "supersede-ignore-delete-fail" permission
     Given Producer "Data Sync" (Organisation ID "DS123") is requesting to create Document Pointers
-    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types stored in NRLF
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And Producer "Data Sync" has the permission "supersede-ignore-delete-fail"
@@ -272,7 +272,7 @@ Feature: Producer Supersede Success scenarios
 
   Scenario: Superseding a document with 2 targets where only 1 exists when calling app has "supersede-ignore-delete-fail" permission
     Given Producer "Data Sync" (Organisation ID "DS123") is requesting to create Document Pointers
-    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types stored in NRLF
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And Producer "Data Sync" has the permission "supersede-ignore-delete-fail"
@@ -319,7 +319,7 @@ Feature: Producer Supersede Success scenarios
 
   Scenario: Superseding a document when calling app has "audit-dates-from-payload" permission, the new created_on date is the date in the payload
     Given Producer "Data Sync" (Organisation ID "DS123") is requesting to create Document Pointers
-    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types stored in NRLF
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And Producer "Data Sync" has the permissions

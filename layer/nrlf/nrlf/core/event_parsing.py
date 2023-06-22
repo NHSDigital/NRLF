@@ -1,9 +1,8 @@
 from json import JSONDecodeError
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
-
 from nrlf.core.constants import JSON_TYPES
 from nrlf.core.errors import RequestValidationError
+from nrlf.core.model import APIGatewayProxyEventModel
 from nrlf.core.validators import json_loads
 
 

@@ -41,10 +41,13 @@ class ClientRpDetailsHeader(AbstractHeader):
 
 
 class ConnectionMetadata(AbstractHeader):
-    pointer_types: list[str] = Field(alias="nrl.pointer-types")
+    pointer_types: list[str] = Field(alias="nrl.pointer-types", default_factory=list)
     ods_code: str = Field(alias="nrl.ods-code")
     ods_code_extension: str = Field(alias="nrl.ods-code-extension", default=None)
-    nrl_permissions: list[str] = Field(alias="nrl.permissions", default=[])
+    nrl_permissions: list[str] = Field(alias="nrl.permissions", default_factory=list)
+    enable_permissions_lookup: bool = Field(
+        alias="nrl.enable-permissions-lookup", default=False
+    )
 
     @property
     def ods_code_parts(self):

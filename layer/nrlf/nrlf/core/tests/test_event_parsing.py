@@ -1,9 +1,9 @@
 import pytest
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_utils.tests.unit.utils import make_aws_event
 
 from nrlf.core.errors import NRLF_TO_SPINE_4XX_ERROR, RequestValidationError
 from nrlf.core.event_parsing import fetch_body_from_event
+from nrlf.core.model import APIGatewayProxyEventModel
 
 
 @pytest.mark.parametrize(

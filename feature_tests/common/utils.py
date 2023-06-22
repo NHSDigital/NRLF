@@ -24,7 +24,7 @@ from feature_tests.common.constants import (
 )
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
-from nrlf.core.types import DynamoDbClient
+from nrlf.core.types import DynamoDbClient, S3Client
 
 RELATES_TO = "relatesTo"
 TARGET = "target"
@@ -83,6 +83,10 @@ def _get_boto3_client(client_name: str, test_mode: TestMode):
 
 def get_dynamodb_client(test_mode: TestMode) -> DynamoDbClient:
     return _get_boto3_client(client_name="dynamodb", test_mode=test_mode)
+
+
+def get_s3_client(test_mode: TestMode) -> S3Client:
+    return _get_boto3_client(client_name="s3", test_mode=test_mode)
 
 
 def get_lambda_client(test_mode: TestMode) -> any:
