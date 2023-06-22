@@ -13,3 +13,7 @@ output "function_name" {
 output "log_group_name" {
   value = aws_cloudwatch_log_group.lambda_cloudwatch_log_group.name
 }
+
+output "lambda_role_name" {
+  value = aws_iam_role.lambda_role.name
+}

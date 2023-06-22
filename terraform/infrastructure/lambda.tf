@@ -266,11 +266,13 @@ module "producer__authoriser_lambda" {
   layers      = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
   kms_key_id  = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    PREFIX       = "${local.prefix}--"
-    ENVIRONMENT  = local.environment
-    SPLUNK_INDEX = module.firehose__processor.splunk.index
+    PREFIX                    = "${local.prefix}--"
+    ENVIRONMENT               = local.environment
+    SPLUNK_INDEX              = module.firehose__processor.splunk.index
+    PERMISSIONS_LOOKUP_BUCKET = aws_s3_bucket.authorization-store.id
   }
   additional_policies = [
+    aws_iam_policy.read-authorization-store-s3.arn,
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
