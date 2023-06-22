@@ -209,6 +209,7 @@ class TestConfig:
     actor_context: ActorContext = None
     dynamodb_client: DynamoDbClient = None
     s3_client: S3Client = None
+    permissions_bucket: str = None
     environment_prefix: str = None
     rendered_templates: dict = field(default_factory=dict)
 

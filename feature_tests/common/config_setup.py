@@ -9,7 +9,6 @@ from feature_tests.common.constants import (
     ALLOWED_APP_IDS,
     ALLOWED_APPS,
     DEFAULT_VERSION,
-    PERMISSIONS_BUCKET,
     TABLE_CONFIG,
     Action,
     TestMode,
@@ -39,6 +38,7 @@ from feature_tests.common.utils import (
     get_lambda_arn,
     get_lambda_client,
     get_lambda_handler,
+    get_permissions_bucket,
     get_s3_client,
     get_test_mode,
     get_tls_ma_files,
@@ -119,6 +119,7 @@ def config_setup(context: Context, scenario_name: str) -> TestConfig:
     if test_mode is TestMode.LOCAL_TEST:
         _local_mock(context=context)
     environment_prefix = get_environment_prefix(test_mode=test_mode)
+    permissions_bucket = get_permissions_bucket(test_mode=test_mode)
     dynamodb_client = get_dynamodb_client(test_mode=test_mode)
     s3_client = get_s3_client(test_mode=test_mode)
     repositories = {
@@ -134,6 +135,7 @@ def config_setup(context: Context, scenario_name: str) -> TestConfig:
     test_config.dynamodb_client = dynamodb_client
     test_config.s3_client = s3_client
     test_config.environment_prefix = environment_prefix
+    test_config.permissions_bucket = permissions_bucket
     return test_config
 
 
@@ -164,6 +166,7 @@ def register_application(
             org_id=org_id,
             pointer_types=pointer_types,
             s3_client=context.test_config.s3_client,
+            permissions_bucket=test_config.permissions_bucket,
         )
     if not enable_s3_for_permissions:
         connection_metadata["nrl.pointer-types"] = pointer_types
@@ -185,10 +188,14 @@ def set_audit_date_permission(context: Context):
 
 
 def register_pointer_types_in_s3(
-    app_id: str, org_id: str, pointer_types: list[str], s3_client: S3Client
+    app_id: str,
+    org_id: str,
+    pointer_types: list[str],
+    s3_client: S3Client,
+    permissions_bucket: str,
 ):
     s3_client.put_object(
-        Bucket=PERMISSIONS_BUCKET,
+        Bucket=permissions_bucket,
         Key=f"{app_id}/{org_id}.json",
         Body=json.dumps(pointer_types).encode(),
     )

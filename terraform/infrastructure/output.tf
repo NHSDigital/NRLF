@@ -57,3 +57,7 @@ output "firehose" {
 output "mi" {
   value = module.mi
 }
+
+output "permissions_bucket" {
+  value = aws_s3_bucket.authorization-store.id
+}
