@@ -1,0 +1,64 @@
+name: Merge to main
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+  actions: write
+
+env:
+  TF_WORKFLOW_ID: ${{ inputs.environment }}
+  ENVIRONMENT: ${{ inputs.environment }}
+  CACHE_NAME: ${{ inputs.environment }}-cache
+  ARTIFACT_NAME: ${{ inputs.environment }}-artifact
+  TF_ARTIFACT_NAME: ${{ inputs.environment }}-terraform-artifact
+  AWS_DEFAULT_REGION: eu-west-2
+  TF_CLI_ARGS: -no-color
+  RUNNING_IN_CI: 1
+  CI_DEPLOY_PERSISTENT_ENV: 1
+
+jobs:
+  make-tag:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    name: Create a tag from main
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+      - name: Extract the tag name from the RELEASE file
+        run: |
+          TAG=$(cat RELEASE)
+          echo "tag=${TAG}" >> $GITHUB_ENV
+      - name: Create tag
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ env.tag }}',
+              sha: context.sha
+            })
+    outputs:
+      tag: ${{ env.tag }}
+
+  # comment
+  message-slack:
+    name: Notify slack of merge to main
+    needs: [make-tag]
+    runs-on: [self-hosted, ci]
+    steps:
+      - name: Send merge result to slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "tag": "${{ needs.make-tag.outputs.tag}}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.MAIN_MERGE_SLACK_HOOK_URL }}

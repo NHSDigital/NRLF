@@ -19,6 +19,7 @@ permissions:
 
 env:
   TF_WORKFLOW_ID: ${{ inputs.environment }}
+  ENVIRONMENT: ${{ inputs.environment }}
   CACHE_NAME: ${{ inputs.environment }}-cache
   ARTIFACT_NAME: ${{ inputs.environment }}-artifact
   TF_ARTIFACT_NAME: ${{ inputs.environment }}-terraform-artifact
@@ -26,6 +27,7 @@ env:
   TF_CLI_ARGS: -no-color
   RUNNING_IN_CI: 1
   CI_DEPLOY_PERSISTENT_ENV: 1
+  SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_ENV_SLACK_HOOK_URL }}
 
 jobs:
   cache:
@@ -104,7 +106,7 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.PE_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
@@ -122,6 +124,22 @@ jobs:
         with:
           name: ${{ env.TF_ARTIFACT_NAME }}
           path: ./terraform/infrastructure/tfplan
+
+  message-slack-approval:
+    name: Notify slack of manual approval
+    runs-on: [self-hosted, ci]
+    needs: [terraform-plan]
+    steps:
+      - name: Send approval message to slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "branch": "${{ inputs.branch_name }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.PROD_APPROVAL_SLACK_HOOK_URL }}
 
   terraform-apply:
     needs: [terraform-plan]
@@ -150,7 +168,7 @@ jobs:
           path: ./terraform/infrastructure/
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.PE_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
@@ -159,6 +177,7 @@ jobs:
       - name: Terraform apply - ${{ env.TF_WORKFLOW_ID }}
         run: |
           source nrlf.sh
+          nrlf truststore pull-server prod
           nrlf terraform ciinit ${TF_WORKFLOW_ID}
           nrlf terraform ciapply ${TF_WORKFLOW_ID}
 
@@ -195,7 +214,7 @@ jobs:
           name: ${{ env.CACHE_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
@@ -205,12 +224,13 @@ jobs:
         run: |
           source .venv/bin/activate
           source nrlf.sh
-          nrlf test smoke
+          nrlf test smoke producer ${{ env.ENVIRONMENT }}
 
   documentation:
     needs: [smoke-test]
     name: Deploy Documentation
     runs-on: [self-hosted, ci]
+    continue-on-error: true
     steps:
       - name: Download cache - ${{ env.CACHE_NAME }}
         uses: ./.github/actions/caching/
@@ -219,7 +239,7 @@ jobs:
           name: ${{ env.CACHE_NAME }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
@@ -237,6 +257,17 @@ jobs:
           source nrlf.sh
           nrlf doc push prod
 
+  set-success:
+    name: Set Success
+    needs: [documentation]
+    runs-on: [self-hosted, ci]
+    steps:
+      - name: Set success env var
+        run: echo "success"
+
+    outputs:
+      success: "succeeded"
+
   clear-cache:
     name: Clear Cache
     needs: [documentation]
@@ -253,3 +284,20 @@ jobs:
         uses: ./.github/actions/clear-cache/
         with:
           name: ${{ env.CACHE_NAME }}
+
+  message-slack:
+    name: Notify slack of deployment
+    needs: [set-success]
+    if: ${{ always() }}
+    runs-on: [self-hosted, ci]
+    steps:
+      - name: Send job result to slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "environment": "${{ env.TF_WORKFLOW_ID }}",
+              "result": "${{ needs.set-success.outputs.success && needs.set-success.outputs.success || 'failed' }}",
+              "branch": "${{ inputs.branch_name }}"
+            }

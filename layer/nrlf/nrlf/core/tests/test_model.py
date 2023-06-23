@@ -2,17 +2,20 @@ import json
 from unittest import mock
 
 import pytest
+
 from nrlf.core.constants import ID_SEPARATOR, DbPrefix
+from nrlf.core.errors import RequestValidationError
 from nrlf.core.model import (
     ConsumerRequestParams,
     DocumentPointer,
+    PaginatedResponse,
     ProducerRequestParams,
     assert_model_has_only_dynamodb_types,
     create_document_type_tuple,
     key,
 )
 from nrlf.core.transform import (
-    create_bundle_from_document_pointers,
+    create_bundle_from_paginated_response,
     create_document_pointer_from_fhir_json,
     update_document_pointer_from_fhir_json,
 )
@@ -31,34 +34,32 @@ TIMESTAMP = "2022-10-18T14:47:22.920Z"
 
 @pytest.mark.parametrize(
     [
-        "provider_id",
         "provider_doc_id",
         "nhs_number",
         "ods_code",
     ],
-    [["XX01", "6789", "0730576353", "RX1"], ["AB12", "9876", "2361846292", "JJ0"]],
+    [["6789", "0730576353", "RX1"], ["9876", "2361846292", "JJ0"]],
 )
 def test_calculated_fields(
-    provider_id: str,
     provider_doc_id: str,
     nhs_number: str,
     ods_code: str,
 ):
     doc = generate_test_document_reference(
-        provider_id=provider_id,
+        provider_id=ods_code,
         provider_doc_id=provider_doc_id,
         subject=generate_test_subject(nhs_number),
         custodian=generate_test_custodian(ods_code),
     )
     model = create_document_pointer_from_fhir_json(doc, 99)
 
-    assert f"{model.pk}" == key(DbPrefix.DocumentPointer, provider_id, provider_doc_id)
+    assert f"{model.pk}" == key(DbPrefix.DocumentPointer, ods_code, provider_doc_id)
     assert f"{model.sk}" == f"{model.pk}"
     assert f"{model.pk_1}" == key(DbPrefix.Patient, nhs_number)
     assert f"{model.sk_1}" == key(
-        DbPrefix.CreatedOn, model.created_on, provider_id, provider_doc_id
+        DbPrefix.CreatedOn, model.created_on, ods_code, provider_doc_id
     )
-    assert f"{model.pk_2}" == key(DbPrefix.Organization, provider_id)
+    assert f"{model.pk_2}" == key(DbPrefix.Organization, ods_code)
     assert f"{model.sk_2}" == f"{model.sk_2}"
 
 
@@ -96,10 +97,10 @@ def test_create_document_pointer_from_fhir_json(mock__make_timestamp):
         fhir_json=fhir_json, api_version=API_VERSION
     )
 
-    id = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"
+    id = "Y05868-1234567890"
     (_, doc_id) = id.split(ID_SEPARATOR)
-    provider_id = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"
-    custodian = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"
+    provider_id = "Y05868"
+    custodian = "Y05868"
     nhs_number = "9278693472"
 
     assert core_model.dict() == {
@@ -113,7 +114,8 @@ def test_create_document_pointer_from_fhir_json(mock__make_timestamp):
         "nhs_number": {"S": nhs_number},
         "producer_id": {"S": provider_id},
         "custodian": {"S": custodian},
-        "type": {"S": "https://snomed.info/ict|736253002"},
+        "custodian_suffix": {"NULL": True},
+        "type": {"S": "http://snomed.info/sct|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
         "document": {"S": json.dumps(fhir_json)},
@@ -152,11 +154,11 @@ def test_update_document_pointer_from_fhir_json(mock__make_timestamp):
     actual = core_model.dict()
     expected = {
         **actual,  # we don't test the calculated values here
-        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
+        "id": {"S": "Y05868-1234567890"},
         "nhs_number": {"S": "9278693472"},
-        "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-        "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-        "type": {"S": "https://snomed.info/ict|736253002"},
+        "producer_id": {"S": "Y05868"},
+        "custodian": {"S": "Y05868"},
+        "type": {"S": "http://snomed.info/sct|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
         "document": {"S": json.dumps(fhir_json)},
@@ -170,11 +172,11 @@ def test_reconstruct_document_pointer_from_db():
     document = json.dumps(generate_test_document_reference())
 
     dynamodb_core_model = {
-        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
+        "id": {"S": "Y05868-1234567890"},
         "nhs_number": {"S": "9278693472"},
-        "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-        "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-        "type": {"S": "https://snomed.info/ict|736253002"},
+        "producer_id": {"S": "Y05868"},
+        "custodian": {"S": "Y05868"},
+        "type": {"S": "http://snomed.info/sct|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
         "document": {"S": document},
@@ -187,11 +189,11 @@ def test_reconstruct_document_pointer_from_db():
     actual = core_model.dict()
     expected = {
         **actual,  # we don't test the calculated values here
-        "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
+        "id": {"S": "Y05868-1234567890"},
         "nhs_number": {"S": "9278693472"},
-        "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-        "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-        "type": {"S": "https://snomed.info/ict|736253002"},
+        "producer_id": {"S": "Y05868"},
+        "custodian": {"S": "Y05868"},
+        "type": {"S": "http://snomed.info/sct|736253002"},
         "source": {"S": "NRLF"},
         "version": {"N": str(API_VERSION)},
         "document": {"S": document},
@@ -201,7 +203,7 @@ def test_reconstruct_document_pointer_from_db():
     assert actual == expected
 
 
-def test_create_bundle_from_multiple_document_pointers():
+def test_create_bundle_from_paginated_response_returns_populated_bundle_of_2():
     fhir_json = read_test_data("nrlf")
 
     core_model = create_document_pointer_from_fhir_json(
@@ -211,7 +213,9 @@ def test_create_bundle_from_multiple_document_pointers():
         fhir_json=fhir_json, api_version=API_VERSION
     )
 
-    result = create_bundle_from_document_pointers([core_model, core_model_2])
+    paginated_response = PaginatedResponse(document_pointers=[core_model, core_model_2])
+
+    result = create_bundle_from_paginated_response(paginated_response)
 
     expected_result = {
         "resourceType": "Bundle",
@@ -221,11 +225,11 @@ def test_create_bundle_from_multiple_document_pointers():
             {
                 "resource": {
                     "resourceType": "DocumentReference",
-                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890",
+                    "id": "Y05868-1234567890",
                     "status": "current",
                     "type": {
                         "coding": [
-                            {"system": "https://snomed.info/ict", "code": "736253002"}
+                            {"system": "http://snomed.info/sct", "code": "736253002"}
                         ]
                     },
                     "subject": {
@@ -236,8 +240,8 @@ def test_create_bundle_from_multiple_document_pointers():
                     },
                     "custodian": {
                         "identifier": {
-                            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
-                            "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL",
+                            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                            "value": "Y05868",
                         }
                     },
                     "content": [
@@ -253,11 +257,11 @@ def test_create_bundle_from_multiple_document_pointers():
             {
                 "resource": {
                     "resourceType": "DocumentReference",
-                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890",
+                    "id": "Y05868-1234567890",
                     "status": "current",
                     "type": {
                         "coding": [
-                            {"system": "https://snomed.info/ict", "code": "736253002"}
+                            {"system": "http://snomed.info/sct", "code": "736253002"}
                         ]
                     },
                     "subject": {
@@ -268,8 +272,8 @@ def test_create_bundle_from_multiple_document_pointers():
                     },
                     "custodian": {
                         "identifier": {
-                            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
-                            "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL",
+                            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                            "value": "Y05868",
                         }
                     },
                     "content": [
@@ -288,14 +292,16 @@ def test_create_bundle_from_multiple_document_pointers():
     assert expected_result == result
 
 
-def test_create_bundle_from_document_pointer():
+def test_create_bundle_from_paginated_response_returns_populated_bundle_of_1():
     fhir_json = read_test_data("nrlf")
 
     core_model = create_document_pointer_from_fhir_json(
         fhir_json=fhir_json, api_version=API_VERSION
     )
 
-    result = create_bundle_from_document_pointers([core_model])
+    paginated_response = PaginatedResponse(document_pointers=[core_model])
+
+    result = create_bundle_from_paginated_response(paginated_response)
 
     expected_result = {
         "resourceType": "Bundle",
@@ -305,11 +311,11 @@ def test_create_bundle_from_document_pointer():
             {
                 "resource": {
                     "resourceType": "DocumentReference",
-                    "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890",
+                    "id": "Y05868-1234567890",
                     "status": "current",
                     "type": {
                         "coding": [
-                            {"system": "https://snomed.info/ict", "code": "736253002"}
+                            {"system": "http://snomed.info/sct", "code": "736253002"}
                         ]
                     },
                     "subject": {
@@ -320,8 +326,8 @@ def test_create_bundle_from_document_pointer():
                     },
                     "custodian": {
                         "identifier": {
-                            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
-                            "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL",
+                            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                            "value": "Y05868",
                         }
                     },
                     "content": [
@@ -340,9 +346,10 @@ def test_create_bundle_from_document_pointer():
     assert expected_result == result
 
 
-def test_create_bundle_from_document_pointer():
+def test_create_bundle_from_paginated_response_returns_unpopulated_bundle():
 
-    result = create_bundle_from_document_pointers([])
+    paginated_response = PaginatedResponse(document_pointers=[])
+    result = create_bundle_from_paginated_response(paginated_response)
 
     expected_result = {
         "resourceType": "Bundle",
@@ -355,7 +362,7 @@ def test_create_bundle_from_document_pointer():
 
 
 def test_producer_request_params_splits_nhs_id():
-    queryParams = {"subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|7736959498"}
+    queryParams = {"subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|7736959498"}
 
     request_params = ProducerRequestParams(**queryParams)
     expected = "7736959498"
@@ -363,15 +370,15 @@ def test_producer_request_params_splits_nhs_id():
 
 
 def test_producer_request_params_throws_error_on_invalid_nhs_number():
-    queryParams = {"subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|773695"}
+    queryParams = {"subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|773695"}
 
-    with pytest.raises(ValueError):
+    with pytest.raises(RequestValidationError):
         request_params = ProducerRequestParams(**queryParams)
         request_params.nhs_number
 
 
 def test_consumer_request_params_splits_nhs_id():
-    queryParams = {"subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|7736959498"}
+    queryParams = {"subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|7736959498"}
 
     request_params = ConsumerRequestParams(**queryParams)
 
@@ -381,8 +388,8 @@ def test_consumer_request_params_splits_nhs_id():
 
 
 def test_consumer_request_params_throws_error_on_invalid_nhs_number():
-    queryParams = {"subject.identifier": "https://fhir.nhs.uk/Id/nhs-number|773695"}
+    queryParams = {"subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|773695"}
 
-    with pytest.raises(ValueError):
+    with pytest.raises(RequestValidationError):
         request_params = ConsumerRequestParams(**queryParams)
         request_params.nhs_number

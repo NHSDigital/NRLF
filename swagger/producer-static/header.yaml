@@ -1,3 +1,4 @@
+---
 openapi: 3.0.0
 info:
   title: NRLF Producer API
@@ -5,29 +6,35 @@ info:
   license:
     name: MIT
 servers:
-  - url: "https://sandbox.api.service.nhs.uk/nrl-producer-api/FHIR/R4"
+  - url: https://sandbox.api.service.nhs.uk/record-locator/producer/FHIR/R4
     description: Sandbox environment.
-  - url: "https://int.api.service.nhs.uk/nrl-producer-api/FHIR/R4"
+  - url: https://int.api.service.nhs.uk/record-locator/producer/FHIR/R4
     description: Integration test environment.
-  - url: "https://api.service.nhs.uk/nrl-producer-api/FHIR/R4"
+  - url: https://api.service.nhs.uk/record-locator/producer/FHIR/R4
     description: Production environment.
 tags:
-  - name: NRLF Producer
 paths:
   /DocumentReference:
     get:
       tags:
-        - NRLF Producer
       summary: Search for DocumentReference resources
       operationId: searchDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
-        - $ref: "#/components/parameters/custodian"
         - $ref: "#/components/parameters/type"
+        - $ref: "#/components/parameters/nextPageToken"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
           description: Search DocumentReference operation successful
+          headers:
+            X-Correlation-Id:
+              $ref: "#/components/headers/CorrelationId"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
           content:
             application/fhir+json:
               schema:
@@ -45,11 +52,13 @@ paths:
         contentHandling: CONVERT_TO_TEXT
     post:
       tags:
-        - NRLF Producer
       summary: Create a DocumentReference resource
       operationId: createDocumentReference
       parameters:
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "201":
           $ref: "#/components/responses/Success"
@@ -69,15 +78,22 @@ paths:
   /DocumentReference/{id}:
     get:
       tags:
-        - NRLF Producer
       summary: Read a DocumentReference resource
       operationId: readDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
           description: Read DocumentReference operation successful
+          headers:
+            X-Correlation-Id:
+              $ref: "#/components/headers/CorrelationId"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
           content:
             application/fhir+json:
               schema:
@@ -95,12 +111,14 @@ paths:
         contentHandling: CONVERT_TO_TEXT
     put:
       tags:
-        - NRLF Producer
       summary: Update an existing DocumentReference resource
       operationId: updateDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
           $ref: "#/components/responses/Success"
@@ -121,12 +139,14 @@ paths:
         contentHandling: CONVERT_TO_TEXT
     delete:
       tags:
-        - NRLF Producer
       summary: Delete a DocumentReference resource
       operationId: deleteDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
           $ref: "#/components/responses/Success"
@@ -138,6 +158,44 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri: ${method_deleteDocumentReference}
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
+  /DocumentReference/_search:
+    post:
+      tags:
+      summary: Search for DocumentReference resources
+      operationId: searchPostDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestParams"
+      responses:
+        "200":
+          description: Search DocumentReference operation successful
+          headers:
+            X-Correlation-Id:
+              $ref: "#/components/headers/CorrelationId"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/Bundle"
+      security:
+        - ${authoriser_name}: []
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: ${method_searchPostDocumentReference}
         responses:
           default:
             statusCode: "200"

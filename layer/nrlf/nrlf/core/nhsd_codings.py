@@ -99,6 +99,9 @@ class SpineCoding(Enum):
     INVALID_RESOURCE_ID = Coding(
         code="INVALID_RESOURCE_ID", display="Invalid resource ID", system=SPINE_SYSTEM
     )
+    INVALID_VALUE = Coding(
+        code="INVALID_VALUE", display="Invalid value", system=SPINE_SYSTEM
+    )
 
 
 class NrlfCoding(Enum):

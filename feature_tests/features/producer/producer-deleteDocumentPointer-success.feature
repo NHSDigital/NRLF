@@ -8,7 +8,7 @@ Feature: Producer Delete Success scenarios
         "id": "$custodian-$identifier",
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },
@@ -21,7 +21,7 @@ Feature: Producer Delete Success scenarios
         "type": {
           "coding": [
             {
-              "system": "https://snomed.info/ict",
+              "system": "http://snomed.info/sct",
               "code": "$type"
             }
           ]
@@ -69,8 +69,8 @@ Feature: Producer Delete Success scenarios
   Scenario: Delete an existing current Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to delete Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
@@ -80,6 +80,29 @@ Feature: Producer Delete Success scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" deletes an existing Document Reference "8FW23-1234567890"
+    Then the operation is successful
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value            |
+      | issue_type        | informational    |
+      | issue_level       | information      |
+      | issue_code        | RESOURCE_REMOVED |
+      | issue_description | Resource removed |
+      | message           | Resource removed |
+
+  Scenario: Delete an existing current Document Pointer when the producer has extension code
+    Given Producer "BaRS (EMIS)" (Organisation ID "V4T0L.YGMMC") is requesting to delete Document Pointers
+    And Producer "BaRS (EMIS)" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | V4T0L.YGMMC                    |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "BaRS (EMIS)" deletes an existing Document Reference "V4T0L.YGMMC-1234567890"
     Then the operation is successful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value            |

@@ -1,30 +1,43 @@
-import json
 import urllib.parse
+from enum import Enum
 from logging import Logger
 from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.logging import log_action
-from nrlf.core.common_steps import parse_headers
-from nrlf.core.errors import AuthenticationError
+
+from nrlf.core.common_steps import (
+    make_common_log_action,
+    parse_headers,
+    parse_path_id,
+    read_subject_from_path,
+)
+from nrlf.core.constants import CUSTODIAN_SEPARATOR
+from nrlf.core.errors import RequestValidationError
 from nrlf.core.model import DocumentPointer
-from nrlf.core.query import create_read_and_filter_query
 from nrlf.core.repository import Repository
 from nrlf.core.validators import (
     generate_producer_id,
+    json_loads,
     validate_document_reference_string,
 )
 
+log_action = make_common_log_action()
 
-def _invalid_producer_for_read(organisation_code, read_item_id: str):
-    producer_id = generate_producer_id(id=read_item_id, producer_id=None)
-    if not organisation_code == producer_id:
+
+class LogReference(Enum):
+    READ001 = "Validating producer permissions"
+    READ002 = "Reading document reference"
+
+
+def _invalid_producer_for_read(ods_code_parts, read_item_id: str):
+    producer_id, _ = generate_producer_id(id=read_item_id, producer_id=None)
+    if not ods_code_parts == tuple(producer_id.split(CUSTODIAN_SEPARATOR)):
         return True
     return False
 
 
-@log_action(narrative="Validating producer permissions")
+@log_action(log_reference=LogReference.READ001)
 def validate_producer_permissions(
     data: PipelineData,
     context: LambdaContext,
@@ -32,20 +45,20 @@ def validate_producer_permissions(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-    organisation_code = data["organisation_code"]
+    ods_code_parts = data["ods_code_parts"]
     decoded_id = urllib.parse.unquote(event.pathParameters["id"])
 
     if _invalid_producer_for_read(
-        organisation_code=organisation_code, read_item_id=decoded_id
+        ods_code_parts=ods_code_parts, read_item_id=decoded_id
     ):
-        raise AuthenticationError(
-            "Required permissions to read a document pointer are missing"
+        raise RequestValidationError(
+            "The requested document pointer cannot be read because it belongs to another organisation"
         )
 
     return PipelineData(decoded_id=decoded_id, **data)
 
 
-@log_action(narrative="Reading document reference")
+@log_action(log_reference=LogReference.READ002)
 def read_document_reference(
     data: PipelineData,
     context: LambdaContext,
@@ -54,19 +67,17 @@ def read_document_reference(
     logger: Logger,
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
-
-    decoded_id = urllib.parse.unquote(event.pathParameters["id"])
-    pk = DocumentPointer.convert_id_to_pk(decoded_id)
-
-    document_pointer: DocumentPointer = repository.read_item(pk)
+    document_pointer: DocumentPointer = repository.read_item(data["pk"])
 
     validate_document_reference_string(document_pointer.document.__root__)
 
-    return PipelineData(**json.loads(document_pointer.document.__root__))
+    return PipelineData(**json_loads(document_pointer.document.__root__))
 
 
 steps = [
+    read_subject_from_path,
     parse_headers,
+    parse_path_id,
     validate_producer_permissions,
     read_document_reference,
 ]

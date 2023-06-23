@@ -1,9 +1,10 @@
+---
 repos:
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.4.0
     hooks:
       - id: detect-secrets
-        exclude: .pre-commit-config.yaml
+        exclude: .pre-commit-config.yaml|layer/psycopg2/.*
 
   - repo: https://github.com/prettier/pre-commit
     rev: 57f39166b5a5a504d6808b87ab98d41ebf095b46
@@ -25,6 +26,17 @@ repos:
         args: [-b, develop, -b, master, -b, main]
         pass_filenames: false
 
+  # Flake8 for print only (error code T201)
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-print
+        args:
+          - "--select=T201,F401,F402,F403"
+          - "--exclude=.git,__pycache__,dist,.venv,scripts,packages/feature_documentation/*,layer/psycopg2/*"
+
   - repo: https://github.com/psf/black
     rev: 22.3.0
     hooks:
@@ -32,16 +44,25 @@ repos:
         language_version: python3
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.6.4
+    rev: 5.12.0
     hooks:
       - id: isort
-        args: ["--profile", "black", "--filter-files"]
+        args:
+          [
+            --profile,
+            black,
+            --filter-files,
+            --project=nrlf,
+            --project=helpers,
+            --project=layer,
+          ]
 
   - repo: https://github.com/ducminh-phan/reformat-gherkin
     rev: v3.0.1
     hooks:
       - id: reformat-gherkin
 
+  # This uses the root .terraform-version file, make sure to update it you change the actual terraform versions
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.76.0
     hooks:
@@ -49,3 +70,12 @@ repos:
         args:
           - --args=-write=true
           - --args=-recursive
+
+  - repo: local
+    hooks:
+      - id: forbid_json_loads
+        name: Don't use json.loads - use json_loads instead
+        entry: json\.loads
+        language: pygrep
+        types: [python]
+        exclude: layer/nrlf/nrlf/core/validators.py|layer/psycopg2/.*|mi/.*

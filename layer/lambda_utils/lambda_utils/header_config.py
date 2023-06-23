@@ -2,6 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, StrictStr, root_validator
 
+from nrlf.core.validators import json_loads
+
 
 class AbstractHeader(BaseModel):
     headers: dict = Field(exclude=True)
@@ -29,6 +31,9 @@ class AcceptHeader(AbstractHeader):
             raise ValueError("Invalid accept header")
         return {**values, **dict(parts)}
 
+    class Config:
+        json_loads = json_loads
+
 
 class ClientRpDetailsHeader(AbstractHeader):
     developer_app_name: StrictStr = Field(alias="developer.app.name")
@@ -38,6 +43,12 @@ class ClientRpDetailsHeader(AbstractHeader):
 class ConnectionMetadata(AbstractHeader):
     pointer_types: list[str] = Field(alias="nrl.pointer-types")
     ods_code: str = Field(alias="nrl.ods-code")
+    ods_code_extension: str = Field(alias="nrl.ods-code-extension", default=None)
+    nrl_permissions: list[str] = Field(alias="nrl.permissions", default=[])
+
+    @property
+    def ods_code_parts(self):
+        return tuple(filter(None, (self.ods_code, self.ods_code_extension)))
 
 
 class LoggingHeader(AbstractHeader):

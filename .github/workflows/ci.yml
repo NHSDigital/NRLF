@@ -21,8 +21,52 @@ env:
   RUNNING_IN_CI: 1
 
 jobs:
+  set-uniquish-id:
+    # Set a uniquish ID - good enough for our purposes since it must be close enough to unique for
+    # a) Terraform / AWS to allow clean build/destroys without side-effects (e.g. we don't
+    #    want resources marked for deletion to be recreated in another CI run)
+    # b) Not to fall foul of character limits on AWS resource names: the ID must be short
+    name: Set a uniquish ID
+    runs-on: [self-hosted, ci]
+    steps:
+      - name: Set a uniquish ID
+        id: set_uniqish_id
+        run: |
+          TIME_IN_SECONDS_SINCE_MIDNIGHT=$(date -d "1970-01-01 UTC $(date +%T)" +%s)
+          echo "uniqish_id=${GITHUB_SHA::7}-${TIME_IN_SECONDS_SINCE_MIDNIGHT}" >> $GITHUB_OUTPUT
+    outputs:
+      uniqish_id: ${{ steps.set_uniqish_id.outputs.uniqish_id }}
+
+  check-release:
+    name: Check if release branch
+    runs-on: [self-hosted, ci]
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Is release branch
+        run: |
+          if [[ ${{ github.event.pull_request.head.ref }} == release/* || ${{ github.event.pull_request.head.ref }} == hotfix/* ]];
+            then
+              echo "Branch is a release branch, checking names match";
+            else
+              echo "Regular branch, exiting release check"
+              exit 0;
+          fi
+          if [ "${{ env.BRANCH_NAME }}" == "$(cat RELEASE)" ];
+            then
+              echo "Branch is a release and name matches release name, continuing"
+              exit 0;
+            else
+              echo "Branch name does not match release name in RELEASE file, exiting"
+              exit 1;
+          fi
+
   cache-base:
     name: Cache (base)
+    needs: [check-release]
     runs-on: [self-hosted, ci]
 
     steps:
@@ -47,6 +91,7 @@ jobs:
 
   cache:
     name: Cache (head)
+    needs: [check-release]
     runs-on: [self-hosted, ci]
 
     steps:
@@ -119,7 +164,7 @@ jobs:
         run: |
           source .venv/bin/activate
           source nrlf.sh
-          nrlf test unit
+          nrlf test unit --runslow
 
   feature-test-local:
     needs: [cache]
@@ -212,7 +257,8 @@ jobs:
           path: ./**/dist/*.zip
 
   terraform-base:
-    needs: [build-base, unit-test, feature-test-local, lint-check]
+    needs:
+      [build-base, unit-test, feature-test-local, lint-check, set-uniquish-id]
     name: Terraform (base)
     runs-on: [self-hosted, ci]
 
@@ -231,22 +277,30 @@ jobs:
           name: ${{ env.BASE_ARTIFACT_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
+          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
           aws-region: eu-west-2
 
       - name: Terraform apply
         run: |
           source nrlf.sh
           nrlf truststore pull-server ref
-          nrlf terraform ciinit "ci-${GITHUB_SHA_SHORT}"
-          nrlf terraform ciplan "ci-${GITHUB_SHA_SHORT}"
-          nrlf terraform ciapply "ci-${GITHUB_SHA_SHORT}"
+          nrlf terraform ciinit "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciplan "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciapply "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
 
   terraform-apply:
-    needs: [build, unit-test, lint-check, feature-test-local, terraform-base]
+    needs:
+      [
+        build,
+        unit-test,
+        lint-check,
+        feature-test-local,
+        terraform-base,
+        set-uniquish-id,
+      ]
     name: Terraform (head)
     runs-on: [self-hosted, ci]
 
@@ -265,21 +319,21 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
+          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
           aws-region: eu-west-2
 
       - name: Terraform apply
         run: |
           source nrlf.sh
           nrlf truststore pull-server ref
-          nrlf terraform ciinit "ci-${GITHUB_SHA_SHORT}"
-          nrlf terraform ciplan "ci-${GITHUB_SHA_SHORT}"
-          nrlf terraform ciapply "ci-${GITHUB_SHA_SHORT}" || echo "ok"
-          nrlf terraform ciplan "ci-${GITHUB_SHA_SHORT}"
-          nrlf terraform ciapply "ci-${GITHUB_SHA_SHORT}"
+          nrlf terraform ciinit "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciplan "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciapply "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}" || echo "ok"
+          nrlf terraform ciplan "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform ciapply "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact/
@@ -288,7 +342,7 @@ jobs:
           path: ./terraform/infrastructure/output.json
 
   integration-test:
-    needs: [terraform-apply]
+    needs: [terraform-apply, set-uniquish-id]
     name: Integration test (head)
     runs-on: [self-hosted, ci]
 
@@ -314,10 +368,10 @@ jobs:
           name: ${{ env.CACHE_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
+          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
           aws-region: eu-west-2
 
       - name: Run test
@@ -326,10 +380,90 @@ jobs:
           source nrlf.sh
           nrlf truststore pull-client ref
           nrlf test integration
+
+  feature-test-integration:
+    needs: [integration-test, set-uniquish-id]
+    name: Feature integration test (head)
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download artifacts - ${{ env.TF_ARTIFACT_NAME }}
+        uses: ./.github/actions/download-artifact/
+        with:
+          name: ${{ env.TF_ARTIFACT_NAME }}
+          path: ./terraform/infrastructure/
+
+      - name: Download cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+          aws-region: eu-west-2
+
+      - name: Run test
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf truststore pull-client ref
           nrlf test feature integration
 
+  firehose-integration-test:
+    needs: [terraform-apply, set-uniquish-id]
+    name: Firehose integration test (head)
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Git clone - ${{ env.BRANCH_NAME }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_NAME }}
+
+      - name: Runner setup
+        uses: ./.github/actions/runner-setup/
+
+      - name: Download artifacts - ${{ env.TF_ARTIFACT_NAME }}
+        uses: ./.github/actions/download-artifact/
+        with:
+          name: ${{ env.TF_ARTIFACT_NAME }}
+          path: ./terraform/infrastructure/
+
+      - name: Download cache - ${{ env.CACHE_NAME }}
+        uses: ./.github/actions/caching/
+        with:
+          path: .venv
+          name: ${{ env.CACHE_NAME }}
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+          aws-region: eu-west-2
+
+      - name: Run test
+        run: |
+          source .venv/bin/activate
+          source nrlf.sh
+          nrlf truststore pull-client ref
+          nrlf test firehose
+
   terraform-destroy:
-    needs: [integration-test]
+    needs:
+      [feature-test-integration, firehose-integration-test, set-uniquish-id]
     if: ${{ always() }}
     name: Terraform destroy
     runs-on: [self-hosted, ci]
@@ -349,21 +483,21 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
+          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
           aws-region: eu-west-2
 
       - name: Terraform destroy
         run: |
           source nrlf.sh
-          nrlf terraform ciinit "ci-${GITHUB_SHA_SHORT}"
-          nrlf terraform cidestroy "ci-${GITHUB_SHA_SHORT}"
+          nrlf terraform ciinit "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          nrlf terraform cidestroy "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
 
   clear-cache:
     name: Clear Caches
-    needs: [integration-test]
+    needs: [feature-test-integration, firehose-integration-test]
     if: ${{ always() }}
     runs-on: [self-hosted, ci]
     steps:

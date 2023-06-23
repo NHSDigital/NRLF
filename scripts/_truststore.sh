@@ -104,7 +104,7 @@ function _truststore_build_cert() {
         -extensions v3_req \
         -extensions usr_cert
 
-    cat truststore/client/$client.crt truststore/ca/$ca.crt > truststore/server/$client.pen
+    cat truststore/client/$client.crt truststore/ca/$ca.crt > truststore/server/$client.pem
 
     rm /tmp/client.conf
 }

@@ -1,0 +1,9 @@
+variable "name" {}
+variable "prefix" {}
+variable "environment" {}
+variable "region" {}
+variable "cloudwatch_kms_arn" {}
+variable "account_name" {}
+variable "layers" {}
+variable "schema_path" {}
+variable "assume_account" {}

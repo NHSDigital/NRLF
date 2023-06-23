@@ -1,10 +1,10 @@
 {
   "resourceType": "DocumentReference",
-  "id": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890",
+  "id": "Y05868-1234567890",
   "custodian": {
     "identifier": {
-      "system": "https://fhir.nhs.uk/Id/accredited-system-id",
-      "value": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"
+      "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+      "value": "Y05868"
     }
   },
   "subject": {
@@ -16,7 +16,7 @@
   "type": {
     "coding": [
       {
-        "system": "https://snomed.info/ict",
+        "system": "http://snomed.info/sct",
         "code": "736253002"
       }
     ]

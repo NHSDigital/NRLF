@@ -7,16 +7,15 @@ import pytest
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import PipelineData
 from lambda_utils.tests.unit.utils import make_aws_event
-from nrlf.core.dynamodb_types import to_dynamodb_dict
+
+from api.producer.updateDocumentReference.src.v1.handler import (
+    _validate_immutable_fields,
+    compare_immutable_fields,
+    parse_request_body,
+)
 from nrlf.core.errors import ImmutableFieldViolationError
 from nrlf.core.model import DocumentPointer
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
-
-from api.producer.updateDocumentReference.src.v1.handler import (
-    compare_immutable_fields,
-    document_pointer_exists,
-    parse_request_body,
-)
 
 
 @mock.patch(
@@ -29,12 +28,12 @@ def test_parse_request_body_to_core_model(mock__make_timestamp):
         **{
             "created_on": {"S": "2022-10-25T15:47:49.732Z"},
             "document": {"S": fhir_json},
-            "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
+            "id": {"S": "Y05868-1234567890"},
             "nhs_number": {"S": "9278693472"},
-            "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-            "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+            "producer_id": {"S": "Y05868"},
+            "custodian": {"S": "Y05868"},
             "source": {"S": "NRLF"},
-            "type": {"S": "https://snomed.info/ict|736253002"},
+            "type": {"S": "http://snomed.info/sct|736253002"},
             "updated_on": {"S": "2022-10-25T15:47:49.732Z"},
             "version": {"N": "1"},
         }
@@ -62,12 +61,12 @@ def test_compare_immutable_fields_success(mock__make_timestamp):
         **{
             "created_on": {"S": "2022-10-25T15:47:49.732Z"},
             "document": {"S": json.dumps(updated_fhir_json)},
-            "id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL-1234567890"},
+            "id": {"S": "Y05868-1234567890"},
             "nhs_number": {"S": "9278693472"},
-            "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-            "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+            "producer_id": {"S": "Y05868"},
+            "custodian": {"S": "Y05868"},
             "source": {"S": "NRLF"},
-            "type": {"S": "https://snomed.info/ict|736253002"},
+            "type": {"S": "http://snomed.info/sct|736253002"},
             "updated_on": {"S": "2022-10-25T15:47:49.732Z"},
             "version": {"N": "1"},
         }
@@ -90,9 +89,7 @@ def test_compare_immutable_fields_failure(mock__make_timestamp):
     fhir_json = read_test_data("nrlf")
 
     updated_fhir_json = deepcopy(fhir_json)
-    updated_fhir_json["custodian"]["identifier"][
-        "value"
-    ] = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL / MODIFIED"
+    updated_fhir_json["custodian"]["identifier"]["value"] = "Y05868 / MODIFIED"
 
     with pytest.raises(ImmutableFieldViolationError):
         event = APIGatewayProxyEventModel(
@@ -107,3 +104,17 @@ def test_compare_immutable_fields_failure(mock__make_timestamp):
         pipeline_data = compare_immutable_fields(
             PipelineData(output), {}, event, {}, getLogger(__name__)
         )
+
+
+_IMMUTABLE_FIELDS = {"foo", "bar"}
+
+
+@pytest.mark.parametrize("field", _IMMUTABLE_FIELDS)
+def test__validate_immutable_fields(field):
+    a = {_field: f"a{_field}" for _field in _IMMUTABLE_FIELDS}
+    b = {field: f"b{field}"}
+    with pytest.raises(ImmutableFieldViolationError):
+        _validate_immutable_fields(immutable_fields=_IMMUTABLE_FIELDS, a=a, b=b)
+
+    with pytest.raises(ImmutableFieldViolationError):
+        _validate_immutable_fields(immutable_fields=_IMMUTABLE_FIELDS, a=b, b=a)

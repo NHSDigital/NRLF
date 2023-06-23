@@ -22,3 +22,8 @@ variable "producer_api_path" {
   type    = string
   default = "producer"
 }
+
+variable "deletion_protection" {
+  type    = bool
+  default = false
+}

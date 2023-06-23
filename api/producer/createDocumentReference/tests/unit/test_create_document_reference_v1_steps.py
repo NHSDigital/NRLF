@@ -5,11 +5,11 @@ from unittest import mock
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import PipelineData
 from lambda_utils.tests.unit.utils import make_aws_event
+
+from api.producer.createDocumentReference.src.v1.handler import parse_request_body
 from nrlf.core.constants import ID_SEPARATOR
 from nrlf.core.model import DocumentPointer
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
-
-from api.producer.createDocumentReference.src.v1.handler import parse_request_body
 
 
 @mock.patch(
@@ -22,14 +22,12 @@ def test_parse_request_body_to_core_model(mock__make_timestamp):
         **{
             "created_on": {"S": "2022-10-25T15:47:49.732Z"},
             "document": {"S": fhir_json},
-            "id": {
-                "S": f"ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL{ID_SEPARATOR}1234567890"
-            },
+            "id": {"S": f"Y05868{ID_SEPARATOR}1234567890"},
             "nhs_number": {"S": "9278693472"},
-            "producer_id": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
-            "custodian": {"S": "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL"},
+            "producer_id": {"S": "Y05868"},
+            "custodian": {"S": "Y05868"},
             "source": {"S": "NRLF"},
-            "type": {"S": "https://snomed.info/ict|736253002"},
+            "type": {"S": "http://snomed.info/sct|736253002"},
             "updated_on": {"NULL": True},
             "version": {"N": "1"},
         }

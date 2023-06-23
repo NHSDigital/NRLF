@@ -9,6 +9,7 @@ from lambda_utils.tests.unit.utils import make_aws_event
 
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
+from nrlf.core.validators import json_loads
 
 
 @pytest.fixture(scope="session")
@@ -60,7 +61,7 @@ def test_status_lambda(actor, client):
     )
     function_name = get_lambda_name(actor=actor)
     aws_response = client.invoke(FunctionName=function_name, Payload=event)
-    lambda_response = json.loads(aws_response["Payload"].read())
+    lambda_response = json_loads(aws_response["Payload"].read())
     assert lambda_response == OK, lambda_response
 
 

@@ -1,9 +1,10 @@
-import json
 from pathlib import Path
 from typing import List
 
 import boto3
 from atlassian import Confluence
+
+from nrlf.core.validators import json_loads
 
 SECRET_NAME = "confluence/credentials"  # pragma: allowlist secret
 REPORT_DIR = "report"
@@ -47,7 +48,7 @@ def push(env_name: str = "dev") -> List[str]:
 def _authenticate_to_confluence():
     session = boto3.session.Session()
     client = session.client("secretsmanager")
-    auth = json.loads(client.get_secret_value(SecretId=SECRET_NAME).get("SecretString"))
+    auth = json_loads(client.get_secret_value(SecretId=SECRET_NAME).get("SecretString"))
     return Confluence(
         url=ENDPOINT, username=auth["username"], password=auth["password"]
     )

@@ -6,6 +6,7 @@ from types import FunctionType
 
 import requests
 from behave.model import Table
+from behave.runner import Context as BehaveContext
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.tests.unit.utils import make_aws_event
 from pydantic import BaseModel
@@ -30,6 +31,7 @@ from feature_tests.common.utils import (
     render_regular_properties,
 )
 from nrlf.core.types import DynamoDbClient
+from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.model import OperationOutcome
 
 
@@ -41,7 +43,7 @@ class Template:
         rendered = render_regular_properties(raw=self.raw, table=table)
         if fhir_type is FhirType.DocumentReference:
             return render_document_reference_properties(
-                document_reference_json=json.loads(rendered), table=table
+                document_reference_json=json_loads(rendered), table=table
             )
         return rendered
 
@@ -52,7 +54,7 @@ class Response:
     status_code: str = STATUS_CODE_200
 
     def success(self):
-        return self.status_code == STATUS_CODE_200
+        return 300 > int(self.status_code) >= int(STATUS_CODE_200)
 
     @property
     def operation_outcome_msg(self) -> str:
@@ -62,7 +64,7 @@ class Response:
 
     @property
     def dict(self) -> dict:
-        return json.loads(self.body)
+        return json_loads(self.body)
 
 
 @dataclass
@@ -176,9 +178,15 @@ class ActorContext:
 class TestConfig:
     mode: TestMode
     request: BaseRequest = field(default_factory=BaseRequest)
+    requestParams: dict[str] = None
     response: Response = None
     repositories: dict[BaseModel, FeatureTestRepository] = field(default_factory=dict)
     templates: dict[str, Template] = field(default_factory=dict)
     actor_context: ActorContext = None
     dynamodb_client: DynamoDbClient = None
     environment_prefix: str = None
+    rendered_templates: dict = field(default_factory=dict)
+
+
+class Context(BehaveContext):
+    test_config: TestConfig

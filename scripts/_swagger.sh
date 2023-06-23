@@ -9,7 +9,7 @@ function _swagger_help() {
     echo "  generate <options>           - generate all swagger and models or producer/consumer if specified"
     echo "  generate-swagger <options>   - generate all swagger or producer/consumer if specified"
     echo "  generate-model <options>     - generate all models or producer/consumer if specified"
-    echo "  merge <options>              - generates the nrl-<type>-api.yml file"
+    echo "  merge <options>              - generates the record-locator/<type>.yml file"
     echo
 }
 
@@ -47,6 +47,7 @@ function _generate_producer_model() {
     fi
 
     datamodel-codegen --input ./api/producer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/producer/fhir/r4/model.py --use-annotated --enum-field-as-literal all --use-double-quotes
+    datamodel-codegen --input ./api/producer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/producer/fhir/r4/strict_model.py --strict-types {str,bytes,int,float,bool}  --use-annotated --enum-field-as-literal all --use-double-quotes
 }
 
 function _generate_consumer_model() {
@@ -137,26 +138,40 @@ function _swagger() {
         local type=$2
         if [[ " ${allowed_types[*]} " =~ " $2 " ]]; then
             cat ./swagger/${type}.yaml |
+                # Remove commented lines
+                grep -v "^\s*#" |
                  # Replace snake case terms, which are invalid in ApiGateway
                 yq 'with(.components.schemas; with_entries(.key |= sub("_","")))' |
                 yq '(.. | select(has("$ref")).$ref) |= sub("_","")' |
                 # Remove the parts we don't want
+                yq 'del(.paths.*.post.requestBody.content."application/x-www-form-urlencoded")' |
                 yq 'del(.x-ibm-configuration)' |
-                yq 'del(.components.schemas.*.discriminator)' \
+                yq 'del(.components.schemas.*.discriminator)' |
+                yq '(.. | select(style == "single")) style |= "double"' \
                     > ./swagger/${type}.tmp.yaml
+
             # Merge in the narrative, and save for internal use (i.e. including status endpoint)
             yq eval-all '. as $item ireduce ({}; . * $item)' \
                 ./swagger/${type}.tmp.yaml \
                 ./swagger/${type}-static/*.yaml \
                 > ./api/${type}/swagger.yaml
 
-            # Remove fields not required for public docs (i.e. for the APIM/APIGEE repo)
+            # Remove fields not required for public docs
+            # * AWS specific stuff, including security & lambdas
+            # * security tags
+            # * API catalogue dislikes tags
+            # * /_status not public
             cat ./api/${type}/swagger.yaml |
+                yq 'with(.paths.*.*.responses.*.content; with_entries(.key |= . + ";version=1" ))' |
+                yq 'with(.components.requestBodies.*.content; with_entries(.key |= . + ";version=1" ))' |
+                yq 'with(.components.responses.*.content; with_entries(.key |= . + ";version=1" ))' |
                 yq 'del(.paths.*.*.x-amazon-apigateway-integration)' |
                 yq 'del(.paths.*.*.security)' |
+                yq 'del(.tags)' |
+                yq 'del(.paths.*.*.tags)' |
                 yq 'del(.paths./_status)' |
                 yq 'del(.components.securitySchemes."${authoriser_name}")' \
-                    > ./api/${type}/nrl-${type}-api.yaml
+                    > ./api/${type}/record-locator/${type}.yaml
 
             rm ./swagger/${type}.tmp.yaml
         else

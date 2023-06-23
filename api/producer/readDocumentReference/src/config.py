@@ -1,7 +1,8 @@
 import boto3
+from pydantic import BaseModel
+
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
-from pydantic import BaseModel
 
 
 class Config(BaseModel):
@@ -19,6 +20,8 @@ class Config(BaseModel):
     AWS_REGION: str
     PREFIX: str
     ENVIRONMENT: str
+    SPLUNK_INDEX: str
+    SOURCE: str
 
 
 def build_persistent_dependencies(config: Config) -> dict[str, any]:
@@ -38,4 +41,6 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
             environment_prefix=config.PREFIX,
         ),
         "environment": config.ENVIRONMENT,
+        "splunk_index": config.SPLUNK_INDEX,
+        "source": config.SOURCE,
     }

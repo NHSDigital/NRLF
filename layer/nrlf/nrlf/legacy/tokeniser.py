@@ -3,6 +3,7 @@ import re
 from math import prod
 
 import ffx
+
 from nrlf.core.errors import InvalidLogicalIdError
 
 _LOGICAL_ID_BLOCK_SIZE = 32

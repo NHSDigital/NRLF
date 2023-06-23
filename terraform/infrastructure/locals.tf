@@ -1,9 +1,10 @@
 locals {
-  region       = "eu-west-2"
-  project      = "nhsd-nrlf"
-  account_name = var.account_name
-  environment  = terraform.workspace
-  prefix       = "${local.project}--${local.environment}"
+  region              = "eu-west-2"
+  project             = "nhsd-nrlf"
+  account_name        = var.account_name
+  environment         = terraform.workspace
+  deletion_protection = var.deletion_protection
+  prefix              = "${local.project}--${local.environment}"
   kms = {
     deletion_window_in_days = 7
   }
@@ -21,4 +22,11 @@ locals {
       path = var.producer_api_path
     }
   }
+  dynamodb_timeout_seconds = "3"
+  # Logic / vars for splunk environment
+  persistent_environments = ["dev", "dev-sandbox", "ref", "ref-sandbox", "int", "int-sandbox", "prod"]
+  #environment_no_hyphen   = replace(local.environment, "-", "")
+  environment_no_hyphen = startswith(local.environment, "int") ? local.environment : replace(local.environment, "-", "")
+  splunk_environment    = contains(local.persistent_environments, local.environment) ? local.environment_no_hyphen : "dev" # dev is the default splunk env
+  splunk_index          = "aws_recordlocator_${local.splunk_environment}"
 }

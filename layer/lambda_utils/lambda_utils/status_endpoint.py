@@ -1,26 +1,32 @@
 import os
 from contextlib import contextmanager
+from enum import Enum
 from http import HTTPStatus
 from logging import Logger
 from types import ModuleType
 from typing import Any, Generator
 
-import boto3
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.header_config import LoggingHeader
 from lambda_utils.logging import log_action, prepare_default_event_for_logging
 from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _function_handler, _setup_logger
-from pydantic import BaseModel, ValidationError
-from nrlf.core.constants import NHS_NUMBER_INDEX
+from pydantic import BaseModel
+
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
+
+
+class LogReference(Enum):
+    STATUS001 = "Getting environmental variables config"
+    STATUS002 = "Getting boto3 client"
+    STATUS003 = "Hitting the database"
 
 
 class Config(BaseModel):
     AWS_REGION: str
     PREFIX: str
+    DYNAMODB_TIMEOUT: float
 
 
 @contextmanager
@@ -33,7 +39,7 @@ def get_mutable_pipeline() -> Generator[ModuleType, None, None]:
         pipeline.__dict__[k] = v
 
 
-@log_action(narrative="Getting environmental variables config")
+@log_action(log_reference=LogReference.STATUS001, errors_only=True)
 def _get_config(
     data: PipelineData,
     context: LambdaContext,
@@ -47,19 +53,7 @@ def _get_config(
     return PipelineData(config=config)
 
 
-@log_action(narrative="Getting boto3 client", log_result=False)
-def _get_boto_client(
-    data: PipelineData,
-    context: LambdaContext,
-    event: APIGatewayProxyEventModel,
-    dependencies: FrozenDict[str, Any],
-    logger: Logger,
-) -> PipelineData:
-    client = boto3.client("dynamodb")
-    return PipelineData(client=client, **data)
-
-
-@log_action(narrative="Hitting the database")
+@log_action(log_reference=LogReference.STATUS003, errors_only=True)
 def _hit_the_database(
     data: PipelineData,
     context: LambdaContext,
@@ -69,7 +63,7 @@ def _hit_the_database(
 ) -> PipelineData:
     repository = Repository(
         item_type=DocumentPointer,
-        client=data["client"],
+        client=dependencies["dynamodb_client"],
         environment_prefix=data["config"].PREFIX,
     )
     result = repository.query(pk="D#NULL")
@@ -78,20 +72,14 @@ def _hit_the_database(
 
 def _set_missing_logging_headers(event: dict) -> dict:
     headers = event.get("headers", {})
-    try:
-        LoggingHeader.parse_obj(headers)
-    except ValidationError:
-        default_headers = prepare_default_event_for_logging().headers
-        default_headers.update(headers)
-        return default_headers
-    else:
-        return headers
+    default_headers = prepare_default_event_for_logging().headers
+    default_headers.update(headers)
+    return default_headers
 
 
 def _get_steps(*args, **kwargs):
     return [
         _get_config,
-        _get_boto_client,
         _hit_the_database,
     ]
 
@@ -100,6 +88,7 @@ def execute_steps(
     index_path: str,
     event: dict,
     context: LambdaContext,
+    http_status: HTTPStatus = HTTPStatus.OK,
     initial_pipeline_data={},
     **dependencies,
 ) -> tuple[HTTPStatus, dict]:
@@ -109,9 +98,12 @@ def execute_steps(
     transaction_id = generate_transaction_id()
     event["headers"] = _set_missing_logging_headers(event=event)
     dependencies["environment"] = os.environ.get("ENVIRONMENT")
+    dependencies["splunk_index"] = os.environ.get("SPLUNK_INDEX")
+    dependencies["source"] = os.environ.get("SOURCE")
 
     status_code, response = _function_handler(
         _setup_logger,
+        http_status,
         transaction_id=transaction_id,
         args=(index_path, transaction_id, event),
         kwargs=dependencies,
@@ -123,6 +115,7 @@ def execute_steps(
     steps = _get_steps()
     status_code, response = _function_handler(
         _execute_steps,
+        http_status,
         transaction_id=transaction_id,
         args=(steps, event, context),
         kwargs={

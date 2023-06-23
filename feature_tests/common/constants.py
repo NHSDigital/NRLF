@@ -1,13 +1,12 @@
 from enum import Enum, auto
 
-from nrlf.core.constants import NHS_NUMBER_INDEX
 from nrlf.core.model import DocumentPointer
 
 DEFAULT_VERSION = 1.0
 STATUS_CODE_200 = 200
 DUMMY_METHOD_ARN = "dummy_method_arn"
 DEFAULT_AUTHORIZATION = "letmein"
-SNOMED_SYSTEM = "https://snomed.info/ict"
+SNOMED_SYSTEM = "http://snomed.info/sct"
 DEFAULT_METHOD_ARN = "<resource-arn>"
 
 DOCUMENT_POINTER_TABLE_DEFINITION = {
@@ -68,6 +67,7 @@ class TestMode(Enum):
 
 class Action(Enum):
     read = auto()
+    count = auto()
     search = auto()
     searchPost = auto()
     create = auto()
@@ -97,6 +97,7 @@ ACTION_SLUG_LOOKUP = {
     Action.read: "DocumentReference",
     Action.search: "DocumentReference",
     Action.searchPost: "DocumentReference/_search",
+    Action.count: "DocumentReference/_count",
     Action.create: "DocumentReference",
     Action.delete: "DocumentReference",
     Action.update: "DocumentReference",
@@ -118,12 +119,23 @@ ALLOWED_TERMS = [
     "a_or_an",
     "fhir_type",
     "with_without_any",
+    "permission",
+    "package",
+    "nrl_template_name",
+    "nhs_number",
+    "error_type",
+    "asid",
 ]
 
 ALLOWED_CONSUMER_ORG_IDS = ["RX898"]
 ALLOWED_CONSUMERS = ["Yorkshire Ambulance Service"]
-ALLOWED_PRODUCER_ORG_IDS = ["8FW23"]
-ALLOWED_PRODUCERS = ["Aaron Court Mental Health NH"]
+ALLOWED_PRODUCER_ORG_IDS = ["8FW23", "V4T0L.YGMMC", "V4T0L.CBH", "DS123"]
+ALLOWED_PRODUCERS = [
+    "Aaron Court Mental Health NH",
+    "BaRS (EMIS)",
+    "BaRS (South Derbyshire Mental Health Unit)",
+    "Data Sync",
+]
 ALLOWED_APPS = ["DataShare"]
 ALLOWED_APP_IDS = [
     "z00z-y11y-x22x",

@@ -2,20 +2,36 @@ import json
 from datetime import datetime as dt
 
 from nhs_number import is_valid as is_valid_nhs_number
-from nrlf.core.constants import ID_SEPARATOR, VALID_SOURCES
-from nrlf.core.errors import DocumentReferenceValidationError, RequestValidationError
-from nrlf.producer.fhir.r4.model import CodeableConcept, DocumentReference
-from nrlf.producer.fhir.r4.strict_model import (
-    DocumentReference as StrictDocumentReference,
-)
 from pydantic import ValidationError
+
+from nrlf.core.constants import (
+    CUSTODIAN_SEPARATOR,
+    ID_SEPARATOR,
+    NHS_NUMBER_SYSTEM_URL,
+    VALID_SOURCES,
+)
+from nrlf.core.errors import (
+    AuthenticationError,
+    DocumentReferenceValidationError,
+    DuplicateKeyError,
+    FhirValidationError,
+    InconsistentProducerId,
+    InvalidTupleError,
+    MalformedProducerId,
+)
+from nrlf.producer.fhir.r4.model import (
+    CodeableConcept,
+    DocumentReference,
+    Identifier,
+    RequestQueryType,
+)
 
 
 def _get_tuple_components(tuple: str, separator: str) -> tuple[str, str]:
     try:
         a, b = tuple.split(separator, 1)
     except ValueError:
-        raise ValueError(
+        raise InvalidTupleError(
             f"Input is not composite of the form a{separator}b: {tuple}"
         ) from None
     return a, b
@@ -27,8 +43,7 @@ def generate_producer_id(id: str, producer_id: str) -> str:
             "producer_id should not be passed to DocumentPointer; "
             "it will be extracted from id."
         )
-    producer_id, _ = _get_tuple_components(tuple=id, separator=ID_SEPARATOR)
-    return producer_id
+    return _get_tuple_components(tuple=id, separator=ID_SEPARATOR)
 
 
 def create_document_type_tuple(document_type: CodeableConcept):
@@ -72,16 +87,69 @@ def requesting_application_is_not_authorised(
 
 def validate_document_reference_string(fhir_json: str):
     try:
-        DocumentReference(**json.loads(fhir_json))
-    except ValidationError:
-        raise DocumentReferenceValidationError("Item could not be found")
-    except ValueError:
-        raise DocumentReferenceValidationError("Item could not be found")
+        DocumentReference(**json_loads(fhir_json))
+    except (ValidationError, ValueError):
+        raise DocumentReferenceValidationError(
+            "There was a problem retrieving the document pointer"
+        ) from None
 
 
-def validate_fhir_model_for_required_fields(model: StrictDocumentReference):
+def validate_type_system(type: RequestQueryType, pointer_types: list[str]):
+    if type is not None:
+        type_system = type.__root__.split("|", 1)[0]
 
-    if not model.custodian:
-        raise RequestValidationError(
-            "DocumentReference validation failure - Invalid custodian"
+        pointer_type_systems = map(
+            lambda pointer_type: pointer_type.split("|", 1)[0], pointer_types
         )
+
+        for pointer_type_system in pointer_type_systems:
+            if type_system == pointer_type_system:
+                return
+
+        raise AuthenticationError(
+            f"The provided system type value - {type_system} - does not match the allowed types"
+        )
+
+
+def validate_subject_identifier_system(subject_identifier: Identifier):
+    if subject_identifier.system != NHS_NUMBER_SYSTEM_URL:
+        raise FhirValidationError("Input FHIR JSON has an invalid subject:identifier")
+
+
+def dict_raise_on_duplicates(list_of_pairs):
+    checked_pairs = {}
+    for k, v in list_of_pairs:
+        if k in checked_pairs:
+            raise DuplicateKeyError("Duplicate key: %r" % (k,))
+        checked_pairs[k] = v
+    return checked_pairs
+
+
+def json_loads(json_string):
+    return json.loads(json_string, object_pairs_hook=dict_raise_on_duplicates)
+
+
+def validate_producer_id(
+    producer_id: str, custodian_id: str, custodian_suffix: str = None
+):
+    if custodian_suffix:
+        if producer_id.split(CUSTODIAN_SEPARATOR) != (custodian_id, custodian_suffix):
+            raise MalformedProducerId(
+                f"Producer ID {producer_id} (extracted from '{id}') is not correctly formed. "
+                "It is expected to be composed in the form '<custodian_id>.<custodian_suffix>'"
+            )
+    else:
+        if producer_id != custodian_id:
+            raise InconsistentProducerId(
+                f"Producer ID {producer_id} (extracted from '{id}') "
+                "does not match the Custodian ID."
+            )
+
+
+def split_custodian_id(custodian_id: str) -> dict:
+    custodian_id_suffix = None
+    try:
+        custodian_id, custodian_id_suffix = custodian_id.split(CUSTODIAN_SEPARATOR)
+    except ValueError:
+        pass
+    return custodian_id, custodian_id_suffix

@@ -5,8 +5,6 @@ from nrlf.core.errors import ItemNotFound
 from nrlf.core.model import DocumentPointer, key
 from nrlf.core.query import (
     create_filter_query,
-    create_read_and_filter_query,
-    create_search_and_filter_query,
     create_updated_expression_query,
     to_dynamodb_dict,
 )
@@ -14,6 +12,7 @@ from nrlf.core.repository import Repository
 from nrlf.core.tests.data_factory import (
     SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY,
     SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN,
+    generate_test_custodian,
     generate_test_document_reference,
     generate_test_document_type,
     generate_test_nhs_number,
@@ -72,7 +71,7 @@ def test_filter_query_in_db():
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        item = repository.read_item(core_model.pk)
+        item = repository.read_item(core_model.pk.__root__)
         assert item == core_model
 
 
@@ -95,9 +94,9 @@ def test_create_search_and_filter_query_in_db():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model)
         result = repository.query_gsi_1(
-            model.pk_1, type="https://snomed.info/ict|736253002"
+            model.pk_1.__root__, type="http://snomed.info/sct|736253002"
         )
-        assert result == [model]
+        assert result.document_pointers == [model]
 
 
 def test_query_can_filter_results():
@@ -108,6 +107,7 @@ def test_query_can_filter_results():
         provider_doc_id="OK",
         type=generate_test_document_type(SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN),
         subject=generate_test_subject(nhs_number),
+        custodian=generate_test_custodian(provider_id),
     )
     doc_2 = generate_test_document_reference(
         provider_id=provider_id,
@@ -116,6 +116,7 @@ def test_query_can_filter_results():
             SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY
         ),
         subject=generate_test_subject(nhs_number),
+        custodian=generate_test_custodian(provider_id),
     )
     model_1 = create_document_pointer_from_fhir_json(doc_1, 99)
     model_2 = create_document_pointer_from_fhir_json(doc_2, 99)
@@ -126,16 +127,16 @@ def test_query_can_filter_results():
         repository.create(item=model_2)
         results_1 = repository.query_gsi_1(
             pk=key(DbPrefix.Patient, nhs_number),
-            type=[f"https://snomed.info/ict|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
+            type=[f"http://snomed.info/sct|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
         )
         results_2 = repository.query_gsi_2(
             pk=key(DbPrefix.Organization, provider_id),
-            type=[f"https://snomed.info/ict|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
+            type=[f"http://snomed.info/sct|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
         )
-        assert len(results_1) == 1
-        assert results_1[0] == model_1
-        assert len(results_2) == 1
-        assert results_2[0] == model_1
+        assert len(results_1.document_pointers) == 1
+        assert results_1.document_pointers[0] == model_1
+        assert len(results_2.document_pointers) == 1
+        assert results_2.document_pointers[0] == model_1
 
 
 def test_filter_can_find_result():
@@ -149,7 +150,7 @@ def test_filter_can_find_result():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model)
         item = repository.read_item(
-            pk=model.pk, type=["https://snomed.info/ict|736253002"]
+            pk=model.pk.__root__, type=["http://snomed.info/sct|736253002"]
         )
         assert item == model
 
@@ -165,17 +166,19 @@ def test_filter_cannot_find_result():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model)
         with pytest.raises(ItemNotFound):
-            repository.read_item(pk=model.pk, type=["https://snomed.info/ict|WRONG"])
+            repository.read_item(
+                pk=model.pk.__root__, type=["http://snomed.info/sct|WRONG"]
+            )
 
 
 def test_create_search_and_filter_query_in_db_returns_empty_bundle():
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
-        items = repository.query_gsi_1(
+        item = repository.query_gsi_1(
             pk=key(DbPrefix.Patient, "EMPTY"),
-            type=["https://snomed.info/ict|736253002"],
+            type=["http://snomed.info/sct|736253002"],
         )
-        assert len(items) == 0
+        assert len(item.document_pointers) == 0
 
 
 @pytest.mark.parametrize(

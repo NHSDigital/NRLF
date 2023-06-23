@@ -51,14 +51,17 @@ def render_document_reference_properties(
     document_reference_json: dict, table: Table
 ) -> str:
     (_relatesTo,) = document_reference_json.pop(RELATES_TO, [None])
+    relatesTo_collection = []
     if _relatesTo:
-        document_reference_json[RELATES_TO] = []
         for row in table:
             if row["property"] != TARGET:
                 continue
             relatesTo = deepcopy(_relatesTo)
-            relatesTo["target"]["identifier"]["value"] = row["value"]
-            document_reference_json[RELATES_TO].append(relatesTo)
+            if relatesTo["target"].get("identifier"):
+                relatesTo["target"]["identifier"]["value"] = row["value"]
+            relatesTo_collection.append(relatesTo)
+    if relatesTo_collection:  # Empty fields aren't valid FHIR
+        document_reference_json[RELATES_TO] = relatesTo_collection
     return json.dumps(document_reference_json)
 
 

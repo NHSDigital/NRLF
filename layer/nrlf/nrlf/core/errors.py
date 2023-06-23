@@ -1,8 +1,9 @@
 from typing import Union
 
+from pydantic import ValidationError
+
 from nrlf.core.nhsd_codings import SpineCoding
 from nrlf.producer.fhir.r4.model import RequestParams
-from pydantic import ValidationError
 
 
 class ItemNotFound(Exception):
@@ -10,10 +11,6 @@ class ItemNotFound(Exception):
 
 
 class DynamoDbError(Exception):
-    pass
-
-
-class AuthenticationError(Exception):
     pass
 
 
@@ -49,7 +46,55 @@ class DocumentReferenceValidationError(Exception):
     pass
 
 
+class ProducerValidationError(Exception):
+    pass
+
+
+class InconsistentUpdateId(Exception):
+    pass
+
+
 class RequestValidationError(Exception):
+    pass
+
+
+class InconsistentUpdateId(Exception):
+    pass
+
+
+class SupersedeValidationError(Exception):
+    pass
+
+
+class InvalidTupleError(Exception):
+    pass
+
+
+class NextPageTokenValidationError(Exception):
+    pass
+
+
+class AuthenticationError(Exception):
+    pass
+
+
+class ProducerCreateValidationError(Exception):
+    pass
+
+
+class MissingRequiredFieldForCreate(Exception):
+    pass
+
+
+class DuplicateKeyError(Exception):
+    pass
+
+
+class MalformedProducerId(ValueError):
+    pass
+
+
+class InconsistentProducerId(ValueError):
     pass
 
 
@@ -59,13 +104,22 @@ NRLF_TO_SPINE_4XX_ERROR = {
     FhirValidationError: SpineCoding.VALIDATION_ERROR,
     ImmutableFieldViolationError: SpineCoding.VALIDATION_ERROR,
     ItemNotFound: SpineCoding.RESOURCE_NOT_FOUND,
-    TooManyItemsError: SpineCoding.NOT_ACCEPTABLE,
+    TooManyItemsError: SpineCoding.VALIDATION_ERROR,
     ValidationError: SpineCoding.VALIDATION_ERROR,
     UnknownParameterError: SpineCoding.VALIDATION_ERROR,
-    DuplicateError: SpineCoding.INVALID_RESOURCE_ID,
+    DuplicateError: SpineCoding.INVALID_VALUE,
     SupersedeError: SpineCoding.INVALID_RESOURCE_ID,
-    DocumentReferenceValidationError: SpineCoding.RESOURCE_NOT_FOUND,
+    DocumentReferenceValidationError: SpineCoding.SERVICE_ERROR,
     RequestValidationError: SpineCoding.VALIDATION_ERROR,
+    InconsistentUpdateId: SpineCoding.VALIDATION_ERROR,
+    ProducerValidationError: SpineCoding.VALIDATION_ERROR,
+    MissingRequiredFieldForCreate: SpineCoding.VALIDATION_ERROR,
+    InconsistentUpdateId: SpineCoding.VALIDATION_ERROR,
+    SupersedeValidationError: SpineCoding.VALIDATION_ERROR,
+    InvalidTupleError: SpineCoding.VALIDATION_ERROR,
+    NextPageTokenValidationError: SpineCoding.VALIDATION_ERROR,
+    ProducerCreateValidationError: SpineCoding.VALIDATION_ERROR,
+    DuplicateKeyError: SpineCoding.VALIDATION_ERROR,
 }
 
 
@@ -82,5 +136,5 @@ def assert_no_extra_params(
     unknown_params = set(provided_params) - set(expected_params)
     if unknown_params:
         raise UnknownParameterError(
-            f"Unexpected query parameters: {', '.join(unknown_params)}"
+            f"Unexpected parameters: {', '.join(unknown_params)}"
         )

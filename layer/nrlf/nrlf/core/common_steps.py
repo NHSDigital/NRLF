@@ -1,17 +1,57 @@
 import urllib.parse
+from enum import Enum
 from logging import Logger
 from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.constants import CONNECTION_METADATA
-from lambda_utils.header_config import AbstractHeader, ConnectionMetadata
-from lambda_utils.logging import log_action
+from lambda_utils.header_config import (
+    AbstractHeader,
+    ClientRpDetailsHeader,
+    ConnectionMetadata,
+)
+from lambda_utils.logging import log_action, make_scoped_log_action
 
-from nrlf.core.model import DocumentPointer
+from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
+from nrlf.core.model import convert_document_pointer_id_to_pk
+from nrlf.core.validators import generate_producer_id, json_loads
 
 
-@log_action(narrative="Parsing headers")
+class LogReference(Enum):
+    COMMON001 = "Parsing headers"
+    COMMON002 = "Parse document pointer id"
+    COMMON003 = "Checking for extra permissions"
+
+
+def read_subject_from_path(
+    data: PipelineData,
+    context: LambdaContext,
+    event: APIGatewayProxyEventModel,
+    dependencies: FrozenDict[str, Any],
+    logger: Logger,
+) -> PipelineData:
+    root = (event.pathParameters or {}).get("id", "unknown")
+    subject = root
+    return PipelineData(**data, root=root, subject=subject)
+
+
+def read_subject_from_body(
+    data: PipelineData,
+    context: LambdaContext,
+    event: APIGatewayProxyEventModel,
+    dependencies: FrozenDict[str, Any],
+    logger: Logger,
+) -> PipelineData:
+    try:
+        raw = json_loads(event.body)
+        root = raw.get("id", "unknown")
+    except Exception as e:
+        root = "unknown"
+    subject = root
+    return PipelineData(**data, root=root, subject=subject)
+
+
+@log_action(log_reference=LogReference.COMMON001)
 def parse_headers(
     data: PipelineData,
     context: LambdaContext,
@@ -21,15 +61,20 @@ def parse_headers(
 ) -> PipelineData:
     _headers = AbstractHeader(**event.headers).headers
     _raw_connection_metadata = _headers.get(CONNECTION_METADATA, "{}")
+    _raw_client_rp_details = _headers.get(CLIENT_RP_DETAILS, "{}")
     connection_metadata = ConnectionMetadata.parse_raw(_raw_connection_metadata)
+    client_rp_details = ClientRpDetailsHeader.parse_raw(_raw_client_rp_details)
     return PipelineData(
         **data,
-        organisation_code=connection_metadata.ods_code,
-        pointer_types=connection_metadata.pointer_types
+        ods_code_parts=connection_metadata.ods_code_parts,
+        pointer_types=connection_metadata.pointer_types,
+        nrl_permissions=connection_metadata.nrl_permissions,
+        developer_app_id=client_rp_details.developer_app_id,
+        developer_app_name=client_rp_details.developer_app_name,
     )
 
 
-@log_action(narrative="Parse document pointer id")
+@log_action(log_reference=LogReference.COMMON002)
 def parse_path_id(
     data: PipelineData,
     context: LambdaContext,
@@ -42,9 +87,24 @@ def parse_path_id(
     representations.
     """
     id = urllib.parse.unquote(event.pathParameters["id"])
-    (producer_id, document_id) = DocumentPointer.split_id(id)
-    pk = DocumentPointer.convert_id_to_pk(id)
+    pk = convert_document_pointer_id_to_pk(id)
+    producer_id, _ = generate_producer_id(id=id, producer_id=None)
+    return PipelineData(**data, producer_id=producer_id, id=id, pk=pk)
 
-    return PipelineData(
-        **data, id=id, producer_id=producer_id, document_id=document_id, pk=pk
+
+def make_common_log_action():
+    """
+    Defines the commonly used request scoped values used in logs.
+        * caller - Comes from the developer_app_id value in the nhsd-client-rp-details http header
+        * root - Comes from the request path in most instances, or the request body when creating
+        * subject - Normally a copy of the root
+    """
+    return make_scoped_log_action(
+        lambda *args, **kwargs: (
+            {
+                "caller": kwargs.get("data", {}).get("developer_app_id", "unknown"),
+                "root": kwargs.get("data", {}).get("root", "unknown"),
+                "subject": kwargs.get("data", {}).get("subject", "unknown"),
+            }
+        )
     )

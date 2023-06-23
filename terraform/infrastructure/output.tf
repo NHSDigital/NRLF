@@ -47,3 +47,13 @@ output "status_lambda_function_names" {
 output "certificate_domain_name" {
   value = aws_acm_certificate.certificate.domain_name
 }
+
+output "firehose" {
+  value = {
+    processor = module.firehose__processor
+  }
+}
+
+output "mi" {
+  value = module.mi
+}

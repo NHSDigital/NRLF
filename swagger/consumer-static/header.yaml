@@ -1,3 +1,4 @@
+---
 openapi: 3.0.0
 info:
   title: NRLF Consumer API
@@ -5,29 +6,36 @@ info:
   license:
     name: MIT
 servers:
-  - url: "https://sandbox.api.service.nhs.uk/nrl-consumer-api/FHIR/R4"
+  - url: https://sandbox.api.service.nhs.uk/record-locator/consumer/FHIR/R4
     description: Sandbox environment.
-  - url: "https://int.api.service.nhs.uk/nrl-consumer-api/FHIR/R4"
+  - url: https://int.api.service.nhs.uk/record-locator/consumer/FHIR/R4
     description: Integration test environment.
-  - url: "https://api.service.nhs.uk/nrl-consumer-api/FHIR/R4"
+  - url: https://api.service.nhs.uk/record-locator/consumer/FHIR/R4
     description: Production environment.
 tags:
-  - name: NRLF Consumer
 paths:
   /DocumentReference:
     get:
       tags:
-        - NRLF Consumer
       summary: Search for DocumentReference resources
       operationId: searchDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
         - $ref: "#/components/parameters/custodian"
         - $ref: "#/components/parameters/type"
+        - $ref: "#/components/parameters/nextPageToken"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
           description: Search DocumentReference operation successful
+          headers:
+            X-Correlation-Id:
+              $ref: "#/components/headers/CorrelationId"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
           content:
             application/fhir+json:
               schema:
@@ -46,11 +54,12 @@ paths:
   /DocumentReference/_search:
     post:
       tags:
-        - NRLF Consumer
       summary: Search for DocumentReference resources
       operationId: searchPostDocumentReference
       parameters:
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       requestBody:
         content:
           application/json:
@@ -59,6 +68,11 @@ paths:
       responses:
         "200":
           description: Search DocumentReference operation successful
+          headers:
+            X-Correlation-Id:
+              $ref: "#/components/headers/CorrelationId"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
           content:
             application/fhir+json:
               schema:
@@ -77,15 +91,22 @@ paths:
   /DocumentReference/{id}:
     get:
       tags:
-        - NRLF Consumer
       summary: Read a DocumentReference resource
       operationId: readDocumentReference
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
       responses:
         "200":
           description: Read DocumentReference operation successful
+          headers:
+            X-Correlation-Id:
+              $ref: "#/components/headers/CorrelationId"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
           content:
             application/fhir+json:
               schema:

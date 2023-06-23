@@ -1,5 +1,6 @@
 import pytest
 
+from nrlf.core.model import ConsumerRequestParams
 from nrlf.core.repository import (
     _decode,
     _encode,
@@ -8,6 +9,8 @@ from nrlf.core.repository import (
     _filter_expression,
     _key_and_filter_clause,
     _key_condition_expression,
+    custodian_filter,
+    type_filter,
 )
 
 
@@ -176,4 +179,63 @@ def test_encode(input: any, expected: str):
 )
 def test_decode(input: dict, expected: any):
     actual = _decode(input)
+    assert actual == expected
+
+
+def test_custodian_filter():
+    queryStringParameters = {
+        "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
+        "custodian:identifier": "https://fhir.nhs.uk/Id/ods-organization-code|RY26A",
+    }
+    request_params = ConsumerRequestParams(**queryStringParameters or {})
+
+    actual = custodian_filter(request_params.custodian_identifier)
+    expected = "RY26A"
+    assert actual == expected
+
+
+def test_custodian_filter_none():
+    queryStringParameters = {
+        "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
+        "custodian:identifier": None,
+    }
+    request_params = ConsumerRequestParams(**queryStringParameters or {})
+
+    actual = custodian_filter(request_params.custodian_identifier)
+    expected = None
+    assert actual == expected
+
+
+def test_type_filter():
+    queryStringParameters = {
+        "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
+        "type": "http://snomed.info/sct|861421000000109",
+    }
+
+    pointer_types = [
+        "http://snomed.info/sct|861421000000109",
+        "http://snomed.info/sct|861421000000108",
+    ]
+    request_params = ConsumerRequestParams(**queryStringParameters or {})
+
+    actual = type_filter(request_params.type, pointer_types)
+    expected = ["http://snomed.info/sct|861421000000109"]
+    assert actual == expected
+
+
+def test_type_filter_none():
+    queryStringParameters = {
+        "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|3495456481",
+    }
+    pointer_types = [
+        "http://snomed.info/sct|861421000000109",
+        "http://snomed.info/sct|861421000000108",
+    ]
+    request_params = ConsumerRequestParams(**queryStringParameters or {})
+
+    actual = type_filter(request_params.type, pointer_types)
+    expected = [
+        "http://snomed.info/sct|861421000000109",
+        "http://snomed.info/sct|861421000000108",
+    ]
     assert actual == expected

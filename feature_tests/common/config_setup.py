@@ -1,9 +1,9 @@
+import json
 from dataclasses import asdict
 from typing import Union
 
 from behave import use_fixture
 from behave.runner import Context
-from lambda_utils.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from lambda_utils.header_config import ClientRpDetailsHeader, ConnectionMetadata
 
 from feature_tests.common.constants import (
@@ -39,6 +39,12 @@ from feature_tests.common.utils import (
     get_test_mode,
     get_tls_ma_files,
 )
+from nrlf.core.constants import (
+    CLIENT_RP_DETAILS,
+    CONNECTION_METADATA,
+    PERMISSION_AUDIT_DATES_FROM_PAYLOAD,
+)
+from nrlf.core.validators import json_loads
 
 
 def _local_mock(context: Context):
@@ -121,7 +127,12 @@ def config_setup(context: Context, scenario_name: str) -> TestConfig:
 
 
 def register_application(
-    context: Context, org_id: str, app_name: str, app_id: str, pointer_types: list[str]
+    context: Context,
+    org_id: str,
+    org_id_extension: str,
+    app_name: str,
+    app_id: str,
+    pointer_types: list[str],
 ):
     test_config: TestConfig = context.test_config
     if app_name not in ALLOWED_APPS:
@@ -131,9 +142,20 @@ def register_application(
         raise ValueError(f"App ID {app_id} must be one of {ALLOWED_APP_IDS}")
 
     test_config.request.headers[CONNECTION_METADATA] = ConnectionMetadata(
-        **{"nrl.pointer-types": pointer_types, "nrl.ods-code": org_id}
+        **{
+            "nrl.pointer-types": pointer_types,
+            "nrl.ods-code": org_id,
+            "nrl.ods-code-extension": org_id_extension,
+        }
     ).json(by_alias=True)
 
     test_config.request.headers[CLIENT_RP_DETAILS] = ClientRpDetailsHeader(
         **{"developer.app.name": app_name, "developer.app.id": app_id}
     ).json(by_alias=True)
+
+
+def set_audit_date_permission(context: Context):
+    test_config = context.test_config
+    existing_headers = json_loads(test_config.request.headers[CONNECTION_METADATA])
+    existing_headers["nrl.permissions"].append(PERMISSION_AUDIT_DATES_FROM_PAYLOAD)
+    test_config.request.headers[CONNECTION_METADATA] = json.dumps(existing_headers)

@@ -33,10 +33,12 @@ def create_zip_package(
 
     clean_dir(dist_dir)
 
-    print(f"Building {package_name}")
+    print(f"Building {package_name}")  # noqa: T201
     yield package_dir
     zip_package(build_dir)
     shutil.move(dist_dir / f"{BUILD_DIR}.zip", dist_dir / f"{package_name}.zip")
+
+    clean_dir(build_dir)
 
 
 def build(file):
@@ -61,7 +63,6 @@ def create_temp_path(path: Path, is_dir: bool) -> Generator[Path, None, None]:
     except Exception as err:
         error = err
     finally:
-        pass
         if is_dir:
             shutil.rmtree(path)
         else:

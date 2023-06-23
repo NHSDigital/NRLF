@@ -1,13 +1,22 @@
-import json
 import logging
+from enum import Enum
 from tempfile import NamedTemporaryFile
 
 import pytest
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
-from lambda_utils.logging import Logger, log_action
+from hypothesis import given
+from hypothesis.strategies import booleans, builds, dictionaries, just, text
+from lambda_utils.logging import LogData, Logger, LogTemplate, log_action
 from lambda_utils.tests.unit.utils import make_aws_event
+from pydantic import ValidationError
+
 from nrlf.core.errors import DynamoDbError
-from nrlf.core.validators import validate_timestamp
+from nrlf.core.validators import json_loads, validate_timestamp
+
+
+class LogReference(Enum):
+    HELLO001 = "Hello, world!"
+
 
 LOGGER_NAME = __name__
 
@@ -23,6 +32,8 @@ DUMMY_LOGGER_KWARGS = {
     ),
     "transaction_id": "ABC",
     "aws_environment": "TEST",
+    "splunk_index": "SPLUNK_INDEX",
+    "source": "SOURCE",
 }
 
 
@@ -40,7 +51,7 @@ def _standard_test(fn):
         assert result == "abcdef"
 
         # Process the log
-        message = json.loads(temp_file.read())
+        message = json_loads(temp_file.read())
 
     # Validate the time components
     timestamp = message.pop("timestamp")
@@ -64,7 +75,7 @@ def _standard_test(fn):
 def test_log_with_log_fields_filter(log_fields, expected_data_inputs):
     kwargs = {"log_fields": log_fields} if log_fields is not None else {}
 
-    @log_action(narrative="Hello, world!", **kwargs)
+    @log_action(log_reference=LogReference.HELLO001, **kwargs)
     def _dummy_function(foo: str, bar: str):
         return foo + bar
 
@@ -75,11 +86,18 @@ def test_log_with_log_fields_filter(log_fields, expected_data_inputs):
         "transaction_id": "ABC",
         "request_id": "789",
         "log_level": "INFO",
-        "log_reference": "test_logging._dummy_function",
+        "log_reference": "HELLO001",
         "outcome": "SUCCESS",
         "message": "Hello, world!",
-        "data": {"result": "abcdef", "inputs": expected_data_inputs},
+        "index": "SPLUNK_INDEX",
+        "source": "SOURCE",
+        "function": "test_logging._dummy_function",
+        "data": {
+            "result": "abcdef",
+            "inputs": expected_data_inputs,
+        },
         "environment": "TEST",
+        "host": "123456789012",
         "sensitive": True,
     }
 
@@ -92,7 +110,7 @@ def test_log_with_log_fields_filter(log_fields, expected_data_inputs):
     ],
 )
 def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
-    @log_action(narrative="Hello, world!", log_fields=["foo", "bar"])
+    @log_action(log_reference=LogReference.HELLO001, log_fields=["foo", "bar"])
     def _dummy_function(foo: str, bar: str):
         raise error("An error message")
 
@@ -108,7 +126,7 @@ def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
             _dummy_function(foo="abc", bar="def", logger=logger)
 
         # Process the log
-        message = json.loads(temp_file.read())
+        message = json_loads(temp_file.read())
 
     # Validate the time components
     timestamp = message.pop("timestamp")
@@ -126,10 +144,51 @@ def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
         "transaction_id": "ABC",
         "request_id": "789",
         "log_level": expected_log_level,
-        "log_reference": "test_logging._dummy_function",
+        "log_reference": "HELLO001",
         "outcome": outcome,
         "message": "Hello, world!",
-        "data": {"result": result, "inputs": {"foo": "abc", "bar": "def"}},
+        "index": "SPLUNK_INDEX",
+        "source": "SOURCE",
+        "function": "test_logging._dummy_function",
+        "data": {
+            "result": result,
+            "inputs": {"foo": "abc", "bar": "def"},
+        },
         "environment": "TEST",
+        "host": "123456789012",
         "sensitive": True,
     }
+
+
+_log = builds(
+    LogTemplate,
+    data=just(LogData(inputs={}, result=None)),
+)
+
+
+@pytest.mark.parametrize("redact", [True, False])
+@given(log=_log)
+def test_log_template_dict_always_exclude_none(log: LogTemplate, redact: bool):
+    dumped_log = log.dict(redact=redact)
+    assert "result" not in dumped_log["data"]
+    assert None not in dumped_log.values()
+
+    if redact and log.sensitive:
+        assert dumped_log["data"] == "REDACTED"
+
+
+@given(log=_log)
+def test_log_template_json_always_exclude_none(log: LogTemplate):
+    dumped_log = json_loads(log.json())
+    assert "result" not in dumped_log["data"]
+    assert None not in dumped_log.values()
+
+
+@given(
+    log=_log,
+    extra_fields=dictionaries(keys=text(max_size=1), values=booleans(), min_size=1),
+)
+def test_log_template_dict_forbids_extra_fields(log: LogTemplate, extra_fields: dict):
+    good_log_input = log.dict()
+    with pytest.raises(ValidationError):
+        LogTemplate(**good_log_input, **extra_fields)

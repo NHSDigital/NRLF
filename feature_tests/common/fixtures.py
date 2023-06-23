@@ -4,9 +4,9 @@ from unittest import mock
 import boto3
 import moto
 from behave import fixture
-from nrlf.core.types import DynamoDbClient
 
 from feature_tests.common.constants import TABLE_CONFIG
+from nrlf.core.types import DynamoDbClient
 
 
 @fixture(name="fixture.mock.dynamodb")
@@ -34,6 +34,9 @@ def mock_environmental_variables(context, *args, **kwargs):
             "DOCUMENT_POINTER_TABLE_NAME": "document-pointer",
             "AWS_DEFAULT_REGION": "eu-west-2",
             "ENVIRONMENT": "__environment__",
+            "SPLUNK_INDEX": "__index__",
+            "SOURCE": "__source__",
+            "DYNAMODB_TIMEOUT": "30",
         },
         clear=True,
     ):

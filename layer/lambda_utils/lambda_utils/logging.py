@@ -1,13 +1,14 @@
-from functools import wraps
+from enum import Enum
+from functools import partial, wraps
 from inspect import signature
+from logging import Logger as CoreLogger
 from logging import getLevelName
 from timeit import default_timer as timer
-from types import FunctionType
-from typing import Any, Optional
+from typing import Any, Callable, Optional, TypeVar, Union
 
-from aws_lambda_powertools import Logger as _Logger
+from aws_lambda_powertools import Logger as AwsLogger
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
-from lambda_utils.constants import LoggingOutcomes, LogLevel
+from lambda_utils.constants import LoggingConstants, LoggingOutcomes, LogLevel
 from lambda_utils.header_config import LoggingHeader
 from lambda_utils.logging_utils import (
     CustomFormatter,
@@ -17,29 +18,62 @@ from lambda_utils.logging_utils import (
     generate_transaction_id,
     json_encode_message,
 )
+from pydantic import BaseModel, Extra, Field
+from typing_extensions import ParamSpec
+
 from nrlf.core.transform import make_timestamp
-from pydantic import BaseModel, Field
 
 
-class LogTemplate(BaseModel):
-    correlation_id: str = None
-    nhsd_correlation_id: str = None
-    transaction_id: str = None
-    request_id: str = None
-    log_level: str = None
-    log_reference: str = None
-    outcome: str = None
-    duration_ms: int = None
-    message: str = None
-    data: dict = None
-    error: Exception = None
+class LogTemplateBase(BaseModel):
+    correlation_id: str
+    nhsd_correlation_id: str
+    request_id: str
+    transaction_id: str
+    host: str
+    environment: str
+    index: str
+    source: str
+
+
+class LogData(BaseModel):
+    inputs: dict[str, object]
+    result: Optional[object]
+
+
+class LogTemplate(LogTemplateBase):
+    caller: Union[str, None]  # Identity of the caller
+    root: Union[str, None]  # The id of root object that triggered the request
+    subject: Union[
+        str, None
+    ]  # The id of the object being operated on, which normally matches the root but can be a child.
+    log_level: str
+    log_reference: str
+    outcome: str
+    duration_ms: int
+    message: str
+    function: str
+    data: LogData
+    error: Union[Exception, str, None]
     call_stack: str = None
-    environment: str = None
-    timestamp: str = None
+    timestamp: str = Field(default_factory=make_timestamp)
     sensitive: bool = True
 
     class Config:
-        arbitrary_types_allowed = True
+        arbitrary_types_allowed = True  # For Exception
+        extra = Extra.forbid
+
+    def dict(self, redact=False, **kwargs):
+        """Force exclude_none, allow redaction of field `data`"""
+        kwargs["exclude_none"] = True
+        log = super().dict(**kwargs)
+        if redact and self.sensitive:
+            log["data"] = LoggingConstants.REDACTED
+        return log
+
+    def json(self, **kwargs):
+        """Force exclude_none"""
+        kwargs["exclude_none"] = True
+        return super().json(**kwargs)
 
 
 class MinimalRequestContextForLogging(BaseModel):
@@ -70,13 +104,15 @@ def prepare_default_event_for_logging() -> MinimalEventModelForLogging:
     )
 
 
-class Logger(_Logger):
+class Logger(AwsLogger, CoreLogger):
     def __init__(
         self,
         *,
         logger_name: str,
         aws_lambda_event: MinimalEventModelForLogging,
         aws_environment: str,
+        splunk_index: str,
+        source: str,
         transaction_id: str = None,
         **kwargs,
     ):
@@ -84,39 +120,56 @@ class Logger(_Logger):
         logging_header = LoggingHeader(**headers)
 
         self.transaction_id = transaction_id or generate_transaction_id()
-        self._base_message = LogTemplate(
+        self._base_message = LogTemplateBase(
             **logging_header.dict(),
             host=aws_lambda_event.requestContext.accountId,
             environment=aws_environment,
-            transaction_id=transaction_id,
+            index=splunk_index,
+            source=source,
+            transaction_id=self.transaction_id,
         )
-        super().__init__(logger_name, logger_formatter=CustomFormatter(), **kwargs)
+        super().__init__(
+            logger_name, level="DEBUG", logger_formatter=CustomFormatter(), **kwargs
+        )
 
     @property
     def base_message(self) -> LogTemplate:
         return self._base_message
 
 
+RT = TypeVar("RT")  # for forwarding type-hints of the return type
+P = ParamSpec("P")  # for forwarding type-hints of the decorated kw/args
+
+
 def log_action(
     *,
-    narrative: str,
+    log_reference: Enum,
+    log_level: LogLevel = LogLevel.INFO,
     log_fields: list[str] = [],
     log_result: bool = True,
     sensitive: bool = True,
-):
+    errors_only: bool = False,
+    scope_fn: Union[Callable[P, dict[str, str]], None] = None,
+) -> Callable[[Callable[P, RT]], Callable[P, RT]]:
     """
     Args:
-        narrative:  Verbose description of what this function is doing.
-        log_fields: Fields to explicitly include. If not provided then
-                    no fields are included in the log output.
-        log_result: Indicate whether or not to log the function result.
-        level:      logging level for this log.
-        sensitive:  Flag for Splunk to categorise this log as sensitive.
+        log_reference:  Enum mapping to a verbose description of what this
+                        function is doing.
+        log_level:      Enum indicating which logging level to be used if the
+                        operation successfully completes.  Failed operations
+                        will be logged as LogLevel.Error
+        log_fields:     Fields to explicitly include. If not provided then no
+                        fields are included in the log output.
+        log_result:     Indicate whether or not to log the function result.
+        level:          logging level for this log.
+        sensitive:      Flag for Splunk to categorise this log as sensitive.
+        errors_only:    Indicates that successful operations should not be
+                        logged, only errors.
     """
 
-    def decorator(fn: FunctionType):
+    def decorator(fn: Callable[P, RT]) -> Callable[P, RT]:
         @wraps(fn)
-        def wrapper(*args, logger: Logger = None, **kwargs):
+        def wrapper(*args: P.args, logger: Logger = None, **kwargs: P.kwargs) -> RT:
             if logger is None:
                 return fn(*args, **kwargs)
 
@@ -137,33 +190,34 @@ def log_action(
                 log_fields=log_fields,
             )
 
-            data = {"inputs": function_kwargs}
+            data = {
+                "inputs": function_kwargs,
+            }
             if log_result:
                 data["result"] = result
 
-            level = (
-                LogLevel.ERROR if outcome == LoggingOutcomes.ERROR else LogLevel.INFO
-            )
+            level = LogLevel.ERROR if outcome == LoggingOutcomes.ERROR else log_level
             error = result if outcome == LoggingOutcomes.ERROR else None
-            _message = LogTemplate(
-                log_reference=f"{fn.__module__}.{fn.__name__}",
-                message=narrative,
-                data=data,
-                error=error,
-                call_stack=call_stack,
-                outcome=outcome,
-                duration_ms=duration_ms,
-                log_level=getLevelName(level),
-                timestamp=make_timestamp(),
-                sensitive=sensitive,
-            )
-            message_json = json_encode_message(
-                message={
-                    **logger.base_message.dict(exclude_none=True),
-                    **_message.dict(exclude_none=True),
-                }
-            )
-            logger.log(msg=message_json, level=level)
+
+            if not errors_only or level == LogLevel.ERROR:
+                scoped_values = {} if scope_fn is None else scope_fn(*args, **kwargs)
+                _message = LogTemplate(
+                    log_reference=log_reference.name,
+                    message=log_reference.value,
+                    function=f"{fn.__module__}.{fn.__name__}",
+                    data=data,
+                    error=error,
+                    call_stack=call_stack,
+                    outcome=outcome,
+                    duration_ms=duration_ms,
+                    log_level=getLevelName(level),
+                    sensitive=sensitive,
+                    **logger.base_message.dict(),
+                    **scoped_values,
+                )
+                message_dict = _message.dict()
+                message_json = json_encode_message(message=message_dict)
+                logger.log(msg=message_json, level=level)
 
             if isinstance(result, Exception):
                 raise result
@@ -172,3 +226,17 @@ def log_action(
         return wrapper
 
     return decorator
+
+
+def make_scoped_log_action(
+    scope_fn,
+    *args,
+    **kwargs,
+):
+    """
+    Uses a partial to define the request scoped values once, rather than each
+    @log_action.
+    """
+    _kwargs: dict[str, Any] = {**kwargs}
+    _kwargs["scope_fn"] = scope_fn
+    return partial(log_action, *args, **_kwargs)

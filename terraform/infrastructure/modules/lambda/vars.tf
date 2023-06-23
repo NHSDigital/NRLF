@@ -2,7 +2,7 @@ variable "prefix" {}
 
 variable "region" {}
 
-variable "apitype" {}
+variable "parent_path" {}
 
 variable "name" {}
 
@@ -21,3 +21,11 @@ variable "additional_policies" {
 }
 
 variable "handler" {}
+
+variable "firehose_subscriptions" {
+  default = []
+}
+
+variable "vpc" {
+  default = {}
+}

@@ -55,14 +55,14 @@ import random
 
 from nrlf.core.constants import ID_SEPARATOR
 
-SNOMED_SYSTEM = "https://snomed.info/ict"
+SNOMED_SYSTEM = "http://snomed.info/sct"
 SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN = "736253002"
 SNOMED_CODES_EMERGENCY_HEALTH_CARE_PLAN = "887701000000100"
 SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY = "861421000000109"
 SNOMED_CODES_NATIONAL_EARLY_WARNING_SCORE_2 = "1363501000000100"
 
 FHIR_SYSTEMS_NHS_NUMBER = "https://fhir.nhs.uk/Id/nhs-number"
-FHIR_SYSTEMS_ASID = "https://fhir.nhs.uk/Id/accredited-system-id"
+FHIR_SYSTEMS_ASID = "https://fhir.nhs.uk/Id/nhsSpineASID"
 FHIR_SYSTEMS_ODS_CODE = "https://fhir.nhs.uk/Id/ods-organization-code"
 
 APIM_PATIENT_SUCCESS = "9000000009"
@@ -121,7 +121,7 @@ def generate_test_subject(
 
 
 def generate_test_custodian(
-    value: str = NRL_ODS_SUCCESS, system: str = FHIR_SYSTEMS_ASID
+    value: str = NRL_ODS_SUCCESS, system: str = FHIR_SYSTEMS_ODS_CODE
 ):
     return {
         "identifier": {

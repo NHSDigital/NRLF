@@ -26,7 +26,7 @@
   "type": {
     "coding": [
       {
-        "system": "https://snomed.info/ict",
+        "system": "http://snomed.info/sct",
         "code": "749001000000101",
         "display": "Appointment (booking)"
       }

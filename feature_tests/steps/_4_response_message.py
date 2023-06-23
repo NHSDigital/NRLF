@@ -1,11 +1,11 @@
 import json
-from dataclasses import asdict
 
 from behave.runner import Context
 
 from feature_tests.common.constants import FhirType
 from feature_tests.common.decorators import then
 from feature_tests.common.models import TestConfig
+from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.strict_model import Bundle
 
 
@@ -32,7 +32,7 @@ def the_response_is_the_template_with_values(
         rendered = rendered.replace("<identifier>", id)
 
     actual = test_config.response.dict
-    expected = json.loads(rendered)
+    expected = json_loads(rendered)
 
     assert actual == expected, json.dumps(
         {
@@ -47,6 +47,12 @@ def producer_search_document_pointers(context: Context, count: int):
     test_config: TestConfig = context.test_config
     bundle = Bundle.parse_raw(test_config.response.body)
     assert len(bundle.entry) == count, bundle.dict()
+
+
+@then("the response has {count:d} total")
+def producer_search_document_pointers(context: Context, count: int):
+    test_config: TestConfig = context.test_config
+    bundle = Bundle.parse_raw(test_config.response.body)
     assert bundle.total == count, bundle.dict()
 
 
@@ -62,15 +68,23 @@ def the_response_contains_the_template_with_values(
     rendered_template = template.render(
         table=context.table, fhir_type=FhirType.DocumentReference
     )
-    fhir_json = json.loads(rendered_template)
+    fhir_json = json_loads(rendered_template)
     assert fhir_json in document_references, document_references
+
+
+@then("the Bundle contains a next page token")
+def the_response_contains_the_template_with_values(context: Context):
+    test_config: TestConfig = context.test_config
+    bundle = test_config.response.dict
+
+    assert bundle["meta"] is not None
 
 
 @then("the response is the policy from {template_name} template")
 def response_contains_correct_policy(context: Context, template_name: str):
     test_config: TestConfig = context.test_config
     template = test_config.templates[template_name]
-    template_policy = json.loads(template.render(table=context.table))
+    template_policy = json_loads(template.render(table=context.table))
     response = test_config.response.dict
 
     # principalId is generated from the transaction id, so don't test this

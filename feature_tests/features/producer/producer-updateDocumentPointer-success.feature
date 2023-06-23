@@ -8,7 +8,7 @@ Feature: Producer Update Success scenarios
          "id": "$custodian-$identifier",
          "custodian": {
             "identifier": {
-               "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+               "system": "https://fhir.nhs.uk/Id/ods-organization-code",
                "value": "$custodian"
             }
          },
@@ -21,7 +21,7 @@ Feature: Producer Update Success scenarios
          "type": {
             "coding": [
                {
-                  "system": "https://snomed.info/ict",
+                  "system": "http://snomed.info/sct",
                   "code": "$type"
                }
             ]
@@ -76,8 +76,8 @@ Feature: Producer Update Success scenarios
   Scenario Outline: Successfully update the mutable properties of a Document Pointer with only one change
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
@@ -107,16 +107,16 @@ Feature: Producer Update Success scenarios
       | issue_description | Resource updated |
       | message           | Resource updated |
     And Document Pointer "8FW23-1234567890" exists
-      | property    | value                              |
-      | id          | 8FW23-1234567890                   |
-      | nhs_number  | 9278693472                         |
-      | producer_id | 8FW23                              |
-      | type        | https://snomed.info/ict\|736253002 |
-      | source      | NRLF                               |
-      | version     | 1                                  |
-      | document    | <document>                         |
-      | created_on  | <timestamp>                        |
-      | updated_on  | <timestamp>                        |
+      | property    | value                             |
+      | id          | 8FW23-1234567890                  |
+      | nhs_number  | 9278693472                        |
+      | producer_id | 8FW23                             |
+      | type        | http://snomed.info/sct\|736253002 |
+      | source      | NRLF                              |
+      | version     | 1                                 |
+      | document    | <document>                        |
+      | created_on  | <timestamp>                       |
+      | updated_on  | <timestamp>                       |
 
     Examples:
       | property    | value                                           |
@@ -128,8 +128,8 @@ Feature: Producer Update Success scenarios
   Scenario: Successfully update the mutable properties of a Document Pointer with multiple changes
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
@@ -162,13 +162,61 @@ Feature: Producer Update Success scenarios
       | issue_description | Resource updated |
       | message           | Resource updated |
     And Document Pointer "8FW23-1234567890" exists
-      | property    | value                              |
-      | id          | 8FW23-1234567890                   |
-      | nhs_number  | 9278693472                         |
-      | producer_id | 8FW23                              |
-      | type        | https://snomed.info/ict\|736253002 |
-      | source      | NRLF                               |
-      | version     | 1                                  |
-      | document    | <document>                         |
-      | created_on  | <timestamp>                        |
-      | updated_on  | <timestamp>                        |
+      | property    | value                             |
+      | id          | 8FW23-1234567890                  |
+      | nhs_number  | 9278693472                        |
+      | producer_id | 8FW23                             |
+      | type        | http://snomed.info/sct\|736253002 |
+      | source      | NRLF                              |
+      | version     | 1                                 |
+      | document    | <document>                        |
+      | created_on  | <timestamp>                       |
+      | updated_on  | <timestamp>                       |
+
+  Scenario: Successfully update the mutable properties of a Document Pointer with multiple changes for a producer with an extension code
+    Given Producer "BaRS (South Derbyshire Mental Health Unit)" (Organisation ID "V4T0L.CBH") is requesting to update Document Pointers
+    And Producer "BaRS (South Derbyshire Mental Health Unit)" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | V4T0L.CBH                      |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+      | docStatus   | preliminary                    |
+      | author      | Practitioner/xcda1             |
+      | description | Physical                       |
+    When Producer "BaRS (South Derbyshire Mental Health Unit)" updates Document Reference "V4T0L.CBH-1234567890" from DOCUMENT template
+      | property    | value                                           |
+      | identifier  | 1234567890                                      |
+      | status      | current                                         |
+      | type        | 736253002                                       |
+      | custodian   | V4T0L.CBH                                       |
+      | subject     | 9278693472                                      |
+      | contentType | application/pdf                                 |
+      | docStatus   | amended                                         |
+      | author      | Organization/1XR                                |
+      | description | Therapy Summary Document for Patient 9278693472 |
+      | url         | https://example.org/different-doc.pdf           |
+    Then the operation is successful
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value            |
+      | issue_type        | informational    |
+      | issue_level       | information      |
+      | issue_code        | RESOURCE_UPDATED |
+      | issue_description | Resource updated |
+      | message           | Resource updated |
+    And Document Pointer "V4T0L.CBH-1234567890" exists
+      | property    | value                             |
+      | id          | V4T0L.CBH-1234567890              |
+      | nhs_number  | 9278693472                        |
+      | producer_id | V4T0L.CBH                         |
+      | type        | http://snomed.info/sct\|736253002 |
+      | source      | NRLF                              |
+      | version     | 1                                 |
+      | document    | <document>                        |
+      | created_on  | <timestamp>                       |
+      | updated_on  | <timestamp>                       |

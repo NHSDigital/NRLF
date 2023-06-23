@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 from lambda_utils.tests.unit.utils import make_aws_event
+
 from nrlf.core.authoriser import Config, _create_policy, execute_steps
 
 
@@ -73,7 +74,11 @@ def test_execute_steps_yields_deny_on_internal_server_error(
         event=event,
         context=None,
         config=Config(
-            AWS_REGION="a-region", PREFIX="a-prefix", ENVIRONMENT="an-environment"
+            AWS_REGION="a-region",
+            PREFIX="a-prefix",
+            ENVIRONMENT="an-environment",
+            SPLUNK_INDEX="an-index",
+            SOURCE="the-lambda-name",
         ),
     )
 

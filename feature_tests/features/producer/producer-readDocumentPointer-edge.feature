@@ -13,7 +13,7 @@ Feature: Producer Read Edge Case scenarios
         },
         "custodian": {
           "identifier": {
-            "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
             "value": "$custodian"
           }
         },
@@ -26,7 +26,7 @@ Feature: Producer Read Edge Case scenarios
         "type": {
           "coding": [
             {
-              "system": "https://snomed.info/ict",
+              "system": "http://snomed.info/sct",
               "code": "$type"
             }
           ]
@@ -74,8 +74,8 @@ Feature: Producer Read Edge Case scenarios
   Scenario: Does not return document pointer that has invalid document reference data
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to read Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                  | value     |
-      | https://snomed.info/ict | 736253002 |
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
     And an invalid Document Pointer exists in the system with the below values for INVALID_AUTHOR_DOCUMENT template
       | property    | value                          |
       | identifier  | 1234567890                     |
@@ -86,10 +86,11 @@ Feature: Producer Read Edge Case scenarios
       | url         | https://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" reads an existing Document Reference "8FW23-1234567890"
     Then the operation is unsuccessful
+    And the status is 500
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                   |
-      | issue_type        | processing              |
-      | issue_level       | error                   |
-      | issue_code        | RESOURCE_NOT_FOUND      |
-      | issue_description | Resource not found      |
-      | message           | Item could not be found |
+      | property          | value                                               |
+      | issue_type        | processing                                          |
+      | issue_level       | error                                               |
+      | issue_code        | SERVICE_ERROR                                       |
+      | issue_description | Service failure or unexpected error                 |
+      | message           | There was a problem retrieving the document pointer |

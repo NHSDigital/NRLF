@@ -9,6 +9,11 @@ resource "aws_iam_role" "developer_role" {
           AWS : "arn:aws:iam::${data.aws_secretsmanager_secret_version.identities_account_id.secret_string}:root"
         },
         Effect : "Allow"
+        Condition : {
+          Bool : {
+            "aws:MultiFactorAuthPresent" : true
+          }
+        }
       }
     ]
   })

@@ -31,7 +31,6 @@ def mock_dynamodb():
 
 @mock.patch("cron.seed_sandbox.steps._is_sandbox_lambda", return_value=True)
 def test_e2e_local(_mocked__is_sandbox_lambda):
-
     from cron.seed_sandbox.index import handler
 
     response = handler(event=None)

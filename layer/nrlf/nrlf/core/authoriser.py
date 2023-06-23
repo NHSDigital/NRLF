@@ -1,11 +1,10 @@
-import json
+from enum import Enum
 from http import HTTPStatus
 from logging import Logger
 from typing import Any
 
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from lambda_utils.header_config import (
     AbstractHeader,
     ClientRpDetailsHeader,
@@ -14,8 +13,16 @@ from lambda_utils.header_config import (
 from lambda_utils.logging import log_action
 from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _setup_logger
-from nrlf.core.response import get_error_message
 from pydantic import BaseModel, ValidationError
+
+from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
+
+
+class LogReference(Enum):
+    AUTHORISER001 = "Parsing headers"
+    AUTHORISER002 = "Validating pointer types"
+    AUTHORISER003 = "Render authorisation response"
+    AUTHORISER004 = "Parsing Client RP Details"
 
 
 class Config(BaseModel):
@@ -33,6 +40,8 @@ class Config(BaseModel):
     AWS_REGION: str
     PREFIX: str
     ENVIRONMENT: str
+    SPLUNK_INDEX: str
+    SOURCE: str
 
 
 def build_persistent_dependencies(config: Config) -> dict[str, any]:
@@ -45,7 +54,11 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
     may not be each execution, depending on how busy the API is.
     These dependencies will be passed through to your `handle` function below.
     """
-    return {"environment": config.ENVIRONMENT}
+    return {
+        "environment": config.ENVIRONMENT,
+        "splunk_index": config.SPLUNK_INDEX,
+        "source": config.SOURCE,
+    }
 
 
 def _create_policy(principal_id, resource, effect, context):
@@ -61,7 +74,12 @@ def _create_policy(principal_id, resource, effect, context):
     }
 
 
-@log_action(narrative="Parsing headers")
+@log_action(log_reference=LogReference.AUTHORISER004, log_result=True)
+def _parse_client_rp_details(raw_client_rp_details: dict):
+    return ClientRpDetailsHeader.parse_raw(raw_client_rp_details)
+
+
+@log_action(log_reference=LogReference.AUTHORISER001)
 def parse_headers(
     data: PipelineData,
     context: LambdaContext,
@@ -74,14 +92,26 @@ def parse_headers(
     _raw_connection_metadata = _headers.get(CONNECTION_METADATA, "{}")
     try:
         connection_metadata = ConnectionMetadata.parse_raw(_raw_connection_metadata)
-        ClientRpDetailsHeader.parse_raw(_raw_client_rp_details)
-    except ValidationError as err:
-        return PipelineData(error={"message": get_error_message(err)}, **data)
-    else:
-        return PipelineData(pointer_types=connection_metadata.pointer_types, **data)
+    except ValidationError:
+        return PipelineData(
+            error="There was an issue parsing the connection metadata, contact onboarding team",
+            **data,
+        )
+
+    try:
+        _parse_client_rp_details(
+            raw_client_rp_details=_raw_client_rp_details, logger=logger
+        )
+    except ValidationError:
+        return PipelineData(
+            error="There was an issue parsing the client rp details, contact onboarding team",
+            **data,
+        )
+
+    return PipelineData(pointer_types=connection_metadata.pointer_types, **data)
 
 
-@log_action(narrative="Validating pointer types")
+@log_action(log_reference=LogReference.AUTHORISER002)
 def validate_pointer_types(
     data: PipelineData,
     context: LambdaContext,
@@ -96,7 +126,7 @@ def validate_pointer_types(
     return PipelineData(**data)
 
 
-@log_action(narrative="Render authorisation response")
+@log_action(log_reference=LogReference.AUTHORISER003)
 def generate_response(
     data: PipelineData,
     context: LambdaContext,
@@ -109,7 +139,7 @@ def generate_response(
         principal_id=logger.transaction_id,
         resource=data["method_arn"],
         effect="Deny" if error else "Allow",
-        context={"error": json.dumps(error)} if error else {},
+        context={"error": error["message"]} if error else {},
     )
     return PipelineData(policy)
 
@@ -122,10 +152,10 @@ steps = [
 
 
 def _function_handler(
-    fn, transaction_id: str, method_arn: str, args, kwargs
+    fn, transaction_id: str, status_code_ok: HTTPStatus, method_arn: str, args, kwargs
 ) -> tuple[HTTPStatus, any]:
     try:
-        status_code, result = HTTPStatus.OK, fn(*args, **kwargs)
+        status_code, result = status_code_ok, fn(*args, **kwargs)
     except Exception:
         status_code = None
         result = _create_policy(
@@ -159,6 +189,7 @@ def execute_steps(
     status_code, response = _function_handler(
         _setup_logger,
         transaction_id=transaction_id,
+        status_code_ok=HTTPStatus.OK,
         method_arn=method_arn,
         args=(index_path, transaction_id, event),
         kwargs=dependencies,
@@ -171,6 +202,7 @@ def execute_steps(
     return _function_handler(
         _execute_steps,
         transaction_id=transaction_id,
+        status_code_ok=HTTPStatus.OK,
         method_arn=method_arn,
         args=(steps, event, context),
         kwargs={

@@ -1,5 +1,6 @@
-import json
 from http import HTTPStatus
+
+from pydantic import BaseModel, ValidationError
 
 from nrlf.core.errors import NRLF_TO_SPINE_4XX_ERROR
 from nrlf.core.nhsd_codings import (
@@ -9,13 +10,13 @@ from nrlf.core.nhsd_codings import (
     NrlfCoding,
     SpineCoding,
 )
+from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.model import (
     CodeableConcept,
     Coding,
     OperationOutcome,
     OperationOutcomeIssue,
 )
-from pydantic import BaseModel, ValidationError
 
 HTTP_STATUS_CODE_MAPPING = {
     SpineCoding.RESOURCE_NOT_FOUND: HTTPStatus.NOT_FOUND,
@@ -26,6 +27,7 @@ HTTP_STATUS_CODE_MAPPING = {
     SpineCoding.ACCESS_DENIED_LEVEL: HTTPStatus.FORBIDDEN,
     SpineCoding.SERVICE_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
     SpineCoding.INVALID_RESOURCE_ID: HTTPStatus.BAD_REQUEST,
+    SpineCoding.INVALID_VALUE: HTTPStatus.CONFLICT,
 }
 
 
@@ -74,7 +76,7 @@ def get_error_message(exception: Exception) -> str:
 
 
 def _format_validation_error_message(exception: ValidationError) -> str:
-    errors = json.loads(exception.json())
+    errors = json_loads(exception.json())
     first_error = errors[0]
     model_name = (
         exception.model.public_alias()

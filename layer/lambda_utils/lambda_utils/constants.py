@@ -1,4 +1,4 @@
-from logging import ERROR, INFO
+from logging import DEBUG, ERROR, INFO
 
 
 class LoggingOutcomes:
@@ -11,12 +11,10 @@ class LoggingConstants:
     TO_MILLISECONDS = 1000
     JSON_INDENT = 2
     RESERVED_FIELDS = ["self", "logger", "context", "dependencies", "event"]
+    REDACTED = "REDACTED"
 
 
 class LogLevel:
     INFO = INFO
     ERROR = ERROR
-
-
-CLIENT_RP_DETAILS = "nhsd-client-rp-details"
-CONNECTION_METADATA = "nhsd-connection-metadata"
+    DEBUG = DEBUG

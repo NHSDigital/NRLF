@@ -1,9 +1,9 @@
 import boto3
-from nrlf.core.model import DocumentPointer
-from nrlf.core.repository import Repository
 from pydantic import BaseModel
 
 from api.producer.updateDocumentReference.src.constants import PersistentDependencies
+from nrlf.core.model import DocumentPointer
+from nrlf.core.repository import Repository
 
 
 class Config(BaseModel):
@@ -21,6 +21,8 @@ class Config(BaseModel):
     AWS_REGION: str
     PREFIX: str
     ENVIRONMENT: str
+    SPLUNK_INDEX: str
+    SOURCE: str
 
 
 def build_persistent_dependencies(config: Config) -> dict[str, any]:
@@ -39,4 +41,6 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
             DocumentPointer, dynamo_client, environment_prefix=config.PREFIX
         ),
         "environment": config.ENVIRONMENT,
+        "splunk_index": config.SPLUNK_INDEX,
+        "source": config.SOURCE,
     }

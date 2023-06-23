@@ -11,6 +11,7 @@ function _test_help() {
   echo "  smoke               - run smoke tests"
   echo "  feature local       - run local BDD tests"
   echo "  feature integration - run integration BDD tests"
+  echo "  firehose            - run firehose integration tests"
   echo
   return 1
 }
@@ -22,8 +23,10 @@ function _test() {
   case $command in
   "unit") _test_unit $args ;;
   "integration") _test_integration $args ;;
-  "smoke") _test_smoke $args ;;
+  "smoke") python api/tests/test_smoke.py manual_smoke_test --actor $2 --environment $3 $4 ;;
+  "token") _test_token $args ;;
   "feature") _test_feature $args ;;
+  "firehose") _test_integration_firehose $args ;;
   *) _test_help ;;
   esac
 }
@@ -35,12 +38,12 @@ function _test_unit() {
 
 function _test_integration() {
   local args=(${@:1})
-  python -m pytest -m "integration" $args
+  python -m pytest -m "integration and not firehose" $args
 }
 
-function _test_smoke() {
+function _test_integration_firehose() {
   local args=(${@:1})
-  python -m pytest -m "smoke" $args
+  python -m pytest -m "integration and firehose" --runslow $args
 }
 
 function _test_feature() {

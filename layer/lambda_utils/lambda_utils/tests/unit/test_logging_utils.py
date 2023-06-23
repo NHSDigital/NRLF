@@ -2,11 +2,9 @@ from datetime import datetime
 from decimal import Decimal
 from inspect import signature
 from ipaddress import IPv4Network
-from logging import getLogger
 
 import pytest
 from lambda_pipeline.types import PipelineData
-from lambda_utils.constants import LoggingConstants
 from lambda_utils.errors import LoggingError
 from lambda_utils.logging_utils import (
     _convert_args_to_kwargs,
@@ -16,8 +14,9 @@ from lambda_utils.logging_utils import (
     generate_transaction_id,
     json_encode_message,
 )
-from nrlf.core.errors import ItemNotFound
 from pydantic import BaseModel
+
+from nrlf.core.errors import ItemNotFound
 
 
 def test_generate_transaction_id_unique():

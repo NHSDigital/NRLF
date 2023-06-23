@@ -1,10 +1,10 @@
 import json
 from copy import deepcopy
-from functools import cache
 from pathlib import Path
 
 import pydantic
 import pytest
+
 from nrlf.producer.fhir.r4.model import DocumentReference
 
 PATH_TO_TEST_DATA = Path(__file__).parent / "data"

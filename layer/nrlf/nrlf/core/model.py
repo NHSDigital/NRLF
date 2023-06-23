@@ -1,6 +1,8 @@
 import re
 from typing import Optional, Union
 
+from pydantic import BaseModel, Field, root_validator, validator
+
 import nrlf.consumer.fhir.r4.model as consumer_model
 import nrlf.producer.fhir.r4.model as producer_model
 from nrlf.core.dynamodb_types import (
@@ -11,17 +13,20 @@ from nrlf.core.dynamodb_types import (
     convert_dynamo_value_to_raw_value,
     is_dynamodb_dict,
 )
+from nrlf.core.errors import RequestValidationError
 from nrlf.core.validators import (
+    _get_tuple_components,
     create_document_type_tuple,
     generate_producer_id,
+    split_custodian_id,
     validate_nhs_number,
+    validate_producer_id,
     validate_source,
     validate_timestamp,
     validate_tuple,
 )
-from pydantic import BaseModel, Field, root_validator, validator
 
-from .constants import ID_SEPARATOR, DbPrefix
+from .constants import CUSTODIAN_SEPARATOR, ID_SEPARATOR, KEY_SEPARATOR, DbPrefix
 
 KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
 
@@ -56,7 +61,6 @@ class DynamoDbModel(BaseModel):
     @root_validator(pre=True)
     def transform_input_values_if_dynamo_values(cls, values: dict) -> dict:
         from_dynamo = all(map(is_dynamodb_dict, values.values()))
-
         if from_dynamo:
             return {
                 **{k: convert_dynamo_value_to_raw_value(v) for k, v in values.items()},
@@ -73,20 +77,30 @@ class DynamoDbModel(BaseModel):
         return cls.__name__
 
 
-KEY_SEPARATOR = "#"
+def key(*args) -> str:
+    """
+    Standard method for creating PKs/SKs. Note that the "magic" here
+    is that calling 'str()' on 'DynamoDbStringType' implicitly returns
+    the __root__ value.
+    """
+    return KEY_SEPARATOR.join(map(str, args))
 
 
-def key(*args):
-    """
-    standard method for creating PKs/SKs
-    """
-    return KEY_SEPARATOR.join(map(lambda s: str(s), args))
+def dynamodb_key(*args) -> DynamoDbStringType:
+    return DynamoDbStringType(__root__=key(*args))
+
+
+def convert_document_pointer_id_to_pk(id: str) -> str:
+    producer_id, document_id = _get_tuple_components(id, separator=ID_SEPARATOR)
+    ods_code_parts = producer_id.split(CUSTODIAN_SEPARATOR)
+    return key(DbPrefix.DocumentPointer, *ods_code_parts, document_id)
 
 
 class DocumentPointer(DynamoDbModel):
     id: DynamoDbStringType
     nhs_number: DynamoDbStringType
     custodian: DynamoDbStringType
+    custodian_suffix: DynamoDbStringType = Field(default=DYNAMODB_NULL)
     producer_id: DynamoDbStringType
     type: DynamoDbStringType
     source: DynamoDbStringType
@@ -94,6 +108,7 @@ class DocumentPointer(DynamoDbModel):
     document: DynamoDbStringType
     created_on: DynamoDbStringType
     updated_on: Optional[DynamoDbStringType] = DYNAMODB_NULL
+    document_id: DynamoDbStringType = Field(exclude=True)
 
     def dict(self, **kwargs):
         return {
@@ -106,44 +121,10 @@ class DocumentPointer(DynamoDbModel):
             **super().dict(**kwargs),
         }
 
-    def super_dict(self):
-        return super().dict()
-
-    @classmethod
-    def generate_pk(cls, provider_id: str, document_id: str) -> str:
-        return f"{DbPrefix.DocumentPointer}{KEY_SEPARATOR}{provider_id}{KEY_SEPARATOR}{document_id}"
-
-    @classmethod
-    def generate_id(cls, provider_id: str, document_id: str) -> str:
-        return f"{provider_id}{ID_SEPARATOR}{document_id}"
-
-    @classmethod
-    def split_id(cls, id: str) -> list[str, str]:
-        return f"{id}".split(ID_SEPARATOR, 1)
-
-    @classmethod
-    def split_pk(cls, pk: str) -> list[str, str]:
-        return f"{pk}".split(KEY_SEPARATOR, 2)[1:]
-
-    @classmethod
-    def convert_id_to_pk(cls, id: str) -> str:
-        (producer_id, document_id) = cls.split_id(id)
-        return cls.generate_pk(producer_id, document_id)
-
-    @classmethod
-    def convert_pk_to_id(cls, pk: str) -> str:
-        (producer_id, document_id) = cls.split_pk(pk)
-        return cls.generate_id(producer_id, document_id)
-
-    @property
-    def doc_id(self) -> str:
-        (_, doc_id) = f"{self.id}".split(ID_SEPARATOR)
-        return doc_id
-
     @property
     def pk(self) -> DynamoDbStringType:
-        return DynamoDbStringType(
-            __root__=self.__class__.generate_pk(*self.__class__.split_id(f"{self.id}"))
+        return dynamodb_key(
+            DbPrefix.DocumentPointer, *self.custodian_parts, self.document_id
         )
 
     @property
@@ -152,37 +133,58 @@ class DocumentPointer(DynamoDbModel):
 
     @property
     def pk_1(self) -> DynamoDbStringType:
-        return DynamoDbStringType(__root__=f"{DbPrefix.Patient}#{self.nhs_number}")
+        return dynamodb_key(DbPrefix.Patient, self.nhs_number)
 
     @property
     def sk_1(self) -> DynamoDbStringType:
-        return DynamoDbStringType(
-            __root__=f"{DbPrefix.CreatedOn}#{self.created_on}#{self.producer_id}#{self.doc_id}"
+        return dynamodb_key(
+            DbPrefix.CreatedOn,
+            self.created_on,
+            *self.custodian_parts,
+            self.document_id,
         )
 
     @property
     def pk_2(self) -> DynamoDbStringType:
-        return DynamoDbStringType(
-            __root__=f"{DbPrefix.Organization}#{self.producer_id}"
-        )
+        return dynamodb_key(DbPrefix.Organization, *self.custodian_parts)
 
     @property
     def sk_2(self) -> DynamoDbStringType:
         return self.sk_1
+
+    @property
+    def custodian_parts(self) -> tuple[str]:
+        return tuple(
+            filter(None, (self.custodian.__root__, self.custodian_suffix.__root__))
+        )
 
     @classmethod
     def public_alias(cls) -> str:
         return "DocumentReference"
 
     @root_validator(pre=True)
-    def inject_producer_id(cls, values: dict) -> dict:
-        if values.get("_from_dynamo"):
-            return values
+    def extract_custodian_suffix(cls, values: dict) -> dict:
+        custodian: str = values.get("custodian")
+        custodian_suffix: str = values.pop("custodian_suffix", None)
+        if (custodian is not None) and (custodian_suffix is None):
+            custodian, custodian_suffix = split_custodian_id(custodian)
+            values["custodian"] = custodian
+        if custodian_suffix is not None:
+            values["custodian_suffix"] = custodian_suffix
+        return values
 
-        producer_id = generate_producer_id(
-            id=values.get("id"), producer_id=values.get("producer_id")
+    @root_validator(pre=True)
+    def inject_producer_id(cls, values: dict) -> dict:
+        producer_id = values.get("producer_id")
+        if values.get("_from_dynamo"):
+            producer_id = None
+
+        producer_id, document_id = generate_producer_id(
+            id=values.get("id"), producer_id=producer_id
         )
+
         values["producer_id"] = producer_id
+        values["document_id"] = document_id
         return values
 
     @root_validator(pre=True)
@@ -199,6 +201,20 @@ class DocumentPointer(DynamoDbModel):
     @validator("id")
     def validate_id(value: any) -> DynamoDbType:
         validate_tuple(tuple=value.__root__, separator=ID_SEPARATOR)
+        return value
+
+    @validator("producer_id")
+    def validate_producer_id(value: DynamoDbStringType, values: dict) -> DynamoDbType:
+        id: DynamoDbStringType = values.get("id")
+        custodian: DynamoDbStringType = values.get("custodian_id")
+        custodian_suffix: DynamoDbStringType = values.get("custodian_suffix")
+        if not any(v is None for v in (id, custodian, custodian_suffix)):
+            validate_producer_id(
+                producer_id=value.__root__,
+                id=id.__root__,
+                custodian_id=custodian.__root__,
+                custodian_suffix=custodian_suffix.__root__,
+            )
         return value
 
     @validator("type")
@@ -223,7 +239,7 @@ class DocumentPointer(DynamoDbModel):
 
     @validator("updated_on")
     def validate_updated_on(value: any) -> DynamoDbType:
-        if value == None:
+        if value is None:
             return DYNAMODB_NULL
 
         validate_timestamp(date=value.__root__)
@@ -235,9 +251,12 @@ class _NhsNumberMixin:
     def nhs_number(self) -> Union[str, None]:
         if self.subject_identifier is None:
             return None
-        nhs_number = self.subject_identifier.__root__.split("|", 1)[1]
-        validate_nhs_number(nhs_number)
-        return nhs_number
+        try:
+            nhs_number = self.subject_identifier.__root__.split("|", 1)[1]
+            validate_nhs_number(nhs_number)
+            return nhs_number
+        except ValueError as e:
+            raise RequestValidationError(e)
 
 
 class ProducerRequestParams(producer_model.RequestParams, _NhsNumberMixin):
@@ -246,3 +265,8 @@ class ProducerRequestParams(producer_model.RequestParams, _NhsNumberMixin):
 
 class ConsumerRequestParams(consumer_model.RequestParams, _NhsNumberMixin):
     pass
+
+
+class PaginatedResponse(BaseModel):
+    last_evaluated_key: str = None
+    document_pointers: list[DocumentPointer]

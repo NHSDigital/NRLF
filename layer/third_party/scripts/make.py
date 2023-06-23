@@ -1,10 +1,14 @@
 import re
+import shutil
 from pathlib import Path
 
-import sh
 from build_scripts.layer_build import build_third_party
 
 path_to_zip = Path(__file__).parent.parent / "dist" / "third_party.zip"
+path_to_previous_pyproject_toml = path_to_zip.parent / "pyproject.toml"
+path_to_current_pyproject_toml = (
+    Path(__file__).parent.parent.parent.parent / "pyproject.toml"
+)
 
 
 def escape_ansi(line):
@@ -12,15 +16,25 @@ def escape_ansi(line):
     return ansi_escape.sub("", line)
 
 
-def change_detected(file: str):
-    result = sh.git("diff", "--quiet", "main", "--", file, _ok_code=[0, 1, 128])
-    return result.exit_code == 1
+def change_detected():
+    with open(path_to_previous_pyproject_toml) as f:
+        old_pyproject = f.read()
+    with open(path_to_current_pyproject_toml) as f:
+        new_pyproject = f.read()
+    return old_pyproject != new_pyproject
 
 
 if __name__ == "__main__":
-    if change_detected("pyproject.toml") or not path_to_zip.exists():
+    if (
+        not path_to_zip.exists()
+        or not path_to_previous_pyproject_toml.exists()
+        or change_detected()
+    ):
         build_third_party(__file__)
+        shutil.copy(
+            src=path_to_current_pyproject_toml, dst=path_to_previous_pyproject_toml
+        )
     else:
-        print(
-            f"Skipping rebuild of {path_to_zip} since no changes detected from 'main'"
+        print(  # noqa: T201
+            f"Skipping rebuild of {path_to_zip} since no changes detected in 'pyproject.toml'"
         )

@@ -1,17 +1,31 @@
 from unittest import mock
 
 import pytest
+
 from nrlf.core.constants import ID_SEPARATOR
-from nrlf.core.errors import DocumentReferenceValidationError, ItemNotFound
+from nrlf.core.errors import (
+    AuthenticationError,
+    DocumentReferenceValidationError,
+    DuplicateKeyError,
+    FhirValidationError,
+    InconsistentProducerId,
+    InvalidTupleError,
+    MalformedProducerId,
+)
 from nrlf.core.transform import make_timestamp
 from nrlf.core.validators import (
+    json_loads,
     requesting_application_is_not_authorised,
     validate_document_reference_string,
     validate_nhs_number,
+    validate_producer_id,
     validate_source,
+    validate_subject_identifier_system,
     validate_timestamp,
     validate_tuple,
+    validate_type_system,
 )
+from nrlf.producer.fhir.r4.model import Identifier, RequestParams
 
 
 @pytest.mark.parametrize(
@@ -26,7 +40,7 @@ def test_validate_tuple(tuple, expected_outcome):
     outcome = True
     try:
         validate_tuple(tuple=tuple, separator=ID_SEPARATOR)
-    except ValueError:
+    except InvalidTupleError:
         outcome = False
     assert expected_outcome == outcome
 
@@ -114,7 +128,7 @@ def test_requesting_application_is_not_authorised(
                 "id": "8FW23-1114567891",
                 "custodian": {
                 "identifier": {
-                    "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+                    "system": "https://fhir.nhs.uk/Id/ods-organization-code",
                     "value": "8FW23"
                 }
                 },
@@ -127,7 +141,7 @@ def test_requesting_application_is_not_authorised(
                 "type": {
                 "coding": [
                     {
-                    "system": "https://snomed.info/ict",
+                    "system": "http://snomed.info/sct",
                     "code": "736253002"
                     }
                 ]
@@ -155,7 +169,7 @@ def test_requesting_application_is_not_authorised(
                 "id": "8FW23-1114567891",
                 "custodian": {
                 "identifier": {
-                    "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+                    "system": "https://fhir.nhs.uk/Id/ods-organization-code",
                     "value": "8FW23"
                 }
                 },
@@ -168,7 +182,7 @@ def test_requesting_application_is_not_authorised(
                 "type": {
                 "coding": [
                     {
-                    "system": "https://snomed.info/ict",
+                    "system": "http://snomed.info/sct",
                     "code": "736253002"
                     }
                 ]
@@ -202,4 +216,149 @@ def test_is_document_reference_string_valid(
         with pytest.raises(expected_outcome):
             validate_document_reference_string(document_reference_string)
     else:
-        assert validate_document_reference_string(document_reference_string) == None
+        assert validate_document_reference_string(document_reference_string) is None
+
+
+@pytest.mark.parametrize(
+    ["type", "pointer_types", "expected_outcome"],
+    (
+        [
+            "https://nrl.team/rowan-test|123",
+            ["https://nrl.team/rowan-poo|123"],
+            AuthenticationError,
+        ],
+        [
+            "https://nrl.team/rowan-test|123",
+            ["https://nrl.team/rowan-poo|123", "https://nrl.team/rowan-test|123"],
+            None,
+        ],
+        [
+            "http://snomed.info/sct|861421000000109",
+            [
+                "https://nrl.team/rowan-poo|123",
+                "http://snomed.info/sct|861421000000109",
+            ],
+            None,
+        ],
+        ["https://nrl.team/rowan-test|123", [], AuthenticationError],
+    ),
+)
+def test_validate_type_system(type, pointer_types, expected_outcome):
+
+    queryStringParameters = {
+        "type": type,
+    }
+    request_params = RequestParams(**queryStringParameters or {})
+
+    if expected_outcome is AuthenticationError:
+        with pytest.raises(expected_outcome):
+            validate_type_system(
+                type=request_params.type,
+                pointer_types=pointer_types,
+            )
+    else:
+        assert (
+            validate_type_system(
+                type=request_params.type,
+                pointer_types=pointer_types,
+            )
+            is None
+        )
+
+
+@pytest.mark.parametrize(
+    ["system_value", "expected_outcome"],
+    (
+        ["https://fhir.nhs.uk/Id/nhs-number", None],
+        ["http://fhir.nhs.uk/Id/nhs-number", FhirValidationError],
+        ["Test", FhirValidationError],
+    ),
+)
+def test_validate_subject_identifier_system(system_value, expected_outcome):
+    subject_identifier = {
+        "system": f"{system_value}",
+    }
+
+    subject_identifier_object = Identifier(**subject_identifier or {})
+
+    if expected_outcome is FhirValidationError:
+        with pytest.raises(expected_outcome):
+            validate_subject_identifier_system(
+                subject_identifier=subject_identifier_object
+            )
+    else:
+        assert (
+            validate_subject_identifier_system(
+                subject_identifier=subject_identifier_object
+            )
+            is None
+        )
+
+
+@pytest.mark.parametrize(
+    ["json_string", "expected_outcome"],
+    (
+        [
+            """{
+            "a": 1,
+            "a": 2,
+            "b": [1,2,3],
+            "b": "foo",
+            "c": {"x":1, "y":2, "z":3, "a":4}
+        }""",
+            DuplicateKeyError,
+        ],
+        [
+            """{
+            "a": 1,
+            "b": [1,2,3],
+            "c": {"x":1, "y":2, "z":3, "a":4}
+        }""",
+            {"a": 1, "b": [1, 2, 3], "c": {"x": 1, "y": 2, "z": 3, "a": 4}},
+        ],
+    ),
+)
+def test_json_loads(json_string, expected_outcome):
+
+    if expected_outcome is DuplicateKeyError:
+        with pytest.raises(expected_outcome):
+            json_loads(json_string=json_string)
+    else:
+        assert json_loads(json_string) == expected_outcome
+
+
+@pytest.mark.parametrize(
+    ["producer_id", "custodian_id", "custodian_suffix", "expected_outcome"],
+    (
+        ["abc", "abc", None, None],
+        ["abc.123", "def", "123", MalformedProducerId],
+        ["abc", "def", None, InconsistentProducerId],
+    ),
+)
+def test_validate_producer_id(
+    producer_id, custodian_id, custodian_suffix, expected_outcome
+):
+
+    if expected_outcome is MalformedProducerId:
+        with pytest.raises(expected_outcome):
+            validate_producer_id(
+                producer_id=producer_id,
+                custodian_id=custodian_id,
+                custodian_suffix=custodian_suffix,
+            )
+    elif expected_outcome is InconsistentProducerId:
+        with pytest.raises(expected_outcome):
+            validate_producer_id(
+                producer_id=producer_id,
+                custodian_id=custodian_id,
+                custodian_suffix=custodian_suffix,
+            )
+    else:
+        assert (
+            validate_producer_id(
+                producer_id=producer_id,
+                custodian_id=custodian_id,
+                custodian_suffix=custodian_suffix,
+            )
+            is None
+        )

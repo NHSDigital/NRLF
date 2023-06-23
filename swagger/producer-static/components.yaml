@@ -1,15 +1,16 @@
+---
 components:
   securitySchemes:
     ${authoriser_name}:
-      type: "apiKey"
-      name: "Authorization"
-      in: "header"
-      x-amazon-apigateway-authtype: "custom"
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: custom
       x-amazon-apigateway-authorizer:
-        type: "request"
-        authorizerUri: "${lambda_invoke_arn}"
-        authorizerCredentials: "${authoriser_iam_role}"
-        identitySource: "method.request.header.Authorization"
+        type: request
+        authorizerUri: ${lambda_invoke_arn}
+        authorizerCredentials: ${authoriser_iam_role}
+        identitySource: method.request.header.Authorization
         authorizerResultTtlInSeconds: 0
   parameters:
     id:
@@ -20,20 +21,24 @@ components:
       schema:
         $ref: "#/components/schemas/DocumentId"
     subject:
-      name: subject.identifier
+      name: subject:identifier
       in: query
       schema:
         $ref: "#/components/schemas/RequestQuerySubject"
-    custodian:
-      name: custodian.identifier
-      in: query
-      schema:
-        $ref: "#/components/schemas/RequestQueryCustodian"
     type:
-      name: type.identifier
+      name: type
       in: query
       schema:
         $ref: "#/components/schemas/RequestQueryType"
+    nextPageToken:
+      name: next-page-token
+      in: query
+      description: |
+        A token that can be sent as either a query parameter or in the post body parameter to retrieve the next set of 20 records.
+
+        This token is returned in the meta.tag field.
+      schema:
+        $ref: "#/components/schemas/NextPageToken"
     odsCode:
       name: NHSD-End-User-Organisation-ODS
       description: ODS Code for Organisation
@@ -41,6 +46,38 @@ components:
       schema:
         $ref: "#/components/schemas/RequestHeaderOdsCode"
       required: true
+    odsCodeExtension:
+      name: NHSD-End-User-Organisation
+      description: Organisation extension code
+      in: header
+      schema:
+        $ref: "#/components/schemas/RequestHeaderOrganisationExtensionCode"
+    requestId:
+      name: X-Request-ID
+      description: |
+        A globally unique identifier (GUID) for the request, which can be used to trace the request if you contact our helpdesk.
+
+        Must be a universally unique identifier (UUID) (ideally version 4).
+
+        Mirrored back in a response header.
+      in: header
+      required: false
+      schema:
+        $ref: "#/components/schemas/RequestHeaderRequestId"
+    correlationId:
+      name: X-Correlation-ID
+      description: |
+        An optional ID which you can use to track transactions across multiple systems, and we use to de-duplicate repeated requests and to trace the request if you contact our helpdesk.
+
+        If you re-send a failed request please re-send this ID in the header.
+
+        It can take any value, but we recommend avoiding `.` characters.
+
+        Mirrored back in a response header.
+      in: header
+      required: false
+      schema:
+        $ref: "#/components/schemas/RequestHeaderCorrelationId"
   requestBodies:
     DocumentReference:
       content:
@@ -51,12 +88,22 @@ components:
   responses:
     Success:
       description: Success Response
+      headers:
+        X-Correlation-Id:
+          $ref: "#/components/headers/CorrelationId"
+        X-Request-Id:
+          $ref: "#/components/headers/RequestId"
       content:
         application/fhir+json:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
     Error:
       description: Error Response
+      headers:
+        X-Correlation-Id:
+          $ref: "#/components/headers/CorrelationId"
+        X-Request-Id:
+          $ref: "#/components/headers/RequestId"
       content:
         application/fhir+json:
           schema:
@@ -82,20 +129,41 @@ components:
     RequestParams:
       type: object
       properties:
-        subject.identifier:
+        subject:identifier:
           $ref: "#/components/schemas/RequestQuerySubject"
-        custodian.identifier:
-          $ref: "#/components/schemas/RequestQueryCustodian"
-        type.identifier:
+        type:
           $ref: "#/components/schemas/RequestQueryType"
+        next-page-token:
+          $ref: "#/components/schemas/NextPageToken"
     RequestQuerySubject:
       type: string
       pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/nhs-number\|(\d+)$
-    RequestQueryCustodian:
-      type: string
-      pattern: ^https\:\/\/fhir\.nhs\.uk\/Id\/ods-code\|(\w+)$
     RequestQueryType:
       type: string
-      pattern: ^http\:\/\/snomed\.info\/sct\|(\d+)
+    NextPageToken:
+      type: string
     RequestHeaderOdsCode:
       type: string
+    RequestHeaderOrganisationExtensionCode:
+      type: string
+    RequestHeaderRequestId:
+      type: string
+      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      example: 60E0B220-8136-4CA5-AE46-1D97EF59D068
+    RequestHeaderCorrelationId:
+      type: string
+      example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+  headers:
+    CorrelationId:
+      schema:
+        type: string
+        example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+        description: |
+          The X-Correlation-ID from the request header, if supplied, mirrored back.
+    RequestId:
+      schema:
+        type: string
+        pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        example: 60E0B220-8136-4CA5-AE46-1D97EF59D068
+        description: |
+          The X-Request-ID from the request header, if supplied, mirrored back.
