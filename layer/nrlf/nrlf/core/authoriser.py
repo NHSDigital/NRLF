@@ -164,7 +164,7 @@ def retrieve_pointer_types(
     connection_metadata: ConnectionMetadata = data["connection_metadata"]
 
     pointer_types = connection_metadata.pointer_types
-    if connection_metadata.enable_permissions_lookup:
+    if connection_metadata.enable_authorization_lookup:
         try:
             pointer_types = _parse_list_from_s3(
                 s3_client=dependencies["s3_client"],

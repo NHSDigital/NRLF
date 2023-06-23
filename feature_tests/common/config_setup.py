@@ -158,7 +158,7 @@ def register_application(
     connection_metadata = {
         "nrl.ods-code": org_id,
         "nrl.ods-code-extension": org_id_extension,
-        "nrl.enable-permissions-lookup": enable_s3_for_permissions,
+        "nrl.enable-authorization-lookup": enable_s3_for_permissions,
     }
     if enable_s3_for_permissions:
         register_pointer_types_in_s3(

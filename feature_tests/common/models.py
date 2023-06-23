@@ -136,7 +136,7 @@ class LocalApiRequest(BaseRequest):
             self.headers[CONNECTION_METADATA]
         )
 
-        if connection_metadata.enable_permissions_lookup:
+        if connection_metadata.enable_authorization_lookup:
             ods_code = connection_metadata.ods_code
             app_id = client_rp_details.developer_app_id
             pointer_types = _parse_list_from_s3(

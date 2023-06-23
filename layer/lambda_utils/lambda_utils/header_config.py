@@ -45,8 +45,8 @@ class ConnectionMetadata(AbstractHeader):
     ods_code: str = Field(alias="nrl.ods-code")
     ods_code_extension: str = Field(alias="nrl.ods-code-extension", default=None)
     nrl_permissions: list[str] = Field(alias="nrl.permissions", default_factory=list)
-    enable_permissions_lookup: bool = Field(
-        alias="nrl.enable-permissions-lookup", default=False
+    enable_authorization_lookup: bool = Field(
+        alias="nrl.enable-authorization-lookup", default=False
     )
 
     @property
