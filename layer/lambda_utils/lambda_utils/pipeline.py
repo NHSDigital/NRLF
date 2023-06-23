@@ -4,7 +4,6 @@ from http import HTTPStatus
 from pathlib import Path
 from types import FunctionType
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.pipeline import make_pipeline
 from lambda_pipeline.types import LambdaContext, PipelineData
 from lambda_utils.constants import LogLevel
@@ -22,6 +21,7 @@ from lambda_utils.versioning import (
 )
 from pydantic import ValidationError
 
+from nrlf.core.model import APIGatewayProxyEventModel
 from nrlf.core.response import operation_outcome_not_ok
 
 

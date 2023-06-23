@@ -3,7 +3,6 @@ from dataclasses import asdict
 from typing import Union
 
 from behave import use_fixture
-from behave.runner import Context
 from lambda_utils.header_config import ClientRpDetailsHeader, ConnectionMetadata
 
 from feature_tests.common.constants import (
@@ -17,12 +16,15 @@ from feature_tests.common.constants import (
 from feature_tests.common.fixtures import (
     mock_dynamodb,
     mock_environmental_variables,
+    mock_s3,
+    setup_buckets,
     setup_tables,
 )
 from feature_tests.common.models import (
     ActorContext,
     ApiRequest,
     AuthLambdaRequest,
+    Context,
     LocalApiRequest,
     LocalAuthLambdaRequest,
     TestConfig,
@@ -30,12 +32,14 @@ from feature_tests.common.models import (
 from feature_tests.common.repository import FeatureTestRepository
 from feature_tests.common.utils import (
     get_api_definitions_from_swagger,
+    get_auth_store,
     get_dynamodb_client,
     get_endpoint,
     get_environment_prefix,
     get_lambda_arn,
     get_lambda_client,
     get_lambda_handler,
+    get_s3_client,
     get_test_mode,
     get_tls_ma_files,
 )
@@ -44,13 +48,16 @@ from nrlf.core.constants import (
     CONNECTION_METADATA,
     PERMISSION_AUDIT_DATES_FROM_PAYLOAD,
 )
+from nrlf.core.types import S3Client
 from nrlf.core.validators import json_loads
 
 
 def _local_mock(context: Context):
     use_fixture(mock_environmental_variables, context)
     use_fixture(mock_dynamodb, context)
+    use_fixture(mock_s3, context)
     setup_tables()
+    setup_buckets()
 
 
 def request_setup(
@@ -88,7 +95,9 @@ def request_setup(
                 action=actor_context.action,
                 suffix="DocumentReference",
             )
-            request = LocalApiRequest(**base_request_config, handler=handler)
+            request = LocalApiRequest(
+                **base_request_config, handler=handler, s3_client=test_config.s3_client
+            )
         else:
             api_definitions = get_api_definitions_from_swagger(
                 actor_type=actor_context.actor_type
@@ -110,7 +119,9 @@ def config_setup(context: Context, scenario_name: str) -> TestConfig:
     if test_mode is TestMode.LOCAL_TEST:
         _local_mock(context=context)
     environment_prefix = get_environment_prefix(test_mode=test_mode)
+    permissions_bucket = get_auth_store(test_mode=test_mode)
     dynamodb_client = get_dynamodb_client(test_mode=test_mode)
+    s3_client = get_s3_client(test_mode=test_mode)
     repositories = {
         table: FeatureTestRepository(
             item_type=table,
@@ -122,7 +133,9 @@ def config_setup(context: Context, scenario_name: str) -> TestConfig:
     test_config = TestConfig(mode=test_mode, repositories=repositories)
     test_config.request.scenario_name = scenario_name
     test_config.dynamodb_client = dynamodb_client
+    test_config.s3_client = s3_client
     test_config.environment_prefix = environment_prefix
+    test_config.auth_store = permissions_bucket
     return test_config
 
 
@@ -133,6 +146,7 @@ def register_application(
     app_name: str,
     app_id: str,
     pointer_types: list[str],
+    enable_s3_for_permissions: bool,
 ):
     test_config: TestConfig = context.test_config
     if app_name not in ALLOWED_APPS:
@@ -141,12 +155,24 @@ def register_application(
     if app_id not in ALLOWED_APP_IDS:
         raise ValueError(f"App ID {app_id} must be one of {ALLOWED_APP_IDS}")
 
+    connection_metadata = {
+        "nrl.ods-code": org_id,
+        "nrl.ods-code-extension": org_id_extension,
+        "nrl.enable-authorization-lookup": enable_s3_for_permissions,
+    }
+    if enable_s3_for_permissions:
+        register_pointer_types_in_s3(
+            app_id=app_id,
+            org_id=org_id,
+            pointer_types=pointer_types,
+            s3_client=context.test_config.s3_client,
+            permissions_bucket=test_config.auth_store,
+        )
+    if not enable_s3_for_permissions:
+        connection_metadata["nrl.pointer-types"] = pointer_types
+
     test_config.request.headers[CONNECTION_METADATA] = ConnectionMetadata(
-        **{
-            "nrl.pointer-types": pointer_types,
-            "nrl.ods-code": org_id,
-            "nrl.ods-code-extension": org_id_extension,
-        }
+        **connection_metadata
     ).json(by_alias=True)
 
     test_config.request.headers[CLIENT_RP_DETAILS] = ClientRpDetailsHeader(
@@ -159,3 +185,17 @@ def set_audit_date_permission(context: Context):
     existing_headers = json_loads(test_config.request.headers[CONNECTION_METADATA])
     existing_headers["nrl.permissions"].append(PERMISSION_AUDIT_DATES_FROM_PAYLOAD)
     test_config.request.headers[CONNECTION_METADATA] = json.dumps(existing_headers)
+
+
+def register_pointer_types_in_s3(
+    app_id: str,
+    org_id: str,
+    pointer_types: list[str],
+    s3_client: S3Client,
+    permissions_bucket: str,
+):
+    s3_client.put_object(
+        Bucket=permissions_bucket,
+        Key=f"{app_id}/{org_id}.json",
+        Body=json.dumps(pointer_types).encode(),
+    )

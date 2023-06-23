@@ -200,7 +200,7 @@ Feature: Producer Create Success scenarios
 
   Scenario: Successfully create a Document Pointer with overridden created on date when producer has permission to set audit date
     Given Producer "Data Sync" (Organisation ID "DS123") is requesting to create Document Pointers
-    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types stored in NRLF
       | system                 | value           |
       | http://snomed.info/sct | 861421000000109 |
     And Producer "Data Sync" has the permission "audit-dates-from-payload"

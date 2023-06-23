@@ -2,7 +2,6 @@ from enum import Enum
 from logging import Logger
 from typing import Any
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 
 from nrlf.core.common_producer_steps import invalid_producer_for_delete
@@ -13,6 +12,7 @@ from nrlf.core.common_steps import (
     read_subject_from_path,
 )
 from nrlf.core.errors import RequestValidationError
+from nrlf.core.model import APIGatewayProxyEventModel
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
 from nrlf.core.response import operation_outcome_ok

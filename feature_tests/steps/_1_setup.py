@@ -37,16 +37,14 @@ def given_permissions_for_types(
     )
 
 
-@given(
-    '{actor_type} "{actor}" is registered in the system for application "{app_name}" (ID "{app_id}") {with_without_any} pointer types'
-)
-def registered_in_system(
+def _registered_in_system(
     context: Context,
     actor_type: str,
     actor: str,
     app_name: str,
     app_id: str,
     with_without_any: str,
+    enable_s3_for_permissions: bool = False,
 ):
     test_config: TestConfig = context.test_config
     if with_without_any not in WITH_WITHOUT_ANY:
@@ -67,6 +65,51 @@ def registered_in_system(
         app_name=app_name,
         app_id=app_id,
         pointer_types=pointer_types,
+        enable_s3_for_permissions=enable_s3_for_permissions,
+    )
+
+
+@given(
+    '{actor_type} "{actor}" is registered in the system for application "{app_name}" (ID "{app_id}") {with_without_any} pointer types'
+)
+def registered_in_system(
+    context: Context,
+    actor_type: str,
+    actor: str,
+    app_name: str,
+    app_id: str,
+    with_without_any: str,
+):
+    _registered_in_system(
+        context=context,
+        actor_type=actor_type,
+        actor=actor,
+        app_name=app_name,
+        app_id=app_id,
+        with_without_any=with_without_any,
+        enable_s3_for_permissions=False,
+    )
+
+
+@given(
+    '{actor_type} "{actor}" is registered in the system for application "{app_name}" (ID "{app_id}") {with_without_any} pointer types stored in NRLF'
+)
+def registered_in_system(
+    context: Context,
+    actor_type: str,
+    actor: str,
+    app_name: str,
+    app_id: str,
+    with_without_any: str,
+):
+    _registered_in_system(
+        context=context,
+        actor_type=actor_type,
+        actor=actor,
+        app_name=app_name,
+        app_id=app_id,
+        with_without_any=with_without_any,
+        enable_s3_for_permissions=True,
     )
 
 
