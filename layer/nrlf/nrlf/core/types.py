@@ -31,3 +31,28 @@ class DynamoDbClient:
 
     def delete_table(self, *args, **kwargs) -> DynamoDbResponse:
         pass
+
+
+class S3Exceptions:
+    class NoSuchKey(Exception):
+        pass
+
+
+class S3Client:
+    """For type-annotating boto3.client('s3')"""
+
+    @property
+    def exceptions(self):
+        return S3Exceptions
+
+        class NoSuchKey(Exception):
+            pass
+
+    def create_bucket(self, Bucket: str, **kwargs) -> dict:
+        pass
+
+    def get_object(self, Bucket: str, Key: str) -> dict:
+        pass
+
+    def put_object(self, Bucket: str, Key: str, Body: bytes) -> dict:
+        pass

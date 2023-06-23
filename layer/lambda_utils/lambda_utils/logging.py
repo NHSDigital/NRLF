@@ -7,7 +7,6 @@ from timeit import default_timer as timer
 from typing import Any, Callable, Optional, TypeVar, Union
 
 from aws_lambda_powertools import Logger as AwsLogger
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_utils.constants import LoggingConstants, LoggingOutcomes, LogLevel
 from lambda_utils.header_config import LoggingHeader
 from lambda_utils.logging_utils import (
@@ -21,6 +20,7 @@ from lambda_utils.logging_utils import (
 from pydantic import BaseModel, Extra, Field
 from typing_extensions import ParamSpec
 
+from nrlf.core.model import APIGatewayProxyEventModel, Authorizer
 from nrlf.core.transform import make_timestamp
 
 
@@ -78,6 +78,7 @@ class LogTemplate(LogTemplateBase):
 
 class MinimalRequestContextForLogging(BaseModel):
     accountId: str
+    authorizer: Optional[Authorizer] = Field(default_factory=Authorizer)
 
 
 class MinimalEventModelForLogging(APIGatewayProxyEventModel):

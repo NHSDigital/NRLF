@@ -1,11 +1,11 @@
 import urllib.parse
 from typing import Any
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from pydantic import BaseModel, validator
 
 from nrlf.core.errors import ItemNotFound
+from nrlf.core.model import APIGatewayProxyEventModel
 
 
 class RaiseValidationErrorModel(BaseModel):

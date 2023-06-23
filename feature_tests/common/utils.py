@@ -18,13 +18,14 @@ from feature_tests.common.constants import (
     ALLOWED_CONSUMERS,
     ALLOWED_PRODUCER_ORG_IDS,
     ALLOWED_PRODUCERS,
+    AUTH_STORE,
     Action,
     ActorType,
     TestMode,
 )
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
-from nrlf.core.types import DynamoDbClient
+from nrlf.core.types import DynamoDbClient, S3Client
 
 RELATES_TO = "relatesTo"
 TARGET = "target"
@@ -85,6 +86,10 @@ def get_dynamodb_client(test_mode: TestMode) -> DynamoDbClient:
     return _get_boto3_client(client_name="dynamodb", test_mode=test_mode)
 
 
+def get_s3_client(test_mode: TestMode) -> S3Client:
+    return _get_boto3_client(client_name="s3", test_mode=test_mode)
+
+
 def get_lambda_client(test_mode: TestMode) -> any:
     return _get_boto3_client(client_name="lambda", test_mode=test_mode)
 
@@ -97,11 +102,19 @@ def get_test_mode(context: Context) -> TestMode:
     )
 
 
-def get_environment_prefix(test_mode: TestMode):
+def get_environment_prefix(test_mode: TestMode) -> str:
     return (
         ""
         if test_mode is TestMode.LOCAL_TEST
         else f'{get_terraform_json()["prefix"]["value"]}--'
+    )
+
+
+def get_auth_store(test_mode: TestMode) -> str:
+    return (
+        AUTH_STORE
+        if test_mode is TestMode.LOCAL_TEST
+        else get_terraform_json()["auth_store"]["value"]
     )
 
 

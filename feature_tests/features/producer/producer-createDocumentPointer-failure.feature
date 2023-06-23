@@ -527,7 +527,7 @@ Feature: Producer Create Failure Scenarios
 
   Scenario: Unable to create a Document Pointer when has permission to set audit date and no date value provided
     Given Producer "Data Sync" (Organisation ID "DS123") is requesting to create Document Pointers
-    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types stored in NRLF
       | system                 | value           |
       | http://snomed.info/sct | 861421000000109 |
     And Producer "Data Sync" has the permission "audit-dates-from-payload"
