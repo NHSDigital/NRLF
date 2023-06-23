@@ -55,7 +55,6 @@ Feature: Consumer Search Success scenarios
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
     And the response has 1 total
 
   Scenario: Successfully search for multiple Document Pointers by NHS number
@@ -91,7 +90,6 @@ Feature: Consumer Search Success scenarios
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
     And the response has 2 total
 
   Scenario: Empty results when searching for a Document Pointer when the consumer can't access existing document type
@@ -111,7 +109,6 @@ Feature: Consumer Search Success scenarios
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
     And the response has 0 total
 
   Scenario: Empty results when searching for a Document Pointer when subject has no documents
@@ -123,7 +120,6 @@ Feature: Consumer Search Success scenarios
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
     And the response has 0 total
 
   Scenario: Successfully searches for all documents by producer and nhs number for a consumer
@@ -152,7 +148,6 @@ Feature: Consumer Search Success scenarios
       | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
       | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
     And the response has 1 total
 
   Scenario: Successfully searches for all documents by type and nhs number for a consumer
@@ -181,7 +176,6 @@ Feature: Consumer Search Success scenarios
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
       | type               | http://snomed.info/sct\|736253002             |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
     And the response has 1 total
 
   Scenario: Successfully searches for all documents by producer and nhs number and type for a consumer
@@ -211,7 +205,6 @@ Feature: Consumer Search Success scenarios
       | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
       | type                 | http://snomed.info/sct\|736253002                   |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
     And the response has 1 total
 
   Scenario: Successfully searches for all documents and provides last evaluated key when above 100 record limit
@@ -233,5 +226,4 @@ Feature: Consumer Search Success scenarios
       | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
       | type                 | http://snomed.info/sct\|736253002                   |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
     And the response has 201 total

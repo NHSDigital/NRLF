@@ -10,9 +10,9 @@ from nrlf.core.errors import (
     RequestValidationError,
 )
 from nrlf.core.transform import (
-    _strip_empty_json_paths,
     create_bundle_entries_from_document_pointers,
     create_document_pointer_from_fhir_json,
+    strip_empty_json_paths,
     transform_next_page_token_to_start_key,
     validate_custodian_system,
     validate_no_extra_fields,
@@ -43,7 +43,7 @@ from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
     ],
 )
 def test__strip_empty_json_paths(input, expected):
-    assert _strip_empty_json_paths(input) == expected
+    assert strip_empty_json_paths(input) == expected
 
 
 @pytest.mark.parametrize(
@@ -57,7 +57,7 @@ def test__strip_empty_json_paths(input, expected):
 )
 def test__strip_empty_json_paths_raises_exception(input):
     with pytest.raises(FhirValidationError):
-        _strip_empty_json_paths(input, raise_on_discovery=True)
+        strip_empty_json_paths(input, raise_on_discovery=True)
 
 
 @pytest.mark.parametrize(
@@ -70,7 +70,7 @@ def test__strip_empty_json_paths_raises_exception(input):
     ],
 )
 def test__strip_empty_json_paths_do_not_raise(input):
-    _strip_empty_json_paths(input, raise_on_discovery=True)
+    strip_empty_json_paths(input, raise_on_discovery=True)
 
 
 @pytest.mark.parametrize("field", REQUIRED_CREATE_FIELDS)
@@ -79,7 +79,7 @@ def test_strip_empty_json_paths_throws_error_when_field_missing(field):
     fhir_json[field] = None
 
     with pytest.raises(ProducerCreateValidationError):
-        _strip_empty_json_paths(fhir_json, raise_on_discovery=True)
+        strip_empty_json_paths(fhir_json, raise_on_discovery=True)
 
 
 def test_strip_empty_json_paths_throws_error_when_field_missing():

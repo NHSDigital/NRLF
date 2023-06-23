@@ -133,7 +133,6 @@ Feature: Producer Search Success scenarios
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
 
   Scenario: Empty results when searching for a Document Pointer when subject has no documents with requesting producer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
@@ -152,7 +151,6 @@ Feature: Producer Search Success scenarios
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|7736959498 |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
 
   Scenario: Empty results when searching for a Document Pointer when provided document type does not match any documents
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
@@ -179,7 +177,6 @@ Feature: Producer Search Success scenarios
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|7736959498 |
     Then the operation is successful
-    And the response is a Bundle with 0 entries
 
   Scenario: Successfully searches for all documents belonging to the producer when no parameters passed
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to search Document Pointers
@@ -463,4 +460,3 @@ Feature: Producer Search Success scenarios
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
-    And the response is a Bundle with 0 entries

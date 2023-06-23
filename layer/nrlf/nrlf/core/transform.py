@@ -40,7 +40,7 @@ def make_timestamp() -> str:
     return dt.utcnow().isoformat(timespec="milliseconds") + "Z"
 
 
-def _strip_empty_json_paths(
+def strip_empty_json_paths(
     json: Union[list[dict], dict], raise_on_discovery=False, json_path: list = None
 ) -> Union[list[dict], dict]:
     if json_path is None:
@@ -63,7 +63,7 @@ def _strip_empty_json_paths(
                 filter(
                     None,
                     (
-                        _strip_empty_json_paths(
+                        strip_empty_json_paths(
                             item, raise_on_discovery, json_path=json_path + [str(i)]
                         )
                         for i, item in enumerate(json)
@@ -76,7 +76,7 @@ def _strip_empty_json_paths(
     modified = False
     for key, value in json.items():
         if type(value) in JSON_TYPES:
-            value = _strip_empty_json_paths(
+            value = strip_empty_json_paths(
                 value, raise_on_discovery, json_path=json_path + [key]
             )
         if value in EMPTY_VALUES:
@@ -92,7 +92,7 @@ def _strip_empty_json_paths(
             continue
         stripped_json[key] = value
     return (
-        _strip_empty_json_paths(stripped_json, raise_on_discovery)
+        strip_empty_json_paths(stripped_json, raise_on_discovery)
         if modified
         else stripped_json
     )
@@ -140,9 +140,7 @@ def create_document_pointer_from_fhir_json(
     source: Source = Source.NRLF,
     **kwargs,
 ) -> DocumentPointer:
-    stripped_fhir_json = _strip_empty_json_paths(
-        json=fhir_json, raise_on_discovery=True
-    )
+    stripped_fhir_json = strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
     fhir_model = create_fhir_model_from_fhir_json(fhir_json=stripped_fhir_json)
     core_model = DocumentPointer(
         id=fhir_model.id,
@@ -171,7 +169,7 @@ def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference
         subject_identifier=fhir_strict_model.subject.identifier
     )
 
-    _strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
+    strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
     if fhir_strict_model.relatesTo:
         validate_relates_to(relates_to=fhir_strict_model.relatesTo)
     return fhir_strict_model
