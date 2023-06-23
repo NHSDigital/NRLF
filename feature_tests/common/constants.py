@@ -60,8 +60,8 @@ TABLE_CONFIG = {
     DocumentPointer: DOCUMENT_POINTER_TABLE_DEFINITION,
 }
 
-PERMISSIONS_BUCKET = "permissions_bucket"  # This should match the value in TF outputs
-BUCKETS = [PERMISSIONS_BUCKET]
+AUTH_STORE = "auth_store"
+BUCKETS = [AUTH_STORE]
 
 
 class TestMode(Enum):

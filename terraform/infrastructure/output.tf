@@ -58,6 +58,6 @@ output "mi" {
   value = module.mi
 }
 
-output "permissions_bucket" {
+output "auth_store" {
   value = aws_s3_bucket.authorization-store.id
 }

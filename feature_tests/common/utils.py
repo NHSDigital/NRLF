@@ -18,7 +18,7 @@ from feature_tests.common.constants import (
     ALLOWED_CONSUMERS,
     ALLOWED_PRODUCER_ORG_IDS,
     ALLOWED_PRODUCERS,
-    PERMISSIONS_BUCKET,
+    AUTH_STORE,
     Action,
     ActorType,
     TestMode,
@@ -110,11 +110,11 @@ def get_environment_prefix(test_mode: TestMode) -> str:
     )
 
 
-def get_permissions_bucket(test_mode: TestMode) -> str:
+def get_auth_store(test_mode: TestMode) -> str:
     return (
-        PERMISSIONS_BUCKET
+        AUTH_STORE
         if test_mode is TestMode.LOCAL_TEST
-        else get_terraform_json()["permissions_bucket"]["value"]
+        else get_terraform_json()["auth_store"]["value"]
     )
 
 

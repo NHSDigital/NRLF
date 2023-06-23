@@ -54,7 +54,7 @@ class Config(BaseModel):
     ENVIRONMENT: str
     SPLUNK_INDEX: str
     SOURCE: str
-    PERMISSIONS_LOOKUP_BUCKET: str
+    AUTH_STORE: str
 
 
 def build_persistent_dependencies(
@@ -73,7 +73,7 @@ def build_persistent_dependencies(
         "environment": config.ENVIRONMENT,
         "splunk_index": config.SPLUNK_INDEX,
         "source": config.SOURCE,
-        "permissions_lookup_bucket": config.PERMISSIONS_LOOKUP_BUCKET,
+        "permissions_lookup_bucket": config.AUTH_STORE,
         "s3_client": s3_client,
     }
 

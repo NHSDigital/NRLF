@@ -13,9 +13,9 @@ from lambda_utils.tests.unit.utils import make_aws_event
 from pydantic import BaseModel
 
 from feature_tests.common.constants import (
+    AUTH_STORE,
     DEFAULT_AUTHORIZATION,
     DEFAULT_METHOD_ARN,
-    PERMISSIONS_BUCKET,
     STATUS_CODE_200,
     Action,
     ActorType,
@@ -141,7 +141,7 @@ class LocalApiRequest(BaseRequest):
             app_id = client_rp_details.developer_app_id
             pointer_types = _parse_list_from_s3(
                 s3_client=self.s3_client,
-                bucket=PERMISSIONS_BUCKET,
+                bucket=AUTH_STORE,
                 key=f"{app_id}/{ods_code}.json",
             )
         else:
@@ -209,7 +209,7 @@ class TestConfig:
     actor_context: ActorContext = None
     dynamodb_client: DynamoDbClient = None
     s3_client: S3Client = None
-    permissions_bucket: str = None
+    auth_store: str = None
     environment_prefix: str = None
     rendered_templates: dict = field(default_factory=dict)
 

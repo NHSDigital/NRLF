@@ -32,13 +32,13 @@ from feature_tests.common.models import (
 from feature_tests.common.repository import FeatureTestRepository
 from feature_tests.common.utils import (
     get_api_definitions_from_swagger,
+    get_auth_store,
     get_dynamodb_client,
     get_endpoint,
     get_environment_prefix,
     get_lambda_arn,
     get_lambda_client,
     get_lambda_handler,
-    get_permissions_bucket,
     get_s3_client,
     get_test_mode,
     get_tls_ma_files,
@@ -119,7 +119,7 @@ def config_setup(context: Context, scenario_name: str) -> TestConfig:
     if test_mode is TestMode.LOCAL_TEST:
         _local_mock(context=context)
     environment_prefix = get_environment_prefix(test_mode=test_mode)
-    permissions_bucket = get_permissions_bucket(test_mode=test_mode)
+    permissions_bucket = get_auth_store(test_mode=test_mode)
     dynamodb_client = get_dynamodb_client(test_mode=test_mode)
     s3_client = get_s3_client(test_mode=test_mode)
     repositories = {
@@ -135,7 +135,7 @@ def config_setup(context: Context, scenario_name: str) -> TestConfig:
     test_config.dynamodb_client = dynamodb_client
     test_config.s3_client = s3_client
     test_config.environment_prefix = environment_prefix
-    test_config.permissions_bucket = permissions_bucket
+    test_config.auth_store = permissions_bucket
     return test_config
 
 
@@ -166,7 +166,7 @@ def register_application(
             org_id=org_id,
             pointer_types=pointer_types,
             s3_client=context.test_config.s3_client,
-            permissions_bucket=test_config.permissions_bucket,
+            permissions_bucket=test_config.auth_store,
         )
     if not enable_s3_for_permissions:
         connection_metadata["nrl.pointer-types"] = pointer_types

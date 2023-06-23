@@ -143,7 +143,7 @@ def test_execute_steps_yields_deny_on_internal_server_error(
             SPLUNK_INDEX="an-index",
             SOURCE="the-lambda-name",
             S3_CLIENT="the-s3-client",
-            PERMISSIONS_LOOKUP_BUCKET="a-bucket",
+            AUTH_STORE="a-bucket",
         ),
     )
 

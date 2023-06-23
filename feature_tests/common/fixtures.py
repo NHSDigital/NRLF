@@ -5,7 +5,7 @@ import boto3
 import moto
 from behave import fixture
 
-from feature_tests.common.constants import BUCKETS, PERMISSIONS_BUCKET, TABLE_CONFIG
+from feature_tests.common.constants import AUTH_STORE, BUCKETS, TABLE_CONFIG
 from nrlf.core.types import DynamoDbClient, S3Client
 
 
@@ -54,7 +54,7 @@ def mock_environmental_variables(context, *args, **kwargs):
             "SPLUNK_INDEX": "__index__",
             "SOURCE": "__source__",
             "DYNAMODB_TIMEOUT": "30",
-            "PERMISSIONS_LOOKUP_BUCKET": PERMISSIONS_BUCKET,
+            "AUTH_STORE": AUTH_STORE,
         },
         clear=True,
     ):
