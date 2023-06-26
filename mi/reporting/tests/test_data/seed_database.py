@@ -3,16 +3,16 @@ from pathlib import Path
 from typing import Generator, Type, Union
 
 import fire
-from reporting.tests.test_data.generate_test_data import (
-    FOREIGN_KEYS,
-    Dimension,
-    Measure,
-)
 
 from helpers.aws_session import new_aws_session
 from helpers.log import log
 from helpers.terraform import get_terraform_json
 from mi.reporting.resources import get_credentials, get_endpoint, get_lambda_name
+from mi.reporting.tests.test_data.generate_test_data import (
+    FOREIGN_KEYS,
+    Dimension,
+    Measure,
+)
 from mi.sql_query.model import Response, Sql, SqlQueryEvent, Status
 
 PATH_TO_HERE = Path(__file__).parent

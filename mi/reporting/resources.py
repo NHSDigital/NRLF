@@ -30,11 +30,6 @@ def each_sql_statement() -> Generator[tuple[str, str], None, None]:
             yield report_name, sql_statement
 
 
-@log("Got SQL identifiers {__result__}")
-def get_sql_identifiers() -> dict:
-    return {}
-
-
 @log("Got endpoint {__result__}")
 def get_endpoint(session, env: str, operation: str = "read") -> str:
     client = session.client("rds")

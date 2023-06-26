@@ -3,7 +3,7 @@ from tempfile import TemporaryDirectory
 from unittest import mock
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis.strategies import builds, just, lists, text, tuples
 
 from mi.reporting.actions import (
@@ -26,24 +26,23 @@ def mock_patch(function_name: str, **kwargs):
     return_value={"user": "foo", "password": "FOO"},  # pragma: allowlist secret
 )
 @mock_patch("get_endpoint", return_value="endpoint")
-@mock_patch("get_sql_statement", return_value="sql")
-@mock_patch("get_sql_identifiers", return_value={"identifiers": "bar"})
+@mock_patch("each_sql_statement", return_value=[["report", "sql"]])
 def test_make_query_event(
-    _mock_get_credentials,
-    _mock_get_endpoint,
-    _mock_get_sql_statement,
-    _mock_get_sql_identifiers,
+    _mock_get_credentials, _mock_get_endpoint, _mock_each_sql_statement
 ):
-    query_event = each_query_event(session=None, workspace=None, env=None)
-    assert query_event == {
+    ((report_name, query_event),) = each_query_event(
+        session=None, workspace=None, env=None, partition_key="party_key"
+    )
+    assert report_name == "report"
+    assert query_event.dict() == {
         "autocommit": False,
         "database_name": None,
         "endpoint": "endpoint",
         "password": "FOO",  # pragma: allowlist secret
         "raise_on_sql_error": False,
         "sql": {
-            "identifiers": {"identifiers": "bar"},
-            "params": {},
+            "identifiers": {},
+            "params": {"partition_key": "party_key"},
             "statement": "sql",
         },
         "user": "foo",
@@ -53,22 +52,32 @@ def test_make_query_event(
 @pytest.mark.parametrize(
     ["query", "column_names"],
     [
-        ("SELECT foo, bar, boom FROM my_table;", ["foo", "bar", "boom"]),
-        ("SELECT foo AS FOO, bar, boom AS BOOM FROM my_table;", ["FOO", "bar", "BOOM"]),
-        ("foo, bar, boom", ["foo", "bar", "boom"]),
+        (
+            "SELECT foo, bar, boom FROM my_table;",
+            ["foo", "bar", "boom"],
+        ),
+        (
+            "SELECT foo AS FOO, bar, boom as BOOM FROM my_table;",
+            ["FOO", "bar", "BOOM"],
+        ),
+        (
+            "SELECT MIN(a.b.foo) AS FOO, c.d.bar AS bar, e.f.boom FROM my_table;",
+            ["FOO", "bar", "e.f.boom"],
+        ),
     ],
 )
 def test__column_names_from_sql_query(query: str, column_names: list[str]):
     assert _column_names_from_sql_query(query) == column_names
 
 
+@settings(deadline=None)
 @given(
     response=builds(
         Response, status=just(Status.OK), results=lists(tuples(text(), text(), text()))
     ),
     event=builds(
         SqlQueryEvent,
-        sql=just(Sql(statement="SELECT first, second, third from my_table;")),
+        sql=just(Sql(statement="SELECT first, second, third FROM my_table;")),
     ),
 )
 def test_perform_query_ok(response: Response, event: SqlQueryEvent):
@@ -91,13 +100,14 @@ def test_write_csv():
             data=[{"FOO": "foo", "BAR": "bar"}],
             path=path,
             env="theEnv",
+            report_name="theReport",
             workspace="theWorkspace",
             today=date(day=1, month=2, year=2000),
             now=datetime(second=30, minute=2, hour=3, day=1, month=2, year=2000),
         )
         assert (
             out_path
-            == f"{path}/2000/02/01/mi-report-theEnv-theWorkspace-2000-02-01T03-02-30.csv"
+            == f"{path}/2000/02/01/theReport/theEnv/theWorkspace/theReport-theEnv-theWorkspace-2000-02-01T03-02-30.csv"
         )
         with open(out_path) as f:
             data = f.read()
