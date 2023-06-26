@@ -16,15 +16,12 @@ from mi.reporting.resources import (
 from mi.sql_query.model import Response, Sql, SqlQueryEvent, Status
 
 SQL_SELECT_REGEX = re.compile(r"SELECT(.*)FROM", flags=re.DOTALL)
-SQL_COLUMN_REGEX = re.compile(
-    r"(?:\s+AS\s+)(\w+)|(?:\s*)(\w+)(?:\,)|(?:\s+)(\w+)(?: FROM)"
-)
 
 
 @log("Created query events")
 def each_query_event(
     session, workspace: str, env: str, partition_key
-) -> Generator[dict, None, None]:
+) -> Generator[tuple[str, SqlQueryEvent], None, None]:
     credentials = get_credentials(session=session, workspace=workspace)
     endpoint = get_endpoint(session=session, env=env)
     for report_name, statement in each_sql_statement():
@@ -42,8 +39,8 @@ def _column_names_from_sql_query(query: str):
         raise ValueError(f"Couldn't find valid SELECT statement in query {query}")
 
     column_names = []
-    for result in SQL_COLUMN_REGEX.finditer(select):
-        (column_name,) = filter(bool, result.groups())
+    for column_statement in select.split(","):
+        column_name = re.split("as|AS", column_statement)[-1].strip()
         column_names.append(column_name)
     return column_names
 

@@ -4,10 +4,10 @@ from datetime import datetime
 
 import pytest
 import yaml
-from reporting.paths import VALIDATOR_PATH
 
-from helpers import log
+from helpers.log import log
 from helpers.terraform import get_terraform_json
+from mi.reporting.paths import VALIDATOR_PATH
 from mi.reporting.report import make_reports
 from mi.reporting.tests.test_data.seed_database import seed_database
 

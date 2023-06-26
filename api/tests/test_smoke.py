@@ -16,7 +16,7 @@ from helpers.oauth import (
     token,
 )
 
-ENV_NAME_RE = re.compile("^(?P<env>\w+)(-(?P<sandbox>sandbox)?)?$")
+ENV_NAME_RE = re.compile(r"^(?P<env>\w+)(-(?P<sandbox>sandbox)?)?$")
 
 APIGEE_BASE_URL = "api.service.nhs.uk"
 API_PATH = "/FHIR/R4/DocumentReference"
