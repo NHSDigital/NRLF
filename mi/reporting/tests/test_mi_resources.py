@@ -9,7 +9,6 @@ from mi.reporting.resources import (
     each_sql_statement,
     get_credentials,
     get_endpoint,
-    get_sql_identifiers,
     make_report_path,
 )
 
@@ -28,12 +27,8 @@ def test_get_credentials():
 
 
 def test_get_sql_statement():
-    assert each_sql_statement().startswith("SELECT")
-
-
-def test_get_sql_identifiers():
-    identifiers = get_sql_identifiers()
-    assert identifiers == {}
+    for _, sql in each_sql_statement():
+        assert sql.startswith("SELECT")
 
 
 @mock_rds
@@ -61,12 +56,13 @@ def test_get_endpoint():
 
 def test_make_report_path():
     with TemporaryDirectory() as path:
-        expected = f"{path}/2000/02/01/mi-report-BAR-BAZ-2000-02-01T03-02-30.csv"
+        expected = f"{path}/2000/02/01/reportName/BAR/BAZ/reportName-BAR-BAZ-2000-02-01T03-02-30.csv"
         assert (
             make_report_path(
                 path=path,
                 env="BAR",
                 workspace="BAZ",
+                report_name="reportName",
                 today=date(day=1, month=2, year=2000),
                 now=datetime(second=30, minute=2, hour=3, day=1, month=2, year=2000),
             )
