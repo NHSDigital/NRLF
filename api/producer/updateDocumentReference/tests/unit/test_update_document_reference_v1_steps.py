@@ -118,3 +118,31 @@ def test__validate_immutable_fields(field):
 
     with pytest.raises(ImmutableFieldViolationError):
         _validate_immutable_fields(immutable_fields=_IMMUTABLE_FIELDS, a=b, b=a)
+
+
+IMMUTABLE_FIELDS = set(
+    (
+        "masterIdentifier",
+        "id",
+        "identifier",
+        "status",
+        "type",
+        "subject",
+        "date",
+        "custodian",
+        "relatesTo",
+        "author",
+    )
+)
+
+
+@pytest.mark.parametrize("field", IMMUTABLE_FIELDS)
+def test__validate_all_immutable_fields(field):
+    a = {_field: f"a{_field}" for _field in IMMUTABLE_FIELDS}
+    b = deepcopy(a)
+    b[field] = f"b{field}"
+    with pytest.raises(ImmutableFieldViolationError):
+        _validate_immutable_fields(a=a, b=b)
+
+    with pytest.raises(ImmutableFieldViolationError):
+        _validate_immutable_fields(a=b, b=a)

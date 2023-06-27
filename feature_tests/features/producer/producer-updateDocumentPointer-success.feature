@@ -38,6 +38,12 @@ Feature: Producer Update Success scenarios
          "docStatus": "$docStatus",
          "author": [
             {
+               "identifier" : {
+                  "system" : "https://fhir.nhs.uk/Id/nhsSpineASID",
+                  "value" : "200000000610"
+               }
+            },
+            {
                "reference": "$author"
             }
          ],
@@ -90,14 +96,15 @@ Feature: Producer Update Success scenarios
       | author      | Practitioner/xcda1             |
       | description | Physical                       |
     When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT template
-      | property    | value           |
-      | identifier  | 1234567890      |
-      | status      | current         |
-      | type        | 736253002       |
-      | custodian   | 8FW23           |
-      | subject     | 9278693472      |
-      | contentType | application/pdf |
-      | <property>  | <value>         |
+      | property    | value              |
+      | identifier  | 1234567890         |
+      | status      | current            |
+      | type        | 736253002          |
+      | custodian   | 8FW23              |
+      | subject     | 9278693472         |
+      | contentType | application/pdf    |
+      | author      | Practitioner/xcda1 |
+      | <property>  | <value>            |
     Then the operation is successful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value            |
@@ -121,7 +128,6 @@ Feature: Producer Update Success scenarios
     Examples:
       | property    | value                                           |
       | docStatus   | amended                                         |
-      | author      | Organization/1XR                                |
       | description | Therapy Summary Document for Patient 9278693472 |
       | url         | https://example.org/different-doc.pdf           |
 
@@ -150,7 +156,7 @@ Feature: Producer Update Success scenarios
       | subject     | 9278693472                                      |
       | contentType | application/pdf                                 |
       | docStatus   | amended                                         |
-      | author      | Organization/1XR                                |
+      | author      | Practitioner/xcda1                              |
       | description | Therapy Summary Document for Patient 9278693472 |
       | url         | https://example.org/different-doc.pdf           |
     Then the operation is successful
@@ -198,7 +204,7 @@ Feature: Producer Update Success scenarios
       | subject     | 9278693472                                      |
       | contentType | application/pdf                                 |
       | docStatus   | amended                                         |
-      | author      | Organization/1XR                                |
+      | author      | Practitioner/xcda1                              |
       | description | Therapy Summary Document for Patient 9278693472 |
       | url         | https://example.org/different-doc.pdf           |
     Then the operation is successful
