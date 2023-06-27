@@ -7,12 +7,11 @@ from mi.reporting.actions import each_query_event, perform_query, write_csv
 
 
 def make_reports(
-    env: str, workspace: str = None, partition_key=None
+    session, env: str, workspace: str = None, partition_key=None
 ) -> Generator[tuple[str, str], None, None]:
     if workspace is None:
         workspace = env
 
-    session = new_session_from_env(env=env)
     for report_name, event in each_query_event(
         session=session, workspace=workspace, env=env, partition_key=partition_key
     ):
@@ -28,7 +27,10 @@ def make_reports(
 
 
 def _make_reports(env: str, workspace: str = None, partition_key=None):
-    for _ in make_reports(env=env, workspace=workspace, partition_key=partition_key):
+    session = new_session_from_env(env=env)
+    for _ in make_reports(
+        session=session, env=env, workspace=workspace, partition_key=partition_key
+    ):
         pass
 
 

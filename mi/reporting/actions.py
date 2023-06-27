@@ -16,6 +16,8 @@ from mi.reporting.resources import (
 from mi.sql_query.model import Response, Sql, SqlQueryEvent, Status
 
 SQL_SELECT_REGEX = re.compile(r"SELECT(.*)FROM", flags=re.DOTALL)
+SQL_SELECT_SEPARATOR = ","
+SQL_ALIAS_SEPARATOR_REGEX = re.compile(r"as|AS")
 
 
 @log("Created query events")
@@ -32,21 +34,33 @@ def each_query_event(
         )
 
 
-def _column_names_from_sql_query(query: str):
+def _select_statement_from_sql_query(query: str) -> str:
     try:
         (select,) = SQL_SELECT_REGEX.match(query).groups()
     except:
         raise ValueError(f"Couldn't find valid SELECT statement in query {query}")
+    return select
 
-    column_names = []
-    for column_statement in select.split(","):
-        column_name = re.split("as|AS", column_statement)[-1].strip()
-        column_names.append(column_name)
+
+def _column_name_from_statement(column_statement: str) -> str:
+    """column_statement ~ 'foo' or 'foo as FOO' or 'foo AS FOO' --> 'foo'"""
+    parts = SQL_ALIAS_SEPARATOR_REGEX.split(column_statement)
+    last_part = parts[-1]
+    return last_part.strip()
+
+
+def _column_names_from_sql_query(query: str):
+    select = _select_statement_from_sql_query(query=query)
+    column_names = list(
+        map(_column_name_from_statement, select.split(SQL_SELECT_SEPARATOR))
+    )
     return column_names
 
 
 @log("Querying lambda")
-def perform_query(session, workspace: str, event: SqlQueryEvent) -> list[dict]:
+def perform_query(
+    session, workspace: str, event: SqlQueryEvent
+) -> list[dict[str, any]]:
     function_name = get_lambda_name(workspace=workspace)
     client = session.client("lambda")
     column_names = _column_names_from_sql_query(query=event.sql.statement)
@@ -54,7 +68,6 @@ def perform_query(session, workspace: str, event: SqlQueryEvent) -> list[dict]:
     response = Response.parse_raw(raw_response["Payload"].read())
     if response.status != Status.OK:
         raise Exception(response.outcome)
-    # NEED TO CORRECTLY COERCE VALUES HERE
     return [dict(zip(column_names, line)) for line in response.results]
 
 

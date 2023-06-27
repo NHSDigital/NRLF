@@ -5,11 +5,12 @@ from datetime import datetime
 import pytest
 import yaml
 
+from helpers.aws_session import new_aws_session
 from helpers.log import log
 from helpers.terraform import get_terraform_json
 from mi.reporting.paths import VALIDATOR_PATH
 from mi.reporting.report import make_reports
-from mi.reporting.tests.test_data.seed_database import seed_database
+from mi.reporting.tests.test_data.seed_database import _get_test_data, _seed_database
 
 
 @log("Using test id (partition key) '{__result__}'")
@@ -36,12 +37,20 @@ def test_make_report():
     tf_json = get_terraform_json()
     environment = tf_json["account_name"]["value"]
     workspace = tf_json["workspace"]["value"]
+    account_id = tf_json["assume_account_id"]["value"]
+    session = new_aws_session(account_id=account_id)
 
     test_id = generate_test_id()
-    seed_database(test_id=test_id)
+    data = _get_test_data(test_id=test_id)
+    _seed_database(
+        session=session,
+        data=data,
+        environment=environment,
+        workspace=workspace,
+    )
 
     for report_name, report_path in make_reports(
-        env=environment, workspace=workspace, partition_key=test_id
+        session=session, env=environment, workspace=workspace, partition_key=test_id
     ):
         results = parse_results(path=report_path)
         validator = get_validator(report_name=report_name)
