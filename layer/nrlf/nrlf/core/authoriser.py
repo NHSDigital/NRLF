@@ -165,11 +165,12 @@ def retrieve_pointer_types(
 
     pointer_types = connection_metadata.pointer_types
     if connection_metadata.enable_authorization_lookup:
+        ods_code = ".".join(connection_metadata.ods_code_parts)
         try:
             pointer_types = _parse_list_from_s3(
                 s3_client=dependencies["s3_client"],
                 bucket=dependencies["permissions_lookup_bucket"],
-                key=f"{client_rp_details.developer_app_id}/{connection_metadata.ods_code}.json",
+                key=f"{client_rp_details.developer_app_id}/{ods_code}.json",
                 logger=logger,
             )
         except _PermissionsLookupError as exc:
