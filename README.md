@@ -25,7 +25,7 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
 8. [Sandbox](#sandbox)
 9. [Firehose](#firehose)
 10. [Releases](#releases)
-11. [MI reporting](#mi-reporting)
+11. [Generating MI Reports](#generating-mi-reports)
 
 ---
 

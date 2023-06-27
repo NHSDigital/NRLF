@@ -5,7 +5,6 @@ from typing import Generator, Type, Union
 import fire
 
 from helpers.aws_session import new_aws_session
-from helpers.log import log
 from helpers.terraform import get_terraform_json
 from mi.reporting.resources import get_credentials, get_endpoint, get_lambda_name
 from mi.reporting.tests.test_data.generate_test_data import (
@@ -59,8 +58,7 @@ def _convert_data_to_sql_insert(data: dict) -> Generator[Sql, None, None]:
         yield _item_to_sql(item=item, model=Measure)
 
 
-def _seed_database(data: dict, workspace: str, environment: str, account_id: str):
-    session = new_aws_session(account_id=account_id)
+def _seed_database(session, data: dict, workspace: str, environment: str):
     credentials = get_credentials(
         session=session, workspace=workspace, operation="write"
     )
@@ -79,24 +77,19 @@ def _seed_database(data: dict, workspace: str, environment: str, account_id: str
         assert response.status == Status.OK, response.outcome
 
 
-@log("Created seed data for {test_id}")
-def run_seed_database(test_id: str):
+def seed_database(test_id: str):
     tf_json = get_terraform_json()
     environment = tf_json["account_name"]["value"]
     workspace = tf_json["workspace"]["value"]
     account_id = tf_json["assume_account_id"]["value"]
-
+    session = new_aws_session(account_id=account_id)
     data = _get_test_data(test_id=test_id)
     _seed_database(
+        session=session,
         data=data,
         environment=environment,
         workspace=workspace,
-        account_id=account_id,
     )
-
-
-def seed_database(test_id: str):
-    run_seed_database(test_id=test_id)
 
 
 if __name__ == "__main__":
