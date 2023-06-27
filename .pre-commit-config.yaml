@@ -79,12 +79,3 @@ repos:
         language: pygrep
         types: [python]
         exclude: layer/nrlf/nrlf/core/validators.py|layer/psycopg2/.*|mi/.*
-
-  # - repo: https://github.com/sqlfluff/sqlfluff
-  #   rev: 2.1.1
-  #   hooks:
-  #     - id: sqlfluff-lint
-  #       name: SQL Lint
-  #       args: [--dialect, postgres]
-  #     - id: sqlfluff-fix
-  #       name: SQL Fix
