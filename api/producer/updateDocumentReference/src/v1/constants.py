@@ -10,5 +10,6 @@ IMMUTABLE_FIELDS = set(
         "date",
         "custodian",
         "relatesTo",
+        "author",
     )
 )
