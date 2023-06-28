@@ -45,6 +45,17 @@ Feature: Producer Update Failure scenarios
               }
             }
           }
+        ],
+        "author" : [
+          {
+            "identifier" : {
+              "system" : "$system",
+              "value" : "$asid"
+            }
+          },
+          {
+            "reference" : "$author"
+          }
         ]
       }
       """
@@ -249,6 +260,48 @@ Feature: Producer Update Failure scenarios
       | issue_code        | VALIDATION_ERROR                                        |
       | issue_description | A parameter or value has resulted in a validation error |
       | message           | Forbidden to update immutable field 'status'            |
+
+  Scenario Outline: Unable to update the author immutable property of a DOCUMENT_POINTER
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                                                        |
+      | identifier  | 1234567890                                                   |
+      | type        | 736253002                                                    |
+      | custodian   | 8FW23                                                        |
+      | subject     | 9278693472                                                   |
+      | contentType | application/pdf                                              |
+      | status      | current                                                      |
+      | url         | https://example.org/my-doc.pdf                               |
+      | asid        | 200000000610                                                 |
+      | system      | https://fhir.nhs.uk/Id/nhsSpineASID                          |
+      | author      | https://directory.spineservices.nhs.uk/STU3/Organization/RAE |
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT template
+      | property    | value           |
+      | identifier  | 1234567890      |
+      | status      | current         |
+      | type        | 736253002       |
+      | custodian   | 8FW23           |
+      | subject     | 9278693472      |
+      | contentType | application/pdf |
+      | <property>  | <value>         |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                   |
+      | issue_type        | processing                                              |
+      | issue_level       | error                                                   |
+      | issue_code        | VALIDATION_ERROR                                        |
+      | issue_description | A parameter or value has resulted in a validation error |
+      | message           | Forbidden to update immutable field 'author'            |
+
+    Examples:
+      | property | value      |
+      | asid     | new_asid   |
+      | system   | new_system |
+      | author   | new_author |
 
   Scenario: Unable to update Document Pointer when required type field is missing
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
