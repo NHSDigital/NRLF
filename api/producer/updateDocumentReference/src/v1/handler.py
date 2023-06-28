@@ -2,7 +2,6 @@ from enum import Enum
 from logging import Logger
 from typing import Any
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 
 from api.producer.updateDocumentReference.src.constants import PersistentDependencies
@@ -19,7 +18,7 @@ from nrlf.core.common_steps import (
 )
 from nrlf.core.errors import ImmutableFieldViolationError, InconsistentUpdateId
 from nrlf.core.event_parsing import fetch_body_from_event
-from nrlf.core.model import DocumentPointer
+from nrlf.core.model import APIGatewayProxyEventModel, DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
 from nrlf.core.response import operation_outcome_ok

@@ -269,8 +269,10 @@ module "producer__authoriser_lambda" {
     PREFIX       = "${local.prefix}--"
     ENVIRONMENT  = local.environment
     SPLUNK_INDEX = module.firehose__processor.splunk.index
+    AUTH_STORE   = aws_s3_bucket.authorization-store.id
   }
   additional_policies = [
+    aws_iam_policy.read-authorization-store-s3.arn,
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -292,6 +294,7 @@ module "consumer__authoriser_lambda" {
     PREFIX       = "${local.prefix}--"
     ENVIRONMENT  = local.environment
     SPLUNK_INDEX = module.firehose__processor.splunk.index
+    AUTH_STORE   = aws_s3_bucket.authorization-store.id
   }
   additional_policies = [
   ]

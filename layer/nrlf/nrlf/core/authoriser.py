@@ -1,9 +1,9 @@
+import json
 from enum import Enum
 from http import HTTPStatus
 from logging import Logger
 from typing import Any
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.header_config import (
     AbstractHeader,
@@ -12,17 +12,29 @@ from lambda_utils.header_config import (
 )
 from lambda_utils.logging import log_action
 from lambda_utils.logging_utils import generate_transaction_id
-from lambda_utils.pipeline import _execute_steps, _setup_logger
+from lambda_utils.pipeline import (
+    APIGatewayProxyEventModel,
+    _execute_steps,
+    _setup_logger,
+)
 from pydantic import BaseModel, ValidationError
 
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
+from nrlf.core.types import S3Client
+from nrlf.core.validators import json_loads
 
 
 class LogReference(Enum):
     AUTHORISER001 = "Parsing headers"
-    AUTHORISER002 = "Validating pointer types"
-    AUTHORISER003 = "Render authorisation response"
-    AUTHORISER004 = "Parsing Client RP Details"
+    AUTHORISER002 = "Parsing pointer types"
+    AUTHORISER003 = "Reading pointer types from S3"
+    AUTHORISER004 = "Validating pointer types"
+    AUTHORISER005 = "Render authorisation response"
+    AUTHORISER006 = "Parsing Client RP Details"
+
+
+class _PermissionsLookupError(Exception):
+    pass
 
 
 class Config(BaseModel):
@@ -42,9 +54,12 @@ class Config(BaseModel):
     ENVIRONMENT: str
     SPLUNK_INDEX: str
     SOURCE: str
+    AUTH_STORE: str
 
 
-def build_persistent_dependencies(config: Config) -> dict[str, any]:
+def build_persistent_dependencies(
+    config: Config, s3_client: S3Client
+) -> dict[str, any]:
     """
     AWS Lambdas may be re-used, rather than spinning up a new instance each
     time.  Doing this we can take advantage of state that persists between
@@ -58,6 +73,8 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
         "environment": config.ENVIRONMENT,
         "splunk_index": config.SPLUNK_INDEX,
         "source": config.SOURCE,
+        "permissions_lookup_bucket": config.AUTH_STORE,
+        "s3_client": s3_client,
     }
 
 
@@ -74,9 +91,26 @@ def _create_policy(principal_id, resource, effect, context):
     }
 
 
-@log_action(log_reference=LogReference.AUTHORISER004, log_result=True)
+@log_action(log_reference=LogReference.AUTHORISER006, log_result=True)
 def _parse_client_rp_details(raw_client_rp_details: dict):
     return ClientRpDetailsHeader.parse_raw(raw_client_rp_details)
+
+
+@log_action(log_reference=LogReference.AUTHORISER003, log_result=True)
+def _parse_list_from_s3(s3_client: S3Client, bucket: str, key: str) -> list:
+    try:
+        response = s3_client.get_object(Bucket=bucket, Key=key)
+    except s3_client.exceptions.NoSuchKey:
+        raise _PermissionsLookupError(
+            "No permissions were found for the provided credentials, contact onboarding team."
+        )
+
+    try:
+        items = json_loads(response["Body"].read())
+    except json.JSONDecodeError:
+        raise _PermissionsLookupError("Malformed permissions, contact onboarding team.")
+
+    return items
 
 
 @log_action(log_reference=LogReference.AUTHORISER001)
@@ -99,7 +133,7 @@ def parse_headers(
         )
 
     try:
-        _parse_client_rp_details(
+        client_rp_details = _parse_client_rp_details(
             raw_client_rp_details=_raw_client_rp_details, logger=logger
         )
     except ValidationError:
@@ -108,10 +142,44 @@ def parse_headers(
             **data,
         )
 
-    return PipelineData(pointer_types=connection_metadata.pointer_types, **data)
+    return PipelineData(
+        connection_metadata=connection_metadata,
+        client_rp_details=client_rp_details,
+        **data,
+    )
 
 
 @log_action(log_reference=LogReference.AUTHORISER002)
+def retrieve_pointer_types(
+    data: PipelineData,
+    context: LambdaContext,
+    event: APIGatewayProxyEventModel,
+    dependencies: FrozenDict[str, Any],
+    logger: Logger,
+) -> PipelineData:
+    if data.get("error"):
+        return PipelineData(**data)
+
+    client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
+    connection_metadata: ConnectionMetadata = data["connection_metadata"]
+
+    pointer_types = connection_metadata.pointer_types
+    if connection_metadata.enable_authorization_lookup:
+        ods_code = ".".join(connection_metadata.ods_code_parts)
+        try:
+            pointer_types = _parse_list_from_s3(
+                s3_client=dependencies["s3_client"],
+                bucket=dependencies["permissions_lookup_bucket"],
+                key=f"{client_rp_details.developer_app_id}/{ods_code}.json",
+                logger=logger,
+            )
+        except _PermissionsLookupError as exc:
+            return PipelineData(error=str(exc), **data)
+
+    return PipelineData(pointer_types=pointer_types, **data)
+
+
+@log_action(log_reference=LogReference.AUTHORISER004)
 def validate_pointer_types(
     data: PipelineData,
     context: LambdaContext,
@@ -119,14 +187,15 @@ def validate_pointer_types(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
+    if data.get("error"):
+        return PipelineData(**data)
+
     if data.get("pointer_types") == []:
-        return PipelineData(
-            error={"message": "No pointer types have been provided"}, **data
-        )
+        return PipelineData(error="No pointer types have been provided", **data)
     return PipelineData(**data)
 
 
-@log_action(log_reference=LogReference.AUTHORISER003)
+@log_action(log_reference=LogReference.AUTHORISER005)
 def generate_response(
     data: PipelineData,
     context: LambdaContext,
@@ -135,17 +204,21 @@ def generate_response(
     logger: Logger,
 ) -> PipelineData:
     error = data.get("error")
+    pointer_types = data.get("pointer_types")
     policy = _create_policy(
         principal_id=logger.transaction_id,
         resource=data["method_arn"],
         effect="Deny" if error else "Allow",
-        context={"error": error["message"]} if error else {},
+        context=(
+            {"error": error} if error else {"pointer-types": json.dumps(pointer_types)}
+        ),
     )
     return PipelineData(policy)
 
 
 steps = [
     parse_headers,
+    retrieve_pointer_types,
     validate_pointer_types,
     generate_response,
 ]

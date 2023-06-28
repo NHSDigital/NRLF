@@ -4,7 +4,6 @@ from logging import getLogger
 from unittest import mock
 
 import pytest
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import PipelineData
 from lambda_utils.tests.unit.utils import make_aws_event
 
@@ -14,7 +13,7 @@ from api.producer.updateDocumentReference.src.v1.handler import (
     parse_request_body,
 )
 from nrlf.core.errors import ImmutableFieldViolationError
-from nrlf.core.model import DocumentPointer
+from nrlf.core.model import APIGatewayProxyEventModel, DocumentPointer
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
 

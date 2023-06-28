@@ -2,12 +2,12 @@ from enum import Enum
 from logging import Logger
 from typing import Any
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action
 
 from nrlf.core.constants import CUSTODIAN_SEPARATOR
 from nrlf.core.errors import RequestValidationError
+from nrlf.core.model import APIGatewayProxyEventModel
 from nrlf.core.validators import generate_producer_id
 
 
@@ -23,7 +23,6 @@ def validate_producer_permissions(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-
     # Compare producer id from path id to ods code from NHSD-Connection-Metadata
     producer_id = data["producer_id"]
     ods_code_parts = data["ods_code_parts"]
