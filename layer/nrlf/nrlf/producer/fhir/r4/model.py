@@ -551,7 +551,7 @@ class DocumentReference(BaseModel):
         Optional[str],
         Field(
             description="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^(?=.{1,64}$)[A-Za-z0-9\\.]+-[A-Za-z0-9]+[A-Za-z0-9\\_\\-]*$",
         ),
     ] = None
     meta: Annotated[
