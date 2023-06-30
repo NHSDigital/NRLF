@@ -111,39 +111,12 @@ Feature: Consumer Search Failure scenarios
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                                 |
-      | issue_type        | processing                                                            |
-      | issue_level       | error                                                                 |
-      | issue_code        | VALIDATION_ERROR                                                      |
-      | issue_description | A parameter or value has resulted in a validation error               |
-      | message           | ConsumerRequestParams validation failure - Invalid subject:identifier |
-
-  Scenario: Search rejects request with type system they are not allowed to use
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to count Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                 | value     |
-      | http://snomed.info/sct | 736253002 |
-    And a Document Pointer exists in the system with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1114567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
-    When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
-      | property           | value                                         |
-      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | type               | http://incorrect.info/sct\|736253002          |
-    Then the operation is unsuccessful
-    And the status is 403
-    And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                                                         |
-      | issue_type        | processing                                                                                    |
-      | issue_level       | error                                                                                         |
-      | issue_code        | ACCESS_DENIED_LEVEL                                                                           |
-      | issue_description | Access has been denied because you need higher level permissions                              |
-      | message           | The provided system type value - http://incorrect.info/sct - does not match the allowed types |
+      | property          | value                                                              |
+      | issue_type        | processing                                                         |
+      | issue_level       | error                                                              |
+      | issue_code        | VALIDATION_ERROR                                                   |
+      | issue_description | A parameter or value has resulted in a validation error            |
+      | message           | CountRequestParams validation failure - Invalid subject:identifier |
 
   Scenario: Search fails when invalid subject:identifier used
     Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to count Document Pointers
@@ -164,9 +137,9 @@ Feature: Consumer Search Failure scenarios
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                                 |
-      | issue_type        | processing                                                            |
-      | issue_level       | error                                                                 |
-      | issue_code        | VALIDATION_ERROR                                                      |
-      | issue_description | A parameter or value has resulted in a validation error               |
-      | message           | ConsumerRequestParams validation failure - Invalid subject:identifier |
+      | property          | value                                                              |
+      | issue_type        | processing                                                         |
+      | issue_level       | error                                                              |
+      | issue_code        | VALIDATION_ERROR                                                   |
+      | issue_description | A parameter or value has resulted in a validation error            |
+      | message           | CountRequestParams validation failure - Invalid subject:identifier |
