@@ -1,15 +1,21 @@
 from enum import Enum
 from logging import Logger
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from lambda_pipeline.types import FrozenDict, PipelineData
+from typing_extensions import Annotated
 
 from layer.nrlf.nrlf.core.constants import DbPrefix
 from nrlf.consumer.fhir.r4.model import NextPageToken, RequestQuerySubject
 from nrlf.core.common_steps import make_common_log_action
 from nrlf.core.errors import assert_no_extra_params
 from nrlf.core.model import ConsumerRequestParams, PaginatedResponse, key
-from nrlf.core.repository import Repository, custodian_filter, type_filter
+from nrlf.core.repository import (
+    PAGE_ITEM_LIMIT,
+    Repository,
+    custodian_filter,
+    type_filter,
+)
 from nrlf.core.validators import validate_type_system
 
 log_action = make_common_log_action()
@@ -26,6 +32,10 @@ def get_paginated_document_references(
     queryStringParams: Dict[str, str],
     dependencies: FrozenDict[str, Any],
     logger: Logger,
+    pageLimit: int = PAGE_ITEM_LIMIT,
+    pageToken: Annotated[
+        Optional[NextPageToken], Field(alias="next-page-token")
+    ] = None,
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
 
@@ -47,8 +57,10 @@ def get_paginated_document_references(
         type_identifier=request_params.type,
         pointer_types=data["pointer_types"],
     )
-
-    next_page_token: NextPageToken = request_params.next_page_token
+    if pageToken is None:
+        next_page_token: NextPageToken = request_params.next_page_token
+    else:
+        next_page_token: NextPageToken = pageToken
 
     if next_page_token is not None:
         next_page_token = next_page_token.__root__
@@ -60,6 +72,7 @@ def get_paginated_document_references(
         type=pointer_types,
         producer_id=custodian,
         exclusive_start_key=next_page_token,
+        limit=pageLimit,
     )
 
     return response
