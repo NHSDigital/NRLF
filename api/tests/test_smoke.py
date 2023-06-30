@@ -125,7 +125,9 @@ def _prepare_base_request(env: str, actor: str, app_alias: str) -> tuple[str, di
     base_env = split_env_variable(env)["env"]
     oauth_token = token(env=base_env, app_alias=app_alias)
     apigee_env = APIGEE_ENV_FOR_ENV[env]
-    base_url = create_apigee_url(apigee_env=apigee_env, actor=actor)
+    base_url = create_apigee_url(
+        apigee_env=apigee_env if apigee_env != "prod" else "", actor=actor
+    )
     headers = {
         "accept": "application/json; version=1.0",
         "authorization": f"Bearer {oauth_token}",
