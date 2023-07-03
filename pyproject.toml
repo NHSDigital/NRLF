@@ -24,7 +24,7 @@ nrlf-converter = {url = "https://github.com/NHSDigital/nrlf-converter/releases/d
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"
 sh = "^2.0.4"
-awscli = "^1.27.155"
+awscli = "^1.27.165"
 moto = "^4.1.11"
 behave = "^1.2.6"
 datamodel-code-generator = "^0.20.0"
