@@ -19,7 +19,6 @@ cryptography = "^41.0.1"
 more-itertools = "^9.0.0"
 typing-extensions = "^4.5.0"
 requests = "^2.31.0"
-nrlf-converter = {url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.4/nrlf_converter-0.0.4-py3-none-any.whl"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"
@@ -47,6 +46,7 @@ ez-setup = "^0.9"
 pygments = "^2.14.0"
 atlassian-python-api = "^3.39.0"
 hypothesis = "^6.79.1"
+nrlf-converter = {url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.6/nrlf_converter-0.0.6-py3-none-any.whl"}
 
 [tool.poetry.group.legacy]
 optional = true
