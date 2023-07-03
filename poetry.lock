@@ -1184,6 +1184,7 @@ url = "layer/nrlf"
 name = "nrlf-converter"
 version = "0.0.6"
 description = "NHS Clinicals Record Locator Document Pointer to HL7 FHIR R4 DocumentReference conversion"
+category = "dev"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
