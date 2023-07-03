@@ -1,7 +1,13 @@
 import re
 from typing import Optional, Union
 
-from pydantic import BaseModel, Field, root_validator, validator
+from aws_lambda_powertools.utilities.parser.models import (
+    APIGatewayEventRequestContext as _APIGatewayEventRequestContext,
+)
+from aws_lambda_powertools.utilities.parser.models import (
+    APIGatewayProxyEventModel as _APIGatewayProxyEventModel,
+)
+from pydantic import BaseModel, Field, Json, root_validator, validator
 
 import nrlf.consumer.fhir.r4.model as consumer_model
 import nrlf.producer.fhir.r4.model as producer_model
@@ -274,3 +280,17 @@ class CountRequestParams(consumer_model.CountRequestParams, _NhsNumberMixin):
 class PaginatedResponse(BaseModel):
     last_evaluated_key: str = None
     document_pointers: list[DocumentPointer]
+
+
+class Authorizer(BaseModel):
+    pointer_types: Optional[Json[list[str]]] = Field(
+        alias="pointer-types", default_factory=list
+    )
+
+
+class APIGatewayEventRequestContext(_APIGatewayEventRequestContext):
+    authorizer: Optional[Authorizer] = Field(default_factory=Authorizer)
+
+
+class APIGatewayProxyEventModel(_APIGatewayProxyEventModel):
+    requestContext: APIGatewayEventRequestContext

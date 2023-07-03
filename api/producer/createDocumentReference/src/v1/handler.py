@@ -3,7 +3,6 @@ from functools import partial
 from logging import Logger
 from typing import Any
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.constants import LogLevel
 
@@ -29,7 +28,11 @@ from nrlf.core.errors import (
     SupersedeValidationError,
 )
 from nrlf.core.event_parsing import fetch_body_from_event
-from nrlf.core.model import DocumentPointer, convert_document_pointer_id_to_pk
+from nrlf.core.model import (
+    APIGatewayProxyEventModel,
+    DocumentPointer,
+    convert_document_pointer_id_to_pk,
+)
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
 from nrlf.core.response import operation_outcome_ok

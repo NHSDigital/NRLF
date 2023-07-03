@@ -3,7 +3,6 @@ from enum import Enum
 from logging import Logger
 from typing import Any
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.header_config import (
     AbstractHeader,
@@ -13,7 +12,7 @@ from lambda_utils.header_config import (
 from lambda_utils.logging import log_action, make_scoped_log_action
 
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
-from nrlf.core.model import convert_document_pointer_id_to_pk
+from nrlf.core.model import APIGatewayProxyEventModel, convert_document_pointer_id_to_pk
 from nrlf.core.validators import generate_producer_id, json_loads
 
 
@@ -67,7 +66,7 @@ def parse_headers(
     return PipelineData(
         **data,
         ods_code_parts=connection_metadata.ods_code_parts,
-        pointer_types=connection_metadata.pointer_types,
+        pointer_types=event.requestContext.authorizer.pointer_types,
         nrl_permissions=connection_metadata.nrl_permissions,
         developer_app_id=client_rp_details.developer_app_id,
         developer_app_name=client_rp_details.developer_app_name,

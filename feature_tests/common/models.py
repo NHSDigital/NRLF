@@ -8,10 +8,12 @@ import requests
 from behave.model import Table
 from behave.runner import Context as BehaveContext
 from lambda_pipeline.types import LambdaContext
+from lambda_utils.header_config import ClientRpDetailsHeader, ConnectionMetadata
 from lambda_utils.tests.unit.utils import make_aws_event
 from pydantic import BaseModel
 
 from feature_tests.common.constants import (
+    AUTH_STORE,
     DEFAULT_AUTHORIZATION,
     DEFAULT_METHOD_ARN,
     STATUS_CODE_200,
@@ -30,7 +32,9 @@ from feature_tests.common.utils import (
     render_document_reference_properties,
     render_regular_properties,
 )
-from nrlf.core.types import DynamoDbClient
+from nrlf.core.authoriser import _parse_list_from_s3
+from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
+from nrlf.core.types import DynamoDbClient, S3Client
 from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.model import OperationOutcome
 
@@ -122,8 +126,28 @@ class ApiRequest(BaseRequest):
 @dataclass
 class LocalApiRequest(BaseRequest):
     handler: FunctionType = None
+    s3_client: S3Client = None
 
     def _invoke(self, body: dict = None, **kwargs) -> dict:
+        client_rp_details = ClientRpDetailsHeader.parse_raw(
+            self.headers[CLIENT_RP_DETAILS]
+        )
+        connection_metadata = ConnectionMetadata.parse_raw(
+            self.headers[CONNECTION_METADATA]
+        )
+
+        if connection_metadata.enable_authorization_lookup:
+            ods_code = connection_metadata.ods_code
+            app_id = client_rp_details.developer_app_id
+            pointer_types = _parse_list_from_s3(
+                s3_client=self.s3_client,
+                bucket=AUTH_STORE,
+                key=f"{app_id}/{ods_code}.json",
+            )
+        else:
+            pointer_types = connection_metadata.pointer_types
+
+        kwargs["authorizer"] = {"pointer-types": json.dumps(pointer_types)}
         event = make_aws_event(body=body, headers=self.headers, **kwargs)
         response = self.handler(event=event, context=LambdaContext())
         return {"body": response["body"], "status_code": response["statusCode"]}
@@ -184,6 +208,8 @@ class TestConfig:
     templates: dict[str, Template] = field(default_factory=dict)
     actor_context: ActorContext = None
     dynamodb_client: DynamoDbClient = None
+    s3_client: S3Client = None
+    auth_store: str = None
     environment_prefix: str = None
     rendered_templates: dict = field(default_factory=dict)
 
