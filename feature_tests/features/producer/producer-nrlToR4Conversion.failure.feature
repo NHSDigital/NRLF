@@ -1,7 +1,7 @@
 Feature: Producer NRL-to-R4 Conversion Failures
 
   Background:
-    Given version "0.0.4" of "nrlf-converter" has been installed
+    Given version "0.0.6" of "nrlf-converter" has been installed
     And template NRL_DOCUMENT_POINTER
       """
       {
