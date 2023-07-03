@@ -2,12 +2,11 @@ from enum import Enum
 from logging import Logger
 from typing import Any
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 
 from nrlf.core.common_search_steps import get_paginated_document_references
 from nrlf.core.common_steps import make_common_log_action, parse_headers
-from nrlf.core.model import ConsumerRequestParams
+from nrlf.core.model import ConsumerRequestParam
 from nrlf.core.transform import create_bundle_from_paginated_response
 
 log_action = make_common_log_action()

@@ -8,7 +8,9 @@ from mi.sql_query.model import Response, Sql, SqlQueryEvent, Status
 from nrlf.core.validators import json_loads
 
 SELECT_SQL = Sql(statement="SELECT * FROM my_table;")
-INSERT_SQL = Sql(statement="INSERT INTO my_table (id, num, data) VALUES (1, 2.3, 'a');")
+INSERT_SQL = Sql(
+    statement="INSERT INTO my_table (id, num, data) VALUES (1, 2.3, 'a') ON CONFLICT DO NOTHING;"
+)
 DELETE_SQL = Sql(statement="DELETE FROM my_table WHERE id=1;")
 
 

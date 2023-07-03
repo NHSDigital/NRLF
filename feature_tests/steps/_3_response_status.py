@@ -26,4 +26,4 @@ def assert_operation_successful(context: Context, outcome: str):
 def assert_status_outome(context: Context, outcome: int):
     test_config: TestConfig = context.test_config
     actual = test_config.response.status_code
-    assert actual == outcome, (actual, outcome)
+    assert actual == outcome, asdict(test_config.response)

@@ -3,7 +3,6 @@ from enum import Enum
 from tempfile import NamedTemporaryFile
 
 import pytest
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from hypothesis import given
 from hypothesis.strategies import booleans, builds, dictionaries, just, text
 from lambda_utils.logging import LogData, Logger, LogTemplate, log_action
@@ -11,6 +10,7 @@ from lambda_utils.tests.unit.utils import make_aws_event
 from pydantic import ValidationError
 
 from nrlf.core.errors import DynamoDbError
+from nrlf.core.model import APIGatewayProxyEventModel
 from nrlf.core.validators import json_loads, validate_timestamp
 
 
@@ -38,7 +38,6 @@ DUMMY_LOGGER_KWARGS = {
 
 
 def _standard_test(fn):
-
     with NamedTemporaryFile() as temp_file:
         logger = Logger(
             logger_name=temp_file.name,

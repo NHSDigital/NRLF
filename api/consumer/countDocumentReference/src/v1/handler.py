@@ -2,7 +2,6 @@ from enum import Enum
 from logging import Logger
 from typing import Any
 
-from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 
 from layer.nrlf.nrlf.core.common_search_steps import get_paginated_document_references

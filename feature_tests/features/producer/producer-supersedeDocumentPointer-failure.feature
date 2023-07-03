@@ -552,7 +552,7 @@ Feature: Producer Supersede Failure scenarios
 
   Scenario: Supersede throws a duplicate item when target doesnt exist and it tries to create a pointer that already exists
     Given Producer "Data Sync" (Organisation ID "DS123") is requesting to create Document Pointers
-    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types stored in NRLF
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And Producer "Data Sync" has the permission "supersede-ignore-delete-fail"
