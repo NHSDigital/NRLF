@@ -7,7 +7,11 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from layer.nrlf.nrlf.core.common_search_steps import get_paginated_document_references
 from nrlf.consumer.fhir.r4.model import NextPageToken
 from nrlf.core.common_steps import make_common_log_action, parse_headers
-from nrlf.core.model import CountRequestParams, PaginatedResponse
+from nrlf.core.model import (
+    APIGatewayProxyEventModel,
+    CountRequestParams,
+    PaginatedResponse,
+)
 from nrlf.core.repository import COUNT_ITEM_LIMIT
 from nrlf.core.transform import create_bundle_count
 
@@ -21,8 +25,8 @@ class LogReference(Enum):
 @log_action(log_reference=LogReference.SEARCH001)
 def search_document_references(
     data: PipelineData,
-    context: LambdaContext,
     event: APIGatewayProxyEventModel,
+    context: LambdaContext,
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
