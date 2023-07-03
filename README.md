@@ -542,7 +542,7 @@ Additionally, and less importantly, there are also fixed organization details in
 
 ## Firehose
 
-### tl;dr
+### Summary
 
 - All Firehose errors must be investigated since (in the worst case, but not unlikely scenario) they may block all logs from reaching Splunk.
 - The main NRLF repo contains a tool to help with debugging, but it cannot diagnose the problem for you.
