@@ -1,32 +1,32 @@
 import csv
-import re
 from datetime import date, datetime
 from pathlib import Path
 from typing import Generator
 
 from helpers.log import log
-from mi.reporting.paths import PATH_TO_REPORT_CSV
+from mi.reporting.constants import (
+    PATH_TO_REPORT_CSV,
+    SQL_ALIAS_SEPARATOR_REGEX,
+    SQL_SELECT_REGEX,
+    SQL_SELECT_SEPARATOR,
+)
 from mi.reporting.resources import (
-    each_sql_statement,
+    each_report_sql_statement,
     get_credentials,
-    get_endpoint,
     get_lambda_name,
+    get_rds_endpoint,
     make_report_path,
 )
 from mi.sql_query.model import Response, Sql, SqlQueryEvent, Status
 
-SQL_SELECT_REGEX = re.compile(r"SELECT(.*)FROM", flags=re.DOTALL)
-SQL_SELECT_SEPARATOR = ","
-SQL_ALIAS_SEPARATOR_REGEX = re.compile(r"as|AS")
-
 
 @log("Created query events")
-def each_query_event(
+def each_stored_query_event(
     session, workspace: str, env: str, partition_key
 ) -> Generator[tuple[str, SqlQueryEvent], None, None]:
     credentials = get_credentials(session=session, workspace=workspace)
-    endpoint = get_endpoint(session=session, env=env)
-    for report_name, statement in each_sql_statement():
+    endpoint = get_rds_endpoint(session=session, env=env)
+    for report_name, statement in each_report_sql_statement():
         yield report_name, SqlQueryEvent(
             sql=Sql(statement=statement, params={"partition_key": partition_key}),
             endpoint=endpoint,
@@ -83,9 +83,9 @@ def write_csv(
     env: str,
     workspace: str,
     report_name: str,
-    path: Path = PATH_TO_REPORT_CSV,
-    today: date = None,
-    now: datetime = None,
+    path: Path = PATH_TO_REPORT_CSV,  # for dependency-injection in unit testing
+    today: date = None,  # for dependency-injection in unit testing
+    now: datetime = None,  # for dependency-injection in unit testing
     partition_key: str = None,
 ) -> str:
     today = date.today() if today is None else today

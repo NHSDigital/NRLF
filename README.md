@@ -608,7 +608,7 @@ This is because it will use that value to tag the commit once its been merged in
 
 ## Generating MI reports
 
-MI reports can be generated in CSV format by running:
+MI reports can be generated in CSV format by running (note: `?` indicates optional that `partition_key` is to indicate the key used to generate test data, described after):
 
 ```
 nrlf mi report <env> <?workspace> <?partition_key>
@@ -626,11 +626,13 @@ All reports, test or otherwise, are saved to `mi/reporting/report`.
 
 ### Creating or amending report queries
 
-Report queries are SQL files that can be found in `mi/reporting/queries`. The standard (pytest, i.e. not gherkin) integration tests will test all reports based on the test data, and will also provide regex validation using matching files found under `mi/reporting/queries/test_validation`.
+Report queries are SQL files that can be found in `mi/reporting/queries`.
 
-For example, if a report query file `mi/reporting/queries/my_report.sql` exists, then a corresponding validation file is also expected to exist called `mi/reporting/queries/test_validation/my_report.yaml` with the form:
+#### Checking that your report queries create valid reports
+
+The standard (pytest) integration tests will run all reports against test data, and additionally provide regex validation using matching files found under `mi/reporting/queries/test_validation`. For example, if a report query file `mi/reporting/queries/my_report.sql` exists, then a corresponding validation file is also expected to exist called `mi/reporting/queries/test_validation/my_report.yaml` with the form:
 
 ```yaml
-field_1: ^\w+$ # field called "field_1" which contains alphanumeric string
-field_2: ^\d+$ # field called "field_2" which contains a positive integer
+month_name: ^\w+$ # require field called "month_name" must be an alphanumeric string
+number_of_pointers: ^\d+$ # require that field called "number_of_pointers" must be a positive integer
 ```

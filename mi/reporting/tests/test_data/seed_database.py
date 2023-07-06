@@ -6,7 +6,7 @@ import fire
 
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
-from mi.reporting.resources import get_credentials, get_endpoint, get_lambda_name
+from mi.reporting.resources import get_credentials, get_lambda_name, get_rds_endpoint
 from mi.reporting.tests.test_data.generate_test_data import (
     FOREIGN_KEYS,
     Dimension,
@@ -65,7 +65,7 @@ def _seed_database(session, data: dict, workspace: str, environment: str):
     function_name = get_lambda_name(workspace=workspace)
     client = session.client("lambda")
 
-    endpoint = get_endpoint(session=session, env=environment, operation="write")
+    endpoint = get_rds_endpoint(session=session, env=environment, operation="write")
     for sql in _convert_data_to_sql_insert(data):
         event = SqlQueryEvent(
             sql=sql,

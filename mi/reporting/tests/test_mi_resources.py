@@ -6,9 +6,9 @@ from tempfile import TemporaryDirectory
 from moto import mock_rds, mock_secretsmanager
 
 from mi.reporting.resources import (
-    each_sql_statement,
+    each_report_sql_statement,
     get_credentials,
-    get_endpoint,
+    get_rds_endpoint,
     make_report_path,
 )
 
@@ -27,7 +27,7 @@ def test_get_credentials():
 
 
 def test_get_sql_statement():
-    for _, sql in each_sql_statement():
+    for _, sql in each_report_sql_statement():
         assert sql.startswith("SELECT")
 
 
@@ -44,7 +44,7 @@ def test_get_endpoint():
         MasterUsername="root",
         MasterUserPassword="the_password",  # pragma: allowlist secret
     )
-    endpoint = get_endpoint(session=boto3, env="FOO")
+    endpoint = get_rds_endpoint(session=boto3, env="FOO")
     assert (
         re.match(
             rf"{db_id}.cluster-ro-(\w{{12}}).eu-west-2.rds.amazonaws.com",

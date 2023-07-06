@@ -3,7 +3,7 @@ from typing import Generator
 import fire
 
 from helpers.aws_session import new_session_from_env
-from mi.reporting.actions import each_query_event, perform_query, write_csv
+from mi.reporting.actions import each_stored_query_event, perform_query, write_csv
 
 
 def make_reports(
@@ -12,7 +12,7 @@ def make_reports(
     if workspace is None:
         workspace = env
 
-    for report_name, event in each_query_event(
+    for report_name, event in each_stored_query_event(
         session=session, workspace=workspace, env=env, partition_key=partition_key
     ):
         data = perform_query(session=session, workspace=workspace, event=event)

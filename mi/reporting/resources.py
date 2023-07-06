@@ -3,12 +3,12 @@ from pathlib import Path
 from typing import Generator
 
 from helpers.log import log
-from mi.reporting.paths import PATH_TO_QUERIES
-
-RESOURCE_PREFIX = "nhsd-nrlf"
-LAMBDA_NAME = RESOURCE_PREFIX + "--{workspace}--mi--sql_query"
-SECRET_NAME = RESOURCE_PREFIX + "--{workspace}--{workspace}--{operation}_password"
-DB_CLUSTER_NAME = RESOURCE_PREFIX + "-{env}-aurora-cluster"
+from mi.reporting.constants import (
+    DB_CLUSTER_NAME,
+    LAMBDA_NAME,
+    PATH_TO_QUERIES,
+    SECRET_NAME,
+)
 
 
 @log("Got credentials")
@@ -20,7 +20,7 @@ def get_credentials(session, workspace: str, operation: str = "read") -> dict:
 
 
 @log("Got SQL statement {__result__}")
-def each_sql_statement() -> Generator[tuple[str, str], None, None]:
+def each_report_sql_statement() -> Generator[tuple[str, str], None, None]:
     for path in Path(PATH_TO_QUERIES).iterdir():
         if path.is_dir():
             continue
@@ -31,7 +31,7 @@ def each_sql_statement() -> Generator[tuple[str, str], None, None]:
 
 
 @log("Got endpoint {__result__}")
-def get_endpoint(session, env: str, operation: str = "read") -> str:
+def get_rds_endpoint(session, env: str, operation: str = "read") -> str:
     client = session.client("rds")
     response = client.describe_db_clusters(
         DBClusterIdentifier=DB_CLUSTER_NAME.format(env=env)
