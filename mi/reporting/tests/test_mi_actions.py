@@ -8,7 +8,7 @@ from hypothesis.strategies import builds, just, lists, text, tuples
 
 from mi.reporting.actions import (
     _column_names_from_sql_query,
-    each_query_event,
+    each_stored_query_event,
     perform_query,
     write_csv,
 )
@@ -26,11 +26,11 @@ def mock_patch(function_name: str, **kwargs):
     return_value={"user": "foo", "password": "FOO"},  # pragma: allowlist secret
 )
 @mock_patch("get_endpoint", return_value="endpoint")
-@mock_patch("each_sql_statement", return_value=[["report", "sql"]])
+@mock_patch("each_report_sql_statement", return_value=[["report", "sql"]])
 def test_make_query_event(
     _mock_get_credentials, _mock_get_endpoint, _mock_each_sql_statement
 ):
-    ((report_name, query_event),) = each_query_event(
+    ((report_name, query_event),) = each_stored_query_event(
         session=None, workspace=None, env=None, partition_key="party_key"
     )
     assert report_name == "report"
