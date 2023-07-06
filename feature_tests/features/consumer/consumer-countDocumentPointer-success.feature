@@ -144,66 +144,8 @@ Feature: Consumer Search Success scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
-      | property             | value                                               |
-      | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
-      | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
-    Then the operation is successful
-    And the response has 1 total
-
-  Scenario: Successfully searches for all documents by type and nhs number for a consumer
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to count Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                 | value     |
-      | http://snomed.info/sct | 736253002 |
-    And a Document Pointer exists in the system with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1114567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
-    And a Document Pointer exists in the system with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1114567891                     |
-      | type        | 999253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
-    When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
       | property           | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
-      | type               | http://snomed.info/sct\|736253002             |
-    Then the operation is successful
-    And the response has 1 total
-
-  Scenario: Successfully searches for all documents by producer and nhs number and type for a consumer
-    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to count Document Pointers
-    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                 | value     |
-      | http://snomed.info/sct | 736253002 |
-    And a Document Pointer exists in the system with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1114567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
-    And a Document Pointer exists in the system with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1114567891                     |
-      | type        | 999253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
-    When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
-      | property             | value                                               |
-      | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
-      | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
-      | type                 | http://snomed.info/sct\|736253002                   |
     Then the operation is successful
     And the response has 1 total
 
@@ -221,9 +163,7 @@ Feature: Consumer Search Success scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
     When Consumer "Yorkshire Ambulance Service" counts Document References with query parameters:
-      | property             | value                                               |
-      | subject:identifier   | https://fhir.nhs.uk/Id/nhs-number\|9278693472       |
-      | custodian:identifier | https://fhir.nhs.uk/Id/ods-organization-code\|8FW23 |
-      | type                 | http://snomed.info/sct\|736253002                   |
+      | property           | value                                         |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
     Then the operation is successful
     And the response has 201 total

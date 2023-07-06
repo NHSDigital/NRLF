@@ -556,7 +556,6 @@ paths:
       operationId: countDocumentReference
       parameters:
         - $ref: "#/components/parameters/subject"
-        - $ref: "#/components/parameters/type"
         - $ref: "#/components/parameters/odsCode"
         - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
@@ -1281,6 +1280,13 @@ components:
           $ref: "#/components/schemas/RequestQueryType"
         next-page-token:
           $ref: "#/components/schemas/NextPageToken"
+      required:
+        - subject:identifier
+    CountRequestParams:
+      type: object
+      properties:
+        subject:identifier:
+          $ref: "#/components/schemas/RequestQuerySubject"
       required:
         - subject:identifier
     RequestQuerySubject:
