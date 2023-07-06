@@ -25,7 +25,7 @@ def mock_patch(function_name: str, **kwargs):
     "get_credentials",
     return_value={"user": "foo", "password": "FOO"},  # pragma: allowlist secret
 )
-@mock_patch("get_endpoint", return_value="endpoint")
+@mock_patch("get_rds_endpoint", return_value="endpoint")
 @mock_patch("each_report_sql_statement", return_value=[["report", "sql"]])
 def test_make_query_event(
     _mock_get_credentials, _mock_get_endpoint, _mock_each_sql_statement
