@@ -4,7 +4,7 @@ from functools import cache
 import boto3
 import botocore.session
 
-from helpers.log import log
+# from helpers.log import log
 from helpers.terraform import get_terraform_json
 
 DEFAULT_WORKSPACE = "dev"
@@ -18,7 +18,7 @@ AWS_ACCOUNT_FOR_ENV = {
 }
 
 
-@log("Got account id '{__result__}' from {env}")
+# @log("Got account id '{__result__}' from {env}")
 def aws_account_id_from_profile(env: str):
     account = AWS_ACCOUNT_FOR_ENV[env]
     profile_names = [f"nhsd-nrlf-{account}-admin", f"nhsd-nrlf-{account}"]
