@@ -89,17 +89,17 @@ validation = ["fastjsonschema (>=2.14.5,<3.0.0)"]
 
 [[package]]
 name = "awscli"
-version = "1.28.0"
+version = "1.28.1"
 description = "Universal Command Line Environment for AWS."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "awscli-1.28.0-py3-none-any.whl", hash = "sha256:c44f7ff84471b879bafbf493910a2904d628cd7084e2c63780880178eb6c3850"},
-    {file = "awscli-1.28.0.tar.gz", hash = "sha256:0f03195edf23d7bff5ed6c5fefac37d60621f5bd6cbd046c7c5484bc29b7bb66"},
+    {file = "awscli-1.28.1-py3-none-any.whl", hash = "sha256:2b0c5cdb25a1d3b56921777596473af2b1314f0059ea451eccb0c3ef72b602b9"},
+    {file = "awscli-1.28.1.tar.gz", hash = "sha256:4d4841058fe87cc70b8deb27b261cf64337be05d36f45c2abb5078ba8a1e07ef"},
 ]
 
 [package.dependencies]
-botocore = "1.30.0"
+botocore = "1.30.1"
 colorama = ">=0.2.5,<0.4.5"
 docutils = ">=0.10,<0.17"
 PyYAML = ">=3.10,<5.5"
@@ -191,17 +191,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.27.0"
+version = "1.27.1"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.27.0-py3-none-any.whl", hash = "sha256:e1e535e9fb23977252f13652ed2fa9b4f2d59a53b04a5f2fad3ee415b6a3b2b0"},
-    {file = "boto3-1.27.0.tar.gz", hash = "sha256:908f9c277325d68963dfcfce963a05336f0eb19505fc239c0ab9d01f4cba0296"},
+    {file = "boto3-1.27.1-py3-none-any.whl", hash = "sha256:0085c1066953e61915b34f24fbdee7117fd2d8b5c9188b9519d47ba84510c067"},
+    {file = "boto3-1.27.1.tar.gz", hash = "sha256:cf43deb4556295219d9de44d1c95921209c90ee25246673b5768aef9d46519cc"},
 ]
 
 [package.dependencies]
-botocore = ">=1.30.0,<1.31.0"
+botocore = ">=1.30.1,<1.31.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -210,13 +210,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.30.0"
+version = "1.30.1"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.30.0-py3-none-any.whl", hash = "sha256:cac1333f41ec98e6f75bbba3f2c74b9e76aa3847469ecea6e7773a0af0049bee"},
-    {file = "botocore-1.30.0.tar.gz", hash = "sha256:b9cb5b78a289f0615a48d85066f01869029aa41b95993f2c0c55003df037c23f"},
+    {file = "botocore-1.30.1-py3-none-any.whl", hash = "sha256:18a32a21bfa9b418b9a38ea5ef4464eba003cbb26fca2cd56e4f51098c5d1a0f"},
+    {file = "botocore-1.30.1.tar.gz", hash = "sha256:4d1ac5a796c5c5c87946f25f3d98764288a0ed848e772a7a47cd134847e885e7"},
 ]
 
 [package.dependencies]
@@ -1182,17 +1182,17 @@ url = "layer/nrlf"
 
 [[package]]
 name = "nrlf-converter"
-version = "0.0.4"
+version = "0.0.6"
 description = "NHS Clinicals Record Locator Document Pointer to HL7 FHIR R4 DocumentReference conversion"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "nrlf_converter-0.0.4-py3-none-any.whl", hash = "sha256:f4e4408838d05c19b4851b1f9dcc50f893596c850b422eb3a5521913a1ce20c1"},
+    {file = "nrlf_converter-0.0.6-py3-none-any.whl", hash = "sha256:27c82953314a605d2b155f99867fbf19783051e1bd23b0941b4da567ad0779fa"},
 ]
 
 [package.source]
 type = "url"
-url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.4/nrlf_converter-0.0.4-py3-none-any.whl"
+url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.6/nrlf_converter-0.0.6-py3-none-any.whl"
 
 [[package]]
 name = "nrlf-lambda-pipeline"
@@ -1291,13 +1291,13 @@ files = [
 
 [[package]]
 name = "parse-type"
-version = "0.6.1"
+version = "0.6.2"
 description = "Simplifies to build parse types based on the parse module"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*"
 files = [
-    {file = "parse_type-0.6.1-py2.py3-none-any.whl", hash = "sha256:696502e748843a1a26bd47367ad248f790b825d6b2ea8b8208ef7cd37d6f3ddd"},
-    {file = "parse_type-0.6.1.tar.gz", hash = "sha256:c909b884f065c46a81feadbf63dbf5d82da94ad61780fcf219d3f5c295fe455c"},
+    {file = "parse_type-0.6.2-py2.py3-none-any.whl", hash = "sha256:06d39a8b70fde873eb2a131141a0e79bb34a432941fb3d66fad247abafc9766c"},
+    {file = "parse_type-0.6.2.tar.gz", hash = "sha256:79b1f2497060d0928bc46016793f1fca1057c4aacdf15ef876aa48d75a73a355"},
 ]
 
 [package.dependencies]
@@ -2162,4 +2162,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "b6a865f98f2c4d2881f21f4ed7677265853f672cf8479968806315d482c470bd"
+content-hash = "71b0bf596eef69d4f1db408cae18e8d79a47a6e9ff04305a179ce95f2d36314e"
