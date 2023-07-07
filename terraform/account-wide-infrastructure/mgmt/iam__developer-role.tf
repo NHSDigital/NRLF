@@ -14,9 +14,9 @@ resource "aws_iam_role" "developer_role" {
   })
 }
 
-module "developer_role_tf_state" {
+module "developer_policy" {
   source    = "../modules/role-policy"
-  name      = "${local.prefix}--developer-tf-state"
+  name      = "${local.prefix}--developer-policy"
   role_name = aws_iam_role.developer_role.name
   iam_permissions = [
     {
@@ -35,15 +35,7 @@ module "developer_role_tf_state" {
         data.aws_s3_bucket.terraform_state.arn,
         "${data.aws_s3_bucket.terraform_state.arn}/*"
       ]
-    }
-  ]
-}
-
-module "developer_role_deny_pe_tf_state" {
-  source    = "../modules/role-policy"
-  name      = "${local.prefix}--developer-deny-pe-tf-state"
-  role_name = aws_iam_role.developer_role.name
-  iam_permissions = [
+    },
     {
       Action = [
         "s3:PutObject",
@@ -67,30 +59,14 @@ module "developer_role_deny_pe_tf_state" {
       Resource = [
         "${data.aws_s3_bucket.terraform_state.arn}/${local.project}/dev/*"
       ]
-    }
-  ]
-}
-
-module "developer_role_assume_tf_role" {
-  source    = "../modules/role-policy"
-  name      = "${local.prefix}--developer-assume-tf-role"
-  role_name = aws_iam_role.developer_role.name
-  iam_permissions = [
+    },
     {
       Action = "sts:AssumeRole"
       Effect = "Allow"
       Resource = [
         "arn:aws:iam::${data.aws_secretsmanager_secret_version.dev_account_id.secret_string}:role/terraform",
       ]
-    }
-  ]
-}
-
-module "developer_role_read_account_id" {
-  source    = "../modules/role-policy"
-  name      = "${local.prefix}--developer-read-account-id"
-  role_name = aws_iam_role.developer_role.name
-  iam_permissions = [
+    },
     {
       Action = [
         "secretsmanager:GetResourcePolicy",
@@ -102,16 +78,7 @@ module "developer_role_read_account_id" {
       Resource = [
         data.aws_secretsmanager_secret.dev_account_id.arn
       ]
-    }
-  ]
-}
-
-
-module "developer_role_read_tf_log" {
-  source    = "../modules/role-policy"
-  name      = "${local.prefix}--developer-read-ci-logs"
-  role_name = aws_iam_role.developer_role.name
-  iam_permissions = [
+    },
     {
       Action = [
         "s3:ListAllMyBuckets"
@@ -131,15 +98,7 @@ module "developer_role_read_tf_log" {
         data.aws_s3_bucket.ci_logging.arn,
         "${data.aws_s3_bucket.ci_logging.arn}/*"
       ]
-    }
-  ]
-}
-
-module "developer_role_read_truststore" {
-  source    = "../modules/role-policy"
-  name      = "${local.prefix}--developer-read-truststore"
-  role_name = aws_iam_role.developer_role.name
-  iam_permissions = [
+    },
     {
       Action = [
         "s3:GetObject"
