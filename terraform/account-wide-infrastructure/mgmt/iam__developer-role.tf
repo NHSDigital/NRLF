@@ -65,6 +65,7 @@ module "developer_policy" {
       Effect = "Allow"
       Resource = [
         "arn:aws:iam::${data.aws_secretsmanager_secret_version.dev_account_id.secret_string}:role/terraform",
+        "arn:aws:iam::${data.aws_secretsmanager_secret_version.test_account_id.secret_string}:role/terraform",
       ]
     },
     {
