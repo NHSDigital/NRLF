@@ -46,7 +46,7 @@ gherkin-official = "^24.1.0"
 ez-setup = "^0.9"
 pygments = "^2.14.0"
 atlassian-python-api = "^3.39.0"
-hypothesis = "^6.79.1"
+hypothesis = "^6.80.1"
 
 [tool.poetry.group.legacy]
 optional = true
