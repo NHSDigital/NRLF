@@ -32,7 +32,7 @@ Before you tackle this guide, there are some more instructions here on the [Deve
 
 ### 1. Prerequisites
 
-- [poetry](https://python-poetry.org/docs/)
+- [poetry](https://python-poetry.org/docs/) (this repository uses poetry ^1.2)
 - [pyenv](https://github.com/pyenv/pyenv) (this repository uses python ^3.9.15)
 - jq
 - terraform
