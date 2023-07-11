@@ -148,6 +148,7 @@ data "aws_lambda_invocation" "set-static-dimensions-data" {
   depends_on = [
     data.aws_lambda_invocation.create-users,
     data.aws_lambda_invocation.create-all-tables,
+    data.aws_lambda_invocation.grant-permissions,
     module.rds-cluster-sql-query-lambda.function_name
   ]
 }
