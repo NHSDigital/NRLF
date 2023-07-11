@@ -74,7 +74,9 @@ def document_pointer_exists(
     )
 
 
-def _validate_immutable_fields(immutable_fields: set, a: dict, b: dict):
+def _validate_immutable_fields(
+    a: dict, b: dict, immutable_fields: set = IMMUTABLE_FIELDS
+):
     immutable_keys_in_a = immutable_fields.intersection(a.keys())
     immutable_keys_in_b = immutable_fields.intersection(b.keys())
     for k in immutable_keys_in_a | immutable_keys_in_b:
@@ -95,7 +97,6 @@ def compare_immutable_fields(
     core_model = data["core_model"]
     raw_original_document = data["original_document"]
     _validate_immutable_fields(
-        immutable_fields=IMMUTABLE_FIELDS,
         a=json_loads(raw_original_document),
         b=json_loads(core_model.document.__root__),
     )

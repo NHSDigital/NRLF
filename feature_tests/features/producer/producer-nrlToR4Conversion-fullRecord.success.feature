@@ -8,7 +8,11 @@ Feature: Producer Create NRL-to-R4 Conversion
           "attachment": {
               "url": "https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf",
               "creation": "2021-03-08T15:26:00+01:00",
-              "contentType": "application/pdf"
+              "contentType": "application/pdf",
+              "hash":"2jmj7l5rSw0yVb/vlWAYkK/YBwk=",
+              "language":"en-US",
+              "title": "$Mental health Crisis Plan Report",
+              "size": 345
           },
           "author": {
               "reference": "https://directory.spineservices.nhs.uk/STU3/Organization/RAE"
@@ -18,7 +22,9 @@ Feature: Producer Create NRL-to-R4 Conversion
                   {
                       "system": "http://snomed.info/sct",
                       "code": "$classCode",
-                      "display": "$classDisplay"
+                      "display": "$classDisplay",
+                      "userSelected": true,
+                      "version": "$classVersion"
                   }
               ]
           },
@@ -27,8 +33,28 @@ Feature: Producer Create NRL-to-R4 Conversion
                   "attachment": {
                       "url": "$attachmentUrl",
                       "contentType": "$attachmentContentType",
-                      "creation": "$attachmentCreation"
+                      "creation": "$attachmentCreation",
+                      "hash": "$attachmentHash",
+                      "language": "$attachmentLanguage",
+                      "title": "$attachmentTitle",
+                      "size": 345
                   },
+                  "extension": [
+                    {
+                        "url": "https://fhir.nhs.uk/STU3/StructureDefinition/Extension-NRL-ContentStability-1",
+                        "valueCodeableConcept": {
+                        "coding": [
+                            {
+                                "code": "static",
+                                "display": "Static",
+                                "id": "",
+                                "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-ContentStability-1",
+                                "version":"1"
+                                }
+                            ]
+                        }
+                    }
+                ],
                   "format": {
                       "code": "urn:nhs-ic:unstructured",
                       "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
@@ -36,7 +62,12 @@ Feature: Producer Create NRL-to-R4 Conversion
                   }
               }
           ],
+          "created": "2022-01-01 11:38:01.362134",
           "context": {
+              "period": {
+                    "start": "$periodStart",
+                    "end": "$periodEnd"
+               },
               "practiceSetting": {
                   "practiceSettingCoding": [
                       {
@@ -60,7 +91,11 @@ Feature: Producer Create NRL-to-R4 Conversion
           "logicalIdentifier": {
               "logicalId": "$logicalId"
           },
-          "meta": {
+         "masterIdentifier": {
+            "system": "$masterIdentifierSystem",
+            "value": "$masterIdentifierValue"
+          },
+         "meta": {
               "versionId": "1",
               "profile": [
                   "https://fhir.nhs.uk/STU3/StructureDefinition/NRL-DocumentReference-1"
@@ -85,7 +120,8 @@ Feature: Producer Create NRL-to-R4 Conversion
                       "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-ContentStability-1",
                       "display": "Dynamic"
                   }
-              ]
+              ],
+          "text": null
           },
           "status": "current",
           "type": {
@@ -114,7 +150,9 @@ Feature: Producer Create NRL-to-R4 Conversion
                       {
                           "code": "$classCode",
                           "display": "$classDisplay",
-                          "system": "http://snomed.info/sct"
+                          "system": "http://snomed.info/sct",
+                          "version":"$classVersion",
+                          "userSelected": true
                       }
                   ]
               }
@@ -148,7 +186,11 @@ Feature: Producer Create NRL-to-R4 Conversion
                   "attachment": {
                       "url": "$attachmentUrl",
                       "contentType": "$attachmentContentType",
-                      "creation": "$attachmentCreation"
+                      "creation": "$attachmentCreation",
+                      "hash": "$attachmentHash",
+                      "language": "$attachmentLanguage",
+                      "title": "$attachmentTitle",
+                      "size": 345
                   },
                   "format": {
                       "code": "urn:nhs-ic:unstructured",
@@ -158,6 +200,10 @@ Feature: Producer Create NRL-to-R4 Conversion
               }
           ],
           "context": {
+             "period": {
+                    "start": "$periodStart",
+                    "end": "$periodEnd"
+               },
               "practiceSetting": {
                   "coding": [
                       {
@@ -210,24 +256,32 @@ Feature: Producer Create NRL-to-R4 Conversion
       }
       """
 
-  Scenario: NRL can Create a DocumentReference from an NRL Document Pointer
+  Scenario: NRL can Create a DocumentReference from a fully populated NRL Document Pointer
     Given Producer "Data Sync" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
       | http://snomed.info/sct | 718377777 |
-    And Producer "Data Sync" has the permission "audit-dates-from-payload"
     And Producer "Data Sync" has an NRL Document Pointer from NRL_DOCUMENT_POINTER template
       | property               | value                                                                                |
       | attachmentContentType  | application/pdf                                                                      |
       | attachmentCreation     | 2021-03-08T15:26:00+01:00                                                            |
       | attachmentUrl          | https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf |
+      | attachmentHash         | 2jmj7l5rSw0yVb/vlWAYkK/YBwk=                                                         |
+      | attachmentLanguage     | en-US                                                                                |
+      | attachmentTitle        | Mental health Crisis Plan Report                                                     |
       | author                 | https://directory.spineservices.nhs.uk/STU3/Organization/RAE                         |
       | classCode              | 734163000                                                                            |
       | classDisplay           | Care plan                                                                            |
+      | classVersion           | 1                                                                                    |
+      | userSelected           | True                                                                                 |
       | custodian              | https://directory.spineservices.nhs.uk/STU3/Organization/8FW23                       |
       | indexed                | 2022-08-23T14:45:17+00:00                                                            |
       | lastModified           | Tue, 23 Aug 2022 14:45:17 GMT                                                        |
       | logicalId              | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851                            |
+      | masterIdentifierSystem | urn:ietf:rfc:395                                                                     |
+      | masterIdentifierValue  | urn:oid:1.3.6.1.4.1.21367.2005.47481.7                                               |
+      | periodStart            | 2023-01-01T20:01:44Z                                                                 |
+      | periodEnd              | 2023-11-12T20:01:44Z                                                                 |
       | practiceSettingCode    | 310167005                                                                            |
       | practiceSettingDisplay | Urology service                                                                      |
       | relatesToCode          |                                                                                      |
@@ -244,13 +298,20 @@ Feature: Producer Create NRL-to-R4 Conversion
       | attachmentContentType  | application/pdf                                                                      |
       | attachmentCreation     | 2021-03-08T15:26:00+01:00                                                            |
       | attachmentUrl          | https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf |
+      | attachmentHash         | 2jmj7l5rSw0yVb/vlWAYkK/YBwk=                                                         |
+      | attachmentLanguage     | en-US                                                                                |
+      | attachmentTitle        | Mental health Crisis Plan Report                                                     |
       | author                 | https://directory.spineservices.nhs.uk/STU3/Organization/RAE                         |
       | classCode              | 734163000                                                                            |
       | classDisplay           | Care plan                                                                            |
+      | classVersion           | 1                                                                                    |
+      | userSelected           | True                                                                                 |
       | custodian              | 8FW23                                                                                |
       | indexed                | 2022-08-23T14:45:17+00:00                                                            |
       | lastModified           | Tue, 23 Aug 2022 14:45:17 GMT                                                        |
       | logicalId              | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851                            |
+      | periodStart            | 2023-01-01T20:01:44Z                                                                 |
+      | periodEnd              | 2023-11-12T20:01:44Z                                                                 |
       | practiceSettingCode    | 310167005                                                                            |
       | practiceSettingDisplay | Urology service                                                                      |
       | typeCode               | 718377777                                                                            |
@@ -279,7 +340,7 @@ Feature: Producer Create NRL-to-R4 Conversion
       | document    | <document>                                                      |
       | created_on  | <timestamp>                                                     |
 
-  Scenario: NRL can Supersede a DocumentReference from an NRL Document Pointer
+  Scenario: NRL can Supersede a DocumentReference from a fully populated NRL Document Pointer
     Given Producer "Data Sync" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
@@ -291,13 +352,21 @@ Feature: Producer Create NRL-to-R4 Conversion
       | attachmentContentType  | application/pdf                                                                      |
       | attachmentCreation     | 2021-03-08T15:26:00+01:00                                                            |
       | attachmentUrl          | https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf |
+      | attachmentHash         | 2jmj7l5rSw0yVb/vlWAYkK/YBwk=                                                         |
+      | attachmentLanguage     | en-US                                                                                |
+      | attachmentTitle        | Mental health Crisis Plan Report                                                     |
       | author                 | https://directory.spineservices.nhs.uk/STU3/Organization/RAE                         |
       | classCode              | 734163000                                                                            |
       | classDisplay           | Care plan                                                                            |
+      | classVersion           | 1                                                                                    |
       | custodian              | 8FW23                                                                                |
       | indexed                | 2022-08-23T14:45:17+00:00                                                            |
       | lastModified           | Tue, 23 Aug 2022 14:45:17 GMT                                                        |
       | logicalId              | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851                            |
+      | masterIdentifierSystem | urn:ietf:rfc:395                                                                     |
+      | masterIdentifierValue  | urn:oid:1.3.6.1.4.1.21367.2005.47481.7                                               |
+      | periodStart            | 2023-01-01T20:01:44Z                                                                 |
+      | periodEnd              | 2023-11-12T20:01:44Z                                                                 |
       | practiceSettingCode    | 310167005                                                                            |
       | practiceSettingDisplay | Urology service                                                                      |
       | typeCode               | 718377777                                                                            |
@@ -308,13 +377,19 @@ Feature: Producer Create NRL-to-R4 Conversion
       | attachmentContentType  | application/pdf                                                                                                    |
       | attachmentCreation     | 2021-03-08T15:26:00+01:00                                                                                          |
       | attachmentUrl          | https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf                               |
+      | attachmentHash         | 2jmj7l5rSw0yVb/vlWAYkK/YBwk=                                                                                       |
+      | attachmentLanguage     | en-US                                                                                                              |
+      | attachmentTitle        | Mental health Crisis Plan Report                                                                                   |
       | author                 | https://directory.spineservices.nhs.uk/STU3/Organization/RAE                                                       |
       | classCode              | 734163000                                                                                                          |
       | classDisplay           | Care plan                                                                                                          |
+      | classVersion           | 1                                                                                                                  |
       | custodian              | https://directory.spineservices.nhs.uk/STU3/Organization/8FW23                                                     |
       | indexed                | 2022-08-23T14:45:17+00:00                                                                                          |
       | lastModified           | Tue, 23 Aug 2022 14:45:17 GMT                                                                                      |
       | logicalId              | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851                                                          |
+      | periodStart            | 2023-01-01T20:01:44Z                                                                                               |
+      | periodEnd              | 2023-11-12T20:01:44Z                                                                                               |
       | practiceSettingCode    | 310167005                                                                                                          |
       | practiceSettingDisplay | Urology service                                                                                                    |
       | relatesToCode          | replaces                                                                                                           |
@@ -331,13 +406,19 @@ Feature: Producer Create NRL-to-R4 Conversion
       | attachmentContentType  | application/pdf                                                                      |
       | attachmentCreation     | 2021-03-08T15:26:00+01:00                                                            |
       | attachmentUrl          | https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf |
+      | attachmentHash         | 2jmj7l5rSw0yVb/vlWAYkK/YBwk=                                                         |
+      | attachmentLanguage     | en-US                                                                                |
+      | attachmentTitle        | Mental health Crisis Plan Report                                                     |
       | author                 | https://directory.spineservices.nhs.uk/STU3/Organization/RAE                         |
       | classCode              | 734163000                                                                            |
       | classDisplay           | Care plan                                                                            |
+      | classVersion           | 1                                                                                    |
       | custodian              | 8FW23                                                                                |
       | indexed                | 2022-08-23T14:45:17+00:00                                                            |
       | lastModified           | Tue, 23 Aug 2022 14:45:17 GMT                                                        |
       | logicalId              | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851                            |
+      | periodStart            | 2023-01-01T20:01:44Z                                                                 |
+      | periodEnd              | 2023-11-12T20:01:44Z                                                                 |
       | practiceSettingCode    | 310167005                                                                            |
       | practiceSettingDisplay | Urology service                                                                      |
       | typeCode               | 718377777                                                                            |
@@ -355,77 +436,6 @@ Feature: Producer Create NRL-to-R4 Conversion
       | issue_code        | RESOURCE_SUPERSEDED                      |
       | issue_description | Resource created and Resource(s) deleted |
       | message           | Resource created and Resource(s) deleted |
-    And Document Pointer "8FW23-341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851" exists
-      | property    | value                                                           |
-      | id          | 8FW23-341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851 |
-      | nhs_number  | 9278693472                                                      |
-      | producer_id | 8FW23                                                           |
-      | type        | http://snomed.info/sct\|718377777                               |
-      | source      | NRLF                                                            |
-      | version     | 1                                                               |
-      | updated_on  | NULL                                                            |
-      | document    | <document>                                                      |
-      | created_on  | <timestamp>                                                     |
-    And Document Pointer "8FW23-e87816c5-1fc9-11ed-bd8d-000c290de2c0-58504e523530384b5851" does not exist
-
-  Scenario: NRL can Supersede a DocumentReference from an NRL Document Pointer when target document does not exist
-    Given Producer "Data Sync" (Organisation ID "8FW23") is requesting to create Document Pointers
-    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                 | value     |
-      | http://snomed.info/sct | 718377777 |
-    And Producer "Data Sync" has the permission "supersede-ignore-delete-fail"
-    And Producer "Data Sync" has an NRL Document Pointer from NRL_DOCUMENT_POINTER template
-      | property               | value                                                                                                              |
-      | attachmentContentType  | application/pdf                                                                                                    |
-      | attachmentCreation     | 2021-03-08T15:26:00+01:00                                                                                          |
-      | attachmentUrl          | https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf                               |
-      | author                 | https://directory.spineservices.nhs.uk/STU3/Organization/RAE                                                       |
-      | classCode              | 734163000                                                                                                          |
-      | classDisplay           | Care plan                                                                                                          |
-      | custodian              | https://directory.spineservices.nhs.uk/STU3/Organization/8FW23                                                     |
-      | indexed                | 2022-08-23T14:45:17+00:00                                                                                          |
-      | lastModified           | Tue, 23 Aug 2022 14:45:17 GMT                                                                                      |
-      | logicalId              | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851                                                          |
-      | practiceSettingCode    | 310167005                                                                                                          |
-      | practiceSettingDisplay | Urology service                                                                                                    |
-      | relatesToCode          | replaces                                                                                                           |
-      | relatesToIdentifier    |                                                                                                                    |
-      | relatesToTarget        | https://psis-sync.national.ncrs.nhs.uk/DocumentReference/e87816c5-1fc9-11ed-bd8d-000c290de2c0-58504e523530384b5851 |
-      | relatesToSystem        |                                                                                                                    |
-      | typeCode               | 718377777                                                                                                          |
-      | typeDisplay            | Another Test data                                                                                                  |
-    When Producer "Data Sync" uses "nrl-to-r4" to convert NRL_DOCUMENT_POINTER with NHS Number "9278693472" and ASID "230811201350" into a DocumentReference according to the DOCUMENT_REFERENCE template
-      | property               | value                                                                                |
-      | id                     | 8FW23-341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851                      |
-      | nhsNumber              | 9278693472                                                                           |
-      | asid                   | 230811201350                                                                         |
-      | attachmentContentType  | application/pdf                                                                      |
-      | attachmentCreation     | 2021-03-08T15:26:00+01:00                                                            |
-      | attachmentUrl          | https://spine-proxy.national.ncrs.nhs.uk/p1.nhs.uk/MentalhealthCarePlanReportRGD.pdf |
-      | author                 | https://directory.spineservices.nhs.uk/STU3/Organization/RAE                         |
-      | classCode              | 734163000                                                                            |
-      | classDisplay           | Care plan                                                                            |
-      | custodian              | 8FW23                                                                                |
-      | indexed                | 2022-08-23T14:45:17+00:00                                                            |
-      | lastModified           | Tue, 23 Aug 2022 14:45:17 GMT                                                        |
-      | logicalId              | 341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851                            |
-      | practiceSettingCode    | 310167005                                                                            |
-      | practiceSettingDisplay | Urology service                                                                      |
-      | typeCode               | 718377777                                                                            |
-      | typeDisplay            | Another Test data                                                                    |
-      | typeSystem             | http://snomed.info/sct                                                               |
-      | target                 | 8FW23-e87816c5-1fc9-11ed-bd8d-000c290de2c0-58504e523530384b5851                      |
-    Then the operation is successful
-    When Producer "Data Sync" creates a Document Reference from DOCUMENT_REFERENCE template
-    Then the operation is successful
-    And the status is 201
-    And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value            |
-      | issue_type        | informational    |
-      | issue_level       | information      |
-      | issue_code        | RESOURCE_CREATED |
-      | issue_description | Resource created |
-      | message           | Resource created |
     And Document Pointer "8FW23-341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851" exists
       | property    | value                                                           |
       | id          | 8FW23-341ec927-22f2-11ed-bd8d-000c290de2c0-58504e523530384b5851 |
