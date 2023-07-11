@@ -40,7 +40,7 @@ nrlf = { path = "./layer/nrlf/", develop = true }
 lambda-utils = { path = "./layer/lambda_utils/", develop = true }
 helpers = { path = "./helpers/", develop = true }
 fire = "^0.5.0"
-cookiecutter = "^2.1.1"
+cookiecutter = "^2.2.2"
 gherkin-official = "^24.1.0"
 ez-setup = "^0.9"
 pygments = "^2.14.0"
