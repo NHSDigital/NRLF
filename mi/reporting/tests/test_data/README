@@ -3,5 +3,5 @@
 To regenerate test data, run (from the repo root)
 
 ```
-python mi/schema/test_data/generate_test_data.py
+python mi/reporting/tests/test_datagenerate_test_data.py
 ```
