@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum
 
 
 class Source(Enum):
@@ -6,14 +6,12 @@ class Source(Enum):
     LEGACY = "NRL"
 
 
-class DbPrefix(Enum):
-    DocumentPointer = auto()
-    Patient = auto()
-    Organization = auto()
-    CreatedOn = auto()
-
-    def __str__(self):
-        return self.name[0]
+class DbPrefix(str, Enum):
+    DocumentPointer = "D"
+    Patient = "P"
+    Organization = "O"
+    CreatedOn = "CO"
+    Contract = "C"
 
 
 VALID_SOURCES = frozenset(item.value for item in Source.__members__.values())
@@ -23,6 +21,7 @@ JSON_TYPES = {dict, list}
 NHS_NUMBER_INDEX = "idx_nhs_number_by_id"
 ID_SEPARATOR = "-"
 CUSTODIAN_SEPARATOR = "."
+TYPE_SEPARATOR = "|"
 KEY_SEPARATOR = "#"
 ODS_SYSTEM = "https://fhir.nhs.uk/Id/ods-organization-code"
 NHS_NUMBER_SYSTEM_URL = "https://fhir.nhs.uk/Id/nhs-number"

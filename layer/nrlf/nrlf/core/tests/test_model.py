@@ -213,7 +213,7 @@ def test_create_bundle_from_paginated_response_returns_populated_bundle_of_2():
         fhir_json=fhir_json, api_version=API_VERSION
     )
 
-    paginated_response = PaginatedResponse(document_pointers=[core_model, core_model_2])
+    paginated_response = PaginatedResponse(items=[core_model, core_model_2])
 
     result = create_bundle_from_paginated_response(paginated_response)
 
@@ -299,7 +299,7 @@ def test_create_bundle_from_paginated_response_returns_populated_bundle_of_1():
         fhir_json=fhir_json, api_version=API_VERSION
     )
 
-    paginated_response = PaginatedResponse(document_pointers=[core_model])
+    paginated_response = PaginatedResponse(items=[core_model])
 
     result = create_bundle_from_paginated_response(paginated_response)
 
@@ -347,8 +347,7 @@ def test_create_bundle_from_paginated_response_returns_populated_bundle_of_1():
 
 
 def test_create_bundle_from_paginated_response_returns_unpopulated_bundle():
-
-    paginated_response = PaginatedResponse(document_pointers=[])
+    paginated_response = PaginatedResponse(items=[])
     result = create_bundle_from_paginated_response(paginated_response)
 
     expected_result = {

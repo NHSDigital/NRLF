@@ -96,7 +96,7 @@ def test_create_search_and_filter_query_in_db():
         result = repository.query_gsi_1(
             model.pk_1.__root__, type="http://snomed.info/sct|736253002"
         )
-        assert result.document_pointers == [model]
+        assert result.items == [model]
 
 
 def test_query_can_filter_results():
@@ -133,10 +133,10 @@ def test_query_can_filter_results():
             pk=key(DbPrefix.Organization, provider_id),
             type=[f"http://snomed.info/sct|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
         )
-        assert len(results_1.document_pointers) == 1
-        assert results_1.document_pointers[0] == model_1
-        assert len(results_2.document_pointers) == 1
-        assert results_2.document_pointers[0] == model_1
+        assert len(results_1.items) == 1
+        assert results_1.items[0] == model_1
+        assert len(results_2.items) == 1
+        assert results_2.items[0] == model_1
 
 
 def test_filter_can_find_result():
@@ -178,7 +178,7 @@ def test_create_search_and_filter_query_in_db_returns_empty_bundle():
             pk=key(DbPrefix.Patient, "EMPTY"),
             type=["http://snomed.info/sct|736253002"],
         )
-        assert len(item.document_pointers) == 0
+        assert len(item.items) == 0
 
 
 @pytest.mark.parametrize(

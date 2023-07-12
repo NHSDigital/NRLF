@@ -9,7 +9,10 @@ from api.producer.updateDocumentReference.src.v1.constants import (
     API_VERSION,
     IMMUTABLE_FIELDS,
 )
-from nrlf.core.common_producer_steps import validate_producer_permissions
+from nrlf.core.common_producer_steps import (
+    apply_json_schema_validators,
+    validate_producer_permissions,
+)
 from nrlf.core.common_steps import (
     make_common_log_action,
     parse_headers,
@@ -128,6 +131,7 @@ steps = [
     parse_headers,
     parse_path_id,
     parse_request_body,
+    apply_json_schema_validators,
     validate_producer_permissions,
     document_pointer_exists,
     compare_immutable_fields,

@@ -194,7 +194,7 @@ def _filter_expression(d: dict) -> str:
     """
 
     def _item(key: str, value: any) -> str:
-        if type(value) == list:
+        if type(value) is list:
             items = ", ".join([f":{key}_{ix}" for ix in range(1, len(value) + 1)])
             return f"#{key} in ({items})"
         return f"#{key} = :{key}"
@@ -375,9 +375,7 @@ class Repository:
                 last_evaluated_key
             )
 
-        return PaginatedResponse(
-            last_evaluated_key=last_evaluated_key, document_pointers=items
-        )
+        return PaginatedResponse(last_evaluated_key=last_evaluated_key, items=items)
 
     def _scroll(
         self,

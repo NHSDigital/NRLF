@@ -43,6 +43,10 @@ class DynamoDbListType(DynamoDbType):
     __root__: list[str]
 
 
+class DynamoDbDictType(DynamoDbType):
+    __root__: dict
+
+
 def convert_value_to_dynamo_format(obj):
     _type = type(obj)
 

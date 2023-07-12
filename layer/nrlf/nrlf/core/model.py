@@ -7,12 +7,13 @@ from aws_lambda_powertools.utilities.parser.models import (
 from aws_lambda_powertools.utilities.parser.models import (
     APIGatewayProxyEventModel as _APIGatewayProxyEventModel,
 )
-from pydantic import BaseModel, Field, Json, root_validator, validator
+from pydantic import BaseModel, Field, Json, PrivateAttr, root_validator, validator
 
 import nrlf.consumer.fhir.r4.model as consumer_model
 import nrlf.producer.fhir.r4.model as producer_model
 from nrlf.core.dynamodb_types import (
     DYNAMODB_NULL,
+    DynamoDbDictType,
     DynamoDbIntType,
     DynamoDbStringType,
     DynamoDbType,
@@ -32,7 +33,13 @@ from nrlf.core.validators import (
     validate_tuple,
 )
 
-from .constants import CUSTODIAN_SEPARATOR, ID_SEPARATOR, KEY_SEPARATOR, DbPrefix
+from .constants import (
+    CUSTODIAN_SEPARATOR,
+    ID_SEPARATOR,
+    KEY_SEPARATOR,
+    TYPE_SEPARATOR,
+    DbPrefix,
+)
 
 KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
 
@@ -102,6 +109,10 @@ def convert_document_pointer_id_to_pk(id: str) -> str:
     return key(DbPrefix.DocumentPointer, *ods_code_parts, document_id)
 
 
+def split_pointer_type(pointer_type: str) -> tuple[str, str]:
+    return pointer_type.split(TYPE_SEPARATOR)
+
+
 class DocumentPointer(DynamoDbModel):
     id: DynamoDbStringType
     nhs_number: DynamoDbStringType
@@ -115,6 +126,11 @@ class DocumentPointer(DynamoDbModel):
     created_on: DynamoDbStringType
     updated_on: Optional[DynamoDbStringType] = DYNAMODB_NULL
     document_id: DynamoDbStringType = Field(exclude=True)
+    _document: dict = PrivateAttr()
+
+    def __init__(self, *, _document=None, **data):
+        super().__init__(**data)
+        self._document = _document
 
     def dict(self, **kwargs):
         return {
@@ -279,7 +295,7 @@ class CountRequestParams(consumer_model.CountRequestParams, _NhsNumberMixin):
 
 class PaginatedResponse(BaseModel):
     last_evaluated_key: str = None
-    document_pointers: list[DocumentPointer]
+    items: list[BaseModel]
 
 
 class Authorizer(BaseModel):
@@ -294,3 +310,13 @@ class APIGatewayEventRequestContext(_APIGatewayEventRequestContext):
 
 class APIGatewayProxyEventModel(_APIGatewayProxyEventModel):
     requestContext: APIGatewayEventRequestContext
+
+
+class Contract(BaseModel):
+    pk: DynamoDbStringType
+    sk: DynamoDbStringType
+    name: DynamoDbStringType
+    version: DynamoDbIntType
+    system: DynamoDbStringType
+    value: DynamoDbStringType
+    schema: DynamoDbDictType
