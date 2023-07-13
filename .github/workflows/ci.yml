@@ -55,26 +55,14 @@ jobs:
               echo "Regular branch, exiting release check"
               exit 0;
           fi
-          releasedate=${2020-01-01}
-          for pathname in changelog/*.md; do
-            name=$(basename "$pathname" .md)
-            if [[ "${name}" > "${releasedate}" ]];
-            then
-                releasedate=${name}
-            fi
-          done
-          releasebranch="release/$releasedate"
-          if [ "${{ env.BRANCH_NAME }}" == "$releasebranch" ];
-            then
-              echo "Branch is a release and name matches release name, continuing"
-              if [ ! -s "changelog/${releasedate}.md" ]; then
-                echo "ChangeLog file is empty, exiting."
-                exit 1;
-              fi
-              exit 0;
-            else
-              echo "Branch name does not match release name from recent changelog file, exiting"
-              exit 1;
+          prefix="release/"
+          releasedate=${env.BRANCH_NAME#"$prefix"}
+          if grep "$releasedate" CHANGELOG.md ; then
+            echo "Branch is a release and matches the latest release details in CHANGELOG.md, continuing"
+            exit 0
+          else
+            echo "Branch name does not match the latest release details in CHANGELOG.md, exiting"
+            exit 1;
           fi
 
   cache-base:
