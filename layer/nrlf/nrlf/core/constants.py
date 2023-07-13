@@ -13,6 +13,9 @@ class DbPrefix(str, Enum):
     CreatedOn = "CO"
     Contract = "C"
 
+    def __str__(self):
+        return self.value
+
 
 VALID_SOURCES = frozenset(item.value for item in Source.__members__.values())
 EMPTY_VALUES = ("", None, [], {})

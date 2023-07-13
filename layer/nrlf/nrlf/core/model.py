@@ -312,11 +312,15 @@ class APIGatewayProxyEventModel(_APIGatewayProxyEventModel):
     requestContext: APIGatewayEventRequestContext
 
 
-class Contract(BaseModel):
+class Contract(DynamoDbModel):
     pk: DynamoDbStringType
     sk: DynamoDbStringType
     name: DynamoDbStringType
     version: DynamoDbIntType
     system: DynamoDbStringType
     value: DynamoDbStringType
-    schema: DynamoDbDictType
+    json_schema: DynamoDbDictType
+
+    @classmethod
+    def kebab(cls) -> str:
+        return "document-pointer"

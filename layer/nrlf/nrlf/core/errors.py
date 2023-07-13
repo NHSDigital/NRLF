@@ -98,6 +98,10 @@ class InconsistentProducerId(ValueError):
     pass
 
 
+class BadJsonSchema(Exception):
+    pass
+
+
 NRLF_TO_SPINE_4XX_ERROR = {
     AuthenticationError: SpineCoding.ACCESS_DENIED_LEVEL,
     DynamoDbError: SpineCoding.RESOURCE_NOT_FOUND,

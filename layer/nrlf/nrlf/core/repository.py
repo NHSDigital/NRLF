@@ -353,9 +353,9 @@ class Repository:
                 exclusive_start_key
             )
 
+        # print(index_keys, query_kwargs, exclusive_start_key)
         items, last_evaluated_key = [], None
         for item in self._scroll(
-            index_keys=index_keys,
             query_kwargs=query_kwargs,
             exclusive_start_key=exclusive_start_key,
             logger=logger,
@@ -379,7 +379,6 @@ class Repository:
 
     def _scroll(
         self,
-        index_keys: str,
         query_kwargs: dict,
         exclusive_start_key: str,
         logger=None,
@@ -404,7 +403,6 @@ class Repository:
         last_evaluated_key = results.get("LastEvaluatedKey")
         if last_evaluated_key is not None:
             yield from self._scroll(
-                index_keys=index_keys,
                 query_kwargs=query_kwargs,
                 exclusive_start_key=last_evaluated_key,
                 logger=logger,
@@ -422,7 +420,10 @@ class Repository:
         """
         Query records using the main partition key
         """
-        return self._query(None, "pk", pk, "sk", sk, **filter)
+        sk_name = None if sk is None else "sk"
+        return self._query(
+            index_name=None, pk_name="pk", pk=pk, sk_name=sk_name, sk=sk, **filter
+        )
 
     def query_gsi_1(
         self,
