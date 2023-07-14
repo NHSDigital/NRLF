@@ -14,12 +14,13 @@ from build_scripts.common import (
 )
 
 UNNECESSARY_DIRS = [
-    "__pycache__",
-    "*.dist-info",
+    "**/__pycache__/*",
+    "[!isort]*.dist-info",  # dist-info is required to import isort
     "*tests",
     "botocore",
     "boto3",
     "**/pydantic/*.so",
+    "_pytest",
 ]
 
 

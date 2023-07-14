@@ -2,6 +2,7 @@ import base64
 import gzip
 import json
 import os
+from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
@@ -144,6 +145,15 @@ def test__parse_s3_uri():
     }
 
 
+@contextmanager
+def reset_cwd():
+    prev_dir = Path.cwd()
+    try:
+        yield
+    finally:
+        os.chdir(prev_dir)
+
+
 def test_local_path_to_s3_components():
     with TemporaryDirectory() as dir:
         local_path = f"{DOT_FIREHOSE}/foo/bar/baz"
@@ -151,11 +161,12 @@ def test_local_path_to_s3_components():
         local_full_path.parent.mkdir(parents=True)
         local_full_path.touch()
 
-        os.chdir(dir)
-        local_path_to_s3_components(local_path=local_path) == {
-            "bucket_name": "foo",
-            "file_key": "bar/baz",
-        }
+        with reset_cwd():
+            os.chdir(dir)
+            local_path_to_s3_components(local_path=local_path) == {
+                "bucket_name": "foo",
+                "file_key": "bar/baz",
+            }
 
 
 def test__error_debug_help():

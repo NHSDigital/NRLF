@@ -8,6 +8,7 @@ from nrlf.core.constants import (
     CUSTODIAN_SEPARATOR,
     ID_SEPARATOR,
     NHS_NUMBER_SYSTEM_URL,
+    TYPE_SEPARATOR,
     VALID_SOURCES,
 )
 from nrlf.core.errors import (

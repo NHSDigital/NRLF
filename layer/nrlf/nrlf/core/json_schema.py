@@ -2,12 +2,13 @@ import importlib.util
 import json
 import re
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from types import FunctionType, ModuleType
 from typing import Generator
 
-from datamodel_code_generator import InputFileType, generate
+from datamodel_code_generator.parser.jsonschema import JsonSchemaParser
 from pydantic import BaseModel
 
 from nrlf.core.constants import DbPrefix
@@ -24,7 +25,7 @@ class JsonSchemaMapping(dict):
     def get_default(self) -> list[FunctionType]:
         return self.get(system="", value="")
 
-    def get(system: str, value: str) -> list[FunctionType]:
+    def get(self, system: str, value: str) -> list[FunctionType]:
         return super().get(system, {}).get(value)
 
     def set_default(self, validators: list[FunctionType]):
@@ -54,15 +55,25 @@ def _load_module_from_file(file_path: Path) -> ModuleType:
     return module
 
 
+@contextmanager
+def _delete_file_on_completion(file_path: Path):
+    try:
+        yield
+    finally:
+        file_path.unlink(missing_ok=True)
+
+
 def json_schema_to_pydantic_model(json_schema: dict, name_override: str) -> BaseModel:
-    with NamedTemporaryFile(suffix=".py") as temp_file:
-        temp_file_path = Path(temp_file.name)
-        generate(
-            json.dumps(json_schema),
-            output=temp_file_path,
-            input_file_type=InputFileType.JsonSchema,
-        )
+    json_schema_as_str = json.dumps(json_schema)
+    pydantic_models_as_str: str = JsonSchemaParser(json_schema_as_str).parse()
+
+    with NamedTemporaryFile(suffix=".py", delete=False) as temp_file:
+        temp_file_path = Path(temp_file.name).resolve()
+        temp_file.write(pydantic_models_as_str.encode())
+
+    with _delete_file_on_completion(file_path=temp_file_path):
         module = _load_module_from_file(file_path=temp_file_path)
+
     main_model_name = _to_camel_case(name=json_schema["title"])
     pydantic_model = module.__dict__[main_model_name]
     pydantic_model.__name__ = name_override
@@ -85,7 +96,7 @@ def _get_contracts_from_db(
 
 
 def get_validators_from_db(
-    repository: Repository, system: str, value: str
+    repository: Repository, system: str = "", value: str = ""
 ) -> list[FunctionType]:
     validators = []
     for contract in _get_contracts_from_db(

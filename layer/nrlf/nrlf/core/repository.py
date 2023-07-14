@@ -353,7 +353,6 @@ class Repository:
                 exclusive_start_key
             )
 
-        # print(index_keys, query_kwargs, exclusive_start_key)
         items, last_evaluated_key = [], None
         for item in self._scroll(
             query_kwargs=query_kwargs,

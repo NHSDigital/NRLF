@@ -55,7 +55,7 @@ def apply_json_schema_validators(
     logger: Logger,
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
-    system, value = split_pointer_type(core_model.type)
+    system, value = split_pointer_type(core_model.type.__root__)
     json_schema_validators: JsonSchemaMapping = dependencies["json_schema_validators"]
     repository: Repository = dependencies["contract_repository"]
 

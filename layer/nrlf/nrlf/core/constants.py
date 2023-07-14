@@ -12,6 +12,7 @@ class DbPrefix(str, Enum):
     Organization = "O"
     CreatedOn = "CO"
     Contract = "C"
+    Version = "V"
 
     def __str__(self):
         return self.value

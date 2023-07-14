@@ -102,6 +102,34 @@ Feature: Producer Create Success scenarios
         ]
       }
       """
+    And template JSON_SCHEMA
+      """
+      {
+        "additionalProperties": true,
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Validate Content Url",
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "attachment": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "pattern": "^https*://(www.)*\\w+.*$"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      """
 
   Scenario: Successfully create a Document Pointer of type Mental health crisis plan
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
@@ -233,3 +261,39 @@ Feature: Producer Create Success scenarios
       | updated_on  | NULL                                    |
       | document    | <document>                              |
       | created_on  | 2023-05-02T12:00:00.000Z                |
+
+  @integration-only
+  Scenario: Validate a Document Pointer of type Mental health crisis plan with good URL
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Data Contract is registered in the system
+      | property             | value                  |
+      | name                 | Validate Content Url   |
+      | system               | http://snomed.info/sct |
+      | value                | 736253002              |
+      | version              | 1                      |
+      | inverse_version      | 0                      |
+      | json_schema_template | JSON_SCHEMA            |
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    Then the operation is successful
+    And the status is 201
+    And Document Pointer "8FW23-1234567890" exists
+      | property    | value                             |
+      | id          | 8FW23-1234567890                  |
+      | nhs_number  | 9278693472                        |
+      | producer_id | 8FW23                             |
+      | type        | http://snomed.info/sct\|736253002 |
+      | source      | NRLF                              |
+      | version     | 1                                 |
+      | updated_on  | NULL                              |
+      | document    | <document>                        |
+      | created_on  | <timestamp>                       |
