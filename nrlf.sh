@@ -23,6 +23,7 @@ function _nrlf_commands_help() {
   echo "  terraform   - terraform commands"
   echo "  test        - run tests"
   echo "  truststore  - manage the certificates for the API TLS MA"
+  echo "  mi          - MI reporting tools"
   echo
   return 1
 }
@@ -49,6 +50,7 @@ function nrlf() {
     "truststore") _truststore "${@:2}" ;;
     "doc") _doc "${@:2}" ;;
     "firehose") _firehose "${@:2}" ;;
+    "mi") _mi "${@:2}" ;;
     *) _nrlf_commands_help ;;
   esac
 

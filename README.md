@@ -23,6 +23,9 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
 6. [Logging](#logging)
 7. [Route 53 & Hosted zones](#route53--hosted-zones)
 8. [Sandbox](#sandbox)
+9. [Firehose](#firehose)
+10. [Releases](#releases)
+11. [Generating MI Reports](#generating-mi-reports)
 
 ---
 
@@ -595,10 +598,41 @@ In order to understand the debugging lifecycle, please follow this example and t
    4. Run `nrlf resubmit file_path <env>` (<env> should match the value from line 4)
 6. Verify that the file has been moved from `errors/` to `fixed/` on s3
 
-### Release items
+## Releases
 
 When you create a release branch in the form of `release/yyyy-mm-dd` or `hotfix/yyyy-mm-dd` then you need to update the RELEASE file in the top level of the repository to match that release name
 
 The CI pipeline will check to make sure you have done this to prevent any mistakes - if you have made a release or hotfix branch it will check that the value in the RELEASE file matches or not
 
 This is because it will use that value to tag the commit once its been merged into main as a reference point, and this is how it tracks which release it is as github actions struggles with post merge branch identification
+
+## Generating MI reports
+
+MI reports can be generated in CSV format by running (note: `?` indicates optional that `partition_key` is to indicate the key used to generate test data, described after):
+
+```
+nrlf mi report <env> <?workspace> <?partition_key>
+```
+
+For standard reports, both `workspace` and `partition_key` can be omitted, however for testing purposes you should `workspace`. If you would like to use test data (found in `mi/reporting/tests/test_data/test_data.json`) then you can do:
+
+```
+nrlf mi seed-db <partition_key>
+```
+
+which will seed an amended version of the test data into the database for your current workspace, which uses the `partition_key` to make the test data unique. You can then run the previous `nrlf mi report` command with your `workspace` and `partition_key` to build reports based on the test data.
+
+All reports, test or otherwise, are saved to `mi/reporting/report`.
+
+### Creating or amending report queries
+
+Report queries are SQL files that can be found in `mi/reporting/queries`.
+
+#### Checking that your report queries create valid reports
+
+The standard (pytest) integration tests will run all reports against test data, and additionally provide regex validation using matching files found under `mi/reporting/queries/test_validation`. For example, if a report query file `mi/reporting/queries/my_report.sql` exists, then a corresponding validation file is also expected to exist called `mi/reporting/queries/test_validation/my_report.yaml` with the form:
+
+```yaml
+month_name: ^\w+$ # require field called "month_name" must be an alphanumeric string
+number_of_pointers: ^\d+$ # require that field called "number_of_pointers" must be a positive integer
+```
