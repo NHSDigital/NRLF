@@ -21,14 +21,16 @@ UPPER_CAMEL_CASE = re.compile(r"[A-Z][a-zA-Z0-9]+")
 LOWER_CAMEL_CASE = re.compile(r"[a-z][a-zA-Z0-9]+")
 
 
-class JsonSchemaMapping(dict):
-    def get_default(self) -> list[FunctionType]:
+class JsonSchemaValidatorCache(dict):
+    """A cache for validators generated from JSON Schema"""
+
+    def get_global_validators(self) -> list[FunctionType]:
         return self.get(system="", value="")
 
     def get(self, system: str, value: str) -> list[FunctionType]:
         return super().get(system, {}).get(value)
 
-    def set_default(self, validators: list[FunctionType]):
+    def set_global_validators(self, validators: list[FunctionType]):
         return self.set(system="", value="", validators=validators)
 
     def set(self, system: str, value: str, validators: list[FunctionType]):
@@ -76,6 +78,7 @@ def json_schema_to_pydantic_model(json_schema: dict, name_override: str) -> Base
 
     main_model_name = _to_camel_case(name=json_schema["title"])
     pydantic_model = module.__dict__[main_model_name]
+    # Override the pydantic model name for nicer ValidationError messaging
     pydantic_model.__name__ = name_override
     return pydantic_model
 
@@ -83,6 +86,14 @@ def json_schema_to_pydantic_model(json_schema: dict, name_override: str) -> Base
 def _get_contracts_from_db(
     repository: Repository, system: str, value: str
 ) -> Generator[Contract, None, None]:
+    """
+    When a querying DynamoDb by PK (i.e. SK is omitted) then all items
+    with that PK are returned, sorted by the SK. In the case of the Data Contracts,
+    the SK is "V#<inverse_version>#<contract_name>". This function therefore
+    returns all distinct Data Contracts (defined by <contract_name>)
+    for the given system|value, for the latest version (lowest inverse_version)
+    of each distinct Data Contract.
+    """
     retrieved_contracts = set()
     pk = key(DbPrefix.Contract, system, value)
     contracts: list[Contract] = repository.query(pk=pk).items
@@ -104,6 +115,7 @@ def get_validators_from_db(
     ):
         pydantic_model = json_schema_to_pydantic_model(
             json_schema=contract.json_schema.__root__,
+            # Override the pydantic model name for nicer ValidationError messaging
             name_override=f"Data Contract '{contract.name.__root__}'",
         )
         validators.append(pydantic_model.parse_obj)

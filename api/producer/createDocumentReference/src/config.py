@@ -2,7 +2,7 @@ import boto3
 from pydantic import BaseModel
 
 from api.producer.createDocumentReference.src.constants import PersistentDependencies
-from nrlf.core.json_schema import JsonSchemaMapping
+from nrlf.core.json_schema import JsonSchemaValidatorCache
 from nrlf.core.model import Contract, DocumentPointer
 from nrlf.core.repository import Repository
 
@@ -45,7 +45,7 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
         "contract_repository": Repository(
             Contract, dynamo_client, environment_prefix=config.PREFIX
         ),
-        "json_schema_validators": JsonSchemaMapping(),
+        "json_schema_validator_cache": JsonSchemaValidatorCache(),
         "environment": config.ENVIRONMENT,
         "splunk_index": config.SPLUNK_INDEX,
         "source": config.SOURCE,

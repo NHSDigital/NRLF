@@ -7,7 +7,7 @@ from lambda_utils.logging import log_action
 
 from nrlf.core.constants import CUSTODIAN_SEPARATOR
 from nrlf.core.errors import RequestValidationError
-from nrlf.core.json_schema import JsonSchemaMapping, get_validators_from_db
+from nrlf.core.json_schema import JsonSchemaValidatorCache, get_validators_from_db
 from nrlf.core.model import (
     APIGatewayProxyEventModel,
     DocumentPointer,
@@ -56,19 +56,22 @@ def apply_json_schema_validators(
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
     system, value = split_pointer_type(core_model.type.__root__)
-    json_schema_validators: JsonSchemaMapping = dependencies["json_schema_validators"]
+    json_schema_validator_cache: JsonSchemaValidatorCache = dependencies[
+        "json_schema_validator_cache"
+    ]
     repository: Repository = dependencies["contract_repository"]
 
-    default_validators = json_schema_validators.get_default() or get_validators_from_db(
-        repository=repository
+    default_validators = (
+        json_schema_validator_cache.get_global_validators()
+        or get_validators_from_db(repository=repository)
     )
 
-    validators = json_schema_validators.get(
+    validators = json_schema_validator_cache.get(
         system=system, value=value
     ) or get_validators_from_db(repository=repository, system=system, value=value)
 
-    json_schema_validators.set_default(validators=default_validators)
-    json_schema_validators.set(system=system, value=value, validators=validators)
+    json_schema_validator_cache.set_global_validators(validators=default_validators)
+    json_schema_validator_cache.set(system=system, value=value, validators=validators)
 
     for validator in (*default_validators, *validators):
         validator(core_model._document)
