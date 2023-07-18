@@ -4,16 +4,15 @@ from typing import Any
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 
-from nrlf.consumer.fhir.r4.model import NextPageToken, RequestQuerySubject
+from nrlf.consumer.fhir.r4.model import NextPageToken
+from nrlf.core.common_search_steps import get_paginated_document_references
 from nrlf.core.common_steps import make_common_log_action, parse_headers
-from nrlf.core.errors import assert_no_extra_params
 from nrlf.core.model import (
     APIGatewayProxyEventModel,
     CountRequestParams,
     PaginatedResponse,
-    key,
 )
-from nrlf.core.repository import COUNT_ITEM_LIMIT, Repository, type_filter
+from nrlf.core.repository import COUNT_ITEM_LIMIT, Repository
 from nrlf.core.transform import create_bundle_count
 
 log_action = make_common_log_action()
@@ -31,32 +30,23 @@ def search_document_references(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
+
+    count = 0
+    next_page_token: NextPageToken = None
     repository: Repository = dependencies["repository"]
 
     request_params = CountRequestParams(**event.queryStringParameters or {})
 
-    assert_no_extra_params(
-        request_params=request_params, provided_params=event.queryStringParameters
-    )
-
-    nhs_number: RequestQuerySubject = request_params.nhs_number
-
-    pointer_types = type_filter(
-        type_identifier=None,
-        pointer_types=data["pointer_types"],
-    )
-
-    pk = key("P", nhs_number)
-
-    count = 0
-    next_page_token: NextPageToken = None
     while True:
-        response: PaginatedResponse = repository.query_gsi_1(
-            pk=pk,
-            type=pointer_types,
-            nhs_number=nhs_number,
-            exclusive_start_key=next_page_token,
-            limit=COUNT_ITEM_LIMIT,
+        response: PaginatedResponse = get_paginated_document_references(
+            request_params=request_params,
+            query_string_params=event.queryStringParameters,
+            repository=repository,
+            type_identifier=None,
+            raw_pointer_types=data["pointer_types"],
+            nhs_number=request_params.nhs_number,
+            page_limit=COUNT_ITEM_LIMIT,
+            page_token=next_page_token,
         )
         count = count + len(response.document_pointers)
         next_page_token = response.last_evaluated_key
