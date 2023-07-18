@@ -61,19 +61,24 @@ def apply_json_schema_validators(
     ]
     repository: Repository = dependencies["contract_repository"]
 
-    default_validators = (
-        json_schema_validator_cache.get_global_validators()
-        or get_validators_from_db(repository=repository)
-    )
+    global_validators = json_schema_validator_cache.get_global_validators(
+        logger=logger
+    ) or get_validators_from_db(repository=repository, logger=logger)
 
     validators = json_schema_validator_cache.get(
-        system=system, value=value
-    ) or get_validators_from_db(repository=repository, system=system, value=value)
+        system=system, value=value, logger=logger
+    ) or get_validators_from_db(
+        repository=repository, system=system, value=value, logger=logger
+    )
 
-    json_schema_validator_cache.set_global_validators(validators=default_validators)
-    json_schema_validator_cache.set(system=system, value=value, validators=validators)
+    json_schema_validator_cache.set_global_validators(
+        validators=global_validators, logger=logger
+    )
+    json_schema_validator_cache.set(
+        system=system, value=value, validators=validators, logger=logger
+    )
 
-    for validator in (*default_validators, *validators):
+    for validator in (*global_validators, *validators):
         validator(core_model._document)
 
     return PipelineData(**data)

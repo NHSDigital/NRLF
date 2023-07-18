@@ -3,12 +3,14 @@ import json
 import re
 import sys
 from contextlib import contextmanager
+from enum import Enum
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from types import FunctionType, ModuleType
 from typing import Generator
 
 from datamodel_code_generator.parser.jsonschema import JsonSchemaParser
+from lambda_utils.logging import log_action
 from pydantic import BaseModel
 
 from nrlf.core.constants import DbPrefix
@@ -21,18 +23,30 @@ UPPER_CAMEL_CASE = re.compile(r"[A-Z][a-zA-Z0-9]+")
 LOWER_CAMEL_CASE = re.compile(r"[a-z][a-zA-Z0-9]+")
 
 
+class LogReference(Enum):
+    JSONSCHEMA001 = "Getting cached validators"
+    JSONSCHEMA002 = "Caching validators"
+
+
 class JsonSchemaValidatorCache(dict):
     """A cache for validators generated from JSON Schema"""
 
-    def get_global_validators(self) -> list[FunctionType]:
-        return self.get(system="", value="")
+    def get_global_validators(self, logger=None) -> list[FunctionType]:
+        return self.get(system="", value="", logger=logger)
 
+    @log_action(
+        log_reference=LogReference.JSONSCHEMA001, log_fields=["system", "value"]
+    )
     def get(self, system: str, value: str) -> list[FunctionType]:
         return super().get(system, {}).get(value)
 
-    def set_global_validators(self, validators: list[FunctionType]):
-        return self.set(system="", value="", validators=validators)
+    def set_global_validators(self, validators: list[FunctionType], logger=None):
+        return self.set(system="", value="", validators=validators, logger=logger)
 
+    @log_action(
+        log_reference=LogReference.JSONSCHEMA002,
+        log_fields=["system", "value", "validators"],
+    )
     def set(self, system: str, value: str, validators: list[FunctionType]):
         return self.__setitem__(system, {value: validators})
 
@@ -77,14 +91,15 @@ def json_schema_to_pydantic_model(json_schema: dict, name_override: str) -> Base
         module = _load_module_from_file(file_path=temp_file_path)
 
     main_model_name = _to_camel_case(name=json_schema["title"])
-    pydantic_model = module.__dict__[main_model_name]
-    # Override the pydantic model name for nicer ValidationError messaging
+    pydantic_model: BaseModel = module.__dict__[main_model_name]
+    # Override the pydantic model/parser name for nicer ValidationError messaging and logging
     pydantic_model.__name__ = name_override
+    pydantic_model.parse_obj.__func__.__name__ = name_override
     return pydantic_model
 
 
 def _get_contracts_from_db(
-    repository: Repository, system: str, value: str
+    repository: Repository, system: str, value: str, logger=None
 ) -> Generator[Contract, None, None]:
     """
     When a querying DynamoDb by PK (i.e. SK is omitted) then all items
@@ -96,7 +111,7 @@ def _get_contracts_from_db(
     """
     retrieved_contracts = set()
     pk = key(DbPrefix.Contract, system, value)
-    contracts: list[Contract] = repository.query(pk=pk).items
+    contracts: list[Contract] = repository.query(pk=pk, logger=logger).items
     for contract in contracts:
         # Retrieve the first validator for this name only, assuming that
         # they have been sorted in reverse order by Version
@@ -107,11 +122,11 @@ def _get_contracts_from_db(
 
 
 def get_validators_from_db(
-    repository: Repository, system: str = "", value: str = ""
+    repository: Repository, system: str = "", value: str = "", logger=None
 ) -> list[FunctionType]:
     validators = []
     for contract in _get_contracts_from_db(
-        repository=repository, system=system, value=value
+        repository=repository, system=system, value=value, logger=logger
     ):
         pydantic_model = json_schema_to_pydantic_model(
             json_schema=contract.json_schema.__root__,
