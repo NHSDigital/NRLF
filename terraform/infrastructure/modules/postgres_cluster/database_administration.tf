@@ -23,6 +23,27 @@ data "aws_lambda_invocation" "create-postgres-database-partition" {
   ]
 }
 
+data "aws_lambda_invocation" "create-schemas" {
+  function_name = module.rds-cluster-sql-query-lambda.function_name
+  input = jsonencode({
+    "user" : data.aws_rds_cluster.rds-cluster.master_username
+    "password" : jsondecode(data.aws_secretsmanager_secret_version.master_user_password.secret_string)["password"]
+    "endpoint" : data.aws_rds_cluster.rds-cluster.endpoint
+    "sql" : {
+      "statement" : <<EOT
+          CREATE SCHEMA IF NOT EXISTS fact;
+          CREATE SCHEMA IF NOT EXISTS dimension;
+      EOT
+    }
+    "raise_on_sql_error" : true
+  })
+
+  depends_on = [
+    data.aws_lambda_invocation.create-postgres-database-partition,
+    module.rds-cluster-sql-query-lambda.function_name
+  ]
+}
+
 data "aws_lambda_invocation" "create-all-tables" {
   function_name = module.rds-cluster-sql-query-lambda.function_name
   input = jsonencode({
@@ -36,7 +57,7 @@ data "aws_lambda_invocation" "create-all-tables" {
   })
 
   depends_on = [
-    data.aws_lambda_invocation.create-postgres-database-partition,
+    data.aws_lambda_invocation.create-schemas,
     module.rds-cluster-sql-query-lambda.function_name
   ]
 }
@@ -81,12 +102,20 @@ data "aws_lambda_invocation" "grant-permissions" {
     "sql" : {
       "statement" : <<EOT
         GRANT CONNECT ON DATABASE {database_name} TO {read_user};
-        GRANT USAGE ON SCHEMA public TO {read_user};
-        GRANT SELECT ON ALL TABLES IN SCHEMA public TO {read_user};
+        GRANT USAGE ON SCHEMA fact TO {read_user};
+        GRANT USAGE ON SCHEMA dimension TO {read_user};
+        GRANT SELECT ON ALL TABLES IN SCHEMA fact TO {read_user};
+        GRANT SELECT ON ALL TABLES IN SCHEMA dimension TO {read_user};
 
         GRANT CONNECT ON DATABASE {database_name} TO {write_user};
-        GRANT USAGE ON SCHEMA public TO {write_user};
-        GRANT INSERT ON ALL TABLES IN SCHEMA public TO {write_user};
+        GRANT USAGE ON SCHEMA fact TO {write_user};
+        GRANT USAGE ON SCHEMA dimension TO {write_user};
+        GRANT SELECT ON ALL TABLES IN SCHEMA fact TO {write_user};
+        GRANT SELECT ON ALL TABLES IN SCHEMA dimension TO {write_user};
+        GRANT INSERT ON ALL TABLES IN SCHEMA fact TO {write_user};
+        GRANT INSERT ON ALL TABLES IN SCHEMA dimension TO {write_user};
+        GRANT UPDATE ON ALL TABLES IN SCHEMA fact TO {write_user};
+        GRANT UPDATE ON ALL TABLES IN SCHEMA dimension TO {write_user};
       EOT
       "identifiers" : {
         "database_name" : var.environment
@@ -100,6 +129,26 @@ data "aws_lambda_invocation" "grant-permissions" {
   depends_on = [
     data.aws_lambda_invocation.create-users,
     data.aws_lambda_invocation.create-all-tables,
+    module.rds-cluster-sql-query-lambda.function_name
+  ]
+}
+
+data "aws_lambda_invocation" "set-static-dimensions-data" {
+  function_name = module.rds-cluster-sql-query-lambda.function_name
+  input = jsonencode({
+    "user" : "${var.environment}-write"
+    "password" : random_password.write_password.result
+    "endpoint" : data.aws_rds_cluster.rds-cluster.endpoint
+    "sql" : {
+      "statement" : file(var.static_dimensions_path)
+    }
+    "raise_on_sql_error" : true
+  })
+
+  depends_on = [
+    data.aws_lambda_invocation.create-users,
+    data.aws_lambda_invocation.create-all-tables,
+    data.aws_lambda_invocation.grant-permissions,
     module.rds-cluster-sql-query-lambda.function_name
   ]
 }

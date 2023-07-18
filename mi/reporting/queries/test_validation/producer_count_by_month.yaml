@@ -1,0 +1,4 @@
+producer_name: ^(\w+)$
+month: ^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$
+year: ^(20)\d{2}$
+count: ^([1-9][0-9]*)$

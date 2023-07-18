@@ -6,4 +6,5 @@ variable "cloudwatch_kms_arn" {}
 variable "account_name" {}
 variable "layers" {}
 variable "schema_path" {}
+variable "static_dimensions_path" {}
 variable "assume_account" {}

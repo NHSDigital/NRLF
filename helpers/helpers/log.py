@@ -1,14 +1,12 @@
 from functools import wraps
 from typing import Callable, TypeVar
 
-from typing_extensions import ParamSpec
+T = TypeVar("T", bound=Callable[..., any])
 
-RT = TypeVar("RT")  # for forwarding type-hints of the return type
-P = ParamSpec("P")  # for forwarding type-hints of the decorated kw/args
 
 # Note that helpers can't be used in production if you wanted to, since they're not built and shipped
 # so using 'print' is fine here
-def log(msg: str) -> Callable[[Callable[P, RT]], Callable[P, RT]]:
+def log(msg: str) -> Callable[[T], T]:
     """
     Args:
         msg: String containing the names of function arguments to log. The result can be logged
@@ -23,9 +21,9 @@ def log(msg: str) -> Callable[[Callable[P, RT]], Callable[P, RT]]:
         <<< This is an example with inputs 'hello' and output 'WORLD'
     """
 
-    def decorator(fn: Callable[P, RT]) -> Callable[P, RT]:
+    def decorator(fn: T) -> T:
         @wraps(fn)
-        def wrapper(*args: P.args, **kwargs: P.kwargs) -> RT:
+        def wrapper(*args: tuple[any, ...], **kwargs: any) -> any:
             if args:
                 raise ValueError(
                     "@log is only valid on functions called with keyword arguments."
