@@ -78,8 +78,9 @@ info:
     In order to retrieve a document, consumers must be able to interact with the National Record Locator and the Spine
     Secure Proxy (SSP).
 
-    You can only use this API if your consuming  application is only accessible  using a valid NHS Smartcard for all
-    users or a system that uses an authentication method supported by NHS Identity.
+    You can only use this API if your consuming application is only accessible using a valid NHS Smartcard for all users
+    or a system that uses an authentication method supported by
+    [NHS Care NHS Care Identity Service 2 (NHS CIS2)](https://digital.nhs.uk/services/identity-and-access-management/nhs-care-identity-service-2).
 
     You must do this before you can go live (see ‘[Onboarding](#api-description__onboarding)’ below).
 
