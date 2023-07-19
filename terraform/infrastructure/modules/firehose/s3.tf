@@ -1,6 +1,9 @@
 resource "aws_s3_bucket" "firehose" {
   bucket        = "${var.prefix}-firehose"
   force_destroy = true
+  lifecycle {
+    prevent_destroy = var.is_persistent_environment
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "firehose" {
@@ -33,6 +36,14 @@ resource "aws_s3_bucket_lifecycle_configuration" "firehose" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "firehose" {
+  bucket = aws_s3_bucket.firehose.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 
 
 resource "aws_iam_policy" "firehose-alert--s3-read" {
