@@ -29,9 +29,9 @@ jobs:
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
-      - name: Extract the tag name from the RELEASE file
+      - name: Extract the tag name from the latest Changelog file
         run: |
-          TAG=$(cat RELEASE)
+          TAG=$(find changelog/ -type f  | sort -nr | head -1 | sed 's/...$//' | awk -F'changelog/' '{print "release/"$2}')
           echo "tag=${TAG}" >> $GITHUB_ENV
       - name: Create tag
         uses: actions/github-script@v6
