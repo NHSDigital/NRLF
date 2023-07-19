@@ -15,6 +15,7 @@ from nrlf.core.dynamodb_types import (
     DYNAMODB_NULL,
     DynamoDbDictType,
     DynamoDbIntType,
+    DynamoDbListType,
     DynamoDbStringType,
     DynamoDbType,
     convert_dynamo_value_to_raw_value,
@@ -56,7 +57,7 @@ def assert_model_has_only_dynamodb_types(model: BaseModel):
     ]
     if bad_fields:
         raise TypeError(
-            f"Model {model.__name__} contains fields {bad_fields} that are not of type DynamoDbType"
+            f"Model {model.__class__.__name__} contains fields {bad_fields} that are not of type DynamoDbType"
         )
 
 
@@ -126,6 +127,7 @@ class DocumentPointer(DynamoDbModel):
     created_on: DynamoDbStringType
     updated_on: Optional[DynamoDbStringType] = DYNAMODB_NULL
     document_id: DynamoDbStringType = Field(exclude=True)
+    schemas: DynamoDbListType = Field(default_factory=DynamoDbListType)
     _document: dict = PrivateAttr()
 
     def __init__(self, *, _document=None, **data):
@@ -324,3 +326,7 @@ class Contract(DynamoDbModel):
     @classmethod
     def kebab(cls) -> str:
         return "document-pointer"
+
+    @property
+    def full_name(self):
+        return f"{self.name.__root__}:{self.version.__root__}"

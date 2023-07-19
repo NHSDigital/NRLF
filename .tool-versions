@@ -1,0 +1,7 @@
+awscli latest
+poetry 1.5.1
+jq 1.6
+python 3.9.15
+terraform 1.3.4
+java zulu-jre-17.42.19
+yq latest

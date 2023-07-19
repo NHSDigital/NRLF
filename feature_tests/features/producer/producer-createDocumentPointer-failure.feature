@@ -655,9 +655,9 @@ Feature: Producer Create Failure Scenarios
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                                     |
-      | issue_type        | processing                                                                |
-      | issue_level       | error                                                                     |
-      | issue_code        | VALIDATION_ERROR                                                          |
-      | issue_description | A parameter or value has resulted in a validation error                   |
-      | message           | Data Contract 'Validate Content Url' validation failure - Invalid content |
+      | property          | value                                                                       |
+      | issue_type        | processing                                                                  |
+      | issue_level       | error                                                                       |
+      | issue_code        | VALIDATION_ERROR                                                            |
+      | issue_description | A parameter or value has resulted in a validation error                     |
+      | message           | Data Contract 'Validate Content Url:1' validation failure - Invalid content |

@@ -1,7 +1,7 @@
 from ast import literal_eval
 from typing import TypeVar, Union
 
-from pydantic import BaseModel, StrictInt, StrictStr
+from pydantic import BaseModel, Field, StrictInt, StrictStr
 
 PythonType = TypeVar("PythonType")
 NoneType = type(None)
@@ -41,7 +41,7 @@ class DynamoDbNullType(DynamoDbType):
 
 
 class DynamoDbListType(DynamoDbType):
-    __root__: list[str]
+    __root__: list[str] = Field(default_factory=list)
 
 
 class DynamoDbDictType(DynamoDbType):

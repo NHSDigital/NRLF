@@ -9,7 +9,7 @@ from lambda_utils.constants import LogLevel
 from api.producer.createDocumentReference.src.constants import PersistentDependencies
 from api.producer.createDocumentReference.src.v1.constants import API_VERSION
 from nrlf.core.common_producer_steps import (
-    apply_json_schema_validators,
+    apply_data_contracts,
     invalid_producer_for_delete,
 )
 from nrlf.core.common_steps import (
@@ -281,7 +281,7 @@ steps = [
     read_subject_from_body,
     parse_headers,
     parse_request_body,
-    apply_json_schema_validators,
+    apply_data_contracts,
     mark_as_supersede,
     validate_producer_permissions,
     validate_ok_to_supersede,

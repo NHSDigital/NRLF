@@ -1,106 +1,122 @@
-import importlib.util
-import json
-import re
-import sys
-from contextlib import contextmanager
 from enum import Enum
-from pathlib import Path
-from tempfile import NamedTemporaryFile
-from types import FunctionType, ModuleType
-from typing import Generator
+from functools import wraps
+from types import FunctionType
+from typing import Type
 
-from datamodel_code_generator.parser.jsonschema import JsonSchemaParser
+from jsonschema import Draft201909Validator as _Draft201909Validator
+from jsonschema import validate
+from jsonschema.exceptions import FormatError, SchemaError, ValidationError
+from jsonschema.exceptions import _Error as JsonSchemaBaseError
 from lambda_utils.logging import log_action
-from pydantic import BaseModel
+from referencing.exceptions import Unresolvable
 
 from nrlf.core.constants import DbPrefix
 from nrlf.core.errors import BadJsonSchema
 from nrlf.core.model import Contract, key
 from nrlf.core.repository import Repository
 
-NON_ALPHANUMERIC = re.compile(r"[^a-zA-Z0-9]+")
-UPPER_CAMEL_CASE = re.compile(r"[A-Z][a-zA-Z0-9]+")
-LOWER_CAMEL_CASE = re.compile(r"[a-z][a-zA-Z0-9]+")
+JSON_SCHEMA_VALIDATOR = _Draft201909Validator
 
 
 class LogReference(Enum):
-    JSONSCHEMA001 = "Getting cached validators"
-    JSONSCHEMA002 = "Caching validators"
+    DATA_CONTRACT_READ_CACHE = "Getting cached Data Contracts"
+    DATA_CONTRACT_WRITE_CACHE = "Caching Data Contracts"
 
 
-class JsonSchemaValidatorCache(dict):
-    """A cache for validators generated from JSON Schema"""
-
-    def get_global_validators(self, logger=None) -> list[FunctionType]:
+class DataContractCache(dict):
+    def get_global_contracts(self, logger=None) -> list[Contract]:
         return self.get(system="", value="", logger=logger)
 
     @log_action(
-        log_reference=LogReference.JSONSCHEMA001, log_fields=["system", "value"]
+        log_reference=LogReference.DATA_CONTRACT_READ_CACHE,
+        log_fields=["system", "value"],
     )
-    def get(self, system: str, value: str) -> list[FunctionType]:
+    def get(self, system: str, value: str) -> list[Contract]:
         return super().get(system, {}).get(value)
 
-    def set_global_validators(self, validators: list[FunctionType], logger=None):
-        return self.set(system="", value="", validators=validators, logger=logger)
+    def set_global_contracts(self, contracts: list[Contract], logger=None):
+        return self.set(system="", value="", contracts=contracts, logger=logger)
 
     @log_action(
-        log_reference=LogReference.JSONSCHEMA002,
-        log_fields=["system", "value", "validators"],
+        log_reference=LogReference.DATA_CONTRACT_WRITE_CACHE,
+        log_fields=["system", "value", "contracts"],
     )
-    def set(self, system: str, value: str, validators: list[FunctionType]):
-        return self.__setitem__(system, {value: validators})
+    def set(self, system: str, value: str, contracts: list[Contract]):
+        return self.__setitem__(system, {value: contracts})
 
 
-def _to_camel_case(name: str) -> str:
-    if any(NON_ALPHANUMERIC.finditer(name)):
-        return "".join(term.lower().title() for term in NON_ALPHANUMERIC.split(name))
-    if UPPER_CAMEL_CASE.match(name):
-        return name
-    if LOWER_CAMEL_CASE.match(name):
-        return name[0].upper() + name[1:]
-    raise BadJsonSchema(f"Unknown case used for {name}")
+class JsonSchemaValidationError(Exception):
+    pass
 
 
-def _load_module_from_file(file_path: Path) -> ModuleType:
-    spec = importlib.util.spec_from_file_location(
-        name=file_path.stem, location=str(file_path)
+def _handle_json_schema_error(
+    allowed_exception: Type[JsonSchemaBaseError],
+    wrapper_exception: Type[Exception],
+):
+    def decorator(fn: FunctionType):
+        @wraps(fn)
+        def _validator(json_schema: dict, contract_name: str, **kwargs):
+            try:
+                fn(json_schema=json_schema, contract_name=contract_name, **kwargs)
+            except allowed_exception as error:
+                error = error.__dict__.get("_wrapped", error)
+                error_message = error.__dict__.get("message", str(error))
+                try:
+                    error_path = error.json_path
+                except AttributeError:
+                    error_path = None
+                message = _parse_json_schema_error(
+                    error_class_name=error.__class__.__name__,
+                    error_message=error_message,
+                    error_path=error_path,
+                    contract_name=contract_name,
+                )
+                raise wrapper_exception(message)
+
+        return _validator
+
+    return decorator
+
+
+def _parse_json_schema_error(
+    error_class_name: str, error_message: str, error_path: str, contract_name: str
+) -> str:
+    path = f" at '{error_path.replace('$.', '')}'" if error_path else ""
+    return (
+        f"{error_class_name} raised from Data Contract "
+        f"'{contract_name}'{path}: {error_message}"
     )
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[file_path.stem] = module
-    spec.loader.exec_module(module)
-    return module
 
 
-@contextmanager
-def _delete_file_on_completion(file_path: Path):
+@_handle_json_schema_error(
+    allowed_exception=Unresolvable,
+    wrapper_exception=BadJsonSchema,
+)
+@_handle_json_schema_error(
+    allowed_exception=SchemaError,
+    wrapper_exception=BadJsonSchema,
+)
+def validate_json_schema(json_schema: dict, contract_name: str):
+    """Note that 'contract_name' is soaked up in '_handle_json_schema_error'"""
+    JSON_SCHEMA_VALIDATOR.check_schema(schema=json_schema)
+    # The second step here is to check for unresolved references
     try:
-        yield
-    finally:
-        file_path.unlink(missing_ok=True)
+        validate(schema=json_schema, instance={}, cls=JSON_SCHEMA_VALIDATOR)
+    except ValidationError:  # We're not actually validating 'instance' here
+        pass
 
 
-def json_schema_to_pydantic_model(json_schema: dict, name_override: str) -> BaseModel:
-    json_schema_as_str = json.dumps(json_schema)
-    pydantic_models_as_str: str = JsonSchemaParser(json_schema_as_str).parse()
-
-    with NamedTemporaryFile(suffix=".py", delete=False) as temp_file:
-        temp_file_path = Path(temp_file.name).resolve()
-        temp_file.write(pydantic_models_as_str.encode())
-
-    with _delete_file_on_completion(file_path=temp_file_path):
-        module = _load_module_from_file(file_path=temp_file_path)
-
-    main_model_name = _to_camel_case(name=json_schema["title"])
-    pydantic_model: BaseModel = module.__dict__[main_model_name]
-    # Override the pydantic model/parser name for nicer ValidationError messaging and logging
-    pydantic_model.__name__ = name_override
-    pydantic_model.parse_obj.__func__.__name__ = name_override
-    return pydantic_model
+@_handle_json_schema_error(
+    allowed_exception=(ValidationError, FormatError),
+    wrapper_exception=JsonSchemaValidationError,
+)
+def validate_against_json_schema(json_schema: dict, contract_name: str, instance: any):
+    validate(schema=json_schema, instance=instance, cls=JSON_SCHEMA_VALIDATOR)
 
 
-def _get_contracts_from_db(
+def get_contracts_from_db(
     repository: Repository, system: str, value: str, logger=None
-) -> Generator[Contract, None, None]:
+) -> list[Contract]:
     """
     When a querying DynamoDb by PK (i.e. SK is omitted) then all items
     with that PK are returned, sorted by the SK. In the case of the Data Contracts,
@@ -111,27 +127,20 @@ def _get_contracts_from_db(
     """
     retrieved_contracts = set()
     pk = key(DbPrefix.Contract, system, value)
-    contracts: list[Contract] = repository.query(pk=pk, logger=logger).items
-    for contract in contracts:
-        # Retrieve the first validator for this name only, assuming that
+    _contracts: list[Contract] = repository.query(pk=pk, logger=logger).items
+
+    contracts: list[Contract] = []
+    for contract in _contracts:
+        # Retrieve the first contract for this name only, assuming that
         # they have been sorted in reverse order by Version
         if contract.name.__root__ in retrieved_contracts:
             continue
         retrieved_contracts.add(contract.name.__root__)
-        yield contract
-
-
-def get_validators_from_db(
-    repository: Repository, system: str = "", value: str = "", logger=None
-) -> list[FunctionType]:
-    validators = []
-    for contract in _get_contracts_from_db(
-        repository=repository, system=system, value=value, logger=logger
-    ):
-        pydantic_model = json_schema_to_pydantic_model(
+        # Validate the retrieved schema's syntax
+        validate_json_schema(
             json_schema=contract.json_schema.__root__,
-            # Override the pydantic model name for nicer ValidationError messaging
-            name_override=f"Data Contract '{contract.name.__root__}'",
+            contract_name=contract.full_name,
         )
-        validators.append(pydantic_model.parse_obj)
-    return validators
+        contracts.append(contract)
+
+    return contracts

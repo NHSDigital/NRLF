@@ -294,6 +294,7 @@ Feature: Producer Create Success scenarios
       | type        | http://snomed.info/sct\|736253002 |
       | source      | NRLF                              |
       | version     | 1                                 |
+      | schemas     | ["Validate Content Url:1"]        |
       | updated_on  | NULL                              |
       | document    | <document>                        |
       | created_on  | <timestamp>                       |

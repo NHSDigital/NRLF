@@ -4,23 +4,103 @@ from typing import Optional
 import hypothesis
 import pytest
 from hypothesis.strategies import builds
-from jsonschema import validate
-from pydantic import BaseModel, Extra, ValidationError
+from pydantic import BaseModel, Extra
 
 from feature_tests.common.repository import FeatureTestRepository as Repository
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
 from nrlf.core.constants import DbPrefix
 from nrlf.core.json_schema import (
-    _get_contracts_from_db,
-    _to_camel_case,
-    get_validators_from_db,
-    json_schema_to_pydantic_model,
+    JsonSchemaValidationError,
+    get_contracts_from_db,
+    validate_against_json_schema,
+    validate_json_schema,
 )
 from nrlf.core.model import Contract, key
 from nrlf.core.types import DynamoDbClient
 
-JSON_SCHEMA = {
+# The following are taken from
+# https://nhsd-confluence.digital.nhs.uk/pages/viewpage.action?spaceKey=CLP&title=NRLF+-+Document+Type+Contracts
+
+SSP_JSON_SCHEMA = {
+    "oneOf": [
+        {"$ref": "#/schemas/has-no-ssp-content"},
+        {"$ref": "#/schemas/has-ssp-content-and-asid-author"},
+    ],
+    "schemas": {
+        "has-no-ssp-content": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "url": {"type": "string", "pattern": r"^(?!ssp:\/\/).+"}
+                        },
+                    },
+                }
+            },
+        },
+        "has-ssp-content-and-asid-author": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "array",
+                    "contains": {
+                        "type": "object",
+                        "properties": {
+                            "system": {
+                                "type": "string",
+                                "enum": ["https://fhir.nhs.uk/Id/accredited-system-id"],
+                            }
+                        },
+                    },
+                },
+                "content": {
+                    "type": "array",
+                    "contains": {
+                        "type": "object",
+                        "properties": {
+                            "url": {"type": "string", "pattern": r"^ssp:\/\/.+"}
+                        },
+                    },
+                },
+            },
+        },
+    },
+}
+
+NOT_SSP_DATA = {
+    "author": [{"system": "XXX", "value": "XYZ"}],
+    "content": [{"url": "http://foo.com"}, {"url": "http://foo.com"}],
+}
+
+HAS_SSP_DATA = {
+    "author": [
+        {"system": "https://fhir.nhs.uk/Id/accredited-system-id", "value": "123"},
+        {"system": "XXX", "value": "XYZ"},
+    ],
+    "content": [{"url": "ssp://foo.com"}, {"url": "http://foo.com"}],
+}
+
+
+HAS_SSP_NO_AUTHOR_DATA = {
+    "author": [{"system": "XXX", "value": "XYZ"}],
+    "content": [{"url": "ssp://foo.com"}, {"url": "http://foo.com"}],
+}
+
+NOT_SSP_HAS_AUTHOR_DATA = {
+    "author": [
+        {"system": "https://fhir.nhs.uk/Id/accredited-system-id", "value": "123"},
+        {"system": "XXX", "value": "XYZ"},
+    ],
+    "content": [{"url": "http://foo.com"}, {"url": "http://foo.com"}],
+}
+
+# The following is a example that involves nested and recursive referencing
+
+RECORDING_JSON_SCHEMA = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "additionalProperties": False,
     "title": "Schema for a recording",
@@ -76,48 +156,52 @@ class SchemaForARecording(BaseModel):
     recording_artists: list[Artist]
 
 
-@hypothesis.given(schema_for_a_recording=builds(SchemaForARecording))
-def test_that_validation_of_model_and_schema_are_same(
-    schema_for_a_recording: SchemaForARecording,
-):
-    data = schema_for_a_recording.dict(exclude_none=True)
-    validate(instance=data, schema=JSON_SCHEMA)
-
-
-@hypothesis.given(schema_for_a_recording=builds(SchemaForARecording))
-def test_json_schema_to_pydantic_model(schema_for_a_recording: SchemaForARecording):
-    NAME = "test123"
-
-    pydantic_model = json_schema_to_pydantic_model(
-        json_schema=JSON_SCHEMA, name_override=NAME
-    )
-    original_schema = SchemaForARecording.schema()
-    created_schema = pydantic_model.schema()
-
-    assert created_schema == {**original_schema, "title": NAME}
-
-    data = schema_for_a_recording.dict(exclude_none=True)
-    assert pydantic_model(**data) == schema_for_a_recording
-
-    with pytest.raises(ValidationError) as error:
-        pydantic_model(bad_data="")
-
-    error.match(f"4 validation errors for {NAME}")
-    error.match(f"extra fields not permitted")
+@pytest.mark.parametrize(
+    ("instance", "error_message"),
+    [
+        (
+            HAS_SSP_NO_AUTHOR_DATA,
+            (
+                "ValidationError raised from Data Contract 'None' at "
+                "'content[0].url': "
+                "'ssp://foo.com' does not match '^(?!ssp:\\\\/\\\\/).+'"
+            ),
+        ),
+    ],
+)
+def test_validate_against_json_schema_ssp_examples_fail(instance, error_message):
+    with pytest.raises(JsonSchemaValidationError) as exception_wrapper:
+        validate_against_json_schema(
+            json_schema=SSP_JSON_SCHEMA, contract_name=None, instance=instance
+        )
+    assert error_message == str(exception_wrapper.value)
 
 
 @pytest.mark.parametrize(
-    "name",
-    [
-        "this  Is\ta Name",
-        "ThisIsAName",
-        "thisIsAName",
-        "thIs_Is_a_nAme",
-        "this-is-a_Name",
-    ],
+    "instance",
+    [HAS_SSP_DATA, NOT_SSP_HAS_AUTHOR_DATA, NOT_SSP_DATA],
 )
-def test__to_camel_case(name: str):
-    assert _to_camel_case(name=name) == "ThisIsAName"
+def test_validate_against_json_schema_ssp_examples_pass(instance):
+    validate_against_json_schema(
+        json_schema=SSP_JSON_SCHEMA, contract_name=None, instance=instance
+    )
+
+
+@pytest.mark.parametrize("json_schema", [RECORDING_JSON_SCHEMA, SSP_JSON_SCHEMA])
+def test_validate_json_schema(json_schema):
+    validate_json_schema(json_schema=json_schema, contract_name=None)
+
+
+@hypothesis.given(schema_for_a_recording=builds(SchemaForARecording))
+def test_validate_against_json_schema_for_good_data(
+    schema_for_a_recording: SchemaForARecording,
+):
+    instance = schema_for_a_recording.dict(exclude_none=True)
+    validate_against_json_schema(
+        json_schema=RECORDING_JSON_SCHEMA,
+        contract_name="My Contract",
+        instance=instance,
+    )
 
 
 @pytest.fixture
@@ -176,13 +260,11 @@ def test__get_contracts_from_db_returns_latest_versions(
                 )
             )
 
-    contracts = _get_contracts_from_db(
-        repository=repository, system=system, value=value
-    )
+    contracts = get_contracts_from_db(repository=repository, system=system, value=value)
 
     # There are {N_SCHEMA_TYPES} distinct contracts, each with {N_VERSIONS} versions
     # and the expectation is that only the latest versions are retrieved
-    assert list(contracts) == [
+    assert contracts == [
         Contract(
             pk=key(DbPrefix.Contract, system, value),
             sk=key(DbPrefix.Version, MIN_VERSION, "name1"),
@@ -227,52 +309,23 @@ def test__get_contracts_from_db_returns_latest_versions(
         ),
     ]
 
-
-@pytest.mark.integration
-@pytest.mark.parametrize(
-    ["system", "value"],
-    [
-        ("", ""),  # Default case
-        ("foo", "bar"),
-    ],
-)
-def test_get_validators_from_db(system: str, value: str, repository: Repository):
-    N_SCHEMA_TYPES = 3
-    N_VERSIONS = 10
-    MIN_VERSION = 1
-
-    for i_name in range(1, N_SCHEMA_TYPES + 1):
-        for version, inverse_version in enumerate(
-            reversed(range(MIN_VERSION, N_VERSIONS + MIN_VERSION))
-        ):
-            repository.create(
-                item=Contract(
-                    pk=key(DbPrefix.Contract, system, value),
-                    sk=key(DbPrefix.Version, inverse_version, f"name{i_name}"),
-                    name=f"name{i_name}",
-                    version=version,
-                    system=system,
-                    value=value,
-                    json_schema={
-                        "$schema": "http://json-schema.org/draft-04/schema#",
-                        "additionalProperties": False,
-                        "title": f"Base {i_name}",
-                        "type": "object",
-                    },
-                )
-            )
-
-    validators = get_validators_from_db(
-        repository=repository, system=system, value=value
-    )
-    # There are {N_SCHEMA_TYPES} distinct validators, each with {N_VERSIONS} versions
-    assert len(validators) == N_SCHEMA_TYPES
-
     # The validator is expecting a blank object only, so the following will pass
-    for validator in validators:
-        validator({})
+    for contract in contracts:
+        validate_against_json_schema(
+            json_schema=contract.json_schema.__root__,
+            contract_name=contract.full_name,
+            instance={},
+        )
 
     # The validator is expecting a blank object only, so the following will fail
-    for validator in validators:
-        with pytest.raises(ValidationError):
-            validator({"foo": "bar"})
+    for contract in contracts:
+        with pytest.raises(JsonSchemaValidationError) as exception_wrapper:
+            validate_against_json_schema(
+                json_schema=contract.json_schema.__root__,
+                contract_name=contract.full_name,
+                instance={"foo": "bar"},
+            )
+        exception_wrapper.match(
+            r"^ValidationError raised from Data Contract '\w+:\w+' at '\$': "
+            r"Additional properties are not allowed \('foo' was unexpected\)$"
+        )

@@ -2,6 +2,7 @@ from typing import Generator
 
 from pydantic import BaseModel
 
+from nrlf.core.errors import ItemNotFound
 from nrlf.core.repository import Repository
 
 CHUNK_SIZE = 25
@@ -49,7 +50,7 @@ class FeatureTestRepository(Repository):
             item = self.read_item(pk)
             exists = True
             message = f"Item found {item.pk}"
-        except Exception as e:
+        except ItemNotFound as e:
             exists = False
             message = str(e)
 
