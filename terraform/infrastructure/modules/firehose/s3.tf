@@ -1,9 +1,6 @@
 resource "aws_s3_bucket" "firehose" {
   bucket        = "${var.prefix}-firehose"
   force_destroy = true
-  lifecycle {
-    prevent_destroy = var.is_persistent_environment
-  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "firehose" {
