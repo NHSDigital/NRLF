@@ -28,7 +28,7 @@ variable "splunk_index" {
   }
 }
 
-variable "is_persistent_environment" {
+variable "slack_alerts_enabled" {
   type    = bool
   default = false
 }
