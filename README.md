@@ -67,7 +67,7 @@ Before you tackle this guide, there are some more instructions here on the [Deve
 For an easy way to make sure your local system matches the requirements needed you can use `asdf tool manager`. This tool fetches the required versions of the libraries needed and sets the directory to use that version instead of your system's default version. To get it up and running,
 
 - Install `asdf` using the instructions given here. https://asdf-vm.com/guide/getting-started.html. You can check it installed properly by using the command `asdf --version`
-- Install the dependencies using the `nrlf-dependencies.sh` bash script. `sh nrlf-dependencies.sh`
+- Install the dependencies using the `nrlf-dependencies.sh` bash script. `bash scripts/nrlf-dependencies.sh`
 - You should be good to go.
 
 #### 2. If you prefer to get your local machine running manually the requirements are...
