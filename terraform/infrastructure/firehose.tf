@@ -8,5 +8,5 @@ module "firehose__processor" {
   cloudwatch_kms_arn        = module.kms__cloudwatch.kms_arn
   splunk_index              = local.splunk_index
   destination               = contains(local.persistent_environments, local.environment) ? "splunk" : "extended_s3"
-  is_persistent_environment = contains(local.persistent_environments, local.environment)
+  slack_alerts_enabled      = contains(local.persistent_environments, local.environment)
 }
