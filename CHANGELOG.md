@@ -1,5 +1,20 @@
 # Changelog
 
+## 2023-07-19a
+
+- NRLF-586 - Consolidate and publish CHANGELOG.md
+- NRLF-460 - Merge steps for search, searchPost and count
+- NRLF-469 - Remove redundant JS Express Sandboxes
+- NRLF-599 - SSO
+- NRLF-620 - Update the IAM-developer role for mgmt to allow them to call test secrets (done within NRLF-599 branch)
+- NRLF-624 - Dependabot part 4 - More updates from the dependabot sorting and merging
+- NRLF-627 - The release tag creation mechanism needs to use changelog file
+
+## 2023-07-11a
+
+- NRLF-605 - Update Readme
+- NRLF-506 - [MI/BI] DB schema and querying the DB
+
 ## 2023-07-06
 
 - NRLF 559 - author is included in set of immutable fields
