@@ -56,7 +56,8 @@ jobs:
               exit 0;
           fi
           prefix="release/"
-          releasedate=${env.BRANCH_NAME#"$prefix"}
+          branchname=${{ env.BRANCH_NAME }}
+          releasedate=${branchname#"$prefix"}
           if grep "$releasedate" CHANGELOG.md ; then
             echo "Branch is a release and matches the latest release details in CHANGELOG.md, continuing"
             exit 0
