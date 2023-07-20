@@ -48,7 +48,7 @@ def search_document_references(
             page_limit=COUNT_ITEM_LIMIT,
             page_token=next_page_token,
         )
-        count = count + len(response.document_pointers)
+        count = count + len(response.items)
         next_page_token = response.last_evaluated_key
         if next_page_token is None:
             break

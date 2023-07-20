@@ -1,5 +1,5 @@
 import re
-from typing import Optional, Union
+from typing import Optional, Type, Union
 
 from aws_lambda_powertools.utilities.parser.models import (
     APIGatewayEventRequestContext as _APIGatewayEventRequestContext,
@@ -7,13 +7,15 @@ from aws_lambda_powertools.utilities.parser.models import (
 from aws_lambda_powertools.utilities.parser.models import (
     APIGatewayProxyEventModel as _APIGatewayProxyEventModel,
 )
-from pydantic import BaseModel, Field, Json, root_validator, validator
+from pydantic import BaseModel, Field, Json, PrivateAttr, root_validator, validator
 
 import nrlf.consumer.fhir.r4.model as consumer_model
 import nrlf.producer.fhir.r4.model as producer_model
 from nrlf.core.dynamodb_types import (
     DYNAMODB_NULL,
+    DynamoDbDictType,
     DynamoDbIntType,
+    DynamoDbListType,
     DynamoDbStringType,
     DynamoDbType,
     convert_dynamo_value_to_raw_value,
@@ -32,7 +34,13 @@ from nrlf.core.validators import (
     validate_tuple,
 )
 
-from .constants import CUSTODIAN_SEPARATOR, ID_SEPARATOR, KEY_SEPARATOR, DbPrefix
+from .constants import (
+    CUSTODIAN_SEPARATOR,
+    ID_SEPARATOR,
+    KEY_SEPARATOR,
+    TYPE_SEPARATOR,
+    DbPrefix,
+)
 
 KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
 
@@ -41,7 +49,7 @@ def to_kebab_case(name: str) -> str:
     return KEBAB_CASE_RE.sub("-", name).lower()
 
 
-def assert_model_has_only_dynamodb_types(model: BaseModel):
+def assert_model_has_only_dynamodb_types(model: Type[BaseModel]):
     bad_fields = [
         field_name
         for field_name, field_value in model.__fields__.items()
@@ -62,7 +70,7 @@ class DynamoDbModel(BaseModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        assert_model_has_only_dynamodb_types(model=self)
+        assert_model_has_only_dynamodb_types(model=self.__class__)
 
     @root_validator(pre=True)
     def transform_input_values_if_dynamo_values(cls, values: dict) -> dict:
@@ -102,6 +110,10 @@ def convert_document_pointer_id_to_pk(id: str) -> str:
     return key(DbPrefix.DocumentPointer, *ods_code_parts, document_id)
 
 
+def split_pointer_type(pointer_type: str) -> tuple[str, str]:
+    return pointer_type.split(TYPE_SEPARATOR)
+
+
 class DocumentPointer(DynamoDbModel):
     id: DynamoDbStringType
     nhs_number: DynamoDbStringType
@@ -115,6 +127,12 @@ class DocumentPointer(DynamoDbModel):
     created_on: DynamoDbStringType
     updated_on: Optional[DynamoDbStringType] = DYNAMODB_NULL
     document_id: DynamoDbStringType = Field(exclude=True)
+    schemas: DynamoDbListType = Field(default_factory=DynamoDbListType)
+    _document: dict = PrivateAttr()
+
+    def __init__(self, *, _document=None, **data):
+        super().__init__(**data)
+        self._document = _document
 
     def dict(self, **kwargs):
         return {
@@ -279,7 +297,7 @@ class CountRequestParams(consumer_model.CountRequestParams, _NhsNumberMixin):
 
 class PaginatedResponse(BaseModel):
     last_evaluated_key: str = None
-    document_pointers: list[DocumentPointer]
+    items: list[BaseModel]
 
 
 class Authorizer(BaseModel):
@@ -294,3 +312,21 @@ class APIGatewayEventRequestContext(_APIGatewayEventRequestContext):
 
 class APIGatewayProxyEventModel(_APIGatewayProxyEventModel):
     requestContext: APIGatewayEventRequestContext
+
+
+class Contract(DynamoDbModel):
+    pk: DynamoDbStringType
+    sk: DynamoDbStringType
+    name: DynamoDbStringType
+    version: DynamoDbIntType
+    system: DynamoDbStringType
+    value: DynamoDbStringType
+    json_schema: DynamoDbDictType
+
+    @classmethod
+    def kebab(cls) -> str:
+        return "document-pointer"
+
+    @property
+    def full_name(self):
+        return f"{self.name.__root__}:{self.version.__root__}"

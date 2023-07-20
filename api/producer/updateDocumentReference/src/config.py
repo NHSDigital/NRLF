@@ -2,7 +2,8 @@ import boto3
 from pydantic import BaseModel
 
 from api.producer.updateDocumentReference.src.constants import PersistentDependencies
-from nrlf.core.model import DocumentPointer
+from nrlf.core.json_schema import DataContractCache
+from nrlf.core.model import Contract, DocumentPointer
 from nrlf.core.repository import Repository
 
 
@@ -40,6 +41,10 @@ def build_persistent_dependencies(config: Config) -> dict[str, any]:
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY: Repository(
             DocumentPointer, dynamo_client, environment_prefix=config.PREFIX
         ),
+        "contract_repository": Repository(
+            Contract, dynamo_client, environment_prefix=config.PREFIX
+        ),
+        DataContractCache.__name__: DataContractCache(),
         "environment": config.ENVIRONMENT,
         "splunk_index": config.SPLUNK_INDEX,
         "source": config.SOURCE,

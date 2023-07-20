@@ -314,7 +314,7 @@ def test_search_returns_multiple_values_with_same_nhs_number():
         repository.create(item=model_2)
         item = repository.query_gsi_1(model_1.pk_1.__root__)
 
-    assert len(item.document_pointers) == 2
+    assert len(item.items) == 2
 
 
 def test_search_returns_correct_values():
@@ -338,8 +338,8 @@ def test_search_returns_correct_values():
             model_1.pk_2.__root__
         )  # ODS Code / Custodian
 
-    assert len(docs_gsi_1_response.document_pointers) == 1, "Partitioned by subject"
-    assert len(docs_gsi_2_response.document_pointers) == 2, "Partitioned by provider"
+    assert len(docs_gsi_1_response.items) == 1, "Partitioned by subject"
+    assert len(docs_gsi_2_response.items) == 2, "Partitioned by provider"
 
 
 def _create_items(
@@ -455,7 +455,7 @@ def test_scroll_gsi_1(bar_batch_sizes, foo_batch_sizes, dynamodb_client):
         )
         last_evaluated_key = response.last_evaluated_key
 
-        pages.append(response.document_pointers)
+        pages.append(response.items)
         if not last_evaluated_key:
             break
         else:

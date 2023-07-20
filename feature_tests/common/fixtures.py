@@ -23,9 +23,14 @@ def mock_s3(context, *args, **kwargs):
 
 def setup_tables():
     client: DynamoDbClient = boto3.client("dynamodb")
+    table_names = set()
     for model, config in TABLE_CONFIG.items():
+        table_name = model.kebab()
+        if table_name in table_names:
+            continue
+        table_names.add(table_name)
         client.create_table(
-            TableName=model.kebab(),
+            TableName=table_name,
             **config,
         )
 

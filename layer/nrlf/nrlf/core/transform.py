@@ -151,6 +151,7 @@ def create_document_pointer_from_fhir_json(
         document=json.dumps(fhir_json),
         source=source.value,
         created_on=kwargs.pop("created_on", make_timestamp()),
+        _document=fhir_json,
         **kwargs,
     )
     return core_model
@@ -218,7 +219,7 @@ def create_bundle_count(count: int) -> Bundle:
 def create_bundle_from_paginated_response(
     paginated_response: PaginatedResponse,
 ) -> Bundle:
-    document_pointers = paginated_response.document_pointers
+    document_pointers = paginated_response.items
 
     bundleEntryList = create_bundle_entries_from_document_pointers(document_pointers)
     bundle_dict = dict(
