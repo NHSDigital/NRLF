@@ -1,6 +1,6 @@
 import json
 import os
-from copy import copy, deepcopy
+from copy import deepcopy
 from functools import cache
 from importlib import import_module
 from pathlib import Path
@@ -26,6 +26,7 @@ from feature_tests.common.constants import (
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
 from nrlf.core.types import DynamoDbClient, S3Client
+from nrlf.core.validators import json_loads
 
 RELATES_TO = "relatesTo"
 TARGET = "target"
@@ -33,19 +34,33 @@ TARGET = "target"
 PATH_TO_HERE = Path(__file__).parent
 
 
-def _json_escape(value: str) -> str:
-    return value.replace('"', '\\"')
-
-
-def render_regular_properties(raw: str, table: Table):
-    rendered = copy(raw)
-    if table is None:
-        table = []
+def _find_and_replace_from_table(x: str, table: Table):
     for row in table:
         if row["property"] == TARGET:
             continue
-        rendered = rendered.replace(f'${row["property"]}', _json_escape(row["value"]))
-    return rendered
+        x = x.replace(f'${row["property"]}', row["value"])
+    return x
+
+
+def _render_regular_properties(obj, table: Table):
+    if type(obj) is str:
+        obj = _find_and_replace_from_table(x=obj, table=table)
+    elif type(obj) is dict:
+        for k, v in obj.items():
+            obj[k] = _render_regular_properties(obj=v, table=table)
+    elif type(obj) is list:
+        obj = [
+            _render_regular_properties(obj=item, table=table)
+            if type(item) is dict
+            else _find_and_replace_from_table(x=item, table=table)
+            for item in obj
+        ]
+    return obj
+
+
+def render_regular_properties(raw: str, table: Table):
+    rendered = _render_regular_properties(obj=json_loads(raw), table=table)
+    return json.dumps(rendered)
 
 
 def render_document_reference_properties(

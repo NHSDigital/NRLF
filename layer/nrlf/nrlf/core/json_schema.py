@@ -3,19 +3,16 @@ from functools import wraps
 from types import FunctionType
 from typing import Type
 
-from jsonschema import Draft201909Validator as _Draft201909Validator
-from jsonschema import validate
+from jsonschema import Draft7Validator as JSON_SCHEMA_VALIDATOR
+from jsonschema import RefResolutionError, validate
 from jsonschema.exceptions import FormatError, SchemaError, ValidationError
 from jsonschema.exceptions import _Error as JsonSchemaBaseError
 from lambda_utils.logging import log_action
-from referencing.exceptions import Unresolvable
 
 from nrlf.core.constants import DbPrefix
-from nrlf.core.errors import BadJsonSchema
+from nrlf.core.errors import BadJsonSchema, JsonSchemaValidationError
 from nrlf.core.model import Contract, key
 from nrlf.core.repository import Repository
-
-JSON_SCHEMA_VALIDATOR = _Draft201909Validator
 
 
 class LogReference(Enum):
@@ -23,9 +20,14 @@ class LogReference(Enum):
     DATA_CONTRACT_WRITE_CACHE = "Caching Data Contracts"
 
 
+DEFAULT_SYSTEM_VALUE = ""
+
+
 class DataContractCache(dict):
     def get_global_contracts(self, logger=None) -> list[Contract]:
-        return self.get(system="", value="", logger=logger)
+        return self.get(
+            system=DEFAULT_SYSTEM_VALUE, value=DEFAULT_SYSTEM_VALUE, logger=logger
+        )
 
     @log_action(
         log_reference=LogReference.DATA_CONTRACT_READ_CACHE,
@@ -35,7 +37,12 @@ class DataContractCache(dict):
         return super().get(system, {}).get(value)
 
     def set_global_contracts(self, contracts: list[Contract], logger=None):
-        return self.set(system="", value="", contracts=contracts, logger=logger)
+        return self.set(
+            system=DEFAULT_SYSTEM_VALUE,
+            value=DEFAULT_SYSTEM_VALUE,
+            contracts=contracts,
+            logger=logger,
+        )
 
     @log_action(
         log_reference=LogReference.DATA_CONTRACT_WRITE_CACHE,
@@ -43,10 +50,6 @@ class DataContractCache(dict):
     )
     def set(self, system: str, value: str, contracts: list[Contract]):
         return self.__setitem__(system, {value: contracts})
-
-
-class JsonSchemaValidationError(Exception):
-    pass
 
 
 def _handle_json_schema_error(
@@ -89,7 +92,7 @@ def _parse_json_schema_error(
 
 
 @_handle_json_schema_error(
-    allowed_exception=Unresolvable,
+    allowed_exception=RefResolutionError,
     wrapper_exception=BadJsonSchema,
 )
 @_handle_json_schema_error(
@@ -115,7 +118,10 @@ def validate_against_json_schema(json_schema: dict, contract_name: str, instance
 
 
 def get_contracts_from_db(
-    repository: Repository, system: str, value: str, logger=None
+    repository: Repository,
+    system: str = DEFAULT_SYSTEM_VALUE,
+    value: str = DEFAULT_SYSTEM_VALUE,
+    logger=None,
 ) -> list[Contract]:
     """
     When a querying DynamoDb by PK (i.e. SK is omitted) then all items

@@ -64,18 +64,18 @@ def apply_data_contracts(
     repository: Repository = dependencies["contract_repository"]
 
     global_contracts = data_contract_cache.get_global_contracts(logger=logger)
-    if global_contracts is None:
+    if not global_contracts:
         global_contracts = get_contracts_from_db(repository=repository, logger=logger)
 
     local_contracts = data_contract_cache.get(system=system, value=value, logger=logger)
-    if local_contracts is None:
+    if not local_contracts:
         local_contracts = get_contracts_from_db(
             repository=repository, system=system, value=value, logger=logger
         )
 
-    data_contract_cache.set_global_contracts(validators=global_contracts, logger=logger)
+    data_contract_cache.set_global_contracts(contracts=global_contracts, logger=logger)
     data_contract_cache.set(
-        system=system, value=value, validators=local_contracts, logger=logger
+        system=system, value=value, contracts=local_contracts, logger=logger
     )
 
     for contract in (*global_contracts, *local_contracts):

@@ -113,6 +113,7 @@ def test_create_document_pointer_from_fhir_json(mock__make_timestamp):
         "id": {"S": id},
         "nhs_number": {"S": nhs_number},
         "producer_id": {"S": provider_id},
+        "schemas": {"L": []},
         "custodian": {"S": custodian},
         "custodian_suffix": {"NULL": True},
         "type": {"S": "http://snomed.info/sct|736253002"},

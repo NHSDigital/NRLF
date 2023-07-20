@@ -97,9 +97,8 @@ BAD_SCHEMA_MISSING_SCHEMAS = {
         (
             BAD_SCHEMA_MISSING_SCHEMAS,
             (
-                "PointerToNowhere raised from Data Contract 'My Contract': "
-                "'/schemas/schema-one' does not exist within "
-                "{'oneOf': [{'$ref': '#/schemas/schema-one'}, {'$ref': '#/schemas/schema-two'}], 'schemas': {}}"
+                "RefResolutionError raised from Data Contract 'My Contract': "
+                "Unresolvable JSON pointer: 'schemas/schema-one'"
             ),
         ),
     ],

@@ -1,5 +1,5 @@
 import re
-from typing import Optional, Union
+from typing import Optional, Type, Union
 
 from aws_lambda_powertools.utilities.parser.models import (
     APIGatewayEventRequestContext as _APIGatewayEventRequestContext,
@@ -49,7 +49,7 @@ def to_kebab_case(name: str) -> str:
     return KEBAB_CASE_RE.sub("-", name).lower()
 
 
-def assert_model_has_only_dynamodb_types(model: BaseModel):
+def assert_model_has_only_dynamodb_types(model: Type[BaseModel]):
     bad_fields = [
         field_name
         for field_name, field_value in model.__fields__.items()
@@ -57,7 +57,7 @@ def assert_model_has_only_dynamodb_types(model: BaseModel):
     ]
     if bad_fields:
         raise TypeError(
-            f"Model {model.__class__.__name__} contains fields {bad_fields} that are not of type DynamoDbType"
+            f"Model {model.__name__} contains fields {bad_fields} that are not of type DynamoDbType"
         )
 
 
@@ -70,7 +70,7 @@ class DynamoDbModel(BaseModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        assert_model_has_only_dynamodb_types(model=self)
+        assert_model_has_only_dynamodb_types(model=self.__class__)
 
     @root_validator(pre=True)
     def transform_input_values_if_dynamo_values(cls, values: dict) -> dict:
