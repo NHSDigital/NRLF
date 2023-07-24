@@ -89,20 +89,20 @@ validation = ["fastjsonschema (>=2.14.5,<3.0.0)"]
 
 [[package]]
 name = "awscli"
-version = "1.28.1"
+version = "1.29.9"
 description = "Universal Command Line Environment for AWS."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "awscli-1.28.1-py3-none-any.whl", hash = "sha256:2b0c5cdb25a1d3b56921777596473af2b1314f0059ea451eccb0c3ef72b602b9"},
-    {file = "awscli-1.28.1.tar.gz", hash = "sha256:4d4841058fe87cc70b8deb27b261cf64337be05d36f45c2abb5078ba8a1e07ef"},
+    {file = "awscli-1.29.9-py3-none-any.whl", hash = "sha256:f77e55b3b2930f76c9e72c3c02ab061fda2091883e5ce066993fbdeedf9a360e"},
+    {file = "awscli-1.29.9.tar.gz", hash = "sha256:f1298ebbbf4564448bd47775e7075dd66d547b0b30a9aba6db2f0b399025f4ff"},
 ]
 
 [package.dependencies]
-botocore = "1.30.1"
+botocore = "1.31.9"
 colorama = ">=0.2.5,<0.4.5"
 docutils = ">=0.10,<0.17"
-PyYAML = ">=3.10,<5.5"
+PyYAML = ">=3.10,<6.1"
 rsa = ">=3.1.2,<4.8"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -191,17 +191,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.27.1"
+version = "1.28.9"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.27.1-py3-none-any.whl", hash = "sha256:0085c1066953e61915b34f24fbdee7117fd2d8b5c9188b9519d47ba84510c067"},
-    {file = "boto3-1.27.1.tar.gz", hash = "sha256:cf43deb4556295219d9de44d1c95921209c90ee25246673b5768aef9d46519cc"},
+    {file = "boto3-1.28.9-py3-none-any.whl", hash = "sha256:01f078047eb4d238c6b9c6cc623f2af33b4ae67980c5326691e35cb5493ff6c7"},
+    {file = "boto3-1.28.9.tar.gz", hash = "sha256:4cc0c6005be910e52077227e670930ab55a41ba86cdb6d1c052571d08cd4d32c"},
 ]
 
 [package.dependencies]
-botocore = ">=1.30.1,<1.31.0"
+botocore = ">=1.31.9,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -210,13 +210,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.30.1"
+version = "1.31.9"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.30.1-py3-none-any.whl", hash = "sha256:18a32a21bfa9b418b9a38ea5ef4464eba003cbb26fca2cd56e4f51098c5d1a0f"},
-    {file = "botocore-1.30.1.tar.gz", hash = "sha256:4d1ac5a796c5c5c87946f25f3d98764288a0ed848e772a7a47cd134847e885e7"},
+    {file = "botocore-1.31.9-py3-none-any.whl", hash = "sha256:e56ccd3536a90094ea5b176b5dd33bfe4f049efdf71af468ea1661bd424c787d"},
+    {file = "botocore-1.31.9.tar.gz", hash = "sha256:bd849d3ac95f1781385ed831d753a04a3ec870a59d6598175aaedd71dc2baf5f"},
 ]
 
 [package.dependencies]
@@ -225,7 +225,7 @@ python-dateutil = ">=2.1,<3.0.0"
 urllib3 = ">=1.25.4,<1.27"
 
 [package.extras]
-crt = ["awscrt (==0.16.9)"]
+crt = ["awscrt (==0.16.26)"]
 
 [[package]]
 name = "build-scripts"
@@ -2162,4 +2162,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "71b0bf596eef69d4f1db408cae18e8d79a47a6e9ff04305a179ce95f2d36314e"
+content-hash = "a802bb55af88a05dc076a9a169ba0ea92b3738d01ef9900656eed9c4d7f485be"
