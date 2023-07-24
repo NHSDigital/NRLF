@@ -543,13 +543,13 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "datamodel-code-generator"
-version = "0.21.1"
+version = "0.21.2"
 description = "Datamodel Code Generator"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "datamodel_code_generator-0.21.1-py3-none-any.whl", hash = "sha256:9898d4a39a54638022850b0df85fab0ef20394382e88482b8bf8925d4817c493"},
-    {file = "datamodel_code_generator-0.21.1.tar.gz", hash = "sha256:feab1c222c5bc3b7c53e1dc8b299bbc261bb17e9dbc22fdd60fc3a2806694ecc"},
+    {file = "datamodel_code_generator-0.21.2-py3-none-any.whl", hash = "sha256:99f07ddeb4b58dbbcd7822ee83f44e408b9a9550975ea64a483df1e101abf4c2"},
+    {file = "datamodel_code_generator-0.21.2.tar.gz", hash = "sha256:824a11c4a0b2e5b23e102a55db0e4e9120d58cdf77e0cc35abd6efbcf7a46326"},
 ]
 
 [package.dependencies]
@@ -2215,4 +2215,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "a802bb55af88a05dc076a9a169ba0ea92b3738d01ef9900656eed9c4d7f485be"
+content-hash = "141574768252d6435db1218715c7acf7cff4beed6e144bc2b5aec101885efd43"
