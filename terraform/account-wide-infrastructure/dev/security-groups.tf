@@ -15,9 +15,25 @@ resource "aws_security_group" "rds-cluster-sg-dev" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  #SecretsManager vpc endpoint port
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 5432
     to_port     = 5432
+    protocol    = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  #SecretsManager vpc endpoint port
+  egress {
+    from_port   = 443
+    to_port     = 443
     protocol    = "TCP"
     cidr_blocks = ["0.0.0.0/0"]
   }
