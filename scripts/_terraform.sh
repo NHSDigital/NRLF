@@ -12,6 +12,7 @@ function _terraform_help() {
     echo "  plan <env> <account_wide>    - runs 'terraform plan'"
     echo "  apply <env> <account_wide>   - runs 'terraform apply'"
     echo "  destroy <env> <account_wide> - runs 'terraform destroy'"
+    echo "  unlock <lock_id>             - runs 'terraform force-unlock'"
     echo
     return 1
 }
@@ -48,6 +49,16 @@ function _terraform() {
 
       cd "$terraform_dir" || return 1
       _terraform_init "$env"
+    ;;
+    #----------------
+    "unlock")
+      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
+        echo "Please log in as the mgmt account" >&2
+        return 1
+      fi
+
+      cd "$terraform_dir" || return 1
+      _terraform_unlock "$2"
     ;;
     #----------------
     "plan")
@@ -231,6 +242,11 @@ function _terraform_init() {
 
   terraform init $args || return 1
   terraform workspace select "$env" || terraform workspace new "$env" || return 1
+}
+
+
+function _terraform_unlock() {
+  terraform force-unlock $1
 }
 
 
