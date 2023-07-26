@@ -113,11 +113,21 @@ resource "aws_vpc_endpoint" "secretsmanager" {
   subnet_ids          = aws_db_subnet_group.rds-cluster-subnet-group-ref.subnet_ids
   vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
+
+  tags = {
+    Name        = "${local.project}-ref-secrets-vpc-endpoint"
+    Environment = local.environment
+  }
 }
 
 resource "aws_vpc_endpoint_security_group_association" "vpc_cluster_security_group_assoc" {
   vpc_endpoint_id   = aws_vpc_endpoint.secretsmanager.id
   security_group_id = aws_security_group.rds-cluster-sg-ref.id
+
+  tags = {
+    Name        = "${local.project}-ref-sg-association"
+    Environment = local.environment
+  }
 }
 
 resource "aws_vpc_endpoint" "secretsmanager" {
@@ -126,9 +136,19 @@ resource "aws_vpc_endpoint" "secretsmanager" {
   subnet_ids          = aws_db_subnet_group.rds-cluster-subnet-group-int.subnet_ids
   vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
+
+  tags = {
+    Name        = "${local.project}-int-secrets-vpc-endpoint"
+    Environment = local.environment
+  }
 }
 
 resource "aws_vpc_endpoint_security_group_association" "vpc_cluster_security_group_assoc" {
   vpc_endpoint_id   = aws_vpc_endpoint.secretsmanager.id
   security_group_id = aws_security_group.rds-cluster-sg-int.id
+
+  tags = {
+    Name        = "${local.project}-int-sg-association"
+    Environment = local.environment
+  }
 }
