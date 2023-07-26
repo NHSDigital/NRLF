@@ -14,7 +14,7 @@ pydantic = "==1.10.11"
 nrlf-lambda-pipeline = {git = "https://github.com/NHSDigital/nrlf-lambda-pipeline.git", tag = "v0.4.0"}
 pytest = "^7.4.0"
 boto3 = "^1.28.3"
-pyjwt = "^2.7.0"
+pyjwt = "^2.8.0"
 cryptography = "^41.0.2"
 more-itertools = "^9.0.0"
 typing-extensions = "^4.7.1"
