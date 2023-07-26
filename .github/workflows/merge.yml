@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Extract the tag name from the latest Changelog file
         run: |
-          TAG=$(find changelog/ -type f  | sort -nr | head -1 | sed 's/...$//' | awk -F'changelog/' '{print "release/"$2}')
+          TAG=$(find changelog/ -type f -maxdepth 1 | sort -nr | head -1 | sed 's/...$//' | awk -F'changelog/' '{print "release/"$2}')
           echo "tag=${TAG}" >> $GITHUB_ENV
       - name: Create tag
         uses: actions/github-script@v6
