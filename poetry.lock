@@ -1186,13 +1186,13 @@ files = [
 
 [[package]]
 name = "nhs-number"
-version = "1.3.3"
+version = "1.3.4"
 description = "Python package to provide utilities for NHS Numbers, including validity checks, normalisation, and generation."
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "nhs_number-1.3.3-py3-none-any.whl", hash = "sha256:41bce29a53ee34699420abdf0b016baffce78325886f3d9be5b3f7909130e584"},
-    {file = "nhs_number-1.3.3.tar.gz", hash = "sha256:f93ba884395bdba2ab7e8b9162b3861ce8fcca6db9709971eba5b785fa276ed2"},
+    {file = "nhs_number-1.3.4-py3-none-any.whl", hash = "sha256:254b31ffe85ae2290c9325442fb4427c3839f46a049408bb1c1e9c9f36e0c39b"},
+    {file = "nhs_number-1.3.4.tar.gz", hash = "sha256:be2bb644aead15a3d7b577d48717d599b85469a101f105efd6effbad1bf70217"},
 ]
 
 [[package]]
@@ -2215,4 +2215,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "4467bdaedfef280f89ec69314634184114cc7f92ac7d60d7b88bf5cc8a53a085"
+content-hash = "29d801b6f62661c3fe6a1c63a7676f731c5b55178b0fa43cebd5718b971b6d65"
