@@ -89,13 +89,13 @@ tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pyte
 
 [[package]]
 name = "aws-lambda-powertools"
-version = "2.20.0"
+version = "2.22.0"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 optional = false
 python-versions = ">=3.7.4,<4.0.0"
 files = [
-    {file = "aws_lambda_powertools-2.20.0-py3-none-any.whl", hash = "sha256:026d64e1fe8e9d6ebfe2e3d6ed0a4c5b7e7a5dfa1ebdb99af3b6cd5fbc411b72"},
-    {file = "aws_lambda_powertools-2.20.0.tar.gz", hash = "sha256:137a5e83ff6160e7b7c790d106bfa0bea78ba4147925b57c2797ece3719997f8"},
+    {file = "aws_lambda_powertools-2.22.0-py3-none-any.whl", hash = "sha256:eae1f1c961893dab5d1e75ffb44d9b58f6426cb148aa39413b04cf36ae46fbe3"},
+    {file = "aws_lambda_powertools-2.22.0.tar.gz", hash = "sha256:0fd535251454b1bd68dbff65e3ed56aa567f3841011e2afbd557b125596a6814"},
 ]
 
 [package.dependencies]
@@ -2215,4 +2215,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "4467bdaedfef280f89ec69314634184114cc7f92ac7d60d7b88bf5cc8a53a085"
+content-hash = "37348d508a435e90b9a19c87bcaa5e4ab98988facc7576a25c17c7f5e48d426b"
