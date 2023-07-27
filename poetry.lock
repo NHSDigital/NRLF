@@ -89,13 +89,13 @@ tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pyte
 
 [[package]]
 name = "aws-lambda-powertools"
-version = "2.20.0"
+version = "2.21.0"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 optional = false
 python-versions = ">=3.7.4,<4.0.0"
 files = [
-    {file = "aws_lambda_powertools-2.20.0-py3-none-any.whl", hash = "sha256:026d64e1fe8e9d6ebfe2e3d6ed0a4c5b7e7a5dfa1ebdb99af3b6cd5fbc411b72"},
-    {file = "aws_lambda_powertools-2.20.0.tar.gz", hash = "sha256:137a5e83ff6160e7b7c790d106bfa0bea78ba4147925b57c2797ece3719997f8"},
+    {file = "aws_lambda_powertools-2.21.0-py3-none-any.whl", hash = "sha256:4525f04b88d6508c22c688f0f0de2f2fbbfd75b9fab719436cec30566e8ba517"},
+    {file = "aws_lambda_powertools-2.21.0.tar.gz", hash = "sha256:888aec00240da78c75994a2e3bd5431baee9337e641943a3c957eb0ee8142cbf"},
 ]
 
 [package.dependencies]
@@ -110,17 +110,17 @@ validation = ["fastjsonschema (>=2.14.5,<3.0.0)"]
 
 [[package]]
 name = "awscli"
-version = "1.29.7"
+version = "1.29.9"
 description = "Universal Command Line Environment for AWS."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "awscli-1.29.7-py3-none-any.whl", hash = "sha256:57125cfff39186e6137bf06a9dd734f1af57ffd39484856b276861457f7865f3"},
-    {file = "awscli-1.29.7.tar.gz", hash = "sha256:b3a7076cb317a21410a2d41734ba338add80f0480804cf9d68cbc52b1d39612a"},
+    {file = "awscli-1.29.9-py3-none-any.whl", hash = "sha256:f77e55b3b2930f76c9e72c3c02ab061fda2091883e5ce066993fbdeedf9a360e"},
+    {file = "awscli-1.29.9.tar.gz", hash = "sha256:f1298ebbbf4564448bd47775e7075dd66d547b0b30a9aba6db2f0b399025f4ff"},
 ]
 
 [package.dependencies]
-botocore = "1.31.7"
+botocore = "1.31.9"
 colorama = ">=0.2.5,<0.4.5"
 docutils = ">=0.10,<0.17"
 PyYAML = ">=3.10,<6.1"
@@ -209,17 +209,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.28.7"
+version = "1.28.9"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.28.7-py3-none-any.whl", hash = "sha256:46803b8ae114ff139f2a87fcb5d2f5a5728f6c96fe3a2b9416a8fcbe761423ae"},
-    {file = "boto3-1.28.7.tar.gz", hash = "sha256:ef6a465d3b25b89bcd00ff69675b33917166145e544735dcb9978091f5b0b752"},
+    {file = "boto3-1.28.9-py3-none-any.whl", hash = "sha256:01f078047eb4d238c6b9c6cc623f2af33b4ae67980c5326691e35cb5493ff6c7"},
+    {file = "boto3-1.28.9.tar.gz", hash = "sha256:4cc0c6005be910e52077227e670930ab55a41ba86cdb6d1c052571d08cd4d32c"},
 ]
 
 [package.dependencies]
-botocore = ">=1.31.7,<1.32.0"
+botocore = ">=1.31.9,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -228,13 +228,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.7"
+version = "1.31.9"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.7-py3-none-any.whl", hash = "sha256:f211ef5714bec8ae24b3fe737b8689611ef4d0dbea0ab46ef8328e112dd10ada"},
-    {file = "botocore-1.31.7.tar.gz", hash = "sha256:f4473f66c153c262b8262404d737f4249366daf00fb068b495577a24b830ebcb"},
+    {file = "botocore-1.31.9-py3-none-any.whl", hash = "sha256:e56ccd3536a90094ea5b176b5dd33bfe4f049efdf71af468ea1661bd424c787d"},
+    {file = "botocore-1.31.9.tar.gz", hash = "sha256:bd849d3ac95f1781385ed831d753a04a3ec870a59d6598175aaedd71dc2baf5f"},
 ]
 
 [package.dependencies]
@@ -543,13 +543,13 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "datamodel-code-generator"
-version = "0.21.1"
+version = "0.21.2"
 description = "Datamodel Code Generator"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "datamodel_code_generator-0.21.1-py3-none-any.whl", hash = "sha256:9898d4a39a54638022850b0df85fab0ef20394382e88482b8bf8925d4817c493"},
-    {file = "datamodel_code_generator-0.21.1.tar.gz", hash = "sha256:feab1c222c5bc3b7c53e1dc8b299bbc261bb17e9dbc22fdd60fc3a2806694ecc"},
+    {file = "datamodel_code_generator-0.21.2-py3-none-any.whl", hash = "sha256:99f07ddeb4b58dbbcd7822ee83f44e408b9a9550975ea64a483df1e101abf4c2"},
+    {file = "datamodel_code_generator-0.21.2.tar.gz", hash = "sha256:824a11c4a0b2e5b23e102a55db0e4e9120d58cdf77e0cc35abd6efbcf7a46326"},
 ]
 
 [package.dependencies]
@@ -1230,13 +1230,13 @@ files = [
 
 [[package]]
 name = "nhs-number"
-version = "1.3.3"
+version = "1.3.4"
 description = "Python package to provide utilities for NHS Numbers, including validity checks, normalisation, and generation."
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "nhs_number-1.3.3-py3-none-any.whl", hash = "sha256:41bce29a53ee34699420abdf0b016baffce78325886f3d9be5b3f7909130e584"},
-    {file = "nhs_number-1.3.3.tar.gz", hash = "sha256:f93ba884395bdba2ab7e8b9162b3861ce8fcca6db9709971eba5b785fa276ed2"},
+    {file = "nhs_number-1.3.4-py3-none-any.whl", hash = "sha256:254b31ffe85ae2290c9325442fb4427c3839f46a049408bb1c1e9c9f36e0c39b"},
+    {file = "nhs_number-1.3.4.tar.gz", hash = "sha256:be2bb644aead15a3d7b577d48717d599b85469a101f105efd6effbad1bf70217"},
 ]
 
 [[package]]
@@ -2299,4 +2299,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "dced167b7a8faf4c1585ae09908aada880337f3a1b3123aea9efa4b1aa12dca5"
+content-hash = "0663bd2a113e3bfd8828e7284b6e5163402e56fa59eacadc70e85f808e12339a"
