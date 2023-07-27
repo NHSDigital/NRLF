@@ -162,6 +162,44 @@ Feature: Producer Update Failure scenarios
         ]
       }
       """
+    And template JSON_SCHEMA
+      """
+      {
+         "$schema": "http://json-schema.org/draft-04/schema#",
+         "type": "object",
+         "title": "Validate Content Title",
+         "properties": {
+            "content": {
+               "type": "array",
+               "items": [
+               {
+                  "type": "object",
+                  "properties": {
+                     "attachment": {
+                     "type": "object",
+                     "properties": {
+                        "title": {
+                           "type": "string",
+                           "pattern": "^Physical$"
+                        }
+                     },
+                     "required": [
+                        "title"
+                     ]
+                     }
+                  },
+                  "required": [
+                     "attachment"
+                  ]
+               }
+               ]
+            }
+         },
+         "required": [
+            "content"
+         ]
+         }
+      """
 
   Scenario: Unable to update a Document Pointer that does not exist
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
@@ -436,3 +474,46 @@ Feature: Producer Update Failure scenarios
       | issue_code        | VALIDATION_ERROR                                                             |
       | issue_description | A parameter or value has resulted in a validation error                      |
       | message           | The target document reference does not belong to the requesting organisation |
+
+  @integration-only
+  Scenario: Fail to update Document Pointer with title not matching json schema
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value           |
+      | http://snomed.info/sct | 861421000000109 |
+    And a Data Contract is registered in the system
+      | property             | value                  |
+      | name                 | Validate Content Title |
+      | system               | http://snomed.info/sct |
+      | value                | 861421000000109        |
+      | version              | 1                      |
+      | inverse_version      | 0                      |
+      | json_schema_template | JSON_SCHEMA            |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 861421000000109                |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | status      | current                        |
+      | url         | https://example.org/my-doc.pdf |
+      | title       | Title                          |
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT template
+      | property    | value           |
+      | identifier  | 1234567890      |
+      | status      | current         |
+      | type        | 861421000000109 |
+      | custodian   | 8FW23           |
+      | subject     | 9278693472      |
+      | contentType | application/pdf |
+      | title       | Health          |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                                                                           |
+      | issue_type        | processing                                                                                                                      |
+      | issue_level       | error                                                                                                                           |
+      | issue_code        | VALIDATION_ERROR                                                                                                                |
+      | issue_description | A parameter or value has resulted in a validation error                                                                         |
+      | message           | ValidationError raised from Data Contract 'Validate Content Title:1' at 'content[0].attachment': 'title' is a required property |

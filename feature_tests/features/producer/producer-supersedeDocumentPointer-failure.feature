@@ -158,6 +158,34 @@ Feature: Producer Supersede Failure scenarios
         ]
       }
       """
+    And template JSON_SCHEMA
+      """
+      {
+        "additionalProperties": true,
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Validate Content Url",
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "attachment": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "pattern": "^https*://(www.)*\\w+.*$"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      """
 
   Scenario: Producer does not have permission to create the supersede Document Pointer
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
@@ -588,3 +616,45 @@ Feature: Producer Supersede Failure scenarios
       | issue_description | Invalid value                           |
       | message           | Condition check failed - Duplicate item |
     And Document Pointer "DS123-1234567890" still exists
+
+  @integration-only
+  Scenario: Fail to validate a supersede Document Pointer with bad URL not matching json schema
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Data Contract is registered in the system
+      | property             | value                  |
+      | name                 | Validate Content Url   |
+      | system               | http://snomed.info/sct |
+      | value                | 736253002              |
+      | version              | 1                      |
+      | inverse_version      | 0                      |
+      | json_schema_template | JSON_SCHEMA            |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 8FW23-1234567891               |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
+      | property    | value            |
+      | identifier  | 8FW23-1234567892 |
+      | target      | 8FW23-1234567891 |
+      | type        | 736253002        |
+      | code        | replaces         |
+      | custodian   | 8FW23            |
+      | subject     | 9278693472       |
+      | contentType | application/pdf  |
+      | url         | not-a-url        |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                                                                                                    |
+      | issue_type        | processing                                                                                                                                               |
+      | issue_level       | error                                                                                                                                                    |
+      | issue_code        | VALIDATION_ERROR                                                                                                                                         |
+      | issue_description | A parameter or value has resulted in a validation error                                                                                                  |
+      | message           | ValidationError raised from Data Contract 'Validate Content Url:1' at 'content[0].attachment.url': 'not-a-url' does not match '^https*://(www.)*\\w+.*$' |
