@@ -43,9 +43,14 @@ def test_status_fails_if_cant_connect_to_db(event):
 def test_status_ok(event):
     from api.consumer.status.index import DYNAMODB_CLIENT, handler
 
+    table_names = set()
     for model, config in TABLE_CONFIG.items():
+        table_name = model.kebab()
+        if table_name in table_names:
+            continue
+        table_names.add(table_name)
         DYNAMODB_CLIENT.create_table(
-            TableName=model.kebab(),
+            TableName=table_name,
             **config,
         )
 

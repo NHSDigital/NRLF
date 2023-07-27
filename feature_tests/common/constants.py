@@ -1,7 +1,7 @@
 from enum import Enum, auto
 from http import HTTPStatus
 
-from nrlf.core.model import DocumentPointer
+from nrlf.core.model import Contract, DocumentPointer
 
 DEFAULT_VERSION = 1.0
 STATUS_CODE_200 = HTTPStatus.OK.value
@@ -58,6 +58,7 @@ DOCUMENT_POINTER_TABLE_DEFINITION = {
 
 TABLE_CONFIG = {
     DocumentPointer: DOCUMENT_POINTER_TABLE_DEFINITION,
+    Contract: DOCUMENT_POINTER_TABLE_DEFINITION,
 }
 
 AUTH_STORE = "auth_store"

@@ -14,12 +14,13 @@ from build_scripts.common import (
 )
 
 UNNECESSARY_DIRS = [
-    "__pycache__",
+    "**/__pycache__/*",
     "*.dist-info",
     "*tests",
     "botocore",
     "boto3",
     "**/pydantic/*.so",
+    "_pytest",
 ]
 
 

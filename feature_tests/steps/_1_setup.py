@@ -6,8 +6,8 @@ from feature_tests.common.config_setup import register_application, request_setu
 from feature_tests.common.constants import DEFAULT_VERSION, WITH_WITHOUT_ANY, FhirType
 from feature_tests.common.decorators import given
 from feature_tests.common.models import Context, Template, TestConfig
-from nrlf.core.constants import CONNECTION_METADATA
-from nrlf.core.model import DocumentPointer
+from nrlf.core.constants import CONNECTION_METADATA, DbPrefix
+from nrlf.core.model import Contract, DocumentPointer, key
 from nrlf.core.transform import create_document_pointer_from_fhir_json
 from nrlf.core.validators import json_loads, split_custodian_id
 
@@ -179,3 +179,22 @@ def given_document_pointer_exists(context: Context, count: int, template_name: s
         )
         test_config.repositories[DocumentPointer].create(core_model)
         documents_created += 1
+
+
+@given("a Data Contract is registered in the system")
+def data_contract_registered_in_the_system(context: Context):
+    test_config: TestConfig = context.test_config
+    contract_kwargs = {row["property"]: row["value"] for row in context.table}
+
+    json_schema = json_loads(
+        test_config.templates[contract_kwargs.pop("json_schema_template")].raw
+    )
+    inverse_version = contract_kwargs.pop("inverse_version")
+    contract_kwargs["version"] = int(contract_kwargs["version"])
+    contract = Contract(
+        pk=key(DbPrefix.Contract, contract_kwargs["system"], contract_kwargs["value"]),
+        sk=key(DbPrefix.Version, inverse_version, contract_kwargs["name"]),
+        json_schema=json_schema,
+        **contract_kwargs,
+    )
+    test_config.repositories[Contract].create(item=contract)

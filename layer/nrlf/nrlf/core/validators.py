@@ -8,6 +8,7 @@ from nrlf.core.constants import (
     CUSTODIAN_SEPARATOR,
     ID_SEPARATOR,
     NHS_NUMBER_SYSTEM_URL,
+    TYPE_SEPARATOR,
     VALID_SOURCES,
 )
 from nrlf.core.errors import (
@@ -54,7 +55,7 @@ def create_document_type_tuple(document_type: CodeableConcept):
         raise ValueError(
             f"Expected exactly one item in DocumentReference.type.coding, got {n}"
         ) from None
-    return f"{coding.system}|{coding.code}"
+    return f"{coding.system}{TYPE_SEPARATOR}{coding.code}"
 
 
 def validate_nhs_number(nhs_number: str):
