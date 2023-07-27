@@ -130,6 +130,23 @@ Feature: Producer Create Success scenarios
         }
       }
       """
+    And template JSON_SCHEMA_DATE
+      """
+      {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "title": "Validate Mandatory Date",
+        "type": "object",
+        "required": [
+          "date"
+        ],
+        "properties": {
+            "date": {
+              "type": "string",
+              "pattern":"^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+-]\\d{2}:\\d{2}$"
+            }
+          }
+        }
+      """
 
   Scenario: Successfully create a Document Pointer of type Mental health crisis plan
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
@@ -276,7 +293,15 @@ Feature: Producer Create Success scenarios
       | version              | 1                      |
       | inverse_version      | 0                      |
       | json_schema_template | JSON_SCHEMA            |
-    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
+    And a Data Contract is registered in the system
+      | property             | value                   |
+      | name                 | Validate Mandatory Date |
+      | system               | http://snomed.info/sct  |
+      | value                | 736253002               |
+      | version              | 1                       |
+      | inverse_version      | 0                       |
+      | json_schema_template | JSON_SCHEMA_DATE        |
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT_WITH_DATE template
       | property    | value                          |
       | identifier  | 1234567890                     |
       | type        | 736253002                      |
@@ -284,17 +309,18 @@ Feature: Producer Create Success scenarios
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
+      | date        | 2022-12-21T10:45:41+11:00      |
     Then the operation is successful
     And the status is 201
     And Document Pointer "8FW23-1234567890" exists
-      | property    | value                             |
-      | id          | 8FW23-1234567890                  |
-      | nhs_number  | 9278693472                        |
-      | producer_id | 8FW23                             |
-      | type        | http://snomed.info/sct\|736253002 |
-      | source      | NRLF                              |
-      | version     | 1                                 |
-      | schemas     | ["Validate Content Url:1"]        |
-      | updated_on  | NULL                              |
-      | document    | <document>                        |
-      | created_on  | <timestamp>                       |
+      | property    | value                                                   |
+      | id          | 8FW23-1234567890                                        |
+      | nhs_number  | 9278693472                                              |
+      | producer_id | 8FW23                                                   |
+      | type        | http://snomed.info/sct\|736253002                       |
+      | source      | NRLF                                                    |
+      | version     | 1                                                       |
+      | schemas     | ["Validate Content Url:1", "Validate Mandatory Date:1"] |
+      | updated_on  | NULL                                                    |
+      | document    | <document>                                              |
+      | created_on  | <timestamp>                                             |
