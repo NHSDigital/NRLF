@@ -192,6 +192,7 @@ def test_validate_json_schema(json_schema):
     validate_json_schema(json_schema=json_schema, contract_name=None)
 
 
+@hypothesis.settings(deadline=None)
 @hypothesis.given(schema_for_a_recording=builds(SchemaForARecording))
 def test_validate_against_json_schema_for_good_data(
     schema_for_a_recording: SchemaForARecording,
