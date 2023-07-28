@@ -44,7 +44,7 @@ class LogReference(Enum):
     REPOSITORY002 = "Querying document"
 
 
-class CorruptDocumentPointer(Exception):
+class CorruptItem(Exception):
     pass
 
 
@@ -89,8 +89,9 @@ def _is_record_valid(item_type: type[DynamoDbModel], item: dict):
     try:
         return item_type(**item)
     except (ValueError, ValidationError):
-        raise CorruptDocumentPointer(
-            f"Document pointer has corrupt data, ignoring ${item}"
+        raise CorruptItem(
+            f"Cannot parse '{item_type.__name__}' - this item may be corrupt. "
+            f"Skipping failed item: {item}"
         )
 
 
@@ -394,7 +395,7 @@ class Repository:
                 _item = _is_record_valid(
                     item_type=self.item_type, item=item, logger=logger
                 )
-            except CorruptDocumentPointer:
+            except CorruptItem:
                 continue
             yield _item
 
