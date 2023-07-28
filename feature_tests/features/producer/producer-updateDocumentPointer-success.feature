@@ -314,6 +314,7 @@ Feature: Producer Update Success scenarios
       | created_on  | <timestamp>                       |
       | updated_on  | <timestamp>                       |
 
+  @integration-only
   Scenario: Validate update operation against json schema
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
