@@ -2,9 +2,8 @@ from typing import Union
 
 import boto3
 
-from mi.stream_writer.model import Environment, Outcome, Response, SqlQueryEvent, Status
+from mi.stream_writer.model import Environment, Outcome, Response, Status
 from mi.stream_writer.psycopg2 import connection, psycopg2
-from mi.stream_writer.sql import execute_sql_query
 
 
 def connect_to_database(**connect_kwargs) -> Union[connection, Response]:
@@ -16,27 +15,6 @@ def connect_to_database(**connect_kwargs) -> Union[connection, Response]:
             status=Status.ERROR, outcome=f"{err.__class__.__name__}: {err}"
         )
         return response
-
-
-def execute_sql(conn: connection, event: SqlQueryEvent):
-    cur = conn.cursor()
-    try:
-        results = execute_sql_query(cursor=cur, sql=event.sql)
-    except Exception as err:
-        response = Response(
-            status=Status.ERROR, outcome=f"{err.__class__.__name__}: {err}"
-        )
-        if event.raise_on_sql_error:
-            raise err
-    else:
-        response = Response(
-            status=Status.OK, outcome=Outcome.OPERATION_SUCCESSFUL, results=results
-        )
-        conn.commit()
-    finally:
-        conn.close()
-        cur.close()
-    return response
 
 
 def handler(event: dict, context=None):
