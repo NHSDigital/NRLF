@@ -80,7 +80,7 @@ Feature: Producer Update Success scenarios
                "attachment": {
                   "contentType": "$contentType",
                   "url": "$url",
-                  "title": "$contentTitle"
+                  "title": "$title"
                }
             }
          ],
