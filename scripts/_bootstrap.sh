@@ -10,6 +10,7 @@ function _bootstrap_help() {
     echo "  delete-mgmt                    - Deletes required aws resource for terraform access in mgmt account"
     echo "  create-non-mgmt                - Creates required aws resource for terraform access in non-mgmt account"
     echo "  delete-non-mgmt                - Deletes required aws resource for terraform access in non-mgmt account"
+    echo "  destroy-non-mgmt               - Destroys a workspace completely in non-mgmt account. ONLY USE if TERRAFORM DESTROY HAS NOT COMPLETED"
     echo
     return 1
 }
@@ -94,6 +95,22 @@ function _bootstrap() {
       aws iam detach-role-policy --policy-arn "${admin_policy_arn}" --role-name "${TERRAFORM_ROLE_NAME}" || return 1
       aws iam delete-role --role-name "${TERRAFORM_ROLE_NAME}" || return 1
       echo "Deleted role ${TERRAFORM_ROLE_NAME} and associated policy ${admin_policy_arn}"
+    ;;
+    #----------------
+    "destroy-non-mgmt")
+      if [[ "$(aws sts get-caller-identity)" == *mgmt* ]]; then
+          echo "Please log in as a non-mgmt account" >&2
+          return 1
+      fi
+      local resources
+      resources=$(aws resourcegroupstaggingapi get-resources --tag-filters Key=workspace,Values=$2 | jq '.ResourceTagMappingList | .[]') || return 1
+      # echo $resources
+      for item in $resources; do
+        #echo $item
+        arn=$(jq -r '.ResourceARN' <<< "$item");
+      #   # arn=$(jq -r '.ResourceARN' <<< "$items");
+        echo $arn
+      done
     ;;
     #----------------
     *) _bootstrap_help ;;
