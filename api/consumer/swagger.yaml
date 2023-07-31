@@ -198,6 +198,10 @@ info:
     * 500 to 599 if it failed because of an error on our server
 
     Errors specific to each API are shown in the Endpoints section, under Response. See our [reference guide](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#http-status-codes) for more on errors.
+
+    ## Change log
+
+    For details of how this API has changed over time, see the [change log](https://raw.githubusercontent.com/NHSDigital/NRLF/main/CHANGELOG.md).
   version: 1.0.0
   license:
     name: MIT
