@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ..
+
 while read dep; do
     lib="${dep% *}"
     asdf plugin add ${lib}
