@@ -104,12 +104,24 @@ function _bootstrap() {
       fi
       local resources
       resources=$(aws resourcegroupstaggingapi get-resources --tag-filters Key=workspace,Values=$2 | jq '.ResourceTagMappingList | .[]') || return 1
-      # echo $resources
       for item in $resources; do
-        #echo $item
         arn=$(jq -r '.ResourceARN' <<< "$item");
-      #   # arn=$(jq -r '.ResourceARN' <<< "$items");
-        echo $arn
+        local lambda="aws:lambda"
+        local logs="aws:logs"
+        case "$arn" in
+          *"$lambda"*)
+            echo $arn
+            ;;
+          #----------------
+          *"$logs"*)
+            echo $arn
+            ;;
+        esac
+        #local type
+        #aws appsync get-type --app-id nhsd-nrlf--b5548ea4--api--consumer--searchPostDocumentReference
+        #type="AWS::"
+        #echo $arn
+        #echo $type
       done
     ;;
     #----------------
