@@ -10,7 +10,7 @@ function _bootstrap_help() {
     echo "  delete-mgmt                    - Deletes required aws resource for terraform access in mgmt account"
     echo "  create-non-mgmt                - Creates required aws resource for terraform access in non-mgmt account"
     echo "  delete-non-mgmt                - Deletes required aws resource for terraform access in non-mgmt account"
-    echo "  destroy-non-mgmt               - Destroys a workspace completely in non-mgmt account. ONLY USE if TERRAFORM DESTROY HAS NOT COMPLETED"
+    echo "  destroy-non-mgmt               - Destroys a workspace completely in non-mgmt (Dev) account. ONLY USE IF TERRAFORM DESTROY HAS NOT COMPLETED"
     echo
     return 1
 }
@@ -98,8 +98,9 @@ function _bootstrap() {
     ;;
     #----------------
     "destroy-non-mgmt")
-      if [[ "$(aws sts get-caller-identity)" == *mgmt* ]]; then
-          echo "Please log in as a non-mgmt account" >&2
+      echo "$(aws sts get-caller-identity)"
+      if [[ "$(aws sts get-caller-identity)" != *dev* ] && [ "$(aws sts get-caller-identity)" != *NHSDAdminRole* ]]; then
+          echo "Please log in as dev with an Admin account" >&2
           return 1
       fi
 
