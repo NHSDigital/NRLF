@@ -98,7 +98,6 @@ function _bootstrap() {
     ;;
     #----------------
     "destroy-non-mgmt")
-      echo "$(aws sts get-caller-identity)"
       if [[ "$(aws sts get-caller-identity)" != *dev* && "$(aws sts get-caller-identity)" != *NHSDAdminRole* ]]; then
           echo "Please log in as dev with an Admin account" >&2
           return 1
@@ -147,7 +146,16 @@ function _bootstrap() {
               arn:aws:s3* )
                   echo "Deleting... : $arn"
                   new_var=$(echo "$arn" | awk -F':' '{print $NF}')
-                  aws s3 rb s3://$new_var --force
+                  local versioned_objects
+                  versioned_objects=$(aws s3api list-object-versions \
+                                      --bucket "${new_var}" \
+                                      --output=json \
+                                      --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}') || return 1
+                  aws s3api delete-objects \
+                      --bucket "${new_var}" \
+                      --delete "${versioned_objects}" || echo "Ignore the previous warning - an empty bucket is a good thing"
+                  echo "Waiting for bucket contents to be deleted..." && sleep 10
+                  aws s3 rb "s3://${new_var}" --force || echo "Bucket could not be deleted at this time. You should go to the AWS Console and delete the bucket manually."
                   ;;
               arn:aws:ssm* )
                   echo "Deleting... : $arn"
