@@ -124,6 +124,34 @@ Feature: Producer Supersede Success scenarios
         ]
       }
       """
+    And template JSON_SCHEMA
+      """
+      {
+        "additionalProperties": true,
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Validate Content Url",
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "attachment": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "pattern": "^https*://(www.)*\\w+.*$"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      """
 
   Scenario: Supersede multiple Document Pointers
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
@@ -364,3 +392,57 @@ Feature: Producer Supersede Success scenarios
       | document    | <document>                        |
       | created_on  | 2023-05-03T12:00:00.000Z          |
     And Document Pointer "DS123-1234567891" does not exist
+
+  @integration-only
+  Scenario: Validate supersede Document Pointer operation with json schema for content url
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Data Contract is registered in the system
+      | property             | value                  |
+      | name                 | Validate Content Url   |
+      | system               | http://snomed.info/sct |
+      | value                | 736253002              |
+      | version              | 1                      |
+      | inverse_version      | 0                      |
+      | json_schema_template | JSON_SCHEMA            |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 8FW23-1234567891               |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
+      | property    | value                              |
+      | identifier  | 8FW23-1234567892                   |
+      | target      | 8FW23-1234567891                   |
+      | type        | 736253002                          |
+      | custodian   | 8FW23                              |
+      | subject     | 9278693472                         |
+      | contentType | application/pdf                    |
+      | url         | https://www.example.org/my-doc.pdf |
+    Then the operation is successful
+    And the status is 201
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                    |
+      | issue_type        | informational                            |
+      | issue_level       | information                              |
+      | issue_code        | RESOURCE_SUPERSEDED                      |
+      | issue_description | Resource created and Resource(s) deleted |
+      | message           | Resource created and Resource(s) deleted |
+    And Document Pointer "8FW23-1234567892" exists
+      | property    | value                             |
+      | id          | 8FW23-1234567892                  |
+      | nhs_number  | 9278693472                        |
+      | producer_id | 8FW23                             |
+      | type        | http://snomed.info/sct\|736253002 |
+      | source      | NRLF                              |
+      | version     | 1                                 |
+      | schemas     | ["Validate Content Url:1"]        |
+      | updated_on  | NULL                              |
+      | document    | <document>                        |
+      | created_on  | <timestamp>                       |
+    And Document Pointer "8FW23-1234567891" does not exist

@@ -44,7 +44,7 @@ class LogReference(Enum):
     REPOSITORY002 = "Querying document"
 
 
-class CorruptDocumentPointer(Exception):
+class CorruptItem(Exception):
     pass
 
 
@@ -89,8 +89,9 @@ def _is_record_valid(item_type: type[DynamoDbModel], item: dict):
     try:
         return item_type(**item)
     except (ValueError, ValidationError):
-        raise CorruptDocumentPointer(
-            f"Document pointer has corrupt data, ignoring ${item}"
+        raise CorruptItem(
+            f"Cannot parse '{item_type.__name__}' - this item may be corrupt. "
+            f"Skipping failed item: {item}"
         )
 
 
@@ -355,7 +356,6 @@ class Repository:
 
         items, last_evaluated_key = [], None
         for item in self._scroll(
-            index_keys=index_keys,
             query_kwargs=query_kwargs,
             exclusive_start_key=exclusive_start_key,
             logger=logger,
@@ -375,13 +375,10 @@ class Repository:
                 last_evaluated_key
             )
 
-        return PaginatedResponse(
-            last_evaluated_key=last_evaluated_key, document_pointers=items
-        )
+        return PaginatedResponse(last_evaluated_key=last_evaluated_key, items=items)
 
     def _scroll(
         self,
-        index_keys: str,
         query_kwargs: dict,
         exclusive_start_key: str,
         logger=None,
@@ -398,7 +395,7 @@ class Repository:
                 _item = _is_record_valid(
                     item_type=self.item_type, item=item, logger=logger
                 )
-            except CorruptDocumentPointer:
+            except CorruptItem:
                 continue
             yield _item
 
@@ -406,7 +403,6 @@ class Repository:
         last_evaluated_key = results.get("LastEvaluatedKey")
         if last_evaluated_key is not None:
             yield from self._scroll(
-                index_keys=index_keys,
                 query_kwargs=query_kwargs,
                 exclusive_start_key=last_evaluated_key,
                 logger=logger,
@@ -424,7 +420,10 @@ class Repository:
         """
         Query records using the main partition key
         """
-        return self._query(None, "pk", pk, "sk", sk, **filter)
+        sk_name = None if sk is None else "sk"
+        return self._query(
+            index_name=None, pk_name="pk", pk=pk, sk_name=sk_name, sk=sk, **filter
+        )
 
     def query_gsi_1(
         self,

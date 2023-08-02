@@ -2,8 +2,7 @@ from typing import Generator
 
 from pydantic import BaseModel
 
-from nrlf.core.decorators import deprecated
-from nrlf.core.dynamodb_types import to_dynamodb_dict
+from nrlf.core.errors import ItemNotFound
 from nrlf.core.repository import Repository
 
 CHUNK_SIZE = 25
@@ -45,29 +44,13 @@ class FeatureTestRepository(Repository):
         for chunk in _chunk_list(transact_items):
             self.dynamodb.transact_write_items(TransactItems=chunk)
 
-    @deprecated("Use 'exists'")
-    def item_exists(self, id) -> tuple[BaseModel, bool, str]:
-        item = None
-        try:
-            item = self.read(
-                KeyConditionExpression="id = :id",
-                ExpressionAttributeValues={":id": to_dynamodb_dict(id)},
-            )
-            exists = True
-            message = f"Item found {item}"
-        except Exception as e:
-            exists = False
-            message = str(e)
-
-        return item, exists, message
-
     def exists(self, pk) -> tuple[BaseModel, bool, str]:
         item = None
         try:
             item = self.read_item(pk)
             exists = True
             message = f"Item found {item.pk}"
-        except Exception as e:
+        except ItemNotFound as e:
             exists = False
             message = str(e)
 

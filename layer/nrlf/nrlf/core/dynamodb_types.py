@@ -1,7 +1,7 @@
 from ast import literal_eval
 from typing import TypeVar, Union
 
-from pydantic import BaseModel, StrictInt, StrictStr
+from pydantic import BaseModel, Field, StrictInt, StrictStr
 
 PythonType = TypeVar("PythonType")
 NoneType = type(None)
@@ -11,6 +11,7 @@ DYNAMODB_TYPE_LOOKUP = {
     float: "N",
     dict: "M",
     list: "L",
+    bool: "BOOL",
     NoneType: "NULL",
 }
 
@@ -40,7 +41,11 @@ class DynamoDbNullType(DynamoDbType):
 
 
 class DynamoDbListType(DynamoDbType):
-    __root__: list[str]
+    __root__: list[str] = Field(default_factory=list)
+
+
+class DynamoDbDictType(DynamoDbType):
+    __root__: dict
 
 
 def convert_value_to_dynamo_format(obj):
@@ -50,7 +55,9 @@ def convert_value_to_dynamo_format(obj):
         return {"M": {k: convert_value_to_dynamo_format(v) for k, v in obj.items()}}
     elif _type is list:
         return {"L": [convert_value_to_dynamo_format(item) for item in obj]}
-    elif obj is None:
+    elif _type is bool:
+        return {"BOOL": obj}
+    elif _type is NoneType:
         return {"NULL": True}
 
     dynamodb_type = DYNAMODB_TYPE_LOOKUP.get(_type)

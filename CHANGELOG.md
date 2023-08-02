@@ -1,5 +1,14 @@
 # Changelog
 
+## 2023-07-27
+
+- NRLF-526 - CIS2
+- NRLF-560 - JSON Schema / Data contracts
+- NRLF-640 - Add changelog details to narrative
+- NRLF-650 - Dependabot updates
+- NRLF-651 - Converter tests
+- NRLF-655 - Tag/release fix
+
 ## 2023-07-19
 
 - NRLF-586 - Consolidate and publish CHANGELOG.md
