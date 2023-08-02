@@ -99,7 +99,7 @@ function _bootstrap() {
     #----------------
     "destroy-non-mgmt")
       echo "$(aws sts get-caller-identity)"
-      if [[ "$(aws sts get-caller-identity)" != *dev* ] && [ "$(aws sts get-caller-identity)" != *NHSDAdminRole* ]]; then
+      if [[ "$(aws sts get-caller-identity)" != *dev* && "$(aws sts get-caller-identity)" != *NHSDAdminRole* ]]; then
           echo "Please log in as dev with an Admin account" >&2
           return 1
       fi
