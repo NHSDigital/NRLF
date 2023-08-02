@@ -102,26 +102,71 @@ function _bootstrap() {
           echo "Please log in as a non-mgmt account" >&2
           return 1
       fi
-      local resources
-      resources=$(aws resourcegroupstaggingapi get-resources --tag-filters Key=workspace,Values=$2 | jq '.ResourceTagMappingList | .[]') || return 1
-      for item in $resources; do
-        arn=$(jq -r '.ResourceARN' <<< "$item");
-        local lambda="aws:lambda"
-        local logs="aws:logs"
-        case "$arn" in
-          *"$lambda"*)
-            echo $arn
-            ;;
-          #----------------
-          *"$logs"*)
-            echo $arn
-            ;;
-        esac
-        #local type
-        #aws appsync get-type --app-id nhsd-nrlf--b5548ea4--api--consumer--searchPostDocumentReference
-        #type="AWS::"
-        #echo $arn
-        #echo $type
+
+      local workspace
+      workspace=$2
+      # Fetch the resources using the AWS CLI command
+      aws resourcegroupstaggingapi get-resources --tag-filters Key=workspace,Values="$2" | jq -c '.ResourceTagMappingList[]' |
+      while IFS= read -r item; do
+          arn=$(jq -r '.ResourceARN' <<< "$item")
+
+          case $arn in
+              arn:aws:lambda* )
+                  echo "Deleting... : $arn"
+                  aws lambda delete-function --function-name $arn
+                  ;;
+              arn:aws:kms* )
+                  echo "Disabling... : $arn"
+                  aws kms disable-key --key-id $arn
+                  echo "Deleting... ': $arn"
+                  aws kms schedule-key-deletion --key-id $arn --pending-window-in-days 7
+                  ;;
+              arn:aws:logs* )
+                  echo "Deleting... : $arn"
+                  new_var=$(echo "$arn" | awk -F':' '{print $NF}')
+                  aws logs delete-log-group --log-group-name $new_var
+                  ;;
+              arn:aws:secretsmanager* )
+                  echo "Deleting... : $arn"
+                  aws secretsmanager delete-secret --secret-id $arn
+                  ;;
+              arn:aws:apigateway* )
+                    echo "Deleting domain-name... : $workspace"
+                    aws apigateway delete-domain-name --domain-name "$workspace.api.record-locator.dev.national.nhs.uk"
+                    echo "Deleting... : $arn"
+                    ag_id=$(echo "$arn" | awk -F'/restapis/' '{print $2}' | awk -F'/' '{print $1}')
+                    aws apigateway delete-rest-api --rest-api-id $ag_id
+                  ;;
+              arn:aws:dynamodb* )
+                  echo "Deleting... ': $arn"
+                  new_var=$(echo "$arn" | awk -F':' '{print $NF}')
+                  table=$(echo "$arn" | awk -F'/' '{print $NF}')
+                  aws dynamodb delete-table --table-name $table
+                  ;;
+              arn:aws:s3* )
+                  echo "Please manually delete... ': $arn"
+                  ;;
+              arn:aws:ssm* )
+                  echo "Deleting... : $arn"
+                  new_var=$(echo "$arn" | awk -F':' '{print $NF}')
+                  suffix=$(echo "$arn" | awk -F'/' '{print $NF}')
+                  name=$(echo "$new_var" | awk -F'/' '{print $(NF-1)}')
+                  aws ssm delete-parameter --name $name/$suffix
+                  ;;
+              arn:aws:acm* )
+                  echo "Deleting... : $arn"
+                  aws acm delete-certificate --certificate-arn $arn
+                  ;;
+              arn:aws:firehose* )
+                  echo "Deleting... : $arn"
+                  new_var=$(echo "$arn" | awk -F':' '{print $NF}')
+                  name=$(echo "$new_var" | awk -F'/' '{print $NF}')
+                  aws firehose delete-delivery-stream --delivery-stream-name $name
+                  ;;
+              * )
+                  echo "Unknown ARN type: $arn"
+                  ;;
+          esac
       done
     ;;
     #----------------
