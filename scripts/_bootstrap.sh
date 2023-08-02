@@ -138,13 +138,15 @@ function _bootstrap() {
                     aws apigateway delete-rest-api --rest-api-id $ag_id
                   ;;
               arn:aws:dynamodb* )
-                  echo "Deleting... ': $arn"
+                  echo "Deleting... : $arn"
                   new_var=$(echo "$arn" | awk -F':' '{print $NF}')
                   table=$(echo "$arn" | awk -F'/' '{print $NF}')
                   aws dynamodb delete-table --table-name $table
                   ;;
               arn:aws:s3* )
-                  echo "Please manually delete... ': $arn"
+                  echo "Deleting... : $arn"
+                  new_var=$(echo "$arn" | awk -F':' '{print $NF}')
+                  aws s3 rb s3://$new_var --force
                   ;;
               arn:aws:ssm* )
                   echo "Deleting... : $arn"
