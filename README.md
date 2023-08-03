@@ -10,7 +10,16 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
 
 1. [Setup](#setup)
    1. [Prerequisites](#1-prerequisites)
-   2. [Install python dependencies](#2-install-python-dependencies)
+      1. [ASDF Tool Manager](#1-asdf-tool-manager)
+      2. [If you prefer to get your local machine running manually the requirements are...](#2-if-you-prefer-to-get-your-local-machine-running-manually-the-requirements-are)
+   2. [Linux set up](#2-linux-set-up)
+      1. [Java:](#1-java)
+      2. [Poetry:](#2-poetry)
+      3. [pyenv:](#3-pyenv)
+      4. [terraform](#4-terraform)
+      5. [tfenv:](#5-tfenv)
+      6. [yq:](#6-yq)
+   3. [Install python dependencies](#2-install-python-dependencies)
 2. [Initialise shell environment](#initialise-shell-environment)
 3. [Login to AWS](#login-to-aws)
 4. [Build, Test & Run the API](#build-test--run-the-api)
@@ -35,10 +44,20 @@ Before you tackle this guide, there are some more instructions here on the [Deve
 
 ### 1. Prerequisites
 
-- [poetry](https://python-poetry.org/docs/) (this repository uses poetry ^1.2)
+#### 1. ASDF Tool Manager
+
+For an easy way to make sure your local system matches the requirements needed you can use `asdf tool manager`. This tool fetches the required versions of the libraries needed and sets the directory to use that version instead of your system's default version. To get it up and running,
+
+- Install `asdf` using the instructions given here. https://asdf-vm.com/guide/getting-started.html. You can check it installed properly by using the command `asdf --version`
+- Install the dependencies using the `nrlf-dependencies.sh` bash script. `bash nrlf-dependencies.sh`
+- You should be good to go.
+
+#### 2. If you prefer to get your local machine running manually the requirements are...
+
+- [poetry](https://python-poetry.org/docs/) (this repository uses poetry ^1.5.1)
 - [pyenv](https://github.com/pyenv/pyenv) (this repository uses python ^3.9.15)
 - jq
-- terraform
+- terraform (this repository uses terraform ^1.3.4)
 - [tfenv](https://github.com/tfutils/tfenv) (this repository uses terraform 1.3.4)
 - coreutils
 
