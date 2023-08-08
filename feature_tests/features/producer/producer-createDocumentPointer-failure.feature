@@ -262,6 +262,68 @@ Feature: Producer Create Failure Scenarios
         }
       }
       """
+    And template JSON_SCHEMA_ASID
+      """
+      {
+        "anyOf": [
+          { "$ref": "#/schemas/has-no-ssp-content" },
+          { "$ref": "#/schemas/has-asid-author" }
+        ],
+        "schemas": {
+          "has-no-ssp-content": {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "attachment": {
+                      "type": "object",
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "pattern": "^(?!ssp:\/\/).+"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "has-asid-author": {
+            "type": "object",
+            "properties": {
+              "author": {
+                "type": "array",
+                "contains": {
+                  "type": "object",
+                  "properties": {
+                    "identifier": {
+                      "type": "object",
+                      "properties": {
+                        "system": {
+                          "type": "string",
+                          "enum": ["https://fhir.nhs.uk/Id/accredited-system-id"]
+                        },
+                        "value": {
+                          "type": "string",
+                          "pattern": "^\\d{12}$"
+                        }
+                      },
+                      "required": ["system", "value"]
+                    }
+                  },
+                  "required": ["identifier"]
+                }
+              }
+            },
+            "required": ["author"]
+          }
+        }
+      }
+      """
 
   Scenario: Requesting producer does not have permission to create another producers document
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
@@ -661,3 +723,37 @@ Feature: Producer Create Failure Scenarios
       | issue_code        | VALIDATION_ERROR                                                                                                                                         |
       | issue_description | A parameter or value has resulted in a validation error                                                                                                  |
       | message           | ValidationError raised from Data Contract 'Validate Content Url:1' at 'content[0].attachment.url': 'not-a-url' does not match '^https*://(www.)*\\w+.*$' |
+
+  @integration-only
+  Scenario: Validate a Document Pointer of type Mental health crisis plan using the asid data contract with ssp and no asid
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Data Contract is registered in the system
+      | property             | value                  |
+      | name                 | Validate asid          |
+      | system               | http://snomed.info/sct |
+      | value                | 736253002              |
+      | version              | 1                      |
+      | inverse_version      | 0                      |
+      | json_schema_template | JSON_SCHEMA_ASID       |
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
+      | property    | value                             |
+      | identifier  | 1234567890                        |
+      | type        | 736253002                         |
+      | custodian   | 8FW23                             |
+      | producer_id | 8FW23                             |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
+      | subject     | 9278693472                        |
+      | contentType | application/pdf                   |
+      | url         | ssp://example.org/my-doc.pdf      |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                                                                                                     |
+      | issue_type        | processing                                                                                                                                                |
+      | issue_level       | error                                                                                                                                                     |
+      | issue_code        | VALIDATION_ERROR                                                                                                                                          |
+      | issue_description | A parameter or value has resulted in a validation error                                                                                                   |
+      | message           | ValidationError raised from Data Contract 'Validate asid:1' at 'content[0].attachment.url': 'ssp://example.org/my-doc.pdf' does not match '^(?!ssp://).+' |
