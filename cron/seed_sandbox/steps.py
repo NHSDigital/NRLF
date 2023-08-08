@@ -1,4 +1,3 @@
-import json
 from enum import Enum
 from logging import Logger
 from pathlib import Path
@@ -13,6 +12,7 @@ from cron.seed_sandbox.validators import validate_items
 from nrlf.core.dynamodb_types import to_dynamodb_dict
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
+from nrlf.core.validators import json_load
 
 SANDBOX = "sandbox"
 TEMPLATE_PATH_TO_DATA = str(Path(__file__).parent / "data" / "{item_type_name}.json")
@@ -34,7 +34,7 @@ def _seed_step_factory(
     item_type_name = item_type.kebab()
     path_to_data = template_path_to_data.format(item_type_name=item_type_name)
     with open(path_to_data) as f:
-        raw_items = json.load(f)
+        raw_items = json_load(f)
     dynamodb_items = map(
         lambda raw_item: {k: to_dynamodb_dict(v) for k, v in raw_item.items()},
         raw_items,

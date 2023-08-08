@@ -1,6 +1,5 @@
 import base64
 import gzip
-import json
 import os
 from contextlib import contextmanager
 from pathlib import Path
@@ -31,7 +30,7 @@ from helpers.firehose import (
     local_path_to_s3_components,
 )
 from nrlf.core.firehose.model import CloudwatchMessageType
-from nrlf.core.validators import json_loads
+from nrlf.core.validators import json_load, json_loads
 
 
 @given(
@@ -109,7 +108,7 @@ def test__write_s3_logs_to_local(logs):
         )
         assert _path == Path(dir) / "foo" / "bar.json"
         with open(_path) as f:
-            assert json.load(f) == logs
+            assert json_load(f) == logs
 
 
 @settings(deadline=3000, max_examples=10)
@@ -183,7 +182,7 @@ def test_fetch(mocked_fetch_logs_from_s3):
         )
         assert _path == Path(dir) / "foo" / "bar.json"
         with open(_path) as f:
-            assert json.load(f) == logs
+            assert json_load(f) == logs
 
 
 @given(

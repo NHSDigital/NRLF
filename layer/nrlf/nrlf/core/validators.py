@@ -130,6 +130,10 @@ def json_loads(json_string):
     return json.loads(json_string, object_pairs_hook=dict_raise_on_duplicates)
 
 
+def json_load(json_file_obj):
+    return json.load(json_file_obj, object_pairs_hook=dict_raise_on_duplicates)
+
+
 def validate_producer_id(
     producer_id: str, custodian_id: str, custodian_suffix: str = None
 ):
