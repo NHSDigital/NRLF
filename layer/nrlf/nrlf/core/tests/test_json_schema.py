@@ -192,7 +192,6 @@ def test_validate_json_schema(json_schema):
     validate_json_schema(json_schema=json_schema, contract_name=None)
 
 
-@hypothesis.settings(deadline=None)
 @hypothesis.given(schema_for_a_recording=builds(SchemaForARecording))
 def test_validate_against_json_schema_for_good_data(
     schema_for_a_recording: SchemaForARecording,
@@ -249,7 +248,7 @@ def test__get_contracts_from_db_returns_latest_versions(
                     pk=key(DbPrefix.Contract, system, value),
                     sk=key(DbPrefix.Version, inverse_version, f"name{i_name}"),
                     name=f"name{i_name}",
-                    version=version + 1,
+                    version=str(version + 1),
                     system=system,
                     value=value,
                     json_schema={
@@ -270,7 +269,7 @@ def test__get_contracts_from_db_returns_latest_versions(
             pk=key(DbPrefix.Contract, system, value),
             sk=key(DbPrefix.Version, MIN_VERSION, "name1"),
             name="name1",
-            version=N_VERSIONS,
+            version=str(N_VERSIONS),
             system=system,
             value=value,
             json_schema={
@@ -284,7 +283,7 @@ def test__get_contracts_from_db_returns_latest_versions(
             pk=key(DbPrefix.Contract, system, value),
             sk=key(DbPrefix.Version, MIN_VERSION, "name2"),
             name="name2",
-            version=N_VERSIONS,
+            version=str(N_VERSIONS),
             system=system,
             value=value,
             json_schema={
@@ -298,7 +297,7 @@ def test__get_contracts_from_db_returns_latest_versions(
             pk=key(DbPrefix.Contract, system, value),
             sk=key(DbPrefix.Version, MIN_VERSION, "name3"),
             name=f"name3",
-            version=N_VERSIONS,
+            version=str(N_VERSIONS),
             system=system,
             value=value,
             json_schema={

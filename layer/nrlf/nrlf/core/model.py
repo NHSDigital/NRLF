@@ -318,7 +318,7 @@ class Contract(DynamoDbModel):
     pk: DynamoDbStringType
     sk: DynamoDbStringType
     name: DynamoDbStringType
-    version: DynamoDbIntType
+    version: DynamoDbStringType
     system: DynamoDbStringType
     value: DynamoDbStringType
     json_schema: DynamoDbDictType
@@ -330,3 +330,22 @@ class Contract(DynamoDbModel):
     @property
     def full_name(self):
         return f"{self.name.__root__}:{self.version.__root__}"
+
+    @property
+    def pk_1(self) -> DynamoDbStringType:
+        return DynamoDbStringType(__root__=DbPrefix.Contract.value)
+
+    @property
+    def sk_1(self) -> DynamoDbStringType:
+        return DynamoDbStringType(
+            __root__=f"{self.pk.__root__}{KEY_SEPARATOR}{self.sk.__root__}"
+        )
+
+    def dict(self, **kwargs):
+        return {
+            "pk": self.pk.dict(),
+            "sk": self.sk.dict(),
+            "pk_1": self.pk_1.dict(),
+            "sk_1": self.sk_1.dict(),
+            **super().dict(**kwargs),
+        }
