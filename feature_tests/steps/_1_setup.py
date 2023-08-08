@@ -190,7 +190,6 @@ def data_contract_registered_in_the_system(context: Context):
         test_config.templates[contract_kwargs.pop("json_schema_template")].raw
     )
     inverse_version = contract_kwargs.pop("inverse_version")
-    contract_kwargs["version"] = int(contract_kwargs["version"])
     contract = Contract(
         pk=key(DbPrefix.Contract, contract_kwargs["system"], contract_kwargs["value"]),
         sk=key(DbPrefix.Version, inverse_version, contract_kwargs["name"]),

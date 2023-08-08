@@ -19,6 +19,8 @@ function _nrlf_commands_help() {
   echo "  make        - calls the make/build routines"
   echo "  doc         - publish documentation into confluence"
   echo "  oauth <env> - Generates an oauth token for the env [dev, ref, prod]"
+  echo "  firehose    - Commands for fixing failed Firehose events"
+  echo "  contracts   - Commands for syncing data contracts"
   echo "  swagger     - swagger generation commands"
   echo "  terraform   - terraform commands"
   echo "  test        - run tests"
@@ -50,6 +52,7 @@ function nrlf() {
     "truststore") _truststore "${@:2}" ;;
     "doc") _doc "${@:2}" ;;
     "firehose") _firehose "${@:2}" ;;
+    "contracts") python -m data_contracts.deploy_contracts.deploy_contracts "${@:2}" ;;
     "mi") _mi "${@:2}" ;;
     *) _nrlf_commands_help ;;
   esac

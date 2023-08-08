@@ -82,6 +82,15 @@ repos:
 
   - repo: local
     hooks:
+      - id: forbid_json_load
+        name: Don't use json.load - use json_load instead
+        entry: json\.load
+        language: pygrep
+        types: [python]
+        exclude: layer/nrlf/nrlf/core/validators.py|layer/psycopg2/.*|mi/.*
+
+  - repo: local
+    hooks:
       - id: create_changelog
         name: Create changelog from changelog files
         entry: changelog/scripts/changelog-pre-commit.sh

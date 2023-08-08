@@ -1,9 +1,10 @@
-import json
 from datetime import datetime
 from pathlib import Path
 
 import boto3
 import pytest
+
+from nrlf.core.validators import json_load
 
 LIMIT = 100
 ENABLED = "ENABLED"
@@ -31,7 +32,7 @@ def _get_access_token(account_id: str) -> dict[str:str]:
 
 def _get_aws_account_id():
     with open(PATH_TO_OUTPUT) as f:
-        tf_output = json.load(f)
+        tf_output = json_load(f)
     return tf_output["assume_account_id"]["value"]
 
 
@@ -45,7 +46,7 @@ def aws_session() -> boto3.Session:
 @pytest.fixture
 def workspace():
     with open(PATH_TO_OUTPUT) as f:
-        tf_output = json.load(f)
+        tf_output = json_load(f)
     return tf_output["workspace"]["value"]
 
 

@@ -66,7 +66,6 @@ def convert_value_to_dynamo_format(obj):
 
 def convert_dynamo_value_to_raw_value(obj: Union[DynamoDbType, dict]):
     _type = type(obj)
-
     if _type in (list, dict):
         ((dynamo_type, value),) = obj.items()
     else:

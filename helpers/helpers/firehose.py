@@ -26,7 +26,7 @@ from nrlf.core.firehose.model import (
 )
 from nrlf.core.firehose.submission import FirehoseClient, _submit_records
 from nrlf.core.firehose.utils import load_json_gzip, name_from_arn
-from nrlf.core.validators import json_loads
+from nrlf.core.validators import json_load, json_loads
 
 S3_URI_COMPONENTS = re.compile("^s3://(?P<bucket_name>[^/]+)/(?P<file_key>.*?)$")
 DOT_FIREHOSE = ".firehose"
@@ -250,7 +250,7 @@ def validate_logs(logs: list):
 @log("{__result__}")
 def validate_line_by_line(local_path: str) -> str:
     with open(local_path) as f:
-        errors = list(validate_logs(logs=json.load(f)))
+        errors = list(validate_logs(logs=json_load(f)))
     msg = [NO_ERRORS_FOUND]
     if errors:
         msg = ["", f"{len(errors)} errors found in this file"]
@@ -289,7 +289,7 @@ def validate(local_path: str):
     msg = validate_line_by_line(local_path=local_path)
     if msg.startswith(NO_ERRORS_FOUND):
         with open(local_path) as f:
-            construct_cloudwatch_logs_data(messages=json.load(f))
+            construct_cloudwatch_logs_data(messages=json_load(f))
         return ALL_GOOD
     else:
         return FAILED_VALIDATION
@@ -333,7 +333,7 @@ def resubmit(local_path: str, s3_client, firehose_client):
         return FAILED_VALIDATION
 
     with open(local_path) as f:
-        cloudwatch_data = construct_cloudwatch_logs_data(messages=json.load(f))
+        cloudwatch_data = construct_cloudwatch_logs_data(messages=json_load(f))
     submit_cloudwatch_data_to_firehose(
         firehose_client=firehose_client,
         stream_arn=stream_arn,
