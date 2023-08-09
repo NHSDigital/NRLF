@@ -1,5 +1,14 @@
 # Changelog
 
+## 2023-08-03a
+
+- NRLF-491 - Implement int-sandbox splunk environment
+- NRLF-525 - Add versioning to firehose S3 bucket
+- NRLF-529 - ASDF Tool manager
+- NRLF-613 - Increase lambda memory size
+- NRLF-638 - Can create documents with contact details
+- NRLF-658 - Consumer S3 Auth
+
 ## 2023-07-27
 
 - NRLF-526 - CIS2
