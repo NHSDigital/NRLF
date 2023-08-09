@@ -153,8 +153,8 @@ info:
     | NRL v3 API                | Source code for the core API and sandbox                  | [GitHub repo](https://github.com/NHSDigital/nrlf)                          |
     | NRL v3 Producer API       | Source code for the producer API proxy and specification. | [GitHub repo](https://github.com/NHSDigital/nrl-producer-api)              |
     | NRL v3 Consumer API       | Source code for the consumer API proxy and specification. | [GitHub repo](https://github.com/NHSDigital/nrl-consumer-api)              |
-    | Lambda Pipeline Package   | Source code for the lambda pipeline utility               | [GitHub repo](https://github.com/NHSDigital/nrlf-lambda-pipeline) |
-    | Lambda Logging Package    | Source code for the lambda logging utility                | [GitHub repo](https://github.com/NHSDigital/nrlf-lambda-logging)
+    | Lambda Pipeline Package   | Source code for the lambda pipeline utility               | [GitHub repo](https://github.com/NHSDigital/nrlf-lambda-pipeline)          |
+    | Lambda Logging Package    | Source code for the lambda logging utility                | [GitHub repo](https://github.com/NHSDigital/nrlf-lambda-logging)           |
 
     We currently don't have any open source client libraries or sample code for this API. If you think this would be useful, you can [upvote the suggestion on our Interactive Product Backlog](https://nhs-digital-api-management.featureupvote.com/suggestions/107439/client-libraries-and-reference-implementations).
 
