@@ -203,7 +203,7 @@ info:
 
     ## Change log
 
-    For details of how this API has changed over time, see the [change log](https://raw.githubusercontent.com/NHSDigital/NRLF/main/CHANGELOG.md).
+    For details of how this API has changed over time, see the [change log](https://github.com/NHSDigital/NRLF/blob/main/CHANGELOG.md).
   version: 1.0.0
   license:
     name: MIT
