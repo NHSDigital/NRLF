@@ -33,8 +33,11 @@ resource "aws_s3_bucket_policy" "allow-authorizer-lambda-to-read" {
 data "aws_iam_policy_document" "allow-authorizer-lambda-to-read" {
   statement {
     principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.assume_account}:role/${module.producer__authoriser_lambda.lambda_role_name}"]
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::${var.assume_account}:role/${module.producer__authoriser_lambda.lambda_role_name}",
+        "arn:aws:iam::${var.assume_account}:role/${module.consumer__authoriser_lambda.lambda_role_name}"
+      ]
     }
 
     actions = [
