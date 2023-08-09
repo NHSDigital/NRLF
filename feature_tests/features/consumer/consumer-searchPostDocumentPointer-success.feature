@@ -333,3 +333,13 @@ Feature: Consumer Search Success scenarios
       | subject     | 9278693472                                   |
       | contentType | application/pdf                              |
       | url         | https://example.org/my-doc.pdf               |
+
+  Scenario: Empty results when searching by POST for a Document Pointer when subject has no documents - using permissions stored in s3 auth
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to search by POST for Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types stored in NRLF
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    When Consumer "Yorkshire Ambulance Service" searches by POST for Document References with body parameters:
+      | property           | value                                         |
+      | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
+    Then the operation is successful
