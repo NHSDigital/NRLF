@@ -529,10 +529,10 @@ class Repository:
         except ClientError as error:
             if "CancellationReasons" in error.response:
                 reasons = error.response["CancellationReasons"]
-                for reason in reasons:
+                for ix, reason in enumerate(reasons):
                     if (
                         reason["Code"] == "ConditionalCheckFailed"
-                        and reason["Item"]["id"] == create_item.id
+                        and "Put" in transact_items[ix]
                     ):
                         raise DuplicateError("Condition check failed - Duplicate item")
             raise error
