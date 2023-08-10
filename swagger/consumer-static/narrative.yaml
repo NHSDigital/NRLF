@@ -220,6 +220,36 @@ paths:
 
         This operation is also available as a http POST, which is the preferred method (see below).
       responses:
+        "4xx":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST	               | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
         "200":
           description: Successful response
           content:
@@ -332,6 +362,37 @@ paths:
         * URLs have a maximum length of 2,048 characters which complex searches can exceed.  NRL does not currently
         exceed this limit, but may evolve in the future.
       responses:
+        "4xx":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST	               | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 403         | ACCESS_DENIED_LEVEL        | Access has been denied because you need higher level permissions                                                                           |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
         "200":
           description: Search successful response
           content:
@@ -431,6 +492,36 @@ paths:
         Read a single document pointer by specifying the `DocumentReference.id`.  Note that you will only be able to
         retrieve document pointers that have the `type` that was agreed during the [onboarding](#api-description__onboarding) process.
       responses:
+        "4xx":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST	               | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
         "200":
           description: Search successful response
           content:
