@@ -61,3 +61,27 @@ Feature: Consumer Read Success scenarios
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
+
+  Scenario: Read an existing current Document Pointer - using permissions lookup in s3 auth
+    Given Consumer "Yorkshire Ambulance Service" (Organisation ID "RX898") is requesting to read Document Pointers
+    And Consumer "Yorkshire Ambulance Service" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types stored in NRLF
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Consumer "Yorkshire Ambulance Service" reads an existing Document Reference "8FW23-1234567890"
+    Then the operation is successful
+    And the response is a DocumentReference according to the DOCUMENT template with the below values
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
