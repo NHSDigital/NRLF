@@ -115,7 +115,7 @@ Feature: Producer Create Success scenarios
             }
           },
           {
-            "reference": "$author"
+            "reference": "https://directory.spineservices.nhs.uk/STU3/Organization/RAT"
           }
         ],
         "status": "current"
@@ -512,28 +512,27 @@ Feature: Producer Create Success scenarios
       | http://snomed.info/sct | 736253002 |
     And the Data Contracts are loaded from the database
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT_WITH_AUTHOR template
-      | property    | value                                                        |
-      | identifier  | 1234567890                                                   |
-      | type        | 736253002                                                    |
-      | custodian   | 8FW23                                                        |
-      | subject     | 9278693472                                                   |
-      | contentType | application/pdf                                              |
-      | url         | https://example.org/my-doc.pdf                               |
-      | author      | https://directory.spineservices.nhs.uk/STU3/Organization/RAT |
+      | property    | value                          |
+      | identifier  | 1234567890                     |
+      | type        | 736253002                      |
+      | custodian   | 8FW23                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
     Then the operation is successful
     And the status is 201
     And Document Pointer "8FW23-1234567890" exists
-      | property    | value                             |
-      | id          | 8FW23-1234567890                  |
-      | nhs_number  | 9278693472                        |
-      | producer_id | 8FW23                             |
-      | type        | http://snomed.info/sct\|736253002 |
-      | source      | NRLF                              |
-      | version     | 1                                 |
-      | schemas     | ["Validate asid:1"]               |
-      | updated_on  | NULL                              |
-      | document    | <document>                        |
-      | created_on  | <timestamp>                       |
+      | property    | value                                                     |
+      | id          | 8FW23-1234567890                                          |
+      | nhs_number  | 9278693472                                                |
+      | producer_id | 8FW23                                                     |
+      | type        | http://snomed.info/sct\|736253002                         |
+      | source      | NRLF                                                      |
+      | version     | 1                                                         |
+      | schemas     | ["test-name:2000.01.01", "asidcheck-contract:2000.01.01"] |
+      | updated_on  | NULL                                                      |
+      | document    | <document>                                                |
+      | created_on  | <timestamp>                                               |
 
   @integration-only
   Scenario: Validate a Document Pointer of type Mental health crisis plan using the asid data contract with ssp and asid
@@ -543,14 +542,13 @@ Feature: Producer Create Success scenarios
       | http://snomed.info/sct | 736253002 |
     And the Data Contracts are loaded from the database
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT_WITH_AUTHOR template
-      | property    | value                                                        |
-      | identifier  | 1234567890                                                   |
-      | type        | 736253002                                                    |
-      | custodian   | 8FW23                                                        |
-      | subject     | 9278693472                                                   |
-      | contentType | application/pdf                                              |
-      | url         | ssp://example.org/my-doc.pdf                                 |
-      | author      | https://directory.spineservices.nhs.uk/STU3/Organization/RAT |
+      | property    | value                        |
+      | identifier  | 1234567890                   |
+      | type        | 736253002                    |
+      | custodian   | 8FW23                        |
+      | subject     | 9278693472                   |
+      | contentType | application/pdf              |
+      | url         | ssp://example.org/my-doc.pdf |
     Then the operation is successful
     And the status is 201
     And Document Pointer "8FW23-1234567890" exists
@@ -584,14 +582,14 @@ Feature: Producer Create Success scenarios
     Then the operation is successful
     And the status is 201
     And Document Pointer "8FW23-1234567890" exists
-      | property    | value                             |
-      | id          | 8FW23-1234567890                  |
-      | nhs_number  | 9278693472                        |
-      | producer_id | 8FW23                             |
-      | type        | http://snomed.info/sct\|736253002 |
-      | source      | NRLF                              |
-      | version     | 1                                 |
-      | schemas     | ["Validate asid:1"]               |
-      | updated_on  | NULL                              |
-      | document    | <document>                        |
-      | created_on  | <timestamp>                       |
+      | property    | value                                                     |
+      | id          | 8FW23-1234567890                                          |
+      | nhs_number  | 9278693472                                                |
+      | producer_id | 8FW23                                                     |
+      | type        | http://snomed.info/sct\|736253002                         |
+      | source      | NRLF                                                      |
+      | version     | 1                                                         |
+      | schemas     | ["test-name:2000.01.01", "asidcheck-contract:2000.01.01"] |
+      | updated_on  | NULL                                                      |
+      | document    | <document>                                                |
+      | created_on  | <timestamp>                                               |
