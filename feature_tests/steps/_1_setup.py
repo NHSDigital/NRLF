@@ -1,7 +1,9 @@
 import json
+from datetime import date
 
 from behave import given as behave_given
 
+from data_contracts.deploy_contracts.deploy_contracts import sync_contracts
 from feature_tests.common.config_setup import register_application, request_setup
 from feature_tests.common.constants import DEFAULT_VERSION, WITH_WITHOUT_ANY, FhirType
 from feature_tests.common.decorators import given
@@ -197,3 +199,11 @@ def data_contract_registered_in_the_system(context: Context):
         **contract_kwargs,
     )
     test_config.repositories[Contract].create(item=contract)
+
+
+@given("the Data Contracts are loaded from the database")
+def load_data_contracts_from_database(context: Context):
+    test_config: TestConfig = context.test_config
+    sync_contracts(
+        test_config.repositories[Contract], today=date(year=2000, month=1, day=1)
+    )
