@@ -18,7 +18,7 @@ function _terraform_help() {
 
 function _terraform() {
   local command=$1
-  local account_wide=$3
+  local extra_command=$3
   local env
   local aws_account_id
   local var_file
@@ -27,7 +27,7 @@ function _terraform() {
   env=$(_get_environment_name "$2")
   aws_account_id=$(_get_aws_account_id "$env")
   var_file=$(_get_environment_vars_file "$env")
-  terraform_dir=$(_get_terraform_dir "$env" "$account_wide")
+  terraform_dir=$(_get_terraform_dir "$env" "$extra_command")
   current_timestamp="$(date '+%Y_%m_%d__%H_%M_%S')"
   local plan_file="./tfplan"
   local ci_log_bucket="${PROFILE_PREFIX}--mgmt--github-ci-logging"
@@ -57,7 +57,7 @@ function _terraform() {
       fi
 
       cd "$terraform_dir" || return 1
-      _terraform_plan "$env" "$var_file" "$plan_file" "$aws_account_id"
+      _terraform_plan "$env" "$var_file" "$plan_file" "$aws_account_id" "$extra_command"
     ;;
     #----------------
     "apply")

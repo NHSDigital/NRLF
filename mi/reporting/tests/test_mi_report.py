@@ -1,4 +1,4 @@
-from datetime import datetime
+import time
 
 import pytest
 
@@ -10,9 +10,9 @@ from mi.reporting.tests.test_data.seed_database import _get_test_data, _seed_dat
 
 
 @log("Using test id (partition key) '{__result__}'")
-def generate_test_id():
-    now = datetime.now()
-    return f"TEST-{now.strftime('%Y-%m-%d_%H:%M:%S')}"
+def generate_test_id() -> int:
+    """A uniquish ID for defining the test data"""
+    return int(time.time() % 10000) * 100
 
 
 @pytest.mark.integration
@@ -33,5 +33,8 @@ def test_make_report():
     )
 
     make_reports(
-        session=session, env=environment, workspace=workspace, partition_key=test_id
+        session=session,
+        env=environment,
+        workspace=workspace,
+        partition_key=str(test_id),
     )

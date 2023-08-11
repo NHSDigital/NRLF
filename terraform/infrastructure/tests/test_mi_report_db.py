@@ -9,9 +9,9 @@ from nrlf.core.validators import json_loads
 
 SELECT_SQL = Sql(statement="SELECT * FROM fact.measure;")
 INSERT_SQL = Sql(
-    statement="INSERT INTO dimension.week (week) VALUES (1) ON CONFLICT (week) DO NOTHING;"
+    statement="INSERT INTO dimension.day_of_week (day_of_week) VALUES (1) ON CONFLICT (day_of_week) DO NOTHING;"
 )
-DELETE_SQL = Sql(statement="DELETE FROM dimension.week WHERE week=100;")
+DELETE_SQL = Sql(statement="DELETE FROM dimension.day_of_week WHERE day_of_week=100;")
 
 
 @pytest.fixture(scope="session")

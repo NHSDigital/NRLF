@@ -64,6 +64,10 @@ def test_make_query_event(
             "SELECT MIN(a.b.foo) AS FOO, c.d.bar AS bar, e.f.boom FROM my_table;",
             ["FOO", "bar", "e.f.boom"],
         ),
+        (
+            "SELECT patient_id, patient_hash FROM dimension.patient;",
+            ["patient_id", "patient_hash"],
+        ),
     ],
 )
 def test__column_names_from_sql_query(query: str, column_names: list[str]):
