@@ -732,7 +732,7 @@ Feature: Producer Create Failure Scenarios
       | message           | ValidationError raised from Data Contract 'asidcheck-contract:2000.01.01' at 'content[0].attachment.url': 'ssp://example.org/my-doc.pdf' does not match '^(?!ssp://).+' |
 
   @integration-only
-  Scenario: Validate a Document Pointer of type Mental health crisis plan using the asid data contract with both ssp and no sssp and no asid
+  Scenario: Validate a Document Pointer of type Mental health crisis plan using the asid data contract with both ssp and no ssp and no asid
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |

@@ -579,14 +579,14 @@ Feature: Producer Update Failure scenarios
       | http://snomed.info/sct | 736253002 |
     And the Data Contracts are loaded from the database
     And a Document Pointer exists in the system with the below values for DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1234567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | status      | current                        |
-      | url         | https://example.org/my-doc.pdf |
+      | property    | value                                    |
+      | identifier  | 1234567890                               |
+      | type        | 736253002                                |
+      | custodian   | 8FW23                                    |
+      | subject     | 9278693472                               |
+      | contentType | application/html                         |
+      | status      | current                                  |
+      | url         | https://example.org/contact-details.html |
     When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT template
       | property    | value                        |
       | identifier  | 1234567890                   |
@@ -621,20 +621,20 @@ Feature: Producer Update Failure scenarios
       | subject      | 9278693472                               |
       | status       | current                                  |
       | contentType1 | application/html                         |
-      | url1         | https://example.org/my-doc.html          |
+      | url1         | https://example.org/contact-details.html |
       | contentType2 | application/html                         |
-      | url2         | https://example.org/contact-details.html |
+      | url2         | https://example.org/my-doc.html          |
     When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT_WITH_TWO_CONTENT_ITEMS template
-      | property     | value                           |
-      | identifier   | 1234567890                      |
-      | status       | current                         |
-      | type         | 736253002                       |
-      | custodian    | 8FW23                           |
-      | subject      | 9278693472                      |
-      | contentType1 | application/html                |
-      | url1         | https://example.org/my-doc.html |
-      | contentType2 | application/pdf                 |
-      | url2         | ssp://example.org/my-doc.pdf    |
+      | property     | value                                    |
+      | identifier   | 1234567890                               |
+      | status       | current                                  |
+      | type         | 736253002                                |
+      | custodian    | 8FW23                                    |
+      | subject      | 9278693472                               |
+      | contentType1 | application/html                         |
+      | url1         | https://example.org/contact-details.html |
+      | contentType2 | application/pdf                          |
+      | url2         | ssp://example.org/my-doc.pdf             |
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values

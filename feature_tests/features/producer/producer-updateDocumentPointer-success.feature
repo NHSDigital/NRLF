@@ -438,14 +438,14 @@ Feature: Producer Update Success scenarios
       | status      | current                      |
       | url         | ssp://example.org/my-doc.pdf |
     When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT_WITH_AUTHOR template
-      | property    | value                          |
-      | identifier  | 1234567890                     |
-      | status      | current                        |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+      | property    | value                                    |
+      | identifier  | 1234567890                               |
+      | status      | current                                  |
+      | type        | 736253002                                |
+      | custodian   | 8FW23                                    |
+      | subject     | 9278693472                               |
+      | contentType | application/html                         |
+      | url         | https://example.org/contact-details.html |
     Then the operation is successful
     And the response is an OperationOutcome according to the OUTCOME template with the below values
       | property          | value            |

@@ -512,13 +512,13 @@ Feature: Producer Create Success scenarios
       | http://snomed.info/sct | 736253002 |
     And the Data Contracts are loaded from the database
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT_WITH_AUTHOR template
-      | property    | value                          |
-      | identifier  | 1234567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+      | property    | value                                    |
+      | identifier  | 1234567890                               |
+      | type        | 736253002                                |
+      | custodian   | 8FW23                                    |
+      | subject     | 9278693472                               |
+      | contentType | application/html                         |
+      | url         | https://example.org/contact-details.html |
     Then the operation is successful
     And the status is 201
     And Document Pointer "8FW23-1234567890" exists
@@ -572,13 +572,13 @@ Feature: Producer Create Success scenarios
       | http://snomed.info/sct | 736253002 |
     And the Data Contracts are loaded from the database
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
-      | property    | value                          |
-      | identifier  | 1234567890                     |
-      | type        | 736253002                      |
-      | custodian   | 8FW23                          |
-      | subject     | 9278693472                     |
-      | contentType | application/pdf                |
-      | url         | https://example.org/my-doc.pdf |
+      | property    | value                                    |
+      | identifier  | 1234567890                               |
+      | type        | 736253002                                |
+      | custodian   | 8FW23                                    |
+      | subject     | 9278693472                               |
+      | contentType | application/html                         |
+      | url         | https://example.org/contact-details.html |
     Then the operation is successful
     And the status is 201
     And Document Pointer "8FW23-1234567890" exists
