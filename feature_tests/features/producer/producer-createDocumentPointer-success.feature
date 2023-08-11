@@ -535,16 +535,16 @@ Feature: Producer Create Success scenarios
       | created_on  | <timestamp>                                               |
 
   @integration-only
-  Scenario: Validate a Document Pointer of type Mental health crisis plan using the asid data contract with ssp and asid
+  Scenario: Validate a Document Pointer of type ReSPECT form using the asid data contract with ssp and asid
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                 | value     |
-      | http://snomed.info/sct | 736253002 |
+      | system                 | value            |
+      | http://snomed.info/sct | 1382601000000107 |
     And the Data Contracts are loaded from the database
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT_WITH_AUTHOR template
       | property    | value                        |
       | identifier  | 1234567890                   |
-      | type        | 736253002                    |
+      | type        | 1382601000000107             |
       | custodian   | 8FW23                        |
       | subject     | 9278693472                   |
       | contentType | application/pdf              |
@@ -556,7 +556,7 @@ Feature: Producer Create Success scenarios
       | id          | 8FW23-1234567890                                          |
       | nhs_number  | 9278693472                                                |
       | producer_id | 8FW23                                                     |
-      | type        | http://snomed.info/sct\|736253002                         |
+      | type        | http://snomed.info/sct\|1382601000000107                  |
       | source      | NRLF                                                      |
       | version     | 1                                                         |
       | schemas     | ["test-name:2000.01.01", "asidcheck-contract:2000.01.01"] |

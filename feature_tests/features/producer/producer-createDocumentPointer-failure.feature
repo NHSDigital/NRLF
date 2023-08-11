@@ -206,6 +206,48 @@ Feature: Producer Create Failure Scenarios
         "date": "$date"
       }
       """
+    And template DOCUMENT_WITH_TWO_CONTENT_TYPES
+      """
+      {
+        "resourceType": "DocumentReference",
+        "id": "$producer_id-$identifier",
+        "custodian": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+            "value": "$custodian"
+          }
+        },
+        "subject": {
+          "identifier": {
+            "system": "$system",
+            "value": "$subject"
+          }
+        },
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "$type"
+            }
+          ]
+        },
+        "content": [
+          {
+            "attachment": {
+              "contentType": "application/html",
+              "url": "https://example.org/contact-details.html"
+            }
+          },
+          {
+            "attachment": {
+              "contentType": "application/pdf",
+              "url": "ssp://example.org/my-doc.pdf"
+            }
+          }
+        ],
+        "status": "current"
+      }
+      """
     And template OUTCOME
       """
       {
@@ -679,6 +721,31 @@ Feature: Producer Create Failure Scenarios
       | subject     | 9278693472                        |
       | contentType | application/pdf                   |
       | url         | ssp://example.org/my-doc.pdf      |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                                                                                                                   |
+      | issue_type        | processing                                                                                                                                                              |
+      | issue_level       | error                                                                                                                                                                   |
+      | issue_code        | VALIDATION_ERROR                                                                                                                                                        |
+      | issue_description | A parameter or value has resulted in a validation error                                                                                                                 |
+      | message           | ValidationError raised from Data Contract 'asidcheck-contract:2000.01.01' at 'content[0].attachment.url': 'ssp://example.org/my-doc.pdf' does not match '^(?!ssp://).+' |
+
+  @integration-only
+  Scenario: Validate a Document Pointer of type Mental health crisis plan using the asid data contract with both ssp and no sssp and no asid
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And the Data Contracts are loaded from the database
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT_WITH_TWO_CONTENT_TYPES template
+      | property    | value                             |
+      | identifier  | 1234567890                        |
+      | type        | 736253002                         |
+      | custodian   | 8FW23                             |
+      | producer_id | 8FW23                             |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
+      | subject     | 9278693472                        |
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values

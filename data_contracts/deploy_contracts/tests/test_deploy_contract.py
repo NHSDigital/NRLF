@@ -903,3 +903,47 @@ def test_sync_contracts_e2e(temp_dir):
     assert result is False
 
     repository.delete_all()
+
+
+@pytest.mark.integration
+def test_sync_actual_contracts_e2e():
+    session = new_aws_session()
+    client = session.client("dynamodb")
+    environment_prefix = get_environment_prefix(None)
+    repository = Repository(
+        item_type=Contract, client=client, environment_prefix=environment_prefix
+    )
+
+    # Verify the initial state
+    initial_db_contracts = _get_contracts_from_db(repository=repository)
+    assert initial_db_contracts == []
+
+    # Deploy the contracts
+    today = date(year=2000, month=1, day=1)
+    result = sync_contracts(repository=repository, today=today)
+    assert result is True
+
+    # Verify the contracts have been deployed
+    synced_db_contracts = _get_contracts_from_db(repository=repository)
+    assert initial_db_contracts != synced_db_contracts  # i.e. an update has taken place
+    assert len(synced_db_contracts) == 8
+
+    # Group the contracts in the database
+    grouped_synced_contracts = _group_contracts(contracts=synced_db_contracts)
+
+    # Check all contract types have been synced
+    # If a new contract is added this check will need updating
+    for group, _contracts in grouped_synced_contracts.items():
+        if group.name == "test-name":
+            continue
+        assert group.value in [
+            "325691000000100",
+            "887701000000100",
+            "861421000000109",
+            "736373009",
+            "736253002",
+            "1382601000000107",
+        ]
+        assert group.name in ["asidcheck-contract"]
+
+    repository.delete_all()
