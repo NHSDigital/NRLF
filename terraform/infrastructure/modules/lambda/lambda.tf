@@ -6,7 +6,7 @@ resource "aws_lambda_function" "lambda_function" {
   filename         = "${path.module}/../../../../${var.parent_path}/${var.name}/dist/${var.name}.zip"
   source_code_hash = filebase64sha256("${path.module}/../../../../${var.parent_path}/${var.name}/dist/${var.name}.zip")
   timeout          = local.lambda_timeout
-  memory_size      = 128
+  memory_size      = 512
 
   environment {
     variables = merge(var.environment_variables, { "SOURCE" : "${var.prefix}--${replace(var.parent_path, "/", "--")}--${var.name}" })

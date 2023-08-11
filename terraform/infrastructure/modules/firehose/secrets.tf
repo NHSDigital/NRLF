@@ -23,6 +23,6 @@ resource "aws_secretsmanager_secret" "slack_webhook_url" {
 }
 
 data "aws_secretsmanager_secret_version" "slack_webhook_url" {
-  count     = var.slack_alerts_enabled ? 1 : 0
+  count     = var.is_persistent_environment ? 1 : 0
   secret_id = aws_secretsmanager_secret.slack_webhook_url.name
 }

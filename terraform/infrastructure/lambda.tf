@@ -297,6 +297,7 @@ module "consumer__authoriser_lambda" {
     AUTH_STORE   = aws_s3_bucket.authorization-store.id
   }
   additional_policies = [
+    aws_iam_policy.read-authorization-store-s3.arn,
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
