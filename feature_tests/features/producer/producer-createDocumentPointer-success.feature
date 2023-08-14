@@ -459,31 +459,33 @@ Feature: Producer Create Success scenarios
       | created_on  | 2023-05-02T12:00:00.000Z                |
 
   @integration-only
-  Scenario: Validate a Document Pointer of type Mental health crisis plan with good URL
+  Scenario: Validate a Document Pointer of type TEST_TYPE with good URL
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
-      | http://snomed.info/sct | 736253002 |
+      | http://snomed.info/sct | TEST_TYPE |
+    # Remove the following line when NRLF-661 is implemented
+    And the Data Contracts are loaded from the database
     And a Data Contract is registered in the system
       | property             | value                  |
       | name                 | Validate Content Url   |
       | system               | http://snomed.info/sct |
-      | value                | 736253002              |
-      | version              | 1                      |
+      | value                | TEST_TYPE              |
+      | version              | 2000.01.01             |
       | inverse_version      | 0                      |
       | json_schema_template | JSON_SCHEMA            |
     And a Data Contract is registered in the system
       | property             | value                   |
       | name                 | Validate Mandatory Date |
       | system               | http://snomed.info/sct  |
-      | value                | 736253002               |
-      | version              | 1                       |
+      | value                | TEST_TYPE               |
+      | version              | 2000.01.01              |
       | inverse_version      | 0                       |
       | json_schema_template | JSON_SCHEMA_DATE        |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT_WITH_DATE template
       | property    | value                          |
       | identifier  | 1234567890                     |
-      | type        | 736253002                      |
+      | type        | TEST_TYPE                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
@@ -492,17 +494,17 @@ Feature: Producer Create Success scenarios
     Then the operation is successful
     And the status is 201
     And Document Pointer "8FW23-1234567890" exists
-      | property    | value                                                   |
-      | id          | 8FW23-1234567890                                        |
-      | nhs_number  | 9278693472                                              |
-      | producer_id | 8FW23                                                   |
-      | type        | http://snomed.info/sct\|736253002                       |
-      | source      | NRLF                                                    |
-      | version     | 1                                                       |
-      | schemas     | ["Validate Content Url:1", "Validate Mandatory Date:1"] |
-      | updated_on  | NULL                                                    |
-      | document    | <document>                                              |
-      | created_on  | <timestamp>                                             |
+      | property    | value                                                                                             |
+      | id          | 8FW23-1234567890                                                                                  |
+      | nhs_number  | 9278693472                                                                                        |
+      | producer_id | 8FW23                                                                                             |
+      | type        | http://snomed.info/sct\|TEST_TYPE                                                                 |
+      | source      | NRLF                                                                                              |
+      | version     | 1                                                                                                 |
+      | schemas     | ["test-name:2000.01.01", "Validate Content Url:2000.01.01", "Validate Mandatory Date:2000.01.01"] |
+      | updated_on  | NULL                                                                                              |
+      | document    | <document>                                                                                        |
+      | created_on  | <timestamp>                                                                                       |
 
   @integration-only
   Scenario: Validate a Document Pointer of type Mental health crisis plan using the asid data contract with no ssp and asid

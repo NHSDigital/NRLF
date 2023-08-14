@@ -671,23 +671,23 @@ Feature: Producer Create Failure Scenarios
       | message           | DocumentReference validation failure - Invalid id       |
 
   @integration-only
-  Scenario: Fail to validate a Document Pointer of type Mental health crisis plan with bad URL
+  Scenario: Fail to validate a Document Pointer of type TEST_TYPE with bad URL
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
-      | http://snomed.info/sct | 736253002 |
+      | http://snomed.info/sct | TEST_TYPE |
     And a Data Contract is registered in the system
       | property             | value                  |
       | name                 | Validate Content Url   |
       | system               | http://snomed.info/sct |
-      | value                | 736253002              |
+      | value                | TEST_TYPE              |
       | version              | 1                      |
       | inverse_version      | 0                      |
       | json_schema_template | JSON_SCHEMA            |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
       | property    | value                             |
       | identifier  | 1234567890                        |
-      | type        | 736253002                         |
+      | type        | TEST_TYPE                         |
       | custodian   | 8FW23                             |
       | producer_id | 8FW23                             |
       | system      | https://fhir.nhs.uk/Id/nhs-number |
@@ -754,4 +754,4 @@ Feature: Producer Create Failure Scenarios
       | issue_level       | error                                                                                                                                                                   |
       | issue_code        | VALIDATION_ERROR                                                                                                                                                        |
       | issue_description | A parameter or value has resulted in a validation error                                                                                                                 |
-      | message           | ValidationError raised from Data Contract 'asidcheck-contract:2000.01.01' at 'content[0].attachment.url': 'ssp://example.org/my-doc.pdf' does not match '^(?!ssp://).+' |
+      | message           | ValidationError raised from Data Contract 'asidcheck-contract:2000.01.01' at 'content[1].attachment.url': 'ssp://example.org/my-doc.pdf' does not match '^(?!ssp://).+' |
