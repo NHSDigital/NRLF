@@ -36,7 +36,7 @@ module "rds-cluster-stream-writer" {
     POSTGRES_USERNAME      = "${var.environment}-write"
     POSTGRES_PASSWORD      = aws_secretsmanager_secret.write_password.arn
   }
-  layers = concat(var.layers, [module.psycopg2.layer_arn])
+  layers = concat(var.layers, [module.psycopg2.layer_arn, module.nrlf.layer_arn, module.lambda_utils.layer_arn])
   additional_policies = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
     aws_iam_policy.stream-writer-lambda.arn

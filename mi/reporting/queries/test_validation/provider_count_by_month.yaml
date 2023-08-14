@@ -1,4 +1,4 @@
-producer_name: ^(\w+)$
+provider_name: ^(\w+)-(\d+)$
 month: ^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$
 year: ^(20)\d{2}$
 count: ^([1-9][0-9]*)$
