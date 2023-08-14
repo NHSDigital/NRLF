@@ -8,6 +8,8 @@ resource "aws_dynamodb_table" "document-pointer" {
   hash_key                    = "pk"
   range_key                   = "sk"
   deletion_protection_enabled = local.deletion_protection
+  stream_enabled              = true
+  stream_view_type            = "NEW_IMAGE"
 
   attribute {
     name = "pk"
