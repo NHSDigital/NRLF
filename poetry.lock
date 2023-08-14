@@ -1211,17 +1211,17 @@ url = "layer/nrlf"
 
 [[package]]
 name = "nrlf-converter"
-version = "0.0.7"
+version = "0.0.8"
 description = "NHS Clinicals Record Locator Document Pointer to HL7 FHIR R4 DocumentReference conversion"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "nrlf_converter-0.0.7-py3-none-any.whl", hash = "sha256:f31daa3ffcf62b3a19b0347dd47b9ef5fbbd735fed40028d670fdb86935ed158"},
+    {file = "nrlf_converter-0.0.8-py3-none-any.whl", hash = "sha256:a636e273f7272406f00deb1a4492813537e23bf9e4da37883057768cbb52329c"},
 ]
 
 [package.source]
 type = "url"
-url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.7/nrlf_converter-0.0.7-py3-none-any.whl"
+url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.8/nrlf_converter-0.0.8-py3-none-any.whl"
 
 [[package]]
 name = "nrlf-lambda-pipeline"
@@ -2231,4 +2231,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "3c343dc7d8348bacd1aefc7474a103e4c12d5c0e08f0bf777f17895b7b2ff3b6"
+content-hash = "64d76e80e2b97e22a41b5e0954515a0aae2e9f455e546c60fe3ed173ec7a285d"
