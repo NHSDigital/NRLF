@@ -55,6 +55,9 @@ class ContractGroup:
 
     @classmethod
     def from_contract(cls, contract: Contract) -> "ContractGroup":
+        """
+        Constructor method for building a ContractGroup a Contract object.
+        """
         return cls(
             system=contract.system.__root__,
             value=contract.value.__root__,
@@ -72,6 +75,10 @@ class ContractGroup:
 
     @classmethod
     def from_path(cls, path: str) -> "ContractGroup":
+        """
+        Constructor method for building a ContractGroup from the filepath
+        of a JSON Schema, which must conform to one of PATH_PATTERNS.
+        """
         for regex in PATH_PATTERNS:
             match: re.Match = regex.match(str(path))
             if match:
@@ -87,6 +94,7 @@ class ContractGroup:
         )
 
     def to_path(self, base_dir: str) -> Path:
+        """The compliment of the class method 'from_path'"""
         if self.system == DEFAULT_SYSTEM_VALUE and self.value == DEFAULT_SYSTEM_VALUE:
             base_path = (GLOBAL,)
         else:

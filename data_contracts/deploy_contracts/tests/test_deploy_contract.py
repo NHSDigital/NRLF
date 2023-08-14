@@ -77,7 +77,7 @@ def mock_patch(target, *args, **kwargs):
     return mock.patch(MOCK_PATH.format(target), *args, **kwargs)
 
 
-@given(today=dates())
+@given(today=one_of(dates(), just(None)))
 def test__generate_calendar_version(today: date):
     version = _generate_calendar_version(today=today)
     assert len(version) == 10
@@ -87,12 +87,24 @@ def test__generate_calendar_version(today: date):
 
 
 def test_contracts_exist():
+    """
+    A number of the following tests explicitly require that
+    PATHS_TO_CONTRACTS is not empty - i.e. that there are
+    valid JSON Schemas in this code repository. This test
+    ensures that these exists, and the next test ensures
+    that they are all valid.
+    """
     assert len(PATHS_TO_CONTRACTS) > 0
 
 
 @pytest.mark.parametrize("path", PATHS_TO_CONTRACTS)
-def test__json_schema_from_file(path: str):
-    _json_schema_from_file(path=path)
+def test_all_paths_to_contracts_yield_valid_contracts(path: str):
+    """
+    A number of the following tests explicitly require the
+    JSON Schemas defined in PATHS_TO_CONTRACTS are valid,
+    which this test ensures.
+    """
+    _json_schema_from_file(path=path)  # will raise an error on failure
 
 
 @pytest.mark.parametrize("path", PATHS_TO_CONTRACTS)
@@ -171,7 +183,11 @@ contract_strategy = one_of(global_contract, local_contract)
 
 @given(contract=contract_strategy)
 def test__parse_contract_group_from_contract(contract: Contract):
-    ContractGroup.from_contract(contract=contract)
+    group = ContractGroup.from_contract(contract=contract)
+    assert group.pk == contract.pk.__root__
+    assert group.system == contract.system.__root__
+    assert group.value == contract.value.__root__
+    assert group.name == contract.name.__root__
 
 
 class DummyModel(DynamoDbModel):
@@ -192,6 +208,10 @@ def _sort_contracts(contracts: list[Contract]) -> list[Contract]:
 
 @pytest.mark.integration  # Query by PK doesn't work in moto, so test has to be integration
 def test__get_contracts_from_db():
+    """
+    Tests that only Contracts, not other objects e.g. 'Dummies' below
+    are not retrieved from the database.
+    """
     prefix = get_environment_prefix(test_mode=None)
     session = new_aws_session()
     client = session.client("dynamodb")
@@ -239,6 +259,10 @@ def test__get_contracts_from_db():
     )
 )
 def test__group_contracts(contract_groups: list[ContractGroup]):
+    """
+    Tests that Contracts with the same system/value/name produce
+    the same ContractGroup
+    """
     unique_groups = set()
     contracts: list[Contract] = []
     for group in contract_groups:
@@ -267,6 +291,10 @@ def test__group_contracts(contract_groups: list[ContractGroup]):
 
 @given(group=builds(ContractGroup))
 def test__group_contracts_bad_contracts(group: ContractGroup):
+    """
+    Tests that a list of Contracts can only be grouped
+    if the first Contract is the active Contract (SK starts with V#0)
+    """
     contracts = [
         Contract(
             pk=group.pk,
@@ -288,6 +316,10 @@ def test__read_latest_json_schemas(
     mocked_ContractGroup: ContractGroup,
     group_json_schema_pairs: dict[str, str],
 ):
+    """
+    Tests that local JSON Schemas are 'grouped' into a mapping of
+    ContractGroup -> [JSON Schema], where each group is an array of size one
+    """
     contract_groups_iter = iter(group_json_schema_pairs.keys())
     json_schemas_iter = iter(group_json_schema_pairs.values())
 
@@ -319,7 +351,7 @@ def test__increment_patch_version_default():
     ["patch_version", "next_patch_version"],
     zip(ascii_lowercase[:-1], ascii_lowercase[1:]),
 )
-def test__increment_patch_version(patch_version: str, next_patch_version: str):
+def test__increment_patch_version_up_to_z(patch_version: str, next_patch_version: str):
     _next_patch_version = _increment_patch_version(patch_version=patch_version)
     assert _next_patch_version != patch_version
     assert _next_patch_version == next_patch_version
@@ -328,7 +360,7 @@ def test__increment_patch_version(patch_version: str, next_patch_version: str):
 @pytest.mark.parametrize(
     "patch_version", ["z", *map(str.upper, ascii_uppercase), *digits]
 )
-def test__increment_patch_version(patch_version: str):
+def test__increment_patch_version_fails_after_z(patch_version: str):
     with pytest.raises(BadVersionError):
         _increment_patch_version(patch_version=patch_version)
 
@@ -423,6 +455,10 @@ def test__active_contract_is_not_latest_when_json_schema_different(
 
 
 def test__get_contracts_to_deactivate():
+    """
+    Test that contracts in grouped_db_contracts will be deactivated
+    if they don't exist in latest_groups
+    """
     grouped_db_contracts = {
         ContractGroup(system="snomed", value="123", name="foo"): [
             Contract(
@@ -527,6 +563,10 @@ def test__get_contracts_to_deactivate():
 
 
 def test__get_contracts_to_deploy():
+    """
+    Test that contracts not in grouped_db_contracts will be deployed
+    if they don't exist OR are out of step with those in latest_groups
+    """
     grouped_db_contracts = {
         ContractGroup(system="snomed", value="123", name="foo"): [
             Contract(
@@ -670,6 +710,11 @@ def test__get_contracts_to_deploy():
 def test_sync_contracts(
     _mock_generate, _mock_read, _mock_get, _mock_group, _mock_deactivate, _mock_deploy
 ):
+    """
+    Test that 'sync_contracts' will concatenate the outputs of
+    _get_contracts_to_deactivate and _get_contracts_to_deploy
+    and pass them to repository.upsert_many
+    """
     repository = mock.Mock(spec=Repository)
 
     @dataclass
@@ -742,6 +787,10 @@ def temp_dir() -> Path:
 
 @pytest.mark.integration
 def test_sync_contracts_e2e(temp_dir):
+    """
+    Tests the behaviour of synchronising a initial state is entirely
+    deterministic. Read the comments for a walkthrough.
+    """
     session = new_aws_session()
     client = session.client("dynamodb")
     environment_prefix = get_environment_prefix(None)
