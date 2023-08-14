@@ -705,16 +705,16 @@ Feature: Producer Create Failure Scenarios
       | message           | ValidationError raised from Data Contract 'Validate Content Url:1' at 'content[0].attachment.url': 'not-a-url' does not match '^https*://(www.)*\\w+.*$' |
 
   @integration-only
-  Scenario: Validate a Document Pointer of type Mental health crisis plan using the asid data contract with ssp and no asid
+  Scenario Outline: Validate a Care Plan Document Pointer type using the asid data contract with ssp and no asid
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                 | value     |
-      | http://snomed.info/sct | 736253002 |
+      | system                 | value  |
+      | http://snomed.info/sct | <type> |
     And the Data Contracts are loaded from the database
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
       | property    | value                             |
       | identifier  | 1234567890                        |
-      | type        | 736253002                         |
+      | type        | <type>                            |
       | custodian   | 8FW23                             |
       | producer_id | 8FW23                             |
       | system      | https://fhir.nhs.uk/Id/nhs-number |
@@ -730,6 +730,15 @@ Feature: Producer Create Failure Scenarios
       | issue_code        | VALIDATION_ERROR                                                                                                                                                        |
       | issue_description | A parameter or value has resulted in a validation error                                                                                                                 |
       | message           | ValidationError raised from Data Contract 'asidcheck-contract:2000.01.01' at 'content[0].attachment.url': 'ssp://example.org/my-doc.pdf' does not match '^(?!ssp://).+' |
+
+    Examples:
+      | type             |
+      | 736253002        |
+      | 325691000000100  |
+      | 887701000000100  |
+      | 861421000000109  |
+      | 736373009        |
+      | 1382601000000107 |
 
   @integration-only
   Scenario: Validate a Document Pointer of type Mental health crisis plan using the asid data contract with both ssp and no ssp and no asid
