@@ -524,7 +524,18 @@ class Repository:
         if len(delete_pks) >= MAX_TRANSACT_ITEMS:
             raise TooManyItemsError("Too many items to process in one transaction")
         transact_items = [_delete(id) for id in delete_pks] + [_put()]
-        return self.dynamodb.transact_write_items(TransactItems=transact_items)
+        try:
+            return self.dynamodb.transact_write_items(TransactItems=transact_items)
+        except ClientError as error:
+            if "CancellationReasons" in error.response:
+                reasons = error.response["CancellationReasons"]
+                for ix, reason in enumerate(reasons):
+                    if (
+                        reason["Code"] == "ConditionalCheckFailed"
+                        and "Put" in transact_items[ix]
+                    ):
+                        raise DuplicateError("Condition check failed - Duplicate item")
+            raise error
 
     @handle_dynamodb_errors(conditional_check_error_message="Forbidden")
     def hard_delete(self, pk, sk=None) -> DynamoDbResponse:
