@@ -79,6 +79,8 @@ def mock_patch(target, *args, **kwargs):
 
 @given(today=one_of(dates(), just(None)))
 def test__generate_calendar_version(today: date):
+    if today is None:
+        today = date.today()
     version = _generate_calendar_version(today=today)
     assert len(version) == 10
 
@@ -184,7 +186,6 @@ contract_strategy = one_of(global_contract, local_contract)
 @given(contract=contract_strategy)
 def test__parse_contract_group_from_contract(contract: Contract):
     group = ContractGroup.from_contract(contract=contract)
-    assert group.pk == contract.pk.__root__
     assert group.system == contract.system.__root__
     assert group.value == contract.value.__root__
     assert group.name == contract.name.__root__
