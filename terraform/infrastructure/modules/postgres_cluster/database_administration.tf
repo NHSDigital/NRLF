@@ -1,16 +1,18 @@
-
 data "aws_lambda_invocation" "create-postgres-database-partition" {
   # Note: if database already exists then the function will fail gracefully.
-
   function_name = module.rds-cluster-sql-query-lambda.function_name
   input = jsonencode({
     "user" : data.aws_rds_cluster.rds-cluster.master_username
     "password" : jsondecode(data.aws_secretsmanager_secret_version.master_user_password.secret_string)["password"]
     "endpoint" : data.aws_rds_cluster.rds-cluster.endpoint
     "database_name" : data.aws_rds_cluster.rds-cluster.database_name # NB: using "default" db name to create new db
-    "autocommit" : true                                              ## Required for CREATE DATABASE, don't use this anywhere else
+    "autocommit" : true                                              ## Required for CREATE/DROP DATABASE, don't use this anywhere else
     "sql" : {
-      "statement" : "CREATE DATABASE {database_name};"
+      "statement" : (
+        var.prefix == var.environment ?                                             # if is_persistent_environment
+        "CREATE DATABASE {database_name};" :                                        # then create
+        "DROP DATABASE IF EXISTS {database_name}; CREATE DATABASE {database_name};" # else drop and create
+      )
       "identifiers" : {
         "database_name" : var.environment
       }
@@ -43,6 +45,8 @@ data "aws_lambda_invocation" "create-schemas" {
     module.rds-cluster-sql-query-lambda.function_name
   ]
 }
+
+
 
 data "aws_lambda_invocation" "create-all-tables" {
   function_name = module.rds-cluster-sql-query-lambda.function_name
@@ -110,12 +114,15 @@ data "aws_lambda_invocation" "grant-permissions" {
         GRANT CONNECT ON DATABASE {database_name} TO {write_user};
         GRANT USAGE ON SCHEMA fact TO {write_user};
         GRANT USAGE ON SCHEMA dimension TO {write_user};
+        GRANT USAGE ON ALL SEQUENCES IN SCHEMA dimension TO {write_user};
         GRANT SELECT ON ALL TABLES IN SCHEMA fact TO {write_user};
         GRANT SELECT ON ALL TABLES IN SCHEMA dimension TO {write_user};
+        GRANT SELECT ON ALL SEQUENCES IN SCHEMA dimension TO {write_user};
         GRANT INSERT ON ALL TABLES IN SCHEMA fact TO {write_user};
         GRANT INSERT ON ALL TABLES IN SCHEMA dimension TO {write_user};
         GRANT UPDATE ON ALL TABLES IN SCHEMA fact TO {write_user};
         GRANT UPDATE ON ALL TABLES IN SCHEMA dimension TO {write_user};
+        GRANT UPDATE ON ALL SEQUENCES IN SCHEMA dimension TO {write_user};
       EOT
       "identifiers" : {
         "database_name" : var.environment

@@ -7,6 +7,7 @@ import yaml
 from helpers.aws_session import new_session_from_env
 from mi.reporting.actions import each_stored_query_event, perform_query, write_csv
 from mi.reporting.constants import VALIDATOR_PATH
+from mi.reporting.resources import hash_str_to_int
 
 
 class ReportValidationError(ValueError):
@@ -67,6 +68,9 @@ def make_reports(session, env: str, workspace: str = None, partition_key=None):
 
 
 def _make_reports(env: str, workspace: str = None, partition_key=None):
+    if partition_key is not None:
+        partition_key = str(hash_str_to_int(key=partition_key))
+
     session = new_session_from_env(env=env)
     try:
         make_reports(

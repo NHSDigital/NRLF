@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from hashlib import sha256
 from pathlib import Path
 from typing import Generator
 
@@ -71,3 +72,9 @@ def make_report_path(
 
     report_path.mkdir(parents=True, exist_ok=True)
     return str(report_path / file_name)
+
+
+@log("Converted key '{key}' to integer '{__result__}'")
+def hash_str_to_int(key: str, n_digits=8):
+    """https://stackoverflow.com/a/42089311/1571593"""
+    return int(sha256(key.encode("utf-8")).hexdigest(), 16) % 10**n_digits

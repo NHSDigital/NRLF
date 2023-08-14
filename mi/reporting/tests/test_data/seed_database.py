@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 from pathlib import Path
 from typing import Generator, Type, Union
 
@@ -6,7 +7,12 @@ import fire
 
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
-from mi.reporting.resources import get_credentials, get_lambda_name, get_rds_endpoint
+from mi.reporting.resources import (
+    get_credentials,
+    get_lambda_name,
+    get_rds_endpoint,
+    hash_str_to_int,
+)
 from mi.reporting.tests.test_data.generate_test_data import (
     FOREIGN_KEYS,
     Dimension,
@@ -17,16 +23,48 @@ from mi.sql_query.model import Response, Sql, SqlQueryEvent, Status
 PATH_TO_HERE = Path(__file__).parent
 
 
-def _get_test_data(test_id: str) -> dict:
+def _get_test_data(test_id: int) -> dict:
+    """
+    Amend the pre-generated test data in test_data.json so that the Measure
+    items have a unique "partition key" (so that we can filter test data)
+    and also propagate this to the Dimensions and foreign keys
+    """
     with open(PATH_TO_HERE / "test_data.json") as f:
-        data = json.load(f)
-    for item in data[Measure.name()]:
-        item["partition_key"] = test_id
-        for fk in FOREIGN_KEYS.keys():
-            item[fk] += "-" + test_id
+        data: dict[str, list[dict[str, any]]] = json.load(f)
+
+    # Now we need to guarantee uniqeness of the foreign keys for each row.
+    # We do this by adding the row number to the test_id, and then caching
+    # the old_fk --> new_fk so that we can be sure to have a corresponding
+    # Dimension to avoid NOT NULL constraints when creating the Measure
+    fk_transformation_cache: dict[
+        Union[Measure, Dimension],
+        dict[
+            str,
+            dict[
+                int,  # i.e transforms this int
+                int,  # to this int
+            ],
+        ],
+    ] = defaultdict(lambda: defaultdict(dict))
+    for i, item in enumerate(data[Measure.name()]):
+        # Assumption here is that test_id + {row_number} will not clash
+        # between tests, which is unlikely locally given the terraform teardown
+        # on every build, and is impossible in CI
+        uniquish_test_id = test_id + i
+        item["partition_key"] = str(uniquish_test_id)
+        for fk, model in FOREIGN_KEYS.items():
+            before = item[fk]
+            item[fk] = fk_transformation_cache[model][fk].get(before, uniquish_test_id)
+            fk_transformation_cache[model][fk][before] = item[fk]
+
     for fk, model in FOREIGN_KEYS.items():
         for item in data[model.name()]:
-            item[fk] += "-" + test_id
+            item[fk] = fk_transformation_cache[model][fk][item[fk]]
+            for k in item:
+                if k == fk:
+                    continue
+                item[k] += "-" + str(item[fk])
+
     return data
 
 
@@ -77,7 +115,9 @@ def _seed_database(session, data: dict, workspace: str, environment: str):
         assert response.status == Status.OK, response.outcome
 
 
-def seed_database(test_id: str):
+def seed_database(test_id: Union[int, str]):
+    if type(test_id) is str:
+        test_id = hash_str_to_int(key=test_id)
     tf_json = get_terraform_json()
     environment = tf_json["account_name"]["value"]
     workspace = tf_json["workspace"]["value"]

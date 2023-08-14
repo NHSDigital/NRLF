@@ -15,4 +15,6 @@ DB_CLUSTER_NAME = RESOURCE_PREFIX + "-{env}-aurora-cluster"
 
 SQL_SELECT_REGEX = re.compile(r"SELECT(.*)FROM", flags=re.DOTALL)
 SQL_SELECT_SEPARATOR = ","
-SQL_ALIAS_SEPARATOR_REGEX = re.compile(r"as|AS")
+SQL_ALIAS_SEPARATOR_REGEX = re.compile(
+    r"\sas\s|\sAS\s"  # SELECT x AS y (incl. whitespace around AS)
+)

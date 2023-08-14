@@ -11,11 +11,11 @@ import fire
 
 PATH_TO_TEST_DATA = Path(__file__).parent / "test_data.json"
 UPPERCASE_SEARCH = re.compile("[A-Z][^A-Z]*")
+ASCII = ascii_letters + digits
 
 
 def generate_random_string(length=10):
-    characters = ascii_letters + digits
-    return "".join(choice(characters) for _ in range(length))
+    return "".join(choice(ASCII) for _ in range(length))
 
 
 def camel_to_snake(camel: str):
@@ -24,23 +24,21 @@ def camel_to_snake(camel: str):
 
 class Dimension:
     @classmethod
-    def name(cls):
+    def name(cls) -> str:
         return f"dimension.{camel_to_snake(cls.__name__)}"
 
 
 @dataclass
 class Measure:
-    producer_id: str
-    consumer_id: str
+    provider_id: str
     patient_id: str
     document_type_id: str
-    status_id: int
     day: int
     month: int
     year: int
-    week: int
     day_of_week: int
-    count: int
+    count_created: int
+    count_deleted: int
 
     @classmethod
     def name(cls):
@@ -48,15 +46,10 @@ class Measure:
 
 
 @dataclass
-class Producer(Dimension):
-    producer_id: str
-    producer_name: str = field(default_factory=generate_random_string)
-
-
-@dataclass
-class Consumer(Dimension):
-    consumer_id: str
-    consumer_name: str = field(default_factory=generate_random_string)
+class Provider(Dimension):
+    provider_id: str
+    provider_suffix: str = field(default_factory=generate_random_string)
+    provider_name: str = field(default_factory=generate_random_string)
 
 
 @dataclass
@@ -68,36 +61,30 @@ class Patient(Dimension):
 @dataclass
 class DocumentType(Dimension):
     document_type_id: str
-    document_type_name: str = field(default_factory=generate_random_string)
+    document_type_code: str = field(default_factory=generate_random_string)
+    document_type_system: str = field(default_factory=generate_random_string)
 
 
 FOREIGN_KEYS: dict[str, Type[Dimension]] = {
-    "producer_id": Producer,
-    "consumer_id": Consumer,
+    "provider_id": Provider,
     "patient_id": Patient,
     "document_type_id": DocumentType,
 }
-
-
-def rand_int_as_str(a, b):
-    return str(randint(a, b))
 
 
 def _generate_measures(n: int) -> list[dict]:
     measures = []
     while len(measures) < n:
         measure = Measure(
-            producer_id=rand_int_as_str(0, 5),
-            consumer_id=rand_int_as_str(0, 5),
-            patient_id=rand_int_as_str(0, 5),
-            document_type_id=rand_int_as_str(0, 2),
-            status_id=randint(0, 1),
+            provider_id=randint(0, 5),
+            patient_id=randint(0, 5),
+            document_type_id=randint(0, 2),
             day=randint(1, 31),
             month=randint(1, 12),
             year=randint(2021, 2028),
-            week=randint(1, 52),
             day_of_week=randint(0, 6),
-            count=randint(1, 30),
+            count_created=randint(1, 30),
+            count_deleted=randint(1, 30),
         )
         measures.append(asdict(measure))
     return measures
