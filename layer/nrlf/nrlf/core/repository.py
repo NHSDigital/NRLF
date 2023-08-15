@@ -1,6 +1,6 @@
 from enum import Enum
 from functools import reduce, wraps
-from typing import Iterator, TypeVar, Union
+from typing import Generic, Iterator, TypeVar, Union
 
 from botocore.exceptions import ClientError
 from lambda_utils.logging import log_action
@@ -262,15 +262,15 @@ def handle_dynamodb_errors(
     )
 
 
-class Repository:
+class Repository(Generic[PydanticModel]):
     def __init__(
         self,
-        item_type: type[DynamoDbModel],
+        item_type: type[PydanticModel],
         client: DynamoDbClient,
         environment_prefix: str = "",
     ):
         self.dynamodb = client
-        self.item_type = item_type
+        self.item_type: PydanticModel = item_type
         self.table_name = environment_prefix + item_type.kebab()
 
     @handle_dynamodb_errors(
@@ -503,15 +503,6 @@ class Repository:
         Creates a new Record and delete existing records in a single transaction
         """
 
-        def _put():
-            return {
-                "Put": {
-                    "TableName": self.table_name,
-                    "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)",
-                    "Item": create_item.dict(),
-                }
-            }
-
         def _delete(id):
             return {
                 "Delete": {
@@ -523,7 +514,9 @@ class Repository:
 
         if len(delete_pks) >= MAX_TRANSACT_ITEMS:
             raise TooManyItemsError("Too many items to process in one transaction")
-        transact_items = [_delete(id) for id in delete_pks] + [_put()]
+        transact_items = [_delete(id) for id in delete_pks] + [
+            self._put_statement(item=create_item)
+        ]
         try:
             return self.dynamodb.transact_write_items(TransactItems=transact_items)
         except ClientError as error:
@@ -548,3 +541,32 @@ class Repository:
             "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)",
         }
         self.dynamodb.delete_item(**args)
+
+    @handle_dynamodb_errors(
+        conditional_check_error_message="Duplicate item", error_type=DuplicateError
+    )
+    def upsert_many(self, items: list[PydanticModel]) -> DynamoDbResponse:
+        """Creates many new Records in a single transaction"""
+
+        transact_items = list(
+            map(lambda item: self._put_statement(item, force_create=True), items)
+        )
+        return self.dynamodb.transact_write_items(TransactItems=transact_items)
+
+    def _put_statement(
+        self, item: PydanticModel, force_create=False
+    ) -> dict[str, dict[str, any]]:
+        condition_kwargs = (
+            {
+                "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)",
+            }
+            if not force_create
+            else {}
+        )
+        return {
+            "Put": {
+                "TableName": self.table_name,
+                "Item": item.dict(),
+                **condition_kwargs,
+            }
+        }

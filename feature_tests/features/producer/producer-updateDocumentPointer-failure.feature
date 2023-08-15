@@ -134,6 +134,59 @@ Feature: Producer Update Failure scenarios
         "status": "current"
       }
       """
+    And template DOCUMENT_WITH_TWO_CONTENT_ITEMS:
+      """
+      {
+        "resourceType": "DocumentReference",
+        "id": "$custodian-$identifier",
+        "custodian": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+            "value": "$custodian"
+          }
+        },
+        "subject": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "$subject"
+          }
+        },
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "$type"
+            }
+          ]
+        },
+        "content": [
+          {
+            "attachment": {
+              "contentType": "$contentType1",
+              "url": "$url1"
+            }
+          },
+          {
+            "attachment": {
+              "contentType": "$contentType2",
+              "url": "$url2"
+            }
+          }
+        ],
+        "status": "$status",
+        "relatesTo": [
+          {
+            "code": "replaces",
+            "target": {
+              "type": "DocumentReference",
+              "identifier": {
+                "value": "$target"
+              }
+            }
+          }
+        ]
+      }
+      """
     And template OUTCOME
       """
       {
@@ -517,3 +570,77 @@ Feature: Producer Update Failure scenarios
       | issue_code        | VALIDATION_ERROR                                                                                                                |
       | issue_description | A parameter or value has resulted in a validation error                                                                         |
       | message           | ValidationError raised from Data Contract 'Validate Content Title:1' at 'content[0].attachment': 'title' is a required property |
+
+  @integration-only
+  Scenario: Fail to update Document Pointer when no asid and update content to ssp
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And the Data Contracts are loaded from the database
+    And a Document Pointer exists in the system with the below values for DOCUMENT template
+      | property    | value                                    |
+      | identifier  | 1234567890                               |
+      | type        | 736253002                                |
+      | custodian   | 8FW23                                    |
+      | subject     | 9278693472                               |
+      | contentType | application/html                         |
+      | status      | current                                  |
+      | url         | https://example.org/contact-details.html |
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT template
+      | property    | value                        |
+      | identifier  | 1234567890                   |
+      | status      | current                      |
+      | type        | 736253002                    |
+      | custodian   | 8FW23                        |
+      | subject     | 9278693472                   |
+      | contentType | application/pdf              |
+      | url         | ssp://example.org/my-doc.pdf |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                                                                                                                   |
+      | issue_type        | processing                                                                                                                                                              |
+      | issue_level       | error                                                                                                                                                                   |
+      | issue_code        | VALIDATION_ERROR                                                                                                                                                        |
+      | issue_description | A parameter or value has resulted in a validation error                                                                                                                 |
+      | message           | ValidationError raised from Data Contract 'asidcheck-contract:2000.01.01' at 'content[0].attachment.url': 'ssp://example.org/my-doc.pdf' does not match '^(?!ssp://).+' |
+
+  @integration-only
+  Scenario: Fail to update Document Pointer when no asid and update one of the two contents to ssp
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And the Data Contracts are loaded from the database
+    And a Document Pointer exists in the system with the below values for DOCUMENT_WITH_TWO_CONTENT_ITEMS template
+      | property     | value                                    |
+      | identifier   | 1234567890                               |
+      | type         | 736253002                                |
+      | custodian    | 8FW23                                    |
+      | subject      | 9278693472                               |
+      | status       | current                                  |
+      | contentType1 | application/html                         |
+      | url1         | https://example.org/contact-details.html |
+      | contentType2 | application/html                         |
+      | url2         | https://example.org/my-doc.html          |
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT_WITH_TWO_CONTENT_ITEMS template
+      | property     | value                                    |
+      | identifier   | 1234567890                               |
+      | status       | current                                  |
+      | type         | 736253002                                |
+      | custodian    | 8FW23                                    |
+      | subject      | 9278693472                               |
+      | contentType1 | application/html                         |
+      | url1         | https://example.org/contact-details.html |
+      | contentType2 | application/pdf                          |
+      | url2         | ssp://example.org/my-doc.pdf             |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                                                                                                                   |
+      | issue_type        | processing                                                                                                                                                              |
+      | issue_level       | error                                                                                                                                                                   |
+      | issue_code        | VALIDATION_ERROR                                                                                                                                                        |
+      | issue_description | A parameter or value has resulted in a validation error                                                                                                                 |
+      | message           | ValidationError raised from Data Contract 'asidcheck-contract:2000.01.01' at 'content[1].attachment.url': 'ssp://example.org/my-doc.pdf' does not match '^(?!ssp://).+' |

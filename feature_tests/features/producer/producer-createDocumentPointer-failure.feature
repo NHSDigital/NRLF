@@ -206,6 +206,48 @@ Feature: Producer Create Failure Scenarios
         "date": "$date"
       }
       """
+    And template DOCUMENT_WITH_TWO_CONTENT_TYPES
+      """
+      {
+        "resourceType": "DocumentReference",
+        "id": "$producer_id-$identifier",
+        "custodian": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+            "value": "$custodian"
+          }
+        },
+        "subject": {
+          "identifier": {
+            "system": "$system",
+            "value": "$subject"
+          }
+        },
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "$type"
+            }
+          ]
+        },
+        "content": [
+          {
+            "attachment": {
+              "contentType": "application/html",
+              "url": "https://example.org/contact-details.html"
+            }
+          },
+          {
+            "attachment": {
+              "contentType": "application/pdf",
+              "url": "ssp://example.org/my-doc.pdf"
+            }
+          }
+        ],
+        "status": "current"
+      }
+      """
     And template OUTCOME
       """
       {
@@ -629,23 +671,23 @@ Feature: Producer Create Failure Scenarios
       | message           | DocumentReference validation failure - Invalid id       |
 
   @integration-only
-  Scenario: Fail to validate a Document Pointer of type Mental health crisis plan with bad URL
+  Scenario: Fail to validate a Document Pointer of type TEST_TYPE with bad URL
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
-      | http://snomed.info/sct | 736253002 |
+      | http://snomed.info/sct | TEST_TYPE |
     And a Data Contract is registered in the system
       | property             | value                  |
       | name                 | Validate Content Url   |
       | system               | http://snomed.info/sct |
-      | value                | 736253002              |
+      | value                | TEST_TYPE              |
       | version              | 1                      |
       | inverse_version      | 0                      |
       | json_schema_template | JSON_SCHEMA            |
     When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
       | property    | value                             |
       | identifier  | 1234567890                        |
-      | type        | 736253002                         |
+      | type        | TEST_TYPE                         |
       | custodian   | 8FW23                             |
       | producer_id | 8FW23                             |
       | system      | https://fhir.nhs.uk/Id/nhs-number |
@@ -661,3 +703,64 @@ Feature: Producer Create Failure Scenarios
       | issue_code        | VALIDATION_ERROR                                                                                                                                         |
       | issue_description | A parameter or value has resulted in a validation error                                                                                                  |
       | message           | ValidationError raised from Data Contract 'Validate Content Url:1' at 'content[0].attachment.url': 'not-a-url' does not match '^https*://(www.)*\\w+.*$' |
+
+  @integration-only
+  Scenario Outline: Validate a Care Plan Document Pointer type using the asid data contract with ssp and no asid
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value  |
+      | http://snomed.info/sct | <type> |
+    And the Data Contracts are loaded from the database
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT template
+      | property    | value                             |
+      | identifier  | 1234567890                        |
+      | type        | <type>                            |
+      | custodian   | 8FW23                             |
+      | producer_id | 8FW23                             |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
+      | subject     | 9278693472                        |
+      | contentType | application/pdf                   |
+      | url         | ssp://example.org/my-doc.pdf      |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                                                                                                                   |
+      | issue_type        | processing                                                                                                                                                              |
+      | issue_level       | error                                                                                                                                                                   |
+      | issue_code        | VALIDATION_ERROR                                                                                                                                                        |
+      | issue_description | A parameter or value has resulted in a validation error                                                                                                                 |
+      | message           | ValidationError raised from Data Contract 'asidcheck-contract:2000.01.01' at 'content[0].attachment.url': 'ssp://example.org/my-doc.pdf' does not match '^(?!ssp://).+' |
+
+    Examples:
+      | type             |
+      | 736253002        |
+      | 325691000000100  |
+      | 887701000000100  |
+      | 861421000000109  |
+      | 736373009        |
+      | 1382601000000107 |
+
+  @integration-only
+  Scenario: Validate a Document Pointer of type Mental health crisis plan using the asid data contract with both ssp and no ssp and no asid
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And the Data Contracts are loaded from the database
+    When Producer "Aaron Court Mental Health NH" creates a Document Reference from DOCUMENT_WITH_TWO_CONTENT_TYPES template
+      | property    | value                             |
+      | identifier  | 1234567890                        |
+      | type        | 736253002                         |
+      | custodian   | 8FW23                             |
+      | producer_id | 8FW23                             |
+      | system      | https://fhir.nhs.uk/Id/nhs-number |
+      | subject     | 9278693472                        |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                                                                                                                                   |
+      | issue_type        | processing                                                                                                                                                              |
+      | issue_level       | error                                                                                                                                                                   |
+      | issue_code        | VALIDATION_ERROR                                                                                                                                                        |
+      | issue_description | A parameter or value has resulted in a validation error                                                                                                                 |
+      | message           | ValidationError raised from Data Contract 'asidcheck-contract:2000.01.01' at 'content[1].attachment.url': 'ssp://example.org/my-doc.pdf' does not match '^(?!ssp://).+' |

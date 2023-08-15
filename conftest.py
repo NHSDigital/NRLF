@@ -1,6 +1,13 @@
 # pytest configuration file
 
+import os
+
 import pytest
+from hypothesis import settings
+
+if os.getenv("RUNNING_IN_CI"):
+    settings.register_profile("ci", deadline=1000)  # max 1 second per test
+    settings.load_profile("ci")
 
 
 def pytest_addoption(parser):

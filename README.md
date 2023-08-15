@@ -30,11 +30,12 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
    5. [Feature test rules](#5-feature-test-rules)
 5. [Smoke tests and oauth tokens for Postman requests](#smoke-tests-and-oauth-tokens)
 6. [Logging](#logging)
-7. [Route 53 & Hosted zones](#route53--hosted-zones)
-8. [Sandbox](#sandbox)
-9. [Firehose](#firehose)
-10. [Releases](#releases)
-11. [Generating MI Reports](#generating-mi-reports)
+7. [Data Contracts](#data-contracts)
+8. [Route 53 & Hosted zones](#route53--hosted-zones)
+9. [Sandbox](#sandbox)
+10. [Firehose](#firehose)
+11. [Releases](#releases)
+12. [Generating MI Reports](#generating-mi-reports)
 
 ---
 
@@ -499,6 +500,27 @@ Logs are processed by Firehose and forwarded to:
 To enable Splunk for a given workspace, ensure that Splunk connection credentials have been set in the corresponding AWS secret resource (see firehose terraform module for more details). You will also need to set 'destination = "splunk"' in the initialisation of the Firehose terraform module, but do not merge this into production since we don't want all development workspace logs going to Splunk. (Our test suite will anyway reject this in the CI, since it expects that the "extended_s3" has been used for non persistent environments)
 
 More details about Firehose are given below.
+
+---
+
+## Data Contracts
+
+The data contract model is described in depth in [here](https://nhsd-confluence.digital.nhs.uk/display/CLP/NRLF+-+Data+Contract+mechanism).
+
+The live state of Data Contracts in a given environment / workspace is synchronised from JSON Schema files in the "`data_contracts`" directory. The JSON Schema files must either sit under `data_contracts/global` or `data_contracts/<system>/<value>` with the name of the file being `<name>.json`. Note that the terms `system`, `value` and `name` are properties of the `DataContract` model, found in the data contracts module. In order to deploy the contracts, run the nrlf script:
+
+```
+nrlf contracts <environment> <workspace>
+```
+
+The behaviour of the synchronisation script is as follows:
+
+- If a contract is present in the `data_contracts` directory that:
+  - isn't present in the database, then it will be created
+  - is present in the database, and the JSON Schema locally and in the database are:
+    - the same, then nothing is done
+    - not the same, then the contract in the database is superseded (SK is "updated") and a new contract is created
+- If a contract is not present in the `data_contracts` directory but is present in the database, then the contract in the database is superseded (SK is "updated") and a new "inactive" contract is created (i.e. with a blank JSON Schema)
 
 ---
 
