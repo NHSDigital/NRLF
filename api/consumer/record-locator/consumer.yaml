@@ -658,6 +658,34 @@ paths:
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       responses:
+        "4xx":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST	               | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
         "200":
           description: Count DocumentReference operation successful
           headers:
