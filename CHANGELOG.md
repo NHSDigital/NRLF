@@ -10,6 +10,7 @@
 - NRLF-642 - Update converter to v0.0.8 in NRLF repository
 - NRLF-652 - Fix forward: Remove tags from security groups associations
 - NRLF-561 - Fix forward: Fix ASID url
+- NRLF-634 - Fix forward: Fix intermittent deploy contract test
 
 ## 2023-08-03a
 

@@ -9,7 +9,7 @@ from tempfile import TemporaryDirectory
 from unittest import mock
 
 import pytest
-from hypothesis import given
+from hypothesis import assume, given
 from hypothesis.strategies import (
     builds,
     dates,
@@ -129,8 +129,7 @@ def test__substitute_http_from_path(system_in, system_out):
 
 @given(path=one_of(from_regex(regex, fullmatch=True) for regex in PATH_PATTERNS))
 def test__parse_contract_group_from_path_good_path(path: str):
-    while "//" in path:
-        path = path.replace("//", "/")
+    assume("//" not in path)
 
     group: ContractGroup = ContractGroup.from_path(path=path)
     _path = group.to_path(base_dir="")
