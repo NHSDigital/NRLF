@@ -107,7 +107,7 @@ resource "aws_route_table_association" "private-int" {
 # VPC endpoints
 #------------------------------------------------------------------------------
 
-resource "aws_vpc_endpoint" "secretsmanager" {
+resource "aws_vpc_endpoint" "secretsmanager-ref" {
   vpc_id              = aws_vpc.rds-cluster-vpc-ref.id
   service_name        = "com.amazonaws.eu-west-2.secretsmanager"
   subnet_ids          = aws_db_subnet_group.rds-cluster-subnet-group-ref.subnet_ids
@@ -120,14 +120,9 @@ resource "aws_vpc_endpoint" "secretsmanager" {
   }
 }
 
-resource "aws_vpc_endpoint_security_group_association" "vpc_cluster_security_group_assoc" {
-  vpc_endpoint_id   = aws_vpc_endpoint.secretsmanager.id
+resource "aws_vpc_endpoint_security_group_association" "vpc_cluster_security_group_assoc-ref" {
+  vpc_endpoint_id   = aws_vpc_endpoint.secretsmanager-ref.id
   security_group_id = aws_security_group.rds-cluster-sg-ref.id
-
-  tags = {
-    Name        = "${local.project}-ref-sg-association"
-    Environment = local.environment
-  }
 }
 
 resource "aws_vpc_endpoint" "secretsmanager" {
@@ -146,9 +141,4 @@ resource "aws_vpc_endpoint" "secretsmanager" {
 resource "aws_vpc_endpoint_security_group_association" "vpc_cluster_security_group_assoc" {
   vpc_endpoint_id   = aws_vpc_endpoint.secretsmanager.id
   security_group_id = aws_security_group.rds-cluster-sg-int.id
-
-  tags = {
-    Name        = "${local.project}-int-sg-association"
-    Environment = local.environment
-  }
 }
