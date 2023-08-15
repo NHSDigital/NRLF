@@ -11,6 +11,7 @@
 - NRLF-652 - Fix forward: Remove tags from security groups associations
 - NRLF-561 - Fix forward: Fix ASID url
 - NRLF-634 - Fix forward: Fix intermittent deploy contract test
+- NRLF-494 - Fix forward: Revert changes introduced by NRLF-494, due to being too restrictive for converter
 
 ## 2023-08-03a
 

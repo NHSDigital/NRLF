@@ -1016,7 +1016,7 @@ components:
             - DocumentReference
         id:
           type: string
-          pattern: "^(?=.{1,64}$)[A-Za-z0-9\\.]+-[A-Za-z0-9]+[A-Za-z0-9\\_\\-]*$"
+          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
           description: The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.
         meta:
           $ref: "#/components/schemas/Meta"
