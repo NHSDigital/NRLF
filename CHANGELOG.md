@@ -1,5 +1,13 @@
 # Changelog
 
+## 2023-08-14
+
+- NRLF-533 - 409 Conflict error not thrown on duplicate supersede request
+- NRLF-585 - Add Live URLs to API Catalogue
+- NRLF-652 - Producer MI - Add infrastructure for dynamodb streams
+- NRLF-561 - Build a an ASID specific document contract
+- NRLF-642 - Update converter to v0.0.8 in NRLF repository
+
 ## 2023-08-03a
 
 - NRLF-491 - Implement int-sandbox splunk environment
