@@ -136,7 +136,7 @@ Feature: Producer Update Success scenarios
         "author": [
           {
             "identifier": {
-              "system": "https://fhir.nhs.uk/Id/accredited-system-id",
+              "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
               "value": "200000000610"
             }
           },

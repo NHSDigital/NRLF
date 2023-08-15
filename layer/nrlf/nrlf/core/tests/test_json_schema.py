@@ -52,7 +52,7 @@ SSP_JSON_SCHEMA = {
                         "properties": {
                             "system": {
                                 "type": "string",
-                                "enum": ["https://fhir.nhs.uk/Id/accredited-system-id"],
+                                "enum": ["https://fhir.nhs.uk/Id/nhsSpineASID"],
                             }
                         },
                     },
@@ -78,7 +78,7 @@ NOT_SSP_DATA = {
 
 HAS_SSP_DATA = {
     "author": [
-        {"system": "https://fhir.nhs.uk/Id/accredited-system-id", "value": "123"},
+        {"system": "https://fhir.nhs.uk/Id/nhsSpineASID", "value": "123"},
         {"system": "XXX", "value": "XYZ"},
     ],
     "content": [{"url": "ssp://foo.com"}, {"url": "http://foo.com"}],
@@ -92,7 +92,7 @@ HAS_SSP_NO_AUTHOR_DATA = {
 
 NOT_SSP_HAS_AUTHOR_DATA = {
     "author": [
-        {"system": "https://fhir.nhs.uk/Id/accredited-system-id", "value": "123"},
+        {"system": "https://fhir.nhs.uk/Id/nhsSpineASID", "value": "123"},
         {"system": "XXX", "value": "XYZ"},
     ],
     "content": [{"url": "http://foo.com"}, {"url": "http://foo.com"}],

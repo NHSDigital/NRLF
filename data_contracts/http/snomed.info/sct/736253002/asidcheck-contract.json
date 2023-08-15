@@ -39,7 +39,7 @@
                 "properties": {
                   "system": {
                     "type": "string",
-                    "enum": ["https://fhir.nhs.uk/Id/accredited-system-id"]
+                    "enum": ["https://fhir.nhs.uk/Id/nhsSpineASID"]
                   },
                   "value": {
                     "type": "string",
