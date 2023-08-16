@@ -1,5 +1,6 @@
 import json
 import string
+import time
 from collections import ChainMap
 from dataclasses import asdict, fields
 from datetime import datetime as dt
@@ -25,11 +26,13 @@ from mi.stream_writer.index import EVENT_CONFIG
 from mi.stream_writer.model import Action, DynamoDBEventConfig, GoodResponse
 from mi.stream_writer.tests.paths import PATH_TO_TEST_DATA
 from mi.stream_writer.utils import hash_nhs_number
+from nrlf.core.types import DynamoDbClient
+from nrlf.core.validators import json_loads
 
 ASCII = list(string.ascii_lowercase + string.ascii_uppercase + string.digits)
 RESOURCE_PREFIX = "nhsd-nrlf"
 LAMBDA_NAME = RESOURCE_PREFIX + "--{workspace}--mi--stream_writer"
-N_INITIAL_RECORDS = 1
+N_INITIAL_RECORDS = 20
 
 
 def get_lambda_name(workspace: str) -> str:
@@ -39,7 +42,6 @@ def get_lambda_name(workspace: str) -> str:
 def _create_report_query(credentials: dict, endpoint: str):
     with open(PATH_TO_TEST_DATA / "example_report.sql") as sql_file:
         statement = sql_file.read()
-
     return SqlQueryEvent(sql=Sql(statement=statement), endpoint=endpoint, **credentials)
 
 
@@ -77,13 +79,15 @@ def _dynamodb_stream_event(
     return json.loads(event_str)  # noqa
 
 
-def _invoke_stream_writer(session, workspace: str, event: dict) -> dict:
+def _invoke_stream_writer(session, workspace: str, event: dict) -> GoodResponse:
     client = session.client("lambda")
     function_name = get_lambda_name(workspace=workspace)
     result = client.invoke(FunctionName=function_name, Payload=json.dumps(event))
     response_payload = result["Payload"].read().decode("utf-8")
-    if response_payload != json.dumps(asdict(GoodResponse())):
+    response: dict = json_loads(response_payload)
+    if response.get("error") or response.get("errorMessage"):
         pytest.fail(f"There was an error with the lambda:\n {response_payload}")
+    return GoodResponse(**response)
 
 
 @pytest.fixture(scope="session")
@@ -101,6 +105,12 @@ def env():
 def workspace():
     tf_json = get_terraform_json()
     return tf_json["workspace"]["value"]
+
+
+@pytest.fixture(scope="session")
+def table_name():
+    tf_json = get_terraform_json()
+    return tf_json["dynamodb"]["value"]["document_pointer"]["name"]
 
 
 @pytest.fixture(scope="session")
@@ -143,6 +153,7 @@ def test_e2e_with_report(
     report_query: SqlQueryEvent,
     dimension_queries: dict[type[Dimension], SqlQueryEvent],
     fact_query: SqlQueryEvent,
+    table_name: str,
     event_config: tuple[DynamoDBRecordEventName, DynamoDBEventConfig],
 ):
     # This function will get the report for
@@ -165,7 +176,8 @@ def test_e2e_with_report(
         )
         for dimension_type, query in dimension_queries.items()
     }
-    # Create the test event (use timestamp as unique id to force create new dimensions)
+
+    # Unique identifiers for this test
     event_name, config = event_config
     timestamp = dt.now()
     unique_id = timestamp.strftime(DateTimeFormats.DOCUMENT_POINTER_FORMAT)
@@ -187,9 +199,11 @@ def test_e2e_with_report(
             image_type=config.image_type,
         )
         records += _event["Records"]
-    _invoke_stream_writer(
+    assert len(records) == N_INITIAL_RECORDS
+    response = _invoke_stream_writer(
         session=session, workspace=workspace, event={"Records": records}
     )
+    assert sum(response.records_processed.values()) == N_INITIAL_RECORDS
 
     # Get the initial state of the report to use later to perform a diff
     initial_report = execute_report_query()
@@ -202,19 +216,18 @@ def test_e2e_with_report(
     assert len(initial_report) >= N_INITIAL_RECORDS
     assert len(initial_facts) >= N_INITIAL_RECORDS
 
-    # Create the test event (use timestamp as unique id to force create new dimensions)
-    event_name, config = event_config
-    timestamp = dt.now()
-    unique_id = timestamp.strftime(DateTimeFormats.DOCUMENT_POINTER_FORMAT)
-    event = _dynamodb_stream_event(
-        unique_id=unique_id,
-        event_name=event_name.name,
-        image_type=config.image_type,
-        created_on=unique_id,
-    )
-
-    # Invoke the lambda to fake a dynamodb stream event
-    _invoke_stream_writer(session=session, workspace=workspace, event=event)
+    # # Invoke the lambda to fake a dynamodb stream event
+    # _invoke_stream_writer(session=session, workspace=workspace, event=event)
+    (record,) = event["Records"]
+    _document_pointer: dict = record["dynamodb"][config.image_type]
+    dynamodb_client: DynamoDbClient = session.client("dynamodb")
+    dynamodb_client.put_item(Item=_document_pointer, TableName=table_name)
+    if event_name == DynamoDBRecordEventName.REMOVE:
+        dynamodb_client.delete_item(
+            Key={"pk": _document_pointer["pk"], "sk": _document_pointer["sk"]},
+            TableName=table_name,
+        )
+    time.sleep(5)
 
     # Get the final state of the report
     # "mi/stream_writer/tests/queries/test_report.sql"
@@ -246,8 +259,8 @@ def test_e2e_with_report(
             "day": timestamp.day,
             "month": timestamp.strftime("%b"),
             "year": timestamp.year,
-            "count_created": 1 if config.action is Action.CREATED else 0,
-            "count_deleted": 1 if config.action is Action.DELETED else 0,
+            "count_created": 1,
+            "count_deleted": int(config.action is Action.DELETED),
         }
     )
 
@@ -278,7 +291,7 @@ def test_e2e_with_report(
         month=timestamp.month,
         year=timestamp.year,
         day_of_week=timestamp.weekday(),
-        count_created=1 if config.action is Action.CREATED else 0,
+        count_created=1,
         count_deleted=1 if config.action is Action.DELETED else 0,
     )
 

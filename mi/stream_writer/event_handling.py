@@ -25,17 +25,19 @@ def catch_error(log_fields: list[str] = None) -> Callable[[T], T]:
     def decorator(fn: T) -> T:
         @wraps(fn)
         def wrapper(*args: tuple[any, ...], **kwargs: any) -> any:
+            metadata = {k: v for k, v in kwargs.items() if k in log_fields}
             try:
-                return fn(*args, **kwargs)
+                response = fn(*args, **kwargs)
             except Exception as error:
-                metadata = {k: v for k, v in kwargs.items() if k in log_fields}
-                return ErrorResponse(
+                response = ErrorResponse(
                     error=str(error),
                     error_type=error.__class__.__name__,
                     function=f"{fn.__module__}.{fn.__name__}",
                     trace=traceback.format_exc(),
                     metadata=metadata,
                 )
+            print(f"{fn.__module__}.{fn.__name__}: ({metadata}):", response)  # noqa
+            return response
 
         return wrapper
 
@@ -45,6 +47,7 @@ def catch_error(log_fields: list[str] = None) -> Callable[[T], T]:
 def _execute_sql(
     cursor: Cursor, statement: str, params: dict, identifiers: dict = None
 ):
+    connection: Connection = cursor.connection
     query = psycopg2_sql.SQL(statement)
     if identifiers:
         query = query.format(
@@ -53,9 +56,10 @@ def _execute_sql(
     try:
         cursor.execute(query, vars=params)
     except:
-        connection: Connection = cursor.connection
         connection.rollback()
         raise
+    else:
+        connection.commit()
 
 
 @catch_error(log_fields=["document_pointer"])
