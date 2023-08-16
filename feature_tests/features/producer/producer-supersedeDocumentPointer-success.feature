@@ -398,19 +398,21 @@ Feature: Producer Supersede Success scenarios
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
       | system                 | value     |
-      | http://snomed.info/sct | 736253002 |
+      | http://snomed.info/sct | TEST_TYPE |
+    # Remove the following line when NRLF-661 is implemented
+    And the Data Contracts are loaded from the database
     And a Data Contract is registered in the system
       | property             | value                  |
       | name                 | Validate Content Url   |
       | system               | http://snomed.info/sct |
-      | value                | 736253002              |
-      | version              | 1                      |
+      | value                | TEST_TYPE              |
+      | version              | 2000.01.01             |
       | inverse_version      | 0                      |
       | json_schema_template | JSON_SCHEMA            |
     And a Document Pointer exists in the system with the below values for DOCUMENT template
       | property    | value                          |
       | identifier  | 8FW23-1234567891               |
-      | type        | 736253002                      |
+      | type        | TEST_TYPE                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
@@ -419,7 +421,7 @@ Feature: Producer Supersede Success scenarios
       | property    | value                              |
       | identifier  | 8FW23-1234567892                   |
       | target      | 8FW23-1234567891                   |
-      | type        | 736253002                          |
+      | type        | TEST_TYPE                          |
       | custodian   | 8FW23                              |
       | subject     | 9278693472                         |
       | contentType | application/pdf                    |
@@ -434,15 +436,15 @@ Feature: Producer Supersede Success scenarios
       | issue_description | Resource created and Resource(s) deleted |
       | message           | Resource created and Resource(s) deleted |
     And Document Pointer "8FW23-1234567892" exists
-      | property    | value                             |
-      | id          | 8FW23-1234567892                  |
-      | nhs_number  | 9278693472                        |
-      | producer_id | 8FW23                             |
-      | type        | http://snomed.info/sct\|736253002 |
-      | source      | NRLF                              |
-      | version     | 1                                 |
-      | schemas     | ["Validate Content Url:1"]        |
-      | updated_on  | NULL                              |
-      | document    | <document>                        |
-      | created_on  | <timestamp>                       |
+      | property    | value                                                       |
+      | id          | 8FW23-1234567892                                            |
+      | nhs_number  | 9278693472                                                  |
+      | producer_id | 8FW23                                                       |
+      | type        | http://snomed.info/sct\|TEST_TYPE                           |
+      | source      | NRLF                                                        |
+      | version     | 1                                                           |
+      | schemas     | ["test-name:2000.01.01", "Validate Content Url:2000.01.01"] |
+      | updated_on  | NULL                                                        |
+      | document    | <document>                                                  |
+      | created_on  | <timestamp>                                                 |
     And Document Pointer "8FW23-1234567891" does not exist

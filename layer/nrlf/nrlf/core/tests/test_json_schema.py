@@ -52,7 +52,7 @@ SSP_JSON_SCHEMA = {
                         "properties": {
                             "system": {
                                 "type": "string",
-                                "enum": ["https://fhir.nhs.uk/Id/accredited-system-id"],
+                                "enum": ["https://fhir.nhs.uk/Id/nhsSpineASID"],
                             }
                         },
                     },
@@ -78,7 +78,7 @@ NOT_SSP_DATA = {
 
 HAS_SSP_DATA = {
     "author": [
-        {"system": "https://fhir.nhs.uk/Id/accredited-system-id", "value": "123"},
+        {"system": "https://fhir.nhs.uk/Id/nhsSpineASID", "value": "123"},
         {"system": "XXX", "value": "XYZ"},
     ],
     "content": [{"url": "ssp://foo.com"}, {"url": "http://foo.com"}],
@@ -92,7 +92,7 @@ HAS_SSP_NO_AUTHOR_DATA = {
 
 NOT_SSP_HAS_AUTHOR_DATA = {
     "author": [
-        {"system": "https://fhir.nhs.uk/Id/accredited-system-id", "value": "123"},
+        {"system": "https://fhir.nhs.uk/Id/nhsSpineASID", "value": "123"},
         {"system": "XXX", "value": "XYZ"},
     ],
     "content": [{"url": "http://foo.com"}, {"url": "http://foo.com"}],
@@ -249,7 +249,7 @@ def test__get_contracts_from_db_returns_latest_versions(
                     pk=key(DbPrefix.Contract, system, value),
                     sk=key(DbPrefix.Version, inverse_version, f"name{i_name}"),
                     name=f"name{i_name}",
-                    version=version + 1,
+                    version=str(version + 1),
                     system=system,
                     value=value,
                     json_schema={
@@ -270,7 +270,7 @@ def test__get_contracts_from_db_returns_latest_versions(
             pk=key(DbPrefix.Contract, system, value),
             sk=key(DbPrefix.Version, MIN_VERSION, "name1"),
             name="name1",
-            version=N_VERSIONS,
+            version=str(N_VERSIONS),
             system=system,
             value=value,
             json_schema={
@@ -284,7 +284,7 @@ def test__get_contracts_from_db_returns_latest_versions(
             pk=key(DbPrefix.Contract, system, value),
             sk=key(DbPrefix.Version, MIN_VERSION, "name2"),
             name="name2",
-            version=N_VERSIONS,
+            version=str(N_VERSIONS),
             system=system,
             value=value,
             json_schema={
@@ -298,7 +298,7 @@ def test__get_contracts_from_db_returns_latest_versions(
             pk=key(DbPrefix.Contract, system, value),
             sk=key(DbPrefix.Version, MIN_VERSION, "name3"),
             name=f"name3",
-            version=N_VERSIONS,
+            version=str(N_VERSIONS),
             system=system,
             value=value,
             json_schema={

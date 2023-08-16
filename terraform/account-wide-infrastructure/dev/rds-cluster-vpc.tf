@@ -57,3 +57,25 @@ resource "aws_route_table_association" "private-dev" {
   subnet_id      = element(aws_subnet.private-subnet-dev, count.index).id
   route_table_id = aws_route_table.private-route-table-dev.id
 }
+
+#------------------------------------------------------------------------------
+# VPC endpoints
+#------------------------------------------------------------------------------
+
+resource "aws_vpc_endpoint" "secretsmanager" {
+  vpc_id              = aws_vpc.rds-cluster-vpc-dev.id
+  service_name        = "com.amazonaws.eu-west-2.secretsmanager"
+  subnet_ids          = aws_db_subnet_group.rds-cluster-subnet-group-dev.subnet_ids
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+
+  tags = {
+    Name        = "${local.project}-dev-secrets-vpc-endpoint"
+    Environment = local.environment
+  }
+}
+
+resource "aws_vpc_endpoint_security_group_association" "vpc_cluster_security_group_assoc" {
+  vpc_endpoint_id   = aws_vpc_endpoint.secretsmanager.id
+  security_group_id = aws_security_group.rds-cluster-sg-dev.id
+}

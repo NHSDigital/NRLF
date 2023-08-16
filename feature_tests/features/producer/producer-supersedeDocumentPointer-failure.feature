@@ -48,6 +48,42 @@ Feature: Producer Supersede Failure scenarios
         ]
       }
       """
+    Given template PLAIN_DOCUMENT
+      """
+      {
+        "resourceType": "DocumentReference",
+        "id": "$identifier",
+        "custodian": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+            "value": "$custodian"
+          }
+        },
+        "subject": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "$subject"
+          }
+        },
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "$type"
+            }
+          ]
+        },
+        "content": [
+          {
+            "attachment": {
+              "contentType": "$contentType",
+              "url": "$url"
+            }
+          }
+        ],
+        "status": "current"
+      }
+      """
     And template BAD_DOCUMENT
       """
       {
@@ -369,12 +405,12 @@ Feature: Producer Supersede Failure scenarios
     Then the operation is unsuccessful
     And the status is 400
     And the response is an OperationOutcome according to the OUTCOME template with the below values
-      | property          | value                                                   |
-      | issue_type        | processing                                              |
-      | issue_level       | error                                                   |
-      | issue_code        | VALIDATION_ERROR                                        |
-      | issue_description | A parameter or value has resulted in a validation error |
-      | message           | DocumentReference validation failure - Invalid id       |
+      | property          | value                                                     |
+      | issue_type        | processing                                                |
+      | issue_level       | error                                                     |
+      | issue_code        | VALIDATION_ERROR                                          |
+      | issue_description | A parameter or value has resulted in a validation error   |
+      | message           | Input is not composite of the form a-b: 8FW23\|1234567890 |
 
   Scenario: Unable to supersede Document Pointer if the nhs number does not match
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to create Document Pointers
@@ -658,3 +694,84 @@ Feature: Producer Supersede Failure scenarios
       | issue_code        | VALIDATION_ERROR                                                                                                                                         |
       | issue_description | A parameter or value has resulted in a validation error                                                                                                  |
       | message           | ValidationError raised from Data Contract 'Validate Content Url:1' at 'content[0].attachment.url': 'not-a-url' does not match '^https*://(www.)*\\w+.*$' |
+
+  Scenario: Supersede without 'supersede-ignore-delete-fail' permission a DocumentPointer that exists with invalid target
+    Given Producer "Data Sync" (Organisation ID "DS123") is requesting to create Document Pointers
+    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types stored in NRLF
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Document Pointer exists in the system with the below values for PLAIN_DOCUMENT template
+      | property    | value                          |
+      | identifier  | DS123-ALREADY_EXISTS           |
+      | type        | 736253002                      |
+      | custodian   | DS123                          |
+      | producer_id | DS123                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Data Sync" creates a Document Reference from DOCUMENT template
+      | property    | value                          |
+      | identifier  | DS123-ALREADY_EXISTS           |
+      | target      | DS123-DOES_NOT_EXIST           |
+      | code        | replaces                       |
+      | type        | 736253002                      |
+      | custodian   | DS123                          |
+      | producer_id | DS123                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    Then the operation is unsuccessful
+    And the status is 400
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                                         |
+      | issue_type        | processing                                                    |
+      | issue_level       | error                                                         |
+      | issue_code        | VALIDATION_ERROR                                              |
+      | issue_description | A parameter or value has resulted in a validation error       |
+      | message           | Validation failure - relatesTo target document does not exist |
+    And Document Pointer "DS123-ALREADY_EXISTS" still exists
+
+  Scenario: Supersede without 'supersede-ignore-delete-fail' permission a DocumentPointer that exists with valid target
+    Given Producer "Data Sync" (Organisation ID "DS123") is requesting to create Document Pointers
+    And Producer "Data Sync" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types stored in NRLF
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And a Document Pointer exists in the system with the below values for PLAIN_DOCUMENT template
+      | property    | value                          |
+      | identifier  | DS123-ALREADY_EXISTS           |
+      | type        | 736253002                      |
+      | custodian   | DS123                          |
+      | producer_id | DS123                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    And a Document Pointer exists in the system with the below values for PLAIN_DOCUMENT template
+      | property    | value                          |
+      | identifier  | DS123-TARGET_EXISTS            |
+      | type        | 736253002                      |
+      | custodian   | DS123                          |
+      | producer_id | DS123                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    When Producer "Data Sync" creates a Document Reference from DOCUMENT template
+      | property    | value                          |
+      | identifier  | DS123-ALREADY_EXISTS           |
+      | target      | DS123-TARGET_EXISTS            |
+      | code        | replaces                       |
+      | type        | 736253002                      |
+      | custodian   | DS123                          |
+      | producer_id | DS123                          |
+      | subject     | 9278693472                     |
+      | contentType | application/pdf                |
+      | url         | https://example.org/my-doc.pdf |
+    Then the operation is unsuccessful
+    And the status is 409
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value                                   |
+      | issue_type        | processing                              |
+      | issue_level       | error                                   |
+      | issue_code        | INVALID_VALUE                           |
+      | issue_description | Invalid value                           |
+      | message           | Condition check failed - Duplicate item |
+    And Document Pointer "DS123-ALREADY_EXISTS" still exists

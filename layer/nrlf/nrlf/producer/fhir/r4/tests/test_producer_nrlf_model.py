@@ -1,10 +1,10 @@
-import json
 from copy import deepcopy
 from pathlib import Path
 
 import pydantic
 import pytest
 
+from nrlf.core.validators import json_load
 from nrlf.producer.fhir.r4.model import DocumentReference
 
 PATH_TO_TEST_DATA = Path(__file__).parent / "data"
@@ -15,7 +15,7 @@ def read_test_data(relative_path: str):
     with open(
         PATH_TO_TEST_DATA / relative_path / "documentreference-example.json"
     ) as f:
-        return json.load(f)
+        return json_load(f)
 
 
 @pytest.mark.parametrize("relative_path", TEST_DATA_RELATIVE_PATHS)

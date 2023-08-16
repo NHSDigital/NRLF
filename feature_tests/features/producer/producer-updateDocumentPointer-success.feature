@@ -100,6 +100,53 @@ Feature: Producer Update Success scenarios
          "description": "$description"
       }
       """
+    And template DOCUMENT_WITH_AUTHOR
+      """
+      {
+        "resourceType": "DocumentReference",
+        "id": "$custodian-$identifier",
+        "custodian": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+            "value": "$custodian"
+          }
+        },
+        "subject": {
+          "identifier": {
+            "system": "https://fhir.nhs.uk/Id/nhs-number",
+            "value": "$subject"
+          }
+        },
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "$type"
+            }
+          ]
+        },
+        "content": [
+          {
+            "attachment": {
+              "contentType": "$contentType",
+              "url": "$url"
+            }
+          }
+        ],
+        "author": [
+          {
+            "identifier": {
+              "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
+              "value": "200000000610"
+            }
+          },
+          {
+            "reference": "https://directory.spineservices.nhs.uk/STU3/Organization/RAT"
+          }
+        ],
+        "status": "current"
+      }
+      """
     And template OUTCOME
       """
       {
@@ -318,20 +365,22 @@ Feature: Producer Update Success scenarios
   Scenario: Validate update operation against json schema
     Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
     And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
-      | system                 | value           |
-      | http://snomed.info/sct | 887701000000100 |
+      | system                 | value     |
+      | http://snomed.info/sct | TEST_TYPE |
+    # Remove the following line when NRLF-661 is implemented
+    And the Data Contracts are loaded from the database
     And a Data Contract is registered in the system
       | property             | value                             |
       | name                 | Validate Content Attachment Title |
       | system               | http://snomed.info/sct            |
-      | value                | 887701000000100                   |
-      | version              | 1                                 |
+      | value                | TEST_TYPE                         |
+      | version              | 2000.01.01                        |
       | inverse_version      | 0                                 |
       | json_schema_template | JSON_SCHEMA                       |
     And a Document Pointer exists in the system with the below values for DOCUMENT_WITH_TITLE template
       | property    | value                          |
       | identifier  | 1234567890                     |
-      | type        | 887701000000100                |
+      | type        | TEST_TYPE                      |
       | custodian   | 8FW23                          |
       | subject     | 9278693472                     |
       | contentType | application/pdf                |
@@ -344,7 +393,7 @@ Feature: Producer Update Success scenarios
       | property    | value                                           |
       | identifier  | 1234567890                                      |
       | status      | current                                         |
-      | type        | 887701000000100                                 |
+      | type        | TEST_TYPE                                       |
       | custodian   | 8FW23                                           |
       | subject     | 9278693472                                      |
       | contentType | application/pdf                                 |
@@ -362,14 +411,60 @@ Feature: Producer Update Success scenarios
       | issue_description | Resource updated |
       | message           | Resource updated |
     And Document Pointer "8FW23-1234567890" exists
-      | property    | value                                   |
-      | id          | 8FW23-1234567890                        |
-      | nhs_number  | 9278693472                              |
-      | producer_id | 8FW23                                   |
-      | type        | http://snomed.info/sct\|887701000000100 |
-      | source      | NRLF                                    |
-      | version     | 1                                       |
-      | schemas     | ["Validate Content Attachment Title:1"] |
-      | document    | <document>                              |
-      | created_on  | <timestamp>                             |
-      | updated_on  | <timestamp>                             |
+      | property    | value                                                                    |
+      | id          | 8FW23-1234567890                                                         |
+      | nhs_number  | 9278693472                                                               |
+      | producer_id | 8FW23                                                                    |
+      | type        | http://snomed.info/sct\|TEST_TYPE                                        |
+      | source      | NRLF                                                                     |
+      | version     | 1                                                                        |
+      | schemas     | ["test-name:2000.01.01", "Validate Content Attachment Title:2000.01.01"] |
+      | document    | <document>                                                               |
+      | created_on  | <timestamp>                                                              |
+      | updated_on  | <timestamp>                                                              |
+
+  @integration-only
+  Scenario: Validate update Document Pointer when asid and update content to contact only
+    Given Producer "Aaron Court Mental Health NH" (Organisation ID "8FW23") is requesting to update Document Pointers
+    And Producer "Aaron Court Mental Health NH" is registered in the system for application "DataShare" (ID "z00z-y11y-x22x") with pointer types
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    And the Data Contracts are loaded from the database
+    And a Document Pointer exists in the system with the below values for DOCUMENT_WITH_AUTHOR template
+      | property    | value                        |
+      | identifier  | 1234567890                   |
+      | type        | 736253002                    |
+      | custodian   | 8FW23                        |
+      | subject     | 9278693472                   |
+      | contentType | application/pdf              |
+      | status      | current                      |
+      | url         | ssp://example.org/my-doc.pdf |
+    When Producer "Aaron Court Mental Health NH" updates Document Reference "8FW23-1234567890" from DOCUMENT_WITH_AUTHOR template
+      | property    | value                                    |
+      | identifier  | 1234567890                               |
+      | status      | current                                  |
+      | type        | 736253002                                |
+      | custodian   | 8FW23                                    |
+      | subject     | 9278693472                               |
+      | contentType | application/html                         |
+      | url         | https://example.org/contact-details.html |
+    Then the operation is successful
+    And the response is an OperationOutcome according to the OUTCOME template with the below values
+      | property          | value            |
+      | issue_type        | informational    |
+      | issue_level       | information      |
+      | issue_code        | RESOURCE_UPDATED |
+      | issue_description | Resource updated |
+      | message           | Resource updated |
+    And Document Pointer "8FW23-1234567890" exists
+      | property    | value                                                     |
+      | id          | 8FW23-1234567890                                          |
+      | nhs_number  | 9278693472                                                |
+      | producer_id | 8FW23                                                     |
+      | type        | http://snomed.info/sct\|736253002                         |
+      | source      | NRLF                                                      |
+      | version     | 1                                                         |
+      | schemas     | ["test-name:2000.01.01", "asidcheck-contract:2000.01.01"] |
+      | document    | <document>                                                |
+      | created_on  | <timestamp>                                               |
+      | updated_on  | <timestamp>                                               |
