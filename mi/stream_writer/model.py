@@ -154,18 +154,25 @@ class RecordParams:
         return dimension_type(**asdict(self))
 
 
+class Status(str, Enum):
+    OK = "OK"
+    ERROR = "ERROR"
+
+
 @dataclass
 class ErrorResponse:
     error: str
     error_type: str
     function: str
     trace: str
+    status: Status = Status.ERROR
     metadata: dict = field(default_factory=dict)
 
 
 @dataclass
 class GoodResponse:
-    status: str = "OK"
+    status: Status = Status.OK
+    records_processed: dict[str, int] = None
 
 
 DIMENSION_TYPES = (DocumentType, Patient, Provider)

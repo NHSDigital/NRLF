@@ -1,3 +1,4 @@
+from collections import Counter
 from dataclasses import asdict
 from typing import Union
 
@@ -49,11 +50,13 @@ def _handler(event) -> Union[GoodResponse, ErrorResponse]:
     )
     cursor = connection.cursor()
 
+    records_processed = Counter()
     response = GoodResponse()
     for record in event.records:
         config = EVENT_CONFIG.get(record.event_name)
         if config is None:
             continue
+        records_processed[record.event_name.name] += 1
         image_type = to_snake_case(config.image_type)
         document_pointer: dict = getattr(record.dynamodb, image_type)
         record = RecordParams.from_document_pointer(**document_pointer)
@@ -61,12 +64,16 @@ def _handler(event) -> Union[GoodResponse, ErrorResponse]:
         if type(response) is ErrorResponse:
             break
 
-    connection.commit()
     connection.close()
+
+    if type(response) is GoodResponse:
+        response.records_processed = dict(records_processed)
 
     return response
 
 
 def handler(event, context=None):
-    response = _handler(event=event)
-    return asdict(response)
+    _response = _handler(event=event)
+    response = asdict(_response)
+    print(response)  # noqa
+    return response

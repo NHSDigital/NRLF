@@ -129,7 +129,6 @@ def test__execute_sql_rollback(mocked_sql):
 def test_execute_sql_success(mocked_sql):
     mocked_cursor = mock.Mock(spec=Cursor)
     mocked_cursor.connection = mock.Mock(spec=Connection)
-    mock.Mock(spec=Cursor)
     _execute_sql(cursor=mocked_cursor, statement=None, params=None, identifiers=None)
 
 
