@@ -1,5 +1,9 @@
 # Changelog
 
+## 2023-08-16
+
+- NRLF-561 - Fix forward: Add missing NEWS2 document type data contract
+
 ## 2023-08-14
 
 - NRLF-533 - 409 Conflict error not thrown on duplicate supersede request

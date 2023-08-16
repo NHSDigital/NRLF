@@ -689,6 +689,7 @@ Feature: Producer Create Failure Scenarios
       | 861421000000109  |
       | 736373009        |
       | 1382601000000107 |
+      | 1363501000000100 |
 
   @integration-only
   Scenario: Validate a Document Pointer of type Mental health crisis plan using the asid data contract with both ssp and no ssp and no asid
