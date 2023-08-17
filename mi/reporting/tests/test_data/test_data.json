@@ -1104,32 +1104,26 @@
   "dimension.provider": [
     {
       "provider_id": "5",
-      "provider_suffix": "78lIaSoFcB",
       "provider_name": "kPL1Dz7KzV"
     },
     {
       "provider_id": "3",
-      "provider_suffix": "jqDhN0CgXV",
       "provider_name": "3omKxYG19c"
     },
     {
       "provider_id": "0",
-      "provider_suffix": "DnPW31uoxz",
       "provider_name": "ctKwXaCnHs"
     },
     {
       "provider_id": "1",
-      "provider_suffix": "YP6IyeuGf3",
       "provider_name": "XiDS5j7bWs"
     },
     {
       "provider_id": "4",
-      "provider_suffix": "3d9TQiDR2b",
       "provider_name": "8IN9CMZxO2"
     },
     {
       "provider_id": "2",
-      "provider_suffix": "s0CYHXA1h2",
       "provider_name": "I8nGIcOADM"
     }
   ],

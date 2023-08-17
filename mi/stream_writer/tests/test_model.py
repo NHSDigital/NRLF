@@ -30,9 +30,14 @@ document_pointer_strategy = {
 )
 def test_record_from_document_pointer(**document_pointer):
     record = RecordParams.from_document_pointer(**document_pointer)
+    custodian = document_pointer["custodian"]
+    if document_pointer["custodian_suffix"]:
+        custodian = (
+            document_pointer["custodian"] + "-" + document_pointer["custodian_suffix"]
+        )
+
     assert record == RecordParams(
-        provider_name=document_pointer["custodian"],
-        provider_suffix=document_pointer["custodian_suffix"],
+        provider_name=custodian,
         patient_hash="a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",  # pragma: allowlist secret
         document_type_system=SYSTEM,
         document_type_code=VALUE,

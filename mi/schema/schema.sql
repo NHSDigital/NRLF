@@ -1,9 +1,8 @@
 CREATE TABLE IF NOT EXISTS dimension.provider (
     provider_id SERIAL PRIMARY KEY,
     provider_name VARCHAR(255),
-    provider_suffix VARCHAR(255),
 
-    UNIQUE (provider_name, provider_suffix)
+    UNIQUE (provider_name)
 );
 
 CREATE TABLE IF NOT EXISTS dimension.patient (

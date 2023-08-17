@@ -23,20 +23,13 @@ from mi.reporting.tests.test_data.generate_test_data import (
 from mi.sql_query.model import Sql, SqlQueryEvent
 from mi.stream_writer.constants import DateTimeFormats
 from mi.stream_writer.index import EVENT_CONFIG
-from mi.stream_writer.model import Action, DynamoDBEventConfig, GoodResponse
+from mi.stream_writer.model import Action, DynamoDBEventConfig
 from mi.stream_writer.tests.paths import PATH_TO_TEST_DATA
-from mi.stream_writer.utils import hash_nhs_number
+from mi.stream_writer.utils import hash_nhs_number, invoke_stream_writer
 from nrlf.core.types import DynamoDbClient
-from nrlf.core.validators import json_loads
 
 ASCII = list(string.ascii_lowercase + string.ascii_uppercase + string.digits)
-RESOURCE_PREFIX = "nhsd-nrlf"
-LAMBDA_NAME = RESOURCE_PREFIX + "--{workspace}--mi--stream_writer"
 N_INITIAL_RECORDS = 20
-
-
-def get_lambda_name(workspace: str) -> str:
-    return LAMBDA_NAME.format(workspace=workspace)
 
 
 def _create_report_query(credentials: dict, endpoint: str):
@@ -77,17 +70,6 @@ def _dynamodb_stream_event(
     event_str = event_str.replace("<<EVENT_NAME>>", event_name)
     event_str = event_str.replace("<<IMAGE_TYPE>>", image_type)
     return json.loads(event_str)  # noqa
-
-
-def _invoke_stream_writer(session, workspace: str, event: dict) -> GoodResponse:
-    client = session.client("lambda")
-    function_name = get_lambda_name(workspace=workspace)
-    result = client.invoke(FunctionName=function_name, Payload=json.dumps(event))
-    response_payload = result["Payload"].read().decode("utf-8")
-    response: dict = json_loads(response_payload)
-    if response.get("error") or response.get("errorMessage"):
-        pytest.fail(f"There was an error with the lambda:\n {response_payload}")
-    return GoodResponse(**response)
 
 
 @pytest.fixture(scope="session")
@@ -200,7 +182,7 @@ def test_e2e_with_report(
         )
         records += _event["Records"]
     assert len(records) == N_INITIAL_RECORDS
-    response = _invoke_stream_writer(
+    response = invoke_stream_writer(
         session=session, workspace=workspace, event={"Records": records}
     )
     assert sum(response.records_processed.values()) == N_INITIAL_RECORDS

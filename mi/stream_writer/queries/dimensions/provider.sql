@@ -1,10 +1,8 @@
 INSERT INTO dimension.provider
 (
-    provider_name,
-    provider_suffix
+    provider_name
 )
 VALUES (
-   %(provider_name)s,
-   %(provider_suffix)s
+   %(provider_name)s
 )
-ON CONFLICT (provider_name, provider_suffix) DO NOTHING
+ON CONFLICT (provider_name) DO NOTHING
