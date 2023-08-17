@@ -57,7 +57,6 @@ def _column_names_from_sql_query(query: str):
     return column_names
 
 
-@log("Querying lambda")
 def perform_query(
     session, workspace: str, event: SqlQueryEvent
 ) -> list[dict[str, any]]:

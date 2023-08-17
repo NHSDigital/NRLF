@@ -1,9 +1,8 @@
 CREATE TABLE IF NOT EXISTS dimension.provider (
     provider_id SERIAL PRIMARY KEY,
     provider_name VARCHAR(255),
-    provider_suffix VARCHAR(255),
 
-    UNIQUE (provider_name, provider_suffix)
+    UNIQUE (provider_name)
 );
 
 CREATE TABLE IF NOT EXISTS dimension.patient (
@@ -56,7 +55,7 @@ CREATE TABLE IF NOT EXISTS fact.measure (
     count_created INTEGER,
     count_deleted INTEGER,
 
-    partition_key VARCHAR(255) NULL, -- NB: used for isolating test data
+    partition_key VARCHAR(255) DEFAULT '', -- NB: used for isolating test data
     CONSTRAINT PK_measure PRIMARY KEY (year, month, day, patient_id, provider_id, document_type_id),
     FOREIGN KEY (provider_id) REFERENCES dimension.provider (provider_id),
     FOREIGN KEY (patient_id) REFERENCES dimension.patient (patient_id),

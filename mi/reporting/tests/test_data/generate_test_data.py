@@ -48,7 +48,6 @@ class Measure:
 @dataclass
 class Provider(Dimension):
     provider_id: str
-    provider_suffix: str = field(default_factory=generate_random_string)
     provider_name: str = field(default_factory=generate_random_string)
 
 

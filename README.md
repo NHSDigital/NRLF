@@ -649,13 +649,15 @@ This is because it will use that value to tag the commit once its been merged in
 
 ## Generating MI reports
 
-MI reports can be generated in CSV format by running (note: `?` indicates optional that `partition_key` is to indicate the key used to generate test data, described after):
+MI reports can be generated in CSV format by running:
+
+(notes: `?` indicates optional, `partition_key` is used to indicate the key used to generate test data, described after)
 
 ```
 nrlf mi report <env> <?workspace> <?partition_key>
 ```
 
-For standard reports, both `workspace` and `partition_key` can be omitted, however for testing purposes you should `workspace`. If you would like to use test data (found in `mi/reporting/tests/test_data/test_data.json`) then you can do:
+For standard reports (i.e. on persistent environments), both `workspace` and `partition_key` can be omitted, however for testing purposes you should `workspace`. If you would like to use test data (found in `mi/reporting/tests/test_data/test_data.json`) then you can do:
 
 ```
 nrlf mi seed-db <partition_key>

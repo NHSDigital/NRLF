@@ -43,13 +43,14 @@ def validate(validator: dict[str, re.Pattern], results: list[dict], report_name:
 def parse_results(path: str):
     with open(path) as f:
         results = list(DictReader(f=f))
-    assert len(results) > 0
     return results
 
 
 def make_reports(session, env: str, workspace: str = None, partition_key=None):
     if workspace is None:
         workspace = env
+    if partition_key is None:
+        partition_key = ""
 
     for report_name, event in each_stored_query_event(
         session=session, workspace=workspace, env=env, partition_key=partition_key
@@ -63,8 +64,11 @@ def make_reports(session, env: str, workspace: str = None, partition_key=None):
             partition_key=partition_key,
         )
         results = parse_results(path=report_path)
-        validator = get_validator(report_name=report_name)
-        validate(validator=validator, results=results, report_name=report_name)
+        if results:
+            validator = get_validator(report_name=report_name)
+            validate(validator=validator, results=results, report_name=report_name)
+        else:
+            print("\tNote: no results found")  # noqa
 
 
 def _make_reports(env: str, workspace: str = None, partition_key=None):

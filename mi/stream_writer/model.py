@@ -97,7 +97,6 @@ class Patient(Dimension):
 @dataclass(init=False)
 class Provider(Dimension):
     provider_name: str
-    provider_suffix: str
 
 
 DimensionType = TypeVar("DimensionType", bound=Dimension)
@@ -115,7 +114,6 @@ class RecordParams:
     """
 
     provider_name: str
-    provider_suffix: str
     patient_hash: str
     document_type_system: str
     document_type_code: str
@@ -138,9 +136,11 @@ class RecordParams:
         created_date = date_time.strftime(DateTimeFormats.FACT_FORMAT)
         created_date_weekday = date_time.weekday()
         patient_hash = hash_nhs_number(nhs_number=nhs_number)
+        provider_name = custodian
+        if custodian_suffix:
+            provider_name += f"-{custodian_suffix}"
         return cls(
-            provider_name=custodian,
-            provider_suffix=custodian_suffix,
+            provider_name=provider_name,
             patient_hash=patient_hash,
             document_type_system=system,
             document_type_code=value,
