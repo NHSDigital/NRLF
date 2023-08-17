@@ -8,6 +8,7 @@ UPPER_LOWER_CASE_BOUNDARY_RE = re.compile("(.)([A-Z][a-z]+)")
 UPPER_TO_LOWER_WITH_UNDERSCORE_RE = re.compile("([a-z0-9])([A-Z])")
 UNDERSCORE_SUB = r"\1_\2"
 TYPE_SEPARATOR = "|"
+DocumentPointerPkPrefix = "D#"
 
 
 class DateTimeFormats:

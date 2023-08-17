@@ -2,11 +2,15 @@ import string
 from unittest import mock
 
 import pytest
+from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
+    StreamRecord,
+)
 from hypothesis import given
 from hypothesis.strategies import (
     booleans,
     builds,
     dictionaries,
+    from_regex,
     lists,
     sampled_from,
     text,
@@ -22,7 +26,7 @@ from mi.stream_writer.model import (
 )
 from mi.stream_writer.psycopg2 import connection as Connection
 from mi.stream_writer.psycopg2 import cursor as Cursor
-from mi.stream_writer.utils import hash_nhs_number, to_snake_case
+from mi.stream_writer.utils import hash_nhs_number, is_document_pointer, to_snake_case
 
 ASCII = list(string.ascii_lowercase + string.ascii_uppercase + string.digits)
 
@@ -141,7 +145,7 @@ def test_insert_mi_record_without_not_null_constraint(
     record: RecordParams, dimension_types: list[Dimension], mocked_execute_sql
 ):
     insert_mi_record(
-        record=record,
+        record_params=record,
         sql=None,
         cursor=None,
         dimension_types=tuple(dimension_types),
@@ -171,7 +175,7 @@ def test_insert_mi_record_with_not_null_contraint(
         "mi.stream_writer.event_handling._execute_sql", side_effect=expected_calls
     ) as mocked__execute_sql:
         response = insert_mi_record(
-            record=record,
+            record_params=record,
             sql=None,
             cursor=None,
             dimension_types=tuple(dimension_types),
@@ -200,7 +204,7 @@ def test_insert_mi_record_with_any_other_pg_error(
     error = _IntegrityError(pgcode="oops")
     mocked_execute_sql.side_effect = [error]
     response = insert_mi_record(
-        record=record,
+        record_params=record,
         sql=None,
         cursor=None,
         dimension_types=tuple(dimension_types),
@@ -215,3 +219,31 @@ def test_insert_mi_record_with_any_other_pg_error(
         trace=response.trace,
         function="mi.stream_writer.event_handling.insert_mi_record",
     )
+
+
+@given(
+    pk=from_regex(r"^D#.*"),
+    other_keys=dictionaries(keys=text(), values=text()),
+)
+def test_is_document_pointer_pass(pk: str, other_keys: dict):
+    assert is_document_pointer(pk=pk, **other_keys)
+
+
+@given(pk=from_regex(r"^D#.*"), sk=text())
+def test_is_document_pointer_pass_from_dynamodb_record(pk: str, sk: str):
+    stream_record = StreamRecord({"Keys": {"pk": {"S": pk}, "sk": {"S": sk}}})
+    assert is_document_pointer(**stream_record.keys)
+
+
+@given(
+    pk=from_regex(r"^[a-zA-Z[D]]#.*"),
+    other_keys=dictionaries(keys=text(), values=text()),
+)
+def test_is_document_pointer_fail(pk: str, other_keys: dict):
+    assert not is_document_pointer(pk=pk, **other_keys)
+
+
+@given(pk=from_regex(r"^[a-zA-Z[D]]#.*"), sk=text())
+def test_is_document_pointer_fail_from_dynamodb_record(pk: str, sk: str):
+    stream_record = StreamRecord({"Keys": {"pk": {"S": pk}, "sk": {"S": sk}}})
+    assert not is_document_pointer(**stream_record.keys)

@@ -36,7 +36,9 @@ def catch_error(log_fields: list[str] = None) -> Callable[[T], T]:
                     trace=traceback.format_exc(),
                     metadata=metadata,
                 )
-            print(f"{fn.__module__}.{fn.__name__}: ({metadata}):", response)  # noqa
+            print(  # noqa
+                f"{fn.__module__}.{fn.__name__}: (metadata={metadata}):", response
+            )
             return response
 
         return wrapper
@@ -64,7 +66,7 @@ def _execute_sql(
 
 @catch_error(log_fields=["document_pointer"])
 def insert_mi_record(
-    record: RecordParams,
+    record_params: RecordParams,
     sql: str,
     cursor: Cursor,
     dimension_types: tuple[type[Dimension]] = DIMENSION_TYPES,
@@ -72,7 +74,7 @@ def insert_mi_record(
     not_null_violation: str = NOT_NULL_VIOLATION,
 ) -> GoodResponse:
     insert_record = partial(
-        _execute_sql, cursor=cursor, statement=sql, params=asdict(record)
+        _execute_sql, cursor=cursor, statement=sql, params=asdict(record_params)
     )
     # Try to insert the Fact
     try:
@@ -85,7 +87,7 @@ def insert_mi_record(
 
     # On NOT NULL CONSTRAINT, insert Dimensions first
     for dimension_type in dimension_types:
-        dim = record.to_dimension(dimension_type=dimension_type)
+        dim = record_params.to_dimension(dimension_type=dimension_type)
         _execute_sql(cursor=cursor, statement=dim.sql, params=asdict(dim))
     insert_record()
     return GoodResponse()

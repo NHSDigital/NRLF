@@ -20,7 +20,7 @@ from mi.stream_writer.model import (
     SecretsManagerCache,
 )
 from mi.stream_writer.psycopg2 import psycopg2
-from mi.stream_writer.utils import to_snake_case
+from mi.stream_writer.utils import is_document_pointer, to_snake_case
 
 EVENT_CONFIG = {
     DynamoDBRecordEventName.INSERT: DynamoDBEventConfig(
@@ -53,14 +53,21 @@ def _handler(event) -> Union[GoodResponse, ErrorResponse]:
     records_processed = Counter()
     response = GoodResponse()
     for record in event.records:
+        if not is_document_pointer(**record.dynamodb.keys):
+            continue
+
         config = EVENT_CONFIG.get(record.event_name)
         if config is None:
             continue
-        records_processed[record.event_name.name] += 1
+
         image_type = to_snake_case(config.image_type)
         document_pointer: dict = getattr(record.dynamodb, image_type)
-        record = RecordParams.from_document_pointer(**document_pointer)
-        response = insert_mi_record(record=record, sql=config.sql, cursor=cursor)
+
+        record_params = RecordParams.from_document_pointer(**document_pointer)
+        response = insert_mi_record(
+            record_params=record_params, sql=config.sql, cursor=cursor
+        )
+        records_processed[record.event_name.name] += 1
         if type(response) is ErrorResponse:
             break
 
