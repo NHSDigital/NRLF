@@ -35,7 +35,7 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
 9. [Sandbox](#sandbox)
 10. [Firehose](#firehose)
 11. [Releases](#releases)
-12. [Generating MI Reports](#generating-mi-reports)
+12. [MI System and Reports](#management-information-mi-system)
 
 ---
 
@@ -647,31 +647,70 @@ The CI pipeline will check to make sure you have done this to prevent any mistak
 
 This is because it will use that value to tag the commit once its been merged into main as a reference point, and this is how it tracks which release it is as github actions struggles with post merge branch identification
 
-## Generating MI reports
+## Management Information (MI) System
 
-MI reports can be generated in CSV format by running:
+The purpose and architecture of the MI system are described [here](link).
 
-(notes: `?` indicates optional, `partition_key` is used to indicate the key used to generate test data, described after)
+### Database Administration
 
-```
-nrlf mi report <env> <?workspace> <?partition_key>
-```
+There is one _shared_ MI Postgres database instance per AWS account and is therefore managed in the `account_wide` Terraform directory. The root username and password (which can be used to create databases, users, tables etc) are defined as secrets, which are automatically created by Terraform for that AWS account.
 
-For standard reports (i.e. on persistent environments), both `workspace` and `partition_key` can be omitted, however for testing purposes you should `workspace`. If you would like to use test data (found in `mi/reporting/tests/test_data/test_data.json`) then you can do:
+Database administration for each workspace in an AWS account are defined in `terraform/infrastructure/modules/postgres_cluster/database_administration.tf`. This will (after every `terraform plan`):
+
+- DROP the database for the current workspace, in non-persistent environments (to drop the database in persistent environments a manual DROP query will be required)
+- CREATE an empty workspace database, if it doesn't already exist
+- CREATE roles, users and schemas in the workspace database
+- CREATE tables, if they don't already exist, from the SQL schemas defined in `mi/schema/*sql`
+
+### Executing "Manual" SQL Statements
+
+As described in [here](link), the "SQL Query Lambda" acts as the equivalent of a bastion server. The event model expected by the lambda is given in `mi/sql_query/model.py::SqlQueryEvent`, and examples of queries can be found in each `input` in `database_administration.tf`.`. Note that the username for a given workspace is either `<workspace_name>-read`or`<workspace_name>-write` (depending on the operation) and corresponding password for the user is stored as a secret. The default database for the lambda is the workspace database. If you wish to perform root-level operations you will need to use the default database name as defined in the account wide infrastructure terraform for the given AWS account.
+
+### Reports (reading from the MI database)
+
+MI reports are generated for each SQL file in `mi/reporting/queries`. For example:
+
+- `fact.measures.sql` will return all rows in the `measure` table
+- `dimension.document_types.sql` will return all rows in the `document_type` table
+- `dimension.patients.sql` will return all rows in the `patient` table
+- `dimension.providers.sql` will return all rows in the `provider` table
+- `report.nrl-210.provider_statistics.sql` will return the report defined in NRL-210
+- `report.nrl-212.provider_snapshot.sql` will return the report defined in NRL-212
+- `report.nrl-218.provider_last_interaction.sql` will return the report defined in NRL-218
+
+#### Seed data for testing reports
+
+If you would like to use test data (found in `mi/reporting/tests/test_data/test_data.json`) then you can do:
 
 ```
 nrlf mi seed-db <partition_key>
 ```
 
-which will seed an amended version of the test data into the database for your current workspace, which uses the `partition_key` to make the test data unique. You can then run the previous `nrlf mi report` command with your `workspace` and `partition_key` to build reports based on the test data.
+which will seed an amended version of the test data into your workspace database, using `partition_key` to make the test data unique. You can then use this when testing reports.
+
+#### Generating reports
+
+All MI reports will be generated in CSV format by running:
+
+(notes: `?` indicates optional)
+
+```
+nrlf mi report <env> <?workspace> <?start_date> <?end_date> <?partition_key>
+```
+
+where:
+
+```
+env:           The environment name (`dev`, `ref`, `int`, `prod`)
+workspace:     The workspace name (defaults to the environment name)
+start_date:    For reports which specify a `start_date` (defaults to one week ago from today)
+end_date:      For reports which specify a `end_date` (default to 7 days after `start_date`)
+partition_key: For generating reports from test data (see above, default to using non-test data when omitted). This is not used in the `dimension` reports since the partition key does not exist in these tables.
+```
 
 All reports, test or otherwise, are saved to `mi/reporting/report`.
 
-### Creating or amending report queries
-
-Report queries are SQL files that can be found in `mi/reporting/queries`.
-
-#### Checking that your report queries create valid reports
+#### Report validation
 
 The standard (pytest) integration tests will run all reports against test data, and additionally provide regex validation using matching files found under `mi/reporting/queries/test_validation`. For example, if a report query file `mi/reporting/queries/my_report.sql` exists, then a corresponding validation file is also expected to exist called `mi/reporting/queries/test_validation/my_report.yaml` with the form:
 
