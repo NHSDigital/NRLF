@@ -7,7 +7,12 @@ import yaml
 from helpers.aws_session import new_session_from_env
 from mi.reporting.actions import each_stored_query_event, perform_query, write_csv
 from mi.reporting.constants import VALIDATOR_PATH
-from mi.reporting.resources import hash_str_to_int
+from mi.reporting.resources import (
+    BadDateError,
+    hash_str_to_int,
+    validate_or_create_end_date,
+    validate_or_create_start_date,
+)
 
 
 class ReportValidationError(ValueError):
@@ -46,14 +51,26 @@ def parse_results(path: str):
     return results
 
 
-def make_reports(session, env: str, workspace: str = None, partition_key=None):
+def make_reports(
+    session,
+    env: str,
+    workspace: str = None,
+    partition_key=None,
+    start_date: str = None,
+    end_date: str = None,
+):
     if workspace is None:
         workspace = env
     if partition_key is None:
         partition_key = ""
 
     for report_name, event in each_stored_query_event(
-        session=session, workspace=workspace, env=env, partition_key=partition_key
+        session=session,
+        workspace=workspace,
+        env=env,
+        partition_key=partition_key,
+        start_date=start_date,
+        end_date=end_date,
     ):
         data = perform_query(session=session, workspace=workspace, event=event)
         report_path = write_csv(
@@ -71,14 +88,30 @@ def make_reports(session, env: str, workspace: str = None, partition_key=None):
             print("\tNote: no results found")  # noqa
 
 
-def _make_reports(env: str, workspace: str = None, partition_key=None):
+def _make_reports(
+    env: str,
+    workspace: str = None,
+    partition_key: str = None,
+    start_date: str = None,
+    end_date: str = None,
+):
     if partition_key is not None:
         partition_key = str(hash_str_to_int(key=partition_key))
+    start_date = validate_or_create_start_date(start_date=start_date)
+    end_date = validate_or_create_end_date(start_date=start_date, end_date=end_date)
+
+    if start_date > end_date:
+        raise BadDateError(f"Start date {start_date} is after end date {end_date}")
 
     session = new_session_from_env(env=env)
     try:
         make_reports(
-            session=session, env=env, workspace=workspace, partition_key=partition_key
+            session=session,
+            env=env,
+            workspace=workspace,
+            partition_key=partition_key,
+            start_date=start_date,
+            end_date=end_date,
         )
     except ReportValidationError as err:
         print("\n❗❗❗ Validation error found in the previous report: ")  # noqa: T201
