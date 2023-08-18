@@ -18,3 +18,6 @@ SQL_SELECT_SEPARATOR = ","
 SQL_ALIAS_SEPARATOR_REGEX = re.compile(
     r"\sas\s|\sAS\s"  # SELECT x AS y (incl. whitespace around AS)
 )
+SQL_FUNCTION_PARAMS_REGEX = re.compile(r"\(.*,.*\)")
+
+DATE_PATTERN = r"%Y-%m-%d"

@@ -31,7 +31,12 @@ def test_make_query_event(
     _mock_get_credentials, _mock_get_endpoint, _mock_each_sql_statement
 ):
     ((report_name, query_event),) = each_stored_query_event(
-        session=None, workspace=None, env=None, partition_key="party_key"
+        session=None,
+        workspace=None,
+        env=None,
+        partition_key="party_key",
+        start_date="start",
+        end_date="end",
     )
     assert report_name == "report"
     assert query_event.dict() == {
@@ -42,7 +47,11 @@ def test_make_query_event(
         "raise_on_sql_error": False,
         "sql": {
             "identifiers": {},
-            "params": {"partition_key": "party_key"},
+            "params": {
+                "partition_key": "party_key",
+                "start_date": "start",
+                "end_date": "end",
+            },
             "statement": "sql",
         },
         "user": "foo",
@@ -68,6 +77,10 @@ def test_make_query_event(
             # This example ensures that the "as" in "hash" isn't picked up in the regex
             "SELECT patient_id, patient_hash FROM dimension.patient;",
             ["patient_id", "patient_hash"],
+        ),
+        (
+            "SELECT SOME_FUNCTION(foo, bar) AS last_interaction_date FROM my_table;",
+            ["last_interaction_date"],
         ),
     ],
 )
