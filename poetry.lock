@@ -89,17 +89,17 @@ validation = ["fastjsonschema (>=2.14.5,<3.0.0)"]
 
 [[package]]
 name = "awscli"
-version = "1.29.12"
+version = "1.29.30"
 description = "Universal Command Line Environment for AWS."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "awscli-1.29.12-py3-none-any.whl", hash = "sha256:d3644851eb82450356f719604e4a2e9143c9d329791356c71d65709b6299eb2c"},
-    {file = "awscli-1.29.12.tar.gz", hash = "sha256:7cd1d7047d64e89c9609650ba169633942b2480252ff497c6aa8ee3f4ae327c2"},
+    {file = "awscli-1.29.30-py3-none-any.whl", hash = "sha256:3805a54d35a4675a7017a292af1f90ad60fe8f15cc867e792f07d437ccb9974e"},
+    {file = "awscli-1.29.30.tar.gz", hash = "sha256:ca96a8090f106c3d18e998b872f1ce9f85565e5e06f142fbf9a1a37b1ff97681"},
 ]
 
 [package.dependencies]
-botocore = "1.31.12"
+botocore = "1.31.30"
 colorama = ">=0.2.5,<0.4.5"
 docutils = ">=0.10,<0.17"
 PyYAML = ">=3.10,<6.1"
@@ -188,17 +188,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.28.12"
+version = "1.28.30"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.28.12-py3-none-any.whl", hash = "sha256:cfcb20d5784428f31d89889e68b26efeda90f231c3119eef4af8b25ad405c55f"},
-    {file = "boto3-1.28.12.tar.gz", hash = "sha256:d5ac6599951fdd519ed26c6fe15c41a7aa4021cb9adce33167344f8ce5cdb07b"},
+    {file = "boto3-1.28.30-py3-none-any.whl", hash = "sha256:e095ede98d3680e65966ab71f273b7d86938f5d853773ef96f4cb646277c2a4b"},
+    {file = "boto3-1.28.30.tar.gz", hash = "sha256:2b509a959966a572f15db5768a18066ce1f53022ac53fca9421c620219fa3998"},
 ]
 
 [package.dependencies]
-botocore = ">=1.31.12,<1.32.0"
+botocore = ">=1.31.30,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -207,13 +207,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.12"
+version = "1.31.30"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.12-py3-none-any.whl", hash = "sha256:86380672151866b5e425636e3ebad74f2b83e7163e36ef5d38d11a04b9cba33b"},
-    {file = "botocore-1.31.12.tar.gz", hash = "sha256:7e5db466c762a071bb58c9a39d070f1333ce4f4ba6fdf9820ba21e87bd4c7e29"},
+    {file = "botocore-1.31.30-py3-none-any.whl", hash = "sha256:269f20dcadd8dfd0c26d0e6fbceb84814ff6638ff3aafcc5324b9fb9949a7051"},
+    {file = "botocore-1.31.30.tar.gz", hash = "sha256:3cf6a9d7621b897c9ff23cd02113826141b3dd3d7e90273b661efc4dc05f84e2"},
 ]
 
 [package.dependencies]
@@ -2117,21 +2117,6 @@ docs = ["furo", "sphinx", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-not
 tests = ["pytest", "pytest-cov"]
 
 [[package]]
-name = "webcolors"
-version = "1.13"
-description = "A library for working with the color formats defined by HTML and CSS."
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "webcolors-1.13-py3-none-any.whl", hash = "sha256:29bc7e8752c0a1bd4a1f03c14d6e6a72e93d82193738fa860cbff59d0fcc11bf"},
-    {file = "webcolors-1.13.tar.gz", hash = "sha256:c225b674c83fa923be93d235330ce0300373d02885cef23238813b0d5668304a"},
-]
-
-[package.extras]
-docs = ["furo", "sphinx", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinxext-opengraph"]
-tests = ["pytest", "pytest-cov"]
-
-[[package]]
 name = "werkzeug"
 version = "2.3.6"
 description = "The comprehensive WSGI web application library."
@@ -2246,4 +2231,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "64d76e80e2b97e22a41b5e0954515a0aae2e9f455e546c60fe3ed173ec7a285d"
+content-hash = "37c89a6173cb7c146066f2df444f196c812a0fe0b8c2e9aee3f92c8e01349ab1"
