@@ -245,17 +245,17 @@ jobs:
           role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
           aws-region: eu-west-2
 
-      - name: Generate Documentation
-        run: |
-          source .venv/bin/activate
-          source nrlf.sh
-          nrlf doc generate default
+      # - name: Generate Documentation
+      #   run: |
+      #     source .venv/bin/activate
+      #     source nrlf.sh
+      #     nrlf doc generate default
 
-      - name: Push Documentation
-        run: |
-          source .venv/bin/activate
-          source nrlf.sh
-          nrlf doc push prod
+      # - name: Push Documentation
+      #   run: |
+      #     source .venv/bin/activate
+      #     source nrlf.sh
+      #     nrlf doc push prod
 
   set-success:
     name: Set Success
