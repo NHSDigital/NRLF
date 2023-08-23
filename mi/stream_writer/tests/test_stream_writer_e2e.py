@@ -23,8 +23,9 @@ from mi.reporting.tests.test_data.generate_test_data import (
 from mi.sql_query.model import Sql, SqlQueryEvent
 from mi.stream_writer.constants import DateTimeFormats
 from mi.stream_writer.index import EVENT_CONFIG
-from mi.stream_writer.model import Action, DynamoDBEventConfig, GoodResponse
+from mi.stream_writer.model import Action, DynamoDBEventConfig, MiResponses
 from mi.stream_writer.tests.paths import PATH_TO_TEST_DATA
+from mi.stream_writer.tests.stream_writer_helpers import dynamodb_stream_event
 from mi.stream_writer.utils import hash_nhs_number
 from nrlf.core.types import DynamoDbClient
 from nrlf.core.validators import json_loads
@@ -66,28 +67,13 @@ def _create_fact_query(credentials: dict, endpoint: str):
     )
 
 
-def _dynamodb_stream_event(
-    unique_id: str, created_on: str, image_type: str, event_name: str
-) -> dict:
-    event_path = PATH_TO_TEST_DATA / "dynamodb_stream_event.json"
-    with open(event_path) as file:
-        event_str = file.read()
-    event_str = event_str.replace("<<UNIQUE_ID>>", unique_id)
-    event_str = event_str.replace("<<CREATED_ON>>", created_on)
-    event_str = event_str.replace("<<EVENT_NAME>>", event_name)
-    event_str = event_str.replace("<<IMAGE_TYPE>>", image_type)
-    return json.loads(event_str)  # noqa
-
-
-def _invoke_stream_writer(session, workspace: str, event: dict) -> GoodResponse:
+def _invoke_stream_writer(session, workspace: str, event: dict) -> MiResponses:
     client = session.client("lambda")
     function_name = get_lambda_name(workspace=workspace)
     result = client.invoke(FunctionName=function_name, Payload=json.dumps(event))
     response_payload = result["Payload"].read().decode("utf-8")
     response: dict = json_loads(response_payload)
-    if response.get("error") or response.get("errorMessage"):
-        pytest.fail(f"There was an error with the lambda:\n {response_payload}")
-    return GoodResponse(**response)
+    return MiResponses(**response)
 
 
 @pytest.fixture(scope="session")
@@ -181,7 +167,7 @@ def test_e2e_with_report(
     event_name, config = event_config
     timestamp = dt.now()
     unique_id = timestamp.strftime(DateTimeFormats.DOCUMENT_POINTER_FORMAT)
-    event = _dynamodb_stream_event(
+    event = dynamodb_stream_event(
         unique_id=unique_id,
         created_on=unique_id,
         event_name=event_name.name,
@@ -192,7 +178,7 @@ def test_e2e_with_report(
     # to ensure that there is some initial state in the db
     records = []
     for i in range(N_INITIAL_RECORDS):
-        _event = _dynamodb_stream_event(
+        _event = dynamodb_stream_event(
             unique_id=unique_id + str(i),
             created_on=unique_id,
             event_name=event_name.name,
@@ -203,7 +189,10 @@ def test_e2e_with_report(
     response = _invoke_stream_writer(
         session=session, workspace=workspace, event={"Records": records}
     )
-    assert sum(response.records_processed.values()) == N_INITIAL_RECORDS
+    assert (
+        len(response.error_responses) + len(response.successful_responses)
+        == N_INITIAL_RECORDS
+    )
 
     # Get the initial state of the report to use later to perform a diff
     initial_report = execute_report_query()
@@ -337,7 +326,7 @@ def test_e2e_modify_events_do_nothing(
     # Create the test event (use timestamp as unique id to force create new dimensions)
     timestamp = dt.now()
     unique_id = timestamp.strftime(DateTimeFormats.DOCUMENT_POINTER_FORMAT)
-    event = _dynamodb_stream_event(
+    event = dynamodb_stream_event(
         unique_id=unique_id, event_name="MODIFY", image_type="", created_on=unique_id
     )
 
@@ -359,3 +348,52 @@ def test_e2e_modify_events_do_nothing(
     assert final_report == initial_report
     assert final_facts == initial_facts
     assert final_dimensions == initial_dimensions
+
+
+@pytest.mark.integration
+def test_e2e_s3_bucket_is_populated(
+    session,
+    workspace,
+    report_query: SqlQueryEvent,
+    dimension_queries: dict[type[Dimension], SqlQueryEvent],
+    fact_query: SqlQueryEvent,
+):
+    # Create the test event (use timestamp as unique id to force create new dimensions)
+    timestamp = dt.now()
+    unique_id = timestamp.strftime(DateTimeFormats.DOCUMENT_POINTER_FORMAT)
+    event = dynamodb_stream_event(
+        unique_id=unique_id,
+        event_name="INSERT",
+        image_type="NewImage",
+        created_on=unique_id,
+    )
+    event_id = "test_event_id"
+    event["Records"][0]["eventID"] = event_id
+
+    record: dict = event["Records"][0]["dynamodb"]["NewImage"]
+    record.pop("custodian")
+
+    responses = _invoke_stream_writer(session=session, workspace=workspace, event=event)
+
+    unique_id = responses.unique_id
+    bucket_key = f"{unique_id}/{event_id}.json"
+    s3_client = session.client("s3")
+
+    tf_json = get_terraform_json()
+    bucket_name = tf_json["mi"]["value"]["s3_mi_errors_bucket"]
+
+    error_object = s3_client.get_object(
+        Bucket=bucket_name,
+        Key=bucket_key,
+    )
+    response_payload = error_object["Body"].read().decode("utf-8")
+    response: dict = json_loads(response_payload)
+
+    assert (
+        response["error"]
+        == "from_document_pointer() missing 1 required positional argument: 'custodian'"
+    )
+    assert response["error_type"] == "TypeError"
+    assert response["function"] == "mi.stream_writer.index._handler"
+    assert response["status"] == "ERROR"
+    assert response["metadata"] == {"event": event}
