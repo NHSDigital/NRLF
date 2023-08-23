@@ -1,16 +1,6 @@
-from enum import Enum
-
 import requests
 
 DUMMY_URL = "http://example.com"
-
-
-class LogReference(Enum):
-    PARSE_EVENT = "Parsing S3 bucket and key from event"
-    READ_BODY = "Reading event body from S3 bucket and key"
-    PARSE_BODY = "Parsing event body as JSON"
-    IS_ERROR_EVENT = "Checking whether this is a true error event"
-    SEND_NOTIFICATION = "Sending notification"
 
 
 def parse_event(event: dict) -> tuple[str, str]:
