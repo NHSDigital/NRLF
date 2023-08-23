@@ -247,8 +247,7 @@ function _terraform_plan() {
     -out="$plan_file" \
     -var-file="$var_file" \
     -var "assume_account=${aws_account_id}" \
-    -var "assume_role=${TERRAFORM_ROLE_NAME}" \
-    $args || return 1
+    -var "assume_role=${TERRAFORM_ROLE_NAME}" || return 1
 }
 
 
