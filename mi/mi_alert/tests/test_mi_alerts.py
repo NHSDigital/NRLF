@@ -5,7 +5,6 @@ from uuid import uuid4
 
 import pytest
 from lambda_utils.logging import LogTemplate
-from pydantic import ValidationError
 
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
@@ -28,11 +27,8 @@ def trawl_logs(
             startTime=start_time,
             endTime=int(time.time() * SECONDS_TO_MILLISECONDS),
         )
-        for event in response["events"]:
-            try:
-                yield event["message"]
-            except ValidationError:
-                pass
+
+        yield from (event["message"] for event in response["events"])
 
 
 @pytest.fixture(scope="session")
