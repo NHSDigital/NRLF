@@ -1,8 +1,10 @@
+import datetime
 import os
 from dataclasses import asdict, dataclass, field, fields
 from datetime import datetime as dt
 from enum import Enum
 from typing import Optional, TypeVar
+from uuid import uuid4
 
 from pydantic import BaseModel
 
@@ -16,6 +18,7 @@ class Environment(BaseModel):
     RDS_CLUSTER_PORT: int
     POSTGRES_USERNAME: str
     POSTGRES_PASSWORD: str
+    MI_S3_ERROR_BUCKET: str
 
     @classmethod
     def construct(cls) -> "Environment":
@@ -64,7 +67,7 @@ class DynamoDBEventConfig(BaseModel):
 
     @property
     def sql(self):
-        with open(f"{PATH_TO_QUERIES}/{self.action}.sql") as f:
+        with open(f"{PATH_TO_QUERIES}/{self.action.value}.sql") as f:
             return f.read()
 
 
@@ -172,7 +175,15 @@ class ErrorResponse:
 @dataclass
 class GoodResponse:
     status: Status = Status.OK
-    records_processed: dict[str, int] = None
+
+
+@dataclass
+class MiResponses:
+    unique_id: str = field(
+        default_factory=lambda: datetime.date.today().isoformat() + str(uuid4())
+    )
+    error_responses: list[ErrorResponse] = field(default_factory=list)
+    successful_responses: list[GoodResponse] = field(default_factory=list)
 
 
 DIMENSION_TYPES = (DocumentType, Patient, Provider)
