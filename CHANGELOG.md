@@ -1,5 +1,11 @@
 # Changelog
 
+## 2023-08-21
+
+- NRLF-669 - Changelog now uses rendered markdown
+- NRLF-653 - Producer MI - Create data model and insert into database
+- NRLF-583 - Remove 'newman' from APIGEE proxies (APIGEE repos only)
+
 ## 2023-08-16
 
 - NRLF-561 - Fix forward: Add missing NEWS2 document type data contract
