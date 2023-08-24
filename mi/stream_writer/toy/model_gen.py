@@ -1,57 +1,104 @@
-from copy import deepcopy
-from pydantic import BaseModel, Field
-from polyfactory.factories.pydantic_factory import ModelFactory
-from typing import Literal
-from pydantic import BaseModel, Field
 from datetime import datetime as dt
-from mi.stream_writer.index import EVENT_CONFIG
+import random
+from typing import Literal
+from more_itertools import ichunked
 
+from polyfactory.factories.pydantic_factory import ModelFactory
+from pydantic import BaseModel, Field
+from feature_tests.common.repository import FeatureTestRepository
+from helpers.aws_session import new_aws_session
+from helpers.terraform import get_terraform_json
+from nrlf.core.dynamodb_types import convert_value_to_dynamo_format
 from nrlf.core.model import DocumentPointer
 
 
-N_SAMPLES = 100_000
-PK = "D#{}"
+N_SAMPLES = 100000
+CHUNKSIZE = 100
+PROPORTION_TO_DELETE = 1 / 4
 
-STREAM_EVENT = {
-    "eventID": "",
-    "eventName": "<<EVENT_NAME>>",
-    "eventVersion": "",
-    "eventSource": "",
-    "awsRegion": "",
-    "dynamodb": {
-        "ApproximateCreationDateTime": 0,
-        "Keys": {},
-        "<<IMAGE_TYPE>>": {},
-        "SequenceNumber": "0",
-        "SizeBytes": 0,
-        "StreamViewType": "NEW_AND_OLD_IMAGES",
-    },
-    "eventSourceARN": "",
-}
+N_TO_DELETE = int(PROPORTION_TO_DELETE * CHUNKSIZE)
+
+PK = "D#{}"
 
 
 class DocumentPointerMI(BaseModel):
-    type: str = Field(regex=r"^http://snomed.info/sct\|(\d[9])$")
-    custodian: str = Field(regex=r"^[A-Z][2][A-Z0-9][3]$")
-    custodian_suffix: str = Field(regex=r"^[A-Z][2][A-Z0-9][3]$")
-    nhs_number: str = Field(regex=r"^[0-9][10]$")
+    pk: str
+    sk: str
+    type: str = Field(regex=r"^http://snomed\.info/sct\|\d{2}$")
+    custodian: str = Field(regex=r"^[A-Z]{1}[0-9]{2}$")
+    custodian_suffix: Literal[""]
+    nhs_number: str = Field(regex=r"^[0-9]{3}$")
     created_on: int = Field(
         ge=dt(year=2023, month=6, day=1).toordinal(),
-        le=dt(year=2025, month=12, day=31).toordinal(),
+        le=dt(year=2023, month=12, day=31).toordinal(),
     )
-    event_name: Literal["INSERT", "REMOVE"]
 
 
 class Factory(ModelFactory[DocumentPointerMI]):
     __model__ = DocumentPointerMI
 
 
-def main():
-    for pk in map(PK.format, range(N_SAMPLES)):
-        doc_ref_mi = Factory.build().dict()
-        event_name = doc_ref_mi.pop("event_name")
-        image_type = EVENT_CONFIG[event_name].image_type
+def draw_doc_refs(item_number: int) -> tuple[str, dict]:
+    pk = PK.format(item_number)
+    doc_ref = Factory.build(pk=pk, sk=pk).dict()
+    doc_ref["created_on"] = dt.fromordinal(doc_ref["created_on"]).strftime(
+        r"%Y-%m-%dT%H:%M:%S.%fZ"
+    )
+    return doc_ref
 
-        basic_document_pointer = {"pk": pk, "sk": pk, **doc_ref_mi}
-        stream_event = {**deepcopy(STREAM_EVENT), **{"eventName": event_name}}
-        stream_event["dynamodb"]
+
+def create_many(client, table_name, items):
+    transact_items = [
+        {
+            "Put": {
+                "TableName": table_name,
+                "Item": {k: convert_value_to_dynamo_format(v) for k, v in item.items()},
+                "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)",
+            }
+        }
+        for item in items
+    ]
+    return client.transact_write_items(TransactItems=transact_items)
+
+
+def delete_many(client, table_name, keys):
+    transact_items = [
+        {
+            "Delete": {
+                "TableName": table_name,
+                "Key": {k: convert_value_to_dynamo_format(v) for k, v in key.items()},
+                "ConditionExpression": "attribute_exists(pk) AND attribute_exists(sk)",
+            }
+        }
+        for key in keys
+    ]
+    return client.transact_write_items(TransactItems=transact_items)
+
+
+def main():
+    session = new_aws_session()
+    tf_json = get_terraform_json()
+
+    doc_refs = map(draw_doc_refs, range(N_SAMPLES))
+    environment_prefix = f'{tf_json["prefix"]["value"]}--'
+
+    client = session.client("dynamodb")
+    table_name = f"{environment_prefix}document-pointer"
+
+    repo = FeatureTestRepository(
+        item_type=DocumentPointer, client=client, environment_prefix=environment_prefix
+    )
+    repo.delete_all()
+
+    for doc_ref_chunk in map(list, ichunked(doc_refs, n=CHUNKSIZE)):
+        create_many(items=doc_ref_chunk, client=client, table_name=table_name)
+
+        doc_refs_to_delete = random.sample(population=doc_ref_chunk, k=N_TO_DELETE)
+        ids_to_delete = [
+            {"pk": doc_ref["pk"], "sk": doc_ref["sk"]} for doc_ref in doc_refs_to_delete
+        ]
+        delete_many(keys=ids_to_delete, client=client, table_name=table_name)
+
+
+if __name__ == "__main__":
+    main()

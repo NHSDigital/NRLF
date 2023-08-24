@@ -16,4 +16,4 @@ WHERE
     AND DATE(year || '-' || month || '-' || day) BETWEEN  %(start_date)s AND  %(end_date)s
 GROUP BY fact.measure.provider_id
 ORDER BY
-    provider_name ASC, count DESC;
+    count DESC, provider_name ASC;
