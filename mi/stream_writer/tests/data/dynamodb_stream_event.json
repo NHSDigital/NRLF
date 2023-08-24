@@ -1,0 +1,79 @@
+{
+  "Records": [
+    {
+      "eventID": "iuaeg83t4kjdf",
+      "eventName": "<<EVENT_NAME>>",
+      "eventVersion": "1.1",
+      "eventSource": "aws:dynamodb",
+      "awsRegion": "eu-west-2",
+      "dynamodb": {
+        "ApproximateCreationDateTime": 1690984669.0,
+        "Keys": {
+          "sk": {
+            "S": "D#RJ11#9-<<UNIQUE_ID>>"
+          },
+          "pk": {
+            "S": "D#RJ11#9-<<UNIQUE_ID>>"
+          }
+        },
+        "<<IMAGE_TYPE>>": {
+          "updated_on": {
+            "NULL": true
+          },
+          "custodian": {
+            "S": "provider-<<UNIQUE_ID>>"
+          },
+          "nhs_number": {
+            "S": "patient-<<UNIQUE_ID>>"
+          },
+          "document": {
+            "S": "{}"
+          },
+          "custodian_suffix": {
+            "NULL": true
+          },
+          "source": {
+            "S": "NRLF"
+          },
+          "type": {
+            "S": "http://snomed.info/sct|document-<<UNIQUE_ID>>"
+          },
+          "version": {
+            "N": "1"
+          },
+          "created_on": {
+            "S": "<<CREATED_ON>>"
+          },
+          "sk": {
+            "S": "D#RJ11#9-<<UNIQUE_ID>>"
+          },
+          "pk_1": {
+            "S": "P#9278693472"
+          },
+          "producer_id": {
+            "S": "RJ11"
+          },
+          "pk_2": {
+            "S": "O#RJ11"
+          },
+          "id": {
+            "S": "RJ11-9"
+          },
+          "pk": {
+            "S": "D#RJ11#9-<<UNIQUE_ID>>"
+          },
+          "sk_2": {
+            "S": "C#2023-08-02T13:57:49.267Z#RJ11#9"
+          },
+          "sk_1": {
+            "S": "C#2023-08-02T13:57:49.267Z#RJ11#9"
+          }
+        },
+        "SequenceNumber": "4140700000000021073673917",
+        "SizeBytes": 799,
+        "StreamViewType": "NEW_AND_OLD_IMAGES"
+      },
+      "eventSourceARN": "arn:aws:dynamodb:eu-west-2:360016957465:table/nhsd-nrlf--row-653f--document-pointer/stream/2023-08-01T13:40:03.568"
+    }
+  ]
+}

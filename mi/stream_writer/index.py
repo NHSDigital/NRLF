@@ -1,42 +1,86 @@
+from collections import Counter
+from dataclasses import asdict
 from typing import Union
 
 import boto3
+from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
+    DynamoDBRecordEventName,
+    DynamoDBStreamEvent,
+)
 
-from mi.stream_writer.model import Environment, Outcome, Response, Status
-from mi.stream_writer.psycopg2 import connection, psycopg2
+from mi.stream_writer.event_handling import catch_error, insert_mi_record
+from mi.stream_writer.model import (
+    Action,
+    DynamoDBEventConfig,
+    DynamodbEventImageType,
+    Environment,
+    ErrorResponse,
+    GoodResponse,
+    RecordParams,
+    SecretsManagerCache,
+)
+from mi.stream_writer.psycopg2 import psycopg2
+from mi.stream_writer.utils import is_document_pointer, to_snake_case
+
+EVENT_CONFIG = {
+    DynamoDBRecordEventName.INSERT: DynamoDBEventConfig(
+        image_type=DynamodbEventImageType.NEW_IMAGE,
+        action=Action.CREATED,
+    ),
+    DynamoDBRecordEventName.REMOVE: DynamoDBEventConfig(
+        image_type=DynamodbEventImageType.OLD_IMAGE,
+        action=Action.DELETED,
+    ),
+}
+SECRETSMANAGER_CLIENT = boto3.client("secretsmanager")
+SECRETSMANAGER = SecretsManagerCache(client=SECRETSMANAGER_CLIENT)
 
 
-def connect_to_database(**connect_kwargs) -> Union[connection, Response]:
-    try:
-        conn = psycopg2.connect(**connect_kwargs)
-        return conn
-    except Exception as err:
-        response = Response(
-            status=Status.ERROR, outcome=f"{err.__class__.__name__}: {err}"
-        )
-        return response
-
-
-def handler(event: dict, context=None):
-    # Parse and validate the event
+@catch_error(log_fields=["event"])
+def _handler(event) -> Union[GoodResponse, ErrorResponse]:
+    event = DynamoDBStreamEvent(event)
     environment = Environment.construct()
-    client = boto3.client("secretsmanager")
-    password = client.get_secret_value(SecretId=environment.POSTGRES_PASSWORD).get(
-        "SecretString"
-    )
 
-    conn = connect_to_database(
+    connection = psycopg2.connect(
         user=environment.POSTGRES_USERNAME,
-        password=password,
+        password=SECRETSMANAGER.get_secret(secret_id=environment.POSTGRES_PASSWORD),
         database=environment.POSTGRES_DATABASE_NAME,
         host=environment.RDS_CLUSTER_HOST,
         port=environment.RDS_CLUSTER_PORT,
     )
-    if type(conn) is Response:
-        response = conn
-    else:
-        response = Response(status=Status.OK, outcome=Outcome.OPERATION_SUCCESSFUL)
+    cursor = connection.cursor()
 
-    rendered_response = response.dict(exclude_none=True)
-    print(rendered_response)  # noqa: T201
-    return rendered_response
+    records_processed = Counter()
+    response = GoodResponse()
+    for record in event.records:
+        if not is_document_pointer(**record.dynamodb.keys):
+            continue
+
+        config = EVENT_CONFIG.get(record.event_name)
+        if config is None:
+            continue
+
+        image_type = to_snake_case(config.image_type)
+        document_pointer: dict = getattr(record.dynamodb, image_type)
+
+        record_params = RecordParams.from_document_pointer(**document_pointer)
+        response = insert_mi_record(
+            record_params=record_params, sql=config.sql, cursor=cursor
+        )
+        records_processed[record.event_name.name] += 1
+        if type(response) is ErrorResponse:
+            break
+
+    connection.close()
+
+    if type(response) is GoodResponse:
+        response.records_processed = dict(records_processed)
+
+    return response
+
+
+def handler(event, context=None):
+    _response = _handler(event=event)
+    response = asdict(_response)
+    print(response)  # noqa
+    return response

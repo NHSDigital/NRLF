@@ -10,3 +10,7 @@ variable "static_dimensions_path" {}
 variable "assume_account" {}
 variable "dynamodb_table" {}
 variable "dynamodb_table_kms_key_arn" {}
+variable "is_persistent_environment" {
+  type    = bool
+  default = false
+}

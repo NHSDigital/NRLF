@@ -1,0 +1,9 @@
+provider_id: ^([1-9][0-9]*)$
+patient_id: ^([1-9][0-9]*)$
+document_type_id: ^([1-9][0-9]*)$
+day: ^([1-9][0-9]*)$
+month: ^(1[0-2]|[1-9])$
+year: ^(20)\d{2}$
+day_of_week: ^([0-6])$
+count_created: ^(0|[1-9]\d*)$
+count_deleted: ^(0|[1-9]\d*)$

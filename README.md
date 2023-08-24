@@ -35,7 +35,7 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
 9. [Sandbox](#sandbox)
 10. [Firehose](#firehose)
 11. [Releases](#releases)
-12. [Generating MI Reports](#generating-mi-reports)
+12. [MI System and Reports](#management-information-mi-system)
 
 ---
 
@@ -647,15 +647,32 @@ The CI pipeline will check to make sure you have done this to prevent any mistak
 
 This is because it will use that value to tag the commit once its been merged into main as a reference point, and this is how it tracks which release it is as github actions struggles with post merge branch identification
 
-## Generating MI reports
+## Management Information (MI) System
 
-MI reports can be generated in CSV format by running (note: `?` indicates optional that `partition_key` is to indicate the key used to generate test data, described after):
+The purpose and architecture of the MI system are described [here](link).
+
+### Database Administration
+
+There is one _shared_ MI Postgres database instance per AWS account and is therefore managed in the `account_wide` Terraform directory. The root username and password (which can be used to create databases, users, tables etc) are defined as secrets, which are automatically created by Terraform for that AWS account.
+
+Database administration for each workspace in an AWS account are defined in `terraform/infrastructure/modules/postgres_cluster/database_administration.tf`. This will (after every `terraform plan`):
+
+- DROP the database for the current workspace, in non-persistent environments (to drop the database in persistent environments a manual DROP query will be required)
+- CREATE an empty workspace database, if it doesn't already exist
+- CREATE roles, users and schemas in the workspace database
+- CREATE tables, if they don't already exist, from the SQL schemas defined in `mi/schema/*sql`
+
+### Reports (reading from the MI database)
+
+MI reports can be generated in CSV format by running:
+
+(notes: `?` indicates optional, `partition_key` is used to indicate the key used to generate test data, described after)
 
 ```
 nrlf mi report <env> <?workspace> <?partition_key>
 ```
 
-For standard reports, both `workspace` and `partition_key` can be omitted, however for testing purposes you should `workspace`. If you would like to use test data (found in `mi/reporting/tests/test_data/test_data.json`) then you can do:
+For standard reports (i.e. on persistent environments), both `workspace` and `partition_key` can be omitted, however for testing purposes you should `workspace`. If you would like to use test data (found in `mi/reporting/tests/test_data/test_data.json`) then you can do:
 
 ```
 nrlf mi seed-db <partition_key>

@@ -12,4 +12,5 @@ module "mi" {
   assume_account             = var.assume_account
   dynamodb_table             = aws_dynamodb_table.document-pointer
   dynamodb_table_kms_key_arn = data.aws_kms_key.document-pointer-kms.arn
+  is_persistent_environment  = contains(local.persistent_environments, local.environment)
 }
