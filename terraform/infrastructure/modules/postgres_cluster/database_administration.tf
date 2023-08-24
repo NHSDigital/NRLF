@@ -9,7 +9,7 @@ data "aws_lambda_invocation" "create-postgres-database-partition" {
     "autocommit" : true                                              ## Required for CREATE/DROP DATABASE, don't use this anywhere else
     "sql" : {
       "statement" : (
-        var.prefix == var.environment ?                                             # if is_persistent_environment
+        var.is_persistent_environment ?                                             # if is_persistent_environment
         "CREATE DATABASE {database_name};" :                                        # then create
         "DROP DATABASE IF EXISTS {database_name}; CREATE DATABASE {database_name};" # else drop and create
       )
