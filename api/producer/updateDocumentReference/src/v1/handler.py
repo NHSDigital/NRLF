@@ -77,13 +77,32 @@ def document_pointer_exists(
     )
 
 
+def _sort_key(key):
+    """
+    Sorts lists and dictionaries recursively to enable comparisons of sorted objects.
+    Dictionaries are sorted by key, and otherwise lists are sorted by value. Lists of
+    dictionaries are sorted by the dictionary key. Dictionaries are transformed into
+    lists of tuples, again noting that the output of this function is intended for
+    deterministic sorted comparisons.
+    """
+    if type(key) is list:
+        return sorted((_sort_key(k) for k in key), key=_sort_key)
+    elif type(key) is dict:
+        return [(k, _sort_key(key[k])) for k in sorted(key.keys())]
+    return key
+
+
+def _keys_are_not_equal(a, b):
+    return _sort_key(a) != _sort_key(b)
+
+
 def _validate_immutable_fields(
     a: dict, b: dict, immutable_fields: set = IMMUTABLE_FIELDS
 ):
     immutable_keys_in_a = immutable_fields.intersection(a.keys())
     immutable_keys_in_b = immutable_fields.intersection(b.keys())
     for k in immutable_keys_in_a | immutable_keys_in_b:
-        if a.get(k) != b.get(k):
+        if _keys_are_not_equal(a.get(k), b.get(k)):
             raise ImmutableFieldViolationError(
                 f"Forbidden to update immutable field '{k}'"
             )
