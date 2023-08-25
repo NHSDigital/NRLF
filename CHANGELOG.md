@@ -1,5 +1,11 @@
 # Changelog
 
+## 2023-08-25
+
+- NRLF-563 - 64L Sort fields that should be treated as Sets, not ordered Lists
+- NRLF-675 - MI dead letters, resubmission and alerting
+- NRLF-683 - MI Documentation and reports
+
 ## 2023-08-21
 
 - NRLF-669 - Changelog now uses rendered markdown
