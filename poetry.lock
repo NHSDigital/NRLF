@@ -1211,17 +1211,17 @@ url = "layer/nrlf"
 
 [[package]]
 name = "nrlf-converter"
-version = "0.0.8"
+version = "0.0.9"
 description = "NHS Clinicals Record Locator Document Pointer to HL7 FHIR R4 DocumentReference conversion"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "nrlf_converter-0.0.8-py3-none-any.whl", hash = "sha256:a636e273f7272406f00deb1a4492813537e23bf9e4da37883057768cbb52329c"},
+    {file = "nrlf_converter-0.0.9-py3-none-any.whl", hash = "sha256:3d525df8507cd517ee5638d880973f650e960afd22be4f33b97ba2f17c5c3a56"},
 ]
 
 [package.source]
 type = "url"
-url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.8/nrlf_converter-0.0.8-py3-none-any.whl"
+url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.9/nrlf_converter-0.0.9-py3-none-any.whl"
 
 [[package]]
 name = "nrlf-lambda-pipeline"
@@ -2117,21 +2117,6 @@ docs = ["furo", "sphinx", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-not
 tests = ["pytest", "pytest-cov"]
 
 [[package]]
-name = "webcolors"
-version = "1.13"
-description = "A library for working with the color formats defined by HTML and CSS."
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "webcolors-1.13-py3-none-any.whl", hash = "sha256:29bc7e8752c0a1bd4a1f03c14d6e6a72e93d82193738fa860cbff59d0fcc11bf"},
-    {file = "webcolors-1.13.tar.gz", hash = "sha256:c225b674c83fa923be93d235330ce0300373d02885cef23238813b0d5668304a"},
-]
-
-[package.extras]
-docs = ["furo", "sphinx", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinxext-opengraph"]
-tests = ["pytest", "pytest-cov"]
-
-[[package]]
 name = "werkzeug"
 version = "2.3.6"
 description = "The comprehensive WSGI web application library."
@@ -2246,4 +2231,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "64d76e80e2b97e22a41b5e0954515a0aae2e9f455e546c60fe3ed173ec7a285d"
+content-hash = "598e71c4a8880fd839493661a45fe2ffdfa0664f88e5dddbe37c26af64ac01d2"

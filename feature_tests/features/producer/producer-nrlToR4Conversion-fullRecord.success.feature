@@ -1,7 +1,7 @@
 Feature: Producer Create NRL-to-R4 Conversion
 
   Background:
-    Given version "0.0.8" of "nrlf-converter" has been installed
+    Given version "0.0.9" of "nrlf-converter" has been installed
     And template NRL_DOCUMENT_POINTER
       """
       {
