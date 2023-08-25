@@ -16,7 +16,7 @@ pytest = "^7.4.0"
 boto3 = "^1.26.165"
 pyjwt = "^2.8.0"
 cryptography = "^41.0.1"
-more-itertools = "^9.0.0"
+more-itertools = "^10.1.0"
 typing-extensions = "^4.7.1"
 requests = "^2.31.0"
 jsonschema = {version = "4.17.*", extras = ["format"]}
