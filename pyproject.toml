@@ -15,7 +15,7 @@ nrlf-lambda-pipeline = {git = "https://github.com/NHSDigital/nrlf-lambda-pipelin
 pytest = "^7.4.0"
 boto3 = "^1.28.30"
 pyjwt = "^2.8.0"
-cryptography = "^41.0.1"
+cryptography = "^41.0.3"
 more-itertools = "^9.0.0"
 typing-extensions = "^4.7.1"
 requests = "^2.31.0"
