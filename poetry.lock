@@ -30,19 +30,20 @@ python-dateutil = ">=2.7.0"
 
 [[package]]
 name = "atlassian-python-api"
-version = "3.39.0"
+version = "3.41.0"
 description = "Python Atlassian REST API Wrapper"
 optional = false
 python-versions = "*"
 files = [
-    {file = "atlassian-python-api-3.39.0.tar.gz", hash = "sha256:69c556b2485224fdc8b4ff1c071d68c81de6c65526a418fb81d99cc34a5d288c"},
+    {file = "atlassian-python-api-3.41.0.tar.gz", hash = "sha256:3ac7dc4b7840fc96f6a22dede9326c810727c261f0ef8986764c6f4f3040058f"},
+    {file = "atlassian_python_api-3.41.0-py3-none-any.whl", hash = "sha256:af4e34c0b92f49e742eedbc14b9b38855242ab61e65d4dc4d77c929cda842190"},
 ]
 
 [package.dependencies]
 deprecated = "*"
 oauthlib = "*"
 requests = "*"
-requests_oauthlib = "*"
+requests-oauthlib = "*"
 six = "*"
 
 [package.extras]
@@ -2117,21 +2118,6 @@ docs = ["furo", "sphinx", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-not
 tests = ["pytest", "pytest-cov"]
 
 [[package]]
-name = "webcolors"
-version = "1.13"
-description = "A library for working with the color formats defined by HTML and CSS."
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "webcolors-1.13-py3-none-any.whl", hash = "sha256:29bc7e8752c0a1bd4a1f03c14d6e6a72e93d82193738fa860cbff59d0fcc11bf"},
-    {file = "webcolors-1.13.tar.gz", hash = "sha256:c225b674c83fa923be93d235330ce0300373d02885cef23238813b0d5668304a"},
-]
-
-[package.extras]
-docs = ["furo", "sphinx", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-notfound-page", "sphinxext-opengraph"]
-tests = ["pytest", "pytest-cov"]
-
-[[package]]
 name = "werkzeug"
 version = "2.3.6"
 description = "The comprehensive WSGI web application library."
@@ -2246,4 +2232,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "64d76e80e2b97e22a41b5e0954515a0aae2e9f455e546c60fe3ed173ec7a285d"
+content-hash = "6b1983dc4fe3a3f69ee0cb37f16059dcf7faad3502e853b9e4c3b1597dbeadcc"

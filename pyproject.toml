@@ -45,7 +45,7 @@ cookiecutter = "^2.2.3"
 gherkin-official = "^24.1.0"
 ez-setup = "^0.9"
 pygments = "^2.14.0"
-atlassian-python-api = "^3.39.0"
+atlassian-python-api = "^3.41.0"
 hypothesis = "^6.81.2"
 nrlf-converter = {url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.8/nrlf_converter-0.0.8-py3-none-any.whl"}
 
