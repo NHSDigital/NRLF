@@ -524,13 +524,13 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "datamodel-code-generator"
-version = "0.21.2"
+version = "0.21.4"
 description = "Datamodel Code Generator"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "datamodel_code_generator-0.21.2-py3-none-any.whl", hash = "sha256:99f07ddeb4b58dbbcd7822ee83f44e408b9a9550975ea64a483df1e101abf4c2"},
-    {file = "datamodel_code_generator-0.21.2.tar.gz", hash = "sha256:824a11c4a0b2e5b23e102a55db0e4e9120d58cdf77e0cc35abd6efbcf7a46326"},
+    {file = "datamodel_code_generator-0.21.4-py3-none-any.whl", hash = "sha256:aef3bcaa68be085a98ec2050f9299d1f85eceee72dcac13fce11a788b98daa9f"},
+    {file = "datamodel_code_generator-0.21.4.tar.gz", hash = "sha256:79982f67413e41e7910a6e52dbcc87d0c17d7fc8a2dcf2bf93dd550cfcab6c25"},
 ]
 
 [package.dependencies]
@@ -540,7 +540,7 @@ genson = ">=1.2.1,<2.0"
 inflect = ">=4.1.0,<6.0"
 isort = ">=4.3.21,<6.0"
 jinja2 = ">=2.10.1,<4.0"
-openapi-spec-validator = ">=0.2.8,<=0.5.2"
+openapi-spec-validator = ">=0.2.8,<=0.5.7"
 packaging = "*"
 prance = ">=0.18.2"
 pydantic = [
