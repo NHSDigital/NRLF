@@ -35,6 +35,7 @@ module "rds-cluster-stream-writer" {
     RDS_CLUSTER_PORT       = data.aws_rds_cluster.rds-cluster.port
     POSTGRES_USERNAME      = "${var.environment}-write"
     POSTGRES_PASSWORD      = aws_secretsmanager_secret.write_password.arn
+    MI_S3_ERROR_BUCKET     = aws_s3_bucket.mi-errors.id
   }
   layers = concat(var.layers, [module.psycopg2.layer_arn, module.nrlf.layer_arn, module.lambda_utils.layer_arn])
   additional_policies = [
@@ -86,6 +87,34 @@ resource "aws_iam_policy" "stream-writer-lambda" {
         ],
         Resource = [
           var.dynamodb_table_kms_key_arn
+        ]
+      },
+      {
+        Action = [
+          "kms:Decrypt",
+          "kms:DescribeKey",
+          "kms:Encrypt",
+          "kms:GenerateDataKey"
+        ]
+        Effect = "Allow"
+        Resource = [
+          aws_kms_key.mi-errors.arn
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:AbortMultipartUpload",
+          "s3:GetBucketLocation",
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:ListBucketMultipartUploads",
+          "s3:PutObjectVersionTagging"
+        ],
+        Resource = [
+          aws_s3_bucket.mi-errors.arn,
+          "${aws_s3_bucket.mi-errors.arn}/*",
         ]
       }
     ]

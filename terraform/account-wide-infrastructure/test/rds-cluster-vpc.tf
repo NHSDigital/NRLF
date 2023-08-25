@@ -142,3 +142,33 @@ resource "aws_vpc_endpoint_security_group_association" "vpc_cluster_security_gro
   vpc_endpoint_id   = aws_vpc_endpoint.secretsmanager.id
   security_group_id = aws_security_group.rds-cluster-sg-int.id
 }
+
+resource "aws_vpc_endpoint" "s3-ref-vpc-endpoint" {
+  vpc_id       = aws_vpc.rds-cluster-vpc-ref.id
+  service_name = "com.amazonaws.eu-west-2.s3"
+
+  tags = {
+    Name        = "${local.project}-ref-s3-vpc-endpoint"
+    Environment = local.environment
+  }
+}
+
+resource "aws_vpc_endpoint_route_table_association" "vpc_cluster_route_table_assoc_s3_ref" {
+  vpc_endpoint_id = aws_vpc_endpoint.s3-ref-vpc-endpoint.id
+  route_table_id  = aws_route_table.private-route-table-ref.id
+}
+
+resource "aws_vpc_endpoint" "s3-int-vpc-endpoint" {
+  vpc_id       = aws_vpc.rds-cluster-vpc-int.id
+  service_name = "com.amazonaws.eu-west-2.s3"
+
+  tags = {
+    Name        = "${local.project}-int-s3-vpc-endpoint"
+    Environment = local.environment
+  }
+}
+
+resource "aws_vpc_endpoint_route_table_association" "vpc_cluster_route_table_assoc_s3_int" {
+  vpc_endpoint_id = aws_vpc_endpoint.s3-int-vpc-endpoint.id
+  route_table_id  = aws_route_table.private-route-table-int.id
+}
