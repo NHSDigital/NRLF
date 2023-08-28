@@ -279,7 +279,7 @@ jobs:
           name: ${{ env.BASE_ARTIFACT_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
@@ -321,7 +321,7 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
@@ -370,7 +370,7 @@ jobs:
           name: ${{ env.CACHE_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
@@ -410,7 +410,7 @@ jobs:
           name: ${{ env.CACHE_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
@@ -450,7 +450,7 @@ jobs:
           name: ${{ env.CACHE_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
@@ -485,7 +485,7 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
