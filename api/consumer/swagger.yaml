@@ -337,7 +337,7 @@ paths:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
-        "4xx":
+        "4XX":
           description: |
             An error occurred as follows:
 
@@ -497,7 +497,7 @@ paths:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
-        "4xx":
+        "4XX":
           description: |
             An error occurred as follows:
 
@@ -640,7 +640,7 @@ paths:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
-        "4xx":
+        "4XX":
           description: |
             An error occurred as follows:
 

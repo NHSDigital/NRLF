@@ -220,7 +220,7 @@ paths:
 
         This operation is also available as a http POST, which is the preferred method (see below).
       responses:
-        "4xx":
+        "4XX":
           description: |
             An error occurred as follows:
 
@@ -362,7 +362,7 @@ paths:
         * URLs have a maximum length of 2,048 characters which complex searches can exceed.  NRL does not currently
         exceed this limit, but may evolve in the future.
       responses:
-        "4xx":
+        "4XX":
           description: |
             An error occurred as follows:
 
@@ -492,7 +492,7 @@ paths:
         Read a single document pointer by specifying the `DocumentReference.id`.  Note that you will only be able to
         retrieve document pointers that have the `type` that was agreed during the [onboarding](#api-description__onboarding) process.
       responses:
-        "4xx":
+        "4XX":
           description: |
             An error occurred as follows:
 
