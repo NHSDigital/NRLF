@@ -234,6 +234,38 @@ paths:
                           code: RESOURCE_CREATED
                           display: Resource created
                     diagnostics: Resource created
+        "4XX":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST                | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 400         | INVALID_RESOURCE_ID        | Invalid resource ID                                                                                                                        |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 403         | ACCESS_DENIED_LEVEL        | Access has been denied because you need higher level permissions                                                                           |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
       parameters:
@@ -502,6 +534,38 @@ paths:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
+        "4XX":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST                | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 400         | INVALID_RESOURCE_ID        | Invalid resource ID                                                                                                                        |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 403         | ACCESS_DENIED_LEVEL        | Access has been denied because you need higher level permissions                                                                           |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
       description: |
         Search through document pointers.
 
@@ -699,6 +763,38 @@ paths:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
+        "4XX":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST                | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 400         | INVALID_RESOURCE_ID        | Invalid resource ID                                                                                                                        |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 403         | ACCESS_DENIED_LEVEL        | Access has been denied because you need higher level permissions                                                                           |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
       description: |
         Search through document pointers.
 
@@ -802,6 +898,37 @@ paths:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
+        "4XX":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST                | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 400         | INVALID_RESOURCE_ID        | Invalid resource ID                                                                                                                        |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
       description: |
         Read a single document pointer by specifying the `DocumentReference.id`.  Note that you will only be able to
         retrieve document pointers that have been created by the organisation specified in the `ODS-End-User-Organisation-ODS`
@@ -856,6 +983,37 @@ paths:
                           code: RESOURCE_UPDATED
                           display: Resource updated
                     diagnostics: Resource updated
+        "4XX":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST                | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 400         | INVALID_RESOURCE_ID        | Invalid resource ID                                                                                                                        |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
       description: |
@@ -925,6 +1083,35 @@ paths:
                           code: RESOURCE_REMOVED
                           display: Resource removed
                     diagnostics: Resource removed
+        "4XX":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST                | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
       description: |
         Delete a single document pointer that your created.
 components:
@@ -1016,7 +1203,7 @@ components:
             - DocumentReference
         id:
           type: string
-          pattern: "[A-Za-z0-9\\-\\.]{1,64}"
+          pattern: "^(?=.{1,64}$)[A-Za-z0-9\\.]+-[A-Za-z0-9]+[A-Za-z0-9\\_\\-]*$"
           description: The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.
         meta:
           $ref: "#/components/schemas/Meta"
