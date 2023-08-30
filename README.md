@@ -649,7 +649,7 @@ This is because it will use that value to tag the commit once its been merged in
 
 ## Management Information (MI) System
 
-The purpose and architecture of the MI system are described [here](link).
+The purpose and architecture of the MI system are described [here](https://nhsd-confluence.digital.nhs.uk/display/CLP/NRLF+-+Reporting).
 
 ### Database Administration
 
@@ -664,7 +664,7 @@ Database administration for each workspace in an AWS account are defined in `ter
 
 ### Executing "Manual" SQL Statements
 
-As described in [here](link), the "SQL Query Lambda" acts as the equivalent of a bastion server. The event model expected by the lambda is given in `mi/sql_query/model.py::SqlQueryEvent`, and examples of queries can be found in each `input` in `database_administration.tf`.`. Note that the username for a given workspace is either `<workspace_name>-read`or`<workspace_name>-write` (depending on the operation) and corresponding password for the user is stored as a secret. The default database for the lambda is the workspace database. If you wish to perform root-level operations you will need to use the default database name as defined in the account wide infrastructure terraform for the given AWS account.
+As illustrated in the diagram [here](https://nhsd-confluence.digital.nhs.uk/display/CLP/NRLF+-+Reporting), the "SQL Query Lambda" acts as the equivalent of a bastion server. The event model expected by the lambda is given in `mi/sql_query/model.py::SqlQueryEvent`, and examples of queries can be found in each `input` in `database_administration.tf`.`. Note that the username for a given workspace is either `<workspace_name>-read`or`<workspace_name>-write` (depending on the operation) and corresponding password for the user is stored as a secret. The default database for the lambda is the workspace database. If you wish to perform root-level operations you will need to use the default database name as defined in the account wide infrastructure terraform for the given AWS account.
 
 ### Reports (reading from the MI database)
 
