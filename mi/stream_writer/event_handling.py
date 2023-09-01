@@ -1,6 +1,7 @@
 import traceback
 from dataclasses import asdict
 from functools import partial, wraps
+from inspect import signature
 from typing import Callable, TypeVar
 
 T = TypeVar("T", bound=Callable[..., any])
@@ -10,6 +11,7 @@ from mi.stream_writer.model import (
     Dimension,
     ErrorResponse,
     GoodResponse,
+    MiResponses,
     RecordParams,
 )
 from mi.stream_writer.psycopg2 import NOT_NULL_VIOLATION, IntegrityError
@@ -24,10 +26,16 @@ def catch_error(log_fields: list[str] = None) -> Callable[[T], T]:
 
     def decorator(fn: T) -> T:
         @wraps(fn)
-        def wrapper(*args: tuple[any, ...], **kwargs: any) -> any:
+        def wrapper(*, responses: MiResponses = None, **kwargs: any) -> any:
+            fn_signature = signature(fn)
+            if "responses" in fn_signature.parameters:
+                kwargs["responses"] = responses
+
             metadata = {k: v for k, v in kwargs.items() if k in log_fields}
             try:
-                response = fn(*args, **kwargs)
+                response = fn(**kwargs)
+                if response is not None:
+                    responses.successful_responses.append(response)
             except Exception as error:
                 response = ErrorResponse(
                     error=str(error),
@@ -36,9 +44,11 @@ def catch_error(log_fields: list[str] = None) -> Callable[[T], T]:
                     trace=traceback.format_exc(),
                     metadata=metadata,
                 )
+                responses.error_responses.append(response)
             print(  # noqa
                 f"{fn.__module__}.{fn.__name__}: (metadata={metadata}):", response
             )
+
             return response
 
         return wrapper
@@ -64,7 +74,7 @@ def _execute_sql(
         connection.commit()
 
 
-@catch_error(log_fields=["document_pointer"])
+@catch_error()
 def insert_mi_record(
     record_params: RecordParams,
     sql: str,

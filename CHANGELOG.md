@@ -1,5 +1,22 @@
 # Changelog
 
+## 2023-08-29
+
+- NRLF-563 - 64L Sort fields that should be treated as Sets, not ordered Lists
+- NRLF-675 - MI dead letters, resubmission and alerting
+- NRLF-683 - MI Documentation and reports
+- NRLF-689 - Update NRLF 1D Converter to v0.0.9
+- Dependabot updates:
+  - pydantic (1.10.10 -> 1.10.12)
+  - boto3 (1.26.165 -> 1.28.30)
+  - cryptography (41.0.1 -> 41.0.3)
+  - awscli (1.27.165 -> 1.29.30)
+  - datamodel-code-generator (0.21.2 -> 0.21.4)
+  - cookiecutter (2.2.3 -> 2.3.0)
+  - atlassian-python-api (3.39.0 -> 3.41.0)
+  - hypothesis (6.82.0 -> 6.82.6)
+  - more-itertools (9.1.0 -> 10.1.0)
+
 ## 2023-08-21
 
 - NRLF-669 - Changelog now uses rendered markdown

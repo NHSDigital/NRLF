@@ -22,6 +22,7 @@ from mi.stream_writer.model import (
     Dimension,
     ErrorResponse,
     GoodResponse,
+    MiResponses,
     RecordParams,
 )
 from mi.stream_writer.psycopg2 import connection as Connection
@@ -86,13 +87,15 @@ def test_catch_error(is_error, kwargs: dict):
 
     ERROR_MSG = "oh, no!"
 
+    responses = MiResponses()
+
     @catch_error(log_fields=kwargs.keys())
-    def wrapped_function(is_error, **kwargs):
+    def wrapped_function(is_error, responses, **kwargs):
         if is_error:
             raise MyException(ERROR_MSG)
         return GoodResponse()
 
-    response = wrapped_function(is_error=is_error, **kwargs)
+    response = wrapped_function(is_error=is_error, responses=responses, **kwargs)
     expected_response = (
         ErrorResponse(
             error=ERROR_MSG,
@@ -144,10 +147,14 @@ def test_execute_sql_success(mocked_sql):
 def test_insert_mi_record_without_not_null_constraint(
     record: RecordParams, dimension_types: list[Dimension], mocked_execute_sql
 ):
+
+    responses = MiResponses()
+
     insert_mi_record(
         record_params=record,
         sql=None,
         cursor=None,
+        responses=responses,
         dimension_types=tuple(dimension_types),
     )
     # Initial call succeeds, so only one call
@@ -161,6 +168,8 @@ def test_insert_mi_record_without_not_null_constraint(
 def test_insert_mi_record_with_not_null_contraint(
     record: RecordParams, dimension_types: list[Dimension]
 ):
+    responses = MiResponses()
+
     class _IntegrityError(Exception):
         NOT_NULL = "not_null"
 
@@ -178,6 +187,7 @@ def test_insert_mi_record_with_not_null_contraint(
             record_params=record,
             sql=None,
             cursor=None,
+            responses=responses,
             dimension_types=tuple(dimension_types),
             integrity_error_type=_IntegrityError,
             not_null_violation=_IntegrityError.NOT_NULL,
@@ -201,12 +211,16 @@ def test_insert_mi_record_with_any_other_pg_error(
         def __init__(self, pgcode: str):
             self.pgcode = pgcode
 
+    responses = MiResponses()
+
     error = _IntegrityError(pgcode="oops")
     mocked_execute_sql.side_effect = [error]
+
     response = insert_mi_record(
         record_params=record,
         sql=None,
         cursor=None,
+        responses=responses,
         dimension_types=tuple(dimension_types),
         integrity_error_type=_IntegrityError,
         not_null_violation=_IntegrityError.NOT_NULL,
