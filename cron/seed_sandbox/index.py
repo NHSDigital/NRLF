@@ -46,7 +46,7 @@ def _do_nothing(*args, **kwargs) -> None:
     return None
 
 
-def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
+def handler(_event: dict, context: LambdaContext = None) -> dict[str, str]:
     if context is None:
         context = LambdaContext()
 
