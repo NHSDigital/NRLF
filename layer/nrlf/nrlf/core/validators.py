@@ -1,5 +1,6 @@
 import json
 from datetime import datetime as dt
+from typing import Optional
 
 from nhs_number import is_valid as is_valid_nhs_number
 from pydantic import ValidationError
@@ -38,7 +39,7 @@ def _get_tuple_components(tuple: str, separator: str) -> tuple[str, str]:
     return a, b
 
 
-def generate_producer_id(id: str, producer_id: str) -> str:
+def generate_producer_id(id: str, producer_id: Optional[str]) -> str:
     if producer_id:
         raise ValueError(
             "producer_id should not be passed to DocumentPointer; "
