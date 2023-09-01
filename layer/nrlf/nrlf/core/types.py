@@ -45,9 +45,6 @@ class S3Client:
     def exceptions(self):
         return S3Exceptions
 
-        class NoSuchKey(Exception):
-            pass
-
     def create_bucket(self, Bucket: str, **kwargs) -> dict:
         pass
 
