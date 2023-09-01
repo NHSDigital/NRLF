@@ -33,7 +33,7 @@ def mock_dynamodb():
 def test_e2e_local(_mocked__is_sandbox_lambda):
     from cron.seed_sandbox.index import handler
 
-    response = handler(event=None)
+    response = handler(None)
     assert response == {
         "body": '{"message": "ok"}',
         "headers": {"Content-Length": 17, "Content-Type": "application/json"},
