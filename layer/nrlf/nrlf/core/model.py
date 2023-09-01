@@ -235,7 +235,6 @@ class DocumentPointer(DynamoDbModel):
         if not any(v is None for v in (id, custodian, custodian_suffix)):
             validate_producer_id(
                 producer_id=value.__root__,
-                id=id.__root__,
                 custodian_id=custodian.__root__,
                 custodian_suffix=custodian_suffix.__root__,
             )
