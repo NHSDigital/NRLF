@@ -1,5 +1,15 @@
 # Changelog
 
+## 2023-09-06
+
+- NRLF-644 - Add missing "Errors" to swagger response in Consumer.
+- NRLF-646 - Add missing "Errors" to swagger response in Producer.
+- NRLF-663 - Add Open Source section to Producer/Consumer Narrative
+- NRLF-693 - Sonarcube Fixes
+- NRLF-682 - Remove documentation from CI
+- NRLF-582 - (APIGEE) 64L CORS issue with "TRY" Section in API Catalogue
+- NRLF-690 - (APIGEE) Update dependency
+
 ## 2023-08-29
 
 - NRLF-563 - 64L Sort fields that should be treated as Sets, not ordered Lists
