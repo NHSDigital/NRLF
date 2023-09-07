@@ -658,7 +658,7 @@ paths:
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       responses:
-        "4xx":
+        "4XX":
           description: |
             An error occurred as follows:
 
