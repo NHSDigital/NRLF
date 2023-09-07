@@ -221,40 +221,9 @@ jobs:
           nrlf test smoke producer ${{ env.WORKSPACE }}
           if [[ ${{ env.WORKSPACE }} != *sandbox ]]; then nrlf test smoke producer ${{ env.WORKSPACE }} nrl_sync; fi
 
-  documentation:
-    needs: [smoke-test]
-    name: Deploy Documentation
-    runs-on: [self-hosted, ci]
-
-    steps:
-      - name: Download cache - ${{ env.CACHE_NAME }}
-        uses: ./.github/actions/caching/
-        with:
-          path: .venv
-          name: ${{ env.CACHE_NAME }}
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ env.GITHUB_SHA_SHORT }}
-          aws-region: eu-west-2
-
-      # - name: Generate Documentation
-      #   run: |
-      #     source .venv/bin/activate
-      #     source nrlf.sh
-      #     nrlf doc generate default
-
-      # - name: Push Documentation
-      #   run: |
-      #     source .venv/bin/activate
-      #     source nrlf.sh
-      #     nrlf doc push ${TF_WORKFLOW_ID}${{ github.event.inputs.sandbox_deploy == 'true' && '-sandbox' || '' }}
-
   set-success:
     name: Set Success
-    needs: [documentation]
+    needs: [smoke-test]
     runs-on: [self-hosted, ci]
     steps:
       - name: Set success env var
@@ -265,7 +234,7 @@ jobs:
 
   clear-cache:
     name: Clear Cache
-    needs: [documentation]
+    needs: [smoke-test]
     if: ${{ always() }}
     runs-on: [self-hosted, ci]
 

@@ -17,7 +17,6 @@ function _nrlf_commands_help() {
   echo "  bootstrap   - bootstrap commands"
   echo "  lint        - lint commands"
   echo "  make        - calls the make/build routines"
-  echo "  doc         - publish documentation into confluence"
   echo "  oauth <env> - Generates an oauth token for the env [dev, ref, prod]"
   echo "  firehose    - Commands for fixing failed Firehose events"
   echo "  contracts   - Commands for syncing data contracts"
@@ -50,7 +49,6 @@ function nrlf() {
     "lint") _lint "${@:2}" ;;
     "swagger") _swagger "${@:2}" ;;
     "truststore") _truststore "${@:2}" ;;
-    "doc") _doc "${@:2}" ;;
     "firehose") _firehose "${@:2}" ;;
     "contracts") python -m data_contracts.deploy_contracts.deploy_contracts "${@:2}" ;;
     "mi") _mi "${@:2}" ;;
