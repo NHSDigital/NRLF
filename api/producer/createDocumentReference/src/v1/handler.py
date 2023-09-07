@@ -105,6 +105,9 @@ def log_superseded(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
+    """
+    This function is deliberately empty because we're just using it to trigger the log
+    """
     pass
 
 

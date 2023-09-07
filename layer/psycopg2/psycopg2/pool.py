@@ -123,7 +123,7 @@ class AbstractConnectionPool:
 
         # here we check for the presence of key because it can happen that a
         # thread tries to put back a connection after a call to close
-        if not self.closed or key in self._used:
+        if key in self._used:
             del self._used[key]
             del self._rused[id(conn)]
 
