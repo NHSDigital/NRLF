@@ -7,6 +7,7 @@
 - NRLF-663 - Add Open Source section to Producer/Consumer Narrative
 - NRLF-693 - Sonarcube Fixes
 - NRLF-682 - Remove documentation from CI
+- NRLF-698 - Fix Forward: 4XX isn’t valid in API Gateway
 - NRLF-582 - (APIGEE) 64L CORS issue with "TRY" Section in API Catalogue
 - NRLF-690 - (APIGEE) Update dependency
 
