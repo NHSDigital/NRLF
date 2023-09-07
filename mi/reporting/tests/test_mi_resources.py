@@ -3,13 +3,16 @@ from datetime import date, datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import pytest
 from moto import mock_rds, mock_secretsmanager
 
 from mi.reporting.resources import (
+    BadDateError,
     each_report_sql_statement,
     get_credentials,
     get_rds_endpoint,
     make_report_path,
+    parse_date_range,
 )
 
 
@@ -69,3 +72,33 @@ def test_make_report_path():
             == expected
         )
         assert Path(expected).parent.exists()
+
+
+def test_parse_date_range_check_injection_defaults():
+    today = datetime.now()
+    default_week_interval = 1
+    assert parse_date_range() == parse_date_range(
+        today=today, default_week_interval=default_week_interval
+    )
+
+
+def test_parse_date_range_default():
+    today = datetime(year=1000, month=1, day=23)
+    assert parse_date_range(today=today) == ("1000-01-16", "1000-01-23")
+
+
+def test_parse_date_range_validation():
+    date_range = dict(start_date="1234-01-16", end_date="1234-01-20")
+    assert parse_date_range(**date_range) == tuple(date_range.values())
+
+
+def test_parse_date_range_validation_fails_start_date():
+    date_range = dict(start_date="12340116", end_date="1234-01-20")
+    with pytest.raises(BadDateError):
+        assert parse_date_range(**date_range)
+
+
+def test_parse_date_range_validation_fails_end_date():
+    date_range = dict(start_date="1234-01-16", end_date="12340116")
+    with pytest.raises(BadDateError):
+        assert parse_date_range(**date_range)

@@ -81,27 +81,37 @@ def hash_str_to_int(key: str, n_digits=8):
     return int(sha256(key.encode("utf-8")).hexdigest(), 16) % 10**n_digits
 
 
-def _validate_or_create_date(date_str: str, week_window: int, from_date: date = None):
-    if from_date is None:
-        from_date = date.today()
-
-    if date_str is None:
-        date_str = (from_date - timedelta(weeks=week_window)).strftime(r"%Y-%m-%d")
+def _parse_date(date_str: str):
     try:
-        datetime.strptime(date_str, r"%Y-%m-%d")
+        return datetime.strptime(date_str, DATE_PATTERN)
     except ValueError:
         raise BadDateError(
             f"Provided date '{date_str}' does not conform to pattern '{DATE_PATTERN}'"
         )
-    return date_str
 
 
-def validate_or_create_start_date(start_date: str) -> date:
-    return _validate_or_create_date(date_str=start_date, week_window=1)
+def parse_date_range(
+    start_date: str = None,
+    end_date: str = None,
+    default_week_interval: int = 1,
+    today: datetime = None,
+):
+    """
+    If start_date and end_date are provided, validate them against the expected DATE_PATTERN
+    If start_date is not provided, set to one week ago
+    If end_date is not provided, set to one week after start_date
+    Therefore the default range is one week to today
+    """
 
+    if start_date is None:
+        today = datetime.now() if today is None else today
+        _start_date = today - timedelta(weeks=default_week_interval)
+    else:
+        _start_date = _parse_date(start_date)
 
-def validate_or_create_end_date(start_date: str, end_date: str) -> date:
-    start_date = datetime.strptime(start_date, r"%Y-%m-%d")
-    return _validate_or_create_date(
-        date_str=end_date, week_window=0, from_date=start_date
-    )
+    if end_date is None:
+        _end_date = _start_date + timedelta(weeks=default_week_interval)
+    else:
+        _end_date = _parse_date(end_date)
+
+    return _start_date.strftime(DATE_PATTERN), _end_date.strftime(DATE_PATTERN)

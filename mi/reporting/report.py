@@ -7,12 +7,7 @@ import yaml
 from helpers.aws_session import new_session_from_env
 from mi.reporting.actions import each_stored_query_event, perform_query, write_csv
 from mi.reporting.constants import VALIDATOR_PATH
-from mi.reporting.resources import (
-    BadDateError,
-    hash_str_to_int,
-    validate_or_create_end_date,
-    validate_or_create_start_date,
-)
+from mi.reporting.resources import BadDateError, hash_str_to_int, parse_date_range
 
 
 class ReportValidationError(ValueError):
@@ -97,8 +92,7 @@ def _make_reports(
 ):
     if partition_key is not None:
         partition_key = str(hash_str_to_int(key=partition_key))
-    start_date = validate_or_create_start_date(start_date=start_date)
-    end_date = validate_or_create_end_date(start_date=start_date, end_date=end_date)
+    start_date, end_date = parse_date_range(start_date=start_date, end_date=end_date)
 
     if start_date > end_date:
         raise BadDateError(f"Start date {start_date} is after end date {end_date}")
