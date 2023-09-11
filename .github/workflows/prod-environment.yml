@@ -36,7 +36,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch_name }}
 
@@ -61,7 +61,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch_name }}
 
@@ -93,7 +93,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch_name }}
 
@@ -149,7 +149,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch_name }}
 
@@ -194,7 +194,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -276,7 +276,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ inputs.branch_name }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch_name }}
 

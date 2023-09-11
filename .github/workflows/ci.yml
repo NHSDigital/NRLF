@@ -42,7 +42,7 @@ jobs:
     runs-on: [self-hosted, ci]
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -73,7 +73,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BASE_BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BASE_BRANCH_NAME }}
 
@@ -98,7 +98,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -123,7 +123,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -149,7 +149,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -175,7 +175,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -201,7 +201,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BASE_BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BASE_BRANCH_NAME }}
 
@@ -233,7 +233,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -266,7 +266,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BASE_BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BASE_BRANCH_NAME }}
 
@@ -308,7 +308,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -350,7 +350,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -390,7 +390,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -430,7 +430,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -472,7 +472,7 @@ jobs:
 
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
@@ -504,7 +504,7 @@ jobs:
     runs-on: [self-hosted, ci]
     steps:
       - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.BRANCH_NAME }}
 
