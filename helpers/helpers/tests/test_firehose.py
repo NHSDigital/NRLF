@@ -28,6 +28,7 @@ from helpers.firehose import (
     construct_cloudwatch_logs_data,
     fetch_and_write_logs,
     local_path_to_s3_components,
+    validate_logs,
 )
 from nrlf.core.firehose.model import CloudwatchMessageType
 from nrlf.core.validators import json_load, json_loads
@@ -190,7 +191,7 @@ def test_fetch(mocked_fetch_logs_from_s3):
     n_bad=integers(min_value=1),
     n_v_bad=integers(min_value=1),
 )
-def validate_logs(n_good, n_bad, n_v_bad):
+def given__validate_logs(n_good, n_bad, n_v_bad):
     good_logs = [_make_good_log(i) for i in range(n_good)]
     bad_json_logs = [{"value": i} for i in range(n_bad)]
     bad_not_even_json_logs = [f"bad {i}" for i in range(n_v_bad)]

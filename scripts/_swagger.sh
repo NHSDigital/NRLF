@@ -174,6 +174,14 @@ function _swagger() {
                     > ./api/${type}/record-locator/${type}.yaml
 
             rm ./swagger/${type}.tmp.yaml
+
+            # Remove fields not valid on AWS but otherwise required in public docs
+            # * 4XX codes
+            cat ./api/${type}/swagger.yaml |
+                yq 'del(.. | select(has("4XX")).4XX)' \
+                    >  ./api/${type}/swagger-tmp.yaml
+            mv ./api/${type}/swagger-tmp.yaml ./api/${type}/swagger.yaml
+
         else
             _swagger_help
         fi

@@ -123,6 +123,7 @@ info:
     There are [libraries and SDKs available](https://digital.nhs.uk/developer/guides-and-documentation/api-technologies-at-nhs-digital#fhir-libraries-and-sdks) to help with FHIR API integration.
 
     ## Network access
+
     This API is available on the internet and, indirectly, on the [Health and Social Care Network (HSCN)](https://digital.nhs.uk/services/health-and-social-care-network).
 
     For more details see [Network access for APIs](https://digital.nhs.uk/developer/guides-and-documentation/network-access-for-apis).
@@ -132,6 +133,32 @@ info:
     This API uses the following access modes:
 
     * [Application-restricted RESTful API - signed JWT authentication](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication)
+
+    ## Errors
+
+    We use standard HTTP status codes to show whether an API request succeeded or not. They are usually in the range:
+
+    * 200 to 299 if it succeeded, including code 202 if it was accepted by an API that needs to wait for further action
+    * 400 to 499 if it failed because of a client error by your application
+    * 500 to 599 if it failed because of an error on our server
+
+    Errors specific to each API are shown in the Endpoints section, under Response. See our [reference guide](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#http-status-codes) for more on errors.
+
+    ## Open source
+
+    You might find the following open source resources useful:
+
+    | Resource                  | Description                                               | Links                                                                      |
+    |---------------------------|-----------------------------------------------------------|----------------------------------------------------------------------------|
+    | NRL v3 API                | Source code for the core API and sandbox                  | [GitHub repo](https://github.com/NHSDigital/nrlf)                          |
+    | NRL v3 Producer API       | Source code for the producer API proxy and specification. | [GitHub repo](https://github.com/NHSDigital/nrl-producer-api)              |
+    | NRL v3 Consumer API       | Source code for the consumer API proxy and specification. | [GitHub repo](https://github.com/NHSDigital/nrl-consumer-api)              |
+    | Lambda Pipeline Package   | Source code for the lambda pipeline utility               | [GitHub repo](https://github.com/NHSDigital/nrlf-lambda-pipeline)          |
+    | Lambda Logging Package    | Source code for the lambda logging utility                | [GitHub repo](https://github.com/NHSDigital/nrlf-lambda-logging)           |
+
+    We currently don't have any open source client libraries or sample code for this API. If you think this would be useful, you can [upvote the suggestion on our Interactive Product Backlog](https://nhs-digital-api-management.featureupvote.com/suggestions/107439/client-libraries-and-reference-implementations).
+
+    The source code for the PDS FHIR back end (the Core Spine source code) is not currently in the open. If you think this would be useful, you can [upvote the suggestion on our Interactive Product Backlog](https://nhs-digital-api-management.featureupvote.com/suggestions/466692/open-source-core-spine-including-pds-eps-scr-and-more).
 
     ## Environments and testing
 
@@ -190,16 +217,6 @@ info:
             </div>
         </div>
     </div>
-
-    ## Errors
-
-    We use standard HTTP status codes to show whether an API request succeeded or not. They are usually in the range:
-
-    * 200 to 299 if it succeeded, including code 202 if it was accepted by an API that needs to wait for further action
-    * 400 to 499 if it failed because of a client error by your application
-    * 500 to 599 if it failed because of an error on our server
-
-    Errors specific to each API are shown in the Endpoints section, under Response. See our [reference guide](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#http-status-codes) for more on errors.
 
     ## Change log
 
@@ -335,6 +352,36 @@ paths:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
+        "4XX":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST	               | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
       description: |
         Retrieve the document pointers for a single patient.  Your request is constrained by the document pointer types
         agreed during onboarding.  The results can also be filtered to return documents by a given `type` and/or created
@@ -453,6 +500,37 @@ paths:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
+        "4XX":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST	               | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 403         | ACCESS_DENIED_LEVEL        | Access has been denied because you need higher level permissions                                                                           |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
       description: |
         Retrieve the document pointers for a single patient.  Your request is constrained by the document pointer types
         agreed during onboarding.  The results can also be filtered to return documents by a given `type` and/or created
@@ -553,6 +631,36 @@ paths:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
+        "4XX":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST	               | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
       description: |
         Read a single document pointer by specifying the `DocumentReference.id`.  Note that you will only be able to
         retrieve document pointers that have the `type` that was agreed during the [onboarding](#api-description__onboarding) process.
@@ -567,6 +675,34 @@ paths:
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
       responses:
+        "4XX":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST	               | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
         "200":
           description: Count DocumentReference operation successful
           headers:

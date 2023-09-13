@@ -41,11 +41,9 @@ nrlf = { path = "./layer/nrlf/", develop = true }
 lambda-utils = { path = "./layer/lambda_utils/", develop = true }
 helpers = { path = "./helpers/", develop = true }
 fire = "^0.5.0"
-cookiecutter = "^2.3.0"
 gherkin-official = "^24.1.0"
 ez-setup = "^0.9"
 pygments = "^2.14.0"
-atlassian-python-api = "^3.41.0"
 hypothesis = "^6.82.6"
 nrlf-converter = {url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.9/nrlf_converter-0.0.9-py3-none-any.whl"}
 
