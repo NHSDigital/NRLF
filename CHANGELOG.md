@@ -1,5 +1,11 @@
 # Changelog
 
+## 2023-09-13
+
+- NRLF-696 - BUG: MI report date range
+- NRLF-697 - Enhancement: MI Max Year
+- NRLF-702 - Add Postman Collection to API Catalogue
+
 ## 2023-09-06
 
 - NRLF-644 - Add missing "Errors" to swagger response in Consumer.

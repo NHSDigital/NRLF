@@ -1,0 +1,596 @@
+{
+  "info": {
+    "_postman_id": "1ae8e168-3f53-4d02-a720-d88318d368f5",
+    "name": "NRLF",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "25486977"
+  },
+  "item": [
+    {
+      "name": "Producer",
+      "item": [
+        {
+          "name": "Search",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-correlation-id",
+                "value": "{{X_CORRELATION_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "x-request-id",
+                "value": "{{X_REQUEST_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "NHSD-End-User-Organisation-ODS",
+                "value": "{{ODS_CODE}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "{{ACCEPT}}",
+                "type": "text"
+              },
+              {
+                "key": "Origin",
+                "value": "https://example.org",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{APIGEE_PRODUCER_URL}}/DocumentReference?next-page-token=eyJwa18yIjogeyJTIjogIk8jUkoxMSJ9LCAicGsiOiB7IlMiOiAiRCNSSjExI2NkNzQ1NTYxLWVmZjEtMTFlZC05YWY5LTAwNTA1NjI1OTQ0Ny01ODU1NDY0NDM4NDIzNjU1NDM1YSJ9LCAic2siOiB7IlMiOiAiRCNSSjExI2NkNzQ1NTYxLWVmZjEtMTFlZC05YWY5LTAwNTA1NjI1OTQ0Ny01ODU1NDY0NDM4NDIzNjU1NDM1YSJ9LCAic2tfMiI6IHsiUyI6ICJDTyMyMDIzLTA1LTExVDExOjQ4OjU2Ljc4N1ojUkoxMSNjZDc0NTU2MS1lZmYxLTExZWQtOWFmOS0wMDUwNTYyNTk0NDctNTg1NTQ2NDQzODQyMzY1NTQzNWEifX0=",
+              "host": ["{{APIGEE_PRODUCER_URL}}"],
+              "path": ["DocumentReference"],
+              "query": [
+                {
+                  "key": "subject",
+                  "value": "https%3A%2F%2Ffhir.nhs.uk%2FId%2Fnhs-number%7C{{NHS_NUMBER_ALT}}",
+                  "disabled": true
+                },
+                {
+                  "key": "next-page-token",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-correlation-id",
+                "value": "{{X_CORRELATION_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "x-request-id",
+                "value": "{{X_REQUEST_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "NHSD-End-User-Organisation-ODS",
+                "value": "{{ODS_CODE}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "{{ACCEPT}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{APIGEE_PRODUCER_URL}}/DocumentReference/RJ11-DEMO_1002",
+              "host": ["{{APIGEE_PRODUCER_URL}}"],
+              "path": ["DocumentReference", "RJ11-DEMO_1002"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "iLVkSlkze7RsoCRbFwq8l9LMdOyO",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-correlation-id",
+                "value": "{{X_CORRELATION_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "x-request-id",
+                "value": "{{X_REQUEST_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "NHSD-End-User-Organisation-ODS",
+                "value": "{{ODS_CODE}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "{{ACCEPT}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"resourceType\": \"DocumentReference\",\n    \"id\": \"{{ODS_CODE}}-DEMO_1013\",\n    \"custodian\": {\n        \"identifier\": {\n            \"system\": \"https://fhir.nhs.uk/Id/ods-organization-code\",\n            \"value\": \"{{ODS_CODE}}\"\n        }\n    },\n    \"subject\": {\n        \"identifier\": {\n            \"system\": \"https://fhir.nhs.uk/Id/nhs-number\",\n            \"value\": \"{{NHS_NUMBER}}\"\n        }\n    },\n    \"type\": {\n        \"coding\": [\n            {\n                \"system\": \"http://snomed.info/sct\",\n                \"code\": \"{{DOCUMENT_TYPE}}\"\n            }\n        ]\n    },\n    \"content\": [\n        {\n            \"attachment\": {\n                \"contentType\": \"application/pdf\",\n                \"url\": \"https://example.org/my-doc.pdf\"\n            }\n        }\n    ],\n    \"status\": \"current\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIGEE_PRODUCER_URL}}/DocumentReference",
+              "host": ["{{APIGEE_PRODUCER_URL}}"],
+              "path": ["DocumentReference"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "epUZAAdeUpgiSCqBH6a4R7peQf52",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-correlation-id",
+                "value": "{{X_CORRELATION_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "x-request-id",
+                "value": "{{X_REQUEST_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "NHSD-End-User-Organisation-ODS",
+                "value": "{{ODS_CODE}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "{{ACCEPT}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "      {\n        \"resourceType\": \"DocumentReference\",\n        \"id\": \"{{ODS_CODE}}-DEMO_1013\",\n        \"custodian\": {\n          \"identifier\": {\n            \"system\": \"https://fhir.nhs.uk/Id/ods-organization-code\",\n            \"value\": \"{{ODS_CODE}}\"\n          }\n        },\n        \"subject\": {\n          \"identifier\": {\n            \"system\": \"https://fhir.nhs.uk/Id/nhs-number\",\n            \"value\": \"{{NHS_NUMBER}}\"\n          }\n        },\n            \"type\": {\n        \"coding\": [\n            {\n                \"system\": \"http://snomed.info/sct\",\n                \"code\": \"{{DOCUMENT_TYPE}}\"\n            }\n        ]\n        },\n        \"content\": [\n          {\n            \"attachment\": {\n              \"contentType\": \"application/pdf\",\n              \"url\": \"https://example.org/sample.pdf\"\n            }\n          }\n        ],\n        \"status\": \"current\"\n      }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{APIGEE_PRODUCER_URL}}/DocumentReference/RJ11-DEMO_1013",
+              "host": ["{{APIGEE_PRODUCER_URL}}"],
+              "path": ["DocumentReference", "RJ11-DEMO_1013"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "QhvNkmqPhHKATT9Q5DUhqkGrjcYb",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-correlation-id",
+                "value": "{{X_CORRELATION_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "x-request-id",
+                "value": "{{X_REQUEST_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "NHSD-End-User-Organisation-ODS",
+                "value": "{{ODS_CODE}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "{{ACCEPT}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{APIGEE_PRODUCER_URL}}/DocumentReference/{{ODS_CODE}}-DEMO_1013",
+              "host": ["{{APIGEE_PRODUCER_URL}}"],
+              "path": ["DocumentReference", "{{ODS_CODE}}-DEMO_1013"],
+              "query": [
+                {
+                  "key": "subject",
+                  "value": "https%3A%2F%2Fsnomed.info%2Fict%7C736253002",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Consumer",
+      "item": [
+        {
+          "name": "Search",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "YTSbEXOiCE5KubSO534QJ8uWDF1F",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-correlation-id",
+                "value": "{{X_CORRELATION_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "x-request-id",
+                "value": "{{X_REQUEST_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "NHSD-End-User-Organisation-ODS",
+                "value": "{{ODS_CODE}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "{{ACCEPT}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{APIGEE_CONSUMER_URL}}/DocumentReference?subject:identifier=https%3A%2F%2Ffhir.nhs.uk%2FId%2Fnhs-number%7C{{NHS_NUMBER}}",
+              "host": ["{{APIGEE_CONSUMER_URL}}"],
+              "path": ["DocumentReference"],
+              "query": [
+                {
+                  "key": "subject:identifier",
+                  "value": "https%3A%2F%2Ffhir.nhs.uk%2FId%2Fnhs-number%7C{{NHS_NUMBER}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Count",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "YTSbEXOiCE5KubSO534QJ8uWDF1F",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-correlation-id",
+                "value": "{{X_CORRELATION_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "x-request-id",
+                "value": "{{X_REQUEST_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "NHSD-End-User-Organisation-ODS",
+                "value": "{{ODS_CODE}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "{{ACCEPT}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{APIGEE_CONSUMER_URL}}/DocumentReference/_count?subject:identifier=https%3A%2F%2Ffhir.nhs.uk%2FId%2Fnhs-number%7C{{NHS_NUMBER}}",
+              "host": ["{{APIGEE_CONSUMER_URL}}"],
+              "path": ["DocumentReference", "_count"],
+              "query": [
+                {
+                  "key": "subject:identifier",
+                  "value": "https%3A%2F%2Ffhir.nhs.uk%2FId%2Fnhs-number%7C{{NHS_NUMBER}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "FAAW6WAFNHBh96DbifB9u0AI3xnf",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-correlation-id",
+                "value": "{{X_CORRELATION_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "x-request-id",
+                "value": "{{X_REQUEST_ID}}",
+                "type": "text"
+              },
+              {
+                "key": "NHSD-End-User-Organisation-ODS",
+                "value": "{{ODS_CODE}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "{{ACCEPT}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{APIGEE_CONSUMER_URL}}/DocumentReference/{{ODS_CODE}}-DEMO_1002",
+              "host": ["{{APIGEE_CONSUMER_URL}}"],
+              "path": ["DocumentReference", "{{ODS_CODE}}-DEMO_1002"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.globals.set('now', new Date().toISOString().substr(0, 19));",
+          "pm.globals.set('randomNumber', Math.floor(Math.random() * 100));",
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "APIGEE_BASE_URL",
+      "value": "https://int.api.service.nhs.uk",
+      "type": "string"
+    },
+    {
+      "key": "APIGEE_PRODUCER_URL",
+      "value": "{{APIGEE_BASE_URL}}/nrl-producer-api/FHIR/R4",
+      "type": "string"
+    },
+    {
+      "key": "APIGEE_CONSUMER_URL",
+      "value": "{{APIGEE_BASE_URL}}/nrl-consumer-api/FHIR/R4",
+      "type": "string"
+    },
+    {
+      "key": "ODS_CODE",
+      "value": "!! CHANGE THIS VALUE !!",
+      "type": "string"
+    },
+    {
+      "key": "ACCESS_TOKEN",
+      "value": "!! CHANGE THIS VALUE !!"
+    },
+    {
+      "key": "DOCUMENT_TYPE",
+      "value": "{{SNOMED_MENTAL_HEALTH_CRISIS_PLAN}}",
+      "type": "string"
+    },
+    {
+      "key": "DOCUMENT_TYPE_SET",
+      "value": "https%3A%2F%2Fsnomed.info%2Fict%7C{{DOCUMENT_TYPE}}",
+      "type": "string"
+    },
+    {
+      "key": "VERSION",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "X_REQUEST_ID",
+      "value": "DEMO",
+      "type": "string"
+    },
+    {
+      "key": "X_CORRELATION_ID",
+      "value": "DEMO",
+      "type": "string"
+    },
+    {
+      "key": "NHSD_CORRELATION_ID",
+      "value": "{{X_CORRELATION_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "NHS_NUMBER",
+      "value": "9278693472",
+      "type": "string"
+    },
+    {
+      "key": "NHS_NUMBER_ALT",
+      "value": "9448646348",
+      "type": "string"
+    },
+    {
+      "key": "NHS_NUMBER_MISSING",
+      "value": "9000000033",
+      "type": "string"
+    },
+    {
+      "key": "SUBJECT",
+      "value": "https%3A%2F%2Ffhir.nhs.uk%2FId%2Fnhs-number%7C{{NHS_NUMBER}}",
+      "type": "string"
+    },
+    {
+      "key": "LOCAL_DOCUMENT_ID",
+      "value": "DEMO_0000000001",
+      "type": "string"
+    },
+    {
+      "key": "DOCUMENT_ID",
+      "value": "{{ODS_CODE}}-{{LOCAL_DOCUMENT_ID}}",
+      "type": "string"
+    },
+    {
+      "key": "SNOMED_CODE_APPOINTMENT",
+      "value": "749001000000101",
+      "type": "string"
+    },
+    {
+      "key": "SNOMED_EMERGENCY_HEALTH_CARE_PLAN",
+      "value": "887701000000100",
+      "type": "string"
+    },
+    {
+      "key": "SNOMED_MENTAL_HEALTH_CRISIS_PLAN",
+      "value": "736253002",
+      "type": "string"
+    },
+    {
+      "key": "SNOMED_END_OF_LIFE_CARE_COORDINATION_SUMMARY",
+      "value": "861421000000109",
+      "type": "string"
+    },
+    {
+      "key": "ACCEPT",
+      "value": "application/json; version={{VERSION}}",
+      "type": "string"
+    }
+  ]
+}
