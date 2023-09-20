@@ -59,6 +59,7 @@ class LoggingHeader(AbstractHeader):
     correlation_id: Optional[StrictStr] = Field(
         alias="x-correlation-id", default_factory=lambda: str(uuid4())
     )
-    nhsd_correlation_id: Optional[StrictStr] = Field(
-        alias="nhsd-correlation-id", default_factory=lambda: str(uuid4())
+    nhsd_correlation_id: Optional[StrictStr] = Field(alias="nhsd-correlation-id")
+    request_id: Optional[StrictStr] = Field(
+        alias="x-request-id", default_factory=lambda: str(uuid4())
     )
