@@ -1,5 +1,11 @@
 # Changelog
 
+## 2023-09-21
+
+- SPINECLI-1190 - Add link to postman collection in narrative
+- NRLF-691 - Amend Document Type used in NRLF Smoke Test to clearly identify as Test-Only in MI Reports
+- SPINECLI-1043 - 403 when x-correlation-id or x-request-id is missing
+
 ## 2023-09-13
 
 - NRLF-696 - BUG: MI report date range
