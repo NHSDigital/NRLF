@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import uuid4
 
 from pydantic import BaseModel, Field, StrictStr, root_validator
 
@@ -55,6 +56,10 @@ class ConnectionMetadata(AbstractHeader):
 
 
 class LoggingHeader(AbstractHeader):
-    correlation_id: Optional[StrictStr] = Field(alias="x-correlation-id")
+    correlation_id: Optional[StrictStr] = Field(
+        alias="x-correlation-id", default_factory=lambda: str(uuid4())
+    )
     nhsd_correlation_id: Optional[StrictStr] = Field(alias="nhsd-correlation-id")
-    request_id: Optional[StrictStr] = Field(alias="x-request-id")
+    request_id: Optional[StrictStr] = Field(
+        alias="x-request-id", default_factory=lambda: str(uuid4())
+    )
