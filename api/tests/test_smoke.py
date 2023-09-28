@@ -21,14 +21,14 @@ ENV_NAME_RE = re.compile(r"^(?P<env>\w+)(-(?P<sandbox>sandbox)?)?$")
 APIGEE_BASE_URL = "api.service.nhs.uk"
 API_PATH = "/FHIR/R4/DocumentReference"
 PATIENT_IDENTIFIER = "https://fhir.nhs.uk/Id/nhs-number|9278693472"
-DOCUMENT_REFERENCE_IDENTIFIER_1 = "RJ11.DEF-2742179658"
-DOCUMENT_REFERENCE_IDENTIFIER_2 = "RJ11.DEF-1234567892"
+DOCUMENT_REFERENCE_IDENTIFIER_1 = "RJ11.SMOKETEST-2742179658"
+DOCUMENT_REFERENCE_IDENTIFIER_2 = "RJ11.SMOKETEST-1234567892"
 DOC_REF_TEMPLATE = {
     "resourceType": "DocumentReference",
     "custodian": {
         "identifier": {
             "system": "https://fhir.nhs.uk/Id/ods-organization-code",
-            "value": "RJ11.DEF",
+            "value": "RJ11.SMOKETEST",
         }
     },
     "subject": {
@@ -118,7 +118,7 @@ def generate_end_user_header(env):
 def generate_end_user_receiver_header(env):
     if env == "prod":
         return "XXXX"
-    return "DEF"
+    return "SMOKETEST"
 
 
 def _prepare_base_request(env: str, actor: str, app_alias: str) -> tuple[str, dict]:

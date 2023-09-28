@@ -180,7 +180,9 @@ info:
 
     Alternatively, you can try out the sandbox using our Postman collection:
 
-    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/TBC)
+    Right click the icon and save link as... to save the Postman collection to your device
+
+    [![Right click and save link as...](https://run.pstmn.io/button.svg)](https://github.com/NHSDigital/NRLF/raw/main/postman_collection.json)
 
     ### Integration testing
 
