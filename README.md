@@ -77,7 +77,7 @@ This section will provide guidance on how to install the latest version of Power
 
 PowerShell is a powerful command-line shell and scripting language, while WSL allows you to run a Linux distribution alongside your Windows installation.
 
-If you wish to use the official guidance, this can be found here:
+If you wish to use the official guidance, links are below:
 
 - PowerShell - https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.3
 - WSL - https://learn.microsoft.com/en-us/windows/wsl/install
