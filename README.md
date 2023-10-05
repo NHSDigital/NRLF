@@ -696,6 +696,8 @@ All MI reports will be generated in CSV format by running:
 
 ```
 nrlf mi report <env> <?workspace> <?start_date> <?end_date> <?partition_key>
+eg nrlf mi report ref - runs the report pack on Ref with end date of today and start date 7 days previous
+   nrlf mi report ref --start_date=2023-09-15 --end_date=2023-09-17 - runs the report pack on Ref between the 2 dates specified
 ```
 
 where:
@@ -708,7 +710,7 @@ end_date:      For reports which specify a `end_date` (default to 7 days after `
 partition_key: For generating reports from test data (see above, default to using non-test data when omitted). This is not used in the `dimension` reports since the partition key does not exist in these tables.
 ```
 
-All reports, test or otherwise, are saved to `mi/reporting/report`.
+All reports, test or otherwise, are saved to `mi/reporting/report`. The reports that have optional start_date and end_date parameters are NRL-210 and NRL-212.
 
 #### Report validation
 
