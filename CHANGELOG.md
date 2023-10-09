@@ -1,5 +1,10 @@
 # Changelog
 
+## 2023-10-09
+
+SPINECLI-1090 - Update NRLF Readme with WSL and Powershell Instructions
+SPINECLI-1619 - Change the readme - updated section on Reporting to add more info
+
 ## 2023-09-21
 
 - SPINECLI-1190 - Add link to postman collection in narrative
