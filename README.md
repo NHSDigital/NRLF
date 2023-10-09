@@ -12,7 +12,10 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
    1. [Prerequisites](#1-prerequisites)
       1. [ASDF Tool Manager](#1-asdf-tool-manager)
       2. [If you prefer to get your local machine running manually the requirements are...](#2-if-you-prefer-to-get-your-local-machine-running-manually-the-requirements-are)
-   2. [WSL Installation](#2-wsl-installation)
+   2. [WSL and PowerShell installation](#2-wsl-and-powershell-installation)
+      1. [Step 1: Install PowerShell](#step-1-install-powershell)
+      2. [Step 2: Install Windows Subsystem for Linux (WSL)](#step-2-install-windows-subsystem-for-linux-wsl)
+      3. [Step 3: Verify Your Installation](#step-3-verify-your-installation)
    3. [Linux set up](#3-linux-set-up)
       1. [Java:](#1-java)
       2. [Poetry:](#2-poetry)
@@ -122,7 +125,7 @@ If you wish to use the official guidance, links are below:
 
    use the command: `wsl -d <DistributionName>` , replacing `<DistributionName>` with the name of the distribution you want to use.
 
-#### Step 3:Verify Your Installation
+#### Step 3: Verify Your Installation
 
 1. To verify that PowerShell and WSL are correctly installed, open a new PowerShell window (WSL not running) and run the following commands:
 
