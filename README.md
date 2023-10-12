@@ -12,14 +12,18 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
    1. [Prerequisites](#1-prerequisites)
       1. [ASDF Tool Manager](#1-asdf-tool-manager)
       2. [If you prefer to get your local machine running manually the requirements are...](#2-if-you-prefer-to-get-your-local-machine-running-manually-the-requirements-are)
-   2. [Linux set up](#2-linux-set-up)
+   2. [WSL and PowerShell installation](#2-wsl-and-powershell-installation)
+      1. [Step 1: Install PowerShell](#step-1-install-powershell)
+      2. [Step 2: Install Windows Subsystem for Linux (WSL)](#step-2-install-windows-subsystem-for-linux-wsl)
+      3. [Step 3: Verify Your Installation](#step-3-verify-your-installation)
+   3. [Linux set up](#3-linux-set-up)
       1. [Java:](#1-java)
       2. [Poetry:](#2-poetry)
       3. [pyenv:](#3-pyenv)
       4. [terraform](#4-terraform)
       5. [tfenv:](#5-tfenv)
       6. [yq:](#6-yq)
-   3. [Install python dependencies](#2-install-python-dependencies)
+   4. [Install python dependencies](#2-install-python-dependencies)
 2. [Initialise shell environment](#initialise-shell-environment)
 3. [Login to AWS](#login-to-aws)
 4. [Build, Test & Run the API](#build-test--run-the-api)
@@ -68,7 +72,78 @@ Swagger generation requirements.
 - java runtime environment (jre) - https://www.oracle.com/java/technologies/downloads/#jdk19-mac
 - yq v4
 
-### 2. Linux set up
+### 2. WSL and PowerShell installation
+
+If you are using Linux machine, please skip this section and go to [Linux set up](#3-linux-set-up)
+
+This section will provide guidance on how to install the latest version of PowerShell and set up the Windows Subsystem for Linux (WSL) on your Windows machine.
+
+PowerShell is a powerful command-line shell and scripting language, while WSL allows you to run a Linux distribution alongside your Windows installation.
+
+If you wish to use the official guidance, links are below:
+
+- PowerShell - https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.3
+- WSL - https://learn.microsoft.com/en-us/windows/wsl/install
+
+#### Step 1: Install PowerShell
+
+1. Open a web browser and go to the official PowerShell GitHub releases page: https://github.com/PowerShell/PowerShell/releases.
+
+2. Scroll down to the "Assets" section and find the latest stable release for your system architecture (usually x64 for 64-bit systems). Download the installer package with the "msi" extension.
+
+3. Run the downloaded MSI installer file.
+
+4. Follow the on-screen instructions to install PowerShell. Make sure to select the "Add to PATH" option during installation so that you can easily access PowerShell from the command line.
+
+5. Once the installation is complete, open a new Command Prompt or PowerShell window to verify that PowerShell is installed. You can do this by typing `powershell` and pressing Enter.
+
+#### Step 2: Install Windows Subsystem for Linux (WSL)
+
+1. Open PowerShell as an administrator. To do this, search for "PowerShell" in the Windows Start menu, right-click on "Windows PowerShell," and select "Run as administrator."
+
+2. Run the following command to enable the WSL feature:
+   ```shell
+   dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+   ```
+3. After the feature is enabled, restart your computer by running:
+   ```shell
+   Restart-Computer
+   ```
+4. After your computer restarts, open PowerShell as an administrator again and run the following command to download and install a Linux distribution of your choice (e.g., Ubuntu):
+   ```shell
+   wsl --install
+   ```
+5. During the installation process, you will be prompted to create a user and set a password for your Linux distribution.
+
+6. Once the installation is complete, you can launch your installed Linux distribution by running:
+
+   ```shell
+   wsl
+   ```
+
+   To run a specific wsl distribution from within PowerShell or Windows Command Prompt without changing your default distribution:
+
+   use the command: `wsl -d <DistributionName>` , replacing `<DistributionName>` with the name of the distribution you want to use.
+
+#### Step 3: Verify Your Installation
+
+1. To verify that PowerShell and WSL are correctly installed, open a new PowerShell window (WSL not running) and run the following commands:
+
+   Check PowerShell version
+
+   ```shell
+   $PSVersionTable.PSVersion
+   ```
+
+   Check WSL distribution list
+
+   ```shell
+   wsl --list
+   ```
+
+   These commands should display the PowerShell version and list the installed WSL distributions.
+
+### 3. Linux set up
 
 For those on a linux/WSL setup these are some helpful instructions:
 
@@ -696,6 +771,8 @@ All MI reports will be generated in CSV format by running:
 
 ```
 nrlf mi report <env> <?workspace> <?start_date> <?end_date> <?partition_key>
+eg nrlf mi report ref - runs the report pack on Ref with end date of today and start date 7 days previous
+   nrlf mi report ref --start_date=2023-09-15 --end_date=2023-09-17 - runs the report pack on Ref between the 2 dates specified
 ```
 
 where:
@@ -708,7 +785,7 @@ end_date:      For reports which specify a `end_date` (default to 7 days after `
 partition_key: For generating reports from test data (see above, default to using non-test data when omitted). This is not used in the `dimension` reports since the partition key does not exist in these tables.
 ```
 
-All reports, test or otherwise, are saved to `mi/reporting/report`.
+All reports, test or otherwise, are saved to `mi/reporting/report`. The reports that have optional start_date and end_date parameters are NRL-210 and NRL-212.
 
 #### Report validation
 
