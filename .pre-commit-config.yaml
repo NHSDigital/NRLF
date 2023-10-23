@@ -35,7 +35,7 @@ repos:
           - flake8-print
         args:
           - "--select=T201,F401,F402,F403"
-          - "--exclude=.git,__pycache__,dist,.venv,scripts,packages/feature_documentation/*,layer/psycopg2/*,changelog/scripts/changelog.py"
+          - "--exclude=.git,__pycache__,dist,.venv,scripts/*,packages/feature_documentation/*,layer/psycopg2/*,changelog/scripts/changelog.py"
 
   - repo: https://github.com/psf/black
     rev: 22.3.0
@@ -95,3 +95,11 @@ repos:
         name: Create changelog from changelog files
         entry: changelog/scripts/changelog-pre-commit.sh
         language: python
+
+  # - repo: local
+  #   hooks:
+  #     - id: append_ticket
+  #       name: Add ticket to commit message
+  #       entry: scripts/commit-msg.py
+  #       language: python
+  #       pass_filenames: false
