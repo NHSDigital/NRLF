@@ -95,11 +95,3 @@ repos:
         name: Create changelog from changelog files
         entry: changelog/scripts/changelog-pre-commit.sh
         language: python
-
-  # - repo: local
-  #   hooks:
-  #     - id: append_ticket
-  #       name: Add ticket to commit message
-  #       entry: scripts/commit-msg.py
-  #       language: python
-  #       pass_filenames: false
