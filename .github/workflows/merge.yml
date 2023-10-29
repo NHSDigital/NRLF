@@ -28,7 +28,7 @@ jobs:
     name: Create a tag from main
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Extract the tag name from the latest Changelog file
         run: |
           TAG=$(find changelog/ -type f -maxdepth 1 | sort -nr | head -1 | sed 's/...$//' | awk -F'changelog/' '{print "release/"$2}')
