@@ -29,7 +29,7 @@ resource "aws_iam_policy" "lambda" {
         ]
         Effect = "Allow"
         Resource = [
-          "*",
+          "arn:aws:logs:*:*:*${var.prefix}*",
         ]
       },
       {

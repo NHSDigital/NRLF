@@ -27,9 +27,10 @@ resource "aws_api_gateway_deployment" "api_gateway_deployment" {
 }
 
 resource "aws_api_gateway_stage" "api_gateway_stage" {
-  deployment_id = aws_api_gateway_deployment.api_gateway_deployment.id
-  rest_api_id   = aws_api_gateway_rest_api.api_gateway_rest_api.id
-  stage_name    = "production"
+  deployment_id        = aws_api_gateway_deployment.api_gateway_deployment.id
+  rest_api_id          = aws_api_gateway_rest_api.api_gateway_rest_api.id
+  stage_name           = "production"
+  xray_tracing_enabled = true
 
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_gateway_access_logs.arn
