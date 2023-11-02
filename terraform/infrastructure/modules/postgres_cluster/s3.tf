@@ -13,6 +13,41 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "mi-errors" {
   }
 }
 
+resource "aws_s3_bucket_policy" "mi-bucket-policy" {
+  bucket = "${var.prefix}-mi-errors"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Id      = "mi-bucket-policy"
+    Statement = [
+      {
+        Sid       = "HTTPSOnly"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:*"
+        Resource = [
+          aws_s3_bucket.mi-errors.arn,
+          "${aws_s3_bucket.mi-errors.arn}/*",
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_s3_bucket_public_access_block" "mi-errors-public-access-block" {
+  bucket = aws_s3_bucket.mi-errors.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_s3_bucket_lifecycle_configuration" "mi-errors" {
   bucket = aws_s3_bucket.mi-errors.id
 

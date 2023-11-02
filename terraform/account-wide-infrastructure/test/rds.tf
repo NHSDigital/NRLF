@@ -11,7 +11,7 @@ resource "aws_rds_cluster" "rds-cluster-ref" {
     aws_security_group.rds-cluster-sg-ref.id
   ]
   db_subnet_group_name = aws_db_subnet_group.rds-cluster-subnet-group-ref.name
-
+  storage_encrypted    = true
   lifecycle {
     ignore_changes = [availability_zones]
   }
@@ -49,6 +49,7 @@ resource "aws_rds_cluster" "rds-cluster-int" {
     aws_security_group.rds-cluster-sg-int.id
   ]
   db_subnet_group_name = aws_db_subnet_group.rds-cluster-subnet-group-int.name
+  storage_encrypted    = true
 
   lifecycle {
     ignore_changes = [availability_zones]
@@ -67,7 +68,7 @@ resource "aws_rds_cluster_instance" "rds-instance-int" {
   engine               = aws_rds_cluster.rds-cluster-int.engine
   engine_version       = aws_rds_cluster.rds-cluster-int.engine_version
   db_subnet_group_name = aws_db_subnet_group.rds-cluster-subnet-group-int.name
-
+  storage_encrypted    = true
   tags = {
     Name        = "${local.project}-int-instance-aurora"
     Environment = "int"
