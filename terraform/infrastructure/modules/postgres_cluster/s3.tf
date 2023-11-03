@@ -14,7 +14,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "mi-errors" {
 }
 
 resource "aws_s3_bucket_policy" "mi-bucket-policy" {
-  bucket = "${var.prefix}-mi-errors"
+  bucket = aws_s3_bucket.mi-errors.id
 
   policy = jsonencode({
     Version = "2012-10-17"

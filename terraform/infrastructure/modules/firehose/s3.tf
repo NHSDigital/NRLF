@@ -14,7 +14,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "firehose" {
 }
 
 resource "aws_s3_bucket_policy" "firehose-policy" {
-  bucket = "${var.prefix}-firehose"
+  bucket = aws_s3_bucket.firehose.id
 
   policy = jsonencode({
     Version = "2012-10-17"
