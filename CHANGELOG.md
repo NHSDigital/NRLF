@@ -1,5 +1,10 @@
 # Changelog
 
+## 2023-11-03
+
+- NRLF-708 - Fix SonarCloud Warnings
+- SPINECLI-1665 - New Lloyd George Pointer Type
+
 ## 2023-10-26
 
 - SPINECLI-1611 - Create sonar-project.properties file for SonarCloud configuration
