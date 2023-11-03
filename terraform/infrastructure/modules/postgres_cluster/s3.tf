@@ -18,7 +18,7 @@ resource "aws_s3_bucket_policy" "mi-errors-bucket-policy" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Id      = "mi-bucket-policy"
+    Id      = "mi-errors-bucket-policy"
     Statement = [
       {
         Sid       = "HTTPSOnly"
