@@ -4,7 +4,7 @@ resource "aws_s3_bucket" "api_truststore" {
 }
 
 resource "aws_s3_bucket_policy" "api_truststore_bucket_policy" {
-  bucket = "${local.prefix}--api-truststore"
+  bucket = aws_s3_bucket.api_truststore.id
 
   policy = jsonencode({
     Version = "2012-10-17"
