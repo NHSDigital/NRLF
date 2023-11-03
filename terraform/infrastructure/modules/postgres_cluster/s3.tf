@@ -13,7 +13,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "mi-errors" {
   }
 }
 
-resource "aws_s3_bucket_policy" "mi-bucket-policy" {
+resource "aws_s3_bucket_policy" "mi-errors-bucket-policy" {
   bucket = aws_s3_bucket.mi-errors.id
 
   policy = jsonencode({
