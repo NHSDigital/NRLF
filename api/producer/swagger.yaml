@@ -29,9 +29,12 @@ info:
     the pointers are classified into the following types:
 
     * [Mental Health Crisis Plan](http://snomed.info/sct/736253002)
-    * [Emergency Healthcare Plan](http://snomed.info/sct/887701000000100)
+    * [Royal College of Physicians NEWS2 (National Early Warning Score 2) chart](http://snomed.info/sct|1363501000000100)
+    * [ReSPECT (Recommended Summary Plan for Emergency Care and Treatment) form](http://snomed.info/sct|1382601000000107)
+    * [Contingency plan](http://snomed.info/sct|325691000000100)
+    * [End of life care plan](http://snomed.info/sct/736373009)
     * [End of Life Care Coordination Summary](http://snomed.info/sct|861421000000109)
-    * [National Early Warning Code 2](http://snomed.info/sct|1363501000000100)
+    * [Emergency Health Care Plans](http://snomed.info/sct|887701000000100)
 
     You can also retrieve booking and referral pointers however you can not currently do this by directly integrating with
     the National Record Locator, you must instead onboard to the [Booking and Referral - FHIR API](https://digital.nhs.uk/developer/api-catalogue/booking-and-referral-fhir)
