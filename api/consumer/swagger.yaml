@@ -1495,9 +1495,6 @@ components:
         SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY:
           summary: End of Life Care Coordination Summary
           value: http://snomed.info/sct|861421000000109
-        SNOMED_CODES_NATIONAL_EARLY_WARNING_SCORE_2:
-          summary: National Early Warning Code 2
-          value: http://snomed.info/sct|1363501000000100
         SNOMED_CODES_RESPECT_FORM:
           summary: ReSPECT form
           value: http://snomed.info/sct|1382601000000107
