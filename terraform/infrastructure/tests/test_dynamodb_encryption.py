@@ -12,7 +12,7 @@ PATH_TO_HERE = Path(__file__).parent
 PATH_TO_OUTPUT = PATH_TO_HERE.parent / "output.json"
 ROLE_ARN = "arn:aws:iam::{account_id}:role/terraform".format
 ROLE_SESSION_NAME = "integration-test-{timestamp}".format
-TABLE_NAME_SUFFIXES = ["document-type", "document-pointer"]
+TABLE_NAME_SUFFIXES = ["document-pointer"]
 
 
 def _get_access_token(account_id: str) -> dict[str:str]:
