@@ -41,41 +41,21 @@ function _terraform() {
     ;;
     #----------------
     "init")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-      fi
-
       cd "$terraform_dir" || return 1
       _terraform_init "$env"
     ;;
     #----------------
     "plan")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-      fi
-
       cd "$terraform_dir" || return 1
       _terraform_plan "$env" "$var_file" "$plan_file" "$aws_account_id"
     ;;
     #----------------
     "apply")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-      fi
-
       cd "$terraform_dir" || return 1
       _terraform_apply "$env" "$plan_file"
     ;;
     #----------------
     "destroy")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-      fi
-
       if [[ -z ${env} ]]; then
         echo "Non-mgmt parameter required" >&2
         echo "Usage:    nrlf terraform bootstrap-non-mgmt <ENV>"
