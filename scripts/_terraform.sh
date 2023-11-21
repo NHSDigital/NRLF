@@ -41,7 +41,7 @@ function _terraform() {
     ;;
     #----------------
     "init")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
+      if [[ "$(aws sts get-caller-identity)" != *508207660891* ]]; then
         echo "Please log in as the mgmt account" >&2
         return 1
       fi
@@ -51,7 +51,7 @@ function _terraform() {
     ;;
     #----------------
     "plan")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
+      if [[ "$(aws sts get-caller-identity)" != *508207660891* ]]; then
         echo "Please log in as the mgmt account" >&2
         return 1
       fi
@@ -61,7 +61,7 @@ function _terraform() {
     ;;
     #----------------
     "apply")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
+      if [[ "$(aws sts get-caller-identity)" != *508207660891* ]]; then
         echo "Please log in as the mgmt account" >&2
         return 1
       fi
@@ -71,7 +71,7 @@ function _terraform() {
     ;;
     #----------------
     "destroy")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
+      if [[ "$(aws sts get-caller-identity)" != *508207660891* ]]; then
         echo "Please log in as the mgmt account" >&2
         return 1
       fi
