@@ -4,9 +4,9 @@ from typing import Optional
 from lambda_utils.logging import log_action
 from pydantic import BaseModel, Field
 
-from nrlf.core.firehose.log_reference import LogReference
 from nrlf.core.firehose.model import FirehoseSubmissionRecord
 from nrlf.core.firehose.utils import list_in_chunks
+from nrlf.log_references import LogReference
 
 SUBMISSION_BATCH_SIZE = 500
 _MAX_SUBMISSION_ATTEMPTS = 20

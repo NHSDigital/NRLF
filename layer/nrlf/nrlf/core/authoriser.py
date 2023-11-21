@@ -1,5 +1,4 @@
 import json
-from enum import Enum
 from http import HTTPStatus
 from logging import Logger
 from typing import Any
@@ -22,15 +21,7 @@ from pydantic import BaseModel, ValidationError
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from nrlf.core.types import S3Client
 from nrlf.core.validators import json_loads
-
-
-class LogReference(Enum):
-    AUTHORISER001 = "Parsing headers"
-    AUTHORISER002 = "Parsing pointer types"
-    AUTHORISER003 = "Reading pointer types from S3"
-    AUTHORISER004 = "Validating pointer types"
-    AUTHORISER005 = "Render authorisation response"
-    AUTHORISER006 = "Parsing Client RP Details"
+from nrlf.log_references import LogReference
 
 
 class _PermissionsLookupError(Exception):

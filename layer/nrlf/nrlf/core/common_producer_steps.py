@@ -1,4 +1,3 @@
-from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -19,11 +18,7 @@ from nrlf.core.model import (
 )
 from nrlf.core.repository import Repository
 from nrlf.core.validators import generate_producer_id
-
-
-class LogReference(Enum):
-    COMMON_PRODUCER_VALIDATE_PERMISSIONS = "Validating producer permissions"
-    COMMON_PRODUCER_APPLY_CONTRACT = "Applying JSON Schema validator"
+from nrlf.log_references import LogReference
 
 
 @log_action(log_reference=LogReference.COMMON_PRODUCER_VALIDATE_PERMISSIONS)

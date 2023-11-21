@@ -1,4 +1,3 @@
-from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -14,12 +13,9 @@ from nrlf.core.model import (
 )
 from nrlf.core.repository import COUNT_ITEM_LIMIT, Repository
 from nrlf.core.transform import create_bundle_count
+from nrlf.log_references import LogReference
 
 log_action = make_common_log_action()
-
-
-class LogReference(Enum):
-    SEARCH001 = "Searching for document references"
 
 
 @log_action(log_reference=LogReference.SEARCH001)

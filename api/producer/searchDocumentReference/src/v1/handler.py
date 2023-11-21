@@ -1,4 +1,3 @@
-from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -16,13 +15,10 @@ from nrlf.core.model import (
 from nrlf.core.repository import Repository, type_filter
 from nrlf.core.transform import create_bundle_from_paginated_response
 from nrlf.core.validators import validate_type_system
+from nrlf.log_references import LogReference
 from nrlf.producer.fhir.r4.model import NextPageToken, RequestQuerySubject
 
 log_action = make_common_log_action()
-
-
-class LogReference(Enum):
-    SEARCH001 = "Searching for document references"
 
 
 @log_action(log_reference=LogReference.SEARCH001)

@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Dict, Union
 
 from lambda_pipeline.types import PipelineData
@@ -24,12 +23,9 @@ from nrlf.core.repository import (
     type_filter,
 )
 from nrlf.core.validators import validate_type_system
+from nrlf.log_references import LogReference
 
 log_action = make_common_log_action()
-
-
-class LogReference(Enum):
-    COMMONSEARCH001 = "Searching for document references"
 
 
 @log_action(log_reference=LogReference.COMMONSEARCH001)

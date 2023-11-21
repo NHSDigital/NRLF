@@ -1,4 +1,3 @@
-from enum import Enum
 from functools import reduce, wraps
 from typing import Generic, Iterator, TypeVar, Union
 
@@ -21,6 +20,7 @@ from nrlf.core.transform import (
     transform_next_page_token_to_start_key,
 )
 from nrlf.core.types import DynamoDbClient, DynamoDbResponse
+from nrlf.log_references import LogReference
 from nrlf.producer.fhir.r4.model import RequestQueryType
 
 from .decorators import deprecated
@@ -37,11 +37,6 @@ CONDITION_CHECK_CODES = [
     "TransactionCanceledException",
     "ValidationException",
 ]
-
-
-class LogReference(Enum):
-    REPOSITORY001 = "Checking if record is valid"
-    REPOSITORY002 = "Querying document"
 
 
 class CorruptItem(Exception):

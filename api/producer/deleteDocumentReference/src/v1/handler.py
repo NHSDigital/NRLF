@@ -1,4 +1,3 @@
-from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -16,14 +15,9 @@ from nrlf.core.model import APIGatewayProxyEventModel
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
 from nrlf.core.response import operation_outcome_ok
+from nrlf.log_references import LogReference
 
 log_action = make_common_log_action()
-
-
-class LogReference(Enum):
-    DELETE001 = "Validating producer permissions"
-    DELETE002 = "Validating item exists for deletion"
-    DELETE003 = "Deleting document reference"
 
 
 @log_action(log_reference=LogReference.DELETE001)

@@ -1,6 +1,5 @@
 import os
 from contextlib import contextmanager
-from enum import Enum
 from http import HTTPStatus
 from logging import Logger
 from types import ModuleType
@@ -14,12 +13,7 @@ from pydantic import BaseModel
 
 from nrlf.core.model import APIGatewayProxyEventModel, DocumentPointer
 from nrlf.core.repository import Repository
-
-
-class LogReference(Enum):
-    STATUS001 = "Getting environmental variables config"
-    STATUS002 = "Getting boto3 client"
-    STATUS003 = "Hitting the database"
+from nrlf.log_references import LogReference
 
 
 class Config(BaseModel):

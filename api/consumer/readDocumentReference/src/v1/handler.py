@@ -1,4 +1,3 @@
-from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -13,15 +12,12 @@ from nrlf.core.common_steps import (
 from nrlf.core.model import APIGatewayProxyEventModel, DocumentPointer
 from nrlf.core.repository import Repository
 from nrlf.core.validators import json_loads, validate_document_reference_string
+from nrlf.log_references import LogReference
 
 log_action = make_common_log_action()
 
 
-class LogReference(Enum):
-    READ001 = "Reading document reference"
-
-
-@log_action(log_reference=LogReference.READ001)
+@log_action(log_reference=LogReference.READ002)
 def read_document_reference(
     data: PipelineData,
     context: LambdaContext,
