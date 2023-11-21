@@ -10,7 +10,7 @@ info:
     The National Record Locator (NRL) enables organisations to share patient data nationwide.  Rather than storing the
     data itself, it is used to share pointers to the data, held in provider systems.  It acts as an index and not a data
     repository.  Each document pointer is defined using the
-    [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) standard.
+    [FHIR R4 DocumentReference](https://hl7.org/fhir/R4/documentreference.html) standard.
 
     ![National Record Locator](https://raw.githubusercontent.com/NHSDigital/nrl-consumer-api/master/specification/nrl.png)
 
@@ -54,7 +54,7 @@ info:
     * improved performance and scalability.
     * improved onboarding experience.
     * authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS.
-    * greater flexibility, by wider support of the [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) resource.
+    * greater flexibility, by wider support of the [FHIR R4 DocumentReference](https://hl7.org/fhir/R4/documentreference.html) resource.
 
     ### Data availability, timing and quality
 
