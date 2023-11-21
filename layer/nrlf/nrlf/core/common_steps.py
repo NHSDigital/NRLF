@@ -1,5 +1,4 @@
 import urllib.parse
-from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -14,12 +13,7 @@ from lambda_utils.logging import log_action, make_scoped_log_action
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from nrlf.core.model import APIGatewayProxyEventModel, convert_document_pointer_id_to_pk
 from nrlf.core.validators import generate_producer_id, json_loads
-
-
-class LogReference(Enum):
-    COMMON001 = "Parsing headers"
-    COMMON002 = "Parse document pointer id"
-    COMMON003 = "Checking for extra permissions"
+from nrlf.log_references import LogReference
 
 
 def read_subject_from_path(

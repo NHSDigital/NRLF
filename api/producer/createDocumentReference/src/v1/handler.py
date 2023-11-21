@@ -1,4 +1,3 @@
-from enum import Enum
 from functools import partial
 from logging import Logger
 from typing import Any
@@ -43,19 +42,12 @@ from nrlf.core.transform import (
     create_document_pointer_from_fhir_json,
     create_fhir_model_from_fhir_json,
 )
+from nrlf.log_references import LogReference
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
 
 log_action = make_common_log_action()
-
-
-class LogReference(Enum):
-    CREATE_REQUEST = "Parsing request body"
-    CREATE_SUPERSEDE_CHECK = "Determining whether document reference will supersede"
-    CREATE_SUPERSEDING = "Mark the document for superseding"
-    CREATE_PERMISSIONS = "Validating producer permissions"
-    CREATE_DB = "Saving document pointer to db"
 
 
 def _invalid_subject_identifier(

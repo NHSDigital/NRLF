@@ -13,13 +13,10 @@ from nrlf.core.dynamodb_types import to_dynamodb_dict
 from nrlf.core.model import DocumentPointer
 from nrlf.core.repository import Repository
 from nrlf.core.validators import json_load
+from nrlf.log_references import LogReference
 
 SANDBOX = "sandbox"
 TEMPLATE_PATH_TO_DATA = str(Path(__file__).parent / "data" / "{item_type_name}.json")
-
-
-class LogReference(Enum):
-    SEED001 = "Ensuring that this is a sandbox environment"
 
 
 def _is_sandbox_lambda(context: LambdaContext, environment: str, prefix: str):

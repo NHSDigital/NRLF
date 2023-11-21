@@ -1,5 +1,4 @@
 import urllib.parse
-from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -20,13 +19,9 @@ from nrlf.core.validators import (
     json_loads,
     validate_document_reference_string,
 )
+from nrlf.log_references import LogReference
 
 log_action = make_common_log_action()
-
-
-class LogReference(Enum):
-    READ001 = "Validating producer permissions"
-    READ002 = "Reading document reference"
 
 
 def _invalid_producer_for_read(ods_code_parts, read_item_id: str):

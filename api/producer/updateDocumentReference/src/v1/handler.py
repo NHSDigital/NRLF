@@ -1,4 +1,3 @@
-from enum import Enum
 from logging import Logger
 from typing import Any
 
@@ -27,15 +26,9 @@ from nrlf.core.repository import Repository
 from nrlf.core.response import operation_outcome_ok
 from nrlf.core.transform import update_document_pointer_from_fhir_json
 from nrlf.core.validators import json_loads
+from nrlf.log_references import LogReference
 
 log_action = make_common_log_action()
-
-
-class LogReference(Enum):
-    UPDATE001 = "Parsing request body"
-    UPDATE002 = "Determining whether document pointer exists"
-    UPDATE003 = "Comparing immutable fields"
-    UPDATE004 = "Updating document pointer model in db"
 
 
 @log_action(log_reference=LogReference.UPDATE001)

@@ -1,5 +1,4 @@
 import json
-from enum import Enum
 from http import HTTPStatus
 from pathlib import Path
 from types import FunctionType
@@ -24,11 +23,7 @@ from pydantic import ValidationError
 from nrlf.core.model import APIGatewayProxyEventModel
 from nrlf.core.response import operation_outcome_not_ok
 from nrlf.core.transform import strip_empty_json_paths
-
-
-class LogReference(Enum):
-    OPERATION = "Executing pipeline steps"
-    VERSION_CHECK = "Getting version from header"
+from nrlf.log_references import LogReference
 
 
 def _get_steps(
