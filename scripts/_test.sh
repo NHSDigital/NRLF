@@ -55,7 +55,11 @@ function _test_feature() {
 
   case $command in
   "local") python -m behave $args ;;
-  "integration") python -m behave --define="integration_test=true" $args ;;
+  "integration")
+    rm -rf ./allure-results
+    python -m behave --define="integration_test=true" $args --alluredir=./allure-results
+    allure generate ./allure-results -o ./allure-report --clean
+    allure open ./allure-report ;;
   *) _test_help ;;
   esac
 }
