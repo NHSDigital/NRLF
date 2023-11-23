@@ -6,7 +6,7 @@ from logging import getLevelName
 from threading import local
 from timeit import default_timer as timer
 from traceback import format_exception
-from typing import Any, Callable, Optional, TypeVar, Union
+from typing import Any, Callable, Literal, Optional, TypeVar, Union
 
 from aws_lambda_powertools import Logger as AwsLogger
 from lambda_utils.constants import LoggingConstants, LoggingOutcomes, LogLevel
@@ -56,8 +56,8 @@ class LogTemplate(LogTemplateBase):
     outcome: str
     duration_ms: int
     message: str
-    function: str
-    data: LogData
+    function: Union[str, None]
+    data: Union[LogData, None]
     error: Union[Exception, str, None]
     call_stack: str = None
     timestamp: str = Field(default_factory=make_timestamp)
@@ -65,7 +65,7 @@ class LogTemplate(LogTemplateBase):
 
     class Config:
         arbitrary_types_allowed = True  # For Exception
-        extra = Extra.forbid
+        extra = Extra.allow
 
     def dict(self, redact=False, **kwargs):
         """Force exclude_none, allow redaction of field `data`"""
@@ -153,9 +153,11 @@ def log_action(
     log_level: LogLevel = LogLevel.INFO,
     log_fields: list[str] = [],
     log_result: bool = True,
+    log_result_as: Union[str, None] = None,
     sensitive: bool = True,
     errors_only: bool = False,
     scope_fn: Union[Callable[P, dict[str, str]], None] = None,
+    **extra_fields,
 ) -> Callable[[Callable[P, RT]], Callable[P, RT]]:
     """
     Args:
@@ -217,6 +219,9 @@ def log_action(
                         if log_result:
                             data["result"] = result
 
+                        if log_result_as:
+                            action.add_fields(**{log_result_as: result})
+
                         scoped_values = (
                             {} if scope_fn is None else scope_fn(*args, **kwargs)
                         )
@@ -225,6 +230,7 @@ def log_action(
                             data=data,
                             function=f"{fn.__module__}.{fn.__name__}",
                             **scoped_values,
+                            **extra_fields,
                         )
 
         return wrapper
@@ -233,7 +239,7 @@ def log_action(
 
 
 class LogAction:
-    __old_action: Union["LogAction", None] = None
+    __old_action: Union["LogAction", None, Literal["unset"]] = "unset"
 
     def __init__(
         self,
@@ -256,21 +262,23 @@ class LogAction:
         self.extra_fields.update(kwargs)
 
     def __enter__(self):
-        if self.logger is None:
-            return self
-
-        assert self.__old_action is None, "Cannot use with LogAction reentrantly"
+        assert self.__old_action == "unset", "Cannot reuse LogActions"
         self.__old_action = logging_context.current_action
-        logging_context.current_action = self
+
+        if self.logger is None:
+            logging_context.current_action = None
+            return self
+        else:
+            logging_context.current_action = self
 
         self.__start_seconds = timer()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        logging_context.current_action = self.__old_action
+
         if self.logger is None:
             return
-
-        logging_context.current_action = self.__old_action
 
         duration_ms = duration_in_milliseconds(
             start_seconds=self.__start_seconds, end_seconds=timer()
@@ -307,7 +315,8 @@ class LogAction:
 
 
 def add_log_fields(**kwargs):
-    logging_context.current_action.add_fields(**kwargs)
+    if (current_action := logging_context.current_action) is not None:
+        logging_context.current_action.add_fields(**kwargs)
 
 
 def make_scoped_log_action(

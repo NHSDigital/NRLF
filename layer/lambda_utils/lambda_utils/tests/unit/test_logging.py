@@ -7,7 +7,6 @@ from hypothesis import given
 from hypothesis.strategies import booleans, builds, dictionaries, just, text
 from lambda_utils.logging import LogData, Logger, LogTemplate, log_action
 from lambda_utils.tests.unit.utils import make_aws_event
-from pydantic import ValidationError
 
 from nrlf.core.errors import DynamoDbError
 from nrlf.core.model import APIGatewayProxyEventModel
@@ -187,7 +186,6 @@ def test_log_template_json_always_exclude_none(log: LogTemplate):
     log=_log,
     extra_fields=dictionaries(keys=text(max_size=1), values=booleans(), min_size=1),
 )
-def test_log_template_dict_forbids_extra_fields(log: LogTemplate, extra_fields: dict):
+def test_log_template_dict_allows_extra_fields(log: LogTemplate, extra_fields: dict):
     good_log_input = log.dict()
-    with pytest.raises(ValidationError):
-        LogTemplate(**good_log_input, **extra_fields)
+    LogTemplate(**good_log_input, **extra_fields)  # Doesn't raise
