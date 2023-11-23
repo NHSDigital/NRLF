@@ -189,18 +189,7 @@ def log_action(
                 logger=logger,
             ) as action:
 
-                function_kwargs = filter_visible_function_arguments(
-                    fn_signature=fn_signature,
-                    function_args=args,
-                    function_kwargs=kwargs,
-                    log_fields=log_fields,
-                )
-
                 error = False
-                data = {
-                    "inputs": function_kwargs,
-                }
-
                 try:
                     result = fn(*args, **kwargs)
                 except ERROR_SET_4XX as e:
@@ -214,8 +203,20 @@ def log_action(
                     return result
                 finally:
                     if not errors_only or error or log_level == LogLevel.ERROR:
+                        function_kwargs = filter_visible_function_arguments(
+                            fn_signature=fn_signature,
+                            function_args=args,
+                            function_kwargs=kwargs,
+                            log_fields=log_fields,
+                        )
+
+                        data = {
+                            "inputs": function_kwargs,
+                        }
+
                         if log_result:
                             data["result"] = result
+
                         scoped_values = (
                             {} if scope_fn is None else scope_fn(*args, **kwargs)
                         )
@@ -258,7 +259,9 @@ class LogAction:
         if self.logger is None:
             return self
 
+        assert self.__old_action is None, "Cannot use with LogAction reentrantly"
         self.__old_action = logging_context.current_action
+        logging_context.current_action = self
 
         self.__start_seconds = timer()
         return self
@@ -266,6 +269,9 @@ class LogAction:
     def __exit__(self, exc_type, exc_value, traceback):
         if self.logger is None:
             return
+
+        logging_context.current_action = self.__old_action
+
         duration_ms = duration_in_milliseconds(
             start_seconds=self.__start_seconds, end_seconds=timer()
         )
@@ -298,6 +304,10 @@ class LogAction:
             message_dict = _message.dict()
             message_json = json_encode_message(message=message_dict)
             self.logger.log(msg=message_json, level=level)
+
+
+def add_log_fields(**kwargs):
+    logging_context.current_action.add_fields(**kwargs)
 
 
 def make_scoped_log_action(
