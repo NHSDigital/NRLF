@@ -24,9 +24,10 @@ class CustomFormatter(LambdaPowertoolsFormatter):
 
 
 def _convert_args_to_kwargs(fn_signature: Signature, args: tuple, kwargs: dict) -> dict:
+    result = dict(kwargs)
     for arg_value, arg_name in zip(args, fn_signature.parameters):
-        kwargs[arg_name] = arg_value
-    return kwargs
+        result[arg_name] = arg_value
+    return result
 
 
 def _json_encoder(obj: any) -> str:
