@@ -11,11 +11,7 @@ from lambda_utils.header_config import (
 )
 from lambda_utils.logging import log_action
 from lambda_utils.logging_utils import generate_transaction_id
-from lambda_utils.pipeline import (
-    APIGatewayProxyEventModel,
-    _execute_steps,
-    _setup_logger,
-)
+from lambda_utils.pipeline import APIGatewayProxyEventModel, _setup_logger
 from pydantic import BaseModel, ValidationError
 
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
@@ -215,22 +211,6 @@ steps = [
 ]
 
 
-def _function_handler(
-    fn, transaction_id: str, status_code_ok: HTTPStatus, method_arn: str, args, kwargs
-) -> tuple[HTTPStatus, any]:
-    try:
-        status_code, result = status_code_ok, fn(*args, **kwargs)
-    except Exception:
-        status_code = None
-        result = _create_policy(
-            principal_id=transaction_id,
-            resource=method_arn,
-            effect="Deny",
-            context={"error": HTTPStatus.INTERNAL_SERVER_ERROR.phrase},
-        )
-    return status_code, result
-
-
 def execute_steps(
     index_path: str,
     event: dict,
@@ -249,29 +229,23 @@ def execute_steps(
     event["isBase64Encoded"] = False
     transaction_id = generate_transaction_id()
     method_arn = event["methodArn"]
-
-    status_code, response = _function_handler(
-        _setup_logger,
-        transaction_id=transaction_id,
-        status_code_ok=HTTPStatus.OK,
-        method_arn=method_arn,
-        args=(index_path, transaction_id, event),
-        kwargs=dependencies,
-    )
-
-    if status_code is not HTTPStatus.OK:
-        return status_code, response
-    logger = response
-
-    return _function_handler(
-        _execute_steps,
-        transaction_id=transaction_id,
-        status_code_ok=HTTPStatus.OK,
-        method_arn=method_arn,
-        args=(steps, event, context),
-        kwargs={
-            "logger": logger,
-            "dependencies": dependencies,
-            "initial_pipeline_data": {"method_arn": method_arn},
-        },
-    )
+    try:
+        status_code = HTTPStatus.OK
+        logger = _setup_logger(index_path, transaction_id, event, **dependencies)
+        result = execute_steps(
+            steps,
+            event,
+            context,
+            logger=logger,
+            dependencies=dependencies,
+            initial_pipeline_data={"method_arn": method_arn},
+        )
+    except Exception:
+        status_code = None
+        result = _create_policy(
+            principal_id=transaction_id,
+            resource=method_arn,
+            effect="Deny",
+            context={"error": HTTPStatus.INTERNAL_SERVER_ERROR.phrase},
+        )
+    return status_code, result
