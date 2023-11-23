@@ -8,7 +8,7 @@ from typing import Any, Generator
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import log_action, prepare_default_event_for_logging
 from lambda_utils.logging_utils import generate_transaction_id
-from lambda_utils.pipeline import _execute_steps, _function_handler, _setup_logger
+from lambda_utils.pipeline import _execute_steps, _setup_logger
 from pydantic import BaseModel
 
 from nrlf.core.model import APIGatewayProxyEventModel, DocumentPointer
@@ -94,30 +94,19 @@ def execute_steps(
     dependencies["splunk_index"] = os.environ.get("SPLUNK_INDEX")
     dependencies["source"] = os.environ.get("SOURCE")
 
-    status_code, response = _function_handler(
-        _setup_logger,
-        http_status,
-        transaction_id=transaction_id,
-        args=(index_path, transaction_id, event),
-        kwargs=dependencies,
-    )
-    if status_code is not HTTPStatus.OK:
-        return status_code, response
-    logger = response
-
-    steps = _get_steps()
-    status_code, response = _function_handler(
-        _execute_steps,
-        http_status,
-        transaction_id=transaction_id,
-        args=(steps, event, context),
-        kwargs={
-            "logger": logger,
-            "dependencies": dependencies,
-            "initial_pipeline_data": initial_pipeline_data,
-        },
-    )
-
-    if status_code is not HTTPStatus.OK:
+    try:
+        logger = _setup_logger(index_path, transaction_id, event, **dependencies)
+        steps = _get_steps()
+        _execute_steps(
+            steps,
+            event,
+            context,
+            logger=logger,
+            dependencies=dependencies,
+            initial_pipeline_data=initial_pipeline_data,
+        )
+        status_code = HTTPStatus.OK
+    except Exception as e:
         status_code = HTTPStatus.SERVICE_UNAVAILABLE
+
     return status_code, {"message": status_code.phrase}
