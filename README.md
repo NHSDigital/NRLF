@@ -418,20 +418,30 @@ this will run all the producer integration tests.
 
 Allure reports (https://allurereport.org/docs/) can be viewed after the integration tests have been run. After the command for integration tests (**"nrlf test feature integration"**) is run, the test results are outputted to a folder named "allure-results", after which a html report is generated in the "allure-report" folder. In addition, a web server is started to view the report. However, before the reports can be viewed successfully, the following steps must be followed:
 
+Before installing these tools, please ensure you have the official "Python" extension installed in VS code.
+
 #### 1. Homwbrew installation:
 
-Run the followwing command in the WSL terminal to install homebrew:
+Run the followwing command in in the WSL terminal, within the NRLF directory:
 
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
+After the homebrew installation is completes, as part fo the success message, two additonal commands will be output to the terminal to update the system path. Run both commands.
+
 #### 2. Allure installation via Homebrew:
 
-Once Homebrew is installed, run the following in the WSL terminal to install allure:
+Once Homebrew is installed, run the following command in the same directory (NRLF) to install allure:
 
 ```shell
 brew install allure
+```
+
+Run the following command to verify allure has been installed successfully:
+
+```shell
+allure --version
 ```
 
 #### 3. Allure pytest adapter installation
@@ -442,9 +452,17 @@ This step should not be necessary if you are using the system Python environment
 pip install allure-pytest
 ```
 
-#### 4. Viewing the report
+#### 4. Allure-behave install/upgrade
 
-Once the aforementioed tools in steps 1-3 have been installed, the report is ready to be viewed. When using WSL the IP address of the web server to view the report must be amended in the web browser. This is because, WSL is being accessed via an IP address different to the usual local IP (127.0.1.1.). In order to find out the IP of your WSL instance, run the following command:
+Ensure the following command is run in the poetry shell environment:
+
+```
+pip install allure-behave
+```
+
+#### 5. Viewing the report
+
+Once the aforementioed tools in steps 1-4 have been installed, the report is ready to be viewed. When using WSL the IP address of the web server to view the report must be amended in the web browser. This is because, WSL is being accessed via an IP address different to the usual local IP (127.0.1.1.). In order to find out the IP of your WSL instance, run the following command:
 
 ```shell
 ip addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'
