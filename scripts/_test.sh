@@ -38,7 +38,7 @@ function _test_unit() {
 
 function _test_integration() {
   local args=(${@:1})
-  python -m pytest -m "integration and not firehose" $args
+  python -m pytest -m "integration and not firehose" $args --alluredir=./allure-results
 }
 
 function _test_integration_firehose() {
@@ -56,10 +56,9 @@ function _test_feature() {
   case $command in
   "local") python -m behave $args ;;
   "integration")
-    rm -rf ./allure-results &&
-    python -m behave --define="integration_test=true" $args --alluredir=./allure-results
-    allure generate ./allure-results -o ./allure-report --clean
-    allure open ./allure-report ;;
+      python -m behave --define="integration_test=true" $args
+      allure generate ./allure-results -o ./allure-report --clean
+      allure open ./allure-report ;;
   *) _test_help ;;
   esac
 }
