@@ -58,6 +58,7 @@ info:
     * improved onboarding experience.
     * authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS.
     * greater flexibility, by wider support of the [FHIR R4 DocumentReference](https://hl7.org/fhir/R4/documentreference.html) resource.
+    * the application only supports json type FHIR, not XML (which is also valid FHIR)
 
     ### Data availability, timing and quality
 
