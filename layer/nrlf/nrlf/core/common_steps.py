@@ -8,7 +8,7 @@ from lambda_utils.header_config import (
     ClientRpDetailsHeader,
     ConnectionMetadata,
 )
-from lambda_utils.logging import log_action, make_scoped_log_action
+from lambda_utils.logging import add_log_fields, log_action, make_scoped_log_action
 
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from nrlf.core.model import APIGatewayProxyEventModel, convert_document_pointer_id_to_pk
@@ -57,6 +57,9 @@ def parse_headers(
     _raw_client_rp_details = _headers.get(CLIENT_RP_DETAILS, "{}")
     connection_metadata = ConnectionMetadata.parse_raw(_raw_connection_metadata)
     client_rp_details = ClientRpDetailsHeader.parse_raw(_raw_client_rp_details)
+    add_log_fields(
+        connection_metadata=connection_metadata, client_rp_details=client_rp_details
+    )  # Might be enough to just mark this log as non-sensitive
     return PipelineData(
         **data,
         ods_code_parts=connection_metadata.ods_code_parts,
@@ -80,6 +83,7 @@ def parse_path_id(
     representations.
     """
     id = urllib.parse.unquote(event.pathParameters["id"])
+    add_log_fields(pointer_id=id)
     pk = convert_document_pointer_id_to_pk(id)
     producer_id, _ = generate_producer_id(id=id, producer_id=None)
     return PipelineData(**data, producer_id=producer_id, id=id, pk=pk)

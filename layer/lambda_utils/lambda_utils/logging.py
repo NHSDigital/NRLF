@@ -62,6 +62,7 @@ class LogTemplate(LogTemplateBase):
     call_stack: str = None
     timestamp: str = Field(default_factory=make_timestamp)
     sensitive: bool = True
+    extra_fields: dict[str, object]
 
     class Config:
         arbitrary_types_allowed = True  # For Exception
@@ -157,7 +158,6 @@ def log_action(
     sensitive: bool = True,
     errors_only: bool = False,
     scope_fn: Union[Callable[P, dict[str, str]], None] = None,
-    **extra_fields,
 ) -> Callable[[Callable[P, RT]], Callable[P, RT]]:
     """
     Args:
@@ -226,11 +226,10 @@ def log_action(
                             {} if scope_fn is None else scope_fn(*args, **kwargs)
                         )
 
-                        action.add_fields(
+                        action.override(
                             data=data,
                             function=f"{fn.__module__}.{fn.__name__}",
                             **scoped_values,
-                            **extra_fields,
                         )
 
         return wrapper
@@ -257,9 +256,13 @@ class LogAction:
         self.errors_only = errors_only
         self.logger = logger
         self.extra_fields = extra_fields
+        self.overrides = {}
 
     def add_fields(self, **kwargs):
         self.extra_fields.update(kwargs)
+
+    def override(self, **kwargs):
+        self.overrides.update(kwargs)
 
     def __enter__(self):
         assert self.__old_action == "unset", "Cannot reuse LogActions"
@@ -306,8 +309,9 @@ class LogAction:
                 duration_ms=duration_ms,
                 log_level=getLevelName(level),
                 sensitive=self.sensitive,
+                extra_fields=self.extra_fields,
                 **self.logger.base_message.dict(),
-                **self.extra_fields,
+                **self.overrides,
             )
             message_dict = _message.dict()
             message_json = json_encode_message(message=message_dict)

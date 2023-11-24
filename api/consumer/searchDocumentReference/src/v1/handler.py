@@ -2,6 +2,7 @@ from logging import Logger
 from typing import Any
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
+from lambda_utils.logging import add_log_fields
 
 from nrlf.core.common_search_steps import get_paginated_document_references
 from nrlf.core.common_steps import make_common_log_action, parse_headers
@@ -24,6 +25,12 @@ def search_document_references(
 
     request_params = ConsumerRequestParams(**event.queryStringParameters or {})
     repo: Repository = dependencies["repository"]
+
+    add_log_fields(
+        incoming_pointer_types=data["pointer_types"],
+        type_identifier=request_params.type,
+        nhs_number=request_params.nhs_number,
+    )
 
     response = get_paginated_document_references(
         request_params=request_params,

@@ -9,7 +9,7 @@ from lambda_utils.header_config import (
     ClientRpDetailsHeader,
     ConnectionMetadata,
 )
-from lambda_utils.logging import log_action
+from lambda_utils.logging import add_log_fields, log_action
 from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import APIGatewayProxyEventModel, _setup_logger
 from pydantic import BaseModel, ValidationError
@@ -78,12 +78,20 @@ def _create_policy(principal_id, resource, effect, context):
     }
 
 
-@log_action(log_reference=LogReference.AUTHORISER006, log_result=True)
+@log_action(
+    log_reference=LogReference.AUTHORISER006,
+    log_result=True,
+    log_fields=["raw_client_rp_details"],
+)
 def _parse_client_rp_details(raw_client_rp_details: dict):
     return ClientRpDetailsHeader.parse_raw(raw_client_rp_details)
 
 
-@log_action(log_reference=LogReference.AUTHORISER003, log_result=True)
+@log_action(
+    log_reference=LogReference.AUTHORISER003,
+    log_result=True,
+    log_fields=["bucket", "key"],
+)
 def _parse_list_from_s3(s3_client: S3Client, bucket: str, key: str) -> list:
     try:
         response = s3_client.get_object(Bucket=bucket, Key=key)
@@ -111,6 +119,10 @@ def parse_headers(
     _headers = AbstractHeader(**event.headers).headers
     _raw_client_rp_details = _headers.get(CLIENT_RP_DETAILS, "{}")
     _raw_connection_metadata = _headers.get(CONNECTION_METADATA, "{}")
+    add_log_fields(
+        raw_client_rp_details=_raw_client_rp_details,
+        raw_connection_metadata=_raw_connection_metadata,
+    )
     try:
         connection_metadata = ConnectionMetadata.parse_raw(_raw_connection_metadata)
     except ValidationError:
@@ -128,6 +140,10 @@ def parse_headers(
             error="There was an issue parsing the client rp details, contact onboarding team",
             **data,
         )
+
+    add_log_fields(
+        client_rp_details=client_rp_details, connection_metadata=connection_metadata
+    )
 
     return PipelineData(
         connection_metadata=connection_metadata,
@@ -149,6 +165,9 @@ def retrieve_pointer_types(
 
     client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
     connection_metadata: ConnectionMetadata = data["connection_metadata"]
+    add_log_fields(
+        client_rp_details=client_rp_details, connection_metadata=connection_metadata
+    )
 
     pointer_types = connection_metadata.pointer_types
     if connection_metadata.enable_authorization_lookup:
@@ -162,7 +181,7 @@ def retrieve_pointer_types(
             )
         except _PermissionsLookupError as exc:
             return PipelineData(error=str(exc), **data)
-
+    add_log_fields(pointer_types=pointer_types)
     return PipelineData(pointer_types=pointer_types, **data)
 
 
