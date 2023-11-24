@@ -56,6 +56,8 @@ function _test_feature() {
   case $command in
   "local") python -m behave $args ;;
   "integration")
+      #The commented out line below can be uncommented if you wish to have a clean of the test results each run
+      #rm -rf ./allure-results
       python -m behave --define="integration_test=true" $args
       allure generate ./allure-results -o ./allure-report --clean
       allure open ./allure-report ;;

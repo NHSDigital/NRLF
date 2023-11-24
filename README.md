@@ -433,7 +433,7 @@ To install Homebrew, Run the followwing command in the WSL terminal, within the 
 After the homebrew installation is completed, as part of the success message, two additonal commands will be output to the terminal to update the system path. Run both commands:
 
 ```
-(echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/anra6/.bashrc
+(echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> ~/.bashrc
 ```
 
 ```
