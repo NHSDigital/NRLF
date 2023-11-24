@@ -1,5 +1,10 @@
 # Changelog
 
+## 2023-11-24
+
+- SPINECLI-1666 - corrected FHIR document reference link and corrected schema reference for create producer
+- SPINECLI-1616 - updated the supported pointer types
+
 ## 2023-10-26
 
 - SPINECLI-1611 - Create sonar-project.properties file for SonarCloud configuration
