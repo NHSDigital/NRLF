@@ -43,8 +43,8 @@ def parse_request_body(
     body = fetch_body_from_event(event)
 
     add_log_fields(
-        body_id=body["id"],
-        data_id=data["id"],
+        body_id=body.get("id"),
+        data_id=data.get("id"),
     )
     if ("id" in body and "id" in data) and (body["id"] != data["id"]):
         raise InconsistentUpdateId(
@@ -118,13 +118,18 @@ def compare_immutable_fields(
 ) -> PipelineData:
     core_model = data["core_model"]
     raw_original_document = data["original_document"]
+
+    orig_document = json_loads(raw_original_document)
+    new_document = json_loads(core_model.document.__root__)
+
     add_log_fields(
         new_pointer_id=core_model.id,
-        orig_pointer_id=raw_original_document.id,
+        orig_pointer_id=orig_document.get("id"),
     )
+
     _validate_immutable_fields(
-        a=json_loads(raw_original_document),
-        b=json_loads(core_model.document.__root__),
+        a=orig_document,
+        b=new_document,
     )
     return PipelineData(**data)
 

@@ -97,6 +97,7 @@ def test_log_with_log_fields_filter(log_fields, expected_data_inputs):
         "environment": "TEST",
         "host": "123456789012",
         "sensitive": True,
+        "extra_fields": {},
     }
 
 
@@ -155,6 +156,7 @@ def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
         "environment": "TEST",
         "host": "123456789012",
         "sensitive": True,
+        "extra_fields": {},
     }
 
 
