@@ -62,7 +62,7 @@ class LogTemplate(LogTemplateBase):
     call_stack: str = None
     timestamp: str = Field(default_factory=make_timestamp)
     sensitive: bool = True
-    extra_fields: dict[str, object]
+    extra_fields: Optional[dict[str, object]]
 
     class Config:
         arbitrary_types_allowed = True  # For Exception
@@ -158,6 +158,7 @@ def log_action(
     sensitive: bool = True,
     errors_only: bool = False,
     scope_fn: Union[Callable[P, dict[str, str]], None] = None,
+    **extra_fields,
 ) -> Callable[[Callable[P, RT]], Callable[P, RT]]:
     """
     Args:
@@ -231,6 +232,7 @@ def log_action(
                             function=f"{fn.__module__}.{fn.__name__}",
                             **scoped_values,
                         )
+                        action.add_fields(**extra_fields)
 
         return wrapper
 
