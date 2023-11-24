@@ -2,6 +2,7 @@ from logging import Logger
 from typing import Any
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
+from lambda_utils.logging import add_log_fields
 
 from nrlf.core.common_steps import make_common_log_action, parse_headers
 from nrlf.core.constants import DbPrefix
@@ -16,7 +17,7 @@ from nrlf.core.repository import Repository, type_filter
 from nrlf.core.transform import create_bundle_from_paginated_response
 from nrlf.core.validators import validate_type_system
 from nrlf.log_references import LogReference
-from nrlf.producer.fhir.r4.model import NextPageToken, RequestQuerySubject
+from nrlf.producer.fhir.r4.model import NextPageToken
 
 log_action = make_common_log_action()
 
@@ -36,15 +37,26 @@ def search_document_references(
         request_params=request_params, provided_params=event.queryStringParameters
     )
 
-    nhs_number: RequestQuerySubject = request_params.nhs_number
+    nhs_number = request_params.nhs_number
 
     ods_code_parts = data["ods_code_parts"]
+
+    add_log_fields(
+        ods_code_parts=ods_code_parts,
+        incoming_pointer_types=data["pointer_types"],
+        type_identifier=request_params.type,
+        nhs_number=nhs_number,
+    )
 
     validate_type_system(request_params.type, pointer_types=data["pointer_types"])
 
     pointer_types = type_filter(
         type_identifier=request_params.type,
         pointer_types=data["pointer_types"],
+    )
+
+    add_log_fields(
+        pointer_types=pointer_types,
     )
 
     next_page_token: NextPageToken = request_params.next_page_token
@@ -60,6 +72,7 @@ def search_document_references(
     )
 
     bundle = create_bundle_from_paginated_response(response)
+    add_log_fields(items_found=bundle.total)
     return PipelineData(bundle)
 
 

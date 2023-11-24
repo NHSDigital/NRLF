@@ -2,6 +2,7 @@ from logging import Logger
 from typing import Any
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
+from lambda_utils.logging import add_log_fields
 
 from nrlf.core.common_steps import (
     make_common_log_action,
@@ -41,11 +42,22 @@ def search_document_references(
     nhs_number: RequestQuerySubject = request_params.nhs_number
     ods_code_parts = data["ods_code_parts"]
 
+    add_log_fields(
+        ods_code_parts=ods_code_parts,
+        incoming_pointer_types=data["pointer_types"],
+        type_identifier=request_params.type,
+        nhs_number=nhs_number,
+    )
+
     validate_type_system(request_params.type, pointer_types=data["pointer_types"])
 
     pointer_types = type_filter(
         type_identifier=request_params.type,
         pointer_types=data["pointer_types"],
+    )
+
+    add_log_fields(
+        pointer_types=pointer_types,
     )
 
     next_page_token: NextPageToken = request_params.next_page_token

@@ -26,6 +26,7 @@ class DataContractCache(dict):
     @log_action(
         log_reference=LogReference.DATA_CONTRACT_READ_CACHE,
         log_fields=["system", "value"],
+        sensitive=False,
     )
     def get(self, system: str, value: str) -> list[Contract]:
         return super().get(system, {}).get(value)
@@ -41,6 +42,7 @@ class DataContractCache(dict):
     @log_action(
         log_reference=LogReference.DATA_CONTRACT_WRITE_CACHE,
         log_fields=["system", "value", "contracts"],
+        sensitive=False,
     )
     def set(self, system: str, value: str, contracts: list[Contract]):
         return self.__setitem__(system, {value: contracts})

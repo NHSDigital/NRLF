@@ -37,7 +37,7 @@ def _get_steps(
 
 def _setup_logger(
     index_path: str, transaction_id: str, event: dict, **dependencies
-) -> tuple[int, any]:
+) -> Logger:
     try:
         _event = MinimalEventModelForLogging.parse_obj(event)
     except ValidationError:
@@ -98,7 +98,7 @@ def execute_steps(
     http_status_ok: HTTPStatus = HTTPStatus.OK,
     initial_pipeline_data={},
     **dependencies,
-) -> tuple[HTTPStatus, dict]:
+) -> tuple[int, dict]:
     """
     Executes the handler and wraps it in exception handling
     """

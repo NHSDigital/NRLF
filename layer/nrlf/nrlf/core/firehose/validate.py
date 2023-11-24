@@ -28,7 +28,11 @@ class NoSpaceLeftInCurrentEventPacket(Exception):
     pass
 
 
-@log_action(log_reference=LogReference.FIREHOSE004)
+@log_action(
+    log_reference=LogReference.FIREHOSE004,
+    sensitive=False,
+    log_fields=["record_size_bytes", "total_event_size_bytes", "number_of_logs"],
+)
 def _validate_record_size(
     record_size_bytes: int,
     total_event_size_bytes: int,

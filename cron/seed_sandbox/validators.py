@@ -1,4 +1,4 @@
-from lambda_utils.logging import log_action
+from lambda_utils.logging import add_log_fields, log_action
 from pydantic import BaseModel, ValidationError
 
 from nrlf.core.model import DocumentPointer
@@ -21,11 +21,20 @@ def validate_items(items: list[BaseModel], logger=None):
 
 
 @log_action(
-    log_reference=LogReference.SEEDVALIDATE001, log_fields=["item"], log_result=True
+    log_reference=LogReference.SEEDVALIDATE001,
+    log_fields=["item"],
+    log_result_as="valid",
 )
 def _is_item_valid(item: BaseModel):
     try:
         if type(item) == DocumentPointer:
+            add_log_fields(
+                pointer_id=item.id,
+                pointer_producer_id=item.producer_id,
+                pointer_type=item.type,
+                pointer_version=item.version,
+                pointer_source=item.source,
+            )
             DocumentReference(**json_loads(item.document.__root__))
             return True
         else:

@@ -2,6 +2,7 @@ from logging import Logger
 from typing import Any
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
+from lambda_utils.logging import add_log_fields
 
 from nrlf.core.common_steps import (
     make_common_log_action,
@@ -31,6 +32,7 @@ def read_document_reference(
     document_pointer: DocumentPointer = repository.read_item(
         data["pk"], type=pointer_types
     )
+    add_log_fields(pointer_id=document_pointer.id, pointer_types=pointer_types)
 
     validate_document_reference_string(document_pointer.document.__root__)
 

@@ -2,6 +2,7 @@ from logging import Logger
 from typing import Any
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
+from lambda_utils.logging import add_log_fields
 
 from nrlf.consumer.fhir.r4.model import NextPageToken
 from nrlf.core.common_search_steps import get_paginated_document_references
@@ -32,6 +33,10 @@ def search_document_references(
     repository: Repository = dependencies["repository"]
 
     request_params = CountRequestParams(**event.queryStringParameters or {})
+    add_log_fields(
+        nhs_number=request_params.nhs_number,
+        raw_pointer_types=data["pointer_types"],
+    )
 
     while True:
         response: PaginatedResponse = get_paginated_document_references(
@@ -48,6 +53,8 @@ def search_document_references(
         next_page_token = response.last_evaluated_key
         if next_page_token is None:
             break
+
+    add_log_fields(count=count)
 
     bundle = create_bundle_count(count)
     return PipelineData(bundle)

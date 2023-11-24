@@ -2,7 +2,7 @@ from logging import Logger
 from typing import Any
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
-from lambda_utils.logging import log_action
+from lambda_utils.logging import add_log_fields, log_action
 
 from nrlf.core.constants import CUSTODIAN_SEPARATOR
 from nrlf.core.errors import RequestValidationError
@@ -32,6 +32,7 @@ def validate_producer_permissions(
     # Compare producer id from path id to ods code from NHSD-Connection-Metadata
     producer_id = data["producer_id"]
     ods_code_parts = data["ods_code_parts"]
+    add_log_fields(producer_id=producer_id, ods_code_parts=ods_code_parts)
 
     if tuple(producer_id.split(CUSTODIAN_SEPARATOR)) != ods_code_parts:
         raise RequestValidationError(
@@ -57,12 +58,15 @@ def apply_data_contracts(
     system, value = split_pointer_type(core_model.type.__root__)
     data_contract_cache: DataContractCache = dependencies[DataContractCache.__name__]
     repository: Repository = dependencies["contract_repository"]
+    add_log_fields(type_system=system, type_value=value)
 
     global_contracts = data_contract_cache.get_global_contracts(logger=logger)
+    add_log_fields(global_contracts_cached=global_contracts is not None)
     if not global_contracts:
         global_contracts = get_contracts_from_db(repository=repository, logger=logger)
 
     local_contracts = data_contract_cache.get(system=system, value=value, logger=logger)
+    add_log_fields(local_contracts_cached=local_contracts is not None)
     if not local_contracts:
         local_contracts = get_contracts_from_db(
             repository=repository, system=system, value=value, logger=logger

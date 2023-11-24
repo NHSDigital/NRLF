@@ -2,7 +2,7 @@ from functools import reduce, wraps
 from typing import Generic, Iterator, TypeVar, Union
 
 from botocore.exceptions import ClientError
-from lambda_utils.logging import log_action
+from lambda_utils.logging import add_log_fields, log_action
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError
 
@@ -81,13 +81,17 @@ def _handle_dynamodb_errors(
 
 @log_action(log_reference=LogReference.REPOSITORY001, log_fields=["item"])
 def _is_record_valid(item_type: type[DynamoDbModel], item: dict):
+    valid = True
     try:
         return item_type(**item)
     except (ValueError, ValidationError):
+        valid = False
         raise CorruptItem(
             f"Cannot parse '{item_type.__name__}' - this item may be corrupt. "
             f"Skipping failed item: {item}"
         )
+    finally:
+        add_log_fields(valid=valid)
 
 
 def _keys(pk, sk, pk_name="pk", sk_name="sk"):
@@ -369,6 +373,7 @@ class Repository(Generic[PydanticModel]):
             last_evaluated_key = transform_evaluation_key_to_next_page_token(
                 last_evaluated_key
             )
+        add_log_fields(count=len(items))
 
         return PaginatedResponse(last_evaluated_key=last_evaluated_key, items=items)
 

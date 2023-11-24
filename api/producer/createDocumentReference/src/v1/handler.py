@@ -4,6 +4,7 @@ from typing import Any
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.constants import LogLevel
+from lambda_utils.logging import add_log_fields
 
 from api.producer.createDocumentReference.src.constants import PersistentDependencies
 from api.producer.createDocumentReference.src.v1.constants import API_VERSION
@@ -85,11 +86,23 @@ def parse_request_body(
     body = fetch_body_from_event(event)
 
     core_model = create_document_pointer_from_fhir_json(body, API_VERSION)
+    add_log_fields(
+        pointer_id=core_model.id,
+        pointer_producer_id=core_model.producer_id,
+        pointer_type=core_model.type,
+        pointer_version=core_model.version,
+        pointer_source=core_model.source,
+    )
 
     return PipelineData(**data, body=body, core_model=core_model)
 
 
-@log_action(log_reference=LogReference.CREATE_SUPERSEDING, log_level=LogLevel.DEBUG)
+@log_action(
+    log_reference=LogReference.CREATE_SUPERSEDING,
+    log_level=LogLevel.DEBUG,
+    sensitive=False,
+    log_result=False,
+)
 def log_superseded(
     data: PipelineData,
     context: LambdaContext,
@@ -100,7 +113,7 @@ def log_superseded(
     """
     This function is deliberately empty because we're just using it to trigger the log
     """
-    pass
+    add_log_fields(delete_item_id=data["id"])
 
 
 def mark_as_supersede(
@@ -141,6 +154,12 @@ def validate_producer_permissions(
     ods_code_parts = data["ods_code_parts"]
     delete_item_ids: list[str] = data.get("delete_item_ids", [])
     pointer_types = data["pointer_types"]
+    add_log_fields(
+        pointer_id=core_model.id,
+        ods_code_parts=ods_code_parts,
+        delete_item_ids=delete_item_ids,
+        pointer_types=pointer_types,
+    )
 
     if ods_code_parts != tuple(
         core_model.producer_id.__root__.split(CUSTODIAN_SEPARATOR)
@@ -194,9 +213,18 @@ def validate_ok_to_supersede(
         if has_delete_target:
             confirmed_delete_pks.append(target_delete_pk)
 
+    add_log_fields(delete_pks=delete_pks, confirmed_delete_pks=confirmed_delete_pks)
+
     return PipelineData(**data, delete_pks=confirmed_delete_pks)
 
 
+@log_action(
+    log_reference=LogReference.CREATE_VALIDATE_SUPERSEDE,
+    sensitive=False,
+    log_result=False,
+    log_fields=["delete_pk"],
+    errors_only=True,
+)
 def _validate_ok_to_supersede(
     document_pointer_repository: Repository,
     source_document_pointer: DocumentPointer,
@@ -240,7 +268,7 @@ def _validate_ok_to_supersede(
     return has_delete_target, delete_pk
 
 
-@log_action(log_reference=LogReference.CREATE_DB, log_level=LogLevel.DEBUG)
+@log_action(log_reference=LogReference.CREATE_PERSIST_TO_DB, log_level=LogLevel.DEBUG)
 def save_core_model_to_db(
     data: PipelineData,
     context: LambdaContext,
@@ -254,6 +282,7 @@ def save_core_model_to_db(
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
     )
     delete_pks: list[str] = data.get("delete_pks", [])
+    add_log_fields(delete_pks=delete_pks, pointer_id=core_model.id)
 
     if PERMISSION_AUDIT_DATES_FROM_PAYLOAD in data["nrl_permissions"]:
         core_model = _override_created_on(data=data, document_pointer=core_model)
