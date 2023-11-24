@@ -422,13 +422,23 @@ Before installing these tools, please ensure you have the official "Python" exte
 
 #### 1. Homwbrew installation:
 
-Run the followwing command in in the WSL terminal, within the NRLF directory:
+For MacOS and Linux users, Allure can be installed in different ways. This readme will detail how to install Allure via Homebrew package manager (for more information see https://brew.sh/). If you do not wish to use Homebrew, see https://allurereport.org/docs/gettingstarted-installation/ for alternative ways to install Allure.
+
+To install Homebrew, Run the followwing command in the WSL terminal, within the NRLF directory:
 
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-After the homebrew installation is completes, as part fo the success message, two additonal commands will be output to the terminal to update the system path. Run both commands.
+After the homebrew installation is completed, as part of the success message, two additonal commands will be output to the terminal to update the system path. Run both commands:
+
+```
+(echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/anra6/.bashrc
+```
+
+```
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+```
 
 #### 2. Allure installation via Homebrew:
 
@@ -446,7 +456,7 @@ allure --version
 
 #### 3. Allure pytest adapter installation
 
-This step should not be necessary if you are using the system Python environment (which will most likely be the case if you are in the usual poetry shell in NRLF).
+**For the next two installation commands, please ensure the installation commands below are run in an activated Poetry shell environment in the terminal:**
 
 ```
 pip install allure-pytest
@@ -454,7 +464,7 @@ pip install allure-pytest
 
 #### 4. Allure-behave install/upgrade
 
-Ensure the following command is run in the poetry shell environment:
+As mentioned above, please ensure the following command is also run in the poetry shell environment:
 
 ```
 pip install allure-behave
