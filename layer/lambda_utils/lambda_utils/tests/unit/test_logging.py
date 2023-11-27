@@ -5,7 +5,7 @@ from tempfile import NamedTemporaryFile
 import pytest
 from hypothesis import given
 from hypothesis.strategies import booleans, builds, dictionaries, just, text
-from lambda_utils.logging import LogData, Logger, LogTemplate, log_action
+from lambda_utils.logging import LogAction, LogData, Logger, LogTemplate, log_action
 from lambda_utils.tests.unit.utils import make_aws_event
 
 from nrlf.core.errors import DynamoDbError
@@ -93,11 +93,41 @@ def test_log_with_log_fields_filter(log_fields, expected_data_inputs):
         "data": {
             "result": "abcdef",
             "inputs": expected_data_inputs,
+            "extra_fields": {},
         },
         "environment": "TEST",
         "host": "123456789012",
         "sensitive": True,
-        "extra_fields": {},
+    }
+
+
+def test_log_as_context_manager():
+    def _dummy_function(logger: Logger, foo: str, bar: str):
+        with LogAction(
+            log_reference=LogReference.HELLO001, logger=logger, input1="xxxxx"
+        ) as action:
+            action.add_fields(hello="world")
+            return foo + bar
+
+    message = _standard_test(fn=_dummy_function)
+    assert message == {
+        "correlation_id": "123",
+        "nhsd_correlation_id": "456",
+        "transaction_id": "ABC",
+        "request_id": "789",
+        "log_level": "INFO",
+        "log_reference": "HELLO001",
+        "outcome": "SUCCESS",
+        "message": "Hello, world!",
+        "index": "SPLUNK_INDEX",
+        "source": "SOURCE",
+        "environment": "TEST",
+        "host": "123456789012",
+        "sensitive": True,
+        "data": {
+            "inputs": {"input1": "xxxxx"},
+            "extra_fields": {"hello": "world"},
+        },
     }
 
 
@@ -152,11 +182,68 @@ def test_log_with_error_outcomes(error, outcome, result, expected_log_level):
         "data": {
             "result": result,
             "inputs": {"foo": "abc", "bar": "def"},
+            "extra_fields": {},
         },
         "environment": "TEST",
         "host": "123456789012",
         "sensitive": True,
-        "extra_fields": {},
+    }
+
+
+@pytest.mark.parametrize(
+    ["error", "outcome", "result", "expected_log_level"],
+    [
+        (DynamoDbError, "FAILURE", "DynamoDbError: An error message", "INFO"),
+        (TypeError, "ERROR", "TypeError: An error message", "ERROR"),
+    ],
+)
+def test_log_as_context_manager_with_error_outcomes(
+    error, outcome, result, expected_log_level
+):
+    def _dummy_function(logger: Logger, foo: str, bar: str):
+        with LogAction(log_reference=LogReference.HELLO001, logger=logger) as action:
+            action.add_fields(hello="world")
+            raise error("An error message")
+
+    with NamedTemporaryFile() as temp_file:
+        logger = Logger(
+            logger_name=temp_file.name,
+            logger_handler=logging.FileHandler(temp_file.name),
+            **DUMMY_LOGGER_KWARGS
+        )
+
+        # Result unaffected by log decorator
+        with pytest.raises(error):
+            _dummy_function(foo="abc", bar="def", logger=logger)
+
+        # Process the log
+        message = json_loads(temp_file.read())
+
+    # Validate the time components
+    timestamp = message.pop("timestamp")
+    duration_ms = message.pop("duration_ms")
+    validate_timestamp(timestamp)
+    assert duration_ms >= 0
+
+    if outcome == "ERROR":
+        assert message.pop("call_stack").startswith("Traceback (most recent call last)")
+        assert message.pop("error") == message["data"]["result"]
+
+    assert message == {
+        "correlation_id": "123",
+        "nhsd_correlation_id": "456",
+        "transaction_id": "ABC",
+        "request_id": "789",
+        "log_level": expected_log_level,
+        "log_reference": "HELLO001",
+        "outcome": outcome,
+        "message": "Hello, world!",
+        "index": "SPLUNK_INDEX",
+        "source": "SOURCE",
+        "environment": "TEST",
+        "host": "123456789012",
+        "sensitive": True,
+        "data": {"extra_fields": {"hello": "world"}, "inputs": {}, "result": result},
     }
 
 

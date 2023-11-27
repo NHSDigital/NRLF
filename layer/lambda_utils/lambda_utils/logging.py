@@ -41,8 +41,9 @@ class LogTemplateBase(BaseModel):
 
 
 class LogData(BaseModel):
-    inputs: dict[str, object]
+    inputs: Optional[dict[str, object]]
     result: Optional[object]
+    extra_fields: Optional[dict[str, object]]
 
 
 class LogTemplate(LogTemplateBase):
@@ -57,12 +58,11 @@ class LogTemplate(LogTemplateBase):
     duration_ms: int
     message: str
     function: Union[str, None]
-    data: Union[LogData, None]
+    data: LogData
     error: Union[Exception, str, None]
     call_stack: str = None
     timestamp: str = Field(default_factory=make_timestamp)
     sensitive: bool = True
-    extra_fields: Optional[dict[str, object]]
 
     class Config:
         arbitrary_types_allowed = True  # For Exception
@@ -193,6 +193,7 @@ def log_action(
             ) as action:
 
                 error = False
+                result = None
                 try:
                     result = fn(*args, **kwargs)
                 except ERROR_SET_4XX as e:
@@ -213,12 +214,10 @@ def log_action(
                             log_fields=log_fields,
                         )
 
-                        data = {
-                            "inputs": function_kwargs,
-                        }
+                        action.add_inputs(**function_kwargs)
 
                         if log_result:
-                            data["result"] = result
+                            action.set_result(result)
 
                         if log_result_as:
                             action.add_fields(**{log_result_as: result})
@@ -228,7 +227,6 @@ def log_action(
                         )
 
                         action.override(
-                            data=data,
                             function=f"{fn.__module__}.{fn.__name__}",
                             **scoped_values,
                         )
@@ -250,21 +248,27 @@ class LogAction:
         sensitive: bool = True,
         errors_only: bool = False,
         logger: Union[Logger, None] = None,
-        **extra_fields,
+        **inputs,
     ):
         self.log_reference = log_reference
         self.log_level = log_level
         self.sensitive = sensitive
         self.errors_only = errors_only
         self.logger = logger
-        self.extra_fields = extra_fields
+        self.data = {"inputs": inputs, "extra_fields": {}}
         self.overrides = {}
 
     def add_fields(self, **kwargs):
-        self.extra_fields.update(kwargs)
+        self.data["extra_fields"].update(kwargs)
 
     def override(self, **kwargs):
         self.overrides.update(kwargs)
+
+    def set_result(self, result):
+        self.data["result"] = result
+
+    def add_inputs(self, **inputs):
+        self.data["inputs"].update(inputs)
 
     def __enter__(self):
         assert self.__old_action == "unset", "Cannot reuse LogActions"
@@ -295,11 +299,13 @@ class LogAction:
         error = None
         if isinstance(exc_value, ERROR_SET_4XX):
             outcome = LoggingOutcomes.FAILURE
+            self.set_result(exc_value)
         elif isinstance(exc_value, Exception):
             level = LogLevel.ERROR
             call_stack = "".join(format_exception(exc_type, exc_value, traceback))
             outcome = LoggingOutcomes.ERROR
             error = exc_value
+            self.set_result(exc_value)
 
         if not self.errors_only or level == LogLevel.ERROR:
             _message = LogTemplate(
@@ -311,7 +317,7 @@ class LogAction:
                 duration_ms=duration_ms,
                 log_level=getLevelName(level),
                 sensitive=self.sensitive,
-                extra_fields=self.extra_fields,
+                data=LogData(**self.data),
                 **self.logger.base_message.dict(),
                 **self.overrides,
             )
