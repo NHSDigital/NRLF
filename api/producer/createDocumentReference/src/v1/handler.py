@@ -113,7 +113,7 @@ def log_superseded(
     """
     This function is deliberately empty because we're just using it to trigger the log
     """
-    add_log_fields(delete_item_id=data["id"])
+    add_log_fields(delete_item_id=data["subject"])
 
 
 def mark_as_supersede(

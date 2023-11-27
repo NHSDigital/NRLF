@@ -72,7 +72,7 @@ def search_document_references(
     )
 
     bundle = create_bundle_from_paginated_response(response)
-    add_log_fields(items_found=bundle.total)
+    add_log_fields(items_found=len(bundle))
     return PipelineData(bundle)
 
 

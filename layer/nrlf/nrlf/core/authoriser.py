@@ -11,7 +11,11 @@ from lambda_utils.header_config import (
 )
 from lambda_utils.logging import add_log_fields, log_action
 from lambda_utils.logging_utils import generate_transaction_id
-from lambda_utils.pipeline import APIGatewayProxyEventModel, _setup_logger
+from lambda_utils.pipeline import (
+    APIGatewayProxyEventModel,
+    _execute_steps,
+    _setup_logger,
+)
 from pydantic import BaseModel, ValidationError
 
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
@@ -251,7 +255,7 @@ def execute_steps(
     try:
         status_code = HTTPStatus.OK
         logger = _setup_logger(index_path, transaction_id, event, **dependencies)
-        result = execute_steps(
+        result = _execute_steps(
             steps,
             event,
             context,
