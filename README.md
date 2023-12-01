@@ -416,45 +416,16 @@ this will run all the producer integration tests.
 
 ### 5. Feature test reports
 
-Allure reports (https://allurereport.org/docs/) can be viewed after the integration tests have been run. After the command for integration tests (**"nrlf test feature integration"**) is run, the test results are outputted to a folder named "allure-results", after which a html report is generated in the "allure-report" folder. In addition, a web server is started to view the report. However, before the reports can be viewed successfully, the following steps must be followed:
+Allure reports (https://allurereport.org/docs/) can be viewed after the integration tests have been run. After the command for integration tests (**"nrlf test feature integration_report"**) is run, the test results are outputted to a folder named "allure-results", after which a html report is generated in the "allure-report" folder. In addition, a web server is started to view the report. However, before the reports can be viewed successfully, the following steps must be followed:
 
 Before installing these tools, please ensure you have the official "Python" extension installed in VS code.
 
-#### 1. Homwbrew installation:
+#### 1. Allure installation:
 
-For MacOS and Linux users, Allure can be installed in different ways. This readme will detail how to install Allure via Homebrew package manager (for more information see https://brew.sh/). If you do not wish to use Homebrew, see https://allurereport.org/docs/gettingstarted-installation/ for alternative ways to install Allure.
+There are several ways to install Allure in your system. At the moment it can be installed via Homebrew (macOS and Linux), Scoop (Windows),
+System package manager (Linux), or NPM (any system). The instructions to install it are here: https://allurereport.org/docs/gettingstarted-installation/. Make sure Java version 8 or above installed, and its directory is specified in the `JAVA_HOME` environment variable.
 
-To install Homebrew, Run the followwing command in the WSL terminal, within the NRLF directory:
-
-```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-After the homebrew installation is completed, as part of the success message, two additonal commands will be output to the terminal to update the system path. Run both commands:
-
-```
-(echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> ~/.bashrc
-```
-
-```
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-```
-
-#### 2. Allure installation via Homebrew:
-
-Once Homebrew is installed, run the following command in the same directory (NRLF) to install allure:
-
-```shell
-brew install allure
-```
-
-Run the following command to verify allure has been installed successfully:
-
-```shell
-allure --version
-```
-
-#### 3. Allure pytest adapter installation
+#### 2. Allure pytest adapter installation
 
 **For the next two installation commands, please ensure the installation commands below are run in an activated Poetry shell environment in the terminal:**
 
@@ -462,7 +433,7 @@ allure --version
 pip install allure-pytest
 ```
 
-#### 4. Allure-behave install/upgrade
+#### 3. Allure-behave install/upgrade
 
 As mentioned above, please ensure the following command is also run in the poetry shell environment:
 
@@ -470,7 +441,7 @@ As mentioned above, please ensure the following command is also run in the poetr
 pip install allure-behave
 ```
 
-#### 5. Viewing the report
+#### 4. Viewing the report
 
 Once the aforementioed tools in steps 1-4 have been installed, the report is ready to be viewed. When using WSL the IP address of the web server to view the report must be amended in the web browser. This is because, WSL is being accessed via an IP address different to the usual local IP (127.0.1.1.). In order to find out the IP of your WSL instance, run the following command:
 

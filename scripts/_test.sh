@@ -23,6 +23,7 @@ function _test() {
   case $command in
   "unit") _test_unit $args ;;
   "integration") _test_integration $args ;;
+  "integration_report") _test_integration_report $args ;;
   "smoke") python api/tests/test_smoke.py manual_smoke_test --actor $2 --environment $3 $4 ;;
   "token") _test_token $args ;;
   "feature") _test_feature $args ;;
@@ -37,6 +38,11 @@ function _test_unit() {
 }
 
 function _test_integration() {
+  local args=(${@:1})
+  python -m pytest -m "integration and not firehose" $args
+}
+
+function _test_integration_report() {
   local args=(${@:1})
   python -m pytest -m "integration and not firehose" $args --alluredir=./allure-results
 }
@@ -55,7 +61,8 @@ function _test_feature() {
 
   case $command in
   "local") python -m behave $args ;;
-  "integration")
+  "integration") python -m behave --define="integration_test=true" $args ;;
+  "integration_report")
       #The commented out line below can be uncommented if you wish to have a clean of the test results each run
       #rm -rf ./allure-results
       python -m behave --define="integration_test=true" $args
