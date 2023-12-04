@@ -41,21 +41,25 @@ function _terraform() {
     ;;
     #----------------
     "init")
+      if ! _check_mgmt; then return 1; fi
       cd "$terraform_dir" || return 1
       _terraform_init "$env"
     ;;
     #----------------
     "plan")
+      if ! _check_mgmt; then return 1; fi
       cd "$terraform_dir" || return 1
       _terraform_plan "$env" "$var_file" "$plan_file" "$aws_account_id"
     ;;
     #----------------
     "apply")
+      if ! _check_mgmt; then return 1; fi
       cd "$terraform_dir" || return 1
       _terraform_apply "$env" "$plan_file"
     ;;
     #----------------
     "destroy")
+      if ! _check_mgmt; then return 1; fi
       if [[ -z ${env} ]]; then
         echo "Non-mgmt parameter required" >&2
         echo "Usage:    nrlf terraform bootstrap-non-mgmt <ENV>"
@@ -145,6 +149,14 @@ function _terraform() {
     #----------------
     *) _terraform_help ;;
   esac
+}
+
+function _check_mgmt() {
+  # Using a hash of the account rather than the account, to avoid committing account ids to repo
+  if [[ "$AWS_PROFILE" != 'nhsd-nrlf-mgmt' ]]; then
+    echo "Please log in as the mgmt account" >&2
+    return 1
+  fi
 }
 
 function _get_environment_name() {
