@@ -79,7 +79,7 @@ def _handle_dynamodb_errors(
     return wrapper
 
 
-@log_action(log_reference=LogReference.REPOSITORY001, log_fields=["item"])
+@log_action(log_reference=LogReference.REPOSITORY001)
 def _is_record_valid(item_type: type[DynamoDbModel], item: dict):
     valid = True
     try:

@@ -33,7 +33,6 @@ log_action = make_common_log_action()
     log_fields=[
         "request_params",
         "query_string_params",
-        "raw_pointer_types",
         "nhs_number",
         "type_identifier",
         "raw_pointer_types",
