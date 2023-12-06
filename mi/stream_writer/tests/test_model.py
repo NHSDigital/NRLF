@@ -8,7 +8,11 @@ from mi.stream_writer.model import DIMENSION_TYPES, Dimension, RecordParams
 from nrlf.core.model import DocumentPointer
 
 NHS_NUMBER = "123"
-CREATED_ON = "2000-01-01T01:02:03.1232Z"
+CREATED_ON = [
+    "2000-01-01T01:02:03.1232Z",
+    "2000-01-01T01:02:03.1232+00:00",
+    "2000-01-01T01:02:03+00:00",
+]
 SYSTEM = "abc"
 VALUE = "def"
 
@@ -24,7 +28,7 @@ document_pointer_strategy = {
         **{
             "nhs_number": just(NHS_NUMBER),
             "type": just(TYPE_SEPARATOR.join((SYSTEM, VALUE))),
-            "created_on": just(CREATED_ON),
+            "created_on": sampled_from(CREATED_ON),
         },
     }
 )

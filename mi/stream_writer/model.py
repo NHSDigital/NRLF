@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Optional, TypeVar
 from uuid import uuid4
 
+from dateutil.parser import isoparse
 from pydantic import BaseModel
 
 from mi.stream_writer.constants import PATH_TO_QUERIES, TYPE_SEPARATOR, DateTimeFormats
@@ -135,7 +136,7 @@ class RecordParams:
     ):
         """Constructor for RecordParams directly from DocumentPointer fields"""
         system, value = type.split(TYPE_SEPARATOR)
-        date_time = dt.strptime(created_on, DateTimeFormats.DOCUMENT_POINTER_FORMAT)
+        date_time = isoparse(created_on)
         created_date = date_time.strftime(DateTimeFormats.FACT_FORMAT)
         created_date_weekday = date_time.weekday()
         patient_hash = hash_nhs_number(nhs_number=nhs_number)

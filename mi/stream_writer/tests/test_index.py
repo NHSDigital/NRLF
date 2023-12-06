@@ -2,7 +2,6 @@ import os
 from datetime import datetime as dt
 from unittest import mock
 
-from mi.stream_writer.constants import DateTimeFormats
 from mi.stream_writer.event_handling import catch_error
 from mi.stream_writer.index import _handler, handler
 from mi.stream_writer.model import (
@@ -31,7 +30,7 @@ def test__handler_populates_success_responses(
     )
 
     timestamp = dt.now()
-    unique_id = timestamp.strftime(DateTimeFormats.DOCUMENT_POINTER_FORMAT)
+    unique_id = timestamp.isoformat()
 
     event = dynamodb_stream_event(
         unique_id=unique_id,
@@ -68,7 +67,7 @@ def test__handler_populates_success_responses(
 @mock.patch(f"{IMPORT_PREFIX}.psycopg2")
 def test_handler_populates_responses(mock_psycopg2, boto3, mock_insert_mi_record):
     timestamp = dt.now()
-    unique_id = timestamp.strftime(DateTimeFormats.DOCUMENT_POINTER_FORMAT)
+    unique_id = timestamp.isoformat()
 
     event = dynamodb_stream_event(
         unique_id=unique_id,
@@ -105,7 +104,7 @@ def test_handler_populates_responses(mock_psycopg2, boto3, mock_insert_mi_record
 @mock.patch(f"{IMPORT_PREFIX}.send_errors_to_s3")
 def test_handler(mock_send_errors_s3, mock_psycopg2, boto3, mock_insert_mi_record):
     timestamp = dt.now()
-    unique_id = timestamp.strftime(DateTimeFormats.DOCUMENT_POINTER_FORMAT)
+    unique_id = timestamp.isoformat()
 
     event = dynamodb_stream_event(
         unique_id=unique_id,

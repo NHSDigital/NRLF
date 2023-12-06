@@ -21,7 +21,6 @@ from mi.reporting.tests.test_data.generate_test_data import (
     Measure,
 )
 from mi.sql_query.model import Sql, SqlQueryEvent
-from mi.stream_writer.constants import DateTimeFormats
 from mi.stream_writer.index import EVENT_CONFIG
 from mi.stream_writer.model import Action, DynamoDBEventConfig, MiResponses
 from mi.stream_writer.tests.paths import PATH_TO_TEST_DATA
@@ -166,7 +165,7 @@ def test_e2e_with_report(
     # Unique identifiers for this test
     event_name, config = event_config
     timestamp = dt.now()
-    unique_id = timestamp.strftime(DateTimeFormats.DOCUMENT_POINTER_FORMAT)
+    unique_id = timestamp.isoformat()
     event = dynamodb_stream_event(
         unique_id=unique_id,
         created_on=unique_id,
@@ -325,7 +324,7 @@ def test_e2e_modify_events_do_nothing(
 
     # Create the test event (use timestamp as unique id to force create new dimensions)
     timestamp = dt.now()
-    unique_id = timestamp.strftime(DateTimeFormats.DOCUMENT_POINTER_FORMAT)
+    unique_id = timestamp.isoformat()
     event = dynamodb_stream_event(
         unique_id=unique_id, event_name="MODIFY", image_type="", created_on=unique_id
     )
@@ -360,7 +359,7 @@ def test_e2e_s3_bucket_is_populated(
 ):
     # Create the test event (use timestamp as unique id to force create new dimensions)
     timestamp = dt.now()
-    unique_id = timestamp.strftime(DateTimeFormats.DOCUMENT_POINTER_FORMAT)
+    unique_id = timestamp.isoformat()
     event = dynamodb_stream_event(
         unique_id=unique_id,
         event_name="INSERT",
