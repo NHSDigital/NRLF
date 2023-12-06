@@ -23,7 +23,7 @@ def validate_items(items: list[BaseModel], logger=None):
 @log_action(
     log_reference=LogReference.SEEDVALIDATE001,
     log_fields=["item"],
-    log_result_as="valid",
+    log_result=True,
 )
 def _is_item_valid(item: BaseModel):
     try:

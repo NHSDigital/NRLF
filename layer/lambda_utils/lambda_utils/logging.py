@@ -57,7 +57,7 @@ class LogTemplate(LogTemplateBase):
     outcome: str
     duration_ms: int
     message: str
-    function: Union[str, None]
+    function: Optional[str]
     data: LogData
     error: Union[Exception, str, None]
     call_stack: str = None
@@ -66,7 +66,7 @@ class LogTemplate(LogTemplateBase):
 
     class Config:
         arbitrary_types_allowed = True  # For Exception
-        extra = Extra.allow
+        extra = Extra.forbid
 
     def dict(self, redact=False, **kwargs):
         """Force exclude_none, allow redaction of field `data`"""
@@ -154,7 +154,6 @@ def log_action(
     log_level: LogLevel = LogLevel.INFO,
     log_fields: list[str] = [],
     log_result: bool = True,
-    log_result_as: Union[str, None] = None,
     sensitive: bool = True,
     errors_only: bool = False,
     scope_fn: Union[Callable[P, dict[str, str]], None] = None,
@@ -218,9 +217,6 @@ def log_action(
 
                         if log_result:
                             action.set_result(result)
-
-                        if log_result_as:
-                            action.add_fields(**{log_result_as: result})
 
                         scoped_values = (
                             {} if scope_fn is None else scope_fn(*args, **kwargs)

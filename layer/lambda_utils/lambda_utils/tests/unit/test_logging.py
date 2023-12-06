@@ -5,8 +5,16 @@ from tempfile import NamedTemporaryFile
 import pytest
 from hypothesis import given
 from hypothesis.strategies import booleans, builds, dictionaries, just, text
-from lambda_utils.logging import LogAction, LogData, Logger, LogTemplate, log_action
+from lambda_utils.logging import (
+    LogAction,
+    LogData,
+    Logger,
+    LogTemplate,
+    log_action,
+    logging_context,
+)
 from lambda_utils.tests.unit.utils import make_aws_event
+from pydantic import ValidationError
 
 from nrlf.core.errors import DynamoDbError
 from nrlf.core.model import APIGatewayProxyEventModel
@@ -271,10 +279,69 @@ def test_log_template_json_always_exclude_none(log: LogTemplate):
     assert None not in dumped_log.values()
 
 
+def test_log_action_cannot_be_called_reentrantly():
+    logger = Logger(
+        logger_name="dummy", logger_handler=logging.NullHandler(), **DUMMY_LOGGER_KWARGS
+    )
+    x = LogAction(log_reference=LogReference.HELLO001, logger=logger)
+    with x:
+        with pytest.raises(AssertionError):
+            with x:
+                pass
+
+
+def test_log_action_cleans_itself_up_happy_path():
+    logger = Logger(
+        logger_name="dummy", logger_handler=logging.NullHandler(), **DUMMY_LOGGER_KWARGS
+    )
+    with LogAction(log_reference=LogReference.HELLO001, logger=logger) as act1:
+        try:
+            assert logging_context.current_action is act1
+            with LogAction(log_reference=LogReference.HELLO001) as act2:
+                try:
+                    assert (
+                        logging_context.current_action is None
+                    )  # current_action is set to None when LogAction has no logger
+                    with LogAction(
+                        log_reference=LogReference.HELLO001, logger=logger
+                    ) as act3:
+                        assert logging_context.current_action is act3
+                finally:
+                    assert logging_context.current_action is None
+        finally:
+            assert logging_context.current_action is act1
+
+
+@pytest.mark.parametrize(["error"], [(DynamoDbError,), (TypeError,)])
+def test_log_action_cleans_itself_up_exception(error):
+    logger = Logger(
+        logger_name="dummy", logger_handler=logging.NullHandler(), **DUMMY_LOGGER_KWARGS
+    )
+    with pytest.raises(error):
+        with LogAction(log_reference=LogReference.HELLO001, logger=logger) as act1:
+            try:
+                assert logging_context.current_action is act1
+                with LogAction(log_reference=LogReference.HELLO001) as act2:
+                    try:
+                        assert (
+                            logging_context.current_action is None
+                        )  # current_action is set to None when LogAction has no logger
+                        with LogAction(
+                            log_reference=LogReference.HELLO001, logger=logger
+                        ) as act3:
+                            assert logging_context.current_action is act3
+                            raise error()
+                    finally:
+                        assert logging_context.current_action is None
+            finally:
+                assert logging_context.current_action is act1
+
+
 @given(
     log=_log,
     extra_fields=dictionaries(keys=text(max_size=1), values=booleans(), min_size=1),
 )
-def test_log_template_dict_allows_extra_fields(log: LogTemplate, extra_fields: dict):
+def test_log_template_dict_forbids_extra_fields(log: LogTemplate, extra_fields: dict):
     good_log_input = log.dict()
-    LogTemplate(**good_log_input, **extra_fields)  # Doesn't raise
+    with pytest.raises(ValidationError):
+        LogTemplate(**good_log_input, **extra_fields)

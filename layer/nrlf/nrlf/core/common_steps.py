@@ -59,7 +59,7 @@ def parse_headers(
     client_rp_details = ClientRpDetailsHeader.parse_raw(_raw_client_rp_details)
     add_log_fields(
         connection_metadata=connection_metadata, client_rp_details=client_rp_details
-    )  # Might be enough to just mark this log as non-sensitive
+    )
     return PipelineData(
         **data,
         ods_code_parts=connection_metadata.ods_code_parts,

@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class LogReference(Enum):
+class LogReference(str, Enum):
     OPERATION = "Executing pipeline steps"
     VERSION_CHECK = "Getting version from header"
     STATUS001 = "Getting environmental variables config"
