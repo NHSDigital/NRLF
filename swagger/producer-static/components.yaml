@@ -103,7 +103,6 @@ components:
               identifier:
                 system: https://fhir.nhs.uk/Id/nhs-number
                 value: "6700028191"
-            date: "2020-12-21T10:45:41+11:00"
             author:
               - identifier:
                   system: https://fhir.nhs.uk/Id/ods-organization-code
