@@ -65,7 +65,7 @@ info:
     * improved onboarding experience.
     * authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS.
     * greater flexibility, by wider support of the [FHIR R4 DocumentReference](https://hl7.org/fhir/R4/documentreference.html) resource.
-    * the application only supports json type FHIR, not XML (which is also valid FHIR)
+    * the application only supports json type FHIR, not XML
 
     ### Data availability, timing and quality
 
@@ -267,13 +267,44 @@ paths:
             ]
           }
           ```
+        * `category` SHOULD indicate the broader class of the Document Type as agreed during [onboarding](#api-description__onboarding). e.g.
+          ```
+          "type": {
+            "coding\": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "1102421000000108",
+                "display": "Observations"
+              }
+            ]
+          }
+          ```
         * `content` MUST have at least one entry.
-        * `content[].format[]` SHOULD indicate the mechanism for accessing documents, e.g.
+        * `content[].format[]` SHOULD indicate whether the data is structured or not, e.g.
           ```
           "format": [
             {
-              "code": "ssp",
-              "display": "Spine Secure Proxy"
+              "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
+              "code": "urn:nhs-ic:unstructured"
+              "display": "Unstructured document"
+            }
+          ]
+          ```
+        * `author` SHOULD have an entry with an `Organization` reference using a valid ODS code.
+        * `author` MUST include an ASID if the document is to be accessed via SSP, e.g.
+          ```
+          "author": [
+            {
+              "identifier": {
+                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "value": "Y05868"
+              }
+            },
+            {
+              "identifier": {
+                "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
+                "value": "230811201350"
+              }
             }
           ]
           ```
