@@ -247,6 +247,8 @@ def test__get_contracts_from_db():
     contracts_from_db = _get_contracts_from_db(repository=repository)
     assert _sort_contracts(contracts_from_db) == _sort_contracts(contracts)
 
+    repository.delete_all()
+
 
 @given(
     contract_groups=lists(
@@ -825,7 +827,7 @@ def test_sync_contracts_e2e(temp_dir):
         local_json_schema=NEW_SCHEMA,
     )
 
-    # Create a contract group with a local counterpart - to be superseded by the sync
+    # Create a contract group with a local counterpart - to be skipped by the sync
     contracts_to_be_skipped = _create_contract_group(
         suffix="to_skip",
         n_contracts=3,
@@ -886,10 +888,38 @@ def test_sync_contracts_e2e(temp_dir):
     grouped_unchanged_contracts: GroupedContracts = {}
     grouped_changed_contracts: GroupedContracts = {}
     for group, _contracts in grouped_synced_contracts.items():
-        if _contracts == grouped_initial_contracts[group]:
+        if _sort_contracts(_contracts) == _sort_contracts(
+            grouped_initial_contracts[group]
+        ):
             grouped_unchanged_contracts[group] = _sort_contracts(_contracts)
         else:
             grouped_changed_contracts[group] = _sort_contracts(_contracts)
+
+    changed_deactivated = grouped_changed_contracts[
+        ContractGroup(
+            name="name_to_deactivate",
+            system="system_to_deactivate",
+            value="value_to_deactivate",
+        )
+    ]
+    assert len(changed_deactivated) == 4
+    changed_superseded = grouped_changed_contracts[
+        ContractGroup(
+            name="name_to_supersede",
+            system="system_to_supersede",
+            value="value_to_supersede",
+        )
+    ]
+    assert len(changed_superseded) == 6
+
+    changed_created = grouped_changed_contracts[
+        ContractGroup(
+            name="name_to_create",
+            system="system_to_create",
+            value="value_to_create",
+        )
+    ]
+    assert len(changed_created) == 1
 
     expected_grouped_unchanged_contracts = ChainMap(
         contracts_already_deactivated,
@@ -897,13 +927,7 @@ def test_sync_contracts_e2e(temp_dir):
     )
     assert grouped_unchanged_contracts == expected_grouped_unchanged_contracts
 
-    assert grouped_changed_contracts[
-        ContractGroup(
-            name="name_to_deactivate",
-            system="system_to_deactivate",
-            value="value_to_deactivate",
-        )
-    ][0] == Contract(
+    assert changed_deactivated[0] == Contract(
         pk=f"C#system_to_deactivate#value_to_deactivate",
         sk=f"V#0#name_to_deactivate",
         name="name_to_deactivate",
@@ -913,13 +937,7 @@ def test_sync_contracts_e2e(temp_dir):
         json_schema=EMPTY_SCHEMA,
     )
 
-    assert grouped_changed_contracts[
-        ContractGroup(
-            name="name_to_supersede",
-            system="system_to_supersede",
-            value="value_to_supersede",
-        )
-    ][0] == Contract(
+    assert changed_superseded[0] == Contract(
         pk=f"C#system_to_supersede#value_to_supersede",
         sk=f"V#0#name_to_supersede",
         name="name_to_supersede",
@@ -929,13 +947,7 @@ def test_sync_contracts_e2e(temp_dir):
         json_schema=NEW_SCHEMA,
     )
 
-    assert grouped_changed_contracts[
-        ContractGroup(
-            name="name_to_create",
-            system="system_to_create",
-            value="value_to_create",
-        )
-    ][0] == Contract(
+    assert changed_created[0] == Contract(
         pk=f"C#system_to_create#value_to_create",
         sk=f"V#0#name_to_create",
         name="name_to_create",

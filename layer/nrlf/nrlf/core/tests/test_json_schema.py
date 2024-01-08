@@ -330,3 +330,5 @@ def test__get_contracts_from_db_returns_latest_versions(
             r"^ValidationError raised from Data Contract '\w+:\w+' at '\$': "
             r"Additional properties are not allowed \('foo' was unexpected\)$"
         )
+
+    repository.delete_all()
