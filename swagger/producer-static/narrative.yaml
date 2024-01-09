@@ -14,7 +14,7 @@ info:
     The National Record Locator (NRL) enables organisations to share patient data nationwide.  Rather than storing the
     data itself, it is used to share pointers to the data, held in provider systems.  It acts as an index and not a data
     repository.  Each document pointer is defined using the
-    [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) standard.
+    [FHIR R4 DocumentReference](https://hl7.org/fhir/R4/documentreference.html) standard.
 
     ![National Record Locator](https://raw.githubusercontent.com/NHSDigital/nrl-producer-api/master/specification/nrl.png)
 
@@ -33,9 +33,12 @@ info:
     the pointers are classified into the following types:
 
     * [Mental Health Crisis Plan](http://snomed.info/sct/736253002)
-    * [Emergency Healthcare Plan](http://snomed.info/sct/887701000000100)
-    * [End of Life Care Coordination Summary](http://snomed.info/sct|861421000000109)
-    * [National Early Warning Code 2](http://snomed.info/sct|1363501000000100)
+    * [Royal College of Physicians NEWS2 (National Early Warning Score 2) chart](http://snomed.info/sct/1363501000000100)
+    * [ReSPECT (Recommended Summary Plan for Emergency Care and Treatment) form](http://snomed.info/sct/1382601000000107)
+    * [Contingency plan](http://snomed.info/sct/325691000000100)
+    * [End of life care plan](http://snomed.info/sct/736373009)
+    * [End of Life Care Coordination Summary](http://snomed.info/sct/861421000000109)
+    * [Emergency Health Care Plans](http://snomed.info/sct/887701000000100)
 
     You can also retrieve booking and referral pointers however you can not currently do this by directly integrating with
     the National Record Locator, you must instead onboard to the [Booking and Referral - FHIR API](https://digital.nhs.uk/developer/api-catalogue/booking-and-referral-fhir)
@@ -61,7 +64,8 @@ info:
     * improved performance and scalability.
     * improved onboarding experience.
     * authenticated using [signed JWT](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication) rather than mTLS.
-    * greater flexibility, by wider support of the [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html) resource.
+    * greater flexibility, by wider support of the [FHIR R4 DocumentReference](https://hl7.org/fhir/R4/documentreference.html) resource.
+    * the application only supports json type FHIR, not XML
 
     ### Data availability, timing and quality
 
@@ -226,7 +230,7 @@ paths:
 
         To create a document pointer you must ensure:
 
-        * the body must be a valid [FHIR R4 DocumentReference](http://hl7.org/fhir/documentreference.html)
+        * the body must be a valid [FHIR R4 DocumentReference](https://hl7.org/fhir/R4/documentreference.html)
         * `id` is a composite of the ODS Code and an identifier that is locally unique to your system.  NRL does not
           generate globally unique ids, instead relies on producers to provide a locally unique id prefixed with their
           ODS code, making it globally unique. e.g.
@@ -263,13 +267,44 @@ paths:
             ]
           }
           ```
+        * `category` SHOULD indicate the broader class of the Document Type as agreed during [onboarding](#api-description__onboarding). e.g.
+          ```
+          "type": {
+            "coding\": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "1102421000000108",
+                "display": "Observations"
+              }
+            ]
+          }
+          ```
         * `content` MUST have at least one entry.
-        * `content[].format[]` SHOULD indicate the mechanism for accessing documents, e.g.
+        * `content[].format[]` SHOULD indicate whether the data is structured or not, e.g.
           ```
           "format": [
             {
-              "code": "ssp",
-              "display": "Spine Secure Proxy"
+              "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
+              "code": "urn:nhs-ic:unstructured"
+              "display": "Unstructured document"
+            }
+          ]
+          ```
+        * `author` SHOULD have an entry with an `Organization` reference using a valid ODS code.
+        * `author` MUST include an ASID if the document is to be accessed via SSP, e.g.
+          ```
+          "author": [
+            {
+              "identifier": {
+                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "value": "Y05868"
+              }
+            },
+            {
+              "identifier": {
+                "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
+                "value": "230811201350"
+              }
             }
           ]
           ```
@@ -1114,9 +1149,18 @@ components:
         SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY:
           summary: End of Life Care Coordination Summary
           value: http://snomed.info/sct|861421000000109
-        SNOMED_CODES_NATIONAL_EARLY_WARNING_SCORE_2:
-          summary: National Early Warning Code 2
+        SNOMED_CODES_RESPECT_FORM:
+          summary: ReSPECT form
+          value: http://snomed.info/sct|1382601000000107
+        SNOMED_CODES_NEWS2_CHART:
+          summary: Royal College of Physicians NEWS2
           value: http://snomed.info/sct|1363501000000100
+        SNOMED_CODES_CONTINGENCY_PLAN:
+          summary: Contingency plan
+          value: http://snomed.info/sct|325691000000100
+        SNOMED_CODES_END_OF_LIFE_CARE_PLAN:
+          summary: End of life care plan
+          value: http://snomed.info/sct|736373009
         invalid:
           summary: Unknown
           value: http://snomed.info/sct|410970009
