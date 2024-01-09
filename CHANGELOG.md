@@ -1,5 +1,14 @@
 # Changelog
 
+## 2024-01-09
+
+- NRLF-657 Add workspace destroy and unlock commands
+- SPINECLI-1665 Add asid-check data contract for the new pointer type Lloyd george
+- NRLF-708 Fix sonarcloud security hotspot changes
+- SPINECLI-1704 add checks and cleanup to contract integration tests
+- NRL-445 Add Allure reports
+- SPINECLI-1666 Documentation Updates
+
 ## 2023-10-26
 
 - SPINECLI-1611 - Create sonar-project.properties file for SonarCloud configuration
