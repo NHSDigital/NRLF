@@ -423,25 +423,9 @@ Before installing these tools, please ensure you have the official "Python" exte
 #### 1. Allure installation:
 
 There are several ways to install Allure in your system. At the moment it can be installed via Homebrew (macOS and Linux), Scoop (Windows),
-System package manager (Linux), or NPM (any system). The instructions to install it are here: https://allurereport.org/docs/gettingstarted-installation/. Make sure Java version 8 or above installed, and its directory is specified in the `JAVA_HOME` environment variable.
+System package manager (Linux), or NPM (any system). The instructions to install it are here: https://allurereport.org/docs/gettingstarted-installation/. Make sure Java version 8 or above installed, and its directory is specified in the `JAVA_HOME` environment variable. Make sure to run `nrlf make install` to install the python allure dependencies.
 
-#### 2. Allure pytest adapter installation
-
-**For the next two installation commands, please ensure the installation commands below are run in an activated Poetry shell environment in the terminal:**
-
-```
-pip install allure-pytest
-```
-
-#### 3. Allure-behave install/upgrade
-
-As mentioned above, please ensure the following command is also run in the poetry shell environment:
-
-```
-pip install allure-behave
-```
-
-#### 4. Viewing the report
+#### 2. Viewing the report
 
 Once the aforementioed tools in steps 1-4 have been installed, the report is ready to be viewed. When using WSL the IP address of the web server to view the report must be amended in the web browser. This is because, WSL is being accessed via an IP address different to the usual local IP (127.0.1.1.). In order to find out the IP of your WSL instance, run the following command:
 
