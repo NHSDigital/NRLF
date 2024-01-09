@@ -10,6 +10,7 @@ function _bootstrap_help() {
     echo "  delete-mgmt                    - Deletes required aws resource for terraform access in mgmt account"
     echo "  create-non-mgmt                - Creates required aws resource for terraform access in non-mgmt account"
     echo "  delete-non-mgmt                - Deletes required aws resource for terraform access in non-mgmt account"
+    echo "  destroy-non-mgmt               - Destroys a workspace completely in non-mgmt (Dev) account. ONLY USE IF TERRAFORM DESTROY HAS NOT COMPLETED"
     echo
     return 1
 }
@@ -94,6 +95,90 @@ function _bootstrap() {
       aws iam detach-role-policy --policy-arn "${admin_policy_arn}" --role-name "${TERRAFORM_ROLE_NAME}" || return 1
       aws iam delete-role --role-name "${TERRAFORM_ROLE_NAME}" || return 1
       echo "Deleted role ${TERRAFORM_ROLE_NAME} and associated policy ${admin_policy_arn}"
+    ;;
+    #----------------
+    "destroy-non-mgmt")
+      if [[ "$(aws sts get-caller-identity)" != *dev* || "$(aws sts get-caller-identity)" != *NHSDAdminRole* ]]; then
+          echo "Please log in as dev with an Admin account" >&2
+          return 1
+      fi
+
+      local workspace
+      workspace=$2
+      # Fetch the resources using the AWS CLI command
+      aws resourcegroupstaggingapi get-resources --tag-filters Key=workspace,Values="$2" | jq -c '.ResourceTagMappingList[]' |
+      while IFS= read -r item; do
+          arn=$(jq -r '.ResourceARN' <<< "$item")
+
+          case $arn in
+              arn:aws:lambda* )
+                  echo "Deleting... : $arn"
+                  aws lambda delete-function --function-name $arn
+                  ;;
+              arn:aws:kms* )
+                  echo "Disabling... : $arn"
+                  aws kms disable-key --key-id $arn
+                  echo "Deleting... ': $arn"
+                  aws kms schedule-key-deletion --key-id $arn --pending-window-in-days 7
+                  ;;
+              arn:aws:logs* )
+                  echo "Deleting... : $arn"
+                  new_var=$(echo "$arn" | awk -F':' '{print $NF}')
+                  aws logs delete-log-group --log-group-name $new_var
+                  ;;
+              arn:aws:secretsmanager* )
+                  echo "Deleting... : $arn"
+                  aws secretsmanager delete-secret --secret-id $arn
+                  ;;
+              arn:aws:apigateway* )
+                    echo "Deleting domain-name... : $workspace"
+                    aws apigateway delete-domain-name --domain-name "$workspace.api.record-locator.dev.national.nhs.uk"
+                    echo "Deleting... : $arn"
+                    ag_id=$(echo "$arn" | awk -F'/restapis/' '{print $2}' | awk -F'/' '{print $1}')
+                    aws apigateway delete-rest-api --rest-api-id $ag_id
+                  ;;
+              arn:aws:dynamodb* )
+                  echo "Deleting... : $arn"
+                  new_var=$(echo "$arn" | awk -F':' '{print $NF}')
+                  table=$(echo "$arn" | awk -F'/' '{print $NF}')
+                  aws dynamodb delete-table --table-name $table
+                  ;;
+              arn:aws:s3* )
+                  echo "Deleting... : $arn"
+                  new_var=$(echo "$arn" | awk -F':' '{print $NF}')
+                  local versioned_objects
+                  versioned_objects=$(aws s3api list-object-versions \
+                                      --bucket "${new_var}" \
+                                      --output=json \
+                                      --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}') || return 1
+                  aws s3api delete-objects \
+                      --bucket "${new_var}" \
+                      --delete "${versioned_objects}" || echo "Ignore the previous warning - an empty bucket is a good thing"
+                  echo "Waiting for bucket contents to be deleted..." && sleep 10
+                  aws s3 rb "s3://${new_var}" --force || echo "Bucket could not be deleted at this time. You should go to the AWS Console and delete the bucket manually."
+                  ;;
+              arn:aws:ssm* )
+                  echo "Deleting... : $arn"
+                  new_var=$(echo "$arn" | awk -F':' '{print $NF}')
+                  suffix=$(echo "$arn" | awk -F'/' '{print $NF}')
+                  name=$(echo "$new_var" | awk -F'/' '{print $(NF-1)}')
+                  aws ssm delete-parameter --name $name/$suffix
+                  ;;
+              arn:aws:acm* )
+                  echo "Deleting... : $arn"
+                  aws acm delete-certificate --certificate-arn $arn
+                  ;;
+              arn:aws:firehose* )
+                  echo "Deleting... : $arn"
+                  new_var=$(echo "$arn" | awk -F':' '{print $NF}')
+                  name=$(echo "$new_var" | awk -F'/' '{print $NF}')
+                  aws firehose delete-delivery-stream --delivery-stream-name $name
+                  ;;
+              * )
+                  echo "Unknown ARN type: $arn"
+                  ;;
+          esac
+      done
     ;;
     #----------------
     *) _bootstrap_help ;;
