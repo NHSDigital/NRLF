@@ -1,5 +1,4 @@
 import json
-from enum import Enum
 from http import HTTPStatus
 from logging import Logger
 from typing import Any
@@ -10,7 +9,7 @@ from lambda_utils.header_config import (
     ClientRpDetailsHeader,
     ConnectionMetadata,
 )
-from lambda_utils.logging import log_action
+from lambda_utils.logging import add_log_fields, log_action
 from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import (
     APIGatewayProxyEventModel,
@@ -22,15 +21,7 @@ from pydantic import BaseModel, ValidationError
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from nrlf.core.types import S3Client
 from nrlf.core.validators import json_loads
-
-
-class LogReference(Enum):
-    AUTHORISER001 = "Parsing headers"
-    AUTHORISER002 = "Parsing pointer types"
-    AUTHORISER003 = "Reading pointer types from S3"
-    AUTHORISER004 = "Validating pointer types"
-    AUTHORISER005 = "Render authorisation response"
-    AUTHORISER006 = "Parsing Client RP Details"
+from nrlf.log_references import LogReference
 
 
 class _PermissionsLookupError(Exception):
@@ -91,12 +82,20 @@ def _create_policy(principal_id, resource, effect, context):
     }
 
 
-@log_action(log_reference=LogReference.AUTHORISER006, log_result=True)
+@log_action(
+    log_reference=LogReference.AUTHORISER006,
+    log_result=True,
+    log_fields=["raw_client_rp_details"],
+)
 def _parse_client_rp_details(raw_client_rp_details: dict):
     return ClientRpDetailsHeader.parse_raw(raw_client_rp_details)
 
 
-@log_action(log_reference=LogReference.AUTHORISER003, log_result=True)
+@log_action(
+    log_reference=LogReference.AUTHORISER003,
+    log_result=True,
+    log_fields=["bucket", "key"],
+)
 def _parse_list_from_s3(s3_client: S3Client, bucket: str, key: str) -> list:
     try:
         response = s3_client.get_object(Bucket=bucket, Key=key)
@@ -124,6 +123,10 @@ def parse_headers(
     _headers = AbstractHeader(**event.headers).headers
     _raw_client_rp_details = _headers.get(CLIENT_RP_DETAILS, "{}")
     _raw_connection_metadata = _headers.get(CONNECTION_METADATA, "{}")
+    add_log_fields(
+        raw_client_rp_details=_raw_client_rp_details,
+        raw_connection_metadata=_raw_connection_metadata,
+    )
     try:
         connection_metadata = ConnectionMetadata.parse_raw(_raw_connection_metadata)
     except ValidationError:
@@ -141,6 +144,10 @@ def parse_headers(
             error="There was an issue parsing the client rp details, contact onboarding team",
             **data,
         )
+
+    add_log_fields(
+        client_rp_details=client_rp_details, connection_metadata=connection_metadata
+    )
 
     return PipelineData(
         connection_metadata=connection_metadata,
@@ -162,6 +169,9 @@ def retrieve_pointer_types(
 
     client_rp_details: ClientRpDetailsHeader = data["client_rp_details"]
     connection_metadata: ConnectionMetadata = data["connection_metadata"]
+    add_log_fields(
+        client_rp_details=client_rp_details, connection_metadata=connection_metadata
+    )
 
     pointer_types = connection_metadata.pointer_types
     if connection_metadata.enable_authorization_lookup:
@@ -175,7 +185,7 @@ def retrieve_pointer_types(
             )
         except _PermissionsLookupError as exc:
             return PipelineData(error=str(exc), **data)
-
+    add_log_fields(pointer_types=pointer_types)
     return PipelineData(pointer_types=pointer_types, **data)
 
 
@@ -224,22 +234,6 @@ steps = [
 ]
 
 
-def _function_handler(
-    fn, transaction_id: str, status_code_ok: HTTPStatus, method_arn: str, args, kwargs
-) -> tuple[HTTPStatus, any]:
-    try:
-        status_code, result = status_code_ok, fn(*args, **kwargs)
-    except Exception:
-        status_code = None
-        result = _create_policy(
-            principal_id=transaction_id,
-            resource=method_arn,
-            effect="Deny",
-            context={"error": HTTPStatus.INTERNAL_SERVER_ERROR.phrase},
-        )
-    return status_code, result
-
-
 def execute_steps(
     index_path: str,
     event: dict,
@@ -258,29 +252,23 @@ def execute_steps(
     event["isBase64Encoded"] = False
     transaction_id = generate_transaction_id()
     method_arn = event["methodArn"]
-
-    status_code, response = _function_handler(
-        _setup_logger,
-        transaction_id=transaction_id,
-        status_code_ok=HTTPStatus.OK,
-        method_arn=method_arn,
-        args=(index_path, transaction_id, event),
-        kwargs=dependencies,
-    )
-
-    if status_code is not HTTPStatus.OK:
-        return status_code, response
-    logger = response
-
-    return _function_handler(
-        _execute_steps,
-        transaction_id=transaction_id,
-        status_code_ok=HTTPStatus.OK,
-        method_arn=method_arn,
-        args=(steps, event, context),
-        kwargs={
-            "logger": logger,
-            "dependencies": dependencies,
-            "initial_pipeline_data": {"method_arn": method_arn},
-        },
-    )
+    try:
+        status_code = HTTPStatus.OK
+        logger = _setup_logger(index_path, transaction_id, event, **dependencies)
+        result = _execute_steps(
+            steps,
+            event,
+            context,
+            logger=logger,
+            dependencies=dependencies,
+            initial_pipeline_data={"method_arn": method_arn},
+        )
+    except Exception:
+        status_code = None
+        result = _create_policy(
+            principal_id=transaction_id,
+            resource=method_arn,
+            effect="Deny",
+            context={"error": HTTPStatus.INTERNAL_SERVER_ERROR.phrase},
+        )
+    return status_code, result

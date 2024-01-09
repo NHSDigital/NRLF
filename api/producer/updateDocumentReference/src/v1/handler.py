@@ -1,8 +1,8 @@
-from enum import Enum
 from logging import Logger
 from typing import Any
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
+from lambda_utils.logging import add_log_fields
 
 from api.producer.updateDocumentReference.src.constants import PersistentDependencies
 from api.producer.updateDocumentReference.src.v1.constants import (
@@ -27,15 +27,9 @@ from nrlf.core.repository import Repository
 from nrlf.core.response import operation_outcome_ok
 from nrlf.core.transform import update_document_pointer_from_fhir_json
 from nrlf.core.validators import json_loads
+from nrlf.log_references import LogReference
 
 log_action = make_common_log_action()
-
-
-class LogReference(Enum):
-    UPDATE001 = "Parsing request body"
-    UPDATE002 = "Determining whether document pointer exists"
-    UPDATE003 = "Comparing immutable fields"
-    UPDATE004 = "Updating document pointer model in db"
 
 
 @log_action(log_reference=LogReference.UPDATE001)
@@ -48,6 +42,10 @@ def parse_request_body(
 ) -> PipelineData:
     body = fetch_body_from_event(event)
 
+    add_log_fields(
+        body_id=body.get("id"),
+        data_id=data.get("id"),
+    )
     if ("id" in body and "id" in data) and (body["id"] != data["id"]):
         raise InconsistentUpdateId(
             "Existing document id does not match the document id in the body"
@@ -68,8 +66,10 @@ def document_pointer_exists(
     repository: Repository = dependencies["document_pointer_repository"]
 
     pk = data["pk"]
+    add_log_fields(pk=pk)
 
     document_pointer: DocumentPointer = repository.read_item(pk)
+    add_log_fields(pointer_id=document_pointer.id)
 
     return PipelineData(
         original_document=document_pointer.document.__root__,
@@ -118,9 +118,18 @@ def compare_immutable_fields(
 ) -> PipelineData:
     core_model = data["core_model"]
     raw_original_document = data["original_document"]
+
+    orig_document = json_loads(raw_original_document)
+    new_document = json_loads(core_model.document.__root__)
+
+    add_log_fields(
+        new_pointer_id=core_model.id,
+        orig_pointer_id=orig_document.get("id"),
+    )
+
     _validate_immutable_fields(
-        a=json_loads(raw_original_document),
-        b=json_loads(core_model.document.__root__),
+        a=orig_document,
+        b=new_document,
     )
     return PipelineData(**data)
 
@@ -134,6 +143,7 @@ def update_core_model_to_db(
     logger: Logger,
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
+    add_log_fields(pointer_id=core_model.id)
     document_pointer_repository: Repository = dependencies.get(
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
     )

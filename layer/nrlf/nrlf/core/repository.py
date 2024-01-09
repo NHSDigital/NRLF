@@ -1,9 +1,8 @@
-from enum import Enum
 from functools import reduce, wraps
 from typing import Generic, Iterator, TypeVar, Union
 
 from botocore.exceptions import ClientError
-from lambda_utils.logging import log_action
+from lambda_utils.logging import add_log_fields, log_action
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError
 
@@ -21,6 +20,7 @@ from nrlf.core.transform import (
     transform_next_page_token_to_start_key,
 )
 from nrlf.core.types import DynamoDbClient, DynamoDbResponse
+from nrlf.log_references import LogReference
 from nrlf.producer.fhir.r4.model import RequestQueryType
 
 from .decorators import deprecated
@@ -37,11 +37,6 @@ CONDITION_CHECK_CODES = [
     "TransactionCanceledException",
     "ValidationException",
 ]
-
-
-class LogReference(Enum):
-    REPOSITORY001 = "Checking if record is valid"
-    REPOSITORY002 = "Querying document"
 
 
 class CorruptItem(Exception):
@@ -84,15 +79,19 @@ def _handle_dynamodb_errors(
     return wrapper
 
 
-@log_action(log_reference=LogReference.REPOSITORY001, log_fields=["item"])
+@log_action(log_reference=LogReference.REPOSITORY001)
 def _is_record_valid(item_type: type[DynamoDbModel], item: dict):
+    valid = True
     try:
         return item_type(**item)
     except (ValueError, ValidationError):
+        valid = False
         raise CorruptItem(
             f"Cannot parse '{item_type.__name__}' - this item may be corrupt. "
             f"Skipping failed item: {item}"
         )
+    finally:
+        add_log_fields(valid=valid)
 
 
 def _keys(pk, sk, pk_name="pk", sk_name="sk"):
@@ -374,6 +373,7 @@ class Repository(Generic[PydanticModel]):
             last_evaluated_key = transform_evaluation_key_to_next_page_token(
                 last_evaluated_key
             )
+        add_log_fields(count=len(items))
 
         return PaginatedResponse(last_evaluated_key=last_evaluated_key, items=items)
 

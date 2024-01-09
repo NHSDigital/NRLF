@@ -10,10 +10,7 @@ from lambda_utils.logging import LogTemplate, log_action
 from pydantic import BaseModel, Field, Json, conlist, constr, root_validator
 
 from nrlf.core.firehose.utils import dump_json_gzip, load_json_gzip
-
-
-class LogReference(Enum):
-    FIREHOSEMODEL001 = "Parsing Cloudwatch Logs Event"
+from nrlf.log_references import LogReference
 
 
 class FirehoseResult(str, Enum):

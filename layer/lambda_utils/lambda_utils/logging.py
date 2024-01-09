@@ -3,8 +3,10 @@ from functools import partial, wraps
 from inspect import signature
 from logging import Logger as CoreLogger
 from logging import getLevelName
+from threading import local
 from timeit import default_timer as timer
-from typing import Any, Callable, Optional, TypeVar, Union
+from traceback import format_exception
+from typing import Any, Callable, Literal, Optional, TypeVar, Union
 
 from aws_lambda_powertools import Logger as AwsLogger
 from lambda_utils.constants import LoggingConstants, LoggingOutcomes, LogLevel
@@ -13,15 +15,18 @@ from lambda_utils.logging_utils import (
     CustomFormatter,
     duration_in_milliseconds,
     filter_visible_function_arguments,
-    function_handler,
     generate_transaction_id,
     json_encode_message,
 )
 from pydantic import BaseModel, Extra, Field
 from typing_extensions import ParamSpec
 
+from nrlf.core.errors import ERROR_SET_4XX
 from nrlf.core.model import APIGatewayProxyEventModel, Authorizer
 from nrlf.core.transform import make_timestamp
+
+logging_context = local()
+logging_context.current_action = None
 
 
 class LogTemplateBase(BaseModel):
@@ -36,8 +41,9 @@ class LogTemplateBase(BaseModel):
 
 
 class LogData(BaseModel):
-    inputs: dict[str, object]
+    inputs: Optional[dict[str, object]]
     result: Optional[object]
+    extra_fields: Optional[dict[str, object]]
 
 
 class LogTemplate(LogTemplateBase):
@@ -51,7 +57,7 @@ class LogTemplate(LogTemplateBase):
     outcome: str
     duration_ms: int
     message: str
-    function: str
+    function: Optional[str]
     data: LogData
     error: Union[Exception, str, None]
     call_stack: str = None
@@ -151,6 +157,7 @@ def log_action(
     sensitive: bool = True,
     errors_only: bool = False,
     scope_fn: Union[Callable[P, dict[str, str]], None] = None,
+    **extra_fields,
 ) -> Callable[[Callable[P, RT]], Callable[P, RT]]:
     """
     Args:
@@ -173,60 +180,151 @@ def log_action(
         def wrapper(*args: P.args, logger: Logger = None, **kwargs: P.kwargs) -> RT:
             if logger is None:
                 return fn(*args, **kwargs)
-
             fn_signature = signature(fn)
             if "logger" in fn_signature.parameters:
                 kwargs["logger"] = logger
+            with LogAction(
+                log_reference=log_reference,
+                log_level=log_level,
+                sensitive=sensitive,
+                errors_only=errors_only,
+                logger=logger,
+            ) as action:
 
-            start_seconds = timer()
-            result, outcome, call_stack = function_handler(fn, args, kwargs)
-            duration_ms = duration_in_milliseconds(
-                start_seconds=start_seconds, end_seconds=timer()
-            )
+                error = False
+                result = None
+                try:
+                    result = fn(*args, **kwargs)
+                except ERROR_SET_4XX as e:
+                    result = e
+                    raise
+                except Exception as e:
+                    error = True
+                    result = e
+                    raise
+                else:
+                    return result
+                finally:
+                    if not errors_only or error or log_level == LogLevel.ERROR:
+                        function_kwargs = filter_visible_function_arguments(
+                            fn_signature=fn_signature,
+                            function_args=args,
+                            function_kwargs=kwargs,
+                            log_fields=log_fields,
+                        )
 
-            function_kwargs = filter_visible_function_arguments(
-                fn_signature=fn_signature,
-                function_args=args,
-                function_kwargs=kwargs,
-                log_fields=log_fields,
-            )
+                        action.add_inputs(**function_kwargs)
 
-            data = {
-                "inputs": function_kwargs,
-            }
-            if log_result:
-                data["result"] = result
+                        if log_result:
+                            action.set_result(result)
 
-            level = LogLevel.ERROR if outcome == LoggingOutcomes.ERROR else log_level
-            error = result if outcome == LoggingOutcomes.ERROR else None
+                        scoped_values = (
+                            {} if scope_fn is None else scope_fn(*args, **kwargs)
+                        )
 
-            if not errors_only or level == LogLevel.ERROR:
-                scoped_values = {} if scope_fn is None else scope_fn(*args, **kwargs)
-                _message = LogTemplate(
-                    log_reference=log_reference.name,
-                    message=log_reference.value,
-                    function=f"{fn.__module__}.{fn.__name__}",
-                    data=data,
-                    error=error,
-                    call_stack=call_stack,
-                    outcome=outcome,
-                    duration_ms=duration_ms,
-                    log_level=getLevelName(level),
-                    sensitive=sensitive,
-                    **logger.base_message.dict(),
-                    **scoped_values,
-                )
-                message_dict = _message.dict()
-                message_json = json_encode_message(message=message_dict)
-                logger.log(msg=message_json, level=level)
-
-            if isinstance(result, Exception):
-                raise result
-            return result
+                        action.override(
+                            function=f"{fn.__module__}.{fn.__name__}",
+                            **scoped_values,
+                        )
+                        action.add_fields(**extra_fields)
 
         return wrapper
 
     return decorator
+
+
+class LogAction:
+    __old_action: Union["LogAction", None, Literal["unset"]] = "unset"
+
+    def __init__(
+        self,
+        *,
+        log_reference: Enum,
+        log_level: int = LogLevel.INFO,
+        sensitive: bool = True,
+        errors_only: bool = False,
+        logger: Union[Logger, None] = None,
+        **inputs,
+    ):
+        self.log_reference = log_reference
+        self.log_level = log_level
+        self.sensitive = sensitive
+        self.errors_only = errors_only
+        self.logger = logger
+        self.data = {"inputs": inputs, "extra_fields": {}}
+        self.overrides = {}
+
+    def add_fields(self, **kwargs):
+        self.data["extra_fields"].update(kwargs)
+
+    def override(self, **kwargs):
+        self.overrides.update(kwargs)
+
+    def set_result(self, result):
+        self.data["result"] = result
+
+    def add_inputs(self, **inputs):
+        self.data["inputs"].update(inputs)
+
+    def __enter__(self):
+        assert self.__old_action == "unset", "Cannot reuse LogActions"
+        self.__old_action = logging_context.current_action
+
+        if self.logger is None:
+            logging_context.current_action = None
+            return self
+        else:
+            logging_context.current_action = self
+
+        self.__start_seconds = timer()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        logging_context.current_action = self.__old_action
+
+        if self.logger is None:
+            return
+
+        duration_ms = duration_in_milliseconds(
+            start_seconds=self.__start_seconds, end_seconds=timer()
+        )
+
+        level = self.log_level
+        call_stack = None
+        outcome = LoggingOutcomes.SUCCESS
+        error = None
+        if isinstance(exc_value, ERROR_SET_4XX):
+            outcome = LoggingOutcomes.FAILURE
+            self.set_result(exc_value)
+        elif isinstance(exc_value, Exception):
+            level = LogLevel.ERROR
+            call_stack = "".join(format_exception(exc_type, exc_value, traceback))
+            outcome = LoggingOutcomes.ERROR
+            error = exc_value
+            self.set_result(exc_value)
+
+        if not self.errors_only or level == LogLevel.ERROR:
+            _message = LogTemplate(
+                log_reference=self.log_reference.name,
+                message=self.log_reference.value,
+                error=error,
+                call_stack=call_stack,
+                outcome=outcome,
+                duration_ms=duration_ms,
+                log_level=getLevelName(level),
+                sensitive=self.sensitive,
+                data=LogData(**self.data),
+                **self.logger.base_message.dict(),
+                **self.overrides,
+            )
+            message_dict = _message.dict()
+            message_json = json_encode_message(message=message_dict)
+            self.logger.log(msg=message_json, level=level)
+
+
+def add_log_fields(**kwargs):
+    if (current_action := logging_context.current_action) is not None:
+        logging_context.current_action.add_fields(**kwargs)
 
 
 def make_scoped_log_action(

@@ -1,5 +1,4 @@
 import json
-from enum import Enum
 from http import HTTPStatus
 from pathlib import Path
 from types import FunctionType
@@ -24,11 +23,7 @@ from pydantic import ValidationError
 from nrlf.core.model import APIGatewayProxyEventModel
 from nrlf.core.response import operation_outcome_not_ok
 from nrlf.core.transform import strip_empty_json_paths
-
-
-class LogReference(Enum):
-    OPERATION = "Executing pipeline steps"
-    VERSION_CHECK = "Getting version from header"
+from nrlf.log_references import LogReference
 
 
 def _get_steps(
@@ -40,21 +35,9 @@ def _get_steps(
     return versioned_steps[version]
 
 
-def _function_handler(
-    fn, status_code_ok: HTTPStatus, transaction_id: str, args, kwargs
-) -> tuple[HTTPStatus, any]:
-    try:
-        status_code, result = status_code_ok, fn(*args, **kwargs)
-    except Exception as exception:
-        status_code, result = operation_outcome_not_ok(
-            transaction_id=transaction_id, exception=exception
-        )
-    return status_code, result
-
-
 def _setup_logger(
     index_path: str, transaction_id: str, event: dict, **dependencies
-) -> tuple[int, any]:
+) -> Logger:
     try:
         _event = MinimalEventModelForLogging.parse_obj(event)
     except ValidationError:
@@ -115,47 +98,25 @@ def execute_steps(
     http_status_ok: HTTPStatus = HTTPStatus.OK,
     initial_pipeline_data={},
     **dependencies,
-) -> tuple[HTTPStatus, dict]:
+) -> tuple[int, dict]:
     """
     Executes the handler and wraps it in exception handling
     """
     transaction_id = generate_transaction_id()
 
-    status_code, response = _function_handler(
-        _setup_logger,
-        status_code_ok=http_status_ok,
-        transaction_id=transaction_id,
-        args=(index_path, transaction_id, event),
-        kwargs=dependencies,
-    )
-
-    if status_code is not http_status_ok:
-        return status_code, response
-    logger = response
-
-    status_code, response = _function_handler(
-        _get_steps_for_version_header,
-        status_code_ok=http_status_ok,
-        transaction_id=transaction_id,
-        args=(index_path, event),
-        kwargs={"logger": logger},
-    )
-
-    if status_code is not http_status_ok:
-        return status_code, response
-    steps = response
-
-    return _function_handler(
-        _execute_steps,
-        status_code_ok=http_status_ok,
-        transaction_id=transaction_id,
-        args=(steps, event, context),
-        kwargs={
-            "logger": logger,
-            "dependencies": dependencies,
-            "initial_pipeline_data": initial_pipeline_data,
-        },
-    )
+    try:
+        logger = _setup_logger(index_path, transaction_id, event, **dependencies)
+        steps = _get_steps_for_version_header(index_path, event, logger=logger)
+        return http_status_ok, _execute_steps(
+            steps,
+            event,
+            context,
+            logger=logger,
+            dependencies=dependencies,
+            initial_pipeline_data=initial_pipeline_data,
+        )
+    except Exception as e:
+        return operation_outcome_not_ok(transaction_id=transaction_id, exception=e)
 
 
 def render_response(status_code: HTTPStatus, result: dict) -> dict:

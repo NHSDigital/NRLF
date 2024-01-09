@@ -1,6 +1,5 @@
 from lambda_utils.logging import Logger, log_action
 
-from nrlf.core.firehose.log_reference import LogReference
 from nrlf.core.firehose.model import (
     CloudwatchLogsData,
     CloudwatchMessageType,
@@ -10,6 +9,7 @@ from nrlf.core.firehose.model import (
     format_cloudwatch_logs_for_splunk,
 )
 from nrlf.core.firehose.utils import encode_as_json_stream
+from nrlf.log_references import LogReference
 
 MAX_PACKET_SIZE_BYTES = (
     6000000  # 6000000 instead of 6291456 to give headroom (according to AWS's example)
@@ -28,7 +28,11 @@ class NoSpaceLeftInCurrentEventPacket(Exception):
     pass
 
 
-@log_action(log_reference=LogReference.FIREHOSE004)
+@log_action(
+    log_reference=LogReference.FIREHOSE004,
+    sensitive=False,
+    log_fields=["record_size_bytes", "total_event_size_bytes", "number_of_logs"],
+)
 def _validate_record_size(
     record_size_bytes: int,
     total_event_size_bytes: int,
