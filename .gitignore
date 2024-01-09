@@ -66,3 +66,7 @@ dist
 
 .hypothesis
 .firehose
+
+# Allure results
+allure-results/*
+allure-report/*

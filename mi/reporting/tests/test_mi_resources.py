@@ -43,7 +43,7 @@ def test_get_endpoint():
     client = boto3.client("rds")
     client.create_db_cluster(
         DBClusterIdentifier=db_id,
-        Engine="aurora",
+        Engine="aurora-postgresql",
         MasterUsername="root",
         MasterUserPassword="the_password",  # pragma: allowlist secret
     )

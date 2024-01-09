@@ -27,11 +27,14 @@ This project uses the `nrlf.sh` script to build, test and deploy. This script wi
 2. [Initialise shell environment](#initialise-shell-environment)
 3. [Login to AWS](#login-to-aws)
 4. [Build, Test & Run the API](#build-test--run-the-api)
+
    1. [Run unit tests](#1-run-the-unit-tests)
    2. [Deploy NRLF](#2-deploy-the-nrlf)
    3. [Run integration tests](#3-run-the-integration-tests)
    4. [Run feature tests](#4-run-the-feature-tests)
-   5. [Feature test rules](#5-feature-test-rules)
+   5. [Feature test reports](#5-feature-test-reports)
+   6. [Feature test rules](#6-feature-test-rules)
+
 5. [Smoke tests and oauth tokens for Postman requests](#smoke-tests-and-oauth-tokens)
 6. [Logging](#logging)
 7. [Data Contracts](#data-contracts)
@@ -411,7 +414,46 @@ python -m behave --define="integration_test=true" -i '.*producer*' ./feature_tes
 
 this will run all the producer integration tests.
 
-### 5. Feature test rules
+### 5. Feature test reports
+
+Allure reports (https://allurereport.org/docs/) can be viewed after the integration tests have been run. After the command for integration tests (**"nrlf test feature integration_report"**) is run, the test results are outputted to a folder named "allure-results", after which a html report is generated in the "allure-report" folder. In addition, a web server is started to view the report. However, before the reports can be viewed successfully, the following steps must be followed:
+
+Before installing these tools, please ensure you have the official "Python" extension installed in VS code.
+
+#### 1. Allure installation:
+
+There are several ways to install Allure in your system. At the moment it can be installed via Homebrew (macOS and Linux), Scoop (Windows),
+System package manager (Linux), or NPM (any system). The instructions to install it are here: https://allurereport.org/docs/gettingstarted-installation/. Make sure Java version 8 or above installed, and its directory is specified in the `JAVA_HOME` environment variable. Make sure to run `nrlf make install` to install the python allure dependencies.
+
+#### 2. Viewing the report
+
+Once the aforementioed tools in steps 1-4 have been installed, the report is ready to be viewed. When using WSL the IP address of the web server to view the report must be amended in the web browser. This is because, WSL is being accessed via an IP address different to the usual local IP (127.0.1.1.). In order to find out the IP of your WSL instance, run the following command:
+
+```shell
+ip addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'
+```
+
+The IP address of your WSL instance should now be visible in the terminal. While the local web server is running, copy and paste the URL in a web browser and replace 127.0.1.1 with the WSl IP in the web browser while keeping the suggested port number the same:
+
+```shell
+http://<WSL instance IP>:<port number>
+```
+
+**Please note**, depending on the current state of your terminal, you may have to stop the web server and regenerate the reports. If this is the case, use the command Ctrl + C to exit the server and once ready, run the following command to start the web server again and generate the re-report:
+
+```shell
+allure serve
+```
+
+Furthermore. the allure-results folder may not always empty before a test run. Therefore, it is recommended to use the following command when running the integration tests to ensure the allure-results folder is emptied before a test run to prevent inaccurate results/reporting:
+
+```shell
+rm -rf ./allure-results && nrlf test feature integration
+```
+
+**rm -rf ./allure-results** removes the previous allure-results folder and contents before the the test run begins.
+
+### 6. Feature test rules
 
 Referring to the sample feature test below:
 
