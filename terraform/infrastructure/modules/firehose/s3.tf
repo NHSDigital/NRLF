@@ -13,6 +13,41 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "firehose" {
   }
 }
 
+resource "aws_s3_bucket_policy" "firehose-policy" {
+  bucket = aws_s3_bucket.firehose.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Id      = "firehose-policy"
+    Statement = [
+      {
+        Sid       = "HTTPSOnly"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:*"
+        Resource = [
+          aws_s3_bucket.firehose.arn,
+          "${aws_s3_bucket.firehose.arn}/*",
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_s3_bucket_public_access_block" "firehose-public-access-block" {
+  bucket = aws_s3_bucket.firehose.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_s3_bucket_lifecycle_configuration" "firehose" {
   bucket = aws_s3_bucket.firehose.id
 

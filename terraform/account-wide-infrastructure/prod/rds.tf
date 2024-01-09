@@ -10,7 +10,9 @@ resource "aws_rds_cluster" "rds-cluster-prod" {
   vpc_security_group_ids = [
     aws_security_group.rds-cluster-sg-prod.id
   ]
-  db_subnet_group_name = aws_db_subnet_group.rds-cluster-subnet-group-prod.name
+  db_subnet_group_name    = aws_db_subnet_group.rds-cluster-subnet-group-prod.name
+  storage_encrypted       = true
+  backup_retention_period = 7
 
   lifecycle {
     ignore_changes = [availability_zones]
