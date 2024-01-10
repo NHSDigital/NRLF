@@ -44,7 +44,7 @@ def _json_schema_from_file(path: str) -> dict:
 
 
 def _get_contracts_from_db(repository: Repository[Contract]) -> list[Contract]:
-    return repository.query_gsi_1(pk=CONTRACT_PK_WILDCARD).items
+    return repository.query_gsi_1(pk=CONTRACT_PK_WILDCARD, limit=-1).items
 
 
 def _group_contracts(contracts: list[Contract]) -> GroupedContracts:

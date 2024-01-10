@@ -6,6 +6,7 @@ from itertools import chain
 from pathlib import Path
 from string import ascii_letters, ascii_lowercase, ascii_uppercase, digits
 from tempfile import TemporaryDirectory
+from typing import Generator
 from unittest import mock
 
 import pytest
@@ -787,19 +788,29 @@ def temp_dir() -> Path:
         yield _path
 
 
-@pytest.mark.integration
-def test_sync_contracts_e2e(temp_dir):
-    """
-    Tests the behaviour of synchronising a initial state is entirely
-    deterministic. Read the comments for a walkthrough.
-    """
+@pytest.fixture
+def contract_repository() -> Generator[Repository, None, None]:
     session = new_aws_session()
     client = session.client("dynamodb")
     environment_prefix = get_environment_prefix(None)
     repository = Repository(
         item_type=Contract, client=client, environment_prefix=environment_prefix
     )
+    repository.delete_all()
+    try:
+        yield repository
+    finally:
+        repository.delete_all()
 
+
+@pytest.mark.integration
+def test_sync_contracts_e2e(temp_dir, contract_repository):
+    """
+    Tests the behaviour of synchronising a initial state is entirely
+    deterministic. Read the comments for a walkthrough.
+    """
+
+    repository = contract_repository
     EMPTY_SCHEMA = {}
     OLD_SCHEMA = {"name": "old schema"}
     NEW_SCHEMA = {"name": "new schema"}
@@ -963,18 +974,11 @@ def test_sync_contracts_e2e(temp_dir):
     )
     assert result is False
 
-    repository.delete_all()
-
 
 @pytest.mark.integration
-def test_sync_actual_contracts_e2e():
+def test_sync_actual_contracts_e2e(contract_repository):
     """Test that all of the contracts are synced even when they are symlinks"""
-    session = new_aws_session()
-    client = session.client("dynamodb")
-    environment_prefix = get_environment_prefix(None)
-    repository = Repository(
-        item_type=Contract, client=client, environment_prefix=environment_prefix
-    )
+    repository = contract_repository
 
     # Verify the initial state
     initial_db_contracts = _get_contracts_from_db(repository=repository)
@@ -989,5 +993,3 @@ def test_sync_actual_contracts_e2e():
     synced_db_contracts = _get_contracts_from_db(repository=repository)
     assert initial_db_contracts != synced_db_contracts  # i.e. an update has taken place
     assert len(synced_db_contracts) == len(PATHS_TO_CONTRACTS)
-
-    repository.delete_all()

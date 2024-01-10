@@ -344,7 +344,9 @@ class Repository(Generic[PydanticModel]):
             index_keys.append(sk_name)
 
         clause = _key_and_filter_clause(key_conditions=key_conditions, filter=filter)
-        query_kwargs = {"TableName": self.table_name, "Limit": limit, **clause}
+        query_kwargs = {"TableName": self.table_name, **clause}
+        if limit > 0:
+            query_kwargs["Limit"] = limit
         if index_name is not None:
             query_kwargs["IndexName"] = index_name
 
@@ -360,7 +362,7 @@ class Repository(Generic[PydanticModel]):
             logger=logger,
         ):
             if item is not None:  # means we haven't reached the final result yet
-                if len(items) == PAGE_ITEM_LIMIT:
+                if len(items) == limit:
                     # never evaluated on the final page
                     last_item = items[-1]
                     last_evaluated_key = {
