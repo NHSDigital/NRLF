@@ -17,8 +17,6 @@ UNNECESSARY_DIRS = [
     "**/__pycache__/*",
     "*.dist-info",
     "*tests",
-    "botocore",
-    "boto3",
     "**/pydantic/*.so",
     "_pytest",
 ]
