@@ -345,7 +345,7 @@ class Repository(Generic[PydanticModel]):
 
         clause = _key_and_filter_clause(key_conditions=key_conditions, filter=filter)
         query_kwargs = {"TableName": self.table_name, **clause}
-        if limit > 0:
+        if limit is not None and limit > 0:
             query_kwargs["Limit"] = limit
         if index_name is not None:
             query_kwargs["IndexName"] = index_name

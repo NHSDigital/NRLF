@@ -796,7 +796,6 @@ def contract_repository() -> Generator[Repository, None, None]:
     repository = Repository(
         item_type=Contract, client=client, environment_prefix=environment_prefix
     )
-    repository.delete_all()
     try:
         yield repository
     finally:
