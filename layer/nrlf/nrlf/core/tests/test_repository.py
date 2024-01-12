@@ -1,7 +1,12 @@
 import pytest
 
-from nrlf.core.model import ConsumerRequestParams
+from feature_tests.common.repository import FeatureTestRepository as Repository
+from feature_tests.common.utils import get_environment_prefix
+from helpers.aws_session import new_aws_session
+from nrlf.core.dynamodb_types import DynamoDbStringType
+from nrlf.core.model import ConsumerRequestParams, DynamoDbModel
 from nrlf.core.repository import (
+    PAGE_ITEM_LIMIT,
     _decode,
     _encode,
     _expression_attribute_names,
@@ -239,3 +244,38 @@ def test_type_filter_none():
         "http://snomed.info/sct|861421000000108",
     ]
     assert actual == expected
+
+
+@pytest.mark.integration
+def test_limit():
+    class DummyModel(DynamoDbModel):
+        pk: DynamoDbStringType
+        sk: DynamoDbStringType
+
+        @classmethod
+        def kebab(cls) -> str:
+            return "document-pointer"
+
+    session = new_aws_session()
+    client = session.client("dynamodb")
+    environment_prefix = get_environment_prefix(None)
+    repository = Repository(
+        item_type=DummyModel, client=client, environment_prefix=environment_prefix
+    )
+    repository.delete_all()
+
+    repository.upsert_many(
+        [
+            DummyModel(
+                pk=DynamoDbStringType(__root__="DUMMY"),
+                sk=DynamoDbStringType(__root__=f"DUMMY#{i}"),
+            )
+            for i in range(50)
+        ]
+    )
+
+    assert len(repository.query("DUMMY", limit=10).items) == 10
+    assert len(repository.query("DUMMY").items) == PAGE_ITEM_LIMIT
+    assert len(repository.query("DUMMY", limit=100).items) == 50
+    assert len(repository.query("DUMMY", limit=None).items) == 50
+    assert len(repository.query("DUMMY", limit=-1).items) == 50
