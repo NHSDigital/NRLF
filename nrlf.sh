@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export PIPENV_VENV_IN_PROJECT=1
+export AWS_DEFAULT_REGION=eu-west-2
 root=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)
 
 for script_file in "$root"/scripts/*.sh; do
