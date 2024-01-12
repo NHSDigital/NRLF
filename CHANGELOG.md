@@ -8,6 +8,7 @@
 - SPINECLI-1704 add checks and cleanup to contract integration tests
 - NRL-445 Add Allure reports
 - SPINECLI-1666 Documentation Updates
+- SPINECLI-1774 Fix integration test failures
 
 ## 2023-10-26
 
