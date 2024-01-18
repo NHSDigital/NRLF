@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export PIPENV_VENV_IN_PROJECT=1
+export AWS_DEFAULT_REGION=eu-west-2
 root=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)
 
 for script_file in "$root"/scripts/*.sh; do
@@ -13,7 +14,6 @@ function _nrlf_commands_help() {
   echo
   echo "commands:"
   echo "  help        - this help screen"
-  echo "  aws         - aws commands"
   echo "  bootstrap   - bootstrap commands"
   echo "  lint        - lint commands"
   echo "  make        - calls the make/build routines"
@@ -40,7 +40,6 @@ function nrlf() {
   cd $root
 
   case $command in
-    "aws") _aws "${@:2}" ;;
     "make") _make "${@:2}" ;;
     "oauth") _oauth_token "${@:2}" ;;
     "terraform") _terraform "${@:2}" ;;
