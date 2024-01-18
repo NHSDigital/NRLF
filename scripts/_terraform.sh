@@ -163,8 +163,7 @@ function _terraform() {
 }
 
 function _check_mgmt() {
-  # Using a hash of the account rather than the account, to avoid committing account ids to repo
-  if [[ "$AWS_PROFILE" != 'nhsd-nrlf-mgmt' ]]; then
+  if [[ "$(aws iam list-account-aliases --query 'AccountAliases[0]' --output text)"] != 'nhsd-nrlf-mgmt' ]]; then
     echo "Please log in as the mgmt account" >&2
     return 1
   fi

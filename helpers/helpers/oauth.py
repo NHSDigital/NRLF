@@ -1,24 +1,25 @@
 import base64
-import os
 import time
 from functools import cache
 from typing import Literal
 from uuid import uuid4
 
+import boto3
 import fire
 import jwt
 import requests
 
-from helpers.aws_session import (
-    AWS_ACCOUNT_FOR_ENV,
-    aws_account_id_from_profile,
-    new_aws_session,
-)
 from helpers.log import log
-from helpers.terraform import get_terraform_json
 from nrlf.core.validators import json_loads
 
 EXPIRATION_TIME_SECONDS = 30
+
+AWS_ACCOUNT_FOR_ENV = {
+    "dev": "dev",
+    "int": "test",
+    "ref": "test",
+    "prod": "prod",
+}
 
 _DEFAULT_APP_DEV = "4e41d2d9-3ef6-48dc-8406-5faba77ffd83"
 _DEFAULT_APP_PROD = "7a4ad8c7-3927-4259-af7b-ac9d305a86ad"
@@ -58,6 +59,8 @@ APIGEE_ENV_FOR_ENV = {
     "prod": "prod",
 }
 
+secrets_client = boto3.client("secretsmanager", region_name="eu-west-2")
+
 
 @log("Generating jwt")
 def _generate_jwt(
@@ -65,7 +68,7 @@ def _generate_jwt(
     oauth_url: str,
     api_key: str,
     uuid: str,
-    expires: time.time,
+    expires: float,
     kid: str,
 ):
     payload = {
@@ -94,16 +97,14 @@ def _oauth_access_token(jwt_token: str, oauth_url: str):
 
 
 @log("Reading secret '{secret_id}'")
-def _aws_read_apigee_app_secrets(session, secret_id: str):
-    secrets_client = session.client("secretsmanager")
-
+def _aws_read_apigee_app_secrets(secret_id: str):
     response = secrets_client.get_secret_value(SecretId=secret_id)
     secret = json_loads(response["SecretString"])
 
     api_key = secret["api_key"]
     oauth_url = secret["oauth_url"]
     kid = secret["kid"]
-    private_key = base64.b64decode(secret["private_key"])
+    private_key = base64.b64decode(secret["private_key"]).decode("utf-8")
     # Check other required fields are present
     for field in ["apigee_url", "public_key"]:
         secret[field]  # Will raise KeyError if missing
@@ -113,11 +114,11 @@ def _aws_read_apigee_app_secrets(session, secret_id: str):
 
 @log("Got OAuth token: {__result__}")
 @cache
-def get_oauth_token(session, account: str, env: str, app_id: str):
+def get_oauth_token(account: str, env: str, app_id: str):
     secret_id = f"nhsd-nrlf--{account}--{env}--apigee-app-token-info--{app_id}"
     try:
         api_key, oauth_url, kid, jwt_private_key = _aws_read_apigee_app_secrets(
-            session=session, secret_id=secret_id
+            secret_id=secret_id
         )
     except Exception as e:
         raise Exception(f"Cannot find secret {secret_id}") from e
@@ -139,13 +140,7 @@ def token(env: str, app_alias: Literal["default", "nrl_sync"] = DEFAULT_APP_ALIA
     apigee_env = APIGEE_ENV_FOR_ENV[env]
     app_id = APP_FOR_ALIAS[app_alias][apigee_env]
 
-    if os.environ.get("RUNNING_IN_CI"):
-        account_id = get_terraform_json()["assume_account_id"]["value"]
-    else:
-        account_id = aws_account_id_from_profile(env=env)
-
-    session = new_aws_session(account_id=account_id)
-    return get_oauth_token(session=session, env=env, account=account, app_id=app_id)
+    return get_oauth_token(env=env, account=account, app_id=app_id)
 
 
 if __name__ == "__main__":

@@ -32,6 +32,6 @@ function _clean() {
 }
 
 function _install() {
-  poetry install || return 1
+  poetry install --no-root || return 1
   cp scripts/commit-msg.py .git/hooks/prepare-commit-msg && chmod ug+x .git/hooks/* || return 1
 }

@@ -8,15 +8,11 @@ from pathlib import Path
 from typing import Optional, Union
 from uuid import uuid4
 
+import boto3
 from fire import Fire
 from lambda_utils.logging import LogTemplate
 from pydantic import BaseModel, Extra, Field, Json, ValidationError, conlist
 
-from helpers.aws_session import (
-    DEFAULT_WORKSPACE,
-    aws_account_id_from_profile,
-    new_aws_session,
-)
 from helpers.log import log
 from nrlf.core.firehose.model import (
     CloudwatchLogsData,
@@ -351,20 +347,16 @@ class CLI:
     def __del__(self):
         print("-------------------------\n")  # noqa: T201
 
-    def fetch(self, s3_path: str, environment: str = DEFAULT_WORKSPACE):
-        account_id = aws_account_id_from_profile(env=environment)
-        session = new_aws_session(account_id=account_id)
-        s3_client = session.client("s3")
+    def fetch(self, s3_path: str):
+        s3_client = boto3.client("s3", region_name="eu-west-2")
         fetch_and_write_logs(s3_path=s3_path, s3_client=s3_client)
 
     def validate(self, local_path: str):
         validate(local_path=local_path)
 
-    def resubmit(self, local_path: str, environment: str = DEFAULT_WORKSPACE):
-        account_id = aws_account_id_from_profile(env=environment)
-        session = new_aws_session(account_id=account_id)
-        s3_client = session.client("s3")
-        firehose_client = session.client("firehose")
+    def resubmit(self, local_path: str):
+        s3_client = boto3.client("s3", region_name="eu-west-2")
+        firehose_client = boto3.client("firehose", region_name="eu-west-2")
         resubmit(
             local_path=local_path, s3_client=s3_client, firehose_client=firehose_client
         )
