@@ -22,9 +22,9 @@ PERMISSIONS = ["foo", "bar"]
 
 @pytest.fixture()
 def s3_client():
-    with mock_s3(), mock.patch.dict(
+    with mock.patch.dict(
         os.environ, {"AWS_REGION": "eu-west-2"}, clear=True
-    ):
+    ), mock_s3():
         client = boto3.client("s3", region_name="eu-west-2")
         client.create_bucket(
             Bucket=BUCKET,

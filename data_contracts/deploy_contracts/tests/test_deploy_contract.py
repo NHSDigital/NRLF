@@ -6,6 +6,7 @@ from itertools import chain
 from pathlib import Path
 from string import ascii_letters, ascii_lowercase, ascii_uppercase, digits
 from tempfile import TemporaryDirectory
+from typing import Generator
 from unittest import mock
 
 import pytest
@@ -246,6 +247,8 @@ def test__get_contracts_from_db():
     # Check that only contracts retrieved
     contracts_from_db = _get_contracts_from_db(repository=repository)
     assert _sort_contracts(contracts_from_db) == _sort_contracts(contracts)
+
+    repository.delete_all()
 
 
 @given(
@@ -785,19 +788,28 @@ def temp_dir() -> Path:
         yield _path
 
 
-@pytest.mark.integration
-def test_sync_contracts_e2e(temp_dir):
-    """
-    Tests the behaviour of synchronising a initial state is entirely
-    deterministic. Read the comments for a walkthrough.
-    """
+@pytest.fixture
+def contract_repository() -> Generator[Repository, None, None]:
     session = new_aws_session()
     client = session.client("dynamodb")
     environment_prefix = get_environment_prefix(None)
     repository = Repository(
         item_type=Contract, client=client, environment_prefix=environment_prefix
     )
+    try:
+        yield repository
+    finally:
+        repository.delete_all()
 
+
+@pytest.mark.integration
+def test_sync_contracts_e2e(temp_dir, contract_repository):
+    """
+    Tests the behaviour of synchronising a initial state is entirely
+    deterministic. Read the comments for a walkthrough.
+    """
+
+    repository = contract_repository
     EMPTY_SCHEMA = {}
     OLD_SCHEMA = {"name": "old schema"}
     NEW_SCHEMA = {"name": "new schema"}
@@ -825,7 +837,7 @@ def test_sync_contracts_e2e(temp_dir):
         local_json_schema=NEW_SCHEMA,
     )
 
-    # Create a contract group with a local counterpart - to be superseded by the sync
+    # Create a contract group with a local counterpart - to be skipped by the sync
     contracts_to_be_skipped = _create_contract_group(
         suffix="to_skip",
         n_contracts=3,
@@ -886,10 +898,38 @@ def test_sync_contracts_e2e(temp_dir):
     grouped_unchanged_contracts: GroupedContracts = {}
     grouped_changed_contracts: GroupedContracts = {}
     for group, _contracts in grouped_synced_contracts.items():
-        if _contracts == grouped_initial_contracts[group]:
+        if _sort_contracts(_contracts) == _sort_contracts(
+            grouped_initial_contracts[group]
+        ):
             grouped_unchanged_contracts[group] = _sort_contracts(_contracts)
         else:
             grouped_changed_contracts[group] = _sort_contracts(_contracts)
+
+    changed_deactivated = grouped_changed_contracts[
+        ContractGroup(
+            name="name_to_deactivate",
+            system="system_to_deactivate",
+            value="value_to_deactivate",
+        )
+    ]
+    assert len(changed_deactivated) == 4
+    changed_superseded = grouped_changed_contracts[
+        ContractGroup(
+            name="name_to_supersede",
+            system="system_to_supersede",
+            value="value_to_supersede",
+        )
+    ]
+    assert len(changed_superseded) == 6
+
+    changed_created = grouped_changed_contracts[
+        ContractGroup(
+            name="name_to_create",
+            system="system_to_create",
+            value="value_to_create",
+        )
+    ]
+    assert len(changed_created) == 1
 
     expected_grouped_unchanged_contracts = ChainMap(
         contracts_already_deactivated,
@@ -897,13 +937,7 @@ def test_sync_contracts_e2e(temp_dir):
     )
     assert grouped_unchanged_contracts == expected_grouped_unchanged_contracts
 
-    assert grouped_changed_contracts[
-        ContractGroup(
-            name="name_to_deactivate",
-            system="system_to_deactivate",
-            value="value_to_deactivate",
-        )
-    ][0] == Contract(
+    assert changed_deactivated[0] == Contract(
         pk=f"C#system_to_deactivate#value_to_deactivate",
         sk=f"V#0#name_to_deactivate",
         name="name_to_deactivate",
@@ -913,13 +947,7 @@ def test_sync_contracts_e2e(temp_dir):
         json_schema=EMPTY_SCHEMA,
     )
 
-    assert grouped_changed_contracts[
-        ContractGroup(
-            name="name_to_supersede",
-            system="system_to_supersede",
-            value="value_to_supersede",
-        )
-    ][0] == Contract(
+    assert changed_superseded[0] == Contract(
         pk=f"C#system_to_supersede#value_to_supersede",
         sk=f"V#0#name_to_supersede",
         name="name_to_supersede",
@@ -929,13 +957,7 @@ def test_sync_contracts_e2e(temp_dir):
         json_schema=NEW_SCHEMA,
     )
 
-    assert grouped_changed_contracts[
-        ContractGroup(
-            name="name_to_create",
-            system="system_to_create",
-            value="value_to_create",
-        )
-    ][0] == Contract(
+    assert changed_created[0] == Contract(
         pk=f"C#system_to_create#value_to_create",
         sk=f"V#0#name_to_create",
         name="name_to_create",
@@ -951,18 +973,11 @@ def test_sync_contracts_e2e(temp_dir):
     )
     assert result is False
 
-    repository.delete_all()
-
 
 @pytest.mark.integration
-def test_sync_actual_contracts_e2e():
+def test_sync_actual_contracts_e2e(contract_repository):
     """Test that all of the contracts are synced even when they are symlinks"""
-    session = new_aws_session()
-    client = session.client("dynamodb")
-    environment_prefix = get_environment_prefix(None)
-    repository = Repository(
-        item_type=Contract, client=client, environment_prefix=environment_prefix
-    )
+    repository = contract_repository
 
     # Verify the initial state
     initial_db_contracts = _get_contracts_from_db(repository=repository)
@@ -977,5 +992,3 @@ def test_sync_actual_contracts_e2e():
     synced_db_contracts = _get_contracts_from_db(repository=repository)
     assert initial_db_contracts != synced_db_contracts  # i.e. an update has taken place
     assert len(synced_db_contracts) == len(PATHS_TO_CONTRACTS)
-
-    repository.delete_all()

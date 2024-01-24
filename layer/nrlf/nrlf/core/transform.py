@@ -218,7 +218,7 @@ def create_bundle_count(count: int) -> Bundle:
 
 def create_bundle_from_paginated_response(
     paginated_response: PaginatedResponse,
-) -> Bundle:
+) -> dict:
     document_pointers = paginated_response.items
 
     bundleEntryList = create_bundle_entries_from_document_pointers(document_pointers)

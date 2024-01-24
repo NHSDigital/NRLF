@@ -1,8 +1,8 @@
-from enum import Enum
 from logging import Logger
 from typing import Any
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
+from lambda_utils.logging import add_log_fields
 
 from nrlf.core.common_producer_steps import invalid_producer_for_delete
 from nrlf.core.common_steps import (
@@ -16,14 +16,9 @@ from nrlf.core.model import APIGatewayProxyEventModel
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
 from nrlf.core.response import operation_outcome_ok
+from nrlf.log_references import LogReference
 
 log_action = make_common_log_action()
-
-
-class LogReference(Enum):
-    DELETE001 = "Validating producer permissions"
-    DELETE002 = "Validating item exists for deletion"
-    DELETE003 = "Deleting document reference"
 
 
 @log_action(log_reference=LogReference.DELETE001)
@@ -34,6 +29,7 @@ def validate_producer_permissions(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
+    add_log_fields(ods_code_parts=data["ods_code_parts"], delete_item_id=data["id"])
     if invalid_producer_for_delete(
         ods_code_parts=data["ods_code_parts"], delete_item_id=data["id"]
     ):
@@ -52,6 +48,7 @@ def validate_item_exists(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
+    add_log_fields(pk=data["pk"])
     repository: Repository = dependencies["repository"]
     repository.read_item(data["pk"])
     return PipelineData(**data)
@@ -67,6 +64,7 @@ def delete_document_reference(
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
     pk = data["pk"]
+    add_log_fields(pk=pk)
 
     repository.hard_delete(pk=pk, sk=pk)
 

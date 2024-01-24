@@ -1,4 +1,3 @@
-from enum import Enum
 from logging import Logger
 from pathlib import Path
 from types import FunctionType
@@ -6,20 +5,16 @@ from typing import Any
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import MinimalEventModelForLogging, log_action
-from pydantic import BaseModel
 
 from cron.seed_sandbox.validators import validate_items
 from nrlf.core.dynamodb_types import to_dynamodb_dict
-from nrlf.core.model import DocumentPointer
+from nrlf.core.model import DocumentPointer, DynamoDbModel
 from nrlf.core.repository import Repository
 from nrlf.core.validators import json_load
+from nrlf.log_references import LogReference
 
 SANDBOX = "sandbox"
 TEMPLATE_PATH_TO_DATA = str(Path(__file__).parent / "data" / "{item_type_name}.json")
-
-
-class LogReference(Enum):
-    SEED001 = "Ensuring that this is a sandbox environment"
 
 
 def _is_sandbox_lambda(context: LambdaContext, environment: str, prefix: str):
@@ -27,7 +22,7 @@ def _is_sandbox_lambda(context: LambdaContext, environment: str, prefix: str):
 
 
 def _seed_step_factory(
-    item_type: BaseModel,
+    item_type: type[DynamoDbModel],
     template_path_to_data: str = TEMPLATE_PATH_TO_DATA,
     log: bool = True,
 ) -> FunctionType:
@@ -56,14 +51,16 @@ def _seed_step_factory(
 
     if log:
 
-        class _LogReference(Enum):
-            SEED00X = f"Seeding {item_type_name} table"
-
-        seeder = log_action(log_reference=_LogReference.SEED00X)(seeder)
+        seeder = log_action(
+            log_reference=LogReference.SEED00X,
+            sensitive=False,
+            log_result=False,
+            item_type_name=item_type_name,
+        )(seeder)
     return seeder
 
 
-@log_action(log_reference=LogReference.SEED001)
+@log_action(log_reference=LogReference.SEED001, sensitive=False, log_result=False)
 def safeguard(
     data: PipelineData,
     context: LambdaContext,

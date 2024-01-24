@@ -1,7 +1,6 @@
-from enum import Enum
 from typing import Dict, Union
 
-from lambda_pipeline.types import PipelineData
+from lambda_utils.logging import add_log_fields
 
 from nrlf.consumer.fhir.r4.model import (
     NextPageToken,
@@ -24,15 +23,22 @@ from nrlf.core.repository import (
     type_filter,
 )
 from nrlf.core.validators import validate_type_system
+from nrlf.log_references import LogReference
 
 log_action = make_common_log_action()
 
 
-class LogReference(Enum):
-    COMMONSEARCH001 = "Searching for document references"
-
-
-@log_action(log_reference=LogReference.COMMONSEARCH001)
+@log_action(
+    log_reference=LogReference.COMMONSEARCH001,
+    log_fields=[
+        "request_params",
+        "query_string_params",
+        "nhs_number",
+        "type_identifier",
+        "raw_pointer_types",
+        "page_limit",
+    ],
+)
 def get_paginated_document_references(
     request_params: Union[ConsumerRequestParams, CountRequestParams],
     query_string_params: Dict[str, str],
@@ -42,7 +48,7 @@ def get_paginated_document_references(
     nhs_number: RequestQuerySubject,
     page_limit: int = PAGE_ITEM_LIMIT,
     page_token: NextPageToken = None,
-) -> PipelineData:
+) -> PaginatedResponse:
 
     assert_no_extra_params(
         request_params=request_params, provided_params=query_string_params
@@ -68,6 +74,7 @@ def get_paginated_document_references(
             next_page_token = next_page_token.__root__
 
     pk = key(DbPrefix.Patient, nhs_number)
+    add_log_fields(custodian=custodian, pk=pk, pointer_types=pointer_types)
 
     response: PaginatedResponse = repository.query_gsi_1(
         pk=pk,
@@ -76,5 +83,6 @@ def get_paginated_document_references(
         exclusive_start_key=next_page_token,
         limit=page_limit,
     )
+    add_log_fields(count=len(response.items))
 
     return response

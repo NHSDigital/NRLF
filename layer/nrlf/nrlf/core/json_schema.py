@@ -1,4 +1,3 @@
-from enum import Enum
 from functools import wraps
 from types import FunctionType
 from typing import Type
@@ -13,12 +12,7 @@ from nrlf.core.constants import DbPrefix
 from nrlf.core.errors import BadJsonSchema, JsonSchemaValidationError
 from nrlf.core.model import Contract, key
 from nrlf.core.repository import Repository
-
-
-class LogReference(Enum):
-    DATA_CONTRACT_READ_CACHE = "Getting cached Data Contracts"
-    DATA_CONTRACT_WRITE_CACHE = "Caching Data Contracts"
-
+from nrlf.log_references import LogReference
 
 DEFAULT_SYSTEM_VALUE = ""
 
@@ -32,6 +26,7 @@ class DataContractCache(dict):
     @log_action(
         log_reference=LogReference.DATA_CONTRACT_READ_CACHE,
         log_fields=["system", "value"],
+        sensitive=False,
     )
     def get(self, system: str, value: str) -> list[Contract]:
         return super().get(system, {}).get(value)
@@ -47,6 +42,7 @@ class DataContractCache(dict):
     @log_action(
         log_reference=LogReference.DATA_CONTRACT_WRITE_CACHE,
         log_fields=["system", "value", "contracts"],
+        sensitive=False,
     )
     def set(self, system: str, value: str, contracts: list[Contract]):
         return self.__setitem__(system, {value: contracts})

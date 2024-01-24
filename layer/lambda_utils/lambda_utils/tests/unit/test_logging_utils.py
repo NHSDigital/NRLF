@@ -10,13 +10,10 @@ from lambda_utils.logging_utils import (
     _convert_args_to_kwargs,
     _json_encoder,
     duration_in_milliseconds,
-    function_handler,
     generate_transaction_id,
     json_encode_message,
 )
 from pydantic import BaseModel
-
-from nrlf.core.errors import ItemNotFound
 
 
 def test_generate_transaction_id_unique():
@@ -73,29 +70,3 @@ def test_json_encode_message_failure():
 
 def raise_(ex):
     raise ex("blah")
-
-
-@pytest.mark.parametrize(
-    ["fn", "expected_result", "expected_outcome", "expected_call_stack"],
-    [
-        (lambda *args, **kwargs: True, True, "SUCCESS", None),
-        (
-            lambda *args, **kwargs: raise_(ItemNotFound),
-            ItemNotFound("blah"),
-            "FAILURE",
-            None,
-        ),
-        (
-            lambda *args, **kwargs: raise_(TypeError),
-            TypeError("blah"),
-            "ERROR",
-            "Traceback (most recent call last)",
-        ),
-    ],
-)
-def test_function_handler(fn, expected_result, expected_outcome, expected_call_stack):
-    result, outcome, call_stack = function_handler(fn=fn, args=(), kwargs={})
-    assert json_encode_message(result) == json_encode_message(expected_result)
-    assert outcome == expected_outcome
-    if expected_call_stack:
-        assert call_stack.startswith(expected_call_stack)

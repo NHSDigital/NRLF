@@ -1,9 +1,9 @@
 import urllib.parse
-from enum import Enum
 from logging import Logger
 from typing import Any
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
+from lambda_utils.logging import add_log_fields
 
 from nrlf.core.common_steps import (
     make_common_log_action,
@@ -20,13 +20,9 @@ from nrlf.core.validators import (
     json_loads,
     validate_document_reference_string,
 )
+from nrlf.log_references import LogReference
 
 log_action = make_common_log_action()
-
-
-class LogReference(Enum):
-    READ001 = "Validating producer permissions"
-    READ002 = "Reading document reference"
 
 
 def _invalid_producer_for_read(ods_code_parts, read_item_id: str):
@@ -46,6 +42,7 @@ def validate_producer_permissions(
 ) -> PipelineData:
     ods_code_parts = data["ods_code_parts"]
     decoded_id = urllib.parse.unquote(event.pathParameters["id"])
+    add_log_fields(ods_code_parts=ods_code_parts, decoded_id=decoded_id)
 
     if _invalid_producer_for_read(
         ods_code_parts=ods_code_parts, read_item_id=decoded_id
@@ -67,6 +64,7 @@ def read_document_reference(
 ) -> PipelineData:
     repository: Repository = dependencies["repository"]
     document_pointer: DocumentPointer = repository.read_item(data["pk"])
+    add_log_fields(pointer_id=document_pointer.id)
 
     validate_document_reference_string(document_pointer.document.__root__)
 

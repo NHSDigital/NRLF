@@ -7,7 +7,6 @@ from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
 from lambda_utils.logging import Logger, log_action
 from pydantic import ValidationError
 
-from nrlf.core.firehose.log_reference import LogReference
 from nrlf.core.firehose.model import (
     FirehoseOutputRecord,
     FirehoseResult,
@@ -17,6 +16,7 @@ from nrlf.core.firehose.model import (
 from nrlf.core.firehose.submission import FirehoseClient, resubmit_unprocessed_records
 from nrlf.core.firehose.utils import get_partition_key, name_from_arn
 from nrlf.core.firehose.validate import process_cloudwatch_record
+from nrlf.log_references import LogReference
 
 
 @log_action(log_reference=LogReference.FIREHOSE001, log_result=False)

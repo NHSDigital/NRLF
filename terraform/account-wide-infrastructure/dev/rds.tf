@@ -11,7 +11,7 @@ resource "aws_rds_cluster" "rds-cluster-dev" {
     aws_security_group.rds-cluster-sg-dev.id
   ]
   db_subnet_group_name = aws_db_subnet_group.rds-cluster-subnet-group-dev.name
-
+  storage_encrypted    = true
   lifecycle {
     ignore_changes = [availability_zones]
   }

@@ -12,6 +12,7 @@ function _terraform_help() {
     echo "  plan <env> <account_wide>    - runs 'terraform plan'"
     echo "  apply <env> <account_wide>   - runs 'terraform apply'"
     echo "  destroy <env> <account_wide> - runs 'terraform destroy'"
+    echo "  unlock <lock_id>             - runs 'terraform force-unlock'"
     echo
     return 1
 }
@@ -41,41 +42,35 @@ function _terraform() {
     ;;
     #----------------
     "init")
+      if ! _check_mgmt; then return 1; fi
+      cd "$terraform_dir" || return 1
+      _terraform_init "$env"
+    ;;
+    #----------------
+    "unlock")
       if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
         echo "Please log in as the mgmt account" >&2
         return 1
       fi
 
       cd "$terraform_dir" || return 1
-      _terraform_init "$env"
+      _terraform_unlock "$2"
     ;;
     #----------------
     "plan")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-      fi
-
+      if ! _check_mgmt; then return 1; fi
       cd "$terraform_dir" || return 1
       _terraform_plan "$env" "$var_file" "$plan_file" "$aws_account_id"
     ;;
     #----------------
     "apply")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-      fi
-
+      if ! _check_mgmt; then return 1; fi
       cd "$terraform_dir" || return 1
       _terraform_apply "$env" "$plan_file"
     ;;
     #----------------
     "destroy")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-      fi
-
+      if ! _check_mgmt; then return 1; fi
       if [[ -z ${env} ]]; then
         echo "Non-mgmt parameter required" >&2
         echo "Usage:    nrlf terraform bootstrap-non-mgmt <ENV>"
@@ -167,6 +162,14 @@ function _terraform() {
   esac
 }
 
+function _check_mgmt() {
+  # Using a hash of the account rather than the account, to avoid committing account ids to repo
+  if [[ "$AWS_PROFILE" != 'nhsd-nrlf-mgmt' ]]; then
+    echo "Please log in as the mgmt account" >&2
+    return 1
+  fi
+}
+
 function _get_environment_name() {
   local environment=$1
 
@@ -231,6 +234,11 @@ function _terraform_init() {
 
   terraform init $args || return 1
   terraform workspace select "$env" || terraform workspace new "$env" || return 1
+}
+
+
+function _terraform_unlock() {
+  terraform force-unlock $1
 }
 
 
