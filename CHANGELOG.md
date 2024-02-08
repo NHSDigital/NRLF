@@ -1,5 +1,9 @@
 # Changelog
 
+## 2024-02-08
+
+- SPINECLI-1795 Add open source links to documentation
+
 ## 2024-01-09
 
 - NRLF-657 Add workspace destroy and unlock commands
