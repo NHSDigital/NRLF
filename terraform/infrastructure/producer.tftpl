@@ -1,0 +1,107 @@
+{
+    "resourceType": "CapabilityStatement",
+    "id": "${id}",
+    "url": "https://${domain}/record-locator/producer/FHIR/R4",
+    "name": "NRL FHIR Server CapabilityStatement - Producer API",
+    "status": "active",
+    "version": "1.0.0",
+    "experimental": false,
+    "date": "2024-01-09",
+    "publisher": "NHS England",
+    "contact": [
+      {
+        "name": "NRL Team",
+        "telecom": [
+          {
+            "system": "email",
+            "value": "nrls@nhs.net"
+          }
+        ]
+      }
+    ],
+    "description": "Basic Capability Statement for the National Record Locator FHIR R4 API.",
+    "kind": "instance",
+    "software": {
+      "name": "National Record Locator FHIR R4 API - Producer"
+    },
+    "implementation": {
+      "description": "NRL v 3.0 Producer API FHIR Server",
+      "url": "https://int.api.service.nhs.uk/record-locator/producer/FHIR/R4/"
+    },
+    "fhirVersion": "4.0.1",
+    "format": ["json", "fhir+json"],
+    "rest": [
+      {
+        "mode": "server",
+        "security": {
+          "service": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/restful-security-service",
+                  "code": "OAuth",
+                  "display": "OAuth"
+                }
+              ]
+            }
+          ]
+        },
+        "resource": [
+          {
+            "type": "CapabilityStatement",
+            "interaction": [
+              {
+                "code": "read"
+              }
+            ],
+            "versioning": "no-version"
+          },
+          {
+            "type": "DocumentReference",
+            "profile": "hl7.org/fhir/R4/documentreference.html",
+            "documentation": "Additional business rules apply to validate patient, organisation and type/category content.",
+            "interaction": [
+              {
+                "code": "read",
+                "documentation": "Get a pointer by ID. Producers can only view their own pointers."
+              },
+              {
+                "code": "update",
+                "documentation": "Update a pointer by ID. Producers can only update their own pointers, and not all fields can be changed."
+              },
+              {
+                "code": "create",
+                "documentation": "Create a new document reference pointer. Producer organisations must have permission to create pointers of the type and category requested."
+              },
+              {
+                "code": "delete",
+                "documentation": "Delete a pointer by ID. Producers can only delete pointers they have created."
+              }
+            ],
+            "versioning": "no-version",
+            "readHistory": false,
+            "updateCreate": true,
+            "conditionalCreate": false,
+            "conditionalRead": "not-supported",
+            "conditionalUpdate": false,
+            "conditionalDelete": "not-supported",
+            "referencePolicy": ["logical"],
+            "searchParam": [
+              {
+                "name": "type",
+                "definition": "http://hl7.org/fhir/SearchParameter/DocumentReference-type",
+                "type": "token",
+                "documentation": "Allows DocumentReference search results to be filtered by pointer type (SNOMED code)."
+              },
+              {
+                "name": "subject",
+                "definition": "http://hl7.org/fhir/SearchParameter/DocumentReference-subject",
+                "type": "reference",
+                "documentation": "Allows DocumentReference search results to be filtered by patient (NHS number)."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+}
