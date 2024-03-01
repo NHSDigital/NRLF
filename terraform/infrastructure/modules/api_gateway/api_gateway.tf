@@ -9,6 +9,47 @@ resource "aws_api_gateway_rest_api" "api_gateway_rest_api" {
   }))
 }
 
+resource "aws_api_gateway_resource" "capability" {
+  rest_api_id = aws_api_gateway_rest_api.api_gateway_rest_api.id
+  parent_id   = aws_api_gateway_rest_api.api_gateway_rest_api.root_resource_id
+  path_part   = "_metadata"
+}
+
+resource "aws_api_gateway_method" "capability" {
+  rest_api_id   = aws_api_gateway_rest_api.api_gateway_rest_api.id
+  resource_id   = aws_api_gateway_resource.capability.id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "capability" {
+  rest_api_id = aws_api_gateway_rest_api.api_gateway_rest_api.id
+  resource_id = aws_api_gateway_resource.capability.id
+  http_method = aws_api_gateway_method.capability.http_method
+  type        = "MOCK"
+  request_templates = {
+    "application/json" = jsonencode({ "statusCode" = 200 })
+  }
+}
+
+resource "aws_api_gateway_method_response" "capability_200" {
+  rest_api_id = aws_api_gateway_rest_api.api_gateway_rest_api.id
+  resource_id = aws_api_gateway_resource.capability.id
+  http_method = aws_api_gateway_method.capability.http_method
+  status_code = "200"
+}
+
+resource "aws_api_gateway_integration_response" "capability" {
+  rest_api_id = aws_api_gateway_rest_api.api_gateway_rest_api.id
+  resource_id = aws_api_gateway_resource.capability.id
+  http_method = aws_api_gateway_method.capability.http_method
+  status_code = aws_api_gateway_method_response.capability_200.status_code
+
+  response_templates = {
+    "application/json" = var.capability_statement_content
+  }
+}
+
 resource "aws_api_gateway_deployment" "api_gateway_deployment" {
   rest_api_id = aws_api_gateway_rest_api.api_gateway_rest_api.id
 
@@ -118,47 +159,5 @@ resource "aws_api_gateway_gateway_response" "api_default_5xx" {
       }]
   }) }
   response_parameters = { "gatewayresponse.header.Access-Control-Allow-Origin" = "'*'"
-  }
-}
-
-resource "aws_api_gateway_resource" "capability" {
-  rest_api_id = aws_api_gateway_rest_api.api_gateway_rest_api.id
-  parent_id   = aws_api_gateway_rest_api.api_gateway_rest_api.root_resource_id
-  path_part   = "metadata"
-}
-
-resource "aws_api_gateway_method" "capability" {
-  rest_api_id   = aws_api_gateway_rest_api.api_gateway_rest_api.id
-  resource_id   = aws_api_gateway_resource.capability.id
-  http_method   = "GET"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_integration" "capability" {
-  rest_api_id = aws_api_gateway_rest_api.api_gateway_rest_api.id
-  resource_id = aws_api_gateway_resource.capability.id
-  http_method = aws_api_gateway_method.capability.http_method
-  type        = "MOCK"
-  request_templates = {
-    "application/json" = jsonencode({ "statusCode" = 200 })
-  }
-}
-
-
-resource "aws_api_gateway_method_response" "capability_200" {
-  rest_api_id = aws_api_gateway_rest_api.api_gateway_rest_api.id
-  resource_id = aws_api_gateway_resource.capability.id
-  http_method = aws_api_gateway_method.capability.http_method
-  status_code = "200"
-}
-
-resource "aws_api_gateway_integration_response" "capability" {
-  rest_api_id = aws_api_gateway_rest_api.api_gateway_rest_api.id
-  resource_id = aws_api_gateway_resource.capability.id
-  http_method = aws_api_gateway_method.capability.http_method
-  status_code = aws_api_gateway_method_response.capability_200.status_code
-
-  response_templates = {
-    "application/json" = var.capability_statement_content
   }
 }
