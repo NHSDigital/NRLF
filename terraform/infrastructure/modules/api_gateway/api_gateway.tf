@@ -150,8 +150,6 @@ resource "aws_api_gateway_method_response" "capability_200" {
   resource_id = aws_api_gateway_resource.capability.id
   http_method = aws_api_gateway_method.capability.http_method
   status_code = "200"
-  response_parameters = { "gatewayresponse.header.Access-Control-Allow-Origin" = "'*'"
-  }
 }
 
 resource "aws_api_gateway_integration_response" "capability" {
