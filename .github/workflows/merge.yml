@@ -34,7 +34,7 @@ jobs:
           TAG=$(find changelog/ -type f -maxdepth 1 | sort -nr | head -1 | sed 's/...$//' | awk -F'changelog/' '{print "release/"$2}')
           echo "tag=${TAG}" >> $GITHUB_ENV
       - name: Create tag
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             github.rest.git.createRef({
