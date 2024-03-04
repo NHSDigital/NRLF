@@ -1,24 +1,25 @@
-from typing import Optional
+from typing import Dict, Optional
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, StrictStr, root_validator
+from pydantic import BaseModel, Field, StrictStr, model_validator
 
 from nrlf.core.validators import json_loads
 
 
 class AbstractHeader(BaseModel):
-    headers: dict = Field(exclude=True)
+    headers: Dict[str, str] = Field(exclude=True)
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def _convert_keys_to_lowercase(cls, values):
         headers = {key.lower(): value for key, value in values.items()}
         return {"headers": headers, **headers}
 
 
 class AcceptHeader(AbstractHeader):
-    version: str = Field(regex="^\\d+\\.?\\d*$")
+    version: str = Field(pattern="^\\d+\\.?\\d*$")
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def _parse_accept_header(cls, values):
         accept_header = values.get("accept")
 

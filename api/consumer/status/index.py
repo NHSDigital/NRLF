@@ -23,4 +23,5 @@ def handler(event, context=None) -> dict[str, str]:
         context=context,
         dynamodb_client=DYNAMODB_CLIENT,
     )
+
     return render_response(status_code, result)

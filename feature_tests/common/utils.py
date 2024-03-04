@@ -25,7 +25,7 @@ from feature_tests.common.constants import (
 )
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
-from nrlf.core.types import DynamoDbClient, S3Client
+from nrlf.core.types import DynamoDBClient, LambdaClient, S3Client
 from nrlf.core.validators import json_loads
 
 RELATES_TO = "relatesTo"
@@ -92,21 +92,23 @@ def logging_headers(scenario_name) -> dict:
     ).dict(by_alias=True)
 
 
-def _get_boto3_client(client_name: str, test_mode: TestMode):
-    session = boto3 if test_mode is TestMode.LOCAL_TEST else new_aws_session()
-    return session.client(client_name)
+def _get_boto3_session(test_mode: TestMode):
+    return boto3 if test_mode is TestMode.LOCAL_TEST else new_aws_session()
 
 
-def get_dynamodb_client(test_mode: TestMode) -> DynamoDbClient:
-    return _get_boto3_client(client_name="dynamodb", test_mode=test_mode)
+def get_dynamodb_client(test_mode: TestMode) -> DynamoDBClient:
+    session = _get_boto3_session(test_mode=test_mode)
+    return session.client("dynamodb")
 
 
 def get_s3_client(test_mode: TestMode) -> S3Client:
-    return _get_boto3_client(client_name="s3", test_mode=test_mode)
+    session = _get_boto3_session(test_mode=test_mode)
+    return session.client("s3")
 
 
-def get_lambda_client(test_mode: TestMode) -> any:
-    return _get_boto3_client(client_name="lambda", test_mode=test_mode)
+def get_lambda_client(test_mode: TestMode) -> LambdaClient:
+    session = _get_boto3_session(test_mode=test_mode)
+    return session.client("lambda")
 
 
 def get_test_mode(context: Context) -> TestMode:

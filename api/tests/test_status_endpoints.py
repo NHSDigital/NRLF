@@ -7,7 +7,6 @@ import requests
 from lambda_utils.tests.unit.status_test_utils import OK
 from lambda_utils.tests.unit.utils import make_aws_event
 
-from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
 from nrlf.core.validators import json_loads
 

@@ -42,25 +42,25 @@ class LogTemplateBase(BaseModel):
 
 class LogData(BaseModel):
     inputs: Optional[dict[str, object]]
-    result: Optional[object]
-    extra_fields: Optional[dict[str, object]]
+    result: Optional[object] = None
+    extra_fields: dict[str, object] = Field(default_factory=dict)
 
 
 class LogTemplate(LogTemplateBase):
-    caller: Union[str, None]  # Identity of the caller
-    root: Union[str, None]  # The id of root object that triggered the request
-    subject: Union[
-        str, None
-    ]  # The id of the object being operated on, which normally matches the root but can be a child.
+    caller: Optional[str] = None  # Identity of the caller
+    root: Optional[str] = None  # The id of root object that triggered the request
+    subject: Optional[
+        str
+    ] = None  # The id of the object being operated on, which normally matches the root but can be a child.
     log_level: str
     log_reference: str
     outcome: str
     duration_ms: int
     message: str
-    function: Optional[str]
+    function: Optional[str] = None
     data: LogData
-    error: Union[Exception, str, None]
-    call_stack: str = None
+    error: Union[Exception, str, None] = None
+    call_stack: Optional[str] = None
     timestamp: str = Field(default_factory=make_timestamp)
     sensitive: bool = True
 
@@ -68,18 +68,18 @@ class LogTemplate(LogTemplateBase):
         arbitrary_types_allowed = True  # For Exception
         extra = Extra.forbid
 
-    def dict(self, redact=False, **kwargs):
+    def model_dump(self, redact=False, **kwargs):
         """Force exclude_none, allow redaction of field `data`"""
         kwargs["exclude_none"] = True
-        log = super().dict(**kwargs)
+        log = super().model_dump(**kwargs)
         if redact and self.sensitive:
             log["data"] = LoggingConstants.REDACTED
         return log
 
-    def json(self, **kwargs):
+    def model_dump_json(self, **kwargs):
         """Force exclude_none"""
         kwargs["exclude_none"] = True
-        return super().json(**kwargs)
+        return super().model_dump_json(**kwargs)
 
 
 class MinimalRequestContextForLogging(BaseModel):
@@ -106,7 +106,12 @@ def prepare_default_event_for_logging() -> MinimalEventModelForLogging:
         **{"x-correlation-id": uid, "x-request-id": uid, "nhsd-correlation-id": uid}
     )
     return MinimalEventModelForLogging(
-        headers=logging_headers.dict(by_alias=True),
+        resource=None,
+        path=None,
+        httpMethod=None,
+        multiValueHeaders=None,
+        isBase64Encoded=None,
+        headers=logging_headers.model_dump(by_alias=True),
         requestContext=MinimalRequestContextForLogging(accountId=uid),
     )
 
@@ -120,7 +125,7 @@ class Logger(AwsLogger, CoreLogger):
         aws_environment: str,
         splunk_index: str,
         source: str,
-        transaction_id: str = None,
+        transaction_id: Optional[str] = None,
         **kwargs,
     ):
         headers = aws_lambda_event.dict().get("headers", {})
@@ -128,7 +133,7 @@ class Logger(AwsLogger, CoreLogger):
 
         self.transaction_id = transaction_id or generate_transaction_id()
         self._base_message = LogTemplateBase(
-            **logging_header.dict(),
+            **logging_header.model_dump(),
             host=aws_lambda_event.requestContext.accountId,
             environment=aws_environment,
             index=splunk_index,
@@ -140,7 +145,7 @@ class Logger(AwsLogger, CoreLogger):
         )
 
     @property
-    def base_message(self) -> LogTemplate:
+    def base_message(self) -> LogTemplateBase:
         return self._base_message
 
 
@@ -151,7 +156,7 @@ P = ParamSpec("P")  # for forwarding type-hints of the decorated kw/args
 def log_action(
     *,
     log_reference: Enum,
-    log_level: LogLevel = LogLevel.INFO,
+    log_level: int = LogLevel.INFO,
     log_fields: list[str] = [],
     log_result: bool = True,
     sensitive: bool = True,

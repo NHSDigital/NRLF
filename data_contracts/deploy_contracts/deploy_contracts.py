@@ -60,7 +60,7 @@ def _group_contracts(contracts: list[Contract]) -> GroupedContracts:
 
     for contract_group, _contracts in contracts_by_group.items():
         # Active Contract should always be first
-        active_contract_sk = _contracts[0].sk.__root__
+        active_contract_sk = _contracts[0].sk.root
         if active_contract_sk != contract_group.active_sk:
             raise BadActiveContract(
                 f"The sort key of the active Contract '{contract_group.dict()}' "
@@ -87,9 +87,9 @@ def _read_latest_json_schemas(paths: list[Path]) -> GroupedJsonSchemas:
 
 
 def _increment_contract_sk(sk: DynamoDbStringType) -> DynamoDbStringType:
-    prefix, inverse_version, name = sk.__root__.split(KEY_SEPARATOR)
+    prefix, inverse_version, name = sk.root.split(KEY_SEPARATOR)
     incremented_inverse_version = f"{int(inverse_version) + 1}"
-    return DynamoDbStringType(__root__=key(prefix, incremented_inverse_version, name))
+    return DynamoDbStringType(root=key(prefix, incremented_inverse_version, name))
 
 
 def _split_core_from_patch_version(version: str):
@@ -124,7 +124,7 @@ def _increment_latest_version_on_conflict(
     core_latest_version, _ = _split_core_from_patch_version(version=latest_version)
     if active_contract:
         core_active_version, patch_active_version = _split_core_from_patch_version(
-            version=active_contract.version.__root__
+            version=active_contract.version.root
         )
         if core_active_version == core_latest_version:
             next_patch_version = _increment_patch_version(
@@ -143,7 +143,7 @@ def _increment_versions_of_contracts(contracts: list[Contract]) -> list[Contract
 
 def _active_contract_is_latest(contracts: list[Contract], json_schema: dict):
     active_contract = contracts[0] if contracts else None
-    return active_contract and (active_contract.json_schema.__root__ == json_schema)
+    return active_contract and (active_contract.json_schema.root == json_schema)
 
 
 def _get_contracts_to_deactivate(

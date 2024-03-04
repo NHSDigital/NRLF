@@ -72,7 +72,7 @@ def document_pointer_exists(
     add_log_fields(pointer_id=document_pointer.id)
 
     return PipelineData(
-        original_document=document_pointer.document.__root__,
+        original_document=document_pointer.document.root,
         **data,
     )
 
@@ -120,7 +120,7 @@ def compare_immutable_fields(
     raw_original_document = data["original_document"]
 
     orig_document = json_loads(raw_original_document)
-    new_document = json_loads(core_model.document.__root__)
+    new_document = json_loads(core_model.document.root)
 
     add_log_fields(
         new_pointer_id=core_model.id,

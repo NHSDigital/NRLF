@@ -60,7 +60,7 @@ def trawl_logs(
         )
         for event in response["events"]:
             try:
-                yield LogTemplate.parse_raw(event["message"])
+                yield LogTemplate.model_validate_json(event["message"])
             except ValidationError:
                 pass
 

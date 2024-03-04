@@ -137,13 +137,13 @@ def test_execute_steps_yields_deny_on_internal_server_error(
         event=event,
         context=None,
         config=Config(
-            AWS_REGION="a-region",
-            PREFIX="a-prefix",
-            ENVIRONMENT="an-environment",
-            SPLUNK_INDEX="an-index",
-            SOURCE="the-lambda-name",
+            aws_region="a-region",
+            prefix="a-prefix",
+            environment="an-environment",
+            splunk_index="an-index",
+            source="the-lambda-name",
             S3_CLIENT="the-s3-client",
-            AUTH_STORE="a-bucket",
+            auth_store="a-bucket",
         ),
     )
 

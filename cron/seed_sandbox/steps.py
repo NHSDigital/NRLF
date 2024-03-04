@@ -1,7 +1,6 @@
 from logging import Logger
 from pathlib import Path
-from types import FunctionType
-from typing import Any
+from typing import Any, Callable
 
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import MinimalEventModelForLogging, log_action
@@ -25,7 +24,7 @@ def _seed_step_factory(
     item_type: type[DynamoDbModel],
     template_path_to_data: str = TEMPLATE_PATH_TO_DATA,
     log: bool = True,
-) -> FunctionType:
+) -> Callable:
     item_type_name = item_type.kebab()
     path_to_data = template_path_to_data.format(item_type_name=item_type_name)
     with open(path_to_data) as f:

@@ -1,9 +1,9 @@
 import json
-import os
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Extra, Field, SecretStr
+from pydantic import BaseModel, ConfigDict, Extra, Field, SecretStr
+from pydantic_settings import BaseSettings
 
 
 class Status(str, Enum):
@@ -34,7 +34,9 @@ class Sql(BaseModel, extra=Extra.forbid):
     )
 
 
-class SqlQueryEvent(BaseModel, extra=Extra.forbid):
+class SqlQueryEvent(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     password: SecretStr
     user: SecretStr
     endpoint: Optional[str] = None
@@ -56,17 +58,13 @@ class SqlQueryEvent(BaseModel, extra=Extra.forbid):
         return json.dumps(_dict)
 
 
-class Environment(BaseModel):
+class Environment(BaseSettings):
     POSTGRES_DATABASE_NAME: str
     RDS_CLUSTER_HOST: str
     RDS_CLUSTER_PORT: int
-
-    @classmethod
-    def construct(cls) -> "Environment":
-        return cls(**os.environ)
 
 
 class Response(BaseModel):
     status: Status
     outcome: str
-    results: list[tuple[object, ...]] = None
+    results: list[tuple[object, ...]]

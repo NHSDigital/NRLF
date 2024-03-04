@@ -35,7 +35,7 @@ def _is_item_valid(item: BaseModel):
                 pointer_version=item.version,
                 pointer_source=item.source,
             )
-            DocumentReference(**json_loads(item.document.__root__))
+            DocumentReference(**json_loads(item.document.root))
             return True
         else:
             return True

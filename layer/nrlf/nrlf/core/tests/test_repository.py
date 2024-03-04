@@ -267,8 +267,8 @@ def test_limit():
     repository.upsert_many(
         [
             DummyModel(
-                pk=DynamoDbStringType(__root__="DUMMY"),
-                sk=DynamoDbStringType(__root__=f"DUMMY#{i}"),
+                pk=DynamoDbStringType(root="DUMMY"),
+                sk=DynamoDbStringType(root=f"DUMMY#{i}"),
             )
             for i in range(50)
         ]

@@ -6,12 +6,20 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, StrictBool, StrictFloat, StrictInt, StrictStr
+from pydantic import (
+    BaseModel,
+    Field,
+    RootModel,
+    StrictBool,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+)
 from typing_extensions import Annotated, Literal
 
 
-class LocationItem(BaseModel):
-    __root__: Annotated[
+class LocationItem(RootModel):
+    root: Annotated[
         StrictStr,
         Field(
             description='This element is deprecated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. \n\nFor resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.'
@@ -19,8 +27,8 @@ class LocationItem(BaseModel):
     ]
 
 
-class ExpressionItem(BaseModel):
-    __root__: Annotated[
+class ExpressionItem(RootModel):
+    root: Annotated[
         StrictStr,
         Field(
             description="A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised."
@@ -256,8 +264,8 @@ class Quantity(BaseModel):
     ] = None
 
 
-class ProfileItem(BaseModel):
-    __root__: Annotated[
+class ProfileItem(RootModel):
+    root: Annotated[
         StrictStr,
         Field(
             description="A list of profiles (references to [StructureDefinition](structuredefinition.html#) resources) that this resource claims to conform to. The URL is a reference to [StructureDefinition.url](structuredefinition&ndash;definitions.html#StructureDefinition.url)."
@@ -316,46 +324,42 @@ class Narrative(BaseModel):
     ]
 
 
-class DocumentId(BaseModel):
-    __root__: StrictStr
+class DocumentId(RootModel):
+    root: StrictStr
 
 
 class RequestPathParams(BaseModel):
     id: DocumentId
 
 
-class RequestQuerySubject(BaseModel):
-    __root__: Annotated[
-        StrictStr, Field(example="https://fhir.nhs.uk/Id/nhs-number|4409815415")
+class RequestQuerySubject(RootModel):
+    root: Annotated[
+        StrictStr, Field(examples=["https://fhir.nhs.uk/Id/nhs-number|4409815415"])
     ]
 
 
-class RequestQueryType(BaseModel):
-    __root__: Annotated[StrictStr, Field(example="http://snomed.info/sct|736253002")]
+class RequestQueryType(RootModel):
+    root: Annotated[StrictStr, Field(examples=["http://snomed.info/sct|736253002"])]
 
 
-class NextPageToken(BaseModel):
-    __root__: StrictStr
+class NextPageToken(RootModel):
+    root: StrictStr
 
 
-class RequestHeaderOdsCode(BaseModel):
-    __root__: StrictStr
+class RequestHeaderOdsCode(RootModel):
+    root: StrictStr
 
 
-class RequestHeaderOrganisationExtensionCode(BaseModel):
-    __root__: StrictStr
+class RequestHeaderOrganisationExtensionCode(RootModel):
+    root: StrictStr
 
 
-class RequestHeaderRequestId(BaseModel):
-    __root__: Annotated[
-        StrictStr, Field(example="60E0B220-8136-4CA5-AE46-1D97EF59D068")
-    ]
+class RequestHeaderRequestId(RootModel):
+    root: Annotated[StrictStr, Field(examples=["60E0B220-8136-4CA5-AE46-1D97EF59D068"])]
 
 
-class RequestHeaderCorrelationId(BaseModel):
-    __root__: Annotated[
-        StrictStr, Field(example="11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA")
-    ]
+class RequestHeaderCorrelationId(RootModel):
+    root: Annotated[StrictStr, Field(examples=["11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA"])]
 
 
 class DocumentReferenceContent(BaseModel):
@@ -472,7 +476,7 @@ class OperationOutcome(BaseModel):
             description='A human&ndash;readable narrative that contains a summary of the resource and can be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it "clinically safe" for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety.'
         ),
     ] = None
-    issue: Annotated[List[OperationOutcomeIssue], Field(min_items=1)]
+    issue: Annotated[List[OperationOutcomeIssue], Field(min_length=1)]
 
 
 class DocumentReference(BaseModel):
@@ -554,7 +558,7 @@ class DocumentReference(BaseModel):
         Field(description="Human&ndash;readable description of the source document."),
     ] = None
     securityLabel: Optional[List[CodeableConcept]] = None
-    content: Annotated[List[DocumentReferenceContent], Field(min_items=1)]
+    content: Annotated[List[DocumentReferenceContent], Field(min_length=1)]
     context: Annotated[
         Optional[DocumentReferenceContext],
         Field(description="The clinical context in which the document was prepared."),
@@ -828,7 +832,7 @@ class Signature(BaseModel):
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
-    type: Annotated[List[Coding], Field(min_items=1)]
+    type: Annotated[List[Coding], Field(min_length=1)]
     when: Annotated[
         StrictStr, Field(description="When the digital signature was signed.")
     ]

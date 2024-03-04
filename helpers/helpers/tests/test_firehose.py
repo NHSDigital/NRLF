@@ -203,7 +203,7 @@ def given__validate_logs(n_good, n_bad, n_v_bad):
 
 
 def test_construct_cloudwatch_logs_data():
-    good_logs = [json_loads(_make_good_log(i)) for i in range(10)]
+    good_logs = [json_loads(_make_good_log(str(i))) for i in range(10)]
     construct_cloudwatch_logs_data(messages=good_logs)
 
 

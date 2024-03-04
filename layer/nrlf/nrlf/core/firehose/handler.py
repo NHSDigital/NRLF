@@ -1,4 +1,4 @@
-from typing import Iterator
+from typing import Any, Iterator, Optional
 
 from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
     KinesisFirehoseModel,
@@ -22,7 +22,7 @@ from nrlf.log_references import LogReference
 @log_action(log_reference=LogReference.FIREHOSE001, log_result=False)
 def _process_firehose_records(
     records: list[KinesisFirehoseRecord],
-    logger: Logger = None,
+    logger: Optional[Logger] = None,
 ) -> Iterator[FirehoseOutputRecord]:
     total_event_size_bytes = 0
     for record in records:
@@ -32,6 +32,7 @@ def _process_firehose_records(
             output_record = FirehoseOutputRecord(
                 record_id=record.recordId,
                 result=FirehoseResult.PROCESSING_FAILED,
+                data=record.data.decode("utf-8"),
             )
         else:
             output_record = process_cloudwatch_record(
@@ -47,7 +48,7 @@ def _process_firehose_records(
 @log_action(log_reference=LogReference.FIREHOSE002, log_result=False)
 def firehose_handler(
     event: KinesisFirehoseModel,
-    boto3_firehose_client: any,
+    boto3_firehose_client: Any,
     logger: Logger = None,
 ) -> LambdaResult:
     firehose_client = FirehoseClient(

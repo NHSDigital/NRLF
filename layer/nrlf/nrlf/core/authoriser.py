@@ -16,7 +16,8 @@ from lambda_utils.pipeline import (
     _execute_steps,
     _setup_logger,
 )
-from pydantic import BaseModel, ValidationError
+from pydantic import Field, ValidationError
+from pydantic_settings import BaseSettings
 
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from nrlf.core.types import S3Client
@@ -28,7 +29,7 @@ class _PermissionsLookupError(Exception):
     pass
 
 
-class Config(BaseModel):
+class Config(BaseSettings):
     """
     The Config class defines all the Environment Variables that are needed for
     the business logic to execute successfully.
@@ -40,17 +41,17 @@ class Config(BaseModel):
     logic to be supported.
     """
 
-    AWS_REGION: str
-    PREFIX: str
-    ENVIRONMENT: str
-    SPLUNK_INDEX: str
-    SOURCE: str
-    AUTH_STORE: str
+    aws_region: str = Field(..., alias="AWS_REGION")
+    prefix: str = Field(..., alias="PREFIX")
+    environment: str = Field(..., alias="ENVIRONMENT")
+    splunk_index: str = Field(..., alias="SPLUNK_INDEX")
+    source: str = Field(..., alias="SOURCE")
+    auth_store: str = Field(..., alias="AUTH_STORE")
 
 
 def build_persistent_dependencies(
     config: Config, s3_client: S3Client
-) -> dict[str, any]:
+) -> dict[str, Any]:
     """
     AWS Lambdas may be re-used, rather than spinning up a new instance each
     time.  Doing this we can take advantage of state that persists between
@@ -61,10 +62,10 @@ def build_persistent_dependencies(
     These dependencies will be passed through to your `handle` function below.
     """
     return {
-        "environment": config.ENVIRONMENT,
-        "splunk_index": config.SPLUNK_INDEX,
-        "source": config.SOURCE,
-        "permissions_lookup_bucket": config.AUTH_STORE,
+        "environment": config.environment,
+        "splunk_index": config.splunk_index,
+        "source": config.source,
+        "permissions_lookup_bucket": config.auth_store,
         "s3_client": s3_client,
     }
 
@@ -87,8 +88,8 @@ def _create_policy(principal_id, resource, effect, context):
     log_result=True,
     log_fields=["raw_client_rp_details"],
 )
-def _parse_client_rp_details(raw_client_rp_details: dict):
-    return ClientRpDetailsHeader.parse_raw(raw_client_rp_details)
+def _parse_client_rp_details(raw_client_rp_details: str):
+    return ClientRpDetailsHeader.model_validate_json(raw_client_rp_details)
 
 
 @log_action(
@@ -120,7 +121,11 @@ def parse_headers(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
-    _headers = AbstractHeader(**event.headers).headers
+    """
+    Parses the headers from the APIGatewayProxyEventModel and extracts the necessary information.
+    """
+
+    _headers = AbstractHeader(headers=event.headers).headers
     _raw_client_rp_details = _headers.get(CLIENT_RP_DETAILS, "{}")
     _raw_connection_metadata = _headers.get(CONNECTION_METADATA, "{}")
     add_log_fields(
@@ -137,8 +142,9 @@ def parse_headers(
 
     try:
         client_rp_details = _parse_client_rp_details(
-            raw_client_rp_details=_raw_client_rp_details, logger=logger
+            raw_client_rp_details=_raw_client_rp_details
         )
+
     except ValidationError:
         return PipelineData(
             error="There was an issue parsing the client rp details, contact onboarding team",
@@ -164,6 +170,9 @@ def retrieve_pointer_types(
     dependencies: FrozenDict[str, Any],
     logger: Logger,
 ) -> PipelineData:
+    """
+    Retrieves the pointer types from the connection metadata and performs authorization lookup if enabled.
+    """
     if data.get("error"):
         return PipelineData(**data)
 
@@ -181,7 +190,6 @@ def retrieve_pointer_types(
                 s3_client=dependencies["s3_client"],
                 bucket=dependencies["permissions_lookup_bucket"],
                 key=f"{client_rp_details.developer_app_id}/{ods_code}.json",
-                logger=logger,
             )
         except _PermissionsLookupError as exc:
             return PipelineData(error=str(exc), **data)
@@ -253,7 +261,6 @@ def execute_steps(
     transaction_id = generate_transaction_id()
     method_arn = event["methodArn"]
     try:
-        status_code = HTTPStatus.OK
         logger = _setup_logger(index_path, transaction_id, event, **dependencies)
         result = _execute_steps(
             steps,
@@ -264,11 +271,11 @@ def execute_steps(
             initial_pipeline_data={"method_arn": method_arn},
         )
     except Exception:
-        status_code = None
         result = _create_policy(
             principal_id=transaction_id,
             resource=method_arn,
             effect="Deny",
             context={"error": HTTPStatus.INTERNAL_SERVER_ERROR.phrase},
         )
-    return status_code, result
+
+    return HTTPStatus.OK, result

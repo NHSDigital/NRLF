@@ -1,13 +1,13 @@
 import json
 import time  # noqa: F401
 from enum import Enum
-from typing import Iterator, Literal, Optional, Union
+from typing import Iterable, Iterator, Literal, Optional, Union
 
 from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
     KinesisFirehoseRecord,
 )
 from lambda_utils.logging import LogTemplate, log_action
-from pydantic import BaseModel, Field, Json, conlist, constr, root_validator
+from pydantic import BaseModel, Field, Json, conlist, constr, model_validator
 
 from nrlf.core.firehose.utils import dump_json_gzip, load_json_gzip
 from nrlf.log_references import LogReference
@@ -38,6 +38,7 @@ class SplunkEvent(BaseModel):
     sourcetype: Literal["_json"] = "_json"  # i.e. use the Splunk JSON auto-indexer
     host: str
     event: dict
+    index: Optional[str] = None
 
 
 class FirehoseSubmissionRecord(BaseModel):
@@ -50,14 +51,15 @@ class FirehoseSubmissionRecord(BaseModel):
     Data: bytes
     PartitionKey: Union[str, None] = None
 
-    def dict(self):
-        return super().dict(exclude_none=True)
+    def model_dump(self, **kwargs):
+        kwargs["exclude_none"] = True
+        return super().model_dump(**kwargs)
 
 
 class FirehoseOutputRecord(BaseModel):
     record_id: str
     result: FirehoseResult
-    data: str = None
+    data: str
     unprocessed_records: list[FirehoseSubmissionRecord] = Field(
         default_factory=list, exclude=True
     )
@@ -68,10 +70,11 @@ class FirehoseOutputRecord(BaseModel):
             return len(self.data) + len(self.record_id)
         return 0
 
-    def dict(self, *args, **kwargs):
+    def model_dump(self, *args, **kwargs):
         data = {"recordId": self.record_id, "result": self.result.value}
-        if self.result is FirehoseResult.OK:
+        if self.result is FirehoseResult.OK and self.data:
             data["data"] = self.data
+
         return data
 
 
@@ -79,13 +82,14 @@ class LogEvent(BaseModel):
     id: str
     timestamp: int
     # Read/write to LogTemplate JSON string (see dict method) OR accept the CONTROL_MESSAGE
-    message: Union[Json[LogTemplate], constr(regex=f"^{CONTROL_MESSAGE_TEXT}$")]
+    message: Union[Json[LogTemplate], constr(pattern=f"^{CONTROL_MESSAGE_TEXT}$")]
 
-    def dict(self, *args, **kwargs):
-        _dict = super().dict(*args, **kwargs)
+    def model_dump(self, *args, **kwargs):
+        _dict = super().model_dump(*args, **kwargs)
+
         # Pydantic doesn't reserialise to JSON[LogTemplate], so we do so here
         if type(self.message) is LogTemplate:
-            _dict["message"] = self.message.json()
+            _dict["message"] = self.message.model_dump_json()
         elif type(self.message) in (dict, list):
             _dict["message"] = json.dumps(self.message)
         return _dict
@@ -100,7 +104,7 @@ class CloudwatchLogsData(BaseModel):
 
     # Fields we need
     record_id: str = Field(exclude=True)  # For convenience, not part of the AWS model
-    log_events: conlist(item_type=LogEvent, min_items=1) = Field(alias="logEvents")
+    log_events: conlist(item_type=LogEvent, min_length=1) = Field(alias="logEvents")
     message_type: CloudwatchMessageType = Field(alias="messageType")
     # Other fields
     owner: str
@@ -110,10 +114,11 @@ class CloudwatchLogsData(BaseModel):
         default_factory=list, alias="subscriptionFilters"
     )
 
-    @root_validator
+    @model_validator(mode="after")
+    @classmethod
     def validate_control_message_consistency(cls, values):
-        log_events: list[LogEvent] = values.get("log_events", [])
-        message_type = values.get("message_type")
+        log_events: list[LogEvent] = values.log_events or []
+        message_type = values.message_type
 
         is_control_message_type = message_type is CloudwatchMessageType.CONTROL_MESSAGE
         contains_control_message = any(
@@ -148,7 +153,7 @@ class CloudwatchLogsData(BaseModel):
 
 
 class LambdaResult(BaseModel):
-    records: conlist(item_type=FirehoseOutputRecord, min_items=1)
+    records: conlist(item_type=FirehoseOutputRecord, min_length=1)
 
 
 @log_action(log_reference=LogReference.FIREHOSEMODEL001, log_result=True)
@@ -159,11 +164,11 @@ def parse_cloudwatch_data(record: KinesisFirehoseRecord) -> CloudwatchLogsData:
 
 def format_cloudwatch_logs_for_splunk(
     cloudwatch_data: CloudwatchLogsData,
-) -> Iterator[SplunkEvent]:
+) -> Iterable[dict]:
     yield from (
         SplunkEvent(
             event=redacted_log, source=log.source, host=log.host, index=log.index
-        ).dict()
+        ).model_dump()
         for log, redacted_log in zip(
             cloudwatch_data.logs, cloudwatch_data.redacted_logs
         )

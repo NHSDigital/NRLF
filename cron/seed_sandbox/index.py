@@ -1,6 +1,7 @@
 import os
 from logging import Logger
-from types import FunctionType, ModuleType
+from types import ModuleType
+from typing import Callable
 
 from lambda_pipeline.types import LambdaContext
 from lambda_utils.logging import (
@@ -25,7 +26,7 @@ dependencies = build_persistent_dependencies(config)
 
 def _patched_execute_steps(
     event: MinimalEventModelForLogging, context: LambdaContext, pipeline: ModuleType
-) -> FunctionType:
+) -> Callable:
     """The regular _execute_steps expects an APIGatewayProxyEventModel, so swap out _execute_steps with this patch"""
 
     def func(*args, logger: Logger, **kwargs) -> dict:

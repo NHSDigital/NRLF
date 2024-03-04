@@ -39,14 +39,14 @@ def dynamodb_table(
     [("1", "1"), ("test", "test")],
 )
 def test_dynamo_db_string_type_validation_success(input_value, expected_value: str):
-    dynamo_db_string = DynamoDbStringType(__root__=input_value)
+    dynamo_db_string = DynamoDbStringType(root=input_value)
     assert dynamo_db_string.dict() == {"S": expected_value}
 
 
 @pytest.mark.parametrize("input_value", [None, 2, True])
 def test_dynamo_db_string_type_validation_failure(input_value):
     with pytest.raises(ValidationError):
-        _dynamo_db_string = DynamoDbStringType(__root__=input_value)
+        _dynamo_db_string = DynamoDbStringType(root=input_value)
 
 
 @pytest.mark.parametrize(
@@ -54,7 +54,7 @@ def test_dynamo_db_string_type_validation_failure(input_value):
     [(2, "2"), (-1, "-1")],
 )
 def test_dynamo_db_int_type_validation_success(input_value, expected_value: str):
-    dynamo_db_int = DynamoDbIntType(__root__=input_value)
+    dynamo_db_int = DynamoDbIntType(root=input_value)
     assert dynamo_db_int.dict() == {"N": expected_value}
 
 
@@ -63,7 +63,7 @@ def test_dynamo_db_int_type_validation_success(input_value, expected_value: str)
 )
 def test_dynamo_db_int_type_validation_failure(input_value):
     with pytest.raises(ValidationError):
-        _dynamo_db_string = DynamoDbIntType(__root__=input_value)
+        _dynamo_db_string = DynamoDbIntType(root=input_value)
 
 
 @pytest.mark.parametrize(

@@ -40,7 +40,7 @@ from nrlf.core.transform import (
 from nrlf.core.transform import (
     update_document_pointer_from_fhir_json as _update_document_pointer_from_fhir_json,
 )
-from nrlf.core.types import DynamoDbClient
+from nrlf.core.types import DynamoDBClient
 from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 
@@ -72,9 +72,9 @@ def raise_exception(exception):
 
 
 @contextmanager
-def mock_dynamodb() -> Generator[DynamoDbClient, None, None]:
+def mock_dynamodb() -> Generator[DynamoDBClient, None, None]:
     with moto.mock_dynamodb():
-        client: DynamoDbClient = boto3.client("dynamodb")
+        client = boto3.client("dynamodb")
         client.create_table(
             TableName=DocumentPointer.kebab(), **DOCUMENT_POINTER_TABLE_DEFINITION
         )
@@ -102,10 +102,14 @@ def test_create_document_pointer():
         repository.create(item=core_model)
         response = client.scan(TableName=DocumentPointer.kebab())
 
+    # response = {
+    # "Items": [{'id': {'S': 'Y05868-1234567890'}, 'nhs_number': {'S': '9278693472'}, 'custodian': {'S': 'Y05868'}, 'custodian_suffix': {'NULL': True}, 'producer_id': {'S': 'Y05868'}, 'type': {'S': 'http://snomed.info/sct|736253002'}, 'source': {'S': 'NRLF'}, 'version': {'N': '1'}, 'document': {'S': '{"resourceType": "DocumentReference", "id": "Y05868-1234567890", "custodian": {"identifier": {"system": "https://fhir.nhs.uk/Id/ods-organization-code", "value": "Y05868"}}, "subject": {"identifier": {"system": "https://fhir.nhs.uk/Id/nhs-number", "value": "9278693472"}}, "type": {"coding": [{"system": "http://snomed.info/sct", "code": "736253002"}]}, "content": [{"attachment": {"contentType": "application/pdf", "url": "https://example.org/my-doc.pdf"}}], "status": "current"}'}, 'created_on': {'S': '2024-03-01T14:26:44.289Z'}, 'updated_on': {'NULL': True}, 'schemas': {'L': []}, 'pk': {'S': 'D#Y05868#1234567890'}, 'sk': {'S': 'D#Y05868#1234567890'}, 'pk_1': {'S': 'P#9278693472'}, 'sk_1': {'S': 'CO#2024-03-01T14:26:44.289Z#Y05868#1234567890'}, 'pk_2': {'S': 'O#Y05868'}, 'sk_2': {'S': 'CO#2024-03-01T14:26:44.289Z#Y05868#1234567890'}}]
+    # }
+
     (item,) = response["Items"]
     recovered_item = DocumentPointer(**item)
 
-    assert recovered_item.dict() == core_model.dict()
+    assert recovered_item.model_dump() == core_model.model_dump()
 
 
 def test_cant_create_if_item_already_exists():
@@ -128,8 +132,9 @@ def test_read_document_pointer():
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        result = repository.read_item(pk=core_model.pk.__root__)
-    assert core_model == result
+        result = repository.read_item(pk=core_model.pk.root)
+
+    assert core_model.model_dump() == result.model_dump()
 
 
 def test_read_document_pointer_throws_error_when_items_key_missing():
@@ -163,10 +168,10 @@ def test_update_document_pointer_success():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model_1)
         repository.update(item=model_2)
-        item = repository.read_item(model_1.pk.__root__)
+        item = repository.read_item(model_1.pk.root)
 
-    doc = json_loads(item.document.__root__)
-    assert item.created_on.__root__ != model_1.created_on.__root__
+    doc = json_loads(item.document.root)
+    assert item.created_on.root != model_1.created_on.root
     assert doc["content"][0]["attachment"]["url"] == new_url
 
 
@@ -185,9 +190,10 @@ def test_update_document_pointer_doesnt_update_if_item_doesnt_exist():
 
 def test_supersede_creates_new_item_and_deletes_existing():
 
-    provider_id = "RJ11"
+    provider_id = "RP7EV"
     doc_1 = generate_test_document_reference(
-        provider_id=provider_id, provider_doc_id="original"
+        provider_id=provider_id,
+        provider_doc_id="original",
     )
     doc_2 = generate_test_document_reference(
         provider_id=provider_id, provider_doc_id="replacement"
@@ -204,9 +210,9 @@ def test_supersede_creates_new_item_and_deletes_existing():
             delete_pks=[model_1.pk],
         )
 
-        repository.read_item(model_2.pk.__root__)
+        repository.read_item(model_2.pk.root)
         try:
-            repository.read_item(model_1.pk.__root__)
+            repository.read_item(model_1.pk.root)
         except ItemNotFound:
             pass
 
@@ -215,9 +221,7 @@ def test_supersede_id_exists_raises_transaction_canceled_exception():
 
     fhir_json = read_test_data("nrlf")
     core_model_for_create = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    core_model_for_create.id.__root__ = (
-        "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
-    )
+    core_model_for_create.id.root = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
 
     core_model_for_delete = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
 
@@ -239,9 +243,7 @@ def test_supersede_too_many_items(max_transact_items):
 
     fhir_json = read_test_data("nrlf")
     core_model_for_create = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
-    core_model_for_create.id.__root__ = (
-        "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
-    )
+    core_model_for_create.id.root = "ACUTE MENTAL HEALTH UNIT & DAY HOSPITAL|1234567891"
     core_model_for_delete = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
 
     with pytest.raises(TooManyItemsError), mock_dynamodb() as client:
@@ -269,8 +271,8 @@ def test_hard_delete():
     with pytest.raises(ItemNotFound), mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model)
-        repository.hard_delete(model.pk.__root__)
-        repository.read_item(model.pk.__root__)
+        repository.hard_delete(model.pk.root)
+        repository.read_item(model.pk.root)
 
 
 def test_wont_hard_delete_if_item_doesnt_exist():
@@ -312,7 +314,7 @@ def test_search_returns_multiple_values_with_same_nhs_number():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model_1)
         repository.create(item=model_2)
-        item = repository.query_gsi_1(model_1.pk_1.__root__)
+        item = repository.query_gsi_1(model_1.pk_1.root)
 
     assert len(item.items) == 2
 
@@ -332,10 +334,10 @@ def test_search_returns_correct_values():
         repository.create(item=model_2)
 
         docs_gsi_1_response = repository.query_gsi_1(
-            model_1.pk_1.__root__
+            model_1.pk_1.root
         )  # NHS Number / Subject
         docs_gsi_2_response = repository.query_gsi_2(
-            model_1.pk_2.__root__
+            model_1.pk_2.root
         )  # ODS Code / Custodian
 
     assert len(docs_gsi_1_response.items) == 1, "Partitioned by subject"
@@ -362,8 +364,8 @@ def _create_items(
 def _document_pointer_collection_are_same(
     a: list[DocumentPointer], b: list[DocumentPointer]
 ):
-    return sorted(a, key=lambda doc: doc.pk.__root__) == sorted(
-        b, key=lambda doc: doc.pk.__root__
+    return sorted(a, key=lambda doc: doc.pk.root) == sorted(
+        b, key=lambda doc: doc.pk.root
     )
 
 
@@ -471,7 +473,7 @@ def test_scroll_gsi_1(bar_batch_sizes, foo_batch_sizes, dynamodb_client):
 
     # Test that we have retrieved all the expected documents
     retrieved_items = list(chain.from_iterable(pages))  # Flatten list of lists
-    n_unique_items = len(set(item.pk.__root__ for item in retrieved_items))  # dupes
+    n_unique_items = len(set(item.pk.root for item in retrieved_items))  # dupes
     assert n_unique_items == len(retrieved_items) == total_expected_docs
     assert _document_pointer_collection_are_same(a=retrieved_items, b=foo_docs)
     assert last_evaluated_key is None

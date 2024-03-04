@@ -27,7 +27,7 @@ from mi.stream_writer.model import Action, DynamoDBEventConfig, MiResponses
 from mi.stream_writer.tests.paths import PATH_TO_TEST_DATA
 from mi.stream_writer.tests.stream_writer_helpers import dynamodb_stream_event
 from mi.stream_writer.utils import hash_nhs_number
-from nrlf.core.types import DynamoDbClient
+from nrlf.core.types import DynamoDBClient
 from nrlf.core.validators import json_loads
 
 ASCII = list(string.ascii_lowercase + string.ascii_uppercase + string.digits)
@@ -209,7 +209,7 @@ def test_e2e_with_report(
     # _invoke_stream_writer(session=session, workspace=workspace, event=event)
     (record,) = event["Records"]
     _document_pointer: dict = record["dynamodb"][config.image_type]
-    dynamodb_client: DynamoDbClient = session.client("dynamodb")
+    dynamodb_client: DynamoDBClient = session.client("dynamodb")
     dynamodb_client.put_item(Item=_document_pointer, TableName=table_name)
     if event_name == DynamoDBRecordEventName.REMOVE:
         dynamodb_client.delete_item(

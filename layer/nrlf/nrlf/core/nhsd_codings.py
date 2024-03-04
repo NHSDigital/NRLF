@@ -5,7 +5,7 @@ from nrlf.producer.fhir.r4.model import Coding, Meta, ProfileItem
 META = Meta(
     profile=[
         ProfileItem(
-            __root__="https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome"
+            root="https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome"
         )
     ]
 )

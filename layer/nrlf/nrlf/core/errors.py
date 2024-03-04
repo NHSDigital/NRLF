@@ -1,9 +1,8 @@
 from typing import Union
 
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from nrlf.core.nhsd_codings import SpineCoding
-from nrlf.producer.fhir.r4.model import RequestParams
 
 
 class ItemNotFound(Exception):
@@ -47,10 +46,6 @@ class DocumentReferenceValidationError(Exception):
 
 
 class ProducerValidationError(Exception):
-    pass
-
-
-class InconsistentUpdateId(Exception):
     pass
 
 
@@ -136,12 +131,19 @@ ERROR_SET_4XX = tuple(NRLF_TO_SPINE_4XX_ERROR.keys())
 
 
 def assert_no_extra_params(
-    request_params: RequestParams,
+    request_params: BaseModel,
     provided_params: Union[list[str], None],
 ):
+    """
+    Asserts that no extra parameters are provided in the request.
+
+    Raises:
+        UnknownParameterError: If any unexpected parameters are found in the request.
+    """
     if provided_params is None:
         return
-    expected_params = request_params.dict(by_alias=True).keys()
+
+    expected_params = request_params.model_dump(by_alias=True).keys()
     unknown_params = set(provided_params) - set(expected_params)
     if unknown_params:
         raise UnknownParameterError(

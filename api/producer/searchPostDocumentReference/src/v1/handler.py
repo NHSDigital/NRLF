@@ -63,7 +63,7 @@ def search_document_references(
     next_page_token: NextPageToken = request_params.next_page_token
 
     if next_page_token is not None:
-        next_page_token = next_page_token.__root__
+        next_page_token = next_page_token.root
 
     response: PaginatedResponse = repository.query_gsi_2(
         pk=key(DbPrefix.Organization, *ods_code_parts),

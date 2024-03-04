@@ -1,5 +1,5 @@
 import base64
-from typing import Union
+from typing import Optional, Union
 from unittest import mock
 
 from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
@@ -25,35 +25,37 @@ from nrlf.core.validators import json_loads
 
 def _log_events_strategy(min_size=1, max_size=None, sensitive=True, message=None):
     if message is None:
-        message = just(
-            LogTemplate(
-                data=LogData(inputs={}, result=""),
-                sensitive=sensitive,
-                correlation_id="",
-                nhsd_correlation_id="",
-                request_id="",
-                transaction_id="",
-                host="",
-                index="",
-                source="",
-                function="",
-                environment="",
-                log_level="",
-                log_reference="",
-                outcome="",
-                duration_ms=1,
-                error="",
-                call_stack="",
-                timestamp="",
-                message="blah",
-            ).json()
-        )
+        message = LogTemplate(
+            data=LogData(inputs={}, result=""),
+            sensitive=sensitive,
+            correlation_id="",
+            nhsd_correlation_id="",
+            request_id="",
+            transaction_id="",
+            host="",
+            index="",
+            source="",
+            function="",
+            environment="",
+            log_level="",
+            log_reference="",
+            outcome="",
+            duration_ms=1,
+            error="",
+            call_stack="",
+            timestamp="",
+            message="blah",
+            caller="",
+            root="",
+            subject="",
+        ).model_dump_json()
+
     return lists(
         builds(
             LogEvent,
             id=just(""),
             timestamp=just(1),
-            message=message,
+            message=just(message),
         ),
         min_size=min_size,
         max_size=max_size,
@@ -103,7 +105,7 @@ def bad_cloudwatch_data(draw: DrawFn, logs: list[Union[dict, str]]):
 def _draw_cloudwatch_data(
     draw: DrawFn,
     message_type: str = CloudwatchMessageType.DATA_MESSAGE,
-    message: str = None,
+    message: Optional[str] = None,
     sensitive: bool = True,
     min_size=2,
     max_size=3,
@@ -229,7 +231,7 @@ def test__process_firehose_records_normal_records(
             KinesisFirehoseRecord,
             data=_draw_cloudwatch_data(
                 message_type=CloudwatchMessageType.CONTROL_MESSAGE,
-                message=just(CONTROL_MESSAGE_TEXT),
+                message=CONTROL_MESSAGE_TEXT,
             ),
         ),
         min_size=1,

@@ -78,6 +78,7 @@ def get_error_message(exception: Exception) -> str:
 def _format_validation_error_message(exception: ValidationError) -> str:
     errors = json_loads(exception.json())
     first_error = errors[0]
+
     model_name = (
         exception.model.public_alias()
         if exception.model.__dict__.get("public_alias")

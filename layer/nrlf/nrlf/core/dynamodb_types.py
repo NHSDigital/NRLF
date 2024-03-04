@@ -1,7 +1,7 @@
 from ast import literal_eval
-from typing import TypeVar, Union
+from typing import Any, TypeVar, Union
 
-from pydantic import BaseModel, Field, StrictInt, StrictStr
+from pydantic import Field, RootModel, StrictInt, StrictStr, model_serializer
 
 PythonType = TypeVar("PythonType")
 NoneType = type(None)
@@ -16,36 +16,37 @@ DYNAMODB_TYPE_LOOKUP = {
 }
 
 
-class DynamoDbType(BaseModel):
-    def dict(self, *args, **kwargs):
-        return convert_value_to_dynamo_format(self.__root__)
+class DynamoDbType(RootModel):
+    @model_serializer()
+    def serialize_to_dynamodb(self, *args, **kwargs):
+        return convert_value_to_dynamo_format(self.root)
 
     @property
     def value(self):
-        return self.__root__
+        return self.root
 
     def __str__(self):
-        return f"{self.__root__}"
+        return f"{self.root}"
 
 
 class DynamoDbStringType(DynamoDbType):
-    __root__: StrictStr
+    root: StrictStr
 
 
 class DynamoDbIntType(DynamoDbType):
-    __root__: StrictInt
+    root: StrictInt
 
 
 class DynamoDbNullType(DynamoDbType):
-    __root__: NoneType = None
+    root: None = None
 
 
 class DynamoDbListType(DynamoDbType):
-    __root__: list[str] = Field(default_factory=list)
+    root: list[str] = Field(default_factory=list)
 
 
 class DynamoDbDictType(DynamoDbType):
-    __root__: dict
+    root: dict
 
 
 def convert_value_to_dynamo_format(obj):
@@ -69,7 +70,7 @@ def convert_dynamo_value_to_raw_value(obj: Union[DynamoDbType, dict]):
     if _type in (list, dict):
         ((dynamo_type, value),) = obj.items()
     else:
-        ((dynamo_type, value),) = obj.dict().items()
+        ((dynamo_type, value),) = obj.model_dump().items()
 
     if dynamo_type in (DYNAMODB_TYPE_LOOKUP[dict], dict):
         return {k: convert_dynamo_value_to_raw_value(v) for k, v in value.items()}
@@ -81,7 +82,7 @@ def convert_dynamo_value_to_raw_value(obj: Union[DynamoDbType, dict]):
     return literal_eval(value) if dynamo_type == "N" else value
 
 
-def is_dynamodb_dict(obj: any) -> bool:
+def is_dynamodb_dict(obj: Any) -> bool:
     try:
         convert_dynamo_value_to_raw_value(obj)
     except:
@@ -98,5 +99,5 @@ DYNAMODBTYPE_TYPE_LOOKUP = {
 }
 
 
-def to_dynamodb_dict(value: PythonType) -> dict[str:PythonType]:
-    return DYNAMODBTYPE_TYPE_LOOKUP[type(value)](__root__=value).dict()
+def to_dynamodb_dict(value: PythonType) -> dict[str, PythonType]:
+    return DYNAMODBTYPE_TYPE_LOOKUP[type(value)](root=value).dict()

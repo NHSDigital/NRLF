@@ -2,7 +2,7 @@ import json
 import urllib.parse
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from types import FunctionType
+from typing import Callable, List, Optional, Tuple
 
 import requests
 from behave.model import Table
@@ -34,7 +34,7 @@ from feature_tests.common.utils import (
 )
 from nrlf.core.authoriser import _parse_list_from_s3
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
-from nrlf.core.types import DynamoDbClient, S3Client
+from nrlf.core.types import DynamoDBClient, LambdaClient, S3Client
 from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.model import OperationOutcome
 
@@ -43,7 +43,7 @@ from nrlf.producer.fhir.r4.model import OperationOutcome
 class Template:
     raw: str
 
-    def render(self, table: Table, fhir_type: FhirType = None) -> str:
+    def render(self, table: Table, fhir_type: Optional[FhirType] = None) -> str:
         rendered = render_regular_properties(raw=self.raw, table=table)
         if fhir_type is FhirType.DocumentReference:
             return render_document_reference_properties(
@@ -61,8 +61,8 @@ class Response:
         return 300 > int(self.status_code) >= int(STATUS_CODE_200)
 
     @property
-    def operation_outcome_msg(self) -> str:
-        operation_outcome = OperationOutcome.parse_raw(self.body)
+    def operation_outcome_msg(self) -> Optional[str]:
+        operation_outcome = OperationOutcome.model_validate_json(self.body)
         (issue,) = operation_outcome.issue
         return issue.diagnostics
 
@@ -73,12 +73,12 @@ class Response:
 
 @dataclass
 class BaseRequest:
-    endpoint: str = None
+    endpoint: str
+    scenario_name: str
+    version: float
     headers: dict = field(default_factory=dict)
-    scenario_name: str = None
-    version: float = None
-    sent_documents: list[str] = field(default_factory=list)
-    sent_requests: list[str] = field(default_factory=list)
+    sent_documents: List[str] = field(default_factory=list)
+    sent_requests: List[dict] = field(default_factory=list)
 
     @abstractmethod
     def _invoke(self, **kwargs) -> dict:
@@ -96,12 +96,15 @@ class BaseRequest:
 
 @dataclass
 class ApiRequest(BaseRequest):
-    request_method: str = None
-    method_slug: str = None
-    cert: tuple[str, str] = None
+    request_method: str  # type: ignore
+    method_slug: str  # type: ignore
+    cert: Tuple[str, str]  # type: ignore
 
     def _invoke(
-        self, body: str = None, query_params: dict = {}, path_params: dict = {}
+        self,
+        body: Optional[str] = None,
+        query_params: dict = {},
+        path_params: dict = {},
     ) -> dict:
         url = f"{self.endpoint}{self.method_slug}"
         request_kwargs = {
@@ -125,10 +128,10 @@ class ApiRequest(BaseRequest):
 
 @dataclass
 class LocalApiRequest(BaseRequest):
-    handler: FunctionType = None
-    s3_client: S3Client = None
+    handler: Callable  # type: ignore
+    s3_client: S3Client  # type: ignore
 
-    def _invoke(self, body: dict = None, **kwargs) -> dict:
+    def _invoke(self, body: dict, **kwargs) -> dict:
         client_rp_details = ClientRpDetailsHeader.parse_raw(
             self.headers[CLIENT_RP_DETAILS]
         )
@@ -155,7 +158,7 @@ class LocalApiRequest(BaseRequest):
 
 @dataclass
 class AuthLambdaRequest(BaseRequest):
-    lambda_client: any = None
+    lambda_client: LambdaClient  # type: ignore
 
     def _invoke(self) -> dict:
         event = make_aws_event(
@@ -173,7 +176,7 @@ class AuthLambdaRequest(BaseRequest):
 
 @dataclass
 class LocalAuthLambdaRequest(BaseRequest):
-    handler: FunctionType = None
+    handler: Callable  # type: ignore
 
     def _invoke(self) -> dict:
         event = make_aws_event(
@@ -207,7 +210,7 @@ class TestConfig:
     repositories: dict[BaseModel, FeatureTestRepository] = field(default_factory=dict)
     templates: dict[str, Template] = field(default_factory=dict)
     actor_context: ActorContext = None
-    dynamodb_client: DynamoDbClient = None
+    dynamodb_client: DynamoDBClient = None
     s3_client: S3Client = None
     auth_store: str = None
     environment_prefix: str = None

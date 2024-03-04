@@ -22,7 +22,7 @@ def parse_prefix(prefix: str, time: datetime) -> str:
     )
 
 
-def _make_good_log(transaction_id) -> str:
+def _make_good_log(transaction_id: str) -> str:
     return LogTemplate(
         correlation_id="123",
         nhsd_correlation_id="abc",
@@ -43,10 +43,13 @@ def _make_good_log(transaction_id) -> str:
         call_stack="oops again",
         timestamp="123",
         sensitive=True,
-    ).json()
+        caller=None,
+        root=None,
+        subject=None,
+    ).model_dump_json()
 
 
-def make_good_cloudwatch_data(transaction_id, n_logs=10):
+def make_good_cloudwatch_data(transaction_id: str, n_logs=10):
     good_log_event = LogEvent(
         id="123",
         timestamp=123,

@@ -1,9 +1,9 @@
 import json
 from datetime import datetime as dt
-from typing import Optional
+from typing import Any, Dict, Optional, Tuple, Union
 
 from nhs_number import is_valid as is_valid_nhs_number
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from nrlf.core.constants import (
     CUSTODIAN_SEPARATOR,
@@ -48,15 +48,24 @@ def generate_producer_id(id: str, producer_id: Optional[str]) -> str:
     return _get_tuple_components(tuple=id, separator=ID_SEPARATOR)
 
 
-def create_document_type_tuple(document_type: CodeableConcept):
-    try:
-        (coding,) = document_type.coding
-    except ValueError:
-        n = len(document_type.coding)
+def create_document_type_tuple(
+    document_type: Optional[Union[Dict[str, Any], CodeableConcept]]
+):
+    if isinstance(document_type, BaseModel):
+        document_type = document_type.model_dump()
+
+    if not document_type:
+        raise ValueError("DocumentReference.type is required")
+
+    codings = document_type.get("coding", [])
+    coding_count = len(codings)
+
+    if coding_count != 1:
         raise ValueError(
-            f"Expected exactly one item in DocumentReference.type.coding, got {n}"
-        ) from None
-    return f"{coding.system}{TYPE_SEPARATOR}{coding.code}"
+            f"Expected exactly one item in DocumentReference.type.coding, got {coding_count}"
+        )
+
+    return f"{codings[0]['system']}{TYPE_SEPARATOR}{codings[0]['code']}"
 
 
 def validate_nhs_number(nhs_number: str):
@@ -98,7 +107,7 @@ def validate_document_reference_string(fhir_json: str):
 
 def validate_type_system(type: RequestQueryType, pointer_types: list[str]):
     if type is not None:
-        type_system = type.__root__.split("|", 1)[0]
+        type_system = type.root.split("|", 1)[0]
 
         pointer_type_systems = map(
             lambda pointer_type: pointer_type.split("|", 1)[0], pointer_types
@@ -141,21 +150,22 @@ def validate_producer_id(
     if custodian_suffix:
         if producer_id.split(CUSTODIAN_SEPARATOR) != (custodian_id, custodian_suffix):
             raise MalformedProducerId(
-                f"Producer ID {producer_id} (extracted from '{id}') is not correctly formed. "
+                f"Producer ID {producer_id} (extracted from 'id') is not correctly formed. "
                 "It is expected to be composed in the form '<custodian_id>.<custodian_suffix>'"
             )
     else:
         if producer_id != custodian_id:
             raise InconsistentProducerId(
-                f"Producer ID {producer_id} (extracted from '{id}') "
+                f"Producer ID {producer_id} (extracted from 'id') "
                 "does not match the Custodian ID."
             )
 
 
-def split_custodian_id(custodian_id: str) -> dict:
+def split_custodian_id(custodian_id: str) -> Tuple[str, Optional[str]]:
     custodian_id_suffix = None
     try:
         custodian_id, custodian_id_suffix = custodian_id.split(CUSTODIAN_SEPARATOR)
     except ValueError:
         pass
+
     return custodian_id, custodian_id_suffix

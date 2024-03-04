@@ -59,9 +59,9 @@ class ContractGroup:
         Constructor method for building a ContractGroup a Contract object.
         """
         return cls(
-            system=contract.system.__root__,
-            value=contract.value.__root__,
-            name=contract.name.__root__,
+            system=contract.system.root,
+            value=contract.value.root,
+            name=contract.name.root,
         )
 
     def to_active_contract(self, version: str, json_schema: dict) -> Contract:

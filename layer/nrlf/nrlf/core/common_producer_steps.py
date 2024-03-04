@@ -55,7 +55,7 @@ def apply_data_contracts(
     logger: Logger,
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
-    system, value = split_pointer_type(core_model.type.__root__)
+    system, value = split_pointer_type(core_model.type.root)
     data_contract_cache: DataContractCache = dependencies[DataContractCache.__name__]
     repository: Repository = dependencies["contract_repository"]
     add_log_fields(type_system=system, type_value=value)
@@ -79,10 +79,10 @@ def apply_data_contracts(
 
     for contract in (*global_contracts, *local_contracts):
         validate_against_json_schema(
-            json_schema=contract.json_schema.__root__,
+            json_schema=contract.json_schema.root,
             contract_name=contract.full_name,
             instance=core_model._document,
         )
-        core_model.schemas.__root__.append(contract.full_name)
+        core_model.schemas.root.append(contract.full_name)
 
     return PipelineData(**data)

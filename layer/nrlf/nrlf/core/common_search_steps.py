@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 
 from lambda_utils.logging import add_log_fields
 
@@ -47,7 +47,7 @@ def get_paginated_document_references(
     raw_pointer_types: list[str],
     nhs_number: RequestQuerySubject,
     page_limit: int = PAGE_ITEM_LIMIT,
-    page_token: NextPageToken = None,
+    page_token: Optional[NextPageToken] = None,
 ) -> PaginatedResponse:
 
     assert_no_extra_params(
@@ -71,7 +71,7 @@ def get_paginated_document_references(
         if page_token is None:
             next_page_token: NextPageToken = request_params.next_page_token
         if next_page_token is not None:
-            next_page_token = next_page_token.__root__
+            next_page_token = next_page_token.root
 
     pk = key(DbPrefix.Patient, nhs_number)
     add_log_fields(custodian=custodian, pk=pk, pointer_types=pointer_types)

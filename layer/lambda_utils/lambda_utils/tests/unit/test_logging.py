@@ -264,7 +264,7 @@ _log = builds(
 @pytest.mark.parametrize("redact", [True, False])
 @given(log=_log)
 def test_log_template_dict_always_exclude_none(log: LogTemplate, redact: bool):
-    dumped_log = log.dict(redact=redact)
+    dumped_log = log.model_dump(redact=redact)
     assert "result" not in dumped_log["data"]
     assert None not in dumped_log.values()
 
@@ -274,7 +274,7 @@ def test_log_template_dict_always_exclude_none(log: LogTemplate, redact: bool):
 
 @given(log=_log)
 def test_log_template_json_always_exclude_none(log: LogTemplate):
-    dumped_log = json_loads(log.json())
+    dumped_log = json_loads(log.model_dump_json())
     assert "result" not in dumped_log["data"]
     assert None not in dumped_log.values()
 

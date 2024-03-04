@@ -70,7 +70,7 @@ def _override_created_on(
         fhir_json=data["body"]
     )
     if fhir_model.date is not None:
-        document_pointer.created_on = DynamoDbStringType(__root__=fhir_model.date)
+        document_pointer.created_on = DynamoDbStringType(root=fhir_model.date)
 
     return document_pointer
 
@@ -161,9 +161,7 @@ def validate_producer_permissions(
         pointer_types=pointer_types,
     )
 
-    if ods_code_parts != tuple(
-        core_model.producer_id.__root__.split(CUSTODIAN_SEPARATOR)
-    ):
+    if ods_code_parts != tuple(core_model.producer_id.root.split(CUSTODIAN_SEPARATOR)):
         raise ProducerValidationError(
             "The id of the provided document pointer does not include the expected organisation code for this app"
         )
@@ -173,7 +171,7 @@ def validate_producer_permissions(
             "The custodian of the provided document pointer does not match the expected organisation code for this app"
         )
 
-    if core_model.type.__root__ not in pointer_types:
+    if core_model.type.root not in pointer_types:
         raise ProducerValidationError(
             "The type of the provided document pointer is not in the list of allowed types for this app"
         )

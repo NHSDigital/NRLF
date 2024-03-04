@@ -15,6 +15,9 @@ LOG_SEPARATOR = ""
 
 
 def load_json_gzip(data: bytes) -> dict:
+    if isinstance(data, str):
+        data = data.encode("utf-8")
+
     return json_loads(gzip.decompress(data))
 
 

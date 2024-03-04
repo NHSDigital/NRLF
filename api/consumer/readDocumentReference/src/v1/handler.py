@@ -34,9 +34,9 @@ def read_document_reference(
     )
     add_log_fields(pointer_id=document_pointer.id, pointer_types=pointer_types)
 
-    validate_document_reference_string(document_pointer.document.__root__)
+    validate_document_reference_string(document_pointer.document.root)
 
-    return PipelineData(**json_loads(document_pointer.document.__root__))
+    return PipelineData(**json_loads(document_pointer.document.root))
 
 
 steps = [

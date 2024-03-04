@@ -10,7 +10,7 @@ from uuid import uuid4
 
 from fire import Fire
 from lambda_utils.logging import LogTemplate
-from pydantic import BaseModel, Extra, Field, Json, ValidationError, conlist
+from pydantic import BaseModel, ConfigDict, Field, Json, ValidationError, conlist
 
 from helpers.aws_session import (
     DEFAULT_WORKSPACE,
@@ -46,7 +46,7 @@ class _LogEvent(LogEvent):
 
 class _CloudwatchLogsData(CloudwatchLogsData):
     record_id: None = None
-    log_events: conlist(item_type=_LogEvent, min_items=1) = Field(alias="logEvents")
+    log_events: conlist(item_type=_LogEvent, min_length=1) = Field(alias="logEvents")
 
 
 class FirehoseErrorEvent(BaseModel):
@@ -60,13 +60,14 @@ class FirehoseErrorEvent(BaseModel):
     event_id: Optional[str] = Field(default=None, alias="EventId")
     subsequence_number: Optional[int] = None
 
-    class Config:
-        allow_population_by_field_name = True
-        alias_generator = lambda x: "".join(
+    model_config = ConfigDict(
+        populate_by_name=True,
+        alias_generator=lambda x: "".join(
             word.lower() if i == 0 else word.capitalize()
             for i, word in enumerate(x.split("_"))
-        )
-        extra = Extra.forbid
+        ),
+        extra="forbid",
+    )
 
     def __str__(self):
         message = [

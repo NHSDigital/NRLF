@@ -59,7 +59,7 @@ def _invalidate_author_on_document_reference_object(rendered_template):
         api_version=int(DEFAULT_VERSION),
     )
 
-    document = json_loads(core_model.document.__root__)
+    document = json_loads(core_model.document.root)
     document["author"] = author
     core_model.document = {"S": json.dumps(document)}
     return core_model

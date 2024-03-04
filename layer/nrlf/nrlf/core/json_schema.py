@@ -131,12 +131,12 @@ def get_contracts_from_db(
     for contract in _contracts:
         # Retrieve the first contract for this name only, assuming that
         # they have been sorted in reverse order by Version
-        if contract.name.__root__ in retrieved_contracts:
+        if contract.name.root in retrieved_contracts:
             continue
-        retrieved_contracts.add(contract.name.__root__)
+        retrieved_contracts.add(contract.name.root)
         # Validate the retrieved schema's syntax
         validate_json_schema(
-            json_schema=contract.json_schema.__root__,
+            json_schema=contract.json_schema.root,
             contract_name=contract.full_name,
         )
         contracts.append(contract)

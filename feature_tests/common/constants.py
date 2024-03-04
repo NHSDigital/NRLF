@@ -4,7 +4,7 @@ from http import HTTPStatus
 from nrlf.core.model import Contract, DocumentPointer
 
 DEFAULT_VERSION = 1.0
-STATUS_CODE_200 = HTTPStatus.OK.value
+STATUS_CODE_200 = str(HTTPStatus.OK.value)
 DUMMY_METHOD_ARN = "dummy_method_arn"
 DEFAULT_AUTHORIZATION = "letmein"
 SNOMED_SYSTEM = "http://snomed.info/sct"

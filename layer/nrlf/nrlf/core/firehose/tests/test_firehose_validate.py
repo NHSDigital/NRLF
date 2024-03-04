@@ -104,8 +104,7 @@ def _raise(ex):
         (
             RecordTooLargeForKinesis,
             FirehoseOutputRecord(
-                record_id="record_id",
-                result=FirehoseResult.PROCESSING_FAILED,
+                record_id="record_id", result=FirehoseResult.PROCESSING_FAILED, data=""
             ),
         ),
         (
@@ -113,6 +112,7 @@ def _raise(ex):
             FirehoseOutputRecord(
                 record_id="record_id",
                 result=FirehoseResult.DROPPED,
+                data="",
                 unprocessed_records=[
                     FirehoseSubmissionRecord(
                         Data=dump_json_gzip(
@@ -132,6 +132,7 @@ def _raise(ex):
         (
             NoSpaceLeftInCurrentEventPacket,
             FirehoseOutputRecord(
+                data="",
                 record_id="record_id",
                 result=FirehoseResult.DROPPED,
                 unprocessed_records=[

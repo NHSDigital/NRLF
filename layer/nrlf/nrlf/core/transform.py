@@ -193,7 +193,7 @@ def create_bundle_entries_from_document_pointers(
     document_pointers: list[DocumentPointer],
 ) -> list[BundleEntry]:
     document_pointer_jsons = map(
-        lambda document_pointer: json_loads(document_pointer.document.__root__),
+        lambda document_pointer: json_loads(document_pointer.document.root),
         document_pointers,
     )
 

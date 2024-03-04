@@ -4,6 +4,7 @@ from typing import Union
 
 from behave import use_fixture
 from lambda_utils.header_config import ClientRpDetailsHeader, ConnectionMetadata
+from mypy_boto3_s3.client import S3Client
 
 from feature_tests.common.constants import (
     ALLOWED_APP_IDS,
@@ -48,7 +49,6 @@ from nrlf.core.constants import (
     CONNECTION_METADATA,
     PERMISSION_AUDIT_DATES_FROM_PAYLOAD,
 )
-from nrlf.core.types import S3Client
 from nrlf.core.validators import json_loads
 
 

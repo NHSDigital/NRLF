@@ -4,9 +4,10 @@ from unittest import mock
 import boto3
 import moto
 from behave import fixture
+from mypy_boto3_dynamodb.client import DynamoDBClient
+from mypy_boto3_s3.client import S3Client
 
 from feature_tests.common.constants import AUTH_STORE, BUCKETS, TABLE_CONFIG
-from nrlf.core.types import DynamoDbClient, S3Client
 
 
 @fixture(name="fixture.mock.dynamodb")
@@ -22,7 +23,7 @@ def mock_s3(context, *args, **kwargs):
 
 
 def setup_tables():
-    client: DynamoDbClient = boto3.client("dynamodb")
+    client: DynamoDBClient = boto3.client("dynamodb")
     table_names = set()
     for model, config in TABLE_CONFIG.items():
         table_name = model.kebab()

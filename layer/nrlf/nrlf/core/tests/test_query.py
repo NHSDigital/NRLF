@@ -71,8 +71,10 @@ def test_filter_query_in_db():
     with mock_dynamodb() as client:
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=core_model)
-        item = repository.read_item(core_model.pk.__root__)
-        assert item == core_model
+        item = repository.read_item(core_model.pk.root)
+
+        assert isinstance(item, DocumentPointer)
+        assert item.model_dump() == core_model.model_dump()
 
 
 def test_filter_query_in_db_not_found():
@@ -94,9 +96,13 @@ def test_create_search_and_filter_query_in_db():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model)
         result = repository.query_gsi_1(
-            model.pk_1.__root__, type="http://snomed.info/sct|736253002"
+            model.pk_1.root, type="http://snomed.info/sct|736253002"
         )
-        assert result.items == [model]
+
+        assert len(result.items) == 1
+
+        item = result.items[0]
+        assert item.model_dump() == model.model_dump()
 
 
 def test_query_can_filter_results():
@@ -134,9 +140,9 @@ def test_query_can_filter_results():
             type=[f"http://snomed.info/sct|{SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN}"],
         )
         assert len(results_1.items) == 1
-        assert results_1.items[0] == model_1
+        assert results_1.items[0].model_dump() == model_1.model_dump()
         assert len(results_2.items) == 1
-        assert results_2.items[0] == model_1
+        assert results_2.items[0].model_dump() == model_1.model_dump()
 
 
 def test_filter_can_find_result():
@@ -150,9 +156,9 @@ def test_filter_can_find_result():
         repository = Repository(item_type=DocumentPointer, client=client)
         repository.create(item=model)
         item = repository.read_item(
-            pk=model.pk.__root__, type=["http://snomed.info/sct|736253002"]
+            pk=model.pk.root, type=["http://snomed.info/sct|736253002"]
         )
-        assert item == model
+        assert item.model_dump() == model.model_dump()
 
 
 def test_filter_cannot_find_result():
@@ -167,7 +173,7 @@ def test_filter_cannot_find_result():
         repository.create(item=model)
         with pytest.raises(ItemNotFound):
             repository.read_item(
-                pk=model.pk.__root__, type=["http://snomed.info/sct|WRONG"]
+                pk=model.pk.root, type=["http://snomed.info/sct|WRONG"]
             )
 
 

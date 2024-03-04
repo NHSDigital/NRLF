@@ -1,5 +1,5 @@
 from functools import wraps
-from types import FunctionType
+from typing import Callable
 
 from behave import given as _given
 from behave import then as _then
@@ -86,8 +86,8 @@ def _step_checks(context: Context, **kwargs):
 
 
 def _behave_decorator_with_checks(
-    description: str, behave_decorator: FunctionType, **kwargs_overrides
-) -> FunctionType:
+    description: str, behave_decorator: Callable, **kwargs_overrides
+) -> Callable:
     _deco = behave_decorator(description)
 
     def deco(fn):

@@ -17,7 +17,7 @@ from nrlf.core.json_schema import (
     validate_json_schema,
 )
 from nrlf.core.model import Contract, key
-from nrlf.core.types import DynamoDbClient
+from nrlf.core.types import DynamoDBClient
 
 # The following are taken from
 # https://nhsd-confluence.digital.nhs.uk/pages/viewpage.action?spaceKey=CLP&title=NRLF+-+Document+Type+Contracts
@@ -211,7 +211,7 @@ def repository():
     account_id = tf_json["assume_account_id"]["value"]
     prefix = tf_json["prefix"]["value"] + "--"
     session = new_aws_session(account_id=account_id)
-    client: DynamoDbClient = session.client("dynamodb")
+    client: DynamoDBClient = session.client("dynamodb")
     return Repository(item_type=Contract, client=client, environment_prefix=prefix)
 
 
@@ -313,7 +313,7 @@ def test__get_contracts_from_db_returns_latest_versions(
     # The validator is expecting a blank object only, so the following will pass
     for contract in contracts:
         validate_against_json_schema(
-            json_schema=contract.json_schema.__root__,
+            json_schema=contract.json_schema.root,
             contract_name=contract.full_name,
             instance={},
         )
@@ -322,7 +322,7 @@ def test__get_contracts_from_db_returns_latest_versions(
     for contract in contracts:
         with pytest.raises(JsonSchemaValidationError) as exception_wrapper:
             validate_against_json_schema(
-                json_schema=contract.json_schema.__root__,
+                json_schema=contract.json_schema.root,
                 contract_name=contract.full_name,
                 instance={"foo": "bar"},
             )
