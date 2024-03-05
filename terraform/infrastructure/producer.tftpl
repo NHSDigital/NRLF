@@ -1,12 +1,12 @@
 {
     "resourceType": "CapabilityStatement",
     "id": "${id}",
-    "url": "https://${domain}/record-locator/producer/FHIR/R4",
-    "name": "NRL FHIR Server CapabilityStatement - Producer API",
+    "url": "https://${domain}/record-locator/producer/FHIR/R4/metadata",
+    "name": "NRLProducerAPICapabilityStatement",
     "status": "active",
     "version": "1.0.0",
     "experimental": false,
-    "date": "2024-01-09",
+    "date": "2024-03-05",
     "publisher": "NHS England",
     "contact": [
       {
@@ -14,26 +14,28 @@
         "telecom": [
           {
             "system": "email",
+            "use": "work",
             "value": "nrls@nhs.net"
           }
         ]
       }
     ],
-    "description": "Basic Capability Statement for the National Record Locator FHIR R4 API.",
+    "description": "Capability Statement for the National Record Locator FHIR R4 Producer API",
     "kind": "instance",
     "software": {
       "name": "National Record Locator FHIR R4 API - Producer"
     },
     "implementation": {
-      "description": "NRL v 3.0 Producer API FHIR Server",
-      "url": "https://int.api.service.nhs.uk/record-locator/producer/FHIR/R4/"
+      "description": "NRL v3.0 Producer API FHIR Server",
+      "url": "https://${domain}/record-locator/producer/FHIR/R4/"
     },
     "fhirVersion": "4.0.1",
-    "format": ["json", "fhir+json"],
+    "format": ["json"],
     "rest": [
       {
         "mode": "server",
         "security": {
+          "cors": true,
           "service": [
             {
               "coding": [
@@ -54,16 +56,21 @@
                 "code": "read"
               }
             ],
-            "versioning": "no-version"
+            "versioning": "version",
+            "readHistory": false,
           },
           {
             "type": "DocumentReference",
-            "profile": "hl7.org/fhir/R4/documentreference.html",
+            "profile": "http://hl7.org/fhir/R4/documentreference.html",
             "documentation": "Additional business rules apply to validate patient, organisation and type/category content.",
             "interaction": [
               {
                 "code": "read",
                 "documentation": "Get a pointer by ID. Producers can only view their own pointers."
+              },
+              {
+                "code": "search-type",
+                "documentation": "Retrieve a set of pointers matching certain filter criteria. Both GET and POST are supported."
               },
               {
                 "code": "update",

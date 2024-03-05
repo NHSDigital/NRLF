@@ -12,7 +12,7 @@ resource "aws_api_gateway_rest_api" "api_gateway_rest_api" {
 resource "aws_api_gateway_resource" "capability" {
   rest_api_id = aws_api_gateway_rest_api.api_gateway_rest_api.id
   parent_id   = aws_api_gateway_rest_api.api_gateway_rest_api.root_resource_id
-  path_part   = "_metadata"
+  path_part   = "metadata"
 }
 
 resource "aws_api_gateway_method" "capability" {
