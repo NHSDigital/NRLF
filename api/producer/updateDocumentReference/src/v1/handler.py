@@ -9,6 +9,7 @@ from api.producer.updateDocumentReference.src.v1.constants import (
     API_VERSION,
     IMMUTABLE_FIELDS,
 )
+from layer.nrlf.nrlf.core.errors import ItemNotFound
 from nrlf.core.common_producer_steps import (
     apply_data_contracts,
     validate_producer_permissions,
@@ -68,13 +69,17 @@ def document_pointer_exists(
     pk = data["pk"]
     add_log_fields(pk=pk)
 
-    document_pointer: DocumentPointer = repository.read_item(pk)
-    add_log_fields(pointer_id=document_pointer.id)
-
-    return PipelineData(
-        original_document=document_pointer.document.__root__,
-        **data,
-    )
+    # NRL-521 handle Update as Create scenario differently
+    try:
+        document_pointer: DocumentPointer = repository.read_item(pk)
+        add_log_fields(pointer_id=document_pointer.id)
+        add_log_fields(is_upsert=False)
+        return PipelineData(
+            original_document=document_pointer.document.__root__,
+            **data,
+        )
+    except ItemNotFound as e:
+        add_log_fields(is_upsert=True)
 
 
 def _sort_key(key):
