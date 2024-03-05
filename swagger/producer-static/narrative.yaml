@@ -270,7 +270,7 @@ paths:
         * `category` SHOULD indicate the broader class of the Document Type as agreed during [onboarding](#api-description__onboarding). e.g.
           ```
           "type": {
-            "coding\": [
+            "coding": [
               {
                 "system": "http://snomed.info/sct",
                 "code": "1102421000000108",
@@ -284,7 +284,7 @@ paths:
           ```
           "format": [
             {
-              "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
+              "system": "	https://fhir.nhs.uk/England/CodeSystem/England-NRLFormatCode",
               "code": "urn:nhs-ic:unstructured"
               "display": "Unstructured document"
             }
