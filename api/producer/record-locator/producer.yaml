@@ -328,7 +328,7 @@ paths:
         * `type` MUST match one of the Document Types agreed during [onboarding](#api-description__onboarding). e.g.
           ```
           "type": {
-            "coding\": [
+            "coding": [
               {
                 "system": "http://snomed.info/sct",
                 "code": "1363501000000100",
