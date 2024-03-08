@@ -2,8 +2,8 @@ from typing import Generator
 
 from pydantic import BaseModel
 
-from nrlf.core.errors import ItemNotFound
-from nrlf.core.repository import Repository
+from nrlf.core_pipeline.errors import ItemNotFound
+from nrlf.core_pipeline.repository import Repository
 
 CHUNK_SIZE = 25
 

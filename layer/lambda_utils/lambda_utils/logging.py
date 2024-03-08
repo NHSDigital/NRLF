@@ -21,9 +21,9 @@ from lambda_utils.logging_utils import (
 from pydantic import BaseModel, Extra, Field
 from typing_extensions import ParamSpec
 
-from nrlf.core.errors import ERROR_SET_4XX
-from nrlf.core.model import APIGatewayProxyEventModel, Authorizer
-from nrlf.core.transform import make_timestamp
+from nrlf.core_pipeline.errors import ERROR_SET_4XX
+from nrlf.core_pipeline.model import APIGatewayProxyEventModel, Authorizer
+from nrlf.core_pipeline.transform import make_timestamp
 
 logging_context = local()
 logging_context.current_action = None

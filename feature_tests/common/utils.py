@@ -26,8 +26,8 @@ from feature_tests.common.constants import (
 )
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
-from nrlf.core.types import DynamoDBClient, S3Client
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.types import DynamoDBClient, S3Client
+from nrlf.core_pipeline.validators import json_loads
 
 RELATES_TO = "relatesTo"
 TARGET = "target"

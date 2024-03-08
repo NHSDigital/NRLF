@@ -3,7 +3,7 @@ import json
 from feature_tests.common.constants import FhirType
 from feature_tests.common.decorators import when
 from feature_tests.common.models import Context, Response
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.validators import json_loads
 
 NOT_A_REAL_FAILURE_CODE = 1000
 

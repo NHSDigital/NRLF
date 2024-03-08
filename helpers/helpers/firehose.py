@@ -14,15 +14,15 @@ from lambda_utils.logging import LogTemplate
 from pydantic import BaseModel, Extra, Field, Json, ValidationError, conlist
 
 from helpers.log import log
-from nrlf.core.firehose.model import (
+from nrlf.core_pipeline.firehose.model import (
     CloudwatchLogsData,
     CloudwatchMessageType,
     FirehoseSubmissionRecord,
     LogEvent,
 )
-from nrlf.core.firehose.submission import FirehoseClient, _submit_records
-from nrlf.core.firehose.utils import load_json_gzip, name_from_arn
-from nrlf.core.validators import json_load, json_loads
+from nrlf.core_pipeline.firehose.submission import FirehoseClient, _submit_records
+from nrlf.core_pipeline.firehose.utils import load_json_gzip, name_from_arn
+from nrlf.core_pipeline.validators import json_load, json_loads
 
 S3_URI_COMPONENTS = re.compile("^s3://(?P<bucket_name>[^/]+)/(?P<file_key>.*?)$")
 DOT_FIREHOSE = ".firehose"

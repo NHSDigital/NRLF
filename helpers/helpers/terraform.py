@@ -1,7 +1,7 @@
 from functools import cache
 from pathlib import Path
 
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.validators import json_loads
 
 terraform_output_json_path = str(
     Path(__file__).parent.parent.parent / "terraform" / "infrastructure" / "output.json"

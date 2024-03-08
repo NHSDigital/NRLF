@@ -4,8 +4,8 @@ from typing import Any
 from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from pydantic import BaseModel, validator
 
-from nrlf.core.errors import ItemNotFound
-from nrlf.core.model import APIGatewayProxyEventModel
+from nrlf.core_pipeline.errors import ItemNotFound
+from nrlf.core_pipeline.model import APIGatewayProxyEventModel
 
 
 class RaiseValidationErrorModel(BaseModel):

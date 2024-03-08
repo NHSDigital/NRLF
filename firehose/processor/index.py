@@ -8,7 +8,7 @@ from aws_lambda_powertools.utilities.parser.models.kinesis_firehose import (
 from lambda_utils.logging import Logger, prepare_default_event_for_logging
 from pydantic import BaseModel
 
-from nrlf.core.firehose.handler import firehose_handler
+from nrlf.core_pipeline.firehose.handler import firehose_handler
 
 
 class Config(BaseModel):

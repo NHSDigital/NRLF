@@ -7,7 +7,11 @@ from typing import Iterator
 from lambda_utils.logging import LogData, LogTemplate
 
 from helpers.firehose import fetch_logs_from_s3
-from nrlf.core.firehose.model import CloudwatchLogsData, CloudwatchMessageType, LogEvent
+from nrlf.core_pipeline.firehose.model import (
+    CloudwatchLogsData,
+    CloudwatchMessageType,
+    LogEvent,
+)
 
 SLEEP_SECONDS = 15
 MAX_RUNTIME = 400

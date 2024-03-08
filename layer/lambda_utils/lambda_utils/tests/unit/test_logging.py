@@ -16,9 +16,9 @@ from lambda_utils.logging import (
 from lambda_utils.tests.unit.utils import make_aws_event
 from pydantic import ValidationError
 
-from nrlf.core.errors import DynamoDbError
-from nrlf.core.model import APIGatewayProxyEventModel
-from nrlf.core.validators import json_loads, validate_timestamp
+from nrlf.core_pipeline.errors import DynamoDbError
+from nrlf.core_pipeline.model import APIGatewayProxyEventModel
+from nrlf.core_pipeline.validators import json_loads, validate_timestamp
 
 
 class LogReference(Enum):

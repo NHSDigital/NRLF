@@ -30,8 +30,8 @@ from helpers.firehose import (
     local_path_to_s3_components,
     validate_logs,
 )
-from nrlf.core.firehose.model import CloudwatchMessageType
-from nrlf.core.validators import json_load, json_loads
+from nrlf.core_pipeline.firehose.model import CloudwatchMessageType
+from nrlf.core_pipeline.validators import json_load, json_loads
 
 
 @given(

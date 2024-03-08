@@ -7,7 +7,7 @@ from hypothesis import given
 from hypothesis.strategies import builds, dictionaries, just, text
 
 from mi.sql_query.model import Environment, Sql, SqlQueryEvent
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.validators import json_loads
 
 ASCII = list(string.ascii_lowercase + string.ascii_uppercase + string.digits)
 

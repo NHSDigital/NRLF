@@ -5,7 +5,7 @@ from behave.runner import Context
 from feature_tests.common.constants import FhirType
 from feature_tests.common.decorators import then
 from feature_tests.common.models import TestConfig
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.validators import json_loads
 from nrlf.producer.fhir.r4.strict_model import Bundle
 
 

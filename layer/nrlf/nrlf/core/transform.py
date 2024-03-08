@@ -1,255 +1,284 @@
-import base64
-import json
-from datetime import datetime as dt
-from typing import Union
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, List, Literal, Optional
 
-from more_itertools import map_except
 from pydantic import ValidationError
 
-from nrlf.core.constants import (
-    ALLOWED_RELATES_TO_CODES,
-    EMPTY_VALUES,
-    JSON_TYPES,
-    ODS_SYSTEM,
-    RELATES_TO_REPLACES,
-    REQUIRED_CREATE_FIELDS,
-    Source,
-)
-from nrlf.core.errors import (
-    FhirValidationError,
-    MissingRequiredFieldForCreate,
-    NextPageTokenValidationError,
-    ProducerCreateValidationError,
-    RequestValidationError,
-)
-from nrlf.core.model import DocumentPointer, PaginatedResponse
-from nrlf.core.validators import json_loads, validate_subject_identifier_system
-from nrlf.producer.fhir.r4.model import (
-    Bundle,
-    BundleEntry,
-    DocumentReference,
-    DocumentReferenceRelatesTo,
-    Meta,
-)
-from nrlf.producer.fhir.r4.strict_model import (
-    DocumentReference as StrictDocumentReference,
-)
+from nrlf.core.logger import logger
+from nrlf.core.types import DocumentReference, OperationOutcomeIssue
+from nrlf.producer.fhir.r4 import model as producer_model
 
 
 def make_timestamp() -> str:
-    return dt.utcnow().isoformat(timespec="milliseconds") + "Z"
+    return datetime.utcnow().isoformat(timespec="milliseconds") + "Z"
 
 
-def strip_empty_json_paths(
-    json: Union[list[dict], dict], raise_on_discovery=False, json_path: list = None
-) -> Union[list[dict], dict]:
-    if json_path is None:
-        json_path = []
+class ParseError(Exception):
+    data: Dict[str, Any]
+    issues: List[OperationOutcomeIssue]
 
-    if json in EMPTY_VALUES:
-        if raise_on_discovery:
-            if json in REQUIRED_CREATE_FIELDS:
-                raise ProducerCreateValidationError(
-                    f"DocumentReference validation failure - Invalid value '{json}' at {'.'.join(json_path)}"
-                )
-            raise FhirValidationError(
-                f"Empty value '{json}' at '{'.'.join(json_path)}' is not valid FHIR"
-            )
-        return None
+    def __init__(self, data: Dict[str, Any], issues: List[OperationOutcomeIssue]):
+        self.data = data
+        self.issues = issues
 
-    if type(json) is list:
-        if type(json[0]) is dict:
-            return list(
-                filter(
-                    None,
-                    (
-                        strip_empty_json_paths(
-                            item, raise_on_discovery, json_path=json_path + [str(i)]
-                        )
-                        for i, item in enumerate(json)
+    @classmethod
+    def from_validation_error(cls, exc: ValidationError, data: Dict[str, Any]):
+        issues = []
+
+        for error in exc.errors():
+            issues.append(
+                producer_model.OperationOutcomeIssue(
+                    severity="error",
+                    code="invalid",
+                    details=producer_model.CodeableConcept(
+                        coding=[
+                            producer_model.Coding(
+                                system="https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                                code="INVALID_RESOURCE",
+                                display="Invalid validation of resource",
+                            )
+                        ],
+                        text=error["msg"],
                     ),
+                    diagnostics=f"{error['loc'][0]}: {error['msg']}",
+                    expression=[str(error["loc"][0])],  # type: ignore
                 )
             )
-        return json
 
-    stripped_json = {}
-    modified = False
-    for key, value in json.items():
-        if type(value) in JSON_TYPES:
-            value = strip_empty_json_paths(
-                value, raise_on_discovery, json_path=json_path + [key]
-            )
-        if value in EMPTY_VALUES:
-            modified = True
-            if raise_on_discovery:
-                if key in REQUIRED_CREATE_FIELDS:
-                    raise ProducerCreateValidationError(
-                        f"DocumentReference validation failure - Invalid '{value}' at {'.'.join(json_path + [key])} "
+        return cls(data, issues)
+
+
+class StopValidation(Exception):
+    pass
+
+
+IssueCode = Literal["invalid", "structure", "required", "value"]
+ErrorCode = Literal[
+    "BAD_REQUEST",
+    "CONFLICTING_VALUES",
+    "DUPLICATE_REJECTED",
+    "FHIR_CONSTRAINT_VIOLATION",
+    "INTERNAL_SERVER_ERROR",
+    "INVALID_CODE_SYSTEM",
+    "INVALID_CODE_VALUE",
+    "INVALID_ELEMENT",
+    "INVALID_IDENTIFIER_SYSTEM",
+    "INVALID_IDENTIFIER_VALUE",
+    "INVALID_NHS_NUMBER",
+    "INVALID_PARAMETER",
+    "INVALID_REQUEST_MESSAGE",
+    "INVALID_REQUEST_TYPE",
+    "INVALID_RESOURCE",
+    "INVALID_VALUE",
+    "MESSAGE_NOT_WELL_FORMED",
+    "INVALID_OR_MISSING_HEADER",
+    "NOT_IMPLEMENTED",
+    "NO_RECORD_FOUND",
+    "ORGANISATION_NOT_FOUND",
+    "PRACTITIONER_NOT_FOUND",
+    "PRECONDITION_FAILED",
+    "REFERENCE_NOT_FOUND",
+    "RESOURCE_CREATED",
+    "RESOURCE_DELETED",
+    "RESOURCE_UPDATED",
+]
+
+
+@dataclass
+class ValidationResult:
+    resource: DocumentReference
+    issues: List[OperationOutcomeIssue]
+
+    def reset(self):
+        self.__init__(resource=producer_model.DocumentReference.construct(), issues=[])
+
+    def add_error(
+        self,
+        issue_code: IssueCode,
+        error_code: Optional[ErrorCode] = None,
+        diagnostics: Optional[str] = None,
+        field: Optional[str] = None,
+    ):
+        details = None
+        if error_code is not None:
+            details = producer_model.CodeableConcept(
+                coding=[
+                    producer_model.Coding(
+                        system="https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                        code=error_code,
                     )
-                raise FhirValidationError(
-                    f"Empty value '{value}' at '{'.'.join(json_path + [key])}' is not valid FHIR"
-                )
-            continue
-        stripped_json[key] = value
-    return (
-        strip_empty_json_paths(stripped_json, raise_on_discovery)
-        if modified
-        else stripped_json
-    )
-
-
-def validate_no_extra_fields(input_fhir_json, output_fhir_json):
-    if input_fhir_json != output_fhir_json:
-        raise FhirValidationError("Input FHIR JSON has additional non-FHIR fields.")
-
-
-def validate_required_create_fields(request_body_json):
-    for field in REQUIRED_CREATE_FIELDS:
-        if field not in request_body_json:
-            raise MissingRequiredFieldForCreate(
-                f"The required field {field} is missing"
+                ]
             )
 
-
-def validate_custodian_system(fhir_strict_model: StrictDocumentReference):
-    if fhir_strict_model.custodian.identifier.system != ODS_SYSTEM:
-        raise RequestValidationError(
-            "Provided custodian identifier system is not the ODS system"
+        issue = producer_model.OperationOutcomeIssue(
+            severity="error",
+            code=issue_code,
+            details=details,
+            diagnostics=diagnostics,
+            expression=[field] if field else None,  # type: ignore
         )
 
+        logger.info("Adding validation issue", issue=issue.dict(exclude_none=True))
+        self.issues.append(issue)
 
-def validate_relates_to(relates_to: list[DocumentReferenceRelatesTo]):
-    for document_reference_relates_to in relates_to:
-        if document_reference_relates_to.code not in ALLOWED_RELATES_TO_CODES:
-            raise RequestValidationError(
-                f"Provided relatesTo code '{document_reference_relates_to.code}' must be one of {sorted(ALLOWED_RELATES_TO_CODES)}"
+    @property
+    def is_valid(self):
+        return not any([issue.severity in {"error", "fatal"} for issue in self.issues])
+
+
+class DocumentReferenceValidator:
+    """
+    A class to validate document references
+    """
+
+    def __init__(self):
+        self.result = ValidationResult(
+            resource=producer_model.DocumentReference.construct(), issues=[]
+        )
+
+    @classmethod
+    def parse(cls, data: Dict[str, Any]):
+        try:
+            result = producer_model.DocumentReference.parse_obj(data)
+            logger.debug("Parsed DocumentReference resource", result=result)
+            return result
+
+        except ValidationError as exc:
+            logger.exception(
+                "Failed to parse DocumentReference resource",
+                data=data,
+                validation_error=exc,
             )
-        if document_reference_relates_to.code == RELATES_TO_REPLACES and not (
-            document_reference_relates_to.target.identifier
-            and document_reference_relates_to.target.identifier.value
+            raise ParseError.from_validation_error(exc, data)
+
+    def validate(self, data: Dict[str, Any]):
+        """
+        Validate the document reference
+        """
+        logger.info("Performing validation on DocumentReference resource", data=data)
+        resource = self.parse(data)
+        self.result = ValidationResult(resource=resource, issues=[])
+
+        try:
+            self._validate_required_fields(resource)
+            self._validate_no_extra_fields(resource, data)
+            self._validate_identifiers(resource)
+            self._validate_relates_to(resource)
+
+        except StopValidation:
+            logger.info("Validation stopped due to errors", result=self.result)
+
+        return self.result
+
+    def _validate_required_fields(self, model: DocumentReference):
+        """
+        Validate the required fields
+        """
+        logger.debug("Validating required fields")
+
+        required_fields = ["custodian", "id", "type", "status", "subject"]
+
+        for field in required_fields:
+            if not getattr(model, field, None):
+                self.result.add_error(
+                    issue_code="required",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"The required field {field} is missing",
+                    field=field,
+                )
+
+        logger.debug(self.result.is_valid)
+        if not self.result.is_valid:
+            raise StopValidation()
+
+    def _validate_no_extra_fields(self, model: DocumentReference, data: Dict[str, Any]):
+        """
+        Validate that there are no extra fields
+        """
+        logger.debug("Validating no extra fields")
+
+        if data != model.dict(exclude_none=True):
+            self.result.add_error(
+                issue_code="invalid",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Input FHIR JSON has additional non-FHIR fields.",
+            )
+
+    def _validate_identifiers(self, model: DocumentReference):
+        """ """
+        logger.debug("Validating identifiers")
+
+        if not (custodian_identifier := getattr(model.custodian, "identifier", None)):
+            self.result.add_error(
+                issue_code="required",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Custodian must have an identifier",
+                field="custodian.identifier",
+            )
+            raise StopValidation()
+
+        if not (subject_identifier := getattr(model.subject, "identifier", None)):
+            self.result.add_error(
+                issue_code="required",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Subject must have an identifier",
+                field="subject.identifier",
+            )
+            raise StopValidation()
+
+        if (
+            custodian_identifier.system
+            != "https://fhir.nhs.uk/Id/ods-organization-code"
         ):
-            raise RequestValidationError(
-                "'relatesTo.target.identifier.value' must be specified when "
-                f"relatesTo.code is '{RELATES_TO_REPLACES}'"
+            self.result.add_error(
+                issue_code="invalid",
+                error_code="INVALID_IDENTIFIER_SYSTEM",
+                diagnostics="Provided custodian identifier system is not the ODS system (expected: 'https://fhir.nhs.uk/Id/ods-organization-code')",
+                field="custodian.identifier.system",
             )
 
+        if subject_identifier.system != "https://fhir.nhs.uk/Id/nhs-number":
+            self.result.add_error(
+                issue_code="invalid",
+                error_code="INVALID_IDENTIFIER_SYSTEM",
+                diagnostics="Provided subject identifier system is not the NHS number system (expected 'https://fhir.nhs.uk/Id/nhs-number')",
+                field="subject.identifier.system",
+            )
 
-def create_document_pointer_from_fhir_json(
-    fhir_json: dict,
-    api_version: int,
-    source: Source = Source.NRLF,
-    **kwargs,
-) -> DocumentPointer:
-    stripped_fhir_json = strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
-    fhir_model = create_fhir_model_from_fhir_json(fhir_json=stripped_fhir_json)
-    core_model = DocumentPointer(
-        id=fhir_model.id,
-        nhs_number=fhir_model.subject.identifier.value,
-        custodian=fhir_model.custodian.identifier.value,
-        type=fhir_model.type,
-        version=api_version,
-        document=json.dumps(fhir_json),
-        source=source.value,
-        created_on=kwargs.pop("created_on", make_timestamp()),
-        _document=fhir_json,
-        **kwargs,
-    )
-    return core_model
+    def _validate_relates_to(self, model: DocumentReference):
+        """"""
+        if not model.relatesTo:
+            logger.debug(
+                "Skipping relatesTo validation as there are no relatesTo fields"
+            )
+            return
 
+        logger.debug("Validating relatesTo")
 
-def create_fhir_model_from_fhir_json(fhir_json: dict) -> StrictDocumentReference:
-    DocumentReference(**fhir_json)
-    fhir_strict_model = StrictDocumentReference(**fhir_json)
-    validate_required_create_fields(fhir_json)
-    validate_no_extra_fields(
-        input_fhir_json=fhir_json,
-        output_fhir_json=fhir_strict_model.dict(exclude_none=True),
-    )
-    validate_custodian_system(fhir_strict_model)
-    validate_subject_identifier_system(
-        subject_identifier=fhir_strict_model.subject.identifier
-    )
+        for index, relates_to in enumerate(model.relatesTo):
+            if relates_to.code not in [
+                "replaces",
+                "transforms",
+                "signs",
+                "appends",
+                "incorporates",
+                "summarizes",
+            ]:
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_CODE_VALUE",
+                    diagnostics=f"Invalid relatesTo code: {relates_to.code}",
+                    field=f"relatesTo[{index}].code",
+                )
+                continue
 
-    strip_empty_json_paths(json=fhir_json, raise_on_discovery=True)
-    if fhir_strict_model.relatesTo:
-        validate_relates_to(relates_to=fhir_strict_model.relatesTo)
-    return fhir_strict_model
-
-
-def update_document_pointer_from_fhir_json(
-    fhir_json: dict, api_version: int, source: Source = Source.NRLF, **kwargs
-) -> DocumentPointer:
-    core_model = create_document_pointer_from_fhir_json(
-        fhir_json=fhir_json,
-        api_version=api_version,
-        source=source,
-        created_on=kwargs.pop("created_on", make_timestamp()),
-        updated_on=kwargs.pop("updated_on", make_timestamp()),
-    )
-    return core_model
-
-
-def create_bundle_entries_from_document_pointers(
-    document_pointers: list[DocumentPointer],
-) -> list[BundleEntry]:
-    document_pointer_jsons = map(
-        lambda document_pointer: json_loads(document_pointer.document.__root__),
-        document_pointers,
-    )
-
-    document_references = map_except(
-        lambda document_json: DocumentReference(**document_json),
-        document_pointer_jsons,
-        ValidationError,
-    )
-
-    return [BundleEntry(resource=reference) for reference in document_references]
-
-
-def create_bundle_count(count: int) -> Bundle:
-    bundle_dict = dict(
-        resourceType="Bundle",
-        type="searchset",
-        total=count,
-        entry=[],
-    )
-    return Bundle(**bundle_dict).dict(exclude_none=True, exclude_defaults=True)
-
-
-def create_bundle_from_paginated_response(
-    paginated_response: PaginatedResponse,
-) -> dict:
-    document_pointers = paginated_response.items
-
-    bundleEntryList = create_bundle_entries_from_document_pointers(document_pointers)
-    bundle_dict = dict(
-        resourceType="Bundle",
-        type="searchset",
-        total=len(bundleEntryList),
-        entry=bundleEntryList,
-    )
-
-    if paginated_response.last_evaluated_key is not None:
-        last_evaluated_key = paginated_response.last_evaluated_key
-        bundle_dict["meta"] = create_meta(last_evaluated_key)
-
-    return Bundle(**bundle_dict).dict(exclude_none=True, exclude_defaults=True)
-
-
-def create_meta(last_evaluated_key: object) -> Meta:
-    last_key = str(last_evaluated_key)
-
-    coding = {"code": last_key, "display": "next_page_token"}
-
-    return {"tag": [coding]}
-
-
-def transform_evaluation_key_to_next_page_token(last_evaluated_key: dict) -> str:
-    return base64.urlsafe_b64encode(json.dumps(last_evaluated_key).encode()).decode()
-
-
-def transform_next_page_token_to_start_key(exclusive_start_key: str) -> dict:
-    try:
-        return json_loads(base64.urlsafe_b64decode(exclusive_start_key))
-    except Exception:
-        raise NextPageTokenValidationError("Unable to decode the next page token")
+            if relates_to.code == "replaces" and not (
+                relates_to.target.identifier and relates_to.target.identifier.value
+            ):
+                self.result.add_error(
+                    issue_code="required",
+                    error_code="INVALID_IDENTIFIER_VALUE",
+                    diagnostics="relatesTo code 'replaces' must have a target identifier",
+                    field=f"relatesTo[{index}].target.identifier.value",
+                )
+                continue

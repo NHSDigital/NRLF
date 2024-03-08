@@ -1,9 +1,9 @@
 from feature_tests.common.decorators import then
 from feature_tests.common.models import Context, TestConfig
 from feature_tests.common.repository import FeatureTestRepository
-from nrlf.core.dynamodb_types import convert_dynamo_value_to_raw_value
-from nrlf.core.model import DocumentPointer, convert_document_pointer_id_to_pk
-from nrlf.core.validators import json_loads, validate_timestamp
+from nrlf.core_pipeline.dynamodb_types import convert_dynamo_value_to_raw_value
+from nrlf.core_pipeline.model import DocumentPointer, convert_document_pointer_id_to_pk
+from nrlf.core_pipeline.validators import json_loads, validate_timestamp
 
 
 @then('Document Pointer "{id}" exists')

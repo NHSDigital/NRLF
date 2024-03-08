@@ -4,7 +4,7 @@ import requests
 from lambda_utils.logging import log_action
 
 from firehose.alert.constants import DUMMY_URL, FLAKY_SPLUNK_ERROR_CODES
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.validators import json_loads
 from nrlf.log_references import LogReference
 
 

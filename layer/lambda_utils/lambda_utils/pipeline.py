@@ -20,9 +20,9 @@ from lambda_utils.versioning import (
 )
 from pydantic import ValidationError
 
-from nrlf.core.model import APIGatewayProxyEventModel
-from nrlf.core.response import operation_outcome_not_ok
-from nrlf.core.transform import strip_empty_json_paths
+from nrlf.core_pipeline.model import APIGatewayProxyEventModel
+from nrlf.core_pipeline.response import operation_outcome_not_ok
+from nrlf.core_pipeline.transform import strip_empty_json_paths
 from nrlf.log_references import LogReference
 
 

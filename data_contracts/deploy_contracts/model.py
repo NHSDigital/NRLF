@@ -2,9 +2,9 @@ import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from nrlf.core.constants import DbPrefix
-from nrlf.core.json_schema import DEFAULT_SYSTEM_VALUE
-from nrlf.core.model import Contract, key
+from nrlf.core_pipeline.constants import DbPrefix
+from nrlf.core_pipeline.json_schema import DEFAULT_SYSTEM_VALUE
+from nrlf.core_pipeline.model import Contract, key
 
 from .constants import GLOBAL, HTTP_SUBS, PATH_PATTERNS
 from .errors import BadContractGroup, BadContractPath

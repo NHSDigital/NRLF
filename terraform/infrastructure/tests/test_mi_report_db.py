@@ -5,7 +5,7 @@ import pytest
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
 from mi.sql_query.model import Response, Sql, SqlQueryEvent, Status
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.validators import json_loads
 
 SELECT_SQL = Sql(statement="SELECT * FROM fact.measure;")
 INSERT_SQL = Sql(

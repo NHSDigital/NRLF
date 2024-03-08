@@ -5,7 +5,7 @@ from hypothesis.strategies import builds, just, sampled_from
 
 from mi.stream_writer.constants import TYPE_SEPARATOR
 from mi.stream_writer.model import DIMENSION_TYPES, Dimension, RecordParams
-from nrlf.core.model import DocumentPointer
+from nrlf.core_pipeline.model import DocumentPointer
 
 NHS_NUMBER = "123"
 CREATED_ON = "2000-01-01T01:02:03.1232Z"

@@ -12,8 +12,8 @@ from api.producer.updateDocumentReference.src.v1.handler import (
     compare_immutable_fields,
     parse_request_body,
 )
-from nrlf.core.errors import ImmutableFieldViolationError
-from nrlf.core.model import APIGatewayProxyEventModel, DocumentPointer
+from nrlf.core_pipeline.errors import ImmutableFieldViolationError
+from nrlf.core_pipeline.model import APIGatewayProxyEventModel, DocumentPointer
 from nrlf.producer.fhir.r4.model import Reference
 from nrlf.producer.fhir.r4.tests.test_producer_nrlf_model import read_test_data
 

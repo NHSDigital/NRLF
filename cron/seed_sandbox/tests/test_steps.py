@@ -13,8 +13,8 @@ from cron.seed_sandbox.tests.utils import (
     create_dummy_model_json_file,
     create_table,
 )
-from nrlf.core.model import DocumentPointer
-from nrlf.core.types import DynamoDBClient
+from nrlf.core_pipeline.model import DocumentPointer
+from nrlf.core_pipeline.types import DynamoDBClient
 
 
 @pytest.fixture

@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from types import MappingProxyType
 
-from nrlf.core.constants import DbPrefix
+from nrlf.core_pipeline.constants import DbPrefix
 
 EMPTY_SCHEMA = MappingProxyType({})
 

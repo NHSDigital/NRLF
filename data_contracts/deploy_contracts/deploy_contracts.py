@@ -8,12 +8,12 @@ from typing import Generator
 from fire import Fire
 
 from helpers.aws_session import new_session_from_env
-from nrlf.core.constants import KEY_SEPARATOR
-from nrlf.core.dynamodb_types import DynamoDbStringType
-from nrlf.core.json_schema import validate_json_schema
-from nrlf.core.model import Contract, key
-from nrlf.core.repository import Repository
-from nrlf.core.validators import json_load
+from nrlf.core_pipeline.constants import KEY_SEPARATOR
+from nrlf.core_pipeline.dynamodb_types import DynamoDbStringType
+from nrlf.core_pipeline.json_schema import validate_json_schema
+from nrlf.core_pipeline.model import Contract, key
+from nrlf.core_pipeline.repository import Repository
+from nrlf.core_pipeline.validators import json_load
 
 from .constants import (
     CONTRACT_PK_WILDCARD,
