@@ -1,24 +1,29 @@
-import os
+import urllib.parse
+from typing import Dict
 
-from lambda_pipeline.types import LambdaContext
-from lambda_utils.pipeline import execute_steps, render_response
-
-from api.consumer.readDocumentReference.src.config import (
-    Config,
-    build_persistent_dependencies,
-)
-
-config = Config(
-    **{env_var: os.environ.get(env_var) for env_var in Config.__fields__.keys()}
-)
-dependencies = build_persistent_dependencies(config)
+from nrlf.core_nonpipeline.decorators import APIGatewayProxyEvent, request_handler
+from nrlf.core_nonpipeline.dynamodb.repository import DocumentPointerRepository
+from nrlf.producer.fhir.r4.model import DocumentReference
 
 
-def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
-    if context is None:
-        context = LambdaContext()
+@request_handler()
+def handler(
+    event: APIGatewayProxyEvent, repository: DocumentPointerRepository, **_
+) -> Dict[str, str]:
+    """
+    Entrypoint for the readDocumentReference function
+    """
+    subject = (event.path_parameters or {}).get("id", "unknown")
+    parsed_id = urllib.parse.unquote(subject)
 
-    status_code, result = execute_steps(
-        index_path=__file__, event=event, context=context, config=config, **dependencies
-    )
-    return render_response(status_code, result)
+    result = repository.get_by_id(parsed_id)
+
+    if result is None:
+        return {"statusCode": "404", "body": "Not Found"}
+
+    document_reference = DocumentReference.parse_raw(result.document)
+
+    return {
+        "statusCode": "200",
+        "body": document_reference.json(indent=2, exclude_none=True),
+    }

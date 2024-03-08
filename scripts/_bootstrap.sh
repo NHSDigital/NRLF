@@ -16,7 +16,7 @@ function _bootstrap_help() {
 }
 
 function _check_mgmt() {
-  if [[ "$(aws iam list-account-aliases --query 'AccountAliases[0]' --output text)"] != 'nhsd-nrlf-mgmt' ]]; then
+  if [ "$(aws iam list-account-aliases --query 'AccountAliases[0]' --output text)" != "nhsd-ddc-spine-nrlf-mgmt" ]; then
     echo "Please log in as the mgmt account" >&2
     return 1
   fi

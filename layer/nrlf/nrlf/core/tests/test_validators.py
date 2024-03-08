@@ -244,7 +244,6 @@ def test_is_document_reference_string_valid(
     ),
 )
 def test_validate_type_system(type, pointer_types, expected_outcome):
-
     queryStringParameters = {
         "type": type,
     }
@@ -319,7 +318,6 @@ def test_validate_subject_identifier_system(system_value, expected_outcome):
     ),
 )
 def test_json_loads(json_string, expected_outcome):
-
     if expected_outcome is DuplicateKeyError:
         with pytest.raises(expected_outcome):
             json_loads(json_string=json_string)
@@ -338,7 +336,6 @@ def test_json_loads(json_string, expected_outcome):
 def test_validate_producer_id(
     producer_id, custodian_id, custodian_suffix, expected_outcome
 ):
-
     if expected_outcome is MalformedProducerId:
         with pytest.raises(expected_outcome):
             validate_producer_id(

@@ -27,7 +27,8 @@ def aws_account_id_from_profile(env: str):
     profiles = session.full_config["profiles"]
 
     for name in profile_names:
-        account_id = profiles.get(name, {}).get("aws_account_id")
+        profile = profiles.get(name, {})
+        account_id = profile.get("aws_account_id") or profile.get("sso_account_id")
         if account_id:
             return account_id
 

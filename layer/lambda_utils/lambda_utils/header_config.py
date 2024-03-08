@@ -36,7 +36,7 @@ class AcceptHeader(AbstractHeader):
         json_loads = json_loads
 
 
-class ClientRpDetailsHeader(AbstractHeader):
+class ClientRpDetails(BaseModel):
     developer_app_name: StrictStr = Field(alias="developer.app.name")
     developer_app_id: StrictStr = Field(alias="developer.app.id")
 
@@ -49,6 +49,7 @@ class ConnectionMetadata(AbstractHeader):
     enable_authorization_lookup: bool = Field(
         alias="nrl.enable-authorization-lookup", default=False
     )
+    client_rp_details: ClientRpDetails
 
     @property
     def ods_code_parts(self):

@@ -142,7 +142,6 @@ def test__process_firehose_records_normal_including_redacted_records(
     sensitive_records: list[KinesisFirehoseRecord],
     non_sensitive_records: list[KinesisFirehoseRecord],
 ):
-
     output_records = list(
         _process_firehose_records(records=sensitive_records + non_sensitive_records)
     )

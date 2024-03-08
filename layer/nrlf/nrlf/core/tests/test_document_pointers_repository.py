@@ -184,7 +184,6 @@ def test_update_document_pointer_doesnt_update_if_item_doesnt_exist():
 
 
 def test_supersede_creates_new_item_and_deletes_existing():
-
     provider_id = "RJ11"
     doc_1 = generate_test_document_reference(
         provider_id=provider_id, provider_doc_id="original"
@@ -212,7 +211,6 @@ def test_supersede_creates_new_item_and_deletes_existing():
 
 
 def test_supersede_id_exists_raises_transaction_canceled_exception():
-
     fhir_json = read_test_data("nrlf")
     core_model_for_create = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
     core_model_for_create.id.__root__ = (
@@ -236,7 +234,6 @@ def test_supersede_id_exists_raises_transaction_canceled_exception():
     [MAX_TRANSACT_ITEMS, MAX_TRANSACT_ITEMS + 1, MAX_TRANSACT_ITEMS * 10],
 )
 def test_supersede_too_many_items(max_transact_items):
-
     fhir_json = read_test_data("nrlf")
     core_model_for_create = create_document_pointer_from_fhir_json(fhir_json=fhir_json)
     core_model_for_create.id.__root__ = (

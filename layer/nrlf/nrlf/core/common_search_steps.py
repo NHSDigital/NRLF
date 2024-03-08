@@ -10,12 +10,7 @@ from nrlf.consumer.fhir.r4.model import (
 from nrlf.core.common_steps import make_common_log_action
 from nrlf.core.constants import DbPrefix
 from nrlf.core.errors import assert_no_extra_params
-from nrlf.core.model import (
-    ConsumerRequestParams,
-    CountRequestParams,
-    PaginatedResponse,
-    key,
-)
+from nrlf.core.model import ConsumerRequestParams, CountRequestParams, key
 from nrlf.core.repository import (
     PAGE_ITEM_LIMIT,
     Repository,
@@ -48,8 +43,7 @@ def get_paginated_document_references(
     nhs_number: RequestQuerySubject,
     page_limit: int = PAGE_ITEM_LIMIT,
     page_token: NextPageToken = None,
-) -> PaginatedResponse:
-
+):
     assert_no_extra_params(
         request_params=request_params, provided_params=query_string_params
     )
@@ -76,7 +70,7 @@ def get_paginated_document_references(
     pk = key(DbPrefix.Patient, nhs_number)
     add_log_fields(custodian=custodian, pk=pk, pointer_types=pointer_types)
 
-    response: PaginatedResponse = repository.query_gsi_1(
+    response = repository.query_gsi_1(
         pk=pk,
         type=pointer_types,
         producer_id=custodian,

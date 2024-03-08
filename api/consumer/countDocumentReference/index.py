@@ -1,24 +1,39 @@
-import os
+import json
+from typing import Dict
 
-from lambda_pipeline.types import LambdaContext
-from lambda_utils.pipeline import execute_steps, render_response
+from lambda_utils.header_config import ConnectionMetadata
+from nhs_number import is_valid as is_valid_nhs_number
+from pydantic import BaseModel, Field, validator
 
-from api.consumer.countDocumentReference.src.config import (
-    Config,
-    build_persistent_dependencies,
-)
-
-config = Config(
-    **{env_var: os.environ.get(env_var) for env_var in Config.__fields__.keys()}
-)
-dependencies = build_persistent_dependencies(config)
+from nrlf.core_nonpipeline.decorators import DocumentPointerRepository, request_handler
 
 
-def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
-    if context is None:
-        context = LambdaContext()
+class CountRequestParams(BaseModel):
+    nhs_number: str = Field(alias="subject:identifier")
 
-    status_code, result = execute_steps(
-        index_path=__file__, event=event, context=context, config=config, **dependencies
+    @validator("nhs_number", pre=True)
+    def validate_nhs_number(cls, nhs_number: str):
+        nhs_number = nhs_number.split("|", 1)[1]
+        if not is_valid_nhs_number(nhs_number):
+            raise ValueError("Invalid NHS number")
+
+        return nhs_number
+
+
+@request_handler(params=CountRequestParams)
+def handler(
+    metadata: ConnectionMetadata,
+    params: CountRequestParams,
+    repository: DocumentPointerRepository,
+    **_
+) -> Dict[str, str]:
+    """
+    Entrypoint for the countDocumentReference function
+    """
+    result = repository.count_by_nhs_number(
+        nhs_number=params.nhs_number, pointer_types=metadata.pointer_types
     )
-    return render_response(status_code, result)
+
+    bundle = {"resourceType": "Bundle", "type": "searchset", "total": result}
+
+    return {"statusCode": "200", "body": json.dumps(bundle, indent=2)}
