@@ -4,7 +4,7 @@ from pathlib import Path
 import pydantic
 import pytest
 
-from nrlf.core.validators import json_load
+from nrlf.core_pipeline.validators import json_load
 from nrlf.producer.fhir.r4.model import DocumentReference
 
 PATH_TO_TEST_DATA = Path(__file__).parent / "data"

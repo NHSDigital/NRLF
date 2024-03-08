@@ -7,7 +7,7 @@ from firehose.processor.tests.e2e_utils import make_good_cloudwatch_data
 from helpers.aws_session import new_aws_session
 from helpers.firehose import submit_cloudwatch_data_to_firehose
 from helpers.terraform import get_terraform_json
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.validators import json_loads
 
 
 @pytest.fixture(scope="session")

@@ -3,7 +3,7 @@ from typing import Dict
 import boto3
 from pydantic import BaseSettings, Field
 
-from nrlf.core_nonpipeline.decorators import DocumentPointerRepository, request_handler
+from nrlf.core.decorators import DocumentPointerRepository, request_handler
 
 
 class Config(BaseSettings):

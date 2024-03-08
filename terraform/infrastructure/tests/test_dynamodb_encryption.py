@@ -4,7 +4,7 @@ from pathlib import Path
 import boto3
 import pytest
 
-from nrlf.core.validators import json_load
+from nrlf.core_pipeline.validators import json_load
 
 LIMIT = 100
 ENABLED = "ENABLED"

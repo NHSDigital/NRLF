@@ -1,8 +1,8 @@
 import json
 
-from nrlf.core.dynamodb_types import DynamoDbStringType
-from nrlf.core.model import DynamoDbModel
-from nrlf.core.types import DynamoDBClient
+from nrlf.core_pipeline.dynamodb_types import DynamoDbStringType
+from nrlf.core_pipeline.model import DynamoDbModel
+from nrlf.core_pipeline.types import DynamoDBClient
 
 
 class DummyModel(DynamoDbModel):

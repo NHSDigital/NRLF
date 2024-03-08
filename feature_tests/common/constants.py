@@ -1,7 +1,7 @@
 from enum import Enum, auto
 from http import HTTPStatus
 
-from nrlf.core.model import Contract, DocumentPointer
+from nrlf.core_pipeline.model import Contract, DocumentPointer
 
 DEFAULT_VERSION = 1.0
 STATUS_CODE_200 = HTTPStatus.OK.value

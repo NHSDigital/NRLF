@@ -2,7 +2,11 @@ import os
 
 import boto3
 
-from nrlf.core.authoriser import Config, build_persistent_dependencies, execute_steps
+from nrlf.core_pipeline.authoriser import (
+    Config,
+    build_persistent_dependencies,
+    execute_steps,
+)
 
 config = Config(
     **{env_var: os.environ.get(env_var) for env_var in Config.__fields__.keys()}

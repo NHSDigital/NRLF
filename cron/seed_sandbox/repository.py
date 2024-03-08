@@ -2,8 +2,8 @@ from functools import partial
 from types import FunctionType
 from typing import Generator
 
-from nrlf.core.repository import Repository
-from nrlf.core.types import DynamoDBClient
+from nrlf.core_pipeline.repository import Repository
+from nrlf.core_pipeline.types import DynamoDBClient
 
 CHUNK_SIZE = 25
 

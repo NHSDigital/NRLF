@@ -27,8 +27,8 @@ from mi.stream_writer.model import Action, DynamoDBEventConfig, MiResponses
 from mi.stream_writer.tests.paths import PATH_TO_TEST_DATA
 from mi.stream_writer.tests.stream_writer_helpers import dynamodb_stream_event
 from mi.stream_writer.utils import hash_nhs_number
-from nrlf.core.types import DynamoDbClient
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.types import DynamoDbClient
+from nrlf.core_pipeline.validators import json_loads
 
 ASCII = list(string.ascii_lowercase + string.ascii_uppercase + string.digits)
 RESOURCE_PREFIX = "nhsd-nrlf"

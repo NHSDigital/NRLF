@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field, StrictStr, root_validator
 
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.validators import json_loads
 
 
 class AbstractHeader(BaseModel):
@@ -34,26 +34,6 @@ class AcceptHeader(AbstractHeader):
 
     class Config:
         json_loads = json_loads
-
-
-class ClientRpDetails(BaseModel):
-    developer_app_name: StrictStr = Field(alias="developer.app.name")
-    developer_app_id: StrictStr = Field(alias="developer.app.id")
-
-
-class ConnectionMetadata(AbstractHeader):
-    pointer_types: list[str] = Field(alias="nrl.pointer-types", default_factory=list)
-    ods_code: str = Field(alias="nrl.ods-code")
-    ods_code_extension: str = Field(alias="nrl.ods-code-extension", default=None)
-    nrl_permissions: list[str] = Field(alias="nrl.permissions", default_factory=list)
-    enable_authorization_lookup: bool = Field(
-        alias="nrl.enable-authorization-lookup", default=False
-    )
-    client_rp_details: ClientRpDetails
-
-    @property
-    def ods_code_parts(self):
-        return tuple(filter(None, (self.ods_code, self.ods_code_extension)))
 
 
 class LoggingHeader(AbstractHeader):

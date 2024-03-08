@@ -1,23 +1,10 @@
-from typing import Dict
-
-from nrlf.core_nonpipeline.decorators import (
-    APIGatewayProxyEvent,
-    ConnectionMetadata,
-    request_handler,
-)
-from nrlf.core_nonpipeline.dynamodb.repository import (
-    DocumentPointer,
-    DocumentPointerRepository,
-)
-from nrlf.core_nonpipeline.errors import OperationOutcomeResponse
-from nrlf.core_nonpipeline.logger import logger
-from nrlf.core_nonpipeline.transform import DocumentReferenceValidator, ParseError
-from nrlf.producer.fhir.r4.model import (
-    CodeableConcept,
-    Coding,
-    OperationOutcome,
-    OperationOutcomeIssue,
-)
+from nrlf.core.codes import NRLResponseConcept, SpineErrorConcept
+from nrlf.core.decorators import APIGatewayProxyEvent, request_handler
+from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
+from nrlf.core.model import ConnectionMetadata
+from nrlf.core.response import Response
+from nrlf.core.transform import DocumentReferenceValidator, ParseError
+from nrlf.producer.fhir.r4.model import OperationOutcomeIssue
 
 
 @request_handler()
@@ -25,13 +12,22 @@ def handler(
     event: APIGatewayProxyEvent,
     metadata: ConnectionMetadata,
     repository: DocumentPointerRepository,
-    **_,
-) -> Dict[str, str]:
+) -> Response:
     """
     Entrypoint for the createDocumentReference function
     """
     if not event.body:
-        return {"statusCode": "400", "body": "Bad Request"}
+        return Response.from_issues(
+            issues=[
+                OperationOutcomeIssue(
+                    severity="error",
+                    code="bad-request",
+                    details=SpineErrorConcept.from_code("BAD_REQUEST"),
+                    diagnostics="The request body is empty",
+                )
+            ],
+            statusCode="400",
+        )
 
     body = event.json_body
     validator = DocumentReferenceValidator()
@@ -40,11 +36,10 @@ def handler(
         result = validator.validate(body)
 
     except ParseError as error:
-        raise OperationOutcomeResponse(issues=error.issues)
+        return Response.from_issues(issues=error.issues, statusCode="400")
 
     if not result.is_valid:
-        logger.debug(result)
-        raise OperationOutcomeResponse(issues=result.issues)
+        return Response.from_issues(issues=result.issues, statusCode="400")
 
     # TODO: Do data contract validation here
 
@@ -100,53 +95,30 @@ def handler(
 
             superseded_ids.append(identifier)
 
-        result = repository.supersede(core_model, superseded_ids)
+        saved_model = repository.supersede(core_model, superseded_ids)
 
-        operation_outcome = OperationOutcome(
-            resourceType="OperationOutcome",
-            issue=[
+        return Response.from_issues(
+            issues=[
                 OperationOutcomeIssue(
                     severity="information",
                     code="informational",
-                    details=CodeableConcept(
-                        coding=[
-                            Coding(
-                                system="https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
-                                code="RESOURCE_SUPERSEDED",
-                                display="Resource created and resources(s) deleted",
-                            )
-                        ]
-                    ),
+                    details=NRLResponseConcept.from_code("RESOURCE_SUPERSEDED"),
+                    diagnostics="The document has been superseded by a new version",
                 )
             ],
+            statusCode="201",
         )
 
-        return {
-            "statusCode": "201",
-            "body": operation_outcome.json(indent=2, exclude_none=True),
-        }
-
     saved_model = repository.create(core_model)
-    operation_outcome = OperationOutcome(
-        resourceType="OperationOutcome",
-        issue=[
+
+    return Response.from_issues(
+        issues=[
             OperationOutcomeIssue(
                 severity="information",
                 code="informational",
-                details=CodeableConcept(
-                    coding=[
-                        Coding(
-                            system="https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
-                            code="RESOURCE_CREATED",
-                            display="Resource created",
-                        )
-                    ]
-                ),
+                details=NRLResponseConcept.from_code("RESOURCE_CREATED"),
+                diagnostics="The document has been created",
             )
         ],
+        statusCode="201",
     )
-
-    return {
-        "statusCode": "201",
-        "body": operation_outcome.json(indent=2, exclude_none=True),
-    }

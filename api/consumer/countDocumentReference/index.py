@@ -1,11 +1,10 @@
-import json
-from typing import Dict
-
-from lambda_utils.header_config import ConnectionMetadata
 from nhs_number import is_valid as is_valid_nhs_number
 from pydantic import BaseModel, Field, validator
 
-from nrlf.core_nonpipeline.decorators import DocumentPointerRepository, request_handler
+from nrlf.consumer.fhir.r4.model import Bundle
+from nrlf.core.decorators import DocumentPointerRepository, request_handler
+from nrlf.core.model import ConnectionMetadata
+from nrlf.core.response import Response
 
 
 class CountRequestParams(BaseModel):
@@ -25,8 +24,7 @@ def handler(
     metadata: ConnectionMetadata,
     params: CountRequestParams,
     repository: DocumentPointerRepository,
-    **_
-) -> Dict[str, str]:
+) -> Response:
     """
     Entrypoint for the countDocumentReference function
     """
@@ -34,6 +32,5 @@ def handler(
         nhs_number=params.nhs_number, pointer_types=metadata.pointer_types
     )
 
-    bundle = {"resourceType": "Bundle", "type": "searchset", "total": result}
-
-    return {"statusCode": "200", "body": json.dumps(bundle, indent=2)}
+    bundle = Bundle(resourceType="Bundle", type="searchset", total=result)
+    return Response.from_bundle(bundle)

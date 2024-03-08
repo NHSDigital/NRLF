@@ -60,13 +60,13 @@ from data_contracts.deploy_contracts.model import (
 from feature_tests.common.repository import FeatureTestRepository as Repository
 from feature_tests.common.utils import get_environment_prefix
 from helpers.aws_session import new_aws_session
-from nrlf.core.constants import DbPrefix
-from nrlf.core.dynamodb_types import (
+from nrlf.core_pipeline.constants import DbPrefix
+from nrlf.core_pipeline.dynamodb_types import (
     DynamoDbStringType,
     convert_dynamo_value_to_raw_value,
 )
-from nrlf.core.json_schema import DEFAULT_SYSTEM_VALUE
-from nrlf.core.model import Contract, DynamoDbModel, key
+from nrlf.core_pipeline.json_schema import DEFAULT_SYSTEM_VALUE
+from nrlf.core_pipeline.model import Contract, DynamoDbModel, key
 
 MOCK_PATH = "data_contracts.deploy_contracts.deploy_contracts.{}"
 ASCII_TEXT = text(alphabet=ascii_letters + digits, min_size=1)

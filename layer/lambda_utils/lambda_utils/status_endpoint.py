@@ -11,8 +11,8 @@ from lambda_utils.logging_utils import generate_transaction_id
 from lambda_utils.pipeline import _execute_steps, _setup_logger
 from pydantic import BaseModel
 
-from nrlf.core.model import APIGatewayProxyEventModel, DocumentPointer
-from nrlf.core.repository import Repository
+from nrlf.core_pipeline.model import APIGatewayProxyEventModel, DocumentPointer
+from nrlf.core_pipeline.repository import Repository
 from nrlf.log_references import LogReference
 
 

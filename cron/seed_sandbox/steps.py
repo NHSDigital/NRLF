@@ -7,10 +7,10 @@ from lambda_pipeline.types import FrozenDict, LambdaContext, PipelineData
 from lambda_utils.logging import MinimalEventModelForLogging, log_action
 
 from cron.seed_sandbox.validators import validate_items
-from nrlf.core.dynamodb_types import to_dynamodb_dict
-from nrlf.core.model import DocumentPointer, DynamoDbModel
-from nrlf.core.repository import Repository
-from nrlf.core.validators import json_load
+from nrlf.core_pipeline.dynamodb_types import to_dynamodb_dict
+from nrlf.core_pipeline.model import DocumentPointer, DynamoDbModel
+from nrlf.core_pipeline.repository import Repository
+from nrlf.core_pipeline.validators import json_load
 from nrlf.log_references import LogReference
 
 SANDBOX = "sandbox"

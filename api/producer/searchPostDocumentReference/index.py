@@ -1,29 +1,31 @@
-from typing import Dict, List
+from typing import List, Optional
 
-from nrlf.core.model import ProducerRequestParams
-from nrlf.core_nonpipeline.decorators import (
-    ConnectionMetadata,
-    DocumentPointerRepository,
-    request_handler,
+from nrlf.core.decorators import DocumentPointerRepository, request_handler
+from nrlf.core.model import ConnectionMetadata, ProducerRequestParams
+from nrlf.core.response import Response, SpineErrorConcept
+from nrlf.producer.fhir.r4.model import (
+    Bundle,
+    DocumentReference,
+    OperationOutcomeIssue,
+    RequestQueryType,
 )
-from nrlf.producer.fhir.r4.model import Bundle, DocumentReference, RequestQueryType
 
 
-def validate_type_system(type_: RequestQueryType, pointer_types: List[str]):
+def validate_type_system(
+    type_: Optional[RequestQueryType], pointer_types: List[str]
+) -> bool:
+    """
+    Validates if the given type system is present in the list of pointer types.
+    """
     if not type_:
-        return
+        return True
 
-    type_system = type_.__root__.split("|", 1)[0]
-
+    type_system = str(type_).split("|", 1)[0]
     pointer_type_systems = [
         pointer_type.split("|", 1)[0] for pointer_type in pointer_types
     ]
 
-    if type_system not in pointer_type_systems:
-        # TODO: Original AuthenticationError
-        raise ValueError(
-            f"The provided system type value - {type_system} - does not match the allowed types"
-        )
+    return type_system in pointer_type_systems
 
 
 @request_handler(body=ProducerRequestParams)
@@ -31,16 +33,35 @@ def handler(
     body: ProducerRequestParams,
     metadata: ConnectionMetadata,
     repository: DocumentPointerRepository,
-    **_,
-) -> Dict[str, str]:
+) -> Response:
     """
     Entrypoint for the searchDocumentReference function
     """
     if not body.nhs_number:
-        return {"statusCode": "400", "body": "Bad Request"}
+        return Response.from_issues(
+            statusCode="400",
+            issues=[
+                OperationOutcomeIssue(
+                    severity="error",
+                    code="bad-request",
+                    details=SpineErrorConcept.from_code("INVALID_NHS_NUMBER"),
+                    diagnostics="NHS number is required to search for document references",
+                )
+            ],
+        )
 
-    if body.type:
-        validate_type_system(body.type, metadata.pointer_types)
+    if not validate_type_system(body.type, metadata.pointer_types):
+        return Response.from_issues(
+            statusCode="400",
+            issues=[
+                OperationOutcomeIssue(
+                    severity="error",
+                    code="bad-request",
+                    details=SpineErrorConcept.from_code("INVALID_CODE_SYSTEM"),
+                    diagnostics="The provided system type value does not match the allowed types",
+                )
+            ],
+        )
 
     pointer_types = metadata.pointer_types
     if body.type:
@@ -58,9 +79,4 @@ def handler(
         bundle["total"] += 1
         bundle["entry"].append({"resource": document_reference.dict(exclude_none=True)})
 
-    return {
-        "statusCode": "200",
-        "body": Bundle(**bundle).json(
-            indent=2, exclude_none=True, exclude_defaults=True
-        ),
-    }
+    return Response.from_bundle(Bundle.parse_obj(bundle))

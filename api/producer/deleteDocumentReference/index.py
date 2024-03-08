@@ -1,18 +1,14 @@
 import urllib.parse
-from typing import Dict
 
-from nrlf.core_nonpipeline.decorators import (
+from nrlf.core.codes import NRLResponseConcept, SpineErrorConcept
+from nrlf.core.decorators import (
     APIGatewayProxyEvent,
-    ConnectionMetadata,
     DocumentPointerRepository,
     request_handler,
 )
-from nrlf.producer.fhir.r4.model import (
-    CodeableConcept,
-    Coding,
-    OperationOutcome,
-    OperationOutcomeIssue,
-)
+from nrlf.core.model import ConnectionMetadata
+from nrlf.core.response import Response
+from nrlf.producer.fhir.r4.model import OperationOutcomeIssue
 
 
 @request_handler()
@@ -20,8 +16,7 @@ def handler(
     event: APIGatewayProxyEvent,
     metadata: ConnectionMetadata,
     repository: DocumentPointerRepository,
-    **_,
-) -> Dict[str, str]:
+) -> Response:
     """
     Entrypoint for the deleteDocumentReference function
     """
@@ -31,34 +26,41 @@ def handler(
     producer_id, _ = pointer_id.split("-", 1)
 
     if metadata.ods_code_parts != tuple(producer_id.split(".")):
-        raise Exception(
-            "The requested document pointer cannot be deleted because it belongs to another organisation"
+        return Response.from_issues(
+            statusCode="403",
+            issues=[
+                OperationOutcomeIssue(
+                    severity="error",
+                    code="forbidden",
+                    details=SpineErrorConcept.from_code("AUTHOR_CREDENTIALS_ERROR"),
+                    diagnostics="The requested document pointer cannot be deleted because it belongs to another organisation",
+                )
+            ],
         )
 
     if not (core_model := repository.get_by_id(pointer_id)):
-        raise Exception("Item could not be found")
+        return Response.from_issues(
+            statusCode="404",
+            issues=[
+                OperationOutcomeIssue(
+                    severity="error",
+                    code="not-found",
+                    details=SpineErrorConcept.from_code("NO_RECORD_FOUND"),
+                    diagnostics="The requested document pointer could not be found",
+                )
+            ],
+        )
 
     repository.delete(core_model)
-    operation_outcome = OperationOutcome(
-        resourceType="OperationOutcome",
-        issue=[
+
+    return Response.from_issues(
+        statusCode="200",
+        issues=[
             OperationOutcomeIssue(
                 severity="information",
                 code="informational",
-                details=CodeableConcept(
-                    coding=[
-                        Coding(
-                            system="https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
-                            code="RESOURCE_DELETED",
-                            display="Resource deleted",
-                        )
-                    ]
-                ),
+                details=NRLResponseConcept.from_code("RESOURCE_DELETED"),
+                diagnostics="The requested document pointer has been deleted",
             )
         ],
     )
-
-    return {
-        "statusCode": "200",
-        "body": operation_outcome.json(exclude_none=True, indent=2),
-    }

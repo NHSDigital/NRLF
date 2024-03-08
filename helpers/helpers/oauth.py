@@ -10,7 +10,7 @@ import jwt
 import requests
 
 from helpers.log import log
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.validators import json_loads
 
 EXPIRATION_TIME_SECONDS = 30
 

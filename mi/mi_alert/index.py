@@ -5,7 +5,7 @@ import boto3
 from pydantic import BaseModel, Json
 
 from mi.mi_alert.steps import parse_event, read_body, send_notification
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.validators import json_loads
 
 PENVS = {"dev", "int", "ref", "prod"}
 

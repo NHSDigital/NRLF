@@ -43,13 +43,13 @@ from feature_tests.common.utils import (
     get_test_mode,
     get_tls_ma_files,
 )
-from nrlf.core.constants import (
+from nrlf.core_pipeline.constants import (
     CLIENT_RP_DETAILS,
     CONNECTION_METADATA,
     PERMISSION_AUDIT_DATES_FROM_PAYLOAD,
 )
-from nrlf.core.types import S3Client
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.types import S3Client
+from nrlf.core_pipeline.validators import json_loads
 
 
 def _local_mock(context: Context):

@@ -1,8 +1,8 @@
 from lambda_utils.logging import add_log_fields, log_action
 from pydantic import BaseModel, ValidationError
 
-from nrlf.core.model import DocumentPointer
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.model import DocumentPointer
+from nrlf.core_pipeline.validators import json_loads
 from nrlf.log_references import LogReference
 from nrlf.producer.fhir.r4.model import DocumentReference
 

@@ -8,10 +8,10 @@ from feature_tests.common.config_setup import register_application, request_setu
 from feature_tests.common.constants import DEFAULT_VERSION, WITH_WITHOUT_ANY, FhirType
 from feature_tests.common.decorators import given
 from feature_tests.common.models import Context, Template, TestConfig
-from nrlf.core.constants import CONNECTION_METADATA, DbPrefix
-from nrlf.core.model import Contract, DocumentPointer, key
-from nrlf.core.transform import create_document_pointer_from_fhir_json
-from nrlf.core.validators import json_loads, split_custodian_id
+from nrlf.core_pipeline.constants import CONNECTION_METADATA, DbPrefix
+from nrlf.core_pipeline.model import Contract, DocumentPointer, key
+from nrlf.core_pipeline.transform import create_document_pointer_from_fhir_json
+from nrlf.core_pipeline.validators import json_loads, split_custodian_id
 
 
 @behave_given("template {template_name}")

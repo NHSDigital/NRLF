@@ -6,7 +6,7 @@ import moto
 from behave import fixture
 
 from feature_tests.common.constants import AUTH_STORE, BUCKETS, TABLE_CONFIG
-from nrlf.core.types import DynamoDBClient, S3Client
+from nrlf.core_pipeline.types import DynamoDBClient, S3Client
 
 
 @fixture(name="fixture.mock.dynamodb")

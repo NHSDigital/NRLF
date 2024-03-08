@@ -32,10 +32,10 @@ from feature_tests.common.utils import (
     render_document_reference_properties,
     render_regular_properties,
 )
-from nrlf.core.authoriser import _parse_list_from_s3
-from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
-from nrlf.core.types import DynamoDBClient, S3Client
-from nrlf.core.validators import json_loads
+from nrlf.core_pipeline.authoriser import _parse_list_from_s3
+from nrlf.core_pipeline.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
+from nrlf.core_pipeline.types import DynamoDBClient, S3Client
+from nrlf.core_pipeline.validators import json_loads
 from nrlf.producer.fhir.r4.model import OperationOutcome
 
 
