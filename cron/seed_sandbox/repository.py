@@ -3,7 +3,7 @@ from types import FunctionType
 from typing import Generator
 
 from nrlf.core.repository import Repository
-from nrlf.core.types import DynamoDbClient
+from nrlf.core.types import DynamoDBClient
 
 CHUNK_SIZE = 25
 
@@ -66,5 +66,5 @@ class SandboxRepository(Repository):
             self.dynamodb.transact_write_items(TransactItems=chunk)
 
     @classmethod
-    def factory(cls, client: DynamoDbClient, environment_prefix: str) -> FunctionType:
+    def factory(cls, client: DynamoDBClient, environment_prefix: str) -> FunctionType:
         return partial(cls, client=client, environment_prefix=environment_prefix)

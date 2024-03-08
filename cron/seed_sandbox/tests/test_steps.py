@@ -14,7 +14,7 @@ from cron.seed_sandbox.tests.utils import (
     create_table,
 )
 from nrlf.core.model import DocumentPointer
-from nrlf.core.types import DynamoDbClient
+from nrlf.core.types import DynamoDBClient
 
 
 @pytest.fixture
@@ -58,7 +58,7 @@ def test__seed_step_factory(data_in_table_before_operation, temp_directory):
     item_type_name = "dummy-model"  # Maps on to DummyModel
     new_raw_data = [{"id": "SPAM"}, {"id": "EGGS"}]  # two rows of DummyModel data
 
-    client: DynamoDbClient = boto3.client("dynamodb")
+    client: DynamoDBClient = boto3.client("dynamodb")
     create_table(client=client, item_type_name=item_type_name)
 
     repository_factory = SandboxRepository.factory(client=client, environment_prefix="")

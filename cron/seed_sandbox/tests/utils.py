@@ -2,14 +2,14 @@ import json
 
 from nrlf.core.dynamodb_types import DynamoDbStringType
 from nrlf.core.model import DynamoDbModel
-from nrlf.core.types import DynamoDbClient
+from nrlf.core.types import DynamoDBClient
 
 
 class DummyModel(DynamoDbModel):
     id: DynamoDbStringType
 
 
-def create_table(client: DynamoDbClient, item_type_name: str):
+def create_table(client: DynamoDBClient, item_type_name: str):
     client.create_table(
         TableName=item_type_name,
         AttributeDefinitions=[{"AttributeName": "id", "AttributeType": "S"}],

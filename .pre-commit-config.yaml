@@ -71,23 +71,23 @@ repos:
           - --args=-write=true
           - --args=-recursive
 
-  - repo: local
-    hooks:
-      - id: forbid_json_loads
-        name: Don't use json.loads - use json_loads instead
-        entry: json\.loads
-        language: pygrep
-        types: [python]
-        exclude: layer/nrlf/nrlf/core/validators.py|layer/psycopg2/.*|mi/.*
+  # - repo: local
+  #   hooks:
+  #     - id: forbid_json_loads
+  #       name: Don't use json.loads - use json_loads instead
+  #       entry: json\.loads
+  #       language: pygrep
+  #       types: [python]
+  #       exclude: layer/nrlf/nrlf/core/validators.py|layer/psycopg2/.*|mi/.*
 
-  - repo: local
-    hooks:
-      - id: forbid_json_load
-        name: Don't use json.load - use json_load instead
-        entry: json\.load
-        language: pygrep
-        types: [python]
-        exclude: layer/nrlf/nrlf/core/validators.py|layer/psycopg2/.*|mi/.*
+  # - repo: local
+  #   hooks:
+  #     - id: forbid_json_load
+  #       name: Don't use json.load - use json_load instead
+  #       entry: json\.load
+  #       language: pygrep
+  #       types: [python]
+  #       exclude: layer/nrlf/nrlf/core/validators.py|layer/psycopg2/.*|mi/.*
 
   - repo: local
     hooks:

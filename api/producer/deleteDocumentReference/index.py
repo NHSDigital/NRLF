@@ -1,24 +1,64 @@
-import os
+import urllib.parse
+from typing import Dict
 
-from lambda_pipeline.types import LambdaContext
-from lambda_utils.pipeline import execute_steps, render_response
-
-from api.producer.deleteDocumentReference.src.config import (
-    Config,
-    build_persistent_dependencies,
+from nrlf.core_nonpipeline.decorators import (
+    APIGatewayProxyEvent,
+    ConnectionMetadata,
+    DocumentPointerRepository,
+    request_handler,
+)
+from nrlf.producer.fhir.r4.model import (
+    CodeableConcept,
+    Coding,
+    OperationOutcome,
+    OperationOutcomeIssue,
 )
 
-config = Config(
-    **{env_var: os.environ.get(env_var) for env_var in Config.__fields__.keys()}
-)
-dependencies = build_persistent_dependencies(config)
 
-
-def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
-    if context is None:
-        context = LambdaContext()
-
-    status_code, result = execute_steps(
-        index_path=__file__, event=event, context=context, config=config, **dependencies
+@request_handler()
+def handler(
+    event: APIGatewayProxyEvent,
+    metadata: ConnectionMetadata,
+    repository: DocumentPointerRepository,
+    **_,
+) -> Dict[str, str]:
+    """
+    Entrypoint for the deleteDocumentReference function
+    """
+    pointer_id = urllib.parse.unquote(
+        (event.path_parameters or {}).get("id", "unknown")
     )
-    return render_response(status_code, result)
+    producer_id, _ = pointer_id.split("-", 1)
+
+    if metadata.ods_code_parts != tuple(producer_id.split(".")):
+        raise Exception(
+            "The requested document pointer cannot be deleted because it belongs to another organisation"
+        )
+
+    if not (core_model := repository.get_by_id(pointer_id)):
+        raise Exception("Item could not be found")
+
+    repository.delete(core_model)
+    operation_outcome = OperationOutcome(
+        resourceType="OperationOutcome",
+        issue=[
+            OperationOutcomeIssue(
+                severity="information",
+                code="informational",
+                details=CodeableConcept(
+                    coding=[
+                        Coding(
+                            system="https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
+                            code="RESOURCE_DELETED",
+                            display="Resource deleted",
+                        )
+                    ]
+                ),
+            )
+        ],
+    )
+
+    return {
+        "statusCode": "200",
+        "body": operation_outcome.json(exclude_none=True, indent=2),
+    }

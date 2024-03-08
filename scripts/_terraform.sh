@@ -48,11 +48,7 @@ function _terraform() {
     ;;
     #----------------
     "unlock")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-      fi
-
+      if ! _check_mgmt; then return 1; fi
       cd "$terraform_dir" || return 1
       _terraform_unlock "$2"
     ;;
@@ -163,7 +159,7 @@ function _terraform() {
 }
 
 function _check_mgmt() {
-  if [[ "$(aws iam list-account-aliases --query 'AccountAliases[0]' --output text)"] != 'nhsd-nrlf-mgmt' ]]; then
+  if [[ "$(aws iam list-account-aliases --query 'AccountAliases[0]' --output text)" != 'nhsd-ddc-spine-nrlf-mgmt' ]]; then
     echo "Please log in as the mgmt account" >&2
     return 1
   fi

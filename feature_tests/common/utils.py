@@ -4,6 +4,7 @@ from copy import deepcopy
 from functools import cache
 from importlib import import_module
 from pathlib import Path
+from typing import Any
 
 import boto3
 import yaml
@@ -25,7 +26,7 @@ from feature_tests.common.constants import (
 )
 from helpers.aws_session import new_aws_session
 from helpers.terraform import get_terraform_json
-from nrlf.core.types import DynamoDbClient, S3Client
+from nrlf.core.types import DynamoDBClient, S3Client
 from nrlf.core.validators import json_loads
 
 RELATES_TO = "relatesTo"
@@ -97,7 +98,7 @@ def _get_boto3_client(client_name: str, test_mode: TestMode):
     return session.client(client_name)
 
 
-def get_dynamodb_client(test_mode: TestMode) -> DynamoDbClient:
+def get_dynamodb_client(test_mode: TestMode) -> DynamoDBClient:
     return _get_boto3_client(client_name="dynamodb", test_mode=test_mode)
 
 
@@ -105,7 +106,7 @@ def get_s3_client(test_mode: TestMode) -> S3Client:
     return _get_boto3_client(client_name="s3", test_mode=test_mode)
 
 
-def get_lambda_client(test_mode: TestMode) -> any:
+def get_lambda_client(test_mode: TestMode) -> Any:
     return _get_boto3_client(client_name="lambda", test_mode=test_mode)
 
 

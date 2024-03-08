@@ -190,7 +190,6 @@ def log_action(
                 errors_only=errors_only,
                 logger=logger,
             ) as action:
-
                 error = False
                 result = None
                 try:

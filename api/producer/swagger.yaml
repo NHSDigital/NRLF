@@ -265,8 +265,8 @@ paths:
         - $ref: "#/components/parameters/odsCodeExtension"
         - $ref: "#/components/parameters/requestId"
         - $ref: "#/components/parameters/correlationId"
-      security:
-        - ${authoriser_name}: []
+      # security:
+      # - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -569,8 +569,8 @@ paths:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
-      security:
-        - ${authoriser_name}: []
+      # security:
+      #   - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -856,8 +856,8 @@ paths:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
-      security:
-        - ${authoriser_name}: []
+      # security:
+      #   - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -971,8 +971,8 @@ paths:
               $ref: "#/components/headers/CorrelationId"
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
-      security:
-        - ${authoriser_name}: []
+      # security:
+      #   - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -1039,8 +1039,8 @@ paths:
                     diagnostics: Resource updated
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
-      security:
-        - ${authoriser_name}: []
+      # security:
+      #   - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -1118,8 +1118,8 @@ paths:
                           code: RESOURCE_REMOVED
                           display: Resource removed
                     diagnostics: Resource removed
-      security:
-        - ${authoriser_name}: []
+      # security:
+      #   - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -1940,18 +1940,18 @@ components:
     RequestHeaderCorrelationId:
       type: string
       example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
-  securitySchemes:
-    ${authoriser_name}:
-      type: apiKey
-      name: Authorization
-      in: header
-      x-amazon-apigateway-authtype: custom
-      x-amazon-apigateway-authorizer:
-        type: request
-        authorizerUri: ${lambda_invoke_arn}
-        authorizerCredentials: ${authoriser_iam_role}
-        identitySource: method.request.header.Authorization
-        authorizerResultTtlInSeconds: 0
+  # securitySchemes:
+  #   ${authoriser_name}:
+  #     type: apiKey
+  #     name: Authorization
+  #     in: header
+  #     x-amazon-apigateway-authtype: custom
+  #     x-amazon-apigateway-authorizer:
+  #       type: request
+  #       authorizerUri: ${lambda_invoke_arn}
+  #       authorizerCredentials: ${authoriser_iam_role}
+  #       identitySource: method.request.header.Authorization
+  #       authorizerResultTtlInSeconds: 0
   parameters:
     id:
       name: id

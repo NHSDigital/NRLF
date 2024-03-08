@@ -34,7 +34,7 @@ from feature_tests.common.utils import (
 )
 from nrlf.core.authoriser import _parse_list_from_s3
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
-from nrlf.core.types import DynamoDbClient, S3Client
+from nrlf.core.types import DynamoDBClient, S3Client
 from nrlf.core.validators import json_loads
 from nrlf.producer.fhir.r4.model import OperationOutcome
 
@@ -207,7 +207,7 @@ class TestConfig:
     repositories: dict[BaseModel, FeatureTestRepository] = field(default_factory=dict)
     templates: dict[str, Template] = field(default_factory=dict)
     actor_context: ActorContext = None
-    dynamodb_client: DynamoDbClient = None
+    dynamodb_client: DynamoDBClient = None
     s3_client: S3Client = None
     auth_store: str = None
     environment_prefix: str = None
