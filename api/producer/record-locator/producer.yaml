@@ -630,6 +630,67 @@ paths:
         This operation is also available as a http POST, which is the preferred method (see below).
     put:
       summary: Create document pointers with a specific id
+      operationId: upsertDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
+      responses:
+        "201":
+          $ref: "#/components/responses/Success"
+          description: Create / Supersede successful response
+          content:
+            application/fhir+json;version=1:
+              example:
+                resourceType: OperationOutcome
+                id: 76db24dc-324a-468a-bf02-c06e82279488
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_CREATED
+                          display: Resource created
+                    diagnostics: Resource created
+        "4XX":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST                | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 400         | INVALID_RESOURCE_ID        | Invalid resource ID                                                                                                                        |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 403         | ACCESS_DENIED_LEVEL        | Access has been denied because you need higher level permissions                                                                           |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json;version=1:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentReference"
       description: |
         Create a new pointer with a unique identifier that you specify. This is the "upsert" or "update as create" functionality in the FHIR R4 REST standard.
 
@@ -665,58 +726,6 @@ paths:
 
         This will cause a new pointer to be created and superseded pointers to be deleted.  Multiple documents can
         be superseded.
-      responses:
-        "4XX":
-          description: |
-            An error occurred as follows:
-
-            | HTTP status | Error code                 | Description                                                                                                                                |
-            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-            | 400         | BAD_REQUEST                | Bad Request                                                                                                                                |
-            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
-            | 400         | INVALID_RESOURCE_ID        | Invalid resource ID                                                                                                                        |
-            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
-            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
-            | 403         | ACCESS_DENIED_LEVEL        | Access has been denied because you need higher level permissions                                                                           |
-            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
-            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
-
-            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
-          content:
-            application/fhir+json;version=1:
-              schema:
-                $ref: "#/components/schemas/OperationOutcome"
-              example:
-                resourceType: OperationOutcome
-                issue:
-                  - severity: error
-                    code: value
-                    details:
-                      coding:
-                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
-                          version: "1"
-                          code: VALIDATION_ERROR
-                          display: A parameter or value has resulted in a validation error
-                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
-        "201":
-          description: Create / Supersede successful response
-          content:
-            application/fhir+json;version=1:
-              example:
-                resourceType: OperationOutcome
-                id: 76db24dc-324a-468a-bf02-c06e82279488
-                meta:
-                  profile:
-                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
-                issue:
-                  - severity: information
-                    code: informational
-                    details:
-                      coding:
-                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
-                          code: RESOURCE_CREATED
-                          display: Resource created
-                    diagnostics: Resource created
   /DocumentReference/_search:
     post:
       summary: Retrieve document pointers (POST)

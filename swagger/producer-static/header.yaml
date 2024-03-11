@@ -75,6 +75,31 @@ paths:
             statusCode: "201"
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
+    put:
+      tags:
+      summary: Create a DocumentReference resource with id
+      operationId: upsertDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
+      responses:
+        "201":
+          $ref: "#/components/responses/Success"
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentReference"
+      security:
+        - ${authoriser_name}: []
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: PUT
+        uri: ${method_upsertDocumentReference}
+        responses:
+          default:
+            statusCode: "201"
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
   /DocumentReference/{id}:
     get:
       tags:

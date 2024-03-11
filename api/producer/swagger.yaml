@@ -590,7 +590,48 @@ paths:
 
         This operation is also available as a http POST, which is the preferred method (see below).
     put:
+      tags:
       summary: Create document pointers with a specific id
+      operationId: upsertDocumentReference
+      parameters:
+        - $ref: "#/components/parameters/odsCode"
+        - $ref: "#/components/parameters/odsCodeExtension"
+        - $ref: "#/components/parameters/requestId"
+        - $ref: "#/components/parameters/correlationId"
+      responses:
+        "201":
+          $ref: "#/components/responses/Success"
+          description: Create / Supersede successful response
+          content:
+            application/fhir+json:
+              example:
+                resourceType: OperationOutcome
+                id: 76db24dc-324a-468a-bf02-c06e82279488
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_CREATED
+                          display: Resource created
+                    diagnostics: Resource created
+      requestBody:
+        $ref: "#/components/requestBodies/DocumentReference"
+      security:
+        - ${authoriser_name}: []
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: PUT
+        uri: ${method_upsertDocumentReference}
+        responses:
+          default:
+            statusCode: "201"
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
       description: |
         Create a new pointer with a unique identifier that you specify. This is the "upsert" or "update as create" functionality in the FHIR R4 REST standard.
 
@@ -626,26 +667,6 @@ paths:
 
         This will cause a new pointer to be created and superseded pointers to be deleted.  Multiple documents can
         be superseded.
-      responses:
-        "201":
-          description: Create / Supersede successful response
-          content:
-            application/fhir+json:
-              example:
-                resourceType: OperationOutcome
-                id: 76db24dc-324a-468a-bf02-c06e82279488
-                meta:
-                  profile:
-                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
-                issue:
-                  - severity: information
-                    code: informational
-                    details:
-                      coding:
-                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
-                          code: RESOURCE_CREATED
-                          display: Resource created
-                    diagnostics: Resource created
   /DocumentReference/_search:
     post:
       tags:
