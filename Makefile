@@ -76,5 +76,6 @@ lint: check-warn ## Lint the project
 	$(PRECOMMIT) run --all-files
 
 clean: ## Remove all generated and temporary files
-	rm -rf $(DIST_PATH)/*.zip
-	rmdir $(DIST_PATH) 2>/dev/null || true
+	[ -n "$(DIST_PATH)" ] && \
+		rm -rf $(DIST_PATH)/*.zip && \
+		rmdir $(DIST_PATH) 2>/dev/null || true
