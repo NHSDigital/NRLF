@@ -93,7 +93,7 @@ paths:
         - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
-        httpMethod: PUT
+        httpMethod: POST
         uri: ${method_upsertDocumentReference}
         responses:
           default:
