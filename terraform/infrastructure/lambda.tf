@@ -257,7 +257,7 @@ module "producer__updateDocumentReference" {
   ]
 }
 
-module "producer__createDocumentReference" {
+module "producer__upsertDocumentReference" {
   source                 = "./modules/lambda"
   parent_path            = "api/producer"
   name                   = "upsertDocumentReference"

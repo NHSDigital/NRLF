@@ -589,6 +589,63 @@ paths:
         requests with the `next-page-token` found in the `meta` portion of the response.
 
         This operation is also available as a http POST, which is the preferred method (see below).
+    put:
+      summary: Create document pointers with a specific id
+      description: |
+        Create a new pointer with a unique identifier that you specify. This is the "upsert" or "update as create" functionality in the FHIR R4 REST standard.
+
+        In addition to the criteria for DocumentReference validity detailed in the POST interaction, you must ensure:
+
+        * `id` is a composite of the ODS Code and an identifier that is locally unique to your system.  NRL does not
+          generate globally unique ids, instead relies on producers to provide a locally unique id prefixed with their
+          ODS code, making it globally unique. e.g.
+          ```
+          XYZ-1234567890
+          ```
+
+        To supersede existing pointers you must further specify:
+
+        * at least one existing pointer in the `relatesTo` with a `code` of `replaces`.
+          ```
+          [
+            {
+              "code": "replaces",
+              "target": {
+                "type": "DocumentReference",
+                "identifier": {
+                  "value": "XYZ-1234567890"
+                }
+              }
+            }
+          ]
+          ```
+
+        * the following fields MUST match the pointers being superseded:
+          * `subject`
+          * `type`
+
+        This will cause a new pointer to be created and superseded pointers to be deleted.  Multiple documents can
+        be superseded.
+      responses:
+        "201":
+          description: Create / Supersede successful response
+          content:
+            application/fhir+json:
+              example:
+                resourceType: OperationOutcome
+                id: 76db24dc-324a-468a-bf02-c06e82279488
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_CREATED
+                          display: Resource created
+                    diagnostics: Resource created
   /DocumentReference/_search:
     post:
       tags:
