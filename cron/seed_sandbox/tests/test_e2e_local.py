@@ -3,7 +3,6 @@ from unittest import mock
 
 import moto
 import pytest
-
 from feature_tests.common.fixtures import setup_tables
 
 

@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, Optional
 
@@ -73,9 +73,17 @@ class DocumentPointer(DynamoDBModel):
     def from_document_reference(
         cls, resource: DocumentReference, created_on: Optional[str] = None
     ) -> "DocumentPointer":
-        assert resource.subject and resource.subject.identifier
-        assert resource.custodian and resource.custodian.identifier
-        assert resource.type and resource.type.coding
+        if not (
+            resource.subject
+            and resource.subject.identifier
+            and resource.custodian
+            and resource.custodian.identifier
+            and resource.type
+            and resource.type.coding
+        ):
+            raise ValueError(
+                "DocumentReference must have a subject, custodian and type"
+            )
 
         coding = resource.type.coding[0]
         pointer_type = f"{coding.system}|{coding.code}"
@@ -89,11 +97,12 @@ class DocumentPointer(DynamoDBModel):
             version=1,
             document=resource.json(exclude_none=True),
             created_on=created_on
-            or datetime.utcnow().isoformat(timespec="milliseconds") + "Z",
+            or datetime.now(tz=timezone.utc).isoformat(timespec="milliseconds") + "Z",
             _document=resource.dict(exclude_none=True),
         )
 
     @root_validator(pre=True)
+    @classmethod
     def extract_custodian_suffix(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """
         Extract the custodian suffix if it is not provided and the custodian
@@ -116,6 +125,7 @@ class DocumentPointer(DynamoDBModel):
         return values
 
     @root_validator(pre=True)
+    @classmethod
     def inject_producer_id(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """
         Inject the producer_id into the DocumentPointer if it is not provided
@@ -172,6 +182,7 @@ class DocumentPointer(DynamoDBModel):
     #     return values
 
     @validator("id")
+    @classmethod
     def validate_id(cls, id_: str) -> str:
         """
         Validate the id of the DocumentPointer
@@ -183,6 +194,7 @@ class DocumentPointer(DynamoDBModel):
         return id_
 
     @validator("producer_id")
+    @classmethod
     def validate_producer_id(cls, producer_id: str, values: Dict[str, Any]) -> str:
         id_ = values.get("id")
         custodian = values.get("custodian_id")
@@ -199,15 +211,16 @@ class DocumentPointer(DynamoDBModel):
                     "It is expected to be composed in the form '<custodian_id>.<custodian_suffix>'"
                 )
 
-        else:
-            if producer_id != custodian:
-                raise ValueError(
-                    f"Producer ID {producer_id} (extracted from '{id_}') does not match the Custodian ID."
-                )
+        elif producer_id != custodian:
+            raise ValueError(
+                f"Producer ID {producer_id} (extracted from '{id_}')"
+                " does not match the Custodian ID."
+            )
 
         return producer_id
 
     @validator("type")
+    @classmethod
     def validate_type(cls, type: str) -> str:
         """
         Validate the type of the DocumentPointer
@@ -219,6 +232,7 @@ class DocumentPointer(DynamoDBModel):
         return type
 
     @validator("nhs_number")
+    @classmethod
     def validate_nhs_number(cls, nhs_number: str) -> str:
         """
         Validate the NHS number of the DocumentPointer
@@ -230,6 +244,7 @@ class DocumentPointer(DynamoDBModel):
         return nhs_number
 
     @validator("source")
+    @classmethod
     def validate_source(cls, source: str) -> str:
         """
         Validate the source of the DocumentPointer
@@ -241,6 +256,7 @@ class DocumentPointer(DynamoDBModel):
         return source
 
     @validator("created_on")
+    @classmethod
     def validate_created_on(cls, created_on: str) -> str:
         """
         Validate the created_on of the DocumentPointer
@@ -251,11 +267,12 @@ class DocumentPointer(DynamoDBModel):
             datetime.fromisoformat(_date)
 
         except ValueError:
-            raise ValueError(f"Not a valid ISO date: {created_on}")
+            raise ValueError(f"Not a valid ISO date: {created_on}") from None
 
         return created_on
 
     @validator("updated_on")
+    @classmethod
     def validate_updated_on(cls, updated_on: Optional[str]) -> Optional[str]:
         """
         Validate the updated_on of the DocumentPointer
@@ -269,7 +286,7 @@ class DocumentPointer(DynamoDBModel):
             datetime.fromisoformat(_date)
 
         except ValueError:
-            raise ValueError(f"Not a valid ISO date: {updated_on}")
+            raise ValueError(f"Not a valid ISO date: {updated_on}") from None
 
         return updated_on
 
@@ -370,34 +387,3 @@ class DocumentPointer(DynamoDBModel):
     @classmethod
     def public_alias(cls) -> str:
         return "DocumentReference"
-
-
-class Contract(DynamoDBModel):
-    pk: str
-    sk: str
-    name: str
-    version: str
-    system: str
-    value: str
-    json_schema: dict
-
-    @property
-    def full_name(self):
-        return f"{self.name}:{self.version}"
-
-    @property
-    def pk_1(self) -> str:
-        return f"{DBPrefix.Contract.value}#{self.name}"
-
-    @property
-    def sk_1(self) -> str:
-        return f"{self.pk}#{self.sk}"
-
-    def dict(self, **kwargs):
-        return {
-            "pk": self.pk,
-            "sk": self.sk,
-            "pk_1": self.pk_1,
-            "sk_1": self.sk_1,
-            **super().dict(**kwargs),
-        }

@@ -244,6 +244,12 @@ function _terraform_plan() {
   local aws_account_id=$4
   local args=${@:5}
 
+  echo "Running terraform plan for $env"
+  echo "Using var file: $var_file"
+  echo "Using plan file: $plan_file"
+  echo "Using assume_account: $aws_account_id"
+  echo "Using assume_role: $TERRAFORM_ROLE_NAME"
+
   terraform init || return 1
   terraform workspace select "$env" || terraform workspace new "$env" || return 1
   terraform plan \

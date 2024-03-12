@@ -1,10 +1,38 @@
+from typing import Dict
+
 from nrlf.consumer.fhir.r4 import model as consumer_model
 from nrlf.producer.fhir.r4 import model as producer_model
 
 
-class NRLResponseConcept(
-    producer_model.CodeableConcept, consumer_model.CodeableConcept
-):
+class _CodeableConcept(producer_model.CodeableConcept, consumer_model.CodeableConcept):
+    """
+    Represents a codeable concept with a mapping of codes to text values.
+    """
+
+    _TEXT_MAP: Dict[str, str] = {}
+    _SYSTEM: str = ""
+
+    @classmethod
+    def from_code(cls, code: str) -> "_CodeableConcept":
+        """
+        Creates a CodeableConcept instance from a given code.
+        """
+        if code not in cls._TEXT_MAP:
+            raise ValueError(f"Unknown code: {code}")
+
+        return cls(
+            coding=[
+                producer_model.Coding(
+                    system=cls._SYSTEM,
+                    code=code,
+                    display=cls._TEXT_MAP[code],
+                )
+            ]
+        )
+
+
+class NRLResponseConcept(_CodeableConcept):
+    _SYSTEM = "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode"
     _TEXT_MAP = {
         "RESOURCE_CREATED": "Resource created",
         "RESOURCE_SUPERSEDED": "Resource created and resource(s) deleted",
@@ -12,44 +40,22 @@ class NRLResponseConcept(
         "RESOURCE_DELETED": "Resource deleted",
     }
 
-    @classmethod
-    def from_code(cls, error_code: str) -> "NRLResponseConcept":
-        if error_code not in cls._TEXT_MAP:
-            raise ValueError(f"Unknown error code: {error_code}")
 
-        return cls(
-            coding=[
-                producer_model.Coding(
-                    system="https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
-                    code=error_code,
-                    display=cls._TEXT_MAP[error_code],
-                )
-            ],
-            text=cls._TEXT_MAP[error_code],
-        )
-
-
-class SpineErrorConcept(producer_model.CodeableConcept, consumer_model.CodeableConcept):
+class SpineErrorConcept(_CodeableConcept):
+    _SYSTEM = "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1"
     _TEXT_MAP = {
+        "INVALID_RESOURCE": "Invalid validation of resource",
         "NO_RECORD_FOUND": "No record found",
         "INVALID_NHS_NUMBER": "Invalid NHS number",
         "INVALID_CODE_SYSTEM": "Invalid code system",
         "INTERNAL_SERVER_ERROR": "Unexpected internal server error",
         "BAD_REQUEST": "Bad request",
         "AUTHOR_CREDENTIALS_ERROR": "Author credentials error",
+        "DUPLICATE_REJECTED": "Create would lead to creation of a duplicate resource",
+        "INVALID_PARAMETER": "Invalid parameter",
+        "MESSAGE_NOT_WELL_FORMED": "Message not well formed",
+        "MISSING_OR_INVALID_HEADER": "There is a required header missing or invalid",
+        "INVALID_IDENTIFIER_SYSTEM": "Invalid identifier system",
+        "INVALID_CODE_VALUE": "Invalid code value",
+        "INVALID_IDENTIFIER_VALUE": "Invalid identifier value",
     }
-
-    @classmethod
-    def from_code(cls, error_code: str) -> "SpineErrorConcept":
-        if error_code not in cls._TEXT_MAP:
-            raise ValueError(f"Unknown error code: {error_code}")
-
-        return cls(
-            coding=[
-                producer_model.Coding(
-                    system="https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
-                    code=error_code,
-                    display=cls._TEXT_MAP[error_code],
-                )
-            ]
-        )

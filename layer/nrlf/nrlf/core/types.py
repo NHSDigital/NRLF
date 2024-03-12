@@ -19,3 +19,6 @@ Bundle = Union[producer_model.Bundle, consumer_model.Bundle]
 DocumentReference = Union[
     producer_model.DocumentReference, consumer_model.DocumentReference
 ]
+RequestQueryType = Union[
+    producer_model.RequestQueryType, consumer_model.RequestQueryType
+]

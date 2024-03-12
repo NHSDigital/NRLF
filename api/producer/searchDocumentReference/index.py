@@ -1,31 +1,8 @@
-from typing import List, Optional
-
 from nrlf.core.decorators import DocumentPointerRepository, request_handler
 from nrlf.core.model import ConnectionMetadata, ProducerRequestParams
 from nrlf.core.response import Response, SpineErrorConcept
-from nrlf.producer.fhir.r4.model import (
-    Bundle,
-    DocumentReference,
-    OperationOutcomeIssue,
-    RequestQueryType,
-)
-
-
-def validate_type_system(
-    type_: Optional[RequestQueryType], pointer_types: List[str]
-) -> bool:
-    """
-    Validates if the given type system is present in the list of pointer types.
-    """
-    if not type_:
-        return True
-
-    type_system = str(type_).split("|", 1)[0]
-    pointer_type_systems = [
-        pointer_type.split("|", 1)[0] for pointer_type in pointer_types
-    ]
-
-    return type_system in pointer_type_systems
+from nrlf.core.validators import validate_type_system
+from nrlf.producer.fhir.r4.model import Bundle, DocumentReference, OperationOutcomeIssue
 
 
 @request_handler(params=ProducerRequestParams)

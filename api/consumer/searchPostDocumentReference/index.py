@@ -1,32 +1,9 @@
-from typing import List, Optional
-
-from nrlf.consumer.fhir.r4.model import (
-    Bundle,
-    DocumentReference,
-    OperationOutcomeIssue,
-    RequestQueryType,
-)
+from nrlf.consumer.fhir.r4.model import Bundle, DocumentReference, OperationOutcomeIssue
 from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
 from nrlf.core.model import ConnectionMetadata, ConsumerRequestParams
 from nrlf.core.response import Response, SpineErrorConcept
-
-
-def validate_type_system(
-    type_: Optional[RequestQueryType], pointer_types: List[str]
-) -> bool:
-    """
-    Validates if the given type system is present in the list of pointer types.
-    """
-    if not type_:
-        return True
-
-    type_system = str(type_).split("|", 1)[0]
-    pointer_type_systems = [
-        pointer_type.split("|", 1)[0] for pointer_type in pointer_types
-    ]
-
-    return type_system in pointer_type_systems
+from nrlf.core.validators import validate_type_system
 
 
 @request_handler(body=ConsumerRequestParams)
@@ -43,9 +20,9 @@ def handler(
             issues=[
                 OperationOutcomeIssue(
                     severity="error",
-                    code="bad-request",
+                    code="invalid",
                     details=SpineErrorConcept.from_code("INVALID_NHS_NUMBER"),
-                    diagnostics="NHS number is required to search for document references",
+                    diagnostics="A valid NHS number is required to search for document references",
                 )
             ],
             statusCode="400",
@@ -56,8 +33,8 @@ def handler(
             issues=[
                 OperationOutcomeIssue(
                     severity="error",
-                    code="bad-request",
-                    details=SpineErrorConcept.from_code("INVALID_CODE_SYSTEM"),
+                    code="invalid",
+                    details=SpineErrorConcept.from_code("INVALID_CODE_VALUE"),
                     diagnostics="The provided system type value does not match the allowed types",
                 )
             ],
@@ -66,7 +43,7 @@ def handler(
 
     bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
 
-    pointer_types = [str(body.type)] if body.type else metadata.pointer_types
+    pointer_types = [body.type.__root__] if body.type else metadata.pointer_types
 
     for result in repository.search(body.nhs_number, pointer_types):
         document_reference = DocumentReference.parse_raw(result.document)

@@ -2,10 +2,9 @@ import os
 from unittest import mock
 
 import moto
+from feature_tests.common.constants import TABLE_CONFIG
 from lambda_utils.tests.unit.status_test_utils import event  # noqa: F401
 from lambda_utils.tests.unit.status_test_utils import OK, SERVICE_UNAVAILABLE
-
-from feature_tests.common.constants import TABLE_CONFIG
 
 BASE_FIELDS = {"ENVIRONMENT": "", "SPLUNK_INDEX": "", "SOURCE": ""}
 

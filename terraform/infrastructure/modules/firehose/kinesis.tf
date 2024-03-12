@@ -41,35 +41,20 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
         log_stream_name = aws_cloudwatch_log_stream.firehose.name
       }
 
-    }
-  }
+      s3_configuration {
+        role_arn            = aws_iam_role.firehose.arn
+        prefix              = "splunk_backup/${local.s3_configuration.prefix}"
+        error_output_prefix = local.s3_configuration.error_output_prefix
+        bucket_arn          = aws_s3_bucket.firehose.arn
+        buffering_size      = local.s3_configuration.buffer_size
+        buffering_interval  = local.s3_configuration.buffer_interval
+        compression_format  = local.s3_configuration.compression_format
 
-  dynamic "s3_configuration" {
-    # "s3_configuration" runs hand-in-hand with "splunk_configuration" in order to pipe a backup of the logs
-    # to S3 in either case of success or failure.
-    #
-    # NB: the for_each will not run in the case that 'secret_string' has not been set in the AWS Console, and
-    # therefore this block will be omitted for default deployments (e.g. developer and CI workspaces).
-    #
-    # "dummyKey" and "dummyValue" are unused, they simply enable this feature when 'secret_string' has been defined.
-    for_each = { for item in data.aws_secretsmanager_secret_version.splunk_configuration.*.secret_string : "dummyKey" => "dummyValue" }
-    content {
-      role_arn            = aws_iam_role.firehose.arn
-      prefix              = "splunk_backup/${local.s3_configuration.prefix}"
-      error_output_prefix = local.s3_configuration.error_output_prefix
-      bucket_arn          = aws_s3_bucket.firehose.arn
-      buffer_size         = local.s3_configuration.buffer_size
-      buffer_interval     = local.s3_configuration.buffer_interval
-      compression_format  = local.s3_configuration.compression_format
-
-      cloudwatch_logging_options {
-        enabled         = true
-        log_group_name  = aws_cloudwatch_log_group.firehose.name
-        log_stream_name = aws_cloudwatch_log_stream.firehose.name
       }
-
     }
   }
+
+
 
   dynamic "extended_s3_configuration" {
     # "extended_s3_configuration" runs INSTEAD OF splunk_configuration, intended for developer and CI
@@ -83,8 +68,8 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
       prefix              = "processed/${local.s3_configuration.prefix}"
       error_output_prefix = local.s3_configuration.error_output_prefix
       bucket_arn          = aws_s3_bucket.firehose.arn
-      buffer_size         = local.s3_configuration.buffer_size
-      buffer_interval     = local.s3_configuration.buffer_interval
+      buffering_size      = local.s3_configuration.buffer_size
+      buffering_interval  = local.s3_configuration.buffer_interval
       compression_format  = local.s3_configuration.compression_format
       processing_configuration {
         enabled = "true"

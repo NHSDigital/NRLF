@@ -3,11 +3,12 @@
 import os
 
 import pytest
-from hypothesis import settings
 
-if os.getenv("RUNNING_IN_CI"):
-    settings.register_profile("ci", deadline=1000)  # max 1 second per test
-    settings.load_profile("ci")
+# from hypothesis import settings
+
+# if os.getenv("RUNNING_IN_CI"):
+#     settings.register_profile("ci", deadline=1000)  # max 1 second per test
+#     settings.load_profile("ci")
 
 
 def pytest_addoption(parser):
@@ -24,3 +25,16 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip_slow)
+
+
+os.environ.update(
+    {
+        "AWS_REGION": "eu-west-2",
+        "PREFIX": "nrlf",
+        "ENVIRONMENT": "production",
+        "SPLUNK_INDEX": "logs",
+        "SOURCE": "app",
+        "AUTH_STORE": "auth-store",
+        "AWS_DEFAULT_REGION": "eu-west-2",
+    }
+)

@@ -11,7 +11,6 @@ from nrlf.core.response import Response
 class Config(BaseSettings):
     AWS_REGION: str = Field(default=..., env="AWS_REGION")
     PREFIX: str = Field(default=..., env="PREFIX")
-    DYNAMODB_TIMEOUT: float = Field(default=..., env="DYNAMODB_TIMEOUT")
 
 
 @request_handler(skip_parse_headers=True, repository=None)
