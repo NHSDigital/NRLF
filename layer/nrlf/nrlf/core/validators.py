@@ -96,12 +96,13 @@ class DocumentReferenceValidator:
                 msg="Failed to parse DocumentReference resource",
             ) from None
 
-    def validate(self, data: Dict[str, Any]):
+    def validate(self, data: Dict[str, Any] | DocumentReference):
         """
         Validate the document reference
         """
         logger.info("Performing validation on DocumentReference resource", data=data)
-        resource = self.parse(data)
+        resource = self.parse(data) if isinstance(data, dict) else data
+
         self.result = ValidationResult(resource=resource, issues=[])
 
         try:
@@ -134,13 +135,23 @@ class DocumentReferenceValidator:
         if not self.result.is_valid:
             raise StopValidationError()
 
-    def _validate_no_extra_fields(self, model: DocumentReference, data: Dict[str, Any]):
+    def _validate_no_extra_fields(
+        self, resource: DocumentReference, data: Dict[str, Any] | DocumentReference
+    ):
         """
         Validate that there are no extra fields
         """
         logger.debug("Validating no extra fields")
+        has_extra_fields = False
 
-        if data != model.dict(exclude_none=True):
+        if isinstance(data, DocumentReference):
+            has_extra_fields = (
+                len(set(resource.__dict__) - set(resource.__fields__)) > 0
+            )
+        else:
+            has_extra_fields = data != resource.dict(exclude_none=True)
+
+        if has_extra_fields:
             self.result.add_error(
                 issue_code="invalid",
                 error_code="INVALID_RESOURCE",

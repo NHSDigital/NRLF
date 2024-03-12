@@ -7,42 +7,40 @@ from nrlf.core.decorators import (
 from nrlf.core.dynamodb.model import DocumentPointer
 from nrlf.core.model import ConnectionMetadata
 from nrlf.core.response import Response, SpineErrorConcept
-from nrlf.core.transform import DocumentReferenceValidator, ParseError
+from nrlf.core.validators import DocumentReferenceValidator
 from nrlf.producer.fhir.r4.model import DocumentReference, OperationOutcomeIssue
 
 
-@request_handler()
+@request_handler(body=DocumentReference)
 def handler(
     event: APIGatewayProxyEvent,
     metadata: ConnectionMetadata,
     repository: DocumentPointerRepository,
+    body: DocumentReference,
 ) -> Response:
     """
     Entrypoint for the updateDocumentReference function
     """
-    subject = (event.path_parameters or {}).get("id", "unknown")
-
-    body = event.json_body
-    if not body:
+    if not (pointer_id := (event.path_parameters or {}).get("id")):
         return Response.from_issues(
-            statusCode="400",
             issues=[
                 OperationOutcomeIssue(
                     severity="error",
-                    code="bad-request",
-                    details=SpineErrorConcept.from_code("BAD_REQUEST"),
-                    diagnostics="The request body is empty",
+                    code="invalid",
+                    details=SpineErrorConcept.from_code("INVALID_IDENTIFIER_VALUE"),
+                    diagnostics="Invalid document reference ID provided in the path parameters",
                 )
             ],
+            statusCode="400",
         )
 
-    if "id" in body and body["id"] != subject:
+    if body.id != pointer_id:
         return Response.from_issues(
             statusCode="400",
             issues=[
                 OperationOutcomeIssue(
                     severity="error",
-                    code="bad-request",
+                    code="invalid",
                     details=SpineErrorConcept.from_code("BAD_REQUEST"),
                     diagnostics="The document id in the path does not match the document id in the body",
                 )
@@ -51,32 +49,27 @@ def handler(
 
     validator = DocumentReferenceValidator()
 
-    try:
-        result = validator.validate(body)
-
-    except ParseError as error:
-        return Response.from_issues(statusCode="400", issues=error.issues)
+    result = validator.validate(body)
 
     if not result.is_valid:
         return Response.from_issues(statusCode="400", issues=result.issues)
 
     core_model = DocumentPointer.from_document_reference(result.resource)
 
-    # TODO: Data contracts
     if metadata.ods_code_parts != tuple(core_model.producer_id.split("|")):
         return Response.from_issues(
-            statusCode="400",
+            statusCode="401",
             issues=[
                 OperationOutcomeIssue(
                     severity="error",
-                    code="bad-request",
-                    details=SpineErrorConcept.from_code("BAD_REQUEST"),
+                    code="invalid",
+                    details=SpineErrorConcept.from_code("AUTHOR_CREDENTIALS_ERROR"),
                     diagnostics="The id of the provided document pointer does not include the expected organisation code for this app",
                 )
             ],
         )
 
-    if not (existing_model := repository.get_by_id(subject)):
+    if not (existing_model := repository.get_by_id(pointer_id)):
         return Response.from_issues(
             statusCode="404",
             issues=[
@@ -111,9 +104,9 @@ def handler(
                 issues=[
                     OperationOutcomeIssue(
                         severity="error",
-                        code="bad-request",
+                        code="invalid",
                         details=SpineErrorConcept.from_code("BAD_REQUEST"),
-                        diagnostics=f"The field {field} is immutable and cannot be updated",
+                        diagnostics=f"The field '{field}' is immutable and cannot be updated",
                     )
                 ],
             )

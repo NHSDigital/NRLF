@@ -77,7 +77,6 @@ def test_validation_result_add_error():
                     "display": "Bad request",
                 }
             ],
-            "text": "Bad request",
         },
         "diagnostics": "diagnostics",
         "expression": ["field"],
@@ -172,8 +171,7 @@ def test_document_reference_validator_parse_invalid():
                     "code": "INVALID_RESOURCE",
                     "display": "Invalid validation of resource",
                 }
-            ],
-            "text": "Invalid validation of resource",
+            ]
         },
         "diagnostics": "Failed to parse DocumentReference resource (id: str type expected)",
         "expression": ["id"],
@@ -188,8 +186,7 @@ def test_document_reference_validator_parse_invalid():
                     "code": "INVALID_RESOURCE",
                     "display": "Invalid validation of resource",
                 }
-            ],
-            "text": "Invalid validation of resource",
+            ]
         },
         "diagnostics": "Failed to parse DocumentReference resource (type: value is not a valid dict)",
         "expression": ["type"],
@@ -231,8 +228,7 @@ def test_validate_document_reference_missing_fields():
                     "code": "INVALID_RESOURCE",
                     "display": "Invalid validation of resource",
                 }
-            ],
-            "text": "Invalid validation of resource",
+            ]
         },
         "diagnostics": "The required field 'custodian' is missing",
         "expression": ["custodian"],
@@ -286,8 +282,7 @@ def test_validate_document_reference_extra_fields():
                     "code": "INVALID_RESOURCE",
                     "display": "Invalid validation of resource",
                 }
-            ],
-            "text": "Invalid validation of resource",
+            ]
         },
         "diagnostics": "The resource contains extra fields",
     }
@@ -314,8 +309,7 @@ def test_validate_identifiers_no_custodian_identifier():
                     "code": "INVALID_RESOURCE",
                     "display": "Invalid validation of resource",
                 }
-            ],
-            "text": "Invalid validation of resource",
+            ]
         },
         "diagnostics": "Custodian must have an identifier",
         "expression": ["custodian.identifier"],
@@ -343,8 +337,7 @@ def test_validate_identifiers_no_subject_identifier():
                     "code": "INVALID_RESOURCE",
                     "display": "Invalid validation of resource",
                 }
-            ],
-            "text": "Invalid validation of resource",
+            ]
         },
         "diagnostics": "Subject must have an identifier",
         "expression": ["subject.identifier"],
@@ -373,8 +366,7 @@ def test_validate_identifiers_invalid_systems():
                     "code": "INVALID_IDENTIFIER_SYSTEM",
                     "display": "Invalid identifier system",
                 }
-            ],
-            "text": "Invalid identifier system",
+            ]
         },
         "diagnostics": "Provided custodian identifier system is not the ODS system (expected: 'https://fhir.nhs.uk/Id/ods-organization-code')",
         "expression": ["custodian.identifier.system"],
@@ -389,8 +381,7 @@ def test_validate_identifiers_invalid_systems():
                     "code": "INVALID_IDENTIFIER_SYSTEM",
                     "display": "Invalid identifier system",
                 }
-            ],
-            "text": "Invalid identifier system",
+            ]
         },
         "diagnostics": "Provided subject identifier system is not the NHS number system (expected 'https://fhir.nhs.uk/Id/nhs-number')",
         "expression": ["subject.identifier.system"],
@@ -448,8 +439,7 @@ def test_validate_relates_to_invalid_code():
                     "code": "INVALID_CODE_VALUE",
                     "display": "Invalid code value",
                 }
-            ],
-            "text": "Invalid code value",
+            ]
         },
         "diagnostics": "Invalid relatesTo code: invalid",
         "expression": ["relatesTo[0].code"],
@@ -476,8 +466,7 @@ def test_validate_relates_to_no_target_identifier():
                     "code": "INVALID_IDENTIFIER_VALUE",
                     "display": "Invalid identifier value",
                 }
-            ],
-            "text": "Invalid identifier value",
+            ]
         },
         "diagnostics": "relatesTo code 'replaces' must have a target identifier",
         "expression": ["relatesTo[0].target.identifier.value"],

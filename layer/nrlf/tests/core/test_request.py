@@ -28,8 +28,7 @@ def test_parse_headers_empty_headers():
                             "code": "MISSING_OR_INVALID_HEADER",
                             "display": "There is a required header missing or invalid",
                         }
-                    ],
-                    "text": "There is a required header missing or invalid",
+                    ]
                 },
                 "diagnostics": "Unable to parse metadata about the requesting application. Contact the onboarding team.",
             }
@@ -94,7 +93,6 @@ def test_parse_headers_invalid_headers():
                             "display": "There is a required header missing or invalid",
                         }
                     ],
-                    "text": "There is a required header missing or invalid",
                 },
                 "diagnostics": "Unable to parse metadata about the requesting application. Contact the onboarding team.",
             }

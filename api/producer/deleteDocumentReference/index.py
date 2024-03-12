@@ -20,14 +20,24 @@ def handler(
     """
     Entrypoint for the deleteDocumentReference function
     """
-    pointer_id = urllib.parse.unquote(
-        (event.path_parameters or {}).get("id", "unknown")
-    )
-    producer_id, _ = pointer_id.split("-", 1)
+    if not (subject := (event.path_parameters or {}).get("id")):
+        return Response.from_issues(
+            issues=[
+                OperationOutcomeIssue(
+                    severity="error",
+                    code="invalid",
+                    details=SpineErrorConcept.from_code("INVALID_IDENTIFIER_VALUE"),
+                    diagnostics="Invalid document reference ID provided in the path parameters",
+                )
+            ],
+            statusCode="400",
+        )
 
+    pointer_id = urllib.parse.unquote(subject)
+    producer_id, _ = pointer_id.split("-", 1)
     if metadata.ods_code_parts != tuple(producer_id.split(".")):
         return Response.from_issues(
-            statusCode="403",
+            statusCode="401",
             issues=[
                 OperationOutcomeIssue(
                     severity="error",
