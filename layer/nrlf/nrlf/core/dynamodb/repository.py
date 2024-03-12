@@ -199,7 +199,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         if custodian_suffix:
             expression_attribute_values[":pk_2"] = f"O#{custodian}#{custodian_suffix}"
 
-        if pointer_types:
+        if pointer_types is not None:
             pointer_type_filters = []
             expression_attribute_names["#pointer_type"] = "type"
 
@@ -284,7 +284,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         producer_id, document_id = id_.split("-", 1)
         ods_code_parts = producer_id.split(".")
         partition_key = "D#" + "#".join([*ods_code_parts, document_id])
-        self.table.delete_item(Key={"pk": partition_key})
+        self.table.delete_item(Key={"pk": partition_key, "sk": partition_key})
 
     def _query(self, **kwargs) -> Iterator[DocumentPointer]:
         """

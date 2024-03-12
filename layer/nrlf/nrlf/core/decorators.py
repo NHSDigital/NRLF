@@ -22,7 +22,6 @@ from nrlf.core.request import parse_headers
 from nrlf.core.response import Response
 
 RequestHandler = Callable[..., Response]
-DYNAMODB_RESOURCE = boto3.resource("dynamodb")
 
 
 def error_handler(
@@ -100,9 +99,7 @@ def request_handler(
 
             if params is not None:
                 try:
-                    kwargs["params"] = params.parse_obj(
-                        event.query_string_parameters or {}
-                    )
+                    kwargs["params"] = params.parse_obj(event.query_string_parameters)
                 except ValidationError as exc:
                     raise ParseError.from_validation_error(
                         exc,
@@ -111,16 +108,8 @@ def request_handler(
                     ) from None
 
             if body is not None:
-                if not event.body:
-                    raise OperationOutcomeError(
-                        severity="error",
-                        code="invalid",
-                        details=SpineErrorConcept.from_code("BAD_REQUEST"),
-                        diagnostics="Request body is missing",
-                    )
-
                 try:
-                    kwargs["body"] = body.parse_raw(event.body or "{}")
+                    kwargs["body"] = body.parse_raw(event.body or "")
                 except ValidationError as exc:
                     raise ParseError.from_validation_error(
                         exc,
@@ -130,7 +119,8 @@ def request_handler(
 
             if repository is not None:
                 kwargs["repository"] = repository(
-                    dynamodb=DYNAMODB_RESOURCE, environment_prefix=CONFIG.PREFIX
+                    dynamodb=boto3.resource("dynamodb"),
+                    environment_prefix=CONFIG.PREFIX,
                 )
 
             function_kwargs = {}

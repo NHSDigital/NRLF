@@ -4,17 +4,17 @@ from typing import Dict, List
 import boto3
 from aws_lambda_powertools.utilities.data_classes import event_source
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
-    DENY_ALL_RESPONSE,
     APIGatewayAuthorizerRequestEvent,
     APIGatewayAuthorizerResponse,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from botocore.exceptions import ClientError
 
 from nrlf.core.config import AuthorizerConfig
+from nrlf.core.errors import OperationOutcomeError
 from nrlf.core.logger import logger
 from nrlf.core.request import parse_headers
 
-S3_CLIENT = boto3.client("s3")
 CONFIG = AuthorizerConfig()
 
 
@@ -31,29 +31,35 @@ def get_pointer_types(headers: Dict[str, str]) -> List[str]:
     key = f"{app_id}/{ods_code}.json"
     logger.debug("Getting pointer types", key=key)
 
+    s3_client = boto3.client("s3")
+
     try:
-        response = S3_CLIENT.get_object(Bucket=CONFIG.AUTH_STORE, Key=key)
+        response = s3_client.get_object(Bucket=CONFIG.AUTH_STORE, Key=key)
         pointer_types = json.loads(response["Body"].read())
         logger.debug("Pointer types", pointer_types=pointer_types)
         return pointer_types
 
-    except S3_CLIENT.exceptions.NoSuchKey:
-        logger.info("No pointer types found", headers=headers)
-        return []
+    except ClientError as exc:
+        if exc.response.get("Error", {}).get("Code") == "NoSuchKey":
+            logger.info("No pointer types found", headers=headers)
+            return []
 
-    except Exception as e:
-        logger.exception("Failed to get pointer types", headers=headers, error=str(e))
-        return []
+        raise exc
+
+    except Exception as exc:
+        logger.exception("Failed to get pointer types", headers=headers, error=str(exc))
+        raise exc
 
 
 @event_source(data_class=APIGatewayAuthorizerRequestEvent)
 def handler(event: APIGatewayAuthorizerRequestEvent, context: LambdaContext):
     """"""
-    pointer_types = get_pointer_types(event.headers)
+    try:
+        pointer_types = get_pointer_types(event.headers)
 
-    if pointer_types == []:
-        logger.info("No pointer types found", headers=event.headers)
-        return {**DENY_ALL_RESPONSE, "context": {"error": "No pointer types found"}}
+    except OperationOutcomeError as error:
+        logger.error("Failed to get pointer types", headers=event.headers, error=error)
+        pointer_types = []
 
     arn = event.parsed_arn
     policy = APIGatewayAuthorizerResponse(
@@ -65,9 +71,15 @@ def handler(event: APIGatewayAuthorizerRequestEvent, context: LambdaContext):
         stage=arn.stage,
     )
 
-    policy.allow_all_routes()
-    response = policy.asdict()
+    if pointer_types == []:
+        policy.deny_route(http_method=arn.http_method, resource=arn.resource)
+        policy.context = {"error": "No pointer types found"}
+        logger.info("No pointer types found", headers=event.headers)
 
+    else:
+        policy.allow_route(http_method=arn.http_method, resource=arn.resource)
+
+    response = policy.asdict()
     logger.info("Authorizer response", response=response)
 
     return response

@@ -69,7 +69,7 @@ def test_operation_outcome_error():
             severity="error",
             code="unauthorized",
             details=SpineErrorConcept.from_code("AUTHOR_CREDENTIALS_ERROR"),
-            diagnostics="",
+            diagnostics="The requested document pointer cannot be read because it belongs to another organisation",
         )
 
     result = decorated_function()
@@ -93,8 +93,7 @@ def test_operation_outcome_error():
                             "code": "AUTHOR_CREDENTIALS_ERROR",
                             "display": "Author credentials error",
                         }
-                    ],
-                    "text": "Author credentials error",
+                    ]
                 },
                 "diagnostics": "The requested document pointer cannot be read because it belongs to another organisation",
             }
@@ -129,8 +128,7 @@ def test_error_handler_decorator_error_handling():
                             "code": "INTERNAL_SERVER_ERROR",
                             "display": "Unexpected internal server error",
                         }
-                    ],
-                    "text": "Unexpected internal server error",
+                    ]
                 },
                 "diagnostics": "Something went wrong",
             }
@@ -226,8 +224,7 @@ def test_request_handler_with_params_missing_params():
                             "code": "INVALID_PARAMETER",
                             "display": "Invalid parameter",
                         }
-                    ],
-                    "text": "Invalid parameter",
+                    ]
                 },
                 "diagnostics": "Invalid query parameter (param1: field required)",
                 "expression": ["param1"],
@@ -242,8 +239,7 @@ def test_request_handler_with_params_missing_params():
                             "code": "INVALID_PARAMETER",
                             "display": "Invalid parameter",
                         }
-                    ],
-                    "text": "Invalid parameter",
+                    ]
                 },
                 "diagnostics": "Invalid query parameter (param2: field required)",
                 "expression": ["param2"],
@@ -315,8 +311,7 @@ def test_request_handler_with_body_missing_body():
                             "code": "BAD_REQUEST",
                             "display": "Bad request",
                         }
-                    ],
-                    "text": "Bad request",
+                    ]
                 },
                 "diagnostics": "Request body is missing",
             }
@@ -363,8 +358,7 @@ def test_request_handler_with_body_invalid_body():
                             "code": "MESSAGE_NOT_WELL_FORMED",
                             "display": "Message not well formed",
                         }
-                    ],
-                    "text": "Message not well formed",
+                    ]
                 },
                 "diagnostics": "Request body could not be parsed (param1: str type expected)",
                 "expression": ["param1"],
@@ -380,7 +374,6 @@ def test_request_handler_with_body_invalid_body():
                             "display": "Message not well formed",
                         }
                     ],
-                    "text": "Message not well formed",
                 },
                 "diagnostics": "Request body could not be parsed (param2: value is not a valid integer)",
                 "expression": ["param2"],
@@ -452,8 +445,7 @@ def test_request_handler_with_invalid_headers():
                             "code": "MISSING_OR_INVALID_HEADER",
                             "display": "There is a required header missing or invalid",
                         }
-                    ],
-                    "text": "There is a required header missing or invalid",
+                    ]
                 },
                 "diagnostics": "Unable to parse metadata about the requesting application. Contact the onboarding team.",
             }

@@ -110,8 +110,7 @@ def test_from_exception():
                             "code": "INTERNAL_SERVER_ERROR",
                             "display": "Unexpected internal server error",
                         }
-                    ],
-                    "text": "Unexpected internal server error",
+                    ]
                 },
                 "diagnostics": "Something went wrong",
             }

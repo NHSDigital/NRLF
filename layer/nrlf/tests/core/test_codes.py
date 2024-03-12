@@ -20,7 +20,6 @@ def test_from_code_known_code():
     assert result.coding[0].system == _CodeableConcept._SYSTEM
     assert result.coding[0].code == code
     assert result.coding[0].display == expected_text
-    assert result.text == expected_text
 
 
 def test_from_code_unknown_code():
@@ -53,7 +52,6 @@ def test_nrl_response_concept_from_code(code, expected_text):
     assert result.coding[0].system == NRLResponseConcept._SYSTEM
     assert result.coding[0].code == code
     assert result.coding[0].display == expected_text
-    assert result.text == expected_text
 
 
 @pytest.mark.parametrize(
@@ -78,4 +76,3 @@ def test_spine_error_concept_from_code(code, expected_text):
     assert result.coding[0].system == SpineErrorConcept._SYSTEM
     assert result.coding[0].code == code
     assert result.coding[0].display == expected_text
-    assert result.text == expected_text

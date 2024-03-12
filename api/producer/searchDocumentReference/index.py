@@ -2,7 +2,12 @@ from nrlf.core.decorators import DocumentPointerRepository, request_handler
 from nrlf.core.model import ConnectionMetadata, ProducerRequestParams
 from nrlf.core.response import Response, SpineErrorConcept
 from nrlf.core.validators import validate_type_system
-from nrlf.producer.fhir.r4.model import Bundle, DocumentReference, OperationOutcomeIssue
+from nrlf.producer.fhir.r4.model import (
+    Bundle,
+    DocumentReference,
+    ExpressionItem,
+    OperationOutcomeIssue,
+)
 
 
 @request_handler(params=ProducerRequestParams)
@@ -20,30 +25,29 @@ def handler(
             issues=[
                 OperationOutcomeIssue(
                     severity="error",
-                    code="bad-request",
+                    code="invalid",
                     details=SpineErrorConcept.from_code("INVALID_NHS_NUMBER"),
-                    diagnostics="NHS number is required to search for document references",
+                    diagnostics="A valid NHS number is required to search for document references",
+                    expression=[ExpressionItem(__root__="subject:identifier")],
                 )
             ],
         )
 
     if not validate_type_system(params.type, metadata.pointer_types):
         return Response.from_issues(
-            statusCode=200,
+            statusCode="400",
             issues=[
                 OperationOutcomeIssue(
                     severity="error",
-                    code="bad-request",
+                    code="invalid",
                     details=SpineErrorConcept.from_code("INVALID_CODE_SYSTEM"),
                     diagnostics="The provided system type value does not match the allowed types",
+                    expression=[ExpressionItem(__root__="type")],
                 )
             ],
         )
 
-    pointer_types = metadata.pointer_types
-    if params.type:
-        pointer_types = [str(params.type)]
-
+    pointer_types = [params.type.__root__] if params.type else metadata.pointer_types
     bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
 
     for result in repository.search_by_custodian(
