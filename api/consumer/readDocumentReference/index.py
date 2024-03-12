@@ -13,9 +13,20 @@ def handler(
     """
     Entrypoint for the readDocumentReference function
     """
-    subject = (event.path_parameters or {}).get("id", "unknown")
-    parsed_id = urllib.parse.unquote(subject)
+    if not (subject := (event.path_parameters or {}).get("id")):
+        return Response.from_issues(
+            issues=[
+                OperationOutcomeIssue(
+                    severity="error",
+                    code="invalid",
+                    details=SpineErrorConcept.from_code("INVALID_IDENTIFIER_VALUE"),
+                    diagnostics="Invalid document reference ID provided in the path parameters",
+                )
+            ],
+            statusCode="400",
+        )
 
+    parsed_id = urllib.parse.unquote(subject)
     result = repository.get_by_id(parsed_id)
 
     if result is None:

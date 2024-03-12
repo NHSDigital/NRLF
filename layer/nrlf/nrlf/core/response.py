@@ -1,3 +1,5 @@
+# ruff: noqa: N803, N815
+
 from typing import List
 
 from pydantic import BaseModel, Field

@@ -4,7 +4,9 @@ from typing import Any, Generic, Iterator, List, Optional, Type, TypeVar
 import boto3
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 
+from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.dynamodb.model import DocumentPointer, DynamoDBModel
+from nrlf.core.errors import OperationOutcomeError
 from nrlf.core.logger import logger
 from nrlf.core.types import DynamoDBServiceResource
 
@@ -50,10 +52,18 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         """
         Create a DocumentPointer resource
         """
-        self.table.put_item(
-            Item=item.dict(),
-            ConditionExpression="attribute_not_exists(pk) AND attribute_not_exists(sk)",
-        )
+
+        try:
+            self.table.put_item(
+                Item=item.dict(),
+                ConditionExpression="attribute_not_exists(pk) AND attribute_not_exists(sk)",
+            )
+        except self.dynamodb.meta.client.exceptions.ConditionalCheckFailedException:
+            raise OperationOutcomeError(
+                severity="error",
+                code="conflict",
+                details=SpineErrorConcept.from_code("DUPLICATE_REJECTED"),
+            ) from None
 
         return item
 
@@ -113,7 +123,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
         if pointer_types:
             pointer_type_filters = []
-            expression_attribute_names[f"#pointer_type"] = "type"
+            expression_attribute_names["#pointer_type"] = "type"
 
             for i, pointer_type in enumerate(pointer_types):
                 pointer_type_filters.append(f"#pointer_type = :type_{i}")
@@ -153,7 +163,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
         if pointer_types:
             pointer_type_filters = []
-            expression_attribute_names[f"#pointer_type"] = "type"
+            expression_attribute_names["#pointer_type"] = "type"
 
             for i, pointer_type in enumerate(pointer_types):
                 pointer_type_filters.append(f"#pointer_type = :type_{i}")
@@ -276,7 +286,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         partition_key = "D#" + "#".join([*ods_code_parts, document_id])
         self.table.delete_item(Key={"pk": partition_key})
 
-    def _query(self, IndexName: str, **kwargs) -> Iterator[DocumentPointer]:
+    def _query(self, **kwargs) -> Iterator[DocumentPointer]:
         """
         Wrapper around DynamoDB query method to handle pagination
         Returns an iterator of DocumentPointer objects
@@ -287,13 +297,11 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         logger.info(f"Querying DynamoDB table {self.table_name}", query=query)
 
         paginator = self.dynamodb.meta.client.get_paginator("query")
-        response_iterator = paginator.paginate(
-            TableName=self.table_name, IndexName=IndexName, **query
-        )
+        response_iterator = paginator.paginate(TableName=self.table_name, **query)
 
         for page in response_iterator:
             logger.debug(
-                f"Received page of results",
+                "Received page of results",
                 stats={
                     "count": page["Count"],
                     "scanned_count": page["ScannedCount"],

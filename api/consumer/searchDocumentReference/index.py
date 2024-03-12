@@ -1,32 +1,9 @@
-from typing import List, Optional
-
-from nrlf.consumer.fhir.r4.model import (
-    Bundle,
-    DocumentReference,
-    OperationOutcomeIssue,
-    RequestQueryType,
-)
+from nrlf.consumer.fhir.r4.model import Bundle, DocumentReference, OperationOutcomeIssue
 from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
 from nrlf.core.model import ConnectionMetadata, ConsumerRequestParams
 from nrlf.core.response import Response, SpineErrorConcept
-
-
-def validate_type_system(
-    type_: Optional[RequestQueryType], pointer_types: List[str]
-) -> bool:
-    """
-    Validates if the given type system is present in the list of pointer types.
-    """
-    if not type_:
-        return True
-
-    type_system = str(type_).split("|", 1)[0]
-    pointer_type_systems = [
-        pointer_type.split("|", 1)[0] for pointer_type in pointer_types
-    ]
-
-    return type_system in pointer_type_systems
+from nrlf.core.validators import validate_type_system
 
 
 @request_handler(params=ConsumerRequestParams)
@@ -43,9 +20,9 @@ def handler(
             issues=[
                 OperationOutcomeIssue(
                     severity="error",
-                    code="bad-request",
+                    code="invalid",
                     details=SpineErrorConcept.from_code("INVALID_NHS_NUMBER"),
-                    diagnostics="NHS number is required to search for document references",
+                    diagnostics="A valid NHS number is required to search for document references",
                 )
             ],
             statusCode="400",
@@ -65,9 +42,10 @@ def handler(
         )
 
     bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
+    pointer_types = [params.type.__root__] if params.type else metadata.pointer_types
 
-    for result in repository.search(params.nhs_number):
-        document_reference = DocumentReference.parse_obj(result.document)
+    for result in repository.search(params.nhs_number, pointer_types):
+        document_reference = DocumentReference.parse_raw(result.document)
         bundle["total"] += 1
         bundle["entry"].append({"resource": document_reference.dict(exclude_none=True)})
 

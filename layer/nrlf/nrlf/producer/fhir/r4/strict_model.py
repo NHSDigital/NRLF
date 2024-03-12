@@ -4,8 +4,6 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
-
 from pydantic import BaseModel, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing_extensions import Annotated, Literal
 
@@ -30,7 +28,7 @@ class ExpressionItem(BaseModel):
 
 class BundleEntryRequest(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
@@ -48,25 +46,25 @@ class BundleEntryRequest(BaseModel):
         ),
     ]
     ifNoneMatch: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description='If the ETag values match, return a 304 Not Modified status. See the API documentation for ["Conditional Read"](http.html#cread).'
         ),
     ] = None
     ifModifiedSince: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description='Only perform the operation if the last updated date matches. See the API documentation for ["Conditional Read"](http.html#cread).'
         ),
     ] = None
     ifMatch: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description='Only perform the operation if the Etag value matches. For more information, see the API section ["Managing Resource Contention"](http.html#concurrency).'
         ),
     ] = None
     ifNoneExist: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description='Instruct the server not to perform the create if a specified resource already exists. For further information, see the API documentation for ["Conditional Create"](http.html#ccreate). This is just the query portion of the URL &ndash; what follows the "?" (not including the "?").'
         ),
@@ -75,19 +73,19 @@ class BundleEntryRequest(BaseModel):
 
 class BundleEntrySearch(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
     mode: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Why this entry is in the result set &ndash; whether it's included as a match or because of an _include requirement, or to convey information or warning information about the search process."
         ),
     ] = None
     score: Annotated[
-        Optional[StrictFloat],
+        StrictFloat | None,
         Field(
             description="When searching, the server's search ranking score for the entry."
         ),
@@ -96,7 +94,7 @@ class BundleEntrySearch(BaseModel):
 
 class BundleLink(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
@@ -112,88 +110,88 @@ class BundleLink(BaseModel):
 
 class Attachment(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
     contentType: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate."
         ),
     ] = None
     language: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The human language of the content. The value can be any valid value according to BCP 47."
         ),
     ] = None
     data: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The actual data of the attachment &ndash; a sequence of bytes, base64 encoded."
         ),
     ] = None
     url: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(description="A location where the data can be accessed."),
     ] = None
     size: Annotated[
-        Optional[StrictInt],
+        StrictInt | None,
         Field(
             description="The number of bytes of data that make up this attachment (before base64 encoding, if that is done)."
         ),
     ] = None
     hash: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The calculated hash of the data using SHA&ndash;1. Represented using base64."
         ),
     ] = None
     title: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(description="A label or set of text to display in place of the data."),
     ] = None
     creation: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(description="The date that the attachment was first created."),
     ] = None
 
 
 class Coding(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
     system: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The identification of the code system that defines the meaning of the symbol in the code."
         ),
     ] = None
     version: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The version of the code system which was used when choosing this code. Note that a well&ndash;maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged."
         ),
     ] = None
     code: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post&ndash;coordination)."
         ),
     ] = None
     display: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="A representation of the meaning of the code in the system, following the rules of the system."
         ),
     ] = None
     userSelected: Annotated[
-        Optional[StrictBool],
+        StrictBool | None,
         Field(
             description="Indicates that this coding was chosen by a user directly &ndash; e.g. off a pick list of available items (codes or displays)."
         ),
@@ -202,17 +200,17 @@ class Coding(BaseModel):
 
 class Period(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
     start: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(description="The start of the period. The boundary is inclusive."),
     ] = None
     end: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The end of the period. If the end of the period is missing, it means no end was known or planned at the time the instance was created. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time."
         ),
@@ -221,35 +219,35 @@ class Period(BaseModel):
 
 class Quantity(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
     value: Annotated[
-        Optional[StrictFloat],
+        StrictFloat | None,
         Field(
             description="The value of the measured amount. The value includes an implicit precision in the presentation of the value."
         ),
     ] = None
     comparator: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description='How the value should be understood and represented &ndash; whether the actual value is greater or less than the stated value due to measurement issues; e.g. if the comparator is "<" , then the real value is < stated value.'
         ),
     ] = None
     unit: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(description="A human&ndash;readable form of the unit."),
     ] = None
     system: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The identification of the system that provides the coded form of the unit."
         ),
     ] = None
     code: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="A computer processable form of the unit in some unit representation system."
         ),
@@ -267,37 +265,37 @@ class ProfileItem(BaseModel):
 
 class Meta(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
     versionId: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The version specific identifier, as it appears in the version portion of the URL. This value changes when the resource is created, updated, or deleted."
         ),
     ] = None
     lastUpdated: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="When the resource last changed &ndash; e.g. when the version changed."
         ),
     ] = None
     source: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="A uri that identifies the source system of the resource. This provides a minimal amount of [Provenance](provenance.html#) information that can be used to track or differentiate the source of information in the resource. The source may identify another FHIR server, document, message, database, etc."
         ),
     ] = None
-    profile: Optional[List[ProfileItem]] = None
-    security: Optional[List[Coding]] = None
-    tag: Optional[List[Coding]] = None
+    profile: list[ProfileItem] | None = None
+    security: list[Coding] | None = None
+    tag: list[Coding] | None = None
 
 
 class Narrative(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
@@ -360,7 +358,7 @@ class RequestHeaderCorrelationId(BaseModel):
 
 class DocumentReferenceContent(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
@@ -372,7 +370,7 @@ class DocumentReferenceContent(BaseModel):
         ),
     ]
     format: Annotated[
-        Optional[Coding],
+        Coding | None,
         Field(
             description="An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType."
         ),
@@ -381,14 +379,14 @@ class DocumentReferenceContent(BaseModel):
 
 class CodeableConcept(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
-    coding: Optional[List[Coding]] = None
+    coding: list[Coding] | None = None
     text: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user."
         ),
@@ -401,17 +399,17 @@ class RequestHeader(BaseModel):
 
 class RequestParams(BaseModel):
     subject_identifier: Annotated[
-        Optional[RequestQuerySubject], Field(alias="subject:identifier")
+        RequestQuerySubject | None, Field(alias="subject:identifier")
     ] = None
-    type: Optional[RequestQueryType] = None
+    type: RequestQueryType | None = None
     next_page_token: Annotated[
-        Optional[NextPageToken], Field(alias="next-page-token")
+        NextPageToken | None, Field(alias="next-page-token")
     ] = None
 
 
 class OperationOutcomeIssue(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
@@ -429,134 +427,134 @@ class OperationOutcomeIssue(BaseModel):
         ),
     ]
     details: Annotated[
-        Optional[CodeableConcept],
+        CodeableConcept | None,
         Field(
             description="Additional details about the error. This may be a text description of the error or a system code that identifies the error."
         ),
     ] = None
     diagnostics: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(description="Additional diagnostic information about the issue."),
     ] = None
-    location: Optional[List[LocationItem]] = None
-    expression: Optional[List[ExpressionItem]] = None
+    location: list[LocationItem] | None = None
+    expression: list[ExpressionItem] | None = None
 
 
 class OperationOutcome(BaseModel):
     resourceType: Literal["OperationOutcome"]
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes."
         ),
     ] = None
     meta: Annotated[
-        Optional[Meta],
+        Meta | None,
         Field(
             description="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource."
         ),
     ] = None
     implicitRules: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc."
         ),
     ] = None
     language: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(description="The base language in which the resource is written."),
     ] = None
     text: Annotated[
-        Optional[Narrative],
+        Narrative | None,
         Field(
             description='A human&ndash;readable narrative that contains a summary of the resource and can be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it "clinically safe" for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety.'
         ),
     ] = None
-    issue: Annotated[List[OperationOutcomeIssue], Field(min_items=1)]
+    issue: Annotated[list[OperationOutcomeIssue], Field(min_items=1)]
 
 
 class DocumentReference(BaseModel):
     resourceType: Literal["DocumentReference"]
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes."
         ),
     ] = None
     meta: Annotated[
-        Optional[Meta],
+        Meta | None,
         Field(
             description="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource."
         ),
     ] = None
     implicitRules: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc."
         ),
     ] = None
     language: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(description="The base language in which the resource is written."),
     ] = None
     text: Annotated[
-        Optional[Narrative],
+        Narrative | None,
         Field(
             description='A human&ndash;readable narrative that contains a summary of the resource and can be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it "clinically safe" for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety.'
         ),
     ] = None
     masterIdentifier: Annotated[
-        Optional[Identifier],
+        Identifier | None,
         Field(
             description="Document identifier as assigned by the source of the document. This identifier is specific to this version of the document. This unique identifier may be used elsewhere to identify this version of the document."
         ),
     ] = None
-    identifier: Optional[List[Identifier]] = None
+    identifier: list[Identifier] | None = None
     status: Annotated[
         StrictStr, Field(description="The status of this document reference.")
     ]
     docStatus: Annotated[
-        Optional[StrictStr], Field(description="The status of the underlying document.")
+        StrictStr | None, Field(description="The status of the underlying document.")
     ] = None
     type: Annotated[
-        Optional[CodeableConcept],
+        CodeableConcept | None,
         Field(
             description="Specifies the particular kind of document referenced  (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the document referenced."
         ),
     ] = None
-    category: Optional[List[CodeableConcept]] = None
+    category: list[CodeableConcept] | None = None
     subject: Annotated[
-        Optional[Reference],
+        Reference | None,
         Field(
             description="Who or what the document is about. The document can be about a person, (patient or healthcare practitioner), a device (e.g. a machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure)."
         ),
     ] = None
     date: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(description="When the document reference was created."),
     ] = None
-    author: Optional[List[Reference]] = None
+    author: list[Reference] | None = None
     authenticator: Annotated[
-        Optional[Reference],
+        Reference | None,
         Field(
             description="Which person or organization authenticates that this document is valid."
         ),
     ] = None
     custodian: Annotated[
-        Optional[Reference],
+        Reference | None,
         Field(
             description="Identifies the organization or group who is responsible for ongoing maintenance of and access to the document."
         ),
     ] = None
-    relatesTo: Optional[List[DocumentReferenceRelatesTo]] = None
+    relatesTo: list[DocumentReferenceRelatesTo] | None = None
     description: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(description="Human&ndash;readable description of the source document."),
     ] = None
-    securityLabel: Optional[List[CodeableConcept]] = None
-    content: Annotated[List[DocumentReferenceContent], Field(min_items=1)]
+    securityLabel: list[CodeableConcept] | None = None
+    content: Annotated[list[DocumentReferenceContent], Field(min_items=1)]
     context: Annotated[
-        Optional[DocumentReferenceContext],
+        DocumentReferenceContext | None,
         Field(description="The clinical context in which the document was prepared."),
     ] = None
 
@@ -564,29 +562,29 @@ class DocumentReference(BaseModel):
 class Bundle(BaseModel):
     resourceType: Literal["Bundle"]
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes."
         ),
     ] = None
     meta: Annotated[
-        Optional[Meta],
+        Meta | None,
         Field(
             description="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource."
         ),
     ] = None
     implicitRules: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc."
         ),
     ] = None
     language: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(description="The base language in which the resource is written."),
     ] = None
     identifier: Annotated[
-        Optional[Identifier],
+        Identifier | None,
         Field(
             description="A persistent identifier for the bundle that won't change as a bundle is copied from server to server."
         ),
@@ -598,21 +596,21 @@ class Bundle(BaseModel):
         ),
     ]
     timestamp: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The date/time that the bundle was assembled &ndash; i.e. when the resources were placed in the bundle."
         ),
     ] = None
     total: Annotated[
-        Optional[StrictInt],
+        StrictInt | None,
         Field(
             description="If a set of search matches, this is the total number of entries of type 'match' across all pages in the search.  It does not include search.mode = 'include' or 'outcome' entries and it does not provide a count of the number of entries in the Bundle."
         ),
     ] = None
-    link: Optional[List[BundleLink]] = None
-    entry: Optional[List[BundleEntry]] = None
+    link: list[BundleLink] | None = None
+    entry: list[BundleEntry] | None = None
     signature: Annotated[
-        Optional[Signature],
+        Signature | None,
         Field(
             description="Digital Signature &ndash; base64 encoded. XML&ndash;DSig or a JWT."
         ),
@@ -621,38 +619,38 @@ class Bundle(BaseModel):
 
 class BundleEntry(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
-    link: Optional[List[BundleLink]] = None
+    link: list[BundleLink] | None = None
     fullUrl: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The Absolute URL for the resource.  The fullUrl SHALL NOT disagree with the id in the resource &ndash; i.e. if the fullUrl is not a urn:uuid, the URL shall be version&ndash;independent URL consistent with the Resource.id. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: \n* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)\n* Results from operations might involve resources that are not identified."
         ),
     ] = None
     resource: Annotated[
-        Optional[DocumentReference],
+        DocumentReference | None,
         Field(
             description="The Resource for the entry. The purpose/meaning of the resource is determined by the Bundle.type."
         ),
     ] = None
     search: Annotated[
-        Optional[BundleEntrySearch],
+        BundleEntrySearch | None,
         Field(
             description="Information about the search process that lead to the creation of this entry."
         ),
     ] = None
     request: Annotated[
-        Optional[BundleEntryRequest],
+        BundleEntryRequest | None,
         Field(
             description="Additional information about how this entry should be processed as part of a transaction or batch.  For history, it shows how the entry was processed to create the version contained in the entry."
         ),
     ] = None
     response: Annotated[
-        Optional[BundleEntryResponse],
+        BundleEntryResponse | None,
         Field(
             description="Indicates the results of processing the corresponding 'request' entry in the batch or transaction being responded to or what the results of an operation where when returning history."
         ),
@@ -661,7 +659,7 @@ class BundleEntry(BaseModel):
 
 class BundleEntryResponse(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
@@ -673,25 +671,25 @@ class BundleEntryResponse(BaseModel):
         ),
     ]
     location: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The location header created by processing this operation, populated if the operation returns a location."
         ),
     ] = None
     etag: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The Etag for the resource, if the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency))."
         ),
     ] = None
     lastModified: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The date/time that the resource was modified on the server."
         ),
     ] = None
     outcome: Annotated[
-        Optional[DocumentReference],
+        DocumentReference | None,
         Field(
             description="An OperationOutcome containing hints and warnings produced as part of processing this entry in a batch or transaction."
         ),
@@ -700,41 +698,41 @@ class BundleEntryResponse(BaseModel):
 
 class DocumentReferenceContext(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
-    encounter: Optional[List[Reference]] = None
-    event: Optional[List[CodeableConcept]] = None
+    encounter: list[Reference] | None = None
+    event: list[CodeableConcept] | None = None
     period: Annotated[
-        Optional[Period],
+        Period | None,
         Field(
             description="The time period over which the service that is described by the document was provided."
         ),
     ] = None
     facilityType: Annotated[
-        Optional[CodeableConcept],
+        CodeableConcept | None,
         Field(description="The kind of facility where the patient was seen."),
     ] = None
     practiceSetting: Annotated[
-        Optional[CodeableConcept],
+        CodeableConcept | None,
         Field(
             description="This property may convey specifics about the practice setting where the content was created, often reflecting the clinical specialty."
         ),
     ] = None
     sourcePatientInfo: Annotated[
-        Optional[Reference],
+        Reference | None,
         Field(
             description="The Patient Information as known when the document was published. May be a reference to a version specific, or contained."
         ),
     ] = None
-    related: Optional[List[Reference]] = None
+    related: list[Reference] | None = None
 
 
 class DocumentReferenceRelatesTo(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
@@ -752,69 +750,69 @@ class DocumentReferenceRelatesTo(BaseModel):
 
 class Identifier(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
     use: Annotated[
-        Optional[StrictStr], Field(description="The purpose of this identifier.")
+        StrictStr | None, Field(description="The purpose of this identifier.")
     ] = None
     type: Annotated[
-        Optional[CodeableConcept],
+        CodeableConcept | None,
         Field(
             description="A coded type for the identifier that can be used to determine which identifier to use for a specific purpose."
         ),
     ] = None
     system: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Establishes the namespace for the value &ndash; that is, a URL that describes a set values that are unique."
         ),
     ] = None
     value: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The portion of the identifier typically relevant to the user and which is unique within the context of the system."
         ),
     ] = None
     period: Annotated[
-        Optional[Period],
+        Period | None,
         Field(description="Time period during which identifier is/was valid for use."),
     ] = None
     assigner: Annotated[
-        Optional[Reference],
+        Reference | None,
         Field(description="Organization that issued/manages the identifier."),
     ] = None
 
 
 class Reference(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
     reference: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources."
         ),
     ] = None
     type: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description='The expected type of the target of the reference. If both Reference.type and Reference.reference are populated and Reference.reference is a FHIR URL, both SHALL be consistent.\nThe type is the Canonical URL of Resource Definition that is the type this reference refers to. References are URLs that are relative to http://hl7.org/fhir/StructureDefinition/ e.g. "Patient" is a reference to http://hl7.org/fhir/StructureDefinition/Patient. Absolute URLs are only allowed for logical models (and can only be used in references in logical models, not resources).'
         ),
     ] = None
     identifier: Annotated[
-        Optional[Identifier],
+        Identifier | None,
         Field(
             description="An identifier for the target resource. This is used when there is no way to reference the other resource directly, either because the entity it represents is not available through a FHIR server, or because there is no way for the author of the resource to convert a known identifier to an actual location. There is no requirement that a Reference.identifier point to something that is actually exposed as a FHIR instance, but it SHALL point to a business concept that would be expected to be exposed as a FHIR instance, and that instance would need to be of a FHIR resource type allowed by the reference."
         ),
     ] = None
     display: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Plain text narrative that identifies the resource in addition to the resource reference."
         ),
@@ -823,12 +821,12 @@ class Reference(BaseModel):
 
 class Signature(BaseModel):
     id: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."
         ),
     ] = None
-    type: Annotated[List[Coding], Field(min_items=1)]
+    type: Annotated[list[Coding], Field(min_items=1)]
     when: Annotated[
         StrictStr, Field(description="When the digital signature was signed.")
     ]
@@ -839,25 +837,25 @@ class Signature(BaseModel):
         ),
     ]
     onBehalfOf: Annotated[
-        Optional[Reference],
+        Reference | None,
         Field(
             description="A reference to an application&ndash;usable description of the identity that is represented by the signature."
         ),
     ] = None
     targetFormat: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="A mime type that indicates the technical format of the target resources signed by the signature."
         ),
     ] = None
     sigFormat: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jose for JWS, and image/* for a graphical image of a signature, etc."
         ),
     ] = None
     data: Annotated[
-        Optional[StrictStr],
+        StrictStr | None,
         Field(
             description="The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty."
         ),

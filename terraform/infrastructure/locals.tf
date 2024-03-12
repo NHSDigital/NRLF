@@ -36,4 +36,6 @@ locals {
     "prod"        = "api.service.nhs.uk",
   }
   public_domain = try(local.public_domain_map[terraform.workspace], local.apis.domain)
+
+  vpc_cidr_block = "10.0.0.0/16"
 }

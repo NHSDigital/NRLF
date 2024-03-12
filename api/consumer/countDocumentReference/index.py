@@ -1,22 +1,8 @@
-from nhs_number import is_valid as is_valid_nhs_number
-from pydantic import BaseModel, Field, validator
-
-from nrlf.consumer.fhir.r4.model import Bundle
+from nrlf.consumer.fhir.r4.model import Bundle, ExpressionItem, OperationOutcomeIssue
+from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.decorators import DocumentPointerRepository, request_handler
-from nrlf.core.model import ConnectionMetadata
+from nrlf.core.model import ConnectionMetadata, CountRequestParams
 from nrlf.core.response import Response
-
-
-class CountRequestParams(BaseModel):
-    nhs_number: str = Field(alias="subject:identifier")
-
-    @validator("nhs_number", pre=True)
-    def validate_nhs_number(cls, nhs_number: str):
-        nhs_number = nhs_number.split("|", 1)[1]
-        if not is_valid_nhs_number(nhs_number):
-            raise ValueError("Invalid NHS number")
-
-        return nhs_number
 
 
 @request_handler(params=CountRequestParams)
@@ -28,8 +14,22 @@ def handler(
     """
     Entrypoint for the countDocumentReference function
     """
+    if not (nhs_number := params.nhs_number):
+        return Response.from_issues(
+            statusCode="400",
+            issues=[
+                OperationOutcomeIssue(
+                    severity="error",
+                    code="invalid",
+                    details=SpineErrorConcept.from_code("INVALID_IDENTIFIER_VALUE"),
+                    diagnostics="Invalid NHS number provided in the query parameters",
+                    expression=[ExpressionItem(__root__="subject:identifier")],
+                )
+            ],
+        )
+
     result = repository.count_by_nhs_number(
-        nhs_number=params.nhs_number, pointer_types=metadata.pointer_types
+        nhs_number=nhs_number, pointer_types=metadata.pointer_types
     )
 
     bundle = Bundle(resourceType="Bundle", type="searchset", total=result)
