@@ -1220,7 +1220,7 @@ components:
                   title: Mental health crisis plan report
                   creation: "2022-12-21T10:45:41+11:00"
                 format:
-                  system: https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1
+                  system: https://fhir.nhs.uk/England/CodeSystem/England-NRLFormatCode
                   code: "urn:nhs-ic:unstructured"
                   display: Unstructured document
             context:
