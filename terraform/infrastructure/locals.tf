@@ -30,7 +30,7 @@ locals {
   splunk_index            = "aws_recordlocator_${local.splunk_environment}"
   public_domain_map = {
     "int"         = "int.api.service.nhs.uk",
-    "dev"         = "dev.api.service.nhs.uk",
+    "dev"         = "internal-dev.api.service.nhs.uk",
     "ref"         = "ref.api.service.nhs.uk",
     "int-sandbox" = "sandbox.api.service.nhs.uk",
     "prod"        = "api.service.nhs.uk",
