@@ -15,6 +15,7 @@ module "consumer__gateway" {
   authoriser_lambda_arn        = module.consumer__authoriser_lambda.arn
   domain                       = local.apis.domain
   path                         = local.apis.consumer.path
+  capability_statement_content = templatefile("${path.module}/consumer.tftpl", { domain = local.public_domain, id = filesha1("${path.module}/consumer.tftpl") })
   depends_on = [
     aws_acm_certificate_validation.validation
   ]
@@ -40,6 +41,7 @@ module "producer__gateway" {
   authoriser_lambda_arn        = module.producer__authoriser_lambda.arn
   domain                       = local.apis.domain
   path                         = local.apis.producer.path
+  capability_statement_content = templatefile("${path.module}/producer.tftpl", { domain = local.public_domain, id = filesha1("${path.module}/producer.tftpl") })
   depends_on = [
     aws_acm_certificate_validation.validation
   ]
