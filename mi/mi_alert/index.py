@@ -5,7 +5,6 @@ import boto3
 from pydantic import BaseModel, Json
 
 from mi.mi_alert.steps import parse_event, read_body, send_notification
-from nrlf.core_pipeline.validators import json_loads
 
 PENVS = {"dev", "int", "ref", "prod"}
 
@@ -35,5 +34,5 @@ def handler(event: dict, context=None):
         )
     else:
         print(  # noqa:T201
-            json.dumps({"Event received by mi errors bucket": json_loads(body)}), end=""
+            json.dumps({"Event received by mi errors bucket": json.loads(body)}), end=""
         )
