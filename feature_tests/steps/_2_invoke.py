@@ -27,7 +27,7 @@ def producer_create_document_pointer_from_template(
     '{actor_type} "{actor}" upserts a Document Reference from {template_name} template',
     action="upsert",
 )
-def producer_create_document_pointer_from_template(
+def producer_upsert_document_pointer_from_template(
     context: Context, actor_type: str, actor: str, template_name: str
 ):
     test_config: TestConfig = context.test_config
@@ -57,7 +57,7 @@ def producer_create_document_pointer_from_bad_json(
     '{actor_type} "{actor}" upserts a Document Reference with bad json',
     action="upsert",
 )
-def producer_create_document_pointer_from_bad_json(
+def producer_upsert_document_pointer_from_bad_json(
     context: Context,
     actor_type: str,
     actor: str,
