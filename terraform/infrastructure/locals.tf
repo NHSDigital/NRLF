@@ -28,4 +28,12 @@ locals {
   environment_no_hyphen   = replace(local.environment, "-", "")
   splunk_environment      = contains(local.persistent_environments, local.environment) ? local.environment_no_hyphen : "dev" # dev is the default splunk env
   splunk_index            = "aws_recordlocator_${local.splunk_environment}"
+  public_domain_map = {
+    "int"         = "int.api.service.nhs.uk",
+    "dev"         = "internal-dev.api.service.nhs.uk",
+    "ref"         = "ref.api.service.nhs.uk",
+    "int-sandbox" = "sandbox.api.service.nhs.uk",
+    "prod"        = "api.service.nhs.uk",
+  }
+  public_domain = try(local.public_domain_map[terraform.workspace], local.apis.domain)
 }

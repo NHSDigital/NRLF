@@ -258,7 +258,7 @@ paths:
         * `type` MUST match one of the Document Types agreed during [onboarding](#api-description__onboarding). e.g.
           ```
           "type": {
-            "coding\": [
+            "coding": [
               {
                 "system": "http://snomed.info/sct",
                 "code": "1363501000000100",
@@ -270,7 +270,7 @@ paths:
         * `category` SHOULD indicate the broader class of the Document Type as agreed during [onboarding](#api-description__onboarding). e.g.
           ```
           "type": {
-            "coding\": [
+            "coding": [
               {
                 "system": "http://snomed.info/sct",
                 "code": "1102421000000108",
@@ -284,7 +284,7 @@ paths:
           ```
           "format": [
             {
-              "system": "https://fhir.nhs.uk/STU3/CodeSystem/NRL-FormatCode-1",
+              "system": "https://fhir.nhs.uk/England/CodeSystem/England-NRLFormatCode",
               "code": "urn:nhs-ic:unstructured"
               "display": "Unstructured document"
             }
@@ -307,6 +307,97 @@ paths:
               }
             }
           ]
+          ```
+
+        To supersede existing pointers you must further specify:
+
+        * at least one existing pointer in the `relatesTo` with a `code` of `replaces`.
+          ```
+          [
+            {
+              "code": "replaces",
+              "target": {
+                "type": "DocumentReference",
+                "identifier": {
+                  "value": "XYZ-1234567890"
+                }
+              }
+            }
+          ]
+          ```
+
+        * the following fields MUST match the pointers being superseded:
+          * `subject`
+          * `type`
+
+        This will cause a new pointer to be created and superseded pointers to be deleted.  Multiple documents can
+        be superseded.
+
+      responses:
+        "4XX":
+          description: |
+            An error occurred as follows:
+
+            | HTTP status | Error code                 | Description                                                                                                                                |
+            | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+            | 400         | BAD_REQUEST                | Bad Request                                                                                                                                |
+            | 400         | VALIDATION_ERROR           | A parameter or value has resulted in a validation error                                                                                    |
+            | 400         | INVALID_RESOURCE_ID        | Invalid resource ID                                                                                                                        |
+            | 401         | ACCESS_DENIED              | Access Denied                                                                                                                              |
+            | 403         | ACCESS_DENIED              | Forbidden                                                                                                                                  |
+            | 403         | ACCESS_DENIED_LEVEL        | Access has been denied because you need higher level permissions                                                                           |
+            | 404         | RESOURCE_NOT_FOUND         | Resource not found                                                                                                                         |
+            | 409         | INVALID_VALUE              | Invalid value                                                                                                                              |
+
+            The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
+          content:
+            application/fhir+json:
+              schema:
+                $ref: "#/components/schemas/OperationOutcome"
+              example:
+                resourceType: OperationOutcome
+                issue:
+                  - severity: error
+                    code: value
+                    details:
+                      coding:
+                        - system: "https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1"
+                          version: "1"
+                          code: VALIDATION_ERROR
+                          display: A parameter or value has resulted in a validation error
+                    diagnostics: "The requested document pointer cannot be read because it belongs to another organisation"
+        "201":
+          description: Create / Supersede successful response
+          content:
+            application/fhir+json:
+              example:
+                resourceType: OperationOutcome
+                id: 76db24dc-324a-468a-bf02-c06e82279488
+                meta:
+                  profile:
+                    - https://fhir.nhs.uk/StructureDefinition/NHSDigital-OperationOutcome
+                issue:
+                  - severity: information
+                    code: informational
+                    details:
+                      coding:
+                        - system: https://fhir.nhs.uk/CodeSystem/NRLF-SuccessCode
+                          code: RESOURCE_CREATED
+                          display: Resource created
+                    diagnostics: Resource created
+
+    put:
+      summary: Create document pointers with a specific id
+      description: |
+        Create a new pointer with a unique identifier that you specify. This is the "upsert" or "update as create" functionality in the FHIR R4 REST standard.
+
+        In addition to the criteria for DocumentReference validity detailed in the POST interaction, you must ensure:
+
+        * `id` is a composite of the ODS Code and an identifier that is locally unique to your system.  NRL does not
+          generate globally unique ids, instead relies on producers to provide a locally unique id prefixed with their
+          ODS code, making it globally unique. e.g.
+          ```
+          XYZ-1234567890
           ```
 
         To supersede existing pointers you must further specify:

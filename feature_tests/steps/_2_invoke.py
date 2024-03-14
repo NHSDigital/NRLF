@@ -24,10 +24,40 @@ def producer_create_document_pointer_from_template(
 
 
 @when(
+    '{actor_type} "{actor}" upserts a Document Reference from {template_name} template',
+    action="upsert",
+)
+def producer_upsert_document_pointer_from_template(
+    context: Context, actor_type: str, actor: str, template_name: str
+):
+    test_config: TestConfig = context.test_config
+    rendered_template = test_config.rendered_templates.get(template_name)
+    if not rendered_template:
+        template = test_config.templates[template_name]
+        rendered_template = template.render(
+            context.table, fhir_type=FhirType.DocumentReference
+        )
+    test_config.response = test_config.request.invoke(body=rendered_template)
+
+
+@when(
     '{actor_type} "{actor}" creates a Document Reference with bad json',
     action="create",
 )
 def producer_create_document_pointer_from_bad_json(
+    context: Context,
+    actor_type: str,
+    actor: str,
+):
+    test_config: TestConfig = context.test_config
+    test_config.response = test_config.request.invoke(body=context.text)
+
+
+@when(
+    '{actor_type} "{actor}" upserts a Document Reference with bad json',
+    action="upsert",
+)
+def producer_upsert_document_pointer_from_bad_json(
     context: Context,
     actor_type: str,
     actor: str,

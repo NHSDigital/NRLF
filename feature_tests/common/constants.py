@@ -78,6 +78,7 @@ class Action(Enum):
     create = auto()
     delete = auto()
     update = auto()
+    upsert = auto()
     authoriser = auto()
 
 
@@ -106,6 +107,7 @@ ACTION_SLUG_LOOKUP = {
     Action.create: "DocumentReference",
     Action.delete: "DocumentReference",
     Action.update: "DocumentReference",
+    Action.upsert: "DocumentReference",
 }
 
 WITH_WITHOUT_ANY = ["with", "without any"]
