@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from functools import partial
 from logging import Logger
 from typing import Any
@@ -71,6 +72,21 @@ def _override_created_on(
     )
     if fhir_model.date is not None:
         document_pointer.created_on = DynamoDbStringType(__root__=fhir_model.date)
+
+    return document_pointer
+
+
+def _set_last_updated(document_pointer: DocumentPointer) -> DocumentPointer:
+    now_str = datetime.now(
+        UTC
+    ).isoformat()  # TODO - Check format. Also, should this be "now", or the exec time of the lambda?
+
+    document_pointer.updated_on = DynamoDbStringType(__root__=now_str)
+
+    if "meta" in document_pointer._document:
+        document_pointer._document["meta"]["lastUpdated"] = now_str
+    else:
+        document_pointer._document["meta"] = {"lastUpdated": now_str}
 
     return document_pointer
 
@@ -287,6 +303,8 @@ def save_core_model_to_db(
     if PERMISSION_AUDIT_DATES_FROM_PAYLOAD in data["nrl_permissions"]:
         core_model = _override_created_on(data=data, document_pointer=core_model)
 
+    core_model = _set_last_updated(core_model)
+
     if delete_pks:
         document_pointer_repository.supersede(
             create_item=core_model, delete_pks=delete_pks
@@ -295,6 +313,7 @@ def save_core_model_to_db(
     else:
         document_pointer_repository.create(item=core_model)
         coding = NrlfCoding.RESOURCE_CREATED
+
     operation_outcome = operation_outcome_ok(
         transaction_id=logger.transaction_id, coding=coding
     )

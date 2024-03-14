@@ -50,6 +50,7 @@ def _operation_outcome(
     coding: SpineCoding,
     severity: IssueSeverity,
     diagnostics: str,
+    headers: dict = None,
 ) -> dict:
     issue_details = CodeableConcept(coding=[coding.value])
     issue = [

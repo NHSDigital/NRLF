@@ -21,4 +21,10 @@ def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
     status_code, result = execute_steps(
         index_path=__file__, event=event, context=context, config=config, **dependencies
     )
-    return render_response(status_code, result)
+
+    response_headers = {}
+    if "meta" in result and "lastUpdated" in result["meta"]:
+        response_headers["Last-Modified"] = result["meta"]["lastUpdated"]
+    # TODO: How do we handle the response when the date' missing?
+
+    return render_response(status_code, result, response_headers)

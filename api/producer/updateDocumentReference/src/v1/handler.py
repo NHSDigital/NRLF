@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from logging import Logger
 from typing import Any
 
@@ -19,6 +20,7 @@ from nrlf.core.common_steps import (
     parse_path_id,
     read_subject_from_path,
 )
+from nrlf.core.dynamodb_types import DynamoDbStringType
 from nrlf.core.errors import ImmutableFieldViolationError, InconsistentUpdateId
 from nrlf.core.event_parsing import fetch_body_from_event
 from nrlf.core.model import APIGatewayProxyEventModel, DocumentPointer
@@ -30,6 +32,21 @@ from nrlf.core.validators import json_loads
 from nrlf.log_references import LogReference
 
 log_action = make_common_log_action()
+
+
+def _set_last_updated(document_pointer: DocumentPointer) -> DocumentPointer:
+    now_str = datetime.now(
+        UTC
+    ).isoformat()  # TODO - Check format. Also, should this be "now", or the exec time of the lambda?
+
+    document_pointer.updated_on = DynamoDbStringType(__root__=now_str)
+
+    if "meta" in document_pointer._document:
+        document_pointer._document["meta"]["lastUpdated"] = now_str
+    else:
+        document_pointer._document["meta"] = {"lastUpdated": now_str}
+
+    return document_pointer
 
 
 @log_action(log_reference=LogReference.UPDATE001)
@@ -143,7 +160,10 @@ def update_core_model_to_db(
     logger: Logger,
 ) -> PipelineData:
     core_model: DocumentPointer = data["core_model"]
+
     add_log_fields(pointer_id=core_model.id)
+    core_model = _set_last_updated(core_model)
+
     document_pointer_repository: Repository = dependencies.get(
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY
     )
