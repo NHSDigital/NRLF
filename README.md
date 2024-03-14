@@ -57,7 +57,7 @@ Before you tackle this guide, there are some more instructions here on the [Deve
 For an easy way to make sure your local system matches the requirements needed you can use `asdf tool manager`. This tool fetches the required versions of the libraries needed and sets the directory to use that version instead of your system's default version. To get it up and running,
 
 - Install `asdf` using the instructions given here. https://asdf-vm.com/guide/getting-started.html. You can check it installed properly by using the command `asdf --version`
-- Install the dependencies using the `nrlf-dependencies.sh` bash script. `bash nrlf-dependencies.sh`
+- Install the dependencies using: `$ make asdf-install`
 - You should be good to go.
 
 #### 2. If you prefer to get your local machine running manually the requirements are...
@@ -146,7 +146,9 @@ If you wish to use the official guidance, links are below:
 
    These commands should display the PowerShell version and list the installed WSL distributions.
 
-### 3. Linux set up
+### 3. Manually setting up Linux
+
+If you're on Linux/WSL and using ASDF, you can skip these steps.
 
 For those on a linux/WSL setup these are some helpful instructions:
 
@@ -274,7 +276,7 @@ At the root of the repo, run:
 ```shell
 poetry install
 poetry shell
-pre-commit install
+make configure
 ```
 
 NOTE
@@ -286,9 +288,69 @@ NOTE
 
 ---
 
-## Quick Run
+## Getting Started
 
-For those wanting to get up and running quickly can follow this list of instructions which by the end will have given you your own workspace with the current version of NRLF running - you can find more information on steps below this section.
+To build packages:
+
+```
+$ make
+```
+
+To run the linters over your changes:
+
+```
+$ make lint
+```
+
+To run the unit tests:
+
+```
+$ make test
+```
+
+To run the local feature tests:
+
+```
+$ make test-features
+```
+
+### Troubleshooting
+
+To check your environment:
+
+```
+$ make check
+```
+
+this will provide a report of the dependencies in your environment and should highlight the things that are not configured correctly or things that are missing.
+
+### Integration testing
+
+For the integration tests, you need to have deployed your infrastructure (using Terraform).
+
+To run integration tests:
+
+```
+$ make test-integration
+```
+
+To run the Firehose integration tests:
+
+```
+$ make test-firehose-integration
+```
+
+To run the feature integration tests:
+
+```
+$ make test-features-integration
+```
+
+## Quick Run using `nrlf` script
+
+Those using the `nrlf` script and wanting to get up and running quickly can follow this list of instructions which by the end will have given you your own workspace with the current version of NRLF running - you can find more information on steps below this section.
+
+Note that we're trying to phase out the `nrlf` script in favour of using tools like Terraform directly and having a top-level Makefile and `scripts/` scripts to do more complex build/dev actions.
 
 ```shell
 poetry shell
@@ -306,7 +368,7 @@ nrlf terraform destroy <yourname>-test
 
 ---
 
-## Initialise shell environment
+## Initialise shell environment for the `nrlf` script
 
 ```shell
 poetry shell
@@ -333,7 +395,7 @@ The env options are `dev, mgmt, test and prod`
 
 This reads the `~/.aws/config` file. You will need to ensure the config file is setup correctly - see [Developer Onboarding](https://nhsd-confluence.digital.nhs.uk/display/CLP/NRLF+-+Developer+Onboarding).
 
-## Build, Test & Run the API
+## Build, Test & Run the API using the `nrlf` script
 
 Now we have installed the dependencies we're going to need to get the software up and running.
 
