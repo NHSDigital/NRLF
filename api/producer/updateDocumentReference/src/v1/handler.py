@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+import json
 from logging import Logger
 from typing import Any
 
@@ -27,24 +27,40 @@ from nrlf.core.model import APIGatewayProxyEventModel, DocumentPointer
 from nrlf.core.nhsd_codings import NrlfCoding
 from nrlf.core.repository import Repository
 from nrlf.core.response import operation_outcome_ok
-from nrlf.core.transform import update_document_pointer_from_fhir_json
+from nrlf.core.transform import (
+    create_fhir_model_from_fhir_json,
+    make_timestamp,
+    update_document_pointer_from_fhir_json,
+)
 from nrlf.core.validators import json_loads
 from nrlf.log_references import LogReference
+from nrlf.producer.fhir.r4.strict_model import (
+    DocumentReference as StrictDocumentReference,
+)
+from nrlf.producer.fhir.r4.strict_model import Meta as StrictMeta
 
 log_action = make_common_log_action()
 
 
-def _set_last_updated(document_pointer: DocumentPointer) -> DocumentPointer:
-    now_str = datetime.now(
-        UTC
-    ).isoformat()  # TODO - Check format. Also, should this be "now", or the exec time of the lambda?
+def _set_pointer_date_fields(document_pointer: DocumentPointer) -> DocumentPointer:
+    update_time = (
+        make_timestamp()
+    )  # TODO - should this be "now", or the exec time of the lambda?
 
-    document_pointer.updated_on = DynamoDbStringType(__root__=now_str)
+    document_pointer.updated_on = DynamoDbStringType(__root__=update_time)
 
-    if "meta" in document_pointer._document:
-        document_pointer._document["meta"]["lastUpdated"] = now_str
-    else:
-        document_pointer._document["meta"] = {"lastUpdated": now_str}
+    document_json = json_loads(document_pointer.document.__root__)
+    document_reference: StrictDocumentReference = create_fhir_model_from_fhir_json(
+        fhir_json=document_json
+    )
+
+    if not document_reference.meta:
+        document_reference.meta = StrictMeta()
+    document_reference.meta.lastUpdated = update_time
+
+    fhir_json = json.dumps(document_reference.dict())
+    document_pointer.document = DynamoDbStringType(__root__=fhir_json)
+    document_pointer._document = fhir_json
 
     return document_pointer
 
@@ -162,7 +178,7 @@ def update_core_model_to_db(
     core_model: DocumentPointer = data["core_model"]
 
     add_log_fields(pointer_id=core_model.id)
-    core_model = _set_last_updated(core_model)
+    core_model = _set_pointer_date_fields(core_model)
 
     document_pointer_repository: Repository = dependencies.get(
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY

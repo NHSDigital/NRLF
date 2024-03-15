@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+import json
 from functools import partial
 from logging import Logger
 from typing import Any
@@ -43,11 +43,14 @@ from nrlf.core.response import operation_outcome_ok
 from nrlf.core.transform import (
     create_document_pointer_from_fhir_json,
     create_fhir_model_from_fhir_json,
+    make_timestamp,
 )
+from nrlf.core.validators import json_loads
 from nrlf.log_references import LogReference
 from nrlf.producer.fhir.r4.strict_model import (
     DocumentReference as StrictDocumentReference,
 )
+from nrlf.producer.fhir.r4.strict_model import Meta as StrictMeta
 
 log_action = make_common_log_action()
 
@@ -76,17 +79,24 @@ def _override_created_on(
     return document_pointer
 
 
-def _set_last_updated(document_pointer: DocumentPointer) -> DocumentPointer:
-    now_str = datetime.now(
-        UTC
-    ).isoformat()  # TODO - Check format. Also, should this be "now", or the exec time of the lambda?
+def _set_pointer_date_fields(document_pointer: DocumentPointer) -> DocumentPointer:
+    create_time = (
+        make_timestamp()
+    )  # TODO - should this be "now", or the exec time of the lambda?
 
-    document_pointer.updated_on = DynamoDbStringType(__root__=now_str)
+    document_json = json_loads(document_pointer.document.__root__)
+    document_reference: StrictDocumentReference = create_fhir_model_from_fhir_json(
+        fhir_json=document_json
+    )
+    document_reference.date = create_time
 
-    if "meta" in document_pointer._document:
-        document_pointer._document["meta"]["lastUpdated"] = now_str
-    else:
-        document_pointer._document["meta"] = {"lastUpdated": now_str}
+    if not document_reference.meta:
+        document_reference.meta = StrictMeta()
+    document_reference.meta.lastUpdated = create_time
+
+    fhir_json = json.dumps(document_reference.dict())
+    document_pointer.document = DynamoDbStringType(__root__=fhir_json)
+    document_pointer._document = fhir_json
 
     return document_pointer
 
@@ -303,7 +313,7 @@ def save_core_model_to_db(
     if PERMISSION_AUDIT_DATES_FROM_PAYLOAD in data["nrl_permissions"]:
         core_model = _override_created_on(data=data, document_pointer=core_model)
 
-    core_model = _set_last_updated(core_model)
+    core_model = _set_pointer_date_fields(core_model)
 
     if delete_pks:
         document_pointer_repository.supersede(

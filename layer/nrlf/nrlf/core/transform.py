@@ -1,6 +1,6 @@
 import base64
 import json
-from datetime import datetime as dt
+from datetime import datetime, timezone
 from typing import Union
 
 from more_itertools import map_except
@@ -37,7 +37,7 @@ from nrlf.producer.fhir.r4.strict_model import (
 
 
 def make_timestamp() -> str:
-    return dt.utcnow().isoformat(timespec="milliseconds") + "Z"
+    return datetime.now(timezone.utc).isoformat(timespec="milliseconds") + "Z"
 
 
 def strip_empty_json_paths(
