@@ -17,3 +17,7 @@ variable "domain" {
 variable "path" {
   type = string
 }
+
+variable "capability_statement_content" {
+  type = string
+}

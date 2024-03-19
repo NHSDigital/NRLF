@@ -4,6 +4,8 @@
 #   /DocumentReference:
 #     post:
 #       operationId: create
+#     put:
+#       operationId: upsert
 #     get:
 #       operationId: search
 #   /DocumentReference/_search:
