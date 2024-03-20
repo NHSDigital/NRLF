@@ -4,38 +4,6 @@ from nrlf.core.response import Response
 from nrlf.producer.fhir.r4 import model as producer_model
 
 
-def test_from_bundle():
-    bundle = producer_model.Bundle(
-        resourceType="Bundle",
-        type="searchset",
-        total=1,
-        entry=[
-            producer_model.BundleEntry(
-                resource=producer_model.DocumentReference.construct(id="document-id")
-            )
-        ],
-    )
-    response = Response.from_bundle(
-        bundle,
-        statusCode="201",
-        headers={"Content-Type": "application/json"},
-        isBase64Encoded=True,
-    )
-
-    assert isinstance(response, Response)
-    assert response.statusCode == "201"
-    assert response.headers == {"Content-Type": "application/json"}
-    assert response.isBase64Encoded is True
-
-    body = json.loads(response.body)
-    assert body == {
-        "resourceType": "Bundle",
-        "type": "searchset",
-        "total": 1,
-        "entry": [{"resource": {"id": "document-id"}}],
-    }
-
-
 def test_from_resource():
     resource = producer_model.DocumentReference.construct(id="test-doc-ref")
     response = Response.from_resource(

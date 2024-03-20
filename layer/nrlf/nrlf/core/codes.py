@@ -44,6 +44,7 @@ class NRLResponseConcept(_CodeableConcept):
 class SpineErrorConcept(_CodeableConcept):
     _SYSTEM = "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1"
     _TEXT_MAP = {
+        "ACCESS DENIED": "Access has been denied to process this request",
         "INVALID_RESOURCE": "Invalid validation of resource",
         "NO_RECORD_FOUND": "No record found",
         "INVALID_NHS_NUMBER": "Invalid NHS number",

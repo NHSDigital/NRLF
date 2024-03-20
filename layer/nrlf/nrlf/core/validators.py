@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.constants import REQUIRED_CREATE_FIELDS
 from nrlf.core.errors import ParseError
-from nrlf.core.logger import logger
+from nrlf.core.logger import LogReference, logger
 from nrlf.core.types import DocumentReference, OperationOutcomeIssue, RequestQueryType
 from nrlf.producer.fhir.r4 import model as producer_model
 
@@ -20,12 +20,12 @@ def validate_type_system(
     if not type_:
         return True
 
-    type_code = type_.__root__.split("|", 1)[1]
-    pointer_type_codes = [
-        pointer_type.split("|", 1)[1] for pointer_type in pointer_types
+    type_system = type_.__root__.split("|", 1)[0]
+    pointer_type_systems = [
+        pointer_type.split("|", 1)[0] for pointer_type in pointer_types
     ]
 
-    return type_code in pointer_type_codes
+    return type_system in pointer_type_systems
 
 
 @dataclass
@@ -55,7 +55,7 @@ class ValidationResult:
             expression=[field] if field else None,  # type: ignore
         )
 
-        logger.info("Adding validation issue", issue=issue.dict(exclude_none=True))
+        logger.log(LogReference.VALIDATOR002, issue=issue.dict(exclude_none=True))
         self.issues.append(issue)
 
     @property
@@ -72,23 +72,26 @@ class DocumentReferenceValidator:
     A class to validate document references
     """
 
+    MODEL = producer_model.DocumentReference
+
     def __init__(self):
-        self.result = ValidationResult(
-            resource=producer_model.DocumentReference.construct(), issues=[]
-        )
+        self.result = ValidationResult(resource=self.MODEL.construct(), issues=[])
 
     @classmethod
     def parse(cls, data: Dict[str, Any]):
         try:
-            result = producer_model.DocumentReference.parse_obj(data)
-            logger.debug("Parsed DocumentReference resource", result=result)
+            logger.log(LogReference.PARSE000, data=data, model=cls.MODEL.__name__)
+            result = cls.MODEL.parse_obj(data)
+            logger.log(LogReference.PARSE001, model=cls.MODEL.__name__)
+            logger.log(LogReference.PARSE001a, result=result)
             return result
 
         except ValidationError as exc:
-            logger.error(
-                "Failed to parse DocumentReference resource",
+            logger.log(
+                LogReference.PARSE002,
+                model=cls.MODEL.__name__,
                 data=data,
-                validation_error=exc,
+                validation_error=str(exc),
             )
             raise ParseError.from_validation_error(
                 exc,
@@ -100,7 +103,7 @@ class DocumentReferenceValidator:
         """
         Validate the document reference
         """
-        logger.info("Performing validation on DocumentReference resource", data=data)
+        logger.log(LogReference.VALIDATOR000, resource_type="DocumentReference")
         resource = self.parse(data) if isinstance(data, dict) else data
 
         self.result = ValidationResult(resource=resource, issues=[])
@@ -112,15 +115,24 @@ class DocumentReferenceValidator:
             self._validate_relates_to(resource)
 
         except StopValidationError:
-            logger.info("Validation stopped due to errors", result=self.result)
+            logger.log(LogReference.VALIDATOR003)
 
+        logger.log(
+            LogReference.VALIDATOR999,
+            is_valid=self.result.is_valid,
+            issue_count=len(self.result.issues),
+        )
         return self.result
 
     def _validate_required_fields(self, model: DocumentReference):
         """
         Validate the required fields
         """
-        logger.debug("Validating required fields")
+        logger.log(
+            LogReference.VALIDATOR001,
+            step="required_fields",
+            required_fields=REQUIRED_CREATE_FIELDS,
+        )
 
         for field in REQUIRED_CREATE_FIELDS:
             if not getattr(model, field, None):
@@ -131,7 +143,6 @@ class DocumentReferenceValidator:
                     field=field,
                 )
 
-        logger.debug(self.result.is_valid)
         if not self.result.is_valid:
             raise StopValidationError()
 
@@ -141,7 +152,7 @@ class DocumentReferenceValidator:
         """
         Validate that there are no extra fields
         """
-        logger.debug("Validating no extra fields")
+        logger.log(LogReference.VALIDATOR001, step="no_extra_fields")
         has_extra_fields = False
 
         if isinstance(data, DocumentReference):
@@ -160,7 +171,7 @@ class DocumentReferenceValidator:
 
     def _validate_identifiers(self, model: DocumentReference):
         """ """
-        logger.debug("Validating identifiers")
+        logger.log(LogReference.VALIDATOR001, step="identifiers")
 
         if not (custodian_identifier := getattr(model.custodian, "identifier", None)):
             self.result.add_error(
@@ -205,10 +216,12 @@ class DocumentReferenceValidator:
     def _validate_relates_to(self, model: DocumentReference):
         """"""
         if not model.relatesTo:
-            logger.debug(
-                "Skipping relatesTo validation as there are no relatesTo fields"
+            logger.log(
+                LogReference.VALIDATOR001, step="relates_to", reason="no_relates_to"
             )
             return
+
+        logger.log(LogReference.VALIDATOR001, step="relates_to")
 
         logger.debug("Validating relatesTo")
 

@@ -34,7 +34,7 @@ resource "aws_s3_bucket_versioning" "authorization-store" {
   }
 }
 
-resource "aws_s3_bucket_policy" "allow-authorizer-lambda-to-read" {
+resource "aws_s3_bucket_policy" "allow-lambda-to-read" {
   bucket = aws_s3_bucket.authorization-store.id
   policy = data.aws_iam_policy_document.allow-authorizer-lambda-to-read.json
 }
@@ -44,8 +44,16 @@ data "aws_iam_policy_document" "allow-authorizer-lambda-to-read" {
     principals {
       type = "AWS"
       identifiers = [
-        "arn:aws:iam::${var.assume_account}:role/${module.producer__authoriser_lambda.lambda_role_name}",
-        "arn:aws:iam::${var.assume_account}:role/${module.consumer__authoriser_lambda.lambda_role_name}"
+        "arn:aws:iam::${var.assume_account}:role/${module.consumer__readDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${var.assume_account}:role/${module.consumer__countDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${var.assume_account}:role/${module.consumer__searchDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${var.assume_account}:role/${module.consumer__searchPostDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${var.assume_account}:role/${module.producer__createDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${var.assume_account}:role/${module.producer__deleteDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${var.assume_account}:role/${module.producer__readDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${var.assume_account}:role/${module.producer__searchDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${var.assume_account}:role/${module.producer__searchPostDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${var.assume_account}:role/${module.producer__updateDocumentReference.lambda_role_name}",
       ]
     }
 

@@ -62,7 +62,7 @@ def test_read_document_reference_not_found(repository: DocumentPointerRepository
                         }
                     ]
                 },
-                "diagnostics": "The requested document pointer could not be found",
+                "diagnostics": "The requested DocumentReference could not be found",
             }
         ],
     }
@@ -86,13 +86,14 @@ def test_read_document_reference_missing_id():
                 "details": {
                     "coding": [
                         {
-                            "code": "INVALID_IDENTIFIER_VALUE",
-                            "display": "Invalid identifier value",
+                            "code": "INVALID_PARAMETER",
+                            "display": "Invalid parameter",
                             "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
                         }
                     ]
                 },
-                "diagnostics": "Invalid document reference ID provided in the path parameters",
+                "diagnostics": "Invalid path parameter (id: field required)",
+                "expression": ["id"],
             }
         ],
     }

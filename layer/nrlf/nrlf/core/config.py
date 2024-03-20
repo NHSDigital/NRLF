@@ -18,7 +18,4 @@ class Config(BaseSettings):
     ENVIRONMENT: str = Field(default=..., env="ENVIRONMENT")
     SPLUNK_INDEX: str = Field(default=..., env="SPLUNK_INDEX")
     SOURCE: str = Field(default=..., env="SOURCE")
-
-
-class AuthorizerConfig(Config):
     AUTH_STORE: str = Field(default=..., env="AUTH_STORE")

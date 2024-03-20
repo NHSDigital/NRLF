@@ -1,3 +1,0 @@
-provider_name: ^.*$
-list_pointer_types: ^.*$
-count: ^(0|[1-9]\d*)$

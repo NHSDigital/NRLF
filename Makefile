@@ -13,7 +13,7 @@ BEHAVE ?= .venv/bin/behave
 PRECOMMIT ?= .venv/bin/pre-commit
 
 DIST_PATH ?= ./dist
-TEST_ARGS ?=
+TEST_ARGS ?= --cov=api/consumer --cov=api/producer --cov=layer/nrlf/nrlf --cov-report=term-missing -vv
 FEATURE_TEST_ARGS ?= ./feature_tests
 
 default: build

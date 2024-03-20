@@ -4,8 +4,6 @@ variable "assume_account" {}
 
 variable "region" {}
 
-variable "layers" {}
-
 variable "environment" {}
 
 variable "cloudwatch_kms_arn" {}
@@ -26,11 +24,6 @@ variable "splunk_index" {
     condition     = startswith(var.splunk_index, "aws_recordlocator_")
     error_message = "Splunk Index must start with aws_recordlocator_"
   }
-}
-
-variable "is_persistent_environment" {
-  type    = bool
-  default = false
 }
 
 variable "error_prefix" {

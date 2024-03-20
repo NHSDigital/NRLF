@@ -1,46 +1,65 @@
+import sys
 import urllib.parse
 
-from nrlf.consumer.fhir.r4.model import DocumentReference, OperationOutcomeIssue
-from nrlf.core.decorators import APIGatewayProxyEvent, request_handler
+from pydantic import ValidationError
+
+from nrlf.consumer.fhir.r4.model import DocumentReference
+from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
-from nrlf.core.response import Response, SpineErrorConcept
+from nrlf.core.errors import OperationOutcomeError
+from nrlf.core.logger import LogReference, logger
+from nrlf.core.model import ConnectionMetadata, ReadDocumentReferencePathParams
+from nrlf.core.response import Response, SpineErrorConcept, SpineErrorResponse
 
 
-@request_handler()
+@request_handler(path=ReadDocumentReferencePathParams)
 def handler(
-    event: APIGatewayProxyEvent, repository: DocumentPointerRepository
+    repository: DocumentPointerRepository,
+    metadata: ConnectionMetadata,
+    path: ReadDocumentReferencePathParams,
 ) -> Response:
     """
     Entrypoint for the readDocumentReference function
     """
-    if not (subject := (event.path_parameters or {}).get("id")):
-        return Response.from_issues(
-            issues=[
-                OperationOutcomeIssue(
-                    severity="error",
-                    code="invalid",
-                    details=SpineErrorConcept.from_code("INVALID_IDENTIFIER_VALUE"),
-                    diagnostics="Invalid document reference ID provided in the path parameters",
-                )
-            ],
-            statusCode="400",
-        )
+    logger.log(LogReference.CONREAD000)
 
-    parsed_id = urllib.parse.unquote(subject)
+    parsed_id = urllib.parse.unquote_plus(path.id)
     result = repository.get_by_id(parsed_id)
 
     if result is None:
-        return Response.from_issues(
-            issues=[
-                OperationOutcomeIssue(
-                    severity="error",
-                    code="not-found",
-                    details=SpineErrorConcept.from_code("NO_RECORD_FOUND"),
-                    diagnostics="The requested document pointer could not be found",
-                )
-            ],
-            statusCode="404",
+        logger.log(LogReference.CONREAD001)
+        return SpineErrorResponse.NO_RECORD_FOUND(
+            diagnostics="The requested DocumentReference could not be found"
         )
 
-    document_reference = DocumentReference.parse_raw(result.document)
-    return Response.from_resource(document_reference)
+    if result.type not in metadata.pointer_types:
+        logger.log(
+            LogReference.CONREAD002,
+            ods_code=metadata.ods_code,
+            type=result.type,
+            pointer_types=metadata.pointer_types,
+        )
+        return SpineErrorResponse.ACCESS_DENIED(
+            diagnostics="The requested DocumentReference is not of a type that this organisation is allowed to access"
+        )
+
+    try:
+        document_reference = DocumentReference.parse_raw(result.document)
+    except ValidationError as exc:
+        logger.log(
+            LogReference.CONREAD003,
+            exc_info=sys.exc_info(),
+            error=str(exc),
+        )
+        raise OperationOutcomeError(
+            status_code="500",
+            severity="error",
+            code="exception",
+            details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
+            diagnostics="An error occurred while parsing the document reference",
+        ) from exc
+
+    response = Response.from_resource(document_reference)
+    logger.log(LogReference.CONREAD999)
+
+    return response

@@ -1,13 +1,16 @@
+import sys
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Iterator, List, Optional, Type, TypeVar
 
 import boto3
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
+from botocore.exceptions import ClientError
+from pydantic import ValidationError
 
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.dynamodb.model import DocumentPointer, DynamoDBModel
 from nrlf.core.errors import OperationOutcomeError
-from nrlf.core.logger import logger
+from nrlf.core.logger import LogReference, logger
 from nrlf.core.types import DynamoDBServiceResource
 
 RepositoryModel = TypeVar("RepositoryModel", bound=DynamoDBModel)
@@ -26,6 +29,11 @@ class Repository(ABC, Generic[RepositoryModel]):
         self.table = self.dynamodb.Table(self.table_name)
         self._serialiser = TypeSerializer()
         self._deserialiser = TypeDeserializer()
+        logger.log(
+            LogReference.REPOSITORY001,
+            table_name=self.table_name,
+            item_type=self.ITEM_TYPE.__name__,
+        )
 
     @abstractmethod
     def create(self, item: RepositoryModel) -> RepositoryModel:
@@ -52,18 +60,41 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         """
         Create a DocumentPointer resource
         """
+        logger.log(
+            LogReference.REPOSITORY002,
+            indexes=item.indexes,
+            type=item.type,
+            source=item.source,
+            version=item.version,
+        )
 
         try:
-            self.table.put_item(
+            result = self.table.put_item(
                 Item=item.dict(),
                 ConditionExpression="attribute_not_exists(pk) AND attribute_not_exists(sk)",
             )
-        except self.dynamodb.meta.client.exceptions.ConditionalCheckFailedException:
-            raise OperationOutcomeError(
-                severity="error",
-                code="conflict",
-                details=SpineErrorConcept.from_code("DUPLICATE_REJECTED"),
-            ) from None
+            logger.log(LogReference.REPOSITORY003, result=result)
+
+        except ClientError as exc:
+            if (
+                exc.response.get("Error", {}).get("Code")
+                == "ConditionalCheckFailedException"
+            ):
+                logger.log(LogReference.REPOSITORY004)
+                raise OperationOutcomeError(
+                    status_code="409",
+                    severity="error",
+                    code="conflict",
+                    details=SpineErrorConcept.from_code("DUPLICATE_REJECTED"),
+                ) from None
+
+            logger.log(
+                LogReference.REPOSITORY005,
+                exc_info=sys.exc_info(),
+                stacklevel=5,
+                error=str(exc),
+            )
+            raise exc
 
         return item
 
@@ -85,41 +116,84 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             "ExpressionAttributeValues": {":pk": partition_key},
         }
 
-        logger.info("Querying DynamoDB table", query=query)
+        logger.log(LogReference.REPOSITORY006, partition_key=partition_key, query=query)
 
-        response = self.table.query(
-            KeyConditionExpression="pk = :pk",
-            ExpressionAttributeValues={":pk": partition_key},
-        )
+        try:
+            result = self.table.query(
+                KeyConditionExpression="pk = :pk",
+                ExpressionAttributeValues={":pk": partition_key},
+            )
+        except ClientError as exc:
+            logger.log(
+                LogReference.REPOSITORY007,
+                exc_info=sys.exc_info(),
+                stacklevel=5,
+                error=str(exc),
+            )
+            raise exc
 
-        if response["Count"] == 0:
+        logger.log(LogReference.REPOSITORY009, result=result)
+
+        if result["Count"] == 0:
+            logger.log(LogReference.REPOSITORY012)
             return None
 
-        if response["Count"] > 1:
-            raise Exception("Multiple items found")
+        if result["Count"] > 1:
+            logger.log(LogReference.REPOSITORY008)
+            raise OperationOutcomeError(
+                status_code="500",
+                severity="error",
+                code="exception",
+                details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
+            )
 
-        logger.debug("Received response", response=response)
+        item = result["Items"][0]
+        try:
+            parsed_item = self.ITEM_TYPE.parse_obj({"_from_dynamo": True, **item})
+            logger.log(LogReference.REPOSITORY011)
+            logger.log(LogReference.REPOSITORY011a, result=parsed_item.dict())
+            return parsed_item
 
-        item = response["Items"][0]
-        return self.ITEM_TYPE.parse_obj({"_from_dynamo": True, **item})
+        except ValidationError as exc:
+            logger.log(
+                LogReference.REPOSITORY010,
+                exc_info=sys.exc_info(),
+                stacklevel=5,
+                error=str(exc),
+            )
+            raise OperationOutcomeError(
+                status_code="500",
+                severity="error",
+                code="exception",
+                details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
+            ) from exc
 
     def count_by_nhs_number(
         self,
         nhs_number: str,
-        producer_id: Optional[str] = None,
         pointer_types: Optional[List[str]] = None,
     ) -> int:
         """
         Count all DocumentPointer records by NHS number
         """
+        logger.log(
+            LogReference.REPOSITORY013,
+            nhs_number=nhs_number,
+            pointer_types=pointer_types,
+        )
+
         key_conditions = ["pk_1 = :pk_1"]
         filter_expressions = []
         expression_attribute_names = {}
         expression_attribute_values = {":pk_1": f"P#{nhs_number}"}
 
-        if producer_id:
-            key_conditions.append("begins_with(sk, :sk)")
-            expression_attribute_values[":sk"] = f"D#{producer_id}"
+        logger.log(
+            LogReference.REPOSITORY014,
+            key_conditions=key_conditions,
+            filter_expressions=filter_expressions,
+            expression_attribute_names=expression_attribute_names,
+            expression_attribute_values=expression_attribute_values,
+        )
 
         if pointer_types:
             pointer_type_filters = []
@@ -129,9 +203,14 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                 pointer_type_filters.append(f"#pointer_type = :type_{i}")
                 expression_attribute_values[f":type_{i}"] = pointer_type
 
-            filter_expressions.append(f"({' OR '.join(pointer_type_filters)})")
+            expression = f"({' OR '.join(pointer_type_filters)})"
+            logger.log(
+                LogReference.REPOSITORY016, expression=expression, values=pointer_types
+            )
+            filter_expressions.append(expression)
 
         query = {
+            "IndexName": "idx_gsi_1",
             "KeyConditionExpression": " AND ".join(key_conditions),
             "FilterExpression": " AND ".join(filter_expressions),
             "ExpressionAttributeNames": expression_attribute_names or None,
@@ -139,27 +218,64 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             "Select": "COUNT",
         }
 
-        logger.info(
-            f"Counting records in DynamoDB table {self.table_name}", query=query
-        )
+        logger.log(LogReference.REPOSITORY017, query=query)
 
-        response = self.table.query(IndexName="idx_gsi_1", **query)
+        try:
+            result = self.table.query(**query)
+        except ClientError as exc:
+            logger.log(
+                LogReference.REPOSITORY019,
+                exc_info=sys.exc_info(),
+                stacklevel=5,
+                error=str(exc),
+            )
+            raise OperationOutcomeError(
+                status_code="500",
+                severity="error",
+                code="exception",
+                details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
+            ) from exc
 
-        logger.debug("Received count response", response=response)
-        logger.info("Counted records", count=response["Count"])
+        logger.log(LogReference.REPOSITORY018, count=result["Count"])
+        logger.log(LogReference.REPOSITORY018a, result=result)
 
-        return response["Count"]
+        return result["Count"]
 
     def search(
         self,
         nhs_number: str,
+        custodian: Optional[str] = None,
         pointer_types: Optional[List[str]] = None,
     ) -> Iterator[DocumentPointer]:
         """"""
+        logger.log(
+            LogReference.REPOSITORY020,
+            nhs_number=nhs_number,
+            custodian=custodian,
+            pointer_types=pointer_types,
+        )
+
         key_conditions = ["pk_1 = :pk_1"]
         filter_expressions = []
         expression_attribute_names = {}
         expression_attribute_values = {":pk_1": f"P#{nhs_number}"}
+
+        logger.log(
+            LogReference.REPOSITORY014,
+            key_conditions=key_conditions,
+            filter_expressions=filter_expressions,
+            expression_attribute_names=expression_attribute_names,
+            expression_attribute_values=expression_attribute_values,
+        )
+
+        if custodian:
+            logger.log(
+                LogReference.REPOSITORY016,
+                expression="custodian = :custodian",
+                values=["custodian"],
+            )
+            filter_expressions.append("custodian = :custodian")
+            expression_attribute_values[":custodian"] = custodian
 
         if pointer_types:
             pointer_type_filters = []
@@ -169,7 +285,11 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                 pointer_type_filters.append(f"#pointer_type = :type_{i}")
                 expression_attribute_values[f":type_{i}"] = pointer_type
 
-            filter_expressions.append(f"({' OR '.join(pointer_type_filters)})")
+            expression = f"({' OR '.join(pointer_type_filters)})"
+            logger.log(
+                LogReference.REPOSITORY016, expression=expression, values=pointer_types
+            )
+            filter_expressions.append(expression)
 
         query = {
             "IndexName": "idx_gsi_1",
@@ -199,6 +319,14 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         if custodian_suffix:
             expression_attribute_values[":pk_2"] = f"O#{custodian}#{custodian_suffix}"
 
+        logger.log(
+            LogReference.REPOSITORY014,
+            key_conditions=key_conditions,
+            filter_expressions=filter_expressions,
+            expression_attribute_names=expression_attribute_names,
+            expression_attribute_values=expression_attribute_values,
+        )
+
         if pointer_types is not None:
             pointer_type_filters = []
             expression_attribute_names["#pointer_type"] = "type"
@@ -207,9 +335,18 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                 pointer_type_filters.append(f"#pointer_type = :type_{i}")
                 expression_attribute_values[f":type_{i}"] = pointer_type
 
-            filter_expressions.append(f"({' OR '.join(pointer_type_filters)})")
+            expression = f"({' OR '.join(pointer_type_filters)})"
+            logger.log(
+                LogReference.REPOSITORY016, expression=expression, values=pointer_types
+            )
+            filter_expressions.append(expression)
 
         if nhs_number:
+            logger.log(
+                LogReference.REPOSITORY016,
+                expression="nhs_number = :nhs_number",
+                values=[nhs_number],
+            )
             filter_expressions.append("nhs_number = :nhs_number")
             expression_attribute_values[":nhs_number"] = nhs_number
 
@@ -248,36 +385,48 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         Save a DocumentPointer resource
         """
         if not item._from_dynamo:
+            logger.log(LogReference.REPOSITORY023)
             return self.create(item)
 
-        self.table.put_item(
-            Item=item.dict(exclude_none=True),
-            ConditionExpression="attribute_exists(pk) AND attribute_exists(sk)",
-        )
-        return item
+        logger.log(LogReference.REPOSITORY024)
+        return self.update(item)
 
     def supersede(
         self, item: DocumentPointer, ids_to_delete: List[str]
     ) -> DocumentPointer:
         """ """
+        saved_item = self.create(item)
         for id_ in ids_to_delete:
             self.delete_by_id(id_)
 
-        return self.create(item)
+        return saved_item
 
     def delete(self, item: DocumentPointer) -> None:
         """
         Delete a DocumentPointer
         """
-        logger.info(
-            f"Deleting record from DynamoDB table {self.table_name}",
-            partition_key=item.pk,
-            sort_key=item.sk,
-        )
-        self.table.delete_item(
-            Key={"pk": item.pk, "sk": item.sk},
-            ConditionExpression="attribute_exists(pk) AND attribute_exists(sk)",
-        )
+        logger.log(LogReference.REPOSITORY025, partition_key=item.pk, sort_key=item.sk)
+
+        try:
+            result = self.table.delete_item(
+                Key={"pk": item.pk, "sk": item.sk},
+                ConditionExpression="attribute_exists(pk) AND attribute_exists(sk)",
+            )
+            logger.log(LogReference.REPOSITORY027, result=result)
+
+        except ClientError as exc:
+            logger.log(
+                LogReference.REPOSITORY026,
+                exc_info=sys.exc_info(),
+                stacklevel=5,
+                error=str(exc),
+            )
+            raise OperationOutcomeError(
+                status_code="500",
+                severity="error",
+                code="exception",
+                details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
+            ) from exc
 
     def delete_by_id(self, id_: str):
         """ """
@@ -294,32 +443,72 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         # Remove empty fields from the search query
         query = {key: value for key, value in kwargs.items() if value}
 
-        logger.info(f"Querying DynamoDB table {self.table_name}", query=query)
+        logger.log(LogReference.REPOSITORY021, query=query, table=self.table_name)
 
-        paginator = self.dynamodb.meta.client.get_paginator("query")
-        response_iterator = paginator.paginate(TableName=self.table_name, **query)
+        try:
+            paginator = self.dynamodb.meta.client.get_paginator("query")
+            response_iterator = paginator.paginate(TableName=self.table_name, **query)
 
-        for page in response_iterator:
-            logger.debug(
-                "Received page of results",
-                stats={
-                    "count": page["Count"],
-                    "scanned_count": page["ScannedCount"],
-                    "last_evaluated_key": page.get("LastEvaluatedKey"),
-                },
+            for page in response_iterator:
+                logger.log(
+                    LogReference.REPOSITORY028,
+                    stats={
+                        "count": page["Count"],
+                        "scanned_count": page["ScannedCount"],
+                        "last_evaluated_key": page.get("LastEvaluatedKey"),
+                    },
+                )
+
+                for item in page["Items"]:
+                    try:
+                        yield self.ITEM_TYPE.parse_obj({"_from_dynamo": True, **item})
+
+                    except ValidationError as exc:
+                        logger.log(
+                            LogReference.REPOSITORY010,
+                            exc_info=sys.exc_info(),
+                            stacklevel=5,
+                            error=str(exc),
+                        )
+                        raise OperationOutcomeError(
+                            status_code="500",
+                            severity="error",
+                            code="exception",
+                            details=SpineErrorConcept.from_code(
+                                "INTERNAL_SERVER_ERROR"
+                            ),
+                        ) from exc
+
+        except ClientError as exc:
+            logger.log(
+                LogReference.REPOSITORY022,
+                exc_info=sys.exc_info(),
+                stacklevel=5,
+                error=str(exc),
             )
-
-            for item in page["Items"]:
-                logger.debug(item)
-                yield self.ITEM_TYPE.parse_obj({"_from_dynamo": True, **item})
+            raise exc
 
     def update(self, item: DocumentPointer) -> DocumentPointer:
         """
         Update a DocumentPointer resource
         """
-        self.table.put_item(
-            Item=item.dict(),
-            ConditionExpression="attribute_exists(pk) AND attribute_exists(sk)",
-        )
+        try:
+            self.table.put_item(
+                Item=item.dict(),
+                ConditionExpression="attribute_exists(pk) AND attribute_exists(sk)",
+            )
+        except ClientError as exc:
+            logger.log(
+                LogReference.REPOSITORY023,
+                exc_info=sys.exc_info(),
+                stacklevel=5,
+                error=str(exc),
+            )
+            raise OperationOutcomeError(
+                status_code="500",
+                severity="error",
+                code="exception",
+                details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
+            ) from exc
 
         return item
