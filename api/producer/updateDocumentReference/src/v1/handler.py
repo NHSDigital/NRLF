@@ -30,6 +30,7 @@ from nrlf.core.response import operation_outcome_ok
 from nrlf.core.transform import (
     create_fhir_model_from_fhir_json,
     make_timestamp,
+    strip_empty_json_paths,
     update_document_pointer_from_fhir_json,
 )
 from nrlf.core.validators import json_loads
@@ -42,10 +43,8 @@ from nrlf.producer.fhir.r4.strict_model import Meta as StrictMeta
 log_action = make_common_log_action()
 
 
-def _set_pointer_date_fields(document_pointer: DocumentPointer) -> DocumentPointer:
-    update_time = (
-        make_timestamp()
-    )  # TODO - should this be "now", or the exec time of the lambda?
+def _set_update_date_fields(document_pointer: DocumentPointer) -> DocumentPointer:
+    update_time = make_timestamp()
 
     document_pointer.updated_on = DynamoDbStringType(__root__=update_time)
 
@@ -58,7 +57,8 @@ def _set_pointer_date_fields(document_pointer: DocumentPointer) -> DocumentPoint
         document_reference.meta = StrictMeta()
     document_reference.meta.lastUpdated = update_time
 
-    fhir_json = json.dumps(document_reference.dict())
+    fhir_json = json.dumps(strip_empty_json_paths(document_reference.dict()))
+
     document_pointer.document = DynamoDbStringType(__root__=fhir_json)
     document_pointer._document = fhir_json
 
@@ -137,7 +137,7 @@ def _validate_immutable_fields(
     for k in immutable_keys_in_a | immutable_keys_in_b:
         if _keys_are_not_equal(a.get(k), b.get(k)):
             raise ImmutableFieldViolationError(
-                f"Forbidden to update immutable field '{k}'"
+                f"Forbidden to update immutable field '{k}' - original value: '{a.get(k)}', new value: '{b.get(k)}'"
             )
 
 
@@ -178,7 +178,7 @@ def update_core_model_to_db(
     core_model: DocumentPointer = data["core_model"]
 
     add_log_fields(pointer_id=core_model.id)
-    core_model = _set_pointer_date_fields(core_model)
+    core_model = _set_update_date_fields(core_model)
 
     document_pointer_repository: Repository = dependencies.get(
         PersistentDependencies.DOCUMENT_POINTER_REPOSITORY

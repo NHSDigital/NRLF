@@ -8,7 +8,7 @@ from lambda_pipeline.types import PipelineData
 from lambda_utils.tests.unit.utils import make_aws_event
 
 from api.producer.updateDocumentReference.src.v1.handler import (
-    _set_pointer_date_fields,
+    _set_update_date_fields,
     _validate_immutable_fields,
     compare_immutable_fields,
     parse_request_body,
@@ -235,13 +235,12 @@ def test_compare_immutable_fields_failure(mock__make_timestamp):
     "api.producer.updateDocumentReference.src.v1.handler.make_timestamp",
     return_value="2024-03-15T12:34:56.789Z",
 )
-def test_set_pointer_date_fields_when_no_dates_in_ref(mock__make_timestamp):
-    expected_timestamp = mock__make_timestamp()
-    fhir_json = json.dumps(read_test_data("nrlf"))
+def test_set_update_date_fields_when_no_dates_in_ref(mock__make_timestamp):
+    test_data = read_test_data("nrlf")
     pointer = DocumentPointer(
         **{
             "created_on": {"S": "2022-10-25T15:47:49.732Z"},
-            "document": {"S": fhir_json},
+            "document": {"S": json.dumps(test_data)},
             "id": {"S": f"Y05868-1234567890"},
             "nhs_number": {"S": "9278693472"},
             "producer_id": {"S": "Y05868"},
@@ -252,65 +251,33 @@ def test_set_pointer_date_fields_when_no_dates_in_ref(mock__make_timestamp):
             "version": {"N": "1"},
         }
     )
-
-    result = _set_pointer_date_fields(pointer)
-
-    assert result.updated_on.dict() == {"S": expected_timestamp}
-
-    document = json_loads(result.document.__root__)
-    assert document["date"] == None
-    assert document["meta"]["lastUpdated"] == expected_timestamp
-
-
-@mock.patch(
-    "api.producer.updateDocumentReference.src.v1.handler.make_timestamp",
-    return_value="2024-03-15T12:34:56.789Z",
-)
-def test_set_pointer_date_fields_when_date_in_ref(mock__make_timestamp):
     expected_timestamp = mock__make_timestamp()
-    test_data = read_test_data("nrlf")
-    test_creation_date = "2022-10-25T09:54:32.101Z"
-    test_data["date"] = test_creation_date
-    fhir_json = json.dumps(test_data)
-    pointer = DocumentPointer(
-        **{
-            "created_on": {"S": "2022-10-25T15:47:49.732Z"},
-            "document": {"S": fhir_json},
-            "id": {"S": f"Y05868-1234567890"},
-            "nhs_number": {"S": "9278693472"},
-            "producer_id": {"S": "Y05868"},
-            "custodian": {"S": "Y05868"},
-            "source": {"S": "NRLF"},
-            "type": {"S": "http://snomed.info/sct|736253002"},
-            "updated_on": {"NULL": True},
-            "version": {"N": "1"},
+    expected_fhir_model = deepcopy(
+        {
+            **test_data,
+            **{
+                "meta": {"lastUpdated": expected_timestamp},
+            },
         }
     )
 
-    result = _set_pointer_date_fields(pointer)
+    result = _set_update_date_fields(pointer)
 
     assert result.updated_on.dict() == {"S": expected_timestamp}
-
-    document = json_loads(result.document.__root__)
-    assert document["date"] == test_creation_date
-    assert document["meta"]["lastUpdated"] == expected_timestamp
+    assert json_loads(result.document.__root__) == expected_fhir_model
 
 
 @mock.patch(
     "api.producer.updateDocumentReference.src.v1.handler.make_timestamp",
     return_value="2024-03-15T12:34:56.789Z",
 )
-def test_set_pointer_date_fields_when_date_and_lastupdated_in_ref(mock__make_timestamp):
-    expected_timestamp = mock__make_timestamp()
+def test_set_update_date_fields_when_meta_lastupdated_in_ref(mock__make_timestamp):
     test_data = read_test_data("nrlf")
-    test_creation_date = "2022-10-25T09:54:32.101Z"
-    test_data["date"] = test_creation_date
     test_data["meta"] = {"lastUpdated": "2022-10-25T09:54:32.101Z"}
-    fhir_json = json.dumps(test_data)
     pointer = DocumentPointer(
         **{
             "created_on": {"S": "2022-10-25T15:47:49.732Z"},
-            "document": {"S": fhir_json},
+            "document": {"S": json.dumps(test_data)},
             "id": {"S": f"Y05868-1234567890"},
             "nhs_number": {"S": "9278693472"},
             "producer_id": {"S": "Y05868"},
@@ -321,14 +288,47 @@ def test_set_pointer_date_fields_when_date_and_lastupdated_in_ref(mock__make_tim
             "version": {"N": "1"},
         }
     )
+    expected_timestamp = mock__make_timestamp()
+    expected_fhir_model = deepcopy(test_data)
+    expected_fhir_model["meta"]["lastUpdated"] = expected_timestamp
 
-    result = _set_pointer_date_fields(pointer)
+    result = _set_update_date_fields(pointer)
 
     assert result.updated_on.dict() == {"S": expected_timestamp}
+    assert json_loads(result.document.__root__) == expected_fhir_model
 
-    document = json_loads(result.document.__root__)
-    assert document["date"] == test_creation_date
-    assert document["meta"]["lastUpdated"] == expected_timestamp
+
+@mock.patch(
+    "api.producer.updateDocumentReference.src.v1.handler.make_timestamp",
+    return_value="2024-03-15T12:34:56.789Z",
+)
+def test_set_update_date_fields_when_meta_but_no_lastupdated_in_ref(
+    mock__make_timestamp,
+):
+    test_data = read_test_data("nrlf")
+    test_data["meta"] = {"id": "123456789"}
+    pointer = DocumentPointer(
+        **{
+            "created_on": {"S": "2022-10-25T15:47:49.732Z"},
+            "document": {"S": json.dumps(test_data)},
+            "id": {"S": f"Y05868-1234567890"},
+            "nhs_number": {"S": "9278693472"},
+            "producer_id": {"S": "Y05868"},
+            "custodian": {"S": "Y05868"},
+            "source": {"S": "NRLF"},
+            "type": {"S": "http://snomed.info/sct|736253002"},
+            "updated_on": {"NULL": True},
+            "version": {"N": "1"},
+        }
+    )
+    expected_timestamp = mock__make_timestamp()
+    expected_fhir_model = deepcopy(test_data)
+    expected_fhir_model["meta"]["lastUpdated"] = expected_timestamp
+
+    result = _set_update_date_fields(pointer)
+
+    assert result.updated_on.dict() == {"S": expected_timestamp}
+    assert json_loads(result.document.__root__) == expected_fhir_model
 
 
 _IMMUTABLE_FIELDS = {"foo", "bar"}

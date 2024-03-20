@@ -44,6 +44,7 @@ from nrlf.core.transform import (
     create_document_pointer_from_fhir_json,
     create_fhir_model_from_fhir_json,
     make_timestamp,
+    strip_empty_json_paths,
 )
 from nrlf.core.validators import json_loads
 from nrlf.log_references import LogReference
@@ -79,22 +80,23 @@ def _override_created_on(
     return document_pointer
 
 
-def _set_pointer_date_fields(document_pointer: DocumentPointer) -> DocumentPointer:
-    create_time = (
-        make_timestamp()
-    )  # TODO - should this be "now", or the exec time of the lambda?
+def _set_create_date_fields(document_pointer: DocumentPointer) -> DocumentPointer:
+    create_time = make_timestamp()
+
+    document_pointer.created_on = DynamoDbStringType(__root__=create_time)
 
     document_json = json_loads(document_pointer.document.__root__)
     document_reference: StrictDocumentReference = create_fhir_model_from_fhir_json(
         fhir_json=document_json
     )
-    document_reference.date = create_time
 
+    document_reference.date = create_time
     if not document_reference.meta:
         document_reference.meta = StrictMeta()
     document_reference.meta.lastUpdated = create_time
 
-    fhir_json = json.dumps(document_reference.dict())
+    fhir_json = json.dumps(strip_empty_json_paths(document_reference.dict()))
+
     document_pointer.document = DynamoDbStringType(__root__=fhir_json)
     document_pointer._document = fhir_json
 
@@ -313,7 +315,7 @@ def save_core_model_to_db(
     if PERMISSION_AUDIT_DATES_FROM_PAYLOAD in data["nrl_permissions"]:
         core_model = _override_created_on(data=data, document_pointer=core_model)
 
-    core_model = _set_pointer_date_fields(core_model)
+    core_model = _set_create_date_fields(core_model)
 
     if delete_pks:
         document_pointer_repository.supersede(
