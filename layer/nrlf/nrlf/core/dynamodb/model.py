@@ -7,6 +7,7 @@ from nhs_number import is_valid as is_valid_nhs_number
 from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from nrlf.core.constants import VALID_SOURCES
+from nrlf.core.logger import LogReference, logger
 from nrlf.core.types import DocumentReference
 
 
@@ -24,6 +25,10 @@ KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
 
 class DynamoDBModel(BaseModel):
     _from_dynamo: bool = PrivateAttr(default=False)
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self._from_dynamo = data.get("_from_dynamo", False)
 
     @classmethod
     def kebab(cls) -> str:
@@ -48,11 +53,6 @@ class DocumentPointer(DynamoDBModel):
     updated_on: Optional[str] = None
     document_id: str = Field(exclude=True)
     schemas: list = Field(default_factory=list)
-    _document: Optional[dict] = PrivateAttr()
-
-    def __init__(self, *, _document: Optional[dict] = None, **data):
-        super().__init__(**data)
-        self._document = _document
 
     def dict(self, **kwargs) -> dict:
         """
@@ -61,45 +61,47 @@ class DocumentPointer(DynamoDBModel):
         default_dict = super().dict(**kwargs)
         return {
             **default_dict,
-            "pk": self.pk,
-            "sk": self.sk,
-            "pk_1": self.pk_1,
-            "sk_1": self.sk_1,
-            "pk_2": self.pk_2,
-            "sk_2": self.sk_2,
+            **self.indexes,
         }
 
     @classmethod
     def from_document_reference(
         cls, resource: DocumentReference, created_on: Optional[str] = None
     ) -> "DocumentPointer":
-        if not (
-            resource.subject
-            and resource.subject.identifier
-            and resource.custodian
-            and resource.custodian.identifier
-            and resource.type
-            and resource.type.coding
-        ):
-            raise ValueError(
-                "DocumentReference must have a subject, custodian and type"
-            )
+        resource_id = getattr(resource, "id")
+        coding = getattr(resource.type, "coding")
+        subject_identifier = getattr(resource.subject, "identifier")
+        custodian_identifier = getattr(resource.custodian, "identifier")
 
-        coding = resource.type.coding[0]
-        pointer_type = f"{coding.system}|{coding.code}"
+        nhs_number = getattr(subject_identifier, "value")
+        custodian = getattr(custodian_identifier, "value")
 
-        return cls(
-            id=resource.id,
-            nhs_number=resource.subject.identifier.value,
-            custodian=resource.custodian.identifier.value,
+        if len(coding) > 1:
+            raise ValueError("DocumentReference.type.coding must have exactly one item")
+
+        pointer_type = f"{coding[0].system}|{coding[0].code}"
+
+        core_model = cls(
+            producer_id=None,  # type: ignore - handled by validators
+            document_id=None,  # type: ignore - handled by validators
+            id=resource_id,
+            nhs_number=nhs_number,
+            custodian=custodian,
             type=pointer_type,
             source="NRLF",
             version=1,
             document=resource.json(exclude_none=True),
             created_on=created_on
             or datetime.now(tz=timezone.utc).isoformat(timespec="milliseconds") + "Z",
-            _document=resource.dict(exclude_none=True),
         )
+
+        logger.log(
+            LogReference.DOCPOINTER005,
+            producer_id=core_model.producer_id,
+            document_id=core_model.document_id,
+            type=pointer_type,
+        )
+        return core_model
 
     @root_validator(pre=True)
     @classmethod
@@ -108,6 +110,7 @@ class DocumentPointer(DynamoDBModel):
         Extract the custodian suffix if it is not provided and the custodian
         is in the format <custodian>.<custodian_suffix>
         """
+        logger.log(LogReference.DOCPOINTER001)
 
         custodian = values.get("custodian")
         custodian_suffix = values.get("custodian_suffix")
@@ -122,6 +125,12 @@ class DocumentPointer(DynamoDBModel):
         if custodian_suffix is not None:
             values["custodian_suffix"] = custodian_suffix
 
+        logger.log(
+            LogReference.DOCPOINTER002,
+            custodian=values["custodian"],
+            custodian_suffix=values.get("custodian_suffix"),
+        )
+
         return values
 
     @root_validator(pre=True)
@@ -130,6 +139,8 @@ class DocumentPointer(DynamoDBModel):
         """
         Inject the producer_id into the DocumentPointer if it is not provided
         """
+        logger.log(LogReference.DOCPOINTER003)
+
         _id: str = values["id"]
         producer_id = values.get("producer_id")
 
@@ -146,49 +157,22 @@ class DocumentPointer(DynamoDBModel):
 
         values["producer_id"] = producer_id
         values["document_id"] = document_id
+
+        logger.log(
+            LogReference.DOCPOINTER004, producer_id=producer_id, document_id=document_id
+        )
         return values
-
-    # @root_validator(pre=True)
-    # def coerce_document_type(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-    #     """
-    #     Coerce the DocumentReference.type to a string if provided as a CodeableConcept
-    #     """
-    #     if values.get("_from_dynamo"):
-    #         return values
-
-    #     document_type = values.get("type")
-    #     assert isinstance(document_type, CodeableConcept), "type must be a CodeableConcept"
-
-    #     if not document_type.coding or len(document_type.coding) != 1:
-    #         raise ValueError("DocumentReference.type.coding must have exactly one item")
-
-    #     coding = document_type.coding[0]
-    #     values["type"] = f"{coding.system}|{coding.code}"
-
-    #     return values
-
-    # @root_validator(pre=True)
-    # def coerce_document(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-    #     """
-    #     Coerce the DocumentReference.document to a dict if provided as a string
-    #     """
-    #     if not values.get("_from_dynamo"):
-    #         return values
-
-    #     document = values.get("document")
-    #     if isinstance(document, str):
-    #         values["document"] = json.loads(document)
-
-    #     return values
 
     @validator("id")
     @classmethod
     def validate_id(cls, id_: str) -> str:
         """
         Validate the id of the DocumentPointer
-        The id should be in the format <producer_id>-<document_id>
+        The id should be in the format <producer_id|producer_suffix>-<document_id>
         """
-        if not re.match(r"^[A-Za-z0-9]+-[A-Za-z0-9\-_]+$", id_):
+        if not re.match(
+            r"^(?=.{1,64}$)[A-Za-z0-9|\\.]+-[A-Za-z0-9]+[A-Za-z0-9\\_\\-]*$", id_
+        ):
             raise ValueError("id must be in the format <producer_id>-<document_id>")
 
         return id_
@@ -200,10 +184,7 @@ class DocumentPointer(DynamoDBModel):
         custodian = values.get("custodian_id")
         custodian_suffix = values.get("custodian_suffix")
 
-        if not all([id_, custodian, custodian_suffix]):
-            return producer_id
-
-        if custodian_suffix:
+        if custodian and custodian_suffix:
             if producer_id.split(".") != (custodian, custodian_suffix):
                 # TODO: Original Error MalformedProducerId
                 raise ValueError(
@@ -211,7 +192,7 @@ class DocumentPointer(DynamoDBModel):
                     "It is expected to be composed in the form '<custodian_id>.<custodian_suffix>'"
                 )
 
-        elif producer_id != custodian:
+        elif custodian and producer_id != custodian:
             raise ValueError(
                 f"Producer ID {producer_id} (extracted from '{id_}')"
                 " does not match the Custodian ID."
@@ -291,6 +272,17 @@ class DocumentPointer(DynamoDBModel):
         return updated_on
 
     @property
+    def indexes(self) -> Dict[str, str]:
+        return {
+            "pk": self.pk,
+            "sk": self.sk,
+            "pk_1": self.pk_1,
+            "sk_1": self.sk_1,
+            "pk_2": self.pk_2,
+            "sk_2": self.sk_2,
+        }
+
+    @property
     def pk(self) -> str:
         """
         Returns the pk (partition key) for the DocumentPointer
@@ -363,7 +355,7 @@ class DocumentPointer(DynamoDBModel):
     @property
     def pk_2(self) -> str:
         """
-        Returns the pk_2 value used for the partition key in the idx_gsi_1 index
+        Returns the pk_2 value used for the partition key in the idx_gsi_2 index
 
         Example:
         - O#<custodian>

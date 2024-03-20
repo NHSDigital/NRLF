@@ -26,7 +26,7 @@ def test_validate_type_system_valid():
 
 
 def test_validate_type_system_invalid():
-    type_ = RequestQueryType(__root__="http://snomed.info/sct|invalid")
+    type_ = RequestQueryType(__root__="http://snomed.info/invalid|736373009")
     pointer_types = [
         "http://snomed.info/sct|736373009",
         "http://snomed.info/sct|736373009",

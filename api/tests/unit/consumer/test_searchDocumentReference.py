@@ -134,6 +134,7 @@ def test_search_document_reference_invalid_nhs_number(
                     ]
                 },
                 "diagnostics": "A valid NHS number is required to search for document references",
+                "expression": ["subject:identifier"],
             }
         ],
     }
@@ -161,7 +162,7 @@ def test_search_document_reference_invalid_type(repository: DocumentPointerRepos
         "issue": [
             {
                 "severity": "error",
-                "code": "bad-request",
+                "code": "code-invalid",
                 "details": {
                     "coding": [
                         {
@@ -171,7 +172,8 @@ def test_search_document_reference_invalid_type(repository: DocumentPointerRepos
                         }
                     ]
                 },
-                "diagnostics": "The provided system type value does not match the allowed types",
+                "diagnostics": "Invalid query parameter (The provided type system does not match the allowed types for this organisation)",
+                "expression": ["type"],
             }
         ],
     }

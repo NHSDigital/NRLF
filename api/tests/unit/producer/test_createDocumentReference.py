@@ -91,14 +91,13 @@ def test_create_document_reference_no_body():
                 "details": {
                     "coding": [
                         {
-                            "code": "MESSAGE_NOT_WELL_FORMED",
-                            "display": "Message not well formed",
+                            "code": "BAD_REQUEST",
+                            "display": "Bad request",
                             "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
                         }
                     ],
                 },
-                "diagnostics": "Request body could not be parsed (__root__: Expecting value: line 1 column 1 (char 0))",
-                "expression": ["__root__"],
+                "diagnostics": "Request body is required",
             }
         ],
     }
@@ -248,7 +247,7 @@ def test_create_document_reference_invalid_producer_id():
                         }
                     ]
                 },
-                "diagnostics": "The id of the provided document pointer does not include the expected organisation code for this app",
+                "diagnostics": "The id of the provided DocumentReference does not include the expected ODS code for this organisation",
             }
         ],
     }
@@ -291,7 +290,7 @@ def test_create_document_reference_invalid_custodian_id():
                         }
                     ]
                 },
-                "diagnostics": "The custodian of the provided document pointer does not match the expected organisation code for this app",
+                "diagnostics": "The custodian of the provided DocumentReference does not match the expected ODS code for this organisation",
                 "expression": ["custodian.identifier.value"],
             }
         ],
@@ -313,7 +312,7 @@ def test_create_document_reference_invalid_pointer_type():
     body = result.pop("body")
 
     assert result == {
-        "statusCode": "401",
+        "statusCode": "403",
         "headers": {},
         "isBase64Encoded": False,
     }
@@ -325,7 +324,7 @@ def test_create_document_reference_invalid_pointer_type():
         "issue": [
             {
                 "severity": "error",
-                "code": "invalid",
+                "code": "forbidden",
                 "details": {
                     "coding": [
                         {
@@ -335,7 +334,7 @@ def test_create_document_reference_invalid_pointer_type():
                         }
                     ]
                 },
-                "diagnostics": "The type of the provided document pointer is not in the list of allowed types for this app",
+                "diagnostics": "The type of the provided DocumentReference is not in the list of allowed types for this organisation",
                 "expression": ["type.coding[0].code"],
             }
         ],
@@ -430,7 +429,7 @@ def test_create_document_reference_invalid_relatesto_target_producer_id():
                         }
                     ]
                 },
-                "diagnostics": "The relatesTo target identifier value does not include the expected organisation code for this app",
+                "diagnostics": "The relatesTo target identifier value does not include the expected ODS code for this organisation",
                 "expression": ["relatesTo[0].target.identifier.value"],
             }
         ],

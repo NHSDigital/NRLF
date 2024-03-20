@@ -1,7 +1,7 @@
 from typing import Union
 
 from nhs_number import is_valid as is_valid_nhs_number
-from pydantic import BaseModel, Field, StrictStr
+from pydantic import BaseModel, Extra, Field, StrictStr
 
 import nrlf.consumer.fhir.r4.model as consumer_model
 import nrlf.producer.fhir.r4.model as producer_model
@@ -27,11 +27,26 @@ class ProducerRequestParams(producer_model.RequestParams, _NhsNumberMixin):
 
 
 class ConsumerRequestParams(consumer_model.RequestParams, _NhsNumberMixin):
+    class Config:
+        extra = Extra.forbid
+
     pass
 
 
 class CountRequestParams(consumer_model.CountRequestParams, _NhsNumberMixin):
     pass
+
+
+class ReadDocumentReferencePathParams(BaseModel):
+    id: StrictStr
+
+
+class DeleteDocumentReferencePathParams(BaseModel):
+    id: StrictStr
+
+
+class UpdateDocumentReferencePathParams(BaseModel):
+    id: StrictStr
 
 
 class ClientRpDetails(BaseModel):
@@ -42,7 +57,7 @@ class ClientRpDetails(BaseModel):
 class ConnectionMetadata(BaseModel):
     pointer_types: list[str] = Field(alias="nrl.pointer-types", default_factory=list)
     ods_code: str = Field(alias="nrl.ods-code")
-    ods_code_extension: str = Field(alias="nrl.ods-code-extension", default=None)
+    ods_code_extension: str | None = Field(alias="nrl.ods-code-extension", default=None)
     nrl_permissions: list[str] = Field(alias="nrl.permissions", default_factory=list)
     enable_authorization_lookup: bool = Field(
         alias="nrl.enable-authorization-lookup", default=False
@@ -51,4 +66,7 @@ class ConnectionMetadata(BaseModel):
 
     @property
     def ods_code_parts(self):
-        return tuple(filter(None, (self.ods_code, self.ods_code_extension)))
+        if self.ods_code_extension:
+            return (self.ods_code, self.ods_code_extension)
+
+        return (self.ods_code,)

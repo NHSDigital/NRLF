@@ -3,7 +3,7 @@ import os
 import pytest
 from pydantic import ValidationError
 
-from nrlf.core.config import AuthorizerConfig, Config
+from nrlf.core.config import Config
 
 
 def test_config_valid():
@@ -73,8 +73,8 @@ def test_config_reads_from_env_variables():
         "SOURCE": "app",
     }
 
-    for k, v in env_vars.items():
-        os.environ[k] = v
+    current_env = os.environ.copy()
+    os.environ.update(env_vars)
 
     # Act
     config = Config()
@@ -86,23 +86,5 @@ def test_config_reads_from_env_variables():
     assert env_vars["SPLUNK_INDEX"] == config.SPLUNK_INDEX
     assert env_vars["SOURCE"] == config.SOURCE
 
-    for k in env_vars:
-        del os.environ[k]
-
-
-def test_authorizer_config_valid():
-    # Arrange
-    env_vars = {
-        "AWS_REGION": "eu-west-2",
-        "PREFIX": "nrlf",
-        "ENVIRONMENT": "production",
-        "SPLUNK_INDEX": "logs",
-        "SOURCE": "app",
-        "AUTH_STORE": "auth-store",
-    }
-
-    # Act
-    config = AuthorizerConfig(**env_vars)
-
-    # Assert
-    assert env_vars["AUTH_STORE"] == config.AUTH_STORE
+    os.environ.clear()
+    os.environ.update(current_env)

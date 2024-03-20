@@ -16,22 +16,28 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
       hec_endpoint               = "https://${splunk_configuration.value["nhs_splunk_url"]}/services/collector/event"
       hec_token                  = splunk_configuration.value["hec_token"]
       hec_acknowledgment_timeout = 300
-      hec_endpoint_type          = "Event"     # Formatted as per https://docs.splunk.com/Documentation/Splunk/latest/Data/FormateventsforHTTPEventCollector
-      s3_backup_mode             = "AllEvents" # Save to prefix "processed" or "errors" before forwarding to Splunk
+      hec_endpoint_type          = "Event"
+      s3_backup_mode             = "FailedEventsOnly"
 
       retry_duration = 0
 
       processing_configuration {
         enabled = "true"
+
         processors {
-          type = "Lambda"
+          type = "Decompression"
           parameters {
-            parameter_name  = "LambdaArn"
-            parameter_value = "${module.lambda.arn}:$LATEST"
+            parameter_name  = "CompressionFormat"
+            parameter_value = "GZIP"
           }
+        }
+
+        processors {
+          type = "CloudWatchLogProcessing"
+
           parameters {
-            parameter_name  = "RoleArn"
-            parameter_value = aws_iam_role.firehose.arn
+            parameter_name  = "DataMessageExtraction"
+            parameter_value = "true"
           }
         }
       }
@@ -49,7 +55,6 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
         buffering_size      = local.s3_configuration.buffer_size
         buffering_interval  = local.s3_configuration.buffer_interval
         compression_format  = local.s3_configuration.compression_format
-
       }
     }
   }
@@ -73,15 +78,21 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
       compression_format  = local.s3_configuration.compression_format
       processing_configuration {
         enabled = "true"
+
         processors {
-          type = "Lambda"
+          type = "Decompression"
           parameters {
-            parameter_name  = "LambdaArn"
-            parameter_value = "${module.lambda.arn}:$LATEST"
+            parameter_name  = "CompressionFormat"
+            parameter_value = "GZIP"
           }
+        }
+
+        processors {
+          type = "CloudWatchLogProcessing"
+
           parameters {
-            parameter_name  = "RoleArn"
-            parameter_value = aws_iam_role.firehose.arn
+            parameter_name  = "DataMessageExtraction"
+            parameter_value = "true"
           }
         }
       }

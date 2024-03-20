@@ -91,14 +91,13 @@ def test_search_document_reference_missing_nhs_number(
                 "details": {
                     "coding": [
                         {
-                            "code": "MESSAGE_NOT_WELL_FORMED",
-                            "display": "Message not well formed",
+                            "code": "BAD_REQUEST",
+                            "display": "Bad request",
                             "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
                         }
                     ]
                 },
-                "expression": ["__root__"],
-                "diagnostics": "Request body could not be parsed (__root__: Expecting value: line 1 column 1 (char 0))",
+                "diagnostics": "Request body is required",
             }
         ],
     }
@@ -168,7 +167,7 @@ def test_search_document_reference_invalid_type(repository: DocumentPointerRepos
         "issue": [
             {
                 "severity": "error",
-                "code": "invalid",
+                "code": "code-invalid",
                 "details": {
                     "coding": [
                         {
@@ -178,7 +177,7 @@ def test_search_document_reference_invalid_type(repository: DocumentPointerRepos
                         }
                     ]
                 },
-                "diagnostics": "The provided system type value does not match the allowed types",
+                "diagnostics": "The provided type system does not match the allowed types for this organisation",
                 "expression": ["type"],
             }
         ],

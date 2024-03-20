@@ -68,17 +68,6 @@ data "aws_iam_policy_document" "firehose" {
 
   statement {
     actions = [
-      "lambda:InvokeFunction",
-      "lambda:GetFunctionConfiguration",
-    ]
-
-    resources = [
-      "${module.lambda.arn}:$LATEST",
-    ]
-  }
-
-  statement {
-    actions = [
       "logs:PutLogEvents",
     ]
     resources = [

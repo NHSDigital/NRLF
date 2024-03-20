@@ -45,7 +45,7 @@ def test_delete_document_reference_happy_path(repository: DocumentPointerReposit
                         }
                     ]
                 },
-                "diagnostics": "The requested document pointer has been deleted",
+                "diagnostics": "The requested DocumentReference has been deleted",
             }
         ],
     }
@@ -71,13 +71,14 @@ def test_delete_document_reference_invalid_id_in_path():
                 "details": {
                     "coding": [
                         {
-                            "code": "INVALID_IDENTIFIER_VALUE",
-                            "display": "Invalid identifier value",
+                            "code": "INVALID_PARAMETER",
+                            "display": "Invalid parameter",
                             "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
                         }
                     ]
                 },
-                "diagnostics": "Invalid document reference ID provided in the path parameters",
+                "diagnostics": "Invalid path parameter (id: field required)",
+                "expression": ["id"],
             }
         ],
     }
@@ -91,7 +92,7 @@ def test_delete_document_reference_invalid_producer_id():
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "401", "headers": {}, "isBase64Encoded": False}
+    assert result == {"statusCode": "403", "headers": {}, "isBase64Encoded": False}
 
     parsed_body = json.loads(body)
     assert parsed_body == {
@@ -109,7 +110,7 @@ def test_delete_document_reference_invalid_producer_id():
                         }
                     ]
                 },
-                "diagnostics": "The requested document pointer cannot be deleted because it belongs to another organisation",
+                "diagnostics": "The requested DocumentReference cannot be deleted because it belongs to another organisation",
             }
         ],
     }
@@ -143,7 +144,7 @@ def test_delete_document_reference_not_exists(repository: DocumentPointerReposit
                         }
                     ]
                 },
-                "diagnostics": "The requested document pointer could not be found",
+                "diagnostics": "The requested DocumentReference could not be found",
             }
         ],
     }

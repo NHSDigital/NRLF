@@ -10,8 +10,8 @@ module "nrlf" {
   prefix = var.prefix
 }
 
-module "lambda_utils" {
-  source = "../layer"
-  name   = "lambda_utils"
-  prefix = var.prefix
-}
+# module "lambda_utils" {
+#   source = "../layer"
+#   name   = "lambda_utils"
+#   prefix = var.prefix
+# }

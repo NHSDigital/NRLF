@@ -1,3 +1,0 @@
-document_type_id: ^([1-9][0-9]*)$
-document_type_code: ^.*$
-document_type_system: ^.*$
