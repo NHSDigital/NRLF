@@ -119,17 +119,13 @@ def execute_steps(
         return operation_outcome_not_ok(transaction_id=transaction_id, exception=e)
 
 
-def render_response(status_code: HTTPStatus, result: dict, headers: dict = {}) -> dict:
+def render_response(status_code: HTTPStatus, result: dict) -> dict:
     """
     Renders the standard http response envelope
     """
     body = json.dumps(strip_empty_json_paths(result))
     return {
         "statusCode": status_code.value,
-        "headers": {
-            "Content-Type": "application/json",
-            "Content-Length": len(body),
-            **headers,
-        },
+        "headers": {"Content-Type": "application/json", "Content-Length": len(body)},
         "body": body,
     }
