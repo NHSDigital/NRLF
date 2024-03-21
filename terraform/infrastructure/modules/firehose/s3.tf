@@ -72,7 +72,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "firehose" {
 resource "aws_s3_bucket_versioning" "firehose" {
   bucket = aws_s3_bucket.firehose.id
   versioning_configuration {
-    status = var.is_persistent_environment ? "Enabled" : "Disabled"
+    status = "Enabled"
   }
 }
 

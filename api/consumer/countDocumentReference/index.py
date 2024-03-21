@@ -1,24 +1,36 @@
-import os
-
-from lambda_pipeline.types import LambdaContext
-from lambda_utils.pipeline import execute_steps, render_response
-
-from api.consumer.countDocumentReference.src.config import (
-    Config,
-    build_persistent_dependencies,
-)
-
-config = Config(
-    **{env_var: os.environ.get(env_var) for env_var in Config.__fields__.keys()}
-)
-dependencies = build_persistent_dependencies(config)
+from nrlf.consumer.fhir.r4.model import Bundle
+from nrlf.core.decorators import DocumentPointerRepository, request_handler
+from nrlf.core.logger import LogReference, logger
+from nrlf.core.model import ConnectionMetadata, CountRequestParams
+from nrlf.core.response import Response, SpineErrorResponse
 
 
-def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
-    if context is None:
-        context = LambdaContext()
+@request_handler(params=CountRequestParams)
+def handler(
+    metadata: ConnectionMetadata,
+    params: CountRequestParams,
+    repository: DocumentPointerRepository,
+) -> Response:
+    """
+    Entrypoint for the countDocumentReference function
+    """
+    logger.log(LogReference.CONCOUNT000)
 
-    status_code, result = execute_steps(
-        index_path=__file__, event=event, context=context, config=config, **dependencies
+    if not (nhs_number := params.nhs_number):
+        logger.log(
+            LogReference.CONCOUNT001, subject_identifier=params.subject_identifier
+        )
+        return SpineErrorResponse.INVALID_IDENTIFIER_VALUE(
+            diagnostics="Invalid NHS number provided in the query parameters",
+            expression="subject:identifier",
+        )
+
+    total = repository.count_by_nhs_number(
+        nhs_number=nhs_number, pointer_types=metadata.pointer_types
     )
-    return render_response(status_code, result)
+
+    bundle = Bundle(resourceType="Bundle", type="searchset", total=total)
+    response = Response.from_resource(bundle)
+
+    logger.log(LogReference.CONCOUNT999)
+    return response

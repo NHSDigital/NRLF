@@ -15,10 +15,23 @@ function _bootstrap_help() {
     return 1
 }
 
+function _check_mgmt() {
+  if [ "$(aws iam list-account-aliases --query 'AccountAliases[0]' --output text)" != "nhsd-ddc-spine-nrlf-mgmt" ]; then
+    echo "Please log in as the mgmt account" >&2
+    return 1
+  fi
+}
+
+function _check_non_mgmt() {
+    if [[ "$(aws iam list-account-aliases --query 'AccountAliases[0]' --output text)"] != 'nhsd-nrlf-mgmt' ]]; then
+    echo "Please log in as a non-mgmt account" >&2
+    return 1
+  fi
+}
 
 function _get_mgmt_account(){
-  python -c "import os; from configparser import ConfigParser; parser = ConfigParser(); parser.read(os.environ['HOME'] + '/.aws/config'); print(parser['nhsd-nrlf-mgmt-admin']['aws_account_id'])"
-  return $?
+  if ! _check_mgmt; then return 1; fi
+  return $(aws sts get-caller-identity --query Account --output text)
 }
 
 
@@ -31,10 +44,7 @@ function _bootstrap() {
 
   case $command in
     "create-mgmt")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
-          echo "Please log in as the mgmt account" >&2
-          return 1
-      fi
+      _check_mgmt || return 1
 
       cd $root/terraform/bootstrap/mgmt
       aws s3api create-bucket --bucket "${truststore_bucket_name}" --region us-east-1 --create-bucket-configuration LocationConstraint="${AWS_REGION_NAME}"
@@ -48,10 +58,7 @@ function _bootstrap() {
     ;;
     #----------------
     "delete-mgmt")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
-          echo "Please log in as the mgmt account" >&2
-          return 1
-      fi
+      _check_mgmt || return 1
 
       cd $root/terraform/bootstrap/mgmt
       aws dynamodb delete-table --table-name "${state_lock_table_name}" || return 1
@@ -72,10 +79,7 @@ function _bootstrap() {
     ;;
     #----------------
     "create-non-mgmt")
-      if [[ "$(aws sts get-caller-identity)" == *mgmt* ]]; then
-          echo "Please log in as a non-mgmt account" >&2
-          return 1
-      fi
+      _check_non_mgmt || return 1
 
       cd $root/terraform/bootstrap/non-mgmt
       local tf_assume_role_policy
@@ -87,10 +91,7 @@ function _bootstrap() {
       ;;
     #----------------
     "delete-non-mgmt")
-      if [[ "$(aws sts get-caller-identity)" == *mgmt* ]]; then
-          echo "Please log in as a non-mgmt account" >&2
-          return 1
-      fi
+      _check_non_mgmt || return 1
 
       aws iam detach-role-policy --policy-arn "${admin_policy_arn}" --role-name "${TERRAFORM_ROLE_NAME}" || return 1
       aws iam delete-role --role-name "${TERRAFORM_ROLE_NAME}" || return 1
@@ -98,10 +99,12 @@ function _bootstrap() {
     ;;
     #----------------
     "destroy-non-mgmt")
-      if [[ "$(aws sts get-caller-identity)" != *dev* || "$(aws sts get-caller-identity)" != *NHSDAdminRole* ]]; then
-          echo "Please log in as dev with an Admin account" >&2
-          return 1
-      fi
+      _check_non_mgmt || return 1
+      # TODO: Reintroduce the admin check - but should be fine for all developers
+      # if [[ "$(aws sts get-caller-identity)" != *dev* || "$(aws sts get-caller-identity)" != *NHSDAdminRole* ]]; then
+      #     echo "Please log in as dev with an Admin account" >&2
+      #     return 1
+      # fi
 
       local workspace
       workspace=$2

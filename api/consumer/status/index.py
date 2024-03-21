@@ -1,26 +1,40 @@
-import os
+import sys
 
 import boto3
-from botocore.config import Config
-from lambda_utils.pipeline import render_response
-from lambda_utils.status_endpoint import execute_steps
 
-_DYNAMODB_TIMEOUT = os.environ.get("DYNAMODB_TIMEOUT")
-_AWS_REGION = os.environ.get("AWS_REGION")
-
-DYNAMODB_CLIENT = None
-if _AWS_REGION and _DYNAMODB_TIMEOUT:
-    DYNAMODB_CLIENT = boto3.client(
-        "dynamodb",
-        config=Config(read_timeout=float(_DYNAMODB_TIMEOUT), region_name=_AWS_REGION),
-    )
+from nrlf.core.config import Config
+from nrlf.core.decorators import DocumentPointerRepository, request_handler
+from nrlf.core.logger import LogReference, logger
+from nrlf.core.response import Response
 
 
-def handler(event, context=None) -> dict[str, str]:
-    status_code, result = execute_steps(
-        index_path=__file__,
-        event=event,
-        context=context,
-        dynamodb_client=DYNAMODB_CLIENT,
-    )
-    return render_response(status_code, result)
+@request_handler(skip_request_verification=True)
+def handler() -> Response:
+    """
+    Entrypoint for the status function
+    """
+    try:
+        logger.log(LogReference.STATUS000)
+        logger.log(LogReference.STATUS001)
+        config = Config()
+
+        logger.log(LogReference.STATUS002)
+        repository = DocumentPointerRepository(
+            dynamodb=boto3.resource("dynamodb"), environment_prefix=config.PREFIX
+        )
+        repository.get("D#NULL")
+
+        response = Response(statusCode="200", body="OK")
+        logger.log(LogReference.STATUS999)
+
+        return response
+
+    except Exception as exc:
+        logger.log(
+            LogReference.STATUS003,
+            error=str(exc),
+            exc_info=sys.exc_info(),
+            stacklevel=5,
+        )
+
+        return Response(statusCode="503", body="Service unavailable")

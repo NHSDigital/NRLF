@@ -30,13 +30,6 @@ output "api_base_urls" {
   }
 }
 
-output "authoriser_lambda_function_names" {
-  value = {
-    producer = module.producer__authoriser_lambda.function_name
-    consumer = module.consumer__authoriser_lambda.function_name
-  }
-}
-
 output "status_lambda_function_names" {
   value = {
     producer = module.producer__status.function_name
@@ -48,11 +41,11 @@ output "certificate_domain_name" {
   value = aws_acm_certificate.certificate.domain_name
 }
 
-output "firehose" {
-  value = {
-    processor = module.firehose__processor
-  }
-}
+# output "firehose" {
+#   value = {
+#     processor = module.firehose__processor
+#   }
+# }
 
 output "mi" {
   value = module.mi

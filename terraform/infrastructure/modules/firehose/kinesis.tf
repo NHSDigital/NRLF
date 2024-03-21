@@ -16,22 +16,28 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
       hec_endpoint               = "https://${splunk_configuration.value["nhs_splunk_url"]}/services/collector/event"
       hec_token                  = splunk_configuration.value["hec_token"]
       hec_acknowledgment_timeout = 300
-      hec_endpoint_type          = "Event"     # Formatted as per https://docs.splunk.com/Documentation/Splunk/latest/Data/FormateventsforHTTPEventCollector
-      s3_backup_mode             = "AllEvents" # Save to prefix "processed" or "errors" before forwarding to Splunk
+      hec_endpoint_type          = "Event"
+      s3_backup_mode             = "FailedEventsOnly"
 
       retry_duration = 0
 
       processing_configuration {
         enabled = "true"
+
         processors {
-          type = "Lambda"
+          type = "Decompression"
           parameters {
-            parameter_name  = "LambdaArn"
-            parameter_value = "${module.lambda.arn}:$LATEST"
+            parameter_name  = "CompressionFormat"
+            parameter_value = "GZIP"
           }
+        }
+
+        processors {
+          type = "CloudWatchLogProcessing"
+
           parameters {
-            parameter_name  = "RoleArn"
-            parameter_value = aws_iam_role.firehose.arn
+            parameter_name  = "DataMessageExtraction"
+            parameter_value = "true"
           }
         }
       }
@@ -41,35 +47,19 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
         log_stream_name = aws_cloudwatch_log_stream.firehose.name
       }
 
-    }
-  }
-
-  dynamic "s3_configuration" {
-    # "s3_configuration" runs hand-in-hand with "splunk_configuration" in order to pipe a backup of the logs
-    # to S3 in either case of success or failure.
-    #
-    # NB: the for_each will not run in the case that 'secret_string' has not been set in the AWS Console, and
-    # therefore this block will be omitted for default deployments (e.g. developer and CI workspaces).
-    #
-    # "dummyKey" and "dummyValue" are unused, they simply enable this feature when 'secret_string' has been defined.
-    for_each = { for item in data.aws_secretsmanager_secret_version.splunk_configuration.*.secret_string : "dummyKey" => "dummyValue" }
-    content {
-      role_arn            = aws_iam_role.firehose.arn
-      prefix              = "splunk_backup/${local.s3_configuration.prefix}"
-      error_output_prefix = local.s3_configuration.error_output_prefix
-      bucket_arn          = aws_s3_bucket.firehose.arn
-      buffer_size         = local.s3_configuration.buffer_size
-      buffer_interval     = local.s3_configuration.buffer_interval
-      compression_format  = local.s3_configuration.compression_format
-
-      cloudwatch_logging_options {
-        enabled         = true
-        log_group_name  = aws_cloudwatch_log_group.firehose.name
-        log_stream_name = aws_cloudwatch_log_stream.firehose.name
+      s3_configuration {
+        role_arn            = aws_iam_role.firehose.arn
+        prefix              = "splunk_backup/${local.s3_configuration.prefix}"
+        error_output_prefix = local.s3_configuration.error_output_prefix
+        bucket_arn          = aws_s3_bucket.firehose.arn
+        buffering_size      = local.s3_configuration.buffer_size
+        buffering_interval  = local.s3_configuration.buffer_interval
+        compression_format  = local.s3_configuration.compression_format
       }
-
     }
   }
+
+
 
   dynamic "extended_s3_configuration" {
     # "extended_s3_configuration" runs INSTEAD OF splunk_configuration, intended for developer and CI
@@ -83,20 +73,26 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
       prefix              = "processed/${local.s3_configuration.prefix}"
       error_output_prefix = local.s3_configuration.error_output_prefix
       bucket_arn          = aws_s3_bucket.firehose.arn
-      buffer_size         = local.s3_configuration.buffer_size
-      buffer_interval     = local.s3_configuration.buffer_interval
+      buffering_size      = local.s3_configuration.buffer_size
+      buffering_interval  = local.s3_configuration.buffer_interval
       compression_format  = local.s3_configuration.compression_format
       processing_configuration {
         enabled = "true"
+
         processors {
-          type = "Lambda"
+          type = "Decompression"
           parameters {
-            parameter_name  = "LambdaArn"
-            parameter_value = "${module.lambda.arn}:$LATEST"
+            parameter_name  = "CompressionFormat"
+            parameter_value = "GZIP"
           }
+        }
+
+        processors {
+          type = "CloudWatchLogProcessing"
+
           parameters {
-            parameter_name  = "RoleArn"
-            parameter_value = aws_iam_role.firehose.arn
+            parameter_name  = "DataMessageExtraction"
+            parameter_value = "true"
           }
         }
       }

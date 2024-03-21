@@ -1,24 +1,65 @@
-import os
+import sys
+import urllib.parse
 
-from lambda_pipeline.types import LambdaContext
-from lambda_utils.pipeline import execute_steps, render_response
+from pydantic import ValidationError
 
-from api.consumer.readDocumentReference.src.config import (
-    Config,
-    build_persistent_dependencies,
-)
-
-config = Config(
-    **{env_var: os.environ.get(env_var) for env_var in Config.__fields__.keys()}
-)
-dependencies = build_persistent_dependencies(config)
+from nrlf.consumer.fhir.r4.model import DocumentReference
+from nrlf.core.decorators import request_handler
+from nrlf.core.dynamodb.repository import DocumentPointerRepository
+from nrlf.core.errors import OperationOutcomeError
+from nrlf.core.logger import LogReference, logger
+from nrlf.core.model import ConnectionMetadata, ReadDocumentReferencePathParams
+from nrlf.core.response import Response, SpineErrorConcept, SpineErrorResponse
 
 
-def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
-    if context is None:
-        context = LambdaContext()
+@request_handler(path=ReadDocumentReferencePathParams)
+def handler(
+    repository: DocumentPointerRepository,
+    metadata: ConnectionMetadata,
+    path: ReadDocumentReferencePathParams,
+) -> Response:
+    """
+    Entrypoint for the readDocumentReference function
+    """
+    logger.log(LogReference.CONREAD000)
 
-    status_code, result = execute_steps(
-        index_path=__file__, event=event, context=context, config=config, **dependencies
-    )
-    return render_response(status_code, result)
+    parsed_id = urllib.parse.unquote_plus(path.id)
+    result = repository.get_by_id(parsed_id)
+
+    if result is None:
+        logger.log(LogReference.CONREAD001)
+        return SpineErrorResponse.NO_RECORD_FOUND(
+            diagnostics="The requested DocumentReference could not be found"
+        )
+
+    if result.type not in metadata.pointer_types:
+        logger.log(
+            LogReference.CONREAD002,
+            ods_code=metadata.ods_code,
+            type=result.type,
+            pointer_types=metadata.pointer_types,
+        )
+        return SpineErrorResponse.ACCESS_DENIED(
+            diagnostics="The requested DocumentReference is not of a type that this organisation is allowed to access"
+        )
+
+    try:
+        document_reference = DocumentReference.parse_raw(result.document)
+    except ValidationError as exc:
+        logger.log(
+            LogReference.CONREAD003,
+            exc_info=sys.exc_info(),
+            error=str(exc),
+        )
+        raise OperationOutcomeError(
+            status_code="500",
+            severity="error",
+            code="exception",
+            details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
+            diagnostics="An error occurred while parsing the document reference",
+        ) from exc
+
+    response = Response.from_resource(document_reference)
+    logger.log(LogReference.CONREAD999)
+
+    return response

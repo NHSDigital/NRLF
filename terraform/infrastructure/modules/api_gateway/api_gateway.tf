@@ -2,11 +2,7 @@ resource "aws_api_gateway_rest_api" "api_gateway_rest_api" {
   name                         = "${var.prefix}--${var.apitype}"
   description                  = "Manages an API Gateway Rest API."
   disable_execute_api_endpoint = true
-  body = templatefile("${path.module}/../../../../api/${var.apitype}/swagger.yaml", merge(var.lambdas, {
-    lambda_invoke_arn   = var.authoriser_lambda_invoke_arn,
-    authoriser_iam_role = aws_iam_role.api_authorizer.arn,
-    authoriser_name     = "${var.prefix}--${var.apitype}-authorizer"
-  }))
+  body                         = templatefile("${path.module}/../../../../api/${var.apitype}/swagger.yaml", var.lambdas)
 }
 
 resource "aws_api_gateway_resource" "capability" {

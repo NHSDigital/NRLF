@@ -6,18 +6,6 @@ class Source(Enum):
     LEGACY = "NRL"
 
 
-class DbPrefix(str, Enum):
-    DocumentPointer = "D"
-    Patient = "P"
-    Organization = "O"
-    CreatedOn = "CO"
-    Contract = "C"
-    Version = "V"
-
-    def __str__(self):
-        return self.value
-
-
 VALID_SOURCES = frozenset(item.value for item in Source.__members__.values())
 EMPTY_VALUES = ("", None, [], {})
 REQUIRED_CREATE_FIELDS = ["custodian", "id", "type", "status", "subject"]

@@ -1,9 +1,3 @@
-module "lambda-utils" {
-  source = "./modules/layer"
-  name   = "lambda_utils"
-  prefix = local.prefix
-}
-
 module "nrlf" {
   source = "./modules/layer"
   name   = "nrlf"

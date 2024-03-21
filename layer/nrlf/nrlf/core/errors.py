@@ -1,149 +1,76 @@
-from typing import Union
+from typing import List, Optional
 
 from pydantic import ValidationError
 
-from nrlf.core.nhsd_codings import SpineCoding
-from nrlf.producer.fhir.r4.model import RequestParams
+from nrlf.core.response import Response
+from nrlf.core.types import CodeableConcept
+from nrlf.producer.fhir.r4 import model as producer_model
+from nrlf.producer.fhir.r4.model import OperationOutcome, OperationOutcomeIssue
 
 
-class ItemNotFound(Exception):
-    pass
+class OperationOutcomeError(Exception):
+    """
+    Will instantly trigger an OperationOutcome error response when raised
+    """
+
+    def __init__(  # noqa: PLR0913
+        self,
+        severity: str,
+        code: str,
+        details: CodeableConcept,
+        diagnostics: Optional[str] = None,
+        status_code: str = "400",
+    ):
+        self.operation_outcome = OperationOutcome(
+            resourceType="OperationOutcome",
+            issue=[
+                OperationOutcomeIssue(
+                    severity=severity,
+                    code=code,
+                    details=details,  # type: ignore
+                    diagnostics=diagnostics,
+                )
+            ],
+        )
+        self.status_code = status_code
+
+    @property
+    def response(self) -> Response:
+        return Response(
+            statusCode=self.status_code,
+            body=self.operation_outcome.json(exclude_none=True, indent=2),
+        )
 
 
-class DynamoDbError(Exception):
-    pass
+class ParseError(Exception):
+    issues: List[OperationOutcomeIssue]
 
+    def __init__(self, issues: List[OperationOutcomeIssue]):
+        self.issues = issues
 
-class FhirValidationError(Exception):
-    pass
+    @classmethod
+    def from_validation_error(
+        cls, exc: ValidationError, details: CodeableConcept, msg: str = ""
+    ):
+        issues = [
+            producer_model.OperationOutcomeIssue(
+                severity="error",
+                code="invalid",
+                details=details,  # type: ignore
+                diagnostics=f"{msg} ({error['loc'][0]}: {error['msg']})",
+                expression=[str(error["loc"][0])],  # type: ignore
+            )
+            for error in exc.errors()
+        ]
 
+        return cls(issues)
 
-class TooManyItemsError(Exception):
-    pass
-
-
-class ImmutableFieldViolationError(Exception):
-    pass
-
-
-class InvalidLogicalIdError(Exception):
-    pass
-
-
-class UnknownParameterError(Exception):
-    pass
-
-
-class DuplicateError(Exception):
-    pass
-
-
-class SupersedeError(Exception):
-    pass
-
-
-class DocumentReferenceValidationError(Exception):
-    pass
-
-
-class ProducerValidationError(Exception):
-    pass
-
-
-class InconsistentUpdateId(Exception):
-    pass
-
-
-class RequestValidationError(Exception):
-    pass
-
-
-class InconsistentUpdateId(Exception):
-    pass
-
-
-class SupersedeValidationError(Exception):
-    pass
-
-
-class InvalidTupleError(Exception):
-    pass
-
-
-class NextPageTokenValidationError(Exception):
-    pass
-
-
-class AuthenticationError(Exception):
-    pass
-
-
-class ProducerCreateValidationError(Exception):
-    pass
-
-
-class MissingRequiredFieldForCreate(Exception):
-    pass
-
-
-class DuplicateKeyError(Exception):
-    pass
-
-
-class MalformedProducerId(ValueError):
-    pass
-
-
-class InconsistentProducerId(ValueError):
-    pass
-
-
-class BadJsonSchema(Exception):
-    pass
-
-
-class JsonSchemaValidationError(ValueError):
-    pass
-
-
-NRLF_TO_SPINE_4XX_ERROR = {
-    AuthenticationError: SpineCoding.ACCESS_DENIED_LEVEL,
-    DynamoDbError: SpineCoding.RESOURCE_NOT_FOUND,
-    FhirValidationError: SpineCoding.VALIDATION_ERROR,
-    ImmutableFieldViolationError: SpineCoding.VALIDATION_ERROR,
-    ItemNotFound: SpineCoding.RESOURCE_NOT_FOUND,
-    TooManyItemsError: SpineCoding.VALIDATION_ERROR,
-    ValidationError: SpineCoding.VALIDATION_ERROR,
-    UnknownParameterError: SpineCoding.VALIDATION_ERROR,
-    DuplicateError: SpineCoding.INVALID_VALUE,
-    SupersedeError: SpineCoding.INVALID_RESOURCE_ID,
-    DocumentReferenceValidationError: SpineCoding.SERVICE_ERROR,
-    RequestValidationError: SpineCoding.VALIDATION_ERROR,
-    InconsistentUpdateId: SpineCoding.VALIDATION_ERROR,
-    ProducerValidationError: SpineCoding.VALIDATION_ERROR,
-    MissingRequiredFieldForCreate: SpineCoding.VALIDATION_ERROR,
-    InconsistentUpdateId: SpineCoding.VALIDATION_ERROR,
-    SupersedeValidationError: SpineCoding.VALIDATION_ERROR,
-    InvalidTupleError: SpineCoding.VALIDATION_ERROR,
-    NextPageTokenValidationError: SpineCoding.VALIDATION_ERROR,
-    ProducerCreateValidationError: SpineCoding.VALIDATION_ERROR,
-    DuplicateKeyError: SpineCoding.VALIDATION_ERROR,
-    JsonSchemaValidationError: SpineCoding.VALIDATION_ERROR,
-}
-
-
-ERROR_SET_4XX = tuple(NRLF_TO_SPINE_4XX_ERROR.keys())
-
-
-def assert_no_extra_params(
-    request_params: RequestParams,
-    provided_params: Union[list[str], None],
-):
-    if provided_params is None:
-        return
-    expected_params = request_params.dict(by_alias=True).keys()
-    unknown_params = set(provided_params) - set(expected_params)
-    if unknown_params:
-        raise UnknownParameterError(
-            f"Unexpected parameters: {', '.join(unknown_params)}"
+    @property
+    def response(self):
+        return Response(
+            statusCode="400",
+            body=producer_model.OperationOutcome(
+                resourceType="OperationOutcome",
+                issue=self.issues,
+            ).json(exclude_none=True, indent=2),
         )

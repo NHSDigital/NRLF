@@ -1,4 +1,0 @@
-provider_name: ^.*$
-system: ^.*$
-type: ^.*$
-count: ^(0|[1-9]\d*)$

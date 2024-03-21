@@ -1,161 +1,254 @@
-import json
-from datetime import datetime as dt
-from typing import Optional
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
-from nhs_number import is_valid as is_valid_nhs_number
 from pydantic import ValidationError
 
-from nrlf.core.constants import (
-    CUSTODIAN_SEPARATOR,
-    ID_SEPARATOR,
-    NHS_NUMBER_SYSTEM_URL,
-    TYPE_SEPARATOR,
-    VALID_SOURCES,
-)
-from nrlf.core.errors import (
-    AuthenticationError,
-    DocumentReferenceValidationError,
-    DuplicateKeyError,
-    FhirValidationError,
-    InconsistentProducerId,
-    InvalidTupleError,
-    MalformedProducerId,
-)
-from nrlf.producer.fhir.r4.model import (
-    CodeableConcept,
-    DocumentReference,
-    Identifier,
-    RequestQueryType,
-)
+from nrlf.core.codes import SpineErrorConcept
+from nrlf.core.constants import REQUIRED_CREATE_FIELDS
+from nrlf.core.errors import ParseError
+from nrlf.core.logger import LogReference, logger
+from nrlf.core.types import DocumentReference, OperationOutcomeIssue, RequestQueryType
+from nrlf.producer.fhir.r4 import model as producer_model
 
 
-def _get_tuple_components(tuple: str, separator: str) -> tuple[str, str]:
-    try:
-        a, b = tuple.split(separator, 1)
-    except ValueError:
-        raise InvalidTupleError(
-            f"Input is not composite of the form a{separator}b: {tuple}"
-        ) from None
-    return a, b
+def validate_type_system(
+    type_: Optional[RequestQueryType], pointer_types: List[str]
+) -> bool:
+    """
+    Validates if the given type system is present in the list of pointer types.
+    """
+    if not type_:
+        return True
+
+    type_system = type_.__root__.split("|", 1)[0]
+    pointer_type_systems = [
+        pointer_type.split("|", 1)[0] for pointer_type in pointer_types
+    ]
+
+    return type_system in pointer_type_systems
 
 
-def generate_producer_id(id: str, producer_id: Optional[str]) -> str:
-    if producer_id:
-        raise ValueError(
-            "producer_id should not be passed to DocumentPointer; "
-            "it will be extracted from id."
-        )
-    return _get_tuple_components(tuple=id, separator=ID_SEPARATOR)
+@dataclass
+class ValidationResult:
+    resource: DocumentReference
+    issues: List[OperationOutcomeIssue]
 
+    def reset(self):
+        self.__init__(resource=producer_model.DocumentReference.construct(), issues=[])
 
-def create_document_type_tuple(document_type: CodeableConcept):
-    try:
-        (coding,) = document_type.coding
-    except ValueError:
-        n = len(document_type.coding)
-        raise ValueError(
-            f"Expected exactly one item in DocumentReference.type.coding, got {n}"
-        ) from None
-    return f"{coding.system}{TYPE_SEPARATOR}{coding.code}"
+    def add_error(
+        self,
+        issue_code: str,
+        error_code: Optional[str] = None,
+        diagnostics: Optional[str] = None,
+        field: Optional[str] = None,
+    ):
+        details = None
+        if error_code is not None:
+            details = SpineErrorConcept.from_code(error_code)
 
-
-def validate_nhs_number(nhs_number: str):
-    if not is_valid_nhs_number(nhs_number):
-        raise ValueError(f"Not a valid NHS Number: {nhs_number}")
-
-
-def validate_tuple(tuple: str, separator: str):
-    _get_tuple_components(tuple=tuple, separator=separator)
-
-
-def validate_source(source: str):
-    if source not in VALID_SOURCES:
-        raise ValueError(f"Not a source: {source}. Expected one of {VALID_SOURCES}.")
-
-
-def validate_timestamp(date: str):
-    _date = date[:-1] if date.endswith("Z") else date
-    try:
-        dt.fromisoformat(_date)
-    except ValueError:
-        raise ValueError(f"Not a valid ISO date: {date}") from None
-
-
-def requesting_application_is_not_authorised(
-    requesting_application_id, authenticated_application_id
-):
-    return requesting_application_id != authenticated_application_id
-
-
-def validate_document_reference_string(fhir_json: str):
-    try:
-        DocumentReference(**json_loads(fhir_json))
-    except (ValidationError, ValueError):
-        raise DocumentReferenceValidationError(
-            "There was a problem retrieving the document pointer"
-        ) from None
-
-
-def validate_type_system(type: RequestQueryType, pointer_types: list[str]):
-    if type is not None:
-        type_system = type.__root__.split("|", 1)[0]
-
-        pointer_type_systems = map(
-            lambda pointer_type: pointer_type.split("|", 1)[0], pointer_types
+        issue = producer_model.OperationOutcomeIssue(
+            severity="error",
+            code=issue_code,
+            details=details,
+            diagnostics=diagnostics,
+            expression=[field] if field else None,  # type: ignore
         )
 
-        for pointer_type_system in pointer_type_systems:
-            if type_system == pointer_type_system:
-                return
+        logger.log(LogReference.VALIDATOR002, issue=issue.dict(exclude_none=True))
+        self.issues.append(issue)
 
-        raise AuthenticationError(
-            f"The provided system type value - {type_system} - does not match the allowed types"
-        )
-
-
-def validate_subject_identifier_system(subject_identifier: Identifier):
-    if subject_identifier.system != NHS_NUMBER_SYSTEM_URL:
-        raise FhirValidationError("Input FHIR JSON has an invalid subject:identifier")
+    @property
+    def is_valid(self):
+        return not any(issue.severity in {"error", "fatal"} for issue in self.issues)
 
 
-def dict_raise_on_duplicates(list_of_pairs):
-    checked_pairs = {}
-    for k, v in list_of_pairs:
-        if k in checked_pairs:
-            raise DuplicateKeyError("Duplicate key: %r" % (k,))
-        checked_pairs[k] = v
-    return checked_pairs
+class StopValidationError(Exception):
+    pass
 
 
-def json_loads(json_string):
-    return json.loads(json_string, object_pairs_hook=dict_raise_on_duplicates)
+class DocumentReferenceValidator:
+    """
+    A class to validate document references
+    """
 
+    MODEL = producer_model.DocumentReference
 
-def json_load(json_file_obj):
-    return json.load(json_file_obj, object_pairs_hook=dict_raise_on_duplicates)
+    def __init__(self):
+        self.result = ValidationResult(resource=self.MODEL.construct(), issues=[])
 
+    @classmethod
+    def parse(cls, data: Dict[str, Any]):
+        try:
+            logger.log(LogReference.PARSE000, data=data, model=cls.MODEL.__name__)
+            result = cls.MODEL.parse_obj(data)
+            logger.log(LogReference.PARSE001, model=cls.MODEL.__name__)
+            logger.log(LogReference.PARSE001a, result=result)
+            return result
 
-def validate_producer_id(
-    producer_id: str, custodian_id: str, custodian_suffix: str = None
-):
-    if custodian_suffix:
-        if producer_id.split(CUSTODIAN_SEPARATOR) != (custodian_id, custodian_suffix):
-            raise MalformedProducerId(
-                f"Producer ID {producer_id} (extracted from '{id}') is not correctly formed. "
-                "It is expected to be composed in the form '<custodian_id>.<custodian_suffix>'"
+        except ValidationError as exc:
+            logger.log(
+                LogReference.PARSE002,
+                model=cls.MODEL.__name__,
+                data=data,
+                validation_error=str(exc),
             )
-    else:
-        if producer_id != custodian_id:
-            raise InconsistentProducerId(
-                f"Producer ID {producer_id} (extracted from '{id}') "
-                "does not match the Custodian ID."
+            raise ParseError.from_validation_error(
+                exc,
+                details=SpineErrorConcept.from_code("INVALID_RESOURCE"),
+                msg="Failed to parse DocumentReference resource",
+            ) from None
+
+    def validate(self, data: Dict[str, Any] | DocumentReference):
+        """
+        Validate the document reference
+        """
+        logger.log(LogReference.VALIDATOR000, resource_type="DocumentReference")
+        resource = self.parse(data) if isinstance(data, dict) else data
+
+        self.result = ValidationResult(resource=resource, issues=[])
+
+        try:
+            self._validate_required_fields(resource)
+            self._validate_no_extra_fields(resource, data)
+            self._validate_identifiers(resource)
+            self._validate_relates_to(resource)
+
+        except StopValidationError:
+            logger.log(LogReference.VALIDATOR003)
+
+        logger.log(
+            LogReference.VALIDATOR999,
+            is_valid=self.result.is_valid,
+            issue_count=len(self.result.issues),
+        )
+        return self.result
+
+    def _validate_required_fields(self, model: DocumentReference):
+        """
+        Validate the required fields
+        """
+        logger.log(
+            LogReference.VALIDATOR001,
+            step="required_fields",
+            required_fields=REQUIRED_CREATE_FIELDS,
+        )
+
+        for field in REQUIRED_CREATE_FIELDS:
+            if not getattr(model, field, None):
+                self.result.add_error(
+                    issue_code="required",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"The required field '{field}' is missing",
+                    field=field,
+                )
+
+        if not self.result.is_valid:
+            raise StopValidationError()
+
+    def _validate_no_extra_fields(
+        self, resource: DocumentReference, data: Dict[str, Any] | DocumentReference
+    ):
+        """
+        Validate that there are no extra fields
+        """
+        logger.log(LogReference.VALIDATOR001, step="no_extra_fields")
+        has_extra_fields = False
+
+        if isinstance(data, DocumentReference):
+            has_extra_fields = (
+                len(set(resource.__dict__) - set(resource.__fields__)) > 0
+            )
+        else:
+            has_extra_fields = data != resource.dict(exclude_none=True)
+
+        if has_extra_fields:
+            self.result.add_error(
+                issue_code="invalid",
+                error_code="INVALID_RESOURCE",
+                diagnostics="The resource contains extra fields",
             )
 
+    def _validate_identifiers(self, model: DocumentReference):
+        """ """
+        logger.log(LogReference.VALIDATOR001, step="identifiers")
 
-def split_custodian_id(custodian_id: str) -> dict:
-    custodian_id_suffix = None
-    try:
-        custodian_id, custodian_id_suffix = custodian_id.split(CUSTODIAN_SEPARATOR)
-    except ValueError:
-        pass
-    return custodian_id, custodian_id_suffix
+        if not (custodian_identifier := getattr(model.custodian, "identifier", None)):
+            self.result.add_error(
+                issue_code="required",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Custodian must have an identifier",
+                field="custodian.identifier",
+            )
+            raise StopValidationError()
+
+        if not (subject_identifier := getattr(model.subject, "identifier", None)):
+            self.result.add_error(
+                issue_code="required",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Subject must have an identifier",
+                field="subject.identifier",
+            )
+            raise StopValidationError()
+
+        if (
+            custodian_identifier.system
+            != "https://fhir.nhs.uk/Id/ods-organization-code"
+        ):
+            self.result.add_error(
+                issue_code="invalid",
+                error_code="INVALID_IDENTIFIER_SYSTEM",
+                diagnostics="Provided custodian identifier system is not the ODS system (expected: 'https://fhir.nhs.uk/Id/ods-organization-code')",
+                field="custodian.identifier.system",
+            )
+
+        if subject_identifier.system != "https://fhir.nhs.uk/Id/nhs-number":
+            self.result.add_error(
+                issue_code="invalid",
+                error_code="INVALID_IDENTIFIER_SYSTEM",
+                diagnostics=(
+                    "Provided subject identifier system is not the NHS number system "
+                    "(expected 'https://fhir.nhs.uk/Id/nhs-number')"
+                ),
+                field="subject.identifier.system",
+            )
+
+    def _validate_relates_to(self, model: DocumentReference):
+        """"""
+        if not model.relatesTo:
+            logger.log(
+                LogReference.VALIDATOR001, step="relates_to", reason="no_relates_to"
+            )
+            return
+
+        logger.log(LogReference.VALIDATOR001, step="relates_to")
+
+        logger.debug("Validating relatesTo")
+
+        for index, relates_to in enumerate(model.relatesTo):
+            if relates_to.code not in [
+                "replaces",
+                "transforms",
+                "signs",
+                "appends",
+                "incorporates",
+                "summarizes",
+            ]:
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_CODE_VALUE",
+                    diagnostics=f"Invalid relatesTo code: {relates_to.code}",
+                    field=f"relatesTo[{index}].code",
+                )
+                continue
+
+            if relates_to.code == "replaces" and not (
+                relates_to.target.identifier and relates_to.target.identifier.value
+            ):
+                self.result.add_error(
+                    issue_code="required",
+                    error_code="INVALID_IDENTIFIER_VALUE",
+                    diagnostics="relatesTo code 'replaces' must have a target identifier",
+                    field=f"relatesTo[{index}].target.identifier.value",
+                )
+                continue
