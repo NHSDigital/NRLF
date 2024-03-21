@@ -45,7 +45,7 @@ jobs:
         uses: asdf-vm/actions/install@v3.0.2
 
       - name: Install zip
-        run: apt-get install zip
+        run: sudo apt-get install zip
 
       - name: Setup Python environment
         run: |
