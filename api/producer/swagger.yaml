@@ -617,8 +617,6 @@ paths:
                     diagnostics: Resource created
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
-      security:
-        - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST

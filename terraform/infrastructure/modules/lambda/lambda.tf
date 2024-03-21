@@ -3,8 +3,8 @@ resource "aws_lambda_function" "lambda_function" {
   runtime          = "python3.12"
   handler          = var.handler
   role             = aws_iam_role.lambda_role.arn
-  filename         = "${path.module}/../../../../${var.parent_path}/${var.name}/dist/${var.name}.zip"
-  source_code_hash = filebase64sha256("${path.module}/../../../../${var.parent_path}/${var.name}/dist/${var.name}.zip")
+  filename         = "${path.module}/../../../../dist/${var.name}.zip"
+  source_code_hash = filebase64sha256("${path.module}/../../../../dist/${var.name}.zip")
   timeout          = local.lambda_timeout
   memory_size      = 512
   # publish = true

@@ -13,7 +13,7 @@ jobs:
     # a) Terraform / AWS to allow clean build/destroys without side-effects (e.g. we don't
     #    want resources marked for deletion to be recreated in another CI run)
     # b) Not to fall foul of character limits on AWS resource names: the ID must be short
-    name: Set a uniquish ID
+    name: Set Unique Environment ID
     runs-on: [self-hosted, ci]
     steps:
       - name: Set a uniquish ID
@@ -24,8 +24,8 @@ jobs:
     outputs:
       uniqish_id: ${{ steps.set_uniqish_id.outputs.uniqish_id }}
 
-  python-check:
-    name: Python Checks (head)
+  build:
+    name: Build Application
     runs-on: [self-hosted, ci]
     steps:
       - name: Git Clone - ${{ github.event.pull_request.head.ref }}
@@ -66,3 +66,156 @@ jobs:
         with:
           name: build-artifacts
           path: dist/*.zip
+
+  deploy:
+    name: Deploy CI Environment
+    runs-on: [self-hosted, ci]
+    needs: [set-uniquish-id, build]
+    steps:
+      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+
+      - name: Terraform Init
+        run: |
+          terraform -chdir=terraform/infrastructure init
+          terraform -chdir=terraform/infrastructure workspace new ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+
+      - name: Terraform Plan
+        run: |
+          terraform -chdir=terraform/infrastructure plan \
+            --var-file=etc/dev.tfvars \
+            --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
+            --var assume_role=terraform \
+            -out tfplan
+
+      - name: Store Terraform Plan Output
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-output
+          path: terraform/infrastructure/tfplan*
+
+      - name: Terraform Apply
+        run: |
+          terraform -chdir=terraform/infrastructure plan \
+            --var-file=etc/dev.tfvars \
+            --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
+            --var assume_role=terraform \
+            tfplan
+
+      - name: Store Terraform Outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-outputs
+          path: terraform/infrastructure/output.json
+
+  integration-test:
+    name: Run Integration Tests
+    needs: [deploy]
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+  performance-test:
+    name: Run Performance Tests
+    needs: [integration-test]
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+  destroy:
+    name: Destroy CI Environment
+    needs: [deploy, integration-test, performance-test]
+    runs-on: [self-hosted, ci]
+    if: ${{ always() }}
+
+    steps:
+      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+
+      - name: Terraform Init
+        run: |
+          terraform -chdir=terraform/infrastructure init
+          terraform -chdir=terraform/infrastructure workspace select ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+
+      - name: Terraform Destroy
+        run: |
+          terraform -chdir=terraform/infrastructure destroy \
+            --var-file=etc/dev.tfvars \
+            --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
+            --var assume_role=terraform \
+            -auto-approve

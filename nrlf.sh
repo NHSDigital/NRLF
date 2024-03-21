@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -x
+set -o xtrace
+
 export PIPENV_VENV_IN_PROJECT=1
 export AWS_DEFAULT_REGION=eu-west-2
 root=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)
