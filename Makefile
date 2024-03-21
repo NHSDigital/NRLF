@@ -13,7 +13,7 @@ BEHAVE ?= .venv/bin/behave
 PRECOMMIT ?= .venv/bin/pre-commit
 
 DIST_PATH ?= ./dist
-TEST_ARGS ?= --cov=api/consumer --cov=api/producer --cov=layer/nrlf/nrlf --cov-report=term-missing -vv
+TEST_ARGS ?= --cov=api/consumer --cov=api/producer --cov=layer/nrlf/nrlf --cov-report=term-missing
 FEATURE_TEST_ARGS ?= ./feature_tests
 
 default: build
@@ -40,7 +40,20 @@ check: # Check the build environment is setup correctly
 check-warn:
 	@SHOULD_WARN_ONLY=true ./scripts/check-build-environment.sh
 
-build: check-warn build-api-packages ## Build the project
+build: check-warn build-api-packages build-layers build-dependency-layer ## Build the project
+
+build-dependency-layer:
+	@echo "Building Lambda dependency layer"
+	@mkdir -p $(DIST_PATH)
+	./scripts/build-lambda-dependency-layer.sh $(DIST_PATH)
+
+build-layers: ./layer/*
+	@echo "Building Lambda layers"
+	@mkdir -p $(DIST_PATH)
+	for layer in $^; do \
+		[ ! -d "$$layer" ] && continue; \
+		./scripts/build-lambda-layer.sh $${layer} $(DIST_PATH); \
+	done
 
 build-api-packages: ./api/consumer/* ./api/producer/*
 	@echo "Building API packages"

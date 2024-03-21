@@ -24,11 +24,34 @@ jobs:
     outputs:
       uniqish_id: ${{ steps.set_uniqish_id.outputs.uniqish_id }}
 
-  lint-check:
-    name: Linting check (head)
+  python-check:
+    name: Python Checks (head)
     runs-on: [self-hosted, ci]
     steps:
       - name: Git Clone - ${{ github.event.pull_request.base.ref }}
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Install asdf and tools
+        uses: asdf-vm/actions/setup@v3.0.2
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          poetry shell
+
+      - name: Run Linting
+        run: make lint
+
+      - name: Run Unit Tests
+        run: make test
+
+      - name: Build Project
+        run: make build
+
+      - name: Save Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/*.zip

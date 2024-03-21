@@ -16,7 +16,6 @@ boto3-stubs = {extras = ["dynamodb", "firehose", "kinesis", "lambda", "rds", "s3
 
 [tool.poetry.group.dev.dependencies]
 build-scripts = { path = "./scripts/build_scripts/", develop = true }
-nrlf = { path = "./layer/nrlf/", develop = true }
 nrlf-converter = {url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.9/nrlf_converter-0.0.9-py3-none-any.whl"}
 pytest = "^8.1.1"
 pytest-mock = "^3.12.0"
