@@ -33,8 +33,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Install asdf and tools
+      - name: Install asdf
         uses: asdf-vm/actions/setup@v3.0.2
+
+      - name: Install tools
+        run: make asdf-install
 
       - name: Setup Python environment
         run: |
