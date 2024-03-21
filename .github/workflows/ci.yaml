@@ -130,11 +130,7 @@ jobs:
 
       - name: Terraform Apply
         run: |
-          terraform -chdir=terraform/infrastructure apply \
-            --var-file=etc/dev.tfvars \
-            --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
-            --var assume_role=terraform \
-            tfplan
+          terraform -chdir=terraform/infrastructure apply tfplan
 
       - name: Store Terraform Outputs
         uses: actions/upload-artifact@v4
