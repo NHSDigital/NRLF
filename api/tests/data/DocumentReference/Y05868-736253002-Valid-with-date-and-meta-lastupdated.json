@@ -1,0 +1,103 @@
+{
+  "resourceType": "DocumentReference",
+  "id": "Y05868-99999-99999-999999",
+  "status": "current",
+  "docStatus": "final",
+  "date": "2024-03-20T00:00:00.001+00:00Z",
+  "meta": {
+    "lastUpdated": "2024-03-20T00:00:00.001+00:00Z"
+  },
+  "type": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "736253002",
+        "display": "Mental health crisis plan"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "734163000",
+          "display": "Care plan"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "identifier": {
+      "system": "https://fhir.nhs.uk/Id/nhs-number",
+      "value": "6700028191"
+    }
+  },
+  "author": [
+    {
+      "identifier": {
+        "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+        "value": "Y05868"
+      }
+    },
+    {
+      "identifier": {
+        "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
+        "value": "012345678910"
+      }
+    }
+  ],
+  "custodian": {
+    "identifier": {
+      "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+      "value": "Y05868"
+    }
+  },
+  "description": "Physical document mental health crisis plan",
+  "securityLabel": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+          "code": "V",
+          "display": "very restricted"
+        }
+      ]
+    }
+  ],
+  "content": [
+    {
+      "attachment": {
+        "contentType": "application/pdf",
+        "language": "en-US",
+        "url": "https://spine-proxy.national.ncrs.nhs.uk/https%3A%2F%2Fp1.nhs.uk%2FMentalhealthCrisisPlanReport.pdf",
+        "size": 3654,
+        "hash": "2jmj7l5rSw0yVb/vlWAYkK/YBwk=",
+        "title": "Mental health crisis plan report",
+        "creation": "2022-12-21T10:45:41+11:00"
+      },
+      "format": {
+        "system": "https://fhir.nhs.uk/England/CodeSystem/England-NRLFormatCode",
+        "code": "urn:nhs-ic:unstructured",
+        "display": "Unstructured document"
+      }
+    }
+  ],
+  "context": {
+    "practiceSetting": {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "788002001",
+          "display": "Adult mental health service"
+        }
+      ]
+    },
+    "sourcePatientInfo": {
+      "identifier": {
+        "system": "https://fhir.nhs.uk/Id/nhs-number",
+        "value": "6700028191"
+      }
+    }
+  }
+}

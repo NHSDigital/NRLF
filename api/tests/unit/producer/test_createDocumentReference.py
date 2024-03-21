@@ -1,4 +1,5 @@
 import json
+from unittest import mock
 
 from moto import mock_aws
 
@@ -21,9 +22,16 @@ from nrlf.producer.fhir.r4.model import (
 )
 
 
+# TODO-NOW Is there a better way of mocking the create_fhir_instant function?
 @mock_aws
 @mock_repository
-def test_create_document_reference_happy_path(repository: DocumentPointerRepository):
+@mock.patch(
+    "api.producer.createDocumentReference.index.create_fhir_instant",
+    return_value="2024-03-21T12:34:56.789+00:00Z",
+)
+def test_create_document_reference_happy_path(
+    mock__create_fhir_instance, repository: DocumentPointerRepository
+):
     doc_ref_data = load_document_reference_data("Y05868-736253002-Valid")
 
     event = create_test_api_gateway_event(
@@ -64,7 +72,15 @@ def test_create_document_reference_happy_path(repository: DocumentPointerReposit
     created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
-    assert json.loads(created_doc_pointer.document) == json.loads(doc_ref_data)
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789+00:00Z"
+    assert created_doc_pointer.updated_on is None
+    assert json.loads(created_doc_pointer.document) == {
+        **json.loads(doc_ref_data),
+        "meta": {
+            "lastUpdated": "2024-03-21T12:34:56.789+00:00Z",
+        },
+        "date": "2024-03-21T12:34:56.789+00:00Z",
+    }
 
 
 def test_create_document_reference_no_body():
@@ -743,3 +759,185 @@ def test_create_document_reference_create_relatesto_not_replaces(
 
     old_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
     assert old_doc_pointer is not None
+
+
+@mock_aws
+@mock_repository
+@mock.patch(
+    "api.producer.createDocumentReference.index.create_fhir_instant",
+    return_value="2024-03-21T12:34:56.789+00:00Z",
+)
+def test_create_document_reference_with_date_ignored(
+    mock__create_fhir_instance, repository: DocumentPointerRepository
+):
+    doc_ref_data = load_document_reference_data("Y05868-736253002-Valid-with-date")
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(),
+        body=doc_ref_data,
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "201",
+        "headers": {},
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "information",
+                "code": "informational",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "RESOURCE_CREATED",
+                            "display": "Resource created",
+                            "system": "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
+                        }
+                    ],
+                },
+                "diagnostics": "The document has been created",
+            }
+        ],
+    }
+
+    created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
+
+    assert created_doc_pointer is not None
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789+00:00Z"
+    assert created_doc_pointer.updated_on is None
+    assert json.loads(created_doc_pointer.document) == {
+        **json.loads(doc_ref_data),
+        "meta": {
+            "lastUpdated": "2024-03-21T12:34:56.789+00:00Z",
+        },
+        "date": "2024-03-21T12:34:56.789+00:00Z",
+    }
+
+
+@mock_aws
+@mock_repository
+@mock.patch(
+    "api.producer.createDocumentReference.index.create_fhir_instant",
+    return_value="2024-03-21T12:34:56.789+00:00Z",
+)
+def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
+    mock__create_fhir_instance, repository: DocumentPointerRepository
+):
+    doc_ref_data = load_document_reference_data(
+        "Y05868-736253002-Valid-with-date-and-meta-lastupdated"
+    )
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(),
+        body=doc_ref_data,
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "201",
+        "headers": {},
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "information",
+                "code": "informational",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "RESOURCE_CREATED",
+                            "display": "Resource created",
+                            "system": "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
+                        }
+                    ],
+                },
+                "diagnostics": "The document has been created",
+            }
+        ],
+    }
+
+    created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
+
+    assert created_doc_pointer is not None
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789+00:00Z"
+    assert created_doc_pointer.updated_on is None
+    assert json.loads(created_doc_pointer.document) == {
+        **json.loads(doc_ref_data),
+        "meta": {
+            "lastUpdated": "2024-03-21T12:34:56.789+00:00Z",
+        },
+        "date": "2024-03-21T12:34:56.789+00:00Z",
+    }
+
+
+@mock_aws
+@mock_repository
+@mock.patch(
+    "api.producer.createDocumentReference.index.create_fhir_instant",
+    return_value="2024-03-21T12:34:56.789+00:00Z",
+)
+def test_create_document_reference_with_date_overidden(
+    mock__create_fhir_instance, repository: DocumentPointerRepository
+):
+    doc_ref_data = load_document_reference_data("Y05868-736253002-Valid-with-date")
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(nrl_permissions=["audit-dates-from-payload"]),
+        body=doc_ref_data,
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "201",
+        "headers": {},
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "information",
+                "code": "informational",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "RESOURCE_CREATED",
+                            "display": "Resource created",
+                            "system": "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
+                        }
+                    ],
+                },
+                "diagnostics": "The document has been created",
+            }
+        ],
+    }
+
+    created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
+
+    assert created_doc_pointer is not None
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789+00:00Z"
+    assert created_doc_pointer.updated_on is None
+    assert json.loads(created_doc_pointer.document) == {
+        **json.loads(doc_ref_data),
+        "meta": {
+            "lastUpdated": "2024-03-21T12:34:56.789+00:00Z",
+        },
+        "date": "2024-03-20T00:00:00.001+00:00Z",
+    }
