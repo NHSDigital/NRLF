@@ -6,12 +6,17 @@ from unittest.mock import Mock
 def create_headers(
     ods_code: str = "Y05868",
     pointer_types: Optional[List[str]] = ["http://snomed.info/sct|736253002"],
+    nrl_permissions: Optional[List[str]] = [],
     app_name: Optional[str] = "TestApp",
     app_id: Optional[str] = "12345",
 ) -> Dict[str, str]:
     return {
         "nhsd-connection-metadata": json.dumps(
-            {"nrl.pointer-types": pointer_types, "nrl.ods-code": ods_code}
+            {
+                "nrl.pointer-types": pointer_types,
+                "nrl.ods-code": ods_code,
+                "nrl.permissions": nrl_permissions,
+            }
         ),
         "nhsd-client-rp-details": json.dumps(
             {"developer.app.name": app_name, "developer.app.id": app_id}
