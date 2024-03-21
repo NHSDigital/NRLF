@@ -83,7 +83,7 @@ test-features-integration: check-warn ## Run the BDD feature tests in the integr
 	allure open ./allure-report
 
 lint: check-warn ## Lint the project
-	$(PRECOMMIT) run --all-files
+	pre-commit run --all-files
 
 clean: ## Remove all generated and temporary files
 	[ -n "$(DIST_PATH)" ] && \
