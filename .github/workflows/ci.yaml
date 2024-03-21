@@ -111,7 +111,8 @@ jobs:
       - name: Terraform Init
         run: |
           terraform -chdir=terraform/infrastructure init
-          terraform -chdir=terraform/infrastructure workspace new ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+          terraform -chdir=terraform/infrastructure workspace new ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} || \
+          terraform -chdir=terraform/infrastructure workspace select ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
 
       - name: Terraform Plan
         run: |
@@ -129,7 +130,7 @@ jobs:
 
       - name: Terraform Apply
         run: |
-          terraform -chdir=terraform/infrastructure plan \
+          terraform -chdir=terraform/infrastructure apply \
             --var-file=etc/dev.tfvars \
             --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
             --var assume_role=terraform \
@@ -213,6 +214,7 @@ jobs:
       - name: Terraform Init
         run: |
           terraform -chdir=terraform/infrastructure init
+          terraform -chdir=terraform/infrastructure workspace new ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} || \
           terraform -chdir=terraform/infrastructure workspace select ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
 
       - name: Terraform Destroy
