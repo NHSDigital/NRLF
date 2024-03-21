@@ -5,6 +5,7 @@ description = ""
 authors = ["NHS Digital"]
 license = "MIT"
 readme = "README.md"
+packages = [{include = "nrlf", from = "layer"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -15,7 +16,7 @@ requests = "^2.31.0"
 boto3-stubs = {extras = ["dynamodb", "firehose", "kinesis", "lambda", "rds", "s3"], version = "^1.34.65"}
 
 [tool.poetry.group.dev.dependencies]
-build-scripts = { path = "./scripts/build_scripts/", develop = true }
+layers = {path = "layer", develop = true}
 nrlf-converter = {url = "https://github.com/NHSDigital/nrlf-converter/releases/download/0.0.9/nrlf_converter-0.0.9-py3-none-any.whl"}
 pytest = "^8.1.1"
 pytest-mock = "^3.12.0"

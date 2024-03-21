@@ -3,10 +3,10 @@ from datetime import datetime, timezone
 
 import pytest
 from freezegun import freeze_time
-from tests.utilities import load_json_file
 
 from nrlf.core.dynamodb.model import DocumentPointer, DynamoDBModel
 from nrlf.producer.fhir.r4.model import DocumentReference
+from nrlf.tests.utilities import load_json_file
 
 
 def test_DynamoDBModel_init():
@@ -74,7 +74,7 @@ def test_DocumentPointer_init():
 
 @freeze_time("2024-01-01")
 def test_DocumentPointer_from_document_reference_valid():
-    doc_ref_data = load_json_file("ValidDocumentReference.json")
+    doc_ref_data = load_json_file("Y05868-736253002-Valid.json")
     doc_ref = DocumentReference.parse_obj(doc_ref_data)
 
     model = DocumentPointer.from_document_reference(doc_ref)
@@ -106,7 +106,7 @@ def test_DocumentPointer_from_document_reference_valid():
 
 
 def test_DocumentPointer_from_document_reference_valid_with_created_on():
-    doc_ref_data = load_json_file("ValidDocumentReference.json")
+    doc_ref_data = load_json_file("Y05868-736253002-Valid.json")
     doc_ref = DocumentReference.parse_obj(doc_ref_data)
 
     model = DocumentPointer.from_document_reference(
@@ -140,7 +140,7 @@ def test_DocumentPointer_from_document_reference_valid_with_created_on():
 
 
 def test_DocumentPointer_from_document_reference_invalid():
-    doc_ref_data = load_json_file("ValidDocumentReference.json")
+    doc_ref_data = load_json_file("Y05868-736253002-Valid.json")
     doc_ref = DocumentReference.parse_obj(doc_ref_data)
     doc_ref.type = None
 
@@ -153,7 +153,7 @@ def test_DocumentPointer_from_document_reference_invalid():
 
 
 def test_DocumentPointer_from_document_reference_multiple_types():
-    doc_ref_data = load_json_file("ValidDocumentReference.json")
+    doc_ref_data = load_json_file("Y05868-736253002-Valid.json")
     doc_ref = DocumentReference.parse_obj(
         {
             **doc_ref_data,

@@ -2,7 +2,7 @@ import json
 import pathlib
 from typing import Any
 
-DATA_DIR = pathlib.Path(__file__).parent / "data"
+DATA_DIR = pathlib.Path(__file__).parent / "../../../api/tests/data/DocumentReference"
 
 
 def load_data_file(file_name: str) -> str:
