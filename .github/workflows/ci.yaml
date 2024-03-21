@@ -39,7 +39,7 @@ jobs:
       - name: Setup Python environment
         run: |
           poetry install --no-root
-          poetry shell
+          source $(poetry env info --path)/bin/activate
 
       - name: Run Linting
         run: make lint
