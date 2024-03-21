@@ -7,14 +7,11 @@
 MAKEFLAGS := --no-print-directory
 SHELL := /bin/bash
 
-# TODO - Fix venv path issues
-PYTEST ?= .venv/bin/pytest
-BEHAVE ?= .venv/bin/behave
-PRECOMMIT ?= .venv/bin/pre-commit
-
 DIST_PATH ?= ./dist
 TEST_ARGS ?= --cov=api/consumer --cov=api/producer --cov=layer/nrlf/nrlf --cov-report=term-missing
 FEATURE_TEST_ARGS ?= ./feature_tests
+
+export PATH := $(PATH):$(PWD)/.venv/bin
 
 default: build
 
@@ -65,23 +62,23 @@ build-api-packages: ./api/consumer/* ./api/producer/*
 
 test: check-warn ## Run the unit tests
 	@echo "Running unit tests"
-	$(PYTEST) -m "not integration and not legacy and not smoke" --ignore=mi $(TEST_ARGS)
+	pytest -m "not integration and not legacy and not smoke" --ignore=mi $(TEST_ARGS)
 
 test-integration: check-warn ## Run the integration tests
 	@echo "Running integration tests"
-	$(PYTEST) -m "integration and not firehose" $(TEST_ARGS)
+	pytest -m "integration and not firehose" $(TEST_ARGS)
 
 test-firehose-integration: check-warn ## Run the firehose integration tests
 	@echo "Running firehose integration tests"
-	$(PYTEST) -m "integration and firehose" --runslow $(TEST_ARGS)
+	pytest -m "integration and firehose" --runslow $(TEST_ARGS)
 
 test-features: check-warn ## Run the BDD feature tests locally
 	@echo "Running feature tests locally"
-	$(BEHAVE) $(FEATURE_TEST_ARGS)
+	behave $(FEATURE_TEST_ARGS)
 
 test-features-integration: check-warn ## Run the BDD feature tests in the integration environment
 	@echo "Running feature tests in the integration environment"
-	$(BEHAVE) --define="integration_test=true" $(FEATURE_TEST_ARGS)
+	behave --define="integration_test=true" $(FEATURE_TEST_ARGS)
 	allure generate ./allure-results -o ./allure-report --clean
 	allure open ./allure-report
 

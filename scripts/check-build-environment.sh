@@ -23,9 +23,9 @@ echo "Checking build environment...."
 BUILD_DEPENDENCIES="
     allure
     behave
+    pre-commit
     jq
     poetry
-    pre-commit
     pytest
     python
     terraform
@@ -47,7 +47,7 @@ for dep in ${BUILD_DEPENDENCIES}; do
     fi
 done
 
-if [ "${POETRY_ACTIVE:=0}" != "1" ];
+if [[ "${CI:='false'}" != 'true' && "${POETRY_ACTIVE:=0}" != "1" ]];
 then
     warning "Poetry is not active. Run 'poetry shell' to activate it."
 else
