@@ -101,6 +101,9 @@ jobs:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
 
+      - name: Retrieve Server Certificates
+        run: aws s3 cp s3://nhsd-nrlf--truststore/server/dev.pem truststore/server/dev.pem
+
       - name: Get AWS Account ID
         id: get_account_id
         run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
@@ -178,7 +181,7 @@ jobs:
 
   destroy:
     name: Destroy CI Environment
-    needs: [deploy, integration-test, performance-test]
+    needs: [set-uniquish-id, deploy, integration-test, performance-test]
     runs-on: [self-hosted, ci]
     if: ${{ always() }}
 

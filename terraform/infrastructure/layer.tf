@@ -6,6 +6,6 @@ module "nrlf" {
 
 module "third_party" {
   source = "./modules/layer"
-  name   = "third_party"
+  name   = "dependency_layer"
   prefix = local.prefix
 }
