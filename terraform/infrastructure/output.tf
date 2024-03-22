@@ -47,9 +47,6 @@ output "certificate_domain_name" {
 #   }
 # }
 
-output "mi" {
-  value = module.mi
-}
 
 output "auth_store" {
   value = aws_s3_bucket.authorization-store.id

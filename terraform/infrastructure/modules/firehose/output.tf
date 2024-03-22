@@ -4,9 +4,9 @@ output "delivery_stream" {
     s3 = {
       # By concatenating the extended_s3_configuration and s3_configuration we get the S3 bucket data in either the case
       # that we've enabled Splunk (persistent environments) or not enabled Splunk (developer and CI workspaces)
-      arn          = concat(aws_kinesis_firehose_delivery_stream.firehose.extended_s3_configuration.*.bucket_arn, aws_kinesis_firehose_delivery_stream.firehose.splunk_configuration[0].s3_configuration.*.bucket_arn)[0]
-      prefix       = concat(aws_kinesis_firehose_delivery_stream.firehose.extended_s3_configuration.*.prefix, aws_kinesis_firehose_delivery_stream.firehose.splunk_configuration[0].s3_configuration.*.prefix)[0]
-      error_prefix = concat(aws_kinesis_firehose_delivery_stream.firehose.extended_s3_configuration.*.error_output_prefix, aws_kinesis_firehose_delivery_stream.firehose.splunk_configuration[0].s3_configuration.*.error_output_prefix)[0]
+      arn          = aws_kinesis_firehose_delivery_stream.firehose.splunk_configuration[0].s3_configuration.*.bucket_arn
+      prefix       = aws_kinesis_firehose_delivery_stream.firehose.splunk_configuration[0].s3_configuration.*.prefix
+      error_prefix = aws_kinesis_firehose_delivery_stream.firehose.splunk_configuration[0].s3_configuration.*.error_output_prefix
     }
   }
 }

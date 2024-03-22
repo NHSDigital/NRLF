@@ -17,6 +17,10 @@ variable "destination" {
   }
 }
 
+variable "splunk_environment" {
+  type = string
+}
+
 variable "splunk_index" {
   type    = string
   default = "aws_recordlocator_dev"

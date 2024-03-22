@@ -5,6 +5,7 @@ module "firehose__processor" {
   region             = local.region
   environment        = local.environment
   cloudwatch_kms_arn = module.kms__cloudwatch.kms_arn
+  splunk_environment = local.splunk_environment
   splunk_index       = local.splunk_index
   destination        = "splunk"
 }
