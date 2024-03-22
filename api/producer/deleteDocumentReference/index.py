@@ -1,24 +1,42 @@
-import os
+import urllib.parse
 
-from lambda_pipeline.types import LambdaContext
-from lambda_utils.pipeline import execute_steps, render_response
-
-from api.producer.deleteDocumentReference.src.config import (
-    Config,
-    build_persistent_dependencies,
-)
-
-config = Config(
-    **{env_var: os.environ.get(env_var) for env_var in Config.__fields__.keys()}
-)
-dependencies = build_persistent_dependencies(config)
+from nrlf.core.decorators import DocumentPointerRepository, request_handler
+from nrlf.core.logger import LogReference, logger
+from nrlf.core.model import ConnectionMetadata, DeleteDocumentReferencePathParams
+from nrlf.core.response import NRLResponse, Response, SpineErrorResponse
 
 
-def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
-    if context is None:
-        context = LambdaContext()
+@request_handler(path=DeleteDocumentReferencePathParams)
+def handler(
+    metadata: ConnectionMetadata,
+    repository: DocumentPointerRepository,
+    path: DeleteDocumentReferencePathParams,
+) -> Response:
+    """
+    Entrypoint for the deleteDocumentReference function
+    """
+    logger.log(LogReference.PRODELETE000)
 
-    status_code, result = execute_steps(
-        index_path=__file__, event=event, context=context, config=config, **dependencies
-    )
-    return render_response(status_code, result)
+    pointer_id = urllib.parse.unquote(path.id)
+    producer_id, _ = pointer_id.split("-", 1)
+
+    if metadata.ods_code_parts != tuple(producer_id.split(".")):
+        logger.log(
+            LogReference.PRODELETE001,
+            ods_code_parts=metadata.ods_code_parts,
+            producer_id=producer_id,
+        )
+        return SpineErrorResponse.AUTHOR_CREDENTIALS_ERROR(
+            diagnostics="The requested DocumentReference cannot be deleted because it belongs to another organisation",
+        )
+
+    if not (core_model := repository.get_by_id(pointer_id)):
+        logger.log(LogReference.PRODELETE002, pointer_id=pointer_id)
+        return SpineErrorResponse.NO_RECORD_FOUND(
+            diagnostics="The requested DocumentReference could not be found",
+        )
+
+    repository.delete(core_model)
+
+    logger.log(LogReference.PRODELETE999)
+    return NRLResponse.RESOURCE_DELETED()

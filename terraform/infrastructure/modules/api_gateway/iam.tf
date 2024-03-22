@@ -14,21 +14,4 @@ resource "aws_iam_role" "api_authorizer" {
       }
     ]
   })
-
-}
-
-resource "aws_iam_role_policy" "api_authorizer" {
-  name = "default"
-  role = aws_iam_role.api_authorizer.id
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action   = "lambda:InvokeFunction",
-        Effect   = "Allow",
-        Resource = var.authoriser_lambda_arn
-      }
-    ]
-  })
 }

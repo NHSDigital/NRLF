@@ -48,11 +48,7 @@ function _terraform() {
     ;;
     #----------------
     "unlock")
-      if [[ "$(aws sts get-caller-identity)" != *mgmt* ]]; then
-        echo "Please log in as the mgmt account" >&2
-        return 1
-      fi
-
+      if ! _check_mgmt; then return 1; fi
       cd "$terraform_dir" || return 1
       _terraform_unlock "$2"
     ;;
@@ -163,8 +159,7 @@ function _terraform() {
 }
 
 function _check_mgmt() {
-  # Using a hash of the account rather than the account, to avoid committing account ids to repo
-  if [[ "$AWS_PROFILE" != 'nhsd-nrlf-mgmt' ]]; then
+  if [[ "$(aws iam list-account-aliases --query 'AccountAliases[0]' --output text)" != 'nhsd-ddc-spine-nrlf-mgmt' ]]; then
     echo "Please log in as the mgmt account" >&2
     return 1
   fi
@@ -248,6 +243,12 @@ function _terraform_plan() {
   local plan_file=$3
   local aws_account_id=$4
   local args=${@:5}
+
+  echo "Running terraform plan for $env"
+  echo "Using var file: $var_file"
+  echo "Using plan file: $plan_file"
+  echo "Using assume_account: $aws_account_id"
+  echo "Using assume_role: $TERRAFORM_ROLE_NAME"
 
   terraform init || return 1
   terraform workspace select "$env" || terraform workspace new "$env" || return 1

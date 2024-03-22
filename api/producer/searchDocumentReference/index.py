@@ -1,24 +1,87 @@
-import os
+from pydantic import ValidationError
 
-from lambda_pipeline.types import LambdaContext
-from lambda_utils.pipeline import execute_steps, render_response
-
-from api.producer.searchDocumentReference.src.config import (
-    Config,
-    build_persistent_dependencies,
-)
-
-config = Config(
-    **{env_var: os.environ.get(env_var) for env_var in Config.__fields__.keys()}
-)
-dependencies = build_persistent_dependencies(config)
+from nrlf.core.codes import SpineErrorConcept
+from nrlf.core.decorators import DocumentPointerRepository, request_handler
+from nrlf.core.errors import OperationOutcomeError
+from nrlf.core.logger import LogReference, logger
+from nrlf.core.model import ConnectionMetadata, ProducerRequestParams
+from nrlf.core.response import Response, SpineErrorResponse
+from nrlf.core.validators import validate_type_system
+from nrlf.producer.fhir.r4.model import Bundle, DocumentReference
 
 
-def handler(event: dict, context: LambdaContext = None) -> dict[str, str]:
-    if context is None:
-        context = LambdaContext()
+@request_handler(params=ProducerRequestParams)
+def handler(
+    metadata: ConnectionMetadata,
+    params: ProducerRequestParams,
+    repository: DocumentPointerRepository,
+) -> Response:
+    """
+    Entrypoint for the searchDocumentReference function
+    """
+    logger.log(LogReference.PROSEARCH000)
 
-    status_code, result = execute_steps(
-        index_path=__file__, event=event, context=context, config=config, **dependencies
+    if not params.nhs_number:
+        logger.log(
+            LogReference.PROSEARCH001, subject_identifier=params.subject_identifier
+        )
+        return SpineErrorResponse.INVALID_NHS_NUMBER(
+            diagnostics="A valid NHS number is required to search for document references",
+            expression="subject:identifier",
+        )
+
+    if not validate_type_system(params.type, metadata.pointer_types):
+        logger.log(
+            LogReference.PROSEARCH002,
+            type=params.type,
+            pointer_types=metadata.pointer_types,
+        )
+        return SpineErrorResponse.INVALID_CODE_SYSTEM(
+            diagnostics="Invalid query parameter (The provided type system does not match the allowed types for this organisation)",
+            expression="type",
+        )
+
+    pointer_types = [params.type.__root__] if params.type else metadata.pointer_types
+    bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
+
+    logger.log(
+        LogReference.PROSEARCH003,
+        custodian=metadata.ods_code,
+        custodian_suffix=metadata.ods_code_extension,
+        nhs_number=params.nhs_number,
+        pointer_types=pointer_types,
     )
-    return render_response(status_code, result)
+
+    for result in repository.search_by_custodian(
+        custodian=metadata.ods_code,
+        custodian_suffix=metadata.ods_code_extension,
+        nhs_number=params.nhs_number,
+        pointer_types=pointer_types,
+    ):
+        try:
+            document_reference = DocumentReference.parse_raw(result.document)
+            bundle["total"] += 1
+            bundle["entry"].append(
+                {"resource": document_reference.dict(exclude_none=True)}
+            )
+            logger.log(
+                LogReference.PROSEARCH004,
+                id=document_reference.id,
+                count=bundle["total"],
+            )
+
+        except ValidationError as exc:
+            logger.log(
+                LogReference.PROSEARCH005, error=str(exc), document=result.document
+            )
+            raise OperationOutcomeError(
+                status_code="500",
+                severity="error",
+                code="exception",
+                details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
+                diagnostics="An error occurred while parsing the document reference",
+            )
+
+    response = Response.from_resource(Bundle.parse_obj(bundle))
+    logger.log(LogReference.PROSEARCH999)
+    return response

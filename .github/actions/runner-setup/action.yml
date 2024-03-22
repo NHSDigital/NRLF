@@ -1,8 +1,0 @@
-name: "Runner setup"
-description: "Setup runner required packages for project. Python, Pipenv and set required vars"
-runs:
-  using: "composite"
-  steps:
-    - name: Set short sha env var
-      run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
-      shell: bash

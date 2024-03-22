@@ -36,4 +36,7 @@ locals {
     "prod"        = "api.service.nhs.uk",
   }
   public_domain = try(local.public_domain_map[terraform.workspace], local.apis.domain)
+
+  development_environments = ["dev", "dev-sandbox", "v2"]
+  log_level                = contains(local.persistent_environments, local.environment) ? (contains(local.development_environments, local.environment) ? "DEBUG" : "INFO") : "DEBUG"
 }
