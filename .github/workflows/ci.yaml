@@ -188,7 +188,7 @@ jobs:
           echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
 
       - name: Run Integration Tests
-        run: make test-features-integration
+        run: make test-features-integration TF_WORKSPACE=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
