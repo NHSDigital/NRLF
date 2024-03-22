@@ -164,6 +164,11 @@ jobs:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
 
+      - name: Retrieve Client Certificates
+        run: |
+          aws s3 cp s3://nhsd-nrlf--truststore/client/dev.key truststore/client/dev.key
+          aws s3 cp s3://nhsd-nrlf--truststore/client/dev.crt truststore/client/dev.crt
+
       - name: Get AWS Account ID
         id: get_account_id
         run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
