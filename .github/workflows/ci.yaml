@@ -140,7 +140,7 @@ jobs:
 
   integration-test:
     name: Run Integration Tests
-    needs: [deploy]
+    needs: [set-uniquish-id, deploy]
     runs-on: [self-hosted, ci]
 
     steps:
@@ -164,10 +164,14 @@ jobs:
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
 
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+
       - name: Configure Dev Account Credentials
         id: configure-dev-account-credentials
         run: |
-          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ secrets.DEV_ACCOUNT_ID }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} --output json)
+          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ steps.get_account_id.outputs.aws_account_id }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} --output json)
           echo "aws_access_key_id=$(echo $aws_credentials | jq -r '.Credentials.AccessKeyId')" >> "$GITHUB_OUTPUT"
           echo "aws_secret_access_key=$(echo $aws_credentials | jq -r '.Credentials.SecretAccessKey')" >> "$GITHUB_OUTPUT"
           echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
