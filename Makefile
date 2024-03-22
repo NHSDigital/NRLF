@@ -9,7 +9,7 @@ SHELL := /bin/bash
 
 DIST_PATH ?= ./dist
 TEST_ARGS ?= --cov --cov-report=term-missing
-FEATURE_TEST_ARGS ?= ./api/tests/integration/features
+FEATURE_TEST_ARGS ?= ./api/tests/integration/features --format progress2
 TF_WORKSPACE ?= $(shell terraform -chdir=terraform/infrastructure workspace show)
 export PATH := $(PATH):$(PWD)/.venv/bin
 
