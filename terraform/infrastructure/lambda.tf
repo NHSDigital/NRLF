@@ -21,7 +21,7 @@ module "consumer__readDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.consumer.readDocumentReference.index.handler"
+  handler = "index.handler"
 }
 
 module "consumer__countDocumentReference" {
@@ -47,7 +47,7 @@ module "consumer__countDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.consumer.countDocumentReference.index.handler"
+  handler = "index.handler"
 }
 
 module "consumer__searchDocumentReference" {
@@ -73,7 +73,7 @@ module "consumer__searchDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.consumer.searchDocumentReference.index.handler"
+  handler = "index.handler"
 }
 
 module "consumer__searchPostDocumentReference" {
@@ -99,7 +99,7 @@ module "consumer__searchPostDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.consumer.searchPostDocumentReference.index.handler"
+  handler = "index.handler"
 }
 
 module "producer__createDocumentReference" {
@@ -126,7 +126,7 @@ module "producer__createDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.createDocumentReference.index.handler"
+  handler = "index.handler"
 }
 
 module "producer__deleteDocumentReference" {
@@ -153,7 +153,7 @@ module "producer__deleteDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.deleteDocumentReference.index.handler"
+  handler = "index.handler"
 }
 
 module "producer__readDocumentReference" {
@@ -179,7 +179,7 @@ module "producer__readDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.readDocumentReference.index.handler"
+  handler = "index.handler"
 }
 
 module "producer__searchDocumentReference" {
@@ -205,7 +205,7 @@ module "producer__searchDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.searchDocumentReference.index.handler"
+  handler = "index.handler"
 }
 
 module "producer__searchPostDocumentReference" {
@@ -231,7 +231,7 @@ module "producer__searchPostDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.searchPostDocumentReference.index.handler"
+  handler = "index.handler"
 }
 
 module "producer__updateDocumentReference" {
@@ -258,7 +258,7 @@ module "producer__updateDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.updateDocumentReference.index.handler"
+  handler = "index.handler"
 
   depends_on = [
     aws_iam_policy.document-pointer__dynamodb-read,
@@ -318,7 +318,7 @@ module "consumer__status" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.consumer.status.index.handler"
+  handler = "index.handler"
 }
 
 
@@ -346,5 +346,5 @@ module "producer__status" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.status.index.handler"
+  handler = "index.handler"
 }

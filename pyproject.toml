@@ -51,6 +51,7 @@ capitalisation_policy = "consistent"
 [tool.pytest.ini_optons]
 addopts = "-v --cov=layer/nrlf/nrlf --cov-report=term-missing --cov-branch"
 
+
 [tool.ruff]
 line-length = 100
 
@@ -82,3 +83,10 @@ ignore = [
 [tool.ruff.format]
 docstring-code-format = true
 docstring-code-line-length = 80
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "*/tests/*",
+    "conftest.py"
+]

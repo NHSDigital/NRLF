@@ -157,6 +157,28 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-asdf-
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+
+      - name: Configure Dev Account Credentials
+        id: configure-dev-account-credentials
+        run: |
+          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ secrets.DEV_ACCOUNT_ID }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} --output json)
+          echo "aws_access_key_id=$(echo $aws_credentials | jq -r '.Credentials.AccessKeyId')" >> "$GITHUB_OUTPUT"
+          echo "aws_secret_access_key=$(echo $aws_credentials | jq -r '.Credentials.SecretAccessKey')" >> "$GITHUB_OUTPUT"
+          echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
+
+      - name: Run Integration Tests
+        run: make test-features-integration
+        env:
+          AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
+          AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}
+
   performance-test:
     name: Run Performance Tests
     needs: [integration-test]

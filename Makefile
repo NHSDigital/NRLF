@@ -8,9 +8,9 @@ MAKEFLAGS := --no-print-directory
 SHELL := /bin/bash
 
 DIST_PATH ?= ./dist
-TEST_ARGS ?= --cov=api/consumer --cov=api/producer --cov=layer/nrlf/nrlf --cov-report=term-missing
-FEATURE_TEST_ARGS ?= ./feature_tests
-
+TEST_ARGS ?= --cov --cov-report=term-missing
+FEATURE_TEST_ARGS ?= ./api/tests/integration/features
+TF_WORKSPACE ?= $(shell terraform -chdir=terraform/infrastructure workspace show)
 export PATH := $(PATH):$(PWD)/.venv/bin
 
 default: build
@@ -78,9 +78,9 @@ test-features: check-warn ## Run the BDD feature tests locally
 
 test-features-integration: check-warn ## Run the BDD feature tests in the integration environment
 	@echo "Running feature tests in the integration environment"
-	behave --define="integration_test=true" $(FEATURE_TEST_ARGS)
+	behave --define="integration_test=true" --define="env=$(TF_WORKSPACE)" $(FEATURE_TEST_ARGS)
 	allure generate ./allure-results -o ./allure-report --clean
-	allure open ./allure-report
+	# allure open ./allure-report
 
 lint: check-warn ## Lint the project
 	pre-commit run --all-files
