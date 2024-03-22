@@ -9,8 +9,22 @@ from nrlf.core.errors import OperationOutcomeError
 from nrlf.core.logger import LogReference, logger
 from nrlf.core.model import ConnectionMetadata, UpdateDocumentReferencePathParams
 from nrlf.core.response import NRLResponse, Response, SpineErrorResponse
+from nrlf.core.utils import create_fhir_instant
 from nrlf.core.validators import DocumentReferenceValidator
-from nrlf.producer.fhir.r4.model import DocumentReference
+from nrlf.producer.fhir.r4.model import DocumentReference, Meta
+
+
+def _set_update_time_fields(
+    update_time: str, document_reference: DocumentReference
+) -> DocumentReference:
+    """
+    Set the lastUpdated timestamp on the provided DocumentReference
+    """
+    if not document_reference.meta:
+        document_reference.meta = Meta()
+    document_reference.meta.lastUpdated = update_time
+
+    return document_reference
 
 
 @request_handler(body=DocumentReference, path=UpdateDocumentReferencePathParams)
@@ -40,7 +54,12 @@ def handler(
         logger.log(LogReference.PROUPDATE003)
         return Response.from_issues(statusCode="400", issues=result.issues)
 
-    core_model = DocumentPointer.from_document_reference(result.resource)
+    update_time = create_fhir_instant()
+    document_reference = _set_update_time_fields(
+        update_time, document_reference=result.resource
+    )
+
+    core_model = DocumentPointer.from_document_reference(document_reference)
 
     if metadata.ods_code_parts != tuple(core_model.producer_id.split("|")):
         logger.log(
@@ -91,6 +110,9 @@ def handler(
                 diagnostics=f"The field '{field}' is immutable and cannot be updated",
                 expression=field,
             )
+
+    core_model.created_on = existing_model.created_on
+    core_model.updated_on = update_time
 
     repository.update(core_model)
 

@@ -19,12 +19,16 @@ def _set_create_time_fields(
         document_reference.meta = Meta()
     document_reference.meta.lastUpdated = create_time
 
-    # TODO-NOW - Do we need this for the POST endpoint? or only on UPSERT?
     if (
         document_reference.date
         and PERMISSION_AUDIT_DATES_FROM_PAYLOAD in nrl_permissions
     ):
-        pass  # TODO-NOW - Log message saying we're honouring the provided date
+        # Perserving the original date if it exists and the permission is set
+        logger.log(
+            LogReference.PROCREATE011,
+            id=document_reference.id,
+            date=document_reference.date,
+        )
     else:
         document_reference.date = create_time
 

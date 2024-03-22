@@ -1,6 +1,6 @@
 import json
-from unittest import mock
 
+from freezegun import freeze_time
 from moto import mock_aws
 
 from api.producer.createDocumentReference.index import handler
@@ -22,16 +22,10 @@ from nrlf.producer.fhir.r4.model import (
 )
 
 
-# TODO-NOW Is there a better way of mocking the create_fhir_instant function?
 @mock_aws
 @mock_repository
-@mock.patch(
-    "api.producer.createDocumentReference.index.create_fhir_instant",
-    return_value="2024-03-21T12:34:56.789+00:00Z",
-)
-def test_create_document_reference_happy_path(
-    mock__create_fhir_instance, repository: DocumentPointerRepository
-):
+@freeze_time("2024-03-21T12:34:56.789")
+def test_create_document_reference_happy_path(repository: DocumentPointerRepository):
     doc_ref_data = load_document_reference_data("Y05868-736253002-Valid")
 
     event = create_test_api_gateway_event(
@@ -72,14 +66,14 @@ def test_create_document_reference_happy_path(
     created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
-    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789+00:00Z"
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
     assert created_doc_pointer.updated_on is None
     assert json.loads(created_doc_pointer.document) == {
         **json.loads(doc_ref_data),
         "meta": {
-            "lastUpdated": "2024-03-21T12:34:56.789+00:00Z",
+            "lastUpdated": "2024-03-21T12:34:56.789000Z",
         },
-        "date": "2024-03-21T12:34:56.789+00:00Z",
+        "date": "2024-03-21T12:34:56.789000Z",
     }
 
 
@@ -763,12 +757,9 @@ def test_create_document_reference_create_relatesto_not_replaces(
 
 @mock_aws
 @mock_repository
-@mock.patch(
-    "api.producer.createDocumentReference.index.create_fhir_instant",
-    return_value="2024-03-21T12:34:56.789+00:00Z",
-)
+@freeze_time("2024-03-21T12:34:56.789")
 def test_create_document_reference_with_date_ignored(
-    mock__create_fhir_instance, repository: DocumentPointerRepository
+    repository: DocumentPointerRepository,
 ):
     doc_ref_data = load_document_reference_data("Y05868-736253002-Valid-with-date")
 
@@ -810,25 +801,22 @@ def test_create_document_reference_with_date_ignored(
     created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
-    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789+00:00Z"
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
     assert created_doc_pointer.updated_on is None
     assert json.loads(created_doc_pointer.document) == {
         **json.loads(doc_ref_data),
         "meta": {
-            "lastUpdated": "2024-03-21T12:34:56.789+00:00Z",
+            "lastUpdated": "2024-03-21T12:34:56.789000Z",
         },
-        "date": "2024-03-21T12:34:56.789+00:00Z",
+        "date": "2024-03-21T12:34:56.789000Z",
     }
 
 
 @mock_aws
 @mock_repository
-@mock.patch(
-    "api.producer.createDocumentReference.index.create_fhir_instant",
-    return_value="2024-03-21T12:34:56.789+00:00Z",
-)
+@freeze_time("2024-03-21T12:34:56.789")
 def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
-    mock__create_fhir_instance, repository: DocumentPointerRepository
+    repository: DocumentPointerRepository,
 ):
     doc_ref_data = load_document_reference_data(
         "Y05868-736253002-Valid-with-date-and-meta-lastupdated"
@@ -872,25 +860,22 @@ def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
     created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
-    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789+00:00Z"
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
     assert created_doc_pointer.updated_on is None
     assert json.loads(created_doc_pointer.document) == {
         **json.loads(doc_ref_data),
         "meta": {
-            "lastUpdated": "2024-03-21T12:34:56.789+00:00Z",
+            "lastUpdated": "2024-03-21T12:34:56.789000Z",
         },
-        "date": "2024-03-21T12:34:56.789+00:00Z",
+        "date": "2024-03-21T12:34:56.789000Z",
     }
 
 
 @mock_aws
 @mock_repository
-@mock.patch(
-    "api.producer.createDocumentReference.index.create_fhir_instant",
-    return_value="2024-03-21T12:34:56.789+00:00Z",
-)
+@freeze_time("2024-03-21T12:34:56.789")
 def test_create_document_reference_with_date_overidden(
-    mock__create_fhir_instance, repository: DocumentPointerRepository
+    repository: DocumentPointerRepository,
 ):
     doc_ref_data = load_document_reference_data("Y05868-736253002-Valid-with-date")
 
@@ -932,12 +917,12 @@ def test_create_document_reference_with_date_overidden(
     created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
-    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789+00:00Z"
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
     assert created_doc_pointer.updated_on is None
     assert json.loads(created_doc_pointer.document) == {
         **json.loads(doc_ref_data),
         "meta": {
-            "lastUpdated": "2024-03-21T12:34:56.789+00:00Z",
+            "lastUpdated": "2024-03-21T12:34:56.789000Z",
         },
-        "date": "2024-03-20T00:00:00.001+00:00Z",
+        "date": "2024-03-20T00:00:01.000000Z",
     }

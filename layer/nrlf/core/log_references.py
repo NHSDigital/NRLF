@@ -214,6 +214,9 @@ class LogReference(Enum):
     PROCREATE008 = _Reference("INFO", "Selecting document as target to be superseded")
     PROCREATE009 = _Reference("INFO", "Creating new document reference")
     PROCREATE010 = _Reference("INFO", "Superseding document reference")
+    PROCREATE011 = _Reference(
+        "INFO", "Preserved .date field when creating new document reference"
+    )
     PROCREATE999 = _Reference(
         "INFO", "Successfully completed producer createDocumentReference"
     )
