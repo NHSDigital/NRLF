@@ -1,10 +1,12 @@
 from nrlf.consumer.fhir.r4.model import Bundle
+from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
 from nrlf.core.logger import LogReference, logger
 from nrlf.core.model import ConnectionMetadata, CountRequestParams
 from nrlf.core.response import Response, SpineErrorResponse
 
 
+@request_handler(params=CountRequestParams)
 def count_document_reference(
     metadata: ConnectionMetadata,
     params: CountRequestParams,

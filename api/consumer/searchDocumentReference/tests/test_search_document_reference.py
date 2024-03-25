@@ -2,7 +2,7 @@ import json
 
 from moto import mock_aws
 
-from api.consumer.searchDocumentReference.index import handler
+from api.consumer.searchDocumentReference import handler
 from api.tests.utilities.data import load_document_reference
 from api.tests.utilities.dynamodb import mock_repository
 from api.tests.utilities.events import (

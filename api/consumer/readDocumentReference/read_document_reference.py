@@ -4,6 +4,7 @@ import urllib.parse
 from pydantic import ValidationError
 
 from nrlf.consumer.fhir.r4.model import DocumentReference
+from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
 from nrlf.core.errors import OperationOutcomeError
 from nrlf.core.logger import LogReference, logger
@@ -11,6 +12,7 @@ from nrlf.core.model import ConnectionMetadata, ReadDocumentReferencePathParams
 from nrlf.core.response import Response, SpineErrorConcept, SpineErrorResponse
 
 
+@request_handler(path=ReadDocumentReferencePathParams)
 def read_document_reference(
     repository: DocumentPointerRepository,
     metadata: ConnectionMetadata,

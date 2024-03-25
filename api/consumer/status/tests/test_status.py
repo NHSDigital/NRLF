@@ -2,7 +2,7 @@ import os
 
 from moto import mock_aws
 
-from api.consumer.status.index import handler
+from api.consumer.status import handler
 from api.tests.utilities.dynamodb import mock_repository
 from api.tests.utilities.events import (
     create_headers,

@@ -3,11 +3,12 @@ import sys
 import boto3
 
 from nrlf.core.config import Config
-from nrlf.core.decorators import DocumentPointerRepository
+from nrlf.core.decorators import DocumentPointerRepository, request_handler
 from nrlf.core.logger import LogReference, logger
 from nrlf.core.response import Response
 
 
+@request_handler(skip_request_verification=True)
 def status() -> Response:
     """
     Retrieves the status of the API.

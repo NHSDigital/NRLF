@@ -2,6 +2,7 @@ from pydantic import ValidationError
 
 from nrlf.consumer.fhir.r4.model import Bundle, DocumentReference
 from nrlf.core.codes import SpineErrorConcept
+from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
 from nrlf.core.errors import OperationOutcomeError
 from nrlf.core.logger import LogReference, logger
@@ -10,6 +11,7 @@ from nrlf.core.response import Response, SpineErrorResponse
 from nrlf.core.validators import validate_type_system
 
 
+@request_handler(body=ConsumerRequestParams)
 def search_post_document_reference(
     body: ConsumerRequestParams,
     metadata: ConnectionMetadata,
