@@ -474,9 +474,9 @@ class RequestParams(BaseModel):
         RequestQueryCustodian | None, Field(alias="custodian:identifier")
     ] = None
     type: RequestQueryType | None = None
-    next_page_token: Annotated[NextPageToken | None, Field(alias="next-page-token")] = (
-        None
-    )
+    next_page_token: Annotated[
+        NextPageToken | None, Field(alias="next-page-token")
+    ] = None
 
 
 class CountRequestParams(BaseModel):
