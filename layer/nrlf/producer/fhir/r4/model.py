@@ -461,9 +461,9 @@ class RequestParams(BaseModel):
         RequestQuerySubject | None, Field(alias="subject:identifier")
     ] = None
     type: RequestQueryType | None = None
-    next_page_token: Annotated[
-        NextPageToken | None, Field(alias="next-page-token")
-    ] = None
+    next_page_token: Annotated[NextPageToken | None, Field(alias="next-page-token")] = (
+        None
+    )
 
 
 class OperationOutcomeIssue(BaseModel):
