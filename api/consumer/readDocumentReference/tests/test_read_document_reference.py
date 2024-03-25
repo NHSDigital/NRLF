@@ -97,3 +97,95 @@ def test_read_document_reference_missing_id():
             }
         ],
     }
+
+
+@mock_aws
+@mock_repository
+def test_read_document_reference_unauthorised_for_type(
+    repository: DocumentPointerRepository,
+):
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+    doc_pointer = DocumentPointer.from_document_reference(doc_ref)
+    repository.create(doc_pointer)
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(
+            pointer_types=["http://snomed.info/sct|887701000000100"]
+        ),
+        path_parameters={"id": doc_pointer.id},
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "403",
+        "headers": {},
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "error",
+                "code": "forbidden",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "ACCESS DENIED",
+                            "display": "Access has been denied to process this request",
+                            "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                        }
+                    ]
+                },
+                "diagnostics": "The requested DocumentReference is not of a type that this organisation is allowed to access",
+            }
+        ],
+    }
+
+
+@mock_aws
+@mock_repository
+def test_document_reference_invalid_json(repository: DocumentPointerRepository):
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+    doc_pointer = DocumentPointer.from_document_reference(doc_ref)
+    doc_pointer.document = "invalid json"
+
+    repository.create(doc_pointer)
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(pointer_types=["http://snomed.info/sct|736253002"]),
+        path_parameters={"id": doc_pointer.id},
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "500",
+        "headers": {},
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "error",
+                "code": "exception",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "INTERNAL_SERVER_ERROR",
+                            "display": "Unexpected internal server error",
+                            "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                        }
+                    ]
+                },
+                "diagnostics": "An error occurred while parsing the document reference",
+            }
+        ],
+    }

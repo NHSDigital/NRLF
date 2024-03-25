@@ -187,3 +187,46 @@ def test_search_post_document_reference_invalid_type(
             }
         ],
     }
+
+
+@mock_aws
+@mock_repository
+def test_search_document_reference_invalid_json(repository: DocumentPointerRepository):
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+    doc_pointer = DocumentPointer.from_document_reference(doc_ref)
+    doc_pointer.document = "invalid json"
+
+    repository.create(doc_pointer)
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(),
+        body=json.dumps(
+            {"subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|6700028191"}
+        ),
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {"statusCode": "500", "headers": {}, "isBase64Encoded": False}
+
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "error",
+                "code": "exception",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "INTERNAL_SERVER_ERROR",
+                            "display": "Unexpected internal server error",
+                            "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                        }
+                    ]
+                },
+                "diagnostics": "An error occurred whilst parsing the document reference search results",
+            }
+        ],
+    }
