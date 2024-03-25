@@ -61,7 +61,6 @@ build-api-packages: ./api/consumer/* ./api/producer/*
 	done
 
 test: check-warn ## Run the unit tests
-	@echo "${PATH}"
 	@echo "Running unit tests"
 	pytest -m "not integration and not legacy and not smoke" --ignore=mi $(TEST_ARGS)
 

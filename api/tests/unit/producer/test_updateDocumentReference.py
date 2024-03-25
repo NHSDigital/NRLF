@@ -2,8 +2,9 @@ import json
 
 from freezegun import freeze_time
 from moto import mock_aws
+from pytest import mark
 
-from api.producer.updateDocumentReference.index import handler
+from api.producer.updateDocumentReference.index import _set_update_time_fields, handler
 from api.tests.utilities.data import load_document_reference
 from api.tests.utilities.dynamodb import mock_repository
 from api.tests.utilities.events import (
@@ -463,3 +464,26 @@ def test_update_document_reference_with_meta_lastupdated_ignored(
     assert updated_doc_ref.meta.lastUpdated == "2024-03-21T12:34:56.789000Z"
     assert updated_doc_pointer.updated_on == "2024-03-21T12:34:56.789000Z"
     assert updated_doc_pointer.created_on == existing_doc_pointer.created_on
+
+
+@freeze_time("2024-03-25")
+@mark.parametrize(
+    "doc_ref_name",
+    [
+        "Y05868-736253002-Valid-with-date",
+        "Y05868-736253002-Valid-with-date-and-meta-lastupdated",
+    ],
+)
+def test__set_update_time_fields(doc_ref_name: str):
+    test_time = "2024-03-24T12:34:56.789000Z"
+    test_doc_ref = load_document_reference(doc_ref_name)
+
+    response = _set_update_time_fields(test_time, test_doc_ref)
+
+    assert response.dict(exclude_none=True) == {
+        **test_doc_ref.dict(exclude_none=True),
+        "meta": {
+            "lastUpdated": test_time,
+        },
+        "date": test_doc_ref.date,
+    }
