@@ -194,5 +194,4 @@ jobs:
           terraform -chdir=terraform/infrastructure workspace select ${{ inputs.environment }}
 
       - name: Terraform Apply
-        run: |
-          # terraform -chdir=terraform/infrastructure apply tfplan
+        run: terraform -chdir=terraform/infrastructure apply tfplan
