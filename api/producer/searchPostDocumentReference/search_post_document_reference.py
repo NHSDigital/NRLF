@@ -1,29 +1,28 @@
 from pydantic import ValidationError
 
-from nrlf.consumer.fhir.r4.model import Bundle, DocumentReference
 from nrlf.core.codes import SpineErrorConcept
-from nrlf.core.decorators import request_handler
-from nrlf.core.dynamodb.repository import DocumentPointerRepository
+from nrlf.core.decorators import DocumentPointerRepository, request_handler
 from nrlf.core.errors import OperationOutcomeError
 from nrlf.core.logger import LogReference, logger
-from nrlf.core.model import ConnectionMetadata, ConsumerRequestParams
+from nrlf.core.model import ConnectionMetadata, ProducerRequestParams
 from nrlf.core.response import Response, SpineErrorResponse
 from nrlf.core.validators import validate_type_system
+from nrlf.producer.fhir.r4.model import Bundle, DocumentReference
 
 
-@request_handler(params=ConsumerRequestParams)
+@request_handler(body=ProducerRequestParams)
 def handler(
+    body: ProducerRequestParams,
     metadata: ConnectionMetadata,
-    params: ConsumerRequestParams,
     repository: DocumentPointerRepository,
 ) -> Response:
     """
-    Searches for document references based on the provided parameters.
+    Search for document references based on the provided parameters.
 
     Args:
+        body (ProducerRequestParams): The request parameters for the search.
         metadata (ConnectionMetadata): The connection metadata.
-        params (ConsumerRequestParams): The consumer request parameters.
-        repository (DocumentPointerRepository): The document pointer repository.
+        repository (DocumentPointerRepository): The repository for document pointers.
 
     Returns:
         Response: The response containing the search results.
@@ -31,46 +30,44 @@ def handler(
     Raises:
         OperationOutcomeError: If an error occurs while parsing the document reference.
     """
-    logger.log(LogReference.CONSEARCH000)
 
-    if not params.nhs_number:
+    logger.log(LogReference.PROPOSTSEARCH000)
+
+    if not body.nhs_number:
         logger.log(
-            LogReference.CONSEARCH001, subject_identifier=params.subject_identifier
+            LogReference.PROPOSTSEARCH001, subject_identifier=body.subject_identifier
         )
         return SpineErrorResponse.INVALID_NHS_NUMBER(
             diagnostics="A valid NHS number is required to search for document references",
             expression="subject:identifier",
         )
 
-    if not validate_type_system(params.type, metadata.pointer_types):
+    if not validate_type_system(body.type, metadata.pointer_types):
         logger.log(
-            LogReference.CONSEARCH002,
-            type=params.type,
+            LogReference.PROPOSTSEARCH002,
+            type=body.type,
             pointer_types=metadata.pointer_types,
         )
         return SpineErrorResponse.INVALID_CODE_SYSTEM(
-            diagnostics="Invalid query parameter (The provided type system does not match the allowed types for this organisation)",
+            diagnostics="The provided type system does not match the allowed types for this organisation",
             expression="type",
         )
 
-    custodian_id = (
-        params.custodian_identifier.__root__.split("|", maxsplit=1)[0]
-        if params.custodian_identifier
-        else None
-    )
+    pointer_types = [body.type.__root__] if body.type else metadata.pointer_types
     bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
-    pointer_types = [params.type.__root__] if params.type else metadata.pointer_types
 
     logger.log(
-        LogReference.CONSEARCH003,
-        nhs_number=params.nhs_number,
-        custodian=custodian_id,
+        LogReference.PROPOSTSEARCH003,
+        custodian=metadata.ods_code,
+        custodian_suffix=metadata.ods_code_extension,
+        nhs_number=body.nhs_number,
         pointer_types=pointer_types,
     )
 
-    for result in repository.search(
-        nhs_number=params.nhs_number,
-        custodian=custodian_id,
+    for result in repository.search_by_custodian(
+        custodian=metadata.ods_code,
+        custodian_suffix=metadata.ods_code_extension,
+        nhs_number=body.nhs_number,
         pointer_types=pointer_types,
     ):
         try:
@@ -80,14 +77,14 @@ def handler(
                 {"resource": document_reference.dict(exclude_none=True)}
             )
             logger.log(
-                LogReference.CONSEARCH004,
+                LogReference.PROPOSTSEARCH004,
                 id=document_reference.id,
                 count=bundle["total"],
             )
 
         except ValidationError as exc:
             logger.log(
-                LogReference.CONSEARCH005, error=str(exc), document=result.document
+                LogReference.PROPOSTSEARCH005, error=str(exc), document=result.document
             )
             raise OperationOutcomeError(
                 status_code="500",
@@ -95,9 +92,7 @@ def handler(
                 code="exception",
                 details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
                 diagnostics="An error occurred whilst parsing the document reference search results",
-            ) from exc
+            )
 
-    response = Response.from_resource(Bundle.parse_obj(bundle))
-    logger.log(LogReference.CONSEARCH999)
-
-    return response
+    logger.log(LogReference.PROPOSTSEARCH999)
+    return Response.from_resource(Bundle.parse_obj(bundle))

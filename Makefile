@@ -9,7 +9,7 @@ SHELL := /bin/bash
 
 DIST_PATH ?= ./dist
 TEST_ARGS ?= --cov --cov-report=term-missing
-FEATURE_TEST_ARGS ?= ./api/tests/integration/features --format progress2
+FEATURE_TEST_ARGS ?= ./tests/features --format progress2
 TF_WORKSPACE ?= $(shell terraform -chdir=terraform/infrastructure workspace show)
 export PATH := $(PATH):$(PWD)/.venv/bin
 
@@ -64,23 +64,10 @@ test: check-warn ## Run the unit tests
 	@echo "Running unit tests"
 	pytest -m "not integration and not legacy and not smoke" --ignore=mi $(TEST_ARGS)
 
-test-integration: check-warn ## Run the integration tests
-	@echo "Running integration tests"
-	pytest -m "integration and not firehose" $(TEST_ARGS)
-
-test-firehose-integration: check-warn ## Run the firehose integration tests
-	@echo "Running firehose integration tests"
-	pytest -m "integration and firehose" --runslow $(TEST_ARGS)
-
-test-features: check-warn ## Run the BDD feature tests locally
-	@echo "Running feature tests locally"
-	behave $(FEATURE_TEST_ARGS)
-
 test-features-integration: check-warn ## Run the BDD feature tests in the integration environment
 	@echo "Running feature tests in the integration environment"
 	behave --define="integration_test=true" --define="env=$(TF_WORKSPACE)" $(FEATURE_TEST_ARGS)
-	allure generate ./allure-results -o ./allure-report --clean
-	# allure open ./allure-report
+
 
 lint: check-warn ## Lint the project
 	pre-commit run --all-files

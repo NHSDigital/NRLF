@@ -12,7 +12,7 @@ from nrlf.core.validators import validate_type_system
 
 
 @request_handler(body=ConsumerRequestParams)
-def search_post_document_reference(
+def handler(
     body: ConsumerRequestParams,
     metadata: ConnectionMetadata,
     repository: DocumentPointerRepository,

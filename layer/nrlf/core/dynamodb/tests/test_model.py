@@ -6,7 +6,7 @@ from freezegun import freeze_time
 
 from nrlf.core.dynamodb.model import DocumentPointer, DynamoDBModel
 from nrlf.producer.fhir.r4.model import DocumentReference
-from nrlf.tests.utilities import load_json_file
+from nrlf.tests.data import load_document_reference, load_document_reference_json
 
 
 def test_DynamoDBModel_init():
@@ -74,9 +74,7 @@ def test_DocumentPointer_init():
 
 @freeze_time("2024-01-01")
 def test_DocumentPointer_from_document_reference_valid():
-    doc_ref_data = load_json_file("Y05868-736253002-Valid.json")
-    doc_ref = DocumentReference.parse_obj(doc_ref_data)
-
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
     model = DocumentPointer.from_document_reference(doc_ref)
 
     model_data = model.dict()
@@ -106,9 +104,7 @@ def test_DocumentPointer_from_document_reference_valid():
 
 
 def test_DocumentPointer_from_document_reference_valid_with_created_on():
-    doc_ref_data = load_json_file("Y05868-736253002-Valid.json")
-    doc_ref = DocumentReference.parse_obj(doc_ref_data)
-
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
     model = DocumentPointer.from_document_reference(
         doc_ref, created_on="2024-02-02T12:34:56.000+00:00Z"
     )
@@ -140,8 +136,7 @@ def test_DocumentPointer_from_document_reference_valid_with_created_on():
 
 
 def test_DocumentPointer_from_document_reference_invalid():
-    doc_ref_data = load_json_file("Y05868-736253002-Valid.json")
-    doc_ref = DocumentReference.parse_obj(doc_ref_data)
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_ref.type = None
 
     # We should have already validated these fields are present by this point,
@@ -153,7 +148,7 @@ def test_DocumentPointer_from_document_reference_invalid():
 
 
 def test_DocumentPointer_from_document_reference_multiple_types():
-    doc_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    doc_ref_data = load_document_reference_json("Y05868-736253002-Valid")
     doc_ref = DocumentReference.parse_obj(
         {
             **doc_ref_data,

@@ -7,7 +7,7 @@ from nrlf.core.response import Response, SpineErrorResponse
 
 
 @request_handler(params=CountRequestParams)
-def count_document_reference(
+def handler(
     metadata: ConnectionMetadata,
     params: CountRequestParams,
     repository: DocumentPointerRepository,

@@ -34,6 +34,7 @@ gherkin-official = "^28.0.0"
 allure-pytest = "^2.13.3"
 allure-behave = "^2.13.3"
 freezegun = "^1.4.0"
+pytest-env = "^1.1.3"
 
 [build-system]
 requires = ["poetry-core"]
@@ -90,3 +91,25 @@ omit = [
     "*/tests/*",
     "conftest.py"
 ]
+
+[tool.pytest.ini_options]
+env = [
+    "D:AWS_REGION=eu-west-2",
+    "D:AWS_DEFAULT_REGION=eu-west-2",
+    "D:ENVIRONMENT=pytest",
+    "PREFIX=nrlf",
+    "SPLUNK_INDEX=logs",
+    "SOURCE=app",
+    "AUTH_STORE=auth-store",
+]
+pythonpath = ["."]
+
+
+[tool.pytest-env]
+AWS_REGION = "eu-west-2"
+PREFIX = "nrlf"
+ENVIRONMENT = {value = "pytest", skip_if_set = true}
+SPLUNK_INDEX = "logs"
+SOURCE = "app"
+AUTH_STORE = "auth-store"
+AWS_DEFAULT_REGION = {value = "eu-west-2", skip_if_set = true}

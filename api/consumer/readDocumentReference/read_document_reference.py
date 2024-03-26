@@ -13,7 +13,7 @@ from nrlf.core.response import Response, SpineErrorConcept, SpineErrorResponse
 
 
 @request_handler(path=ReadDocumentReferencePathParams)
-def read_document_reference(
+def handler(
     repository: DocumentPointerRepository,
     metadata: ConnectionMetadata,
     path: ReadDocumentReferencePathParams,
@@ -36,7 +36,7 @@ def read_document_reference(
 
     logger.log(LogReference.CONREAD000)
 
-    parsed_id = urllib.parse.unquote_plus(path.id)
+    parsed_id = urllib.parse.unquote(path.id)
     result = repository.get_by_id(parsed_id)
 
     if result is None:

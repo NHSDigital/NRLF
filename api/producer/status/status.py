@@ -11,10 +11,7 @@ from nrlf.core.response import Response
 @request_handler(skip_request_verification=True)
 def handler(event, context) -> Response:
     """
-    Retrieves the status of the API.
-
-    Returns:
-        Response: The response object containing the status code and body.
+    Entrypoint for the status function
     """
     try:
         logger.log(LogReference.STATUS000)

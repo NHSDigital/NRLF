@@ -2,15 +2,15 @@ import json
 
 from moto import mock_aws
 
-from api.consumer.countDocumentReference import handler
-from api.tests.utilities.data import load_document_reference
-from api.tests.utilities.dynamodb import mock_repository
-from api.tests.utilities.events import (
+from api.consumer.countDocumentReference.count_document_reference import handler
+from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
+from nrlf.tests.data import load_document_reference
+from nrlf.tests.dynamodb import mock_repository
+from nrlf.tests.events import (
     create_headers,
     create_mock_context,
     create_test_api_gateway_event,
 )
-from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
 
 
 @mock_aws

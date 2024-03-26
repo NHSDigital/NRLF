@@ -18,7 +18,7 @@ resource "aws_secretsmanager_secret" "int_splunk_configuration" {
 }
 
 resource "aws_secretsmanager_secret" "int_sandbox_splunk_configuration" {
-  name        = "${local.project}--int-sandbox--splunk-configuration"
+  name        = "${local.project}--intsandbox--splunk-configuration"
   description = "Splunk configuration for the aws_recordlocator_intsandbox index"
 }
 
@@ -28,6 +28,6 @@ resource "aws_secretsmanager_secret" "ref_splunk_configuration" {
 }
 
 resource "aws_secretsmanager_secret" "ref_sandbox_splunk_configuration" {
-  name        = "${local.project}--ref-sandbox--splunk-configuration"
+  name        = "${local.project}--refsandbox--splunk-configuration"
   description = "Splunk configuration for the aws_recordlocator_refsandbox index"
 }
