@@ -109,7 +109,7 @@ jobs:
         run: aws s3 cp s3://nhsd-nrlf--truststore/server/${{ steps.get_account_id.outputs.account }}.pem truststore/server/${{ steps.get_account_id.outputs.account }}.pem
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: build-artifacts
           path: dist
@@ -158,13 +158,13 @@ jobs:
         uses: asdf-vm/actions/install@v3.0.2
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: build-artifacts
           path: dist
 
       - name: Download Terraform Plan artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: tfplan-output
           path: terraform/infrastructure
