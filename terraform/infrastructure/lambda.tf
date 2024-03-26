@@ -267,32 +267,32 @@ module "producer__updateDocumentReference" {
   ]
 }
 
-# module "producer__upsertDocumentReference" {
-#   source                 = "./modules/lambda"
-#   parent_path            = "api/producer"
-#   name                   = "upsertDocumentReference"
-#   region                 = local.region
-#   prefix                 = local.prefix
-#   layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-#   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference"]
-#   kms_key_id             = module.kms__cloudwatch.kms_arn
-#   environment_variables = {
-#     PREFIX               = "${local.prefix}--"
-#     ENVIRONMENT          = local.environment
-#     AUTH_STORE           = aws_s3_bucket.authorization-store.id
-#     POWERTOOLS_LOG_LEVEL = local.log_level
-#     SPLUNK_INDEX         = module.firehose__processor.splunk.index
-#   }
-#   additional_policies = [
-#     aws_iam_policy.document-pointer__dynamodb-write.arn,
-#     aws_iam_policy.document-pointer__dynamodb-read.arn,
-#     aws_iam_policy.document-pointer__kms-read-write.arn
-#   ]
-#   firehose_subscriptions = [
-#     module.firehose__processor.firehose_subscription
-#   ]
-#   handler = "api.producer.upsertDocumentReference.index.handler"
-# }
+module "producer__upsertDocumentReference" {
+  source                 = "./modules/lambda"
+  parent_path            = "api/producer"
+  name                   = "upsertDocumentReference"
+  region                 = local.region
+  prefix                 = local.prefix
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference"]
+  kms_key_id             = module.kms__cloudwatch.kms_arn
+  environment_variables = {
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
+  }
+  additional_policies = [
+    aws_iam_policy.document-pointer__dynamodb-write.arn,
+    aws_iam_policy.document-pointer__dynamodb-read.arn,
+    aws_iam_policy.document-pointer__kms-read-write.arn
+  ]
+  firehose_subscriptions = [
+    module.firehose__processor.firehose_subscription
+  ]
+  handler = "index.handler"
+}
 
 module "consumer__status" {
   source                 = "./modules/lambda"
