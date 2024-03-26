@@ -1,5 +1,5 @@
 name: Persistent Environment Deploy
-run-name: Deployment to ${{ inputs.environment }} of ${{ inputs.branch_name }} by ${{ github.action }}
+run-name: Deployment to ${{ inputs.environment }} of ${{ inputs.branch_name }} by ${{ github.actor }}
 
 on:
   workflow_dispatch:
