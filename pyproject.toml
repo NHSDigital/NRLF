@@ -5,7 +5,6 @@ description = ""
 authors = ["NHS Digital"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "nrlf", from = "layer"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"

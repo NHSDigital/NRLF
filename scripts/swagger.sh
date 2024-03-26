@@ -2,7 +2,7 @@
 
 function _swagger_help() {
     echo
-    echo "nrlf swagger <command> [options]"
+    echo "swagger.sh <command> [options]"
     echo
     echo "commands:"
     echo "  help                         - this help screen"
@@ -189,3 +189,5 @@ function _swagger() {
     *) _swagger_help ;;
     esac
 }
+
+_swagger "${@:1}"
