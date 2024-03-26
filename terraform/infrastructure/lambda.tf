@@ -117,6 +117,7 @@ module "producer__createDocumentReference" {
     AUTH_STORE           = aws_s3_bucket.authorization-store.id
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
     POWERTOOLS_LOG_LEVEL = local.log_level
+    ENDPOINT_URL         = "${local.public_domain}/nrl-producer-api/FHIR/R4/DocumentReference"
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-write.arn,

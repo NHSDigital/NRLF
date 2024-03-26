@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from nrlf.core.constants import PERMISSION_AUDIT_DATES_FROM_PAYLOAD
 from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
@@ -55,6 +57,10 @@ def handler(
     logger.log(LogReference.PROCREATE000)
 
     logger.log(LogReference.PROCREATE001, resource=body)
+
+    ods_prefix = metadata.ods_code.split("-")[0]
+    body.id = f"{ods_prefix}-{uuid4()}"
+
     validator = DocumentReferenceValidator()
     result = validator.validate(body)
 
@@ -171,9 +177,9 @@ def handler(
         )
         saved_model = repository.supersede(core_model, ids_to_delete)
         logger.log(LogReference.PROCREATE999)
-        return NRLResponse.RESOURCE_SUPERSEDED()
+        return NRLResponse.RESOURCE_SUPERSEDED(resource_id=result.resource.id)
 
     logger.log(LogReference.PROCREATE009, pointer_id=result.resource.id)
     saved_model = repository.create(core_model)
     logger.log(LogReference.PROCREATE999)
-    return NRLResponse.RESOURCE_CREATED()
+    return NRLResponse.RESOURCE_CREATED(resource_id=result.resource.id)
