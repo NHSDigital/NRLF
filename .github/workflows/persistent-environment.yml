@@ -1,0 +1,197 @@
+name: Persistent Environment Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - ref
+          - int
+          - dev-sandbox
+          - ref-sandbox
+          - int-sandbox
+      branch_name:
+        description: Branch to deploy
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+  actions: write
+
+jobs:
+  build:
+    name: Build - ${{ inputs.branch_name }}
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Git clone - ${{ inputs.branch_name }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch_name }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: poetry install --no-root
+
+      - name: Run Linting
+        run: make lint
+
+      - name: Run Unit Tests
+        run: make test
+
+      - name: Build Project
+        run: make build
+
+      - name: Save Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/*.zip
+
+  terraform-plan:
+    name: Terraform Plan - ${{ inputs.environment }}
+    needs: [build]
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Git clone - ${{ inputs.branch_name }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch_name }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
+
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: |
+          account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
+
+          echo "account=${account}" >> "$GITHUB_OUTPUT"
+          echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--${account}-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+
+      - name: Retrieve Server Certificates
+        run: aws s3 cp s3://nhsd-nrlf--truststore/server/${{ steps.get_account_id.outputs.account }}.pem truststore/server/${{ steps.get_account_id.outputs.account }}.pem
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+          path: dist
+
+      - name: Terraform Init
+        run: |
+          terraform -chdir=terraform/infrastructure init
+          terraform -chdir=terraform/infrastructure workspace new ${{ inputs.environment }} || \
+          terraform -chdir=terraform/infrastructure workspace select ${{ inputs.environment }}
+
+      - name: Terraform Plan
+        run: |
+          terraform -chdir=terraform/infrastructure plan \
+            --var-file=etc/dev.tfvars \
+            --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
+            --var assume_role=terraform \
+            -out tfplan
+
+      - name: Store Terraform Plan Output
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-output
+          path: terraform/infrastructure/tfplan*
+
+  terraform-apply:
+    name: Terraform Apply - ${{ inputs.environment }}
+    needs: [terraform-plan]
+    runs-on: [self-hosted, ci]
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Git clone - ${{ inputs.branch_name }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch_name }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+          path: dist
+
+      - name: Download Terraform Plan artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: tfplan-output
+          path: terraform/infrastructure
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
+
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: |
+          account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
+
+          echo "account=${account}" >> "$GITHUB_OUTPUT"
+          echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--${account}-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+
+      - name: Retrieve Server Certificates
+        run: aws s3 cp s3://nhsd-nrlf--truststore/server/${{ steps.get_account_id.outputs.account }}.pem truststore/server/${{ steps.get_account_id.outputs.account }}.pem
+
+      - name: Terraform Init
+        run: |
+          terraform -chdir=terraform/infrastructure init
+          terraform -chdir=terraform/infrastructure workspace new ${{ inputs.environment }} || \
+          terraform -chdir=terraform/infrastructure workspace select ${{ inputs.environment }}
+
+      - name: Terraform Apply
+        run: |
+          # terraform -chdir=terraform/infrastructure apply tfplan
