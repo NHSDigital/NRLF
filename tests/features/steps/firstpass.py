@@ -1,10 +1,10 @@
 import json
 
-import boto3
 from behave import *  # noqa
 from behave.runner import Context
 from pydantic import BaseModel
 
+from nrlf.core.boto import get_s3_client
 from nrlf.core.dynamodb.model import DocumentPointer
 from nrlf.producer.fhir.r4.model import (
     Attachment,
@@ -64,7 +64,7 @@ def register_org_permissions_s3_step(context: Context, org_name: str, ods_code: 
     bucket = f"nhsd-nrlf--{context.env}--authorization-store"
     key = f"{context.application.app_id}/{ods_code}.json"
 
-    s3_client = boto3.client("s3")
+    s3_client = get_s3_client()
     s3_client.put_object(Bucket=bucket, Key=key, Body=json.dumps(pointer_types))
     context.add_cleanup(lambda: s3_client.delete_object(Bucket=bucket, Key=key))
 

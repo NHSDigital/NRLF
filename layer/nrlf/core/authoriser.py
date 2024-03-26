@@ -1,9 +1,9 @@
 import json
 import sys
 
-import boto3
 from botocore.exceptions import ClientError
 
+from nrlf.core.boto import get_s3_client
 from nrlf.core.config import Config
 from nrlf.core.logger import LogReference, logger
 from nrlf.core.model import ConnectionMetadata
@@ -24,7 +24,7 @@ def get_pointer_types(
         key = f"{app_id}/{ods_code}.json"
 
     logger.log(LogReference.S3PERMISSIONS001, bucket=config.AUTH_STORE, key=key)
-    s3_client = boto3.client("s3")
+    s3_client = get_s3_client()
 
     try:
         response = s3_client.get_object(Bucket=config.AUTH_STORE, Key=key)

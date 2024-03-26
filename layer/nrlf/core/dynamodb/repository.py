@@ -1,17 +1,15 @@
 import sys
-from abc import ABC, abstractmethod
-from typing import Any, Generic, Iterator, List, Optional, Type, TypeVar
+from abc import ABC
+from typing import Generic, Iterator, List, Optional, Type, TypeVar
 
-import boto3
-from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
 
+from nrlf.core.boto import get_dynamodb_resource, get_dynamodb_table
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.dynamodb.model import DocumentPointer, DynamoDBModel
 from nrlf.core.errors import OperationOutcomeError
 from nrlf.core.logger import LogReference, logger
-from nrlf.core.types import DynamoDBServiceResource
 
 RepositoryModel = TypeVar("RepositoryModel", bound=DynamoDBModel)
 
@@ -19,38 +17,15 @@ RepositoryModel = TypeVar("RepositoryModel", bound=DynamoDBModel)
 class Repository(ABC, Generic[RepositoryModel]):
     ITEM_TYPE: Type[RepositoryModel]
 
-    def __init__(
-        self,
-        dynamodb: Optional[DynamoDBServiceResource] = None,
-        environment_prefix: str = "",
-    ):
-        self.dynamodb = dynamodb or boto3.resource("dynamodb")
+    def __init__(self, environment_prefix: str = ""):
+        self.dynamodb = get_dynamodb_resource()
         self.table_name = environment_prefix + self.ITEM_TYPE.kebab()
-        self.table = self.dynamodb.Table(self.table_name)
-        self._serialiser = TypeSerializer()
-        self._deserialiser = TypeDeserializer()
+        self.table = get_dynamodb_table(self.table_name)
         logger.log(
             LogReference.REPOSITORY001,
             table_name=self.table_name,
             item_type=self.ITEM_TYPE.__name__,
         )
-
-    @abstractmethod
-    def create(self, item: RepositoryModel) -> RepositoryModel:
-        """
-        Creates a new item in the DynamoDB table
-        Should always return an updated version of the item (if applicable)
-        """
-        raise NotImplementedError()
-
-    def _to_dynamodb_type(self, value: Any):
-        return self._serialiser.serialize(value)
-
-    def _from_dynamodb_type(self, value: Any):
-        if value is None:
-            return None
-
-        return self._deserialiser.deserialize(value)
 
 
 class DocumentPointerRepository(Repository[DocumentPointer]):

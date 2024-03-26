@@ -103,13 +103,3 @@ env = [
     "AUTH_STORE=auth-store",
 ]
 pythonpath = ["."]
-
-
-[tool.pytest-env]
-AWS_REGION = "eu-west-2"
-PREFIX = "nrlf"
-ENVIRONMENT = {value = "pytest", skip_if_set = true}
-SPLUNK_INDEX = "logs"
-SOURCE = "app"
-AUTH_STORE = "auth-store"
-AWS_DEFAULT_REGION = {value = "eu-west-2", skip_if_set = true}

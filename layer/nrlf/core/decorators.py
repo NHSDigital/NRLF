@@ -5,7 +5,6 @@ import warnings
 from functools import wraps
 from typing import Any, Callable, Dict, Optional, Type, Union
 
-import boto3
 from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEvent,
     event_source,
@@ -185,7 +184,6 @@ def request_handler(
 
             if repository is not None:
                 kwargs["repository"] = repository(
-                    dynamodb=boto3.resource("dynamodb"),
                     environment_prefix=kwargs["config"].PREFIX,
                 )
 
