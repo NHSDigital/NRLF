@@ -72,6 +72,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             result = self.table.put_item(
                 Item=item.dict(),
                 ConditionExpression="attribute_not_exists(pk) AND attribute_not_exists(sk)",
+                ReturnConsumedCapacity="INDEXES",
             )
             logger.log(LogReference.REPOSITORY003, result=result)
 
@@ -122,6 +123,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             result = self.table.query(
                 KeyConditionExpression="pk = :pk",
                 ExpressionAttributeValues={":pk": partition_key},
+                ReturnConsumedCapacity="INDEXES",
             )
         except ClientError as exc:
             logger.log(
@@ -216,6 +218,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             "ExpressionAttributeNames": expression_attribute_names or None,
             "ExpressionAttributeValues": expression_attribute_values,
             "Select": "COUNT",
+            "ReturnConsumedCapacity": "INDEXES",
         }
 
         logger.log(LogReference.REPOSITORY017, query=query)
@@ -297,6 +300,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             "FilterExpression": " AND ".join(filter_expressions),
             "ExpressionAttributeNames": expression_attribute_names,
             "ExpressionAttributeValues": expression_attribute_values,
+            "ReturnConsumedCapacity": "INDEXES",
         }
 
         yield from self._query(**query)
@@ -356,6 +360,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             "KeyConditionExpression": " AND ".join(key_conditions),
             "ExpressionAttributeNames": expression_attribute_names,
             "ExpressionAttributeValues": expression_attribute_values,
+            "ReturnConsumedCapacity": "INDEXES",
         }
 
         yield from self._query(**query)
@@ -368,6 +373,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             IndexName="idx_gsi_1",
             KeyConditionExpression="pk_1 = :pk_1",
             ExpressionAttributeValues={":pk_1": f"P#{nhs_number}"},
+            ReturnConsumedCapacity="INDEXES",
         )
 
     def find_by_custodian(self, custodian: str) -> Iterator[DocumentPointer]:
@@ -378,6 +384,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             IndexName="idx_gsi_2",
             KeyConditionExpression="pk_2 = :pk_2",
             ExpressionAttributeValues={":pk_2": f"C#{custodian}"},
+            ReturnConsumedCapacity="INDEXES",
         )
 
     def save(self, item: DocumentPointer) -> DocumentPointer:
@@ -411,6 +418,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             result = self.table.delete_item(
                 Key={"pk": item.pk, "sk": item.sk},
                 ConditionExpression="attribute_exists(pk) AND attribute_exists(sk)",
+                ReturnConsumedCapacity="INDEXES",
             )
             logger.log(LogReference.REPOSITORY027, result=result)
 
@@ -458,6 +466,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                         "last_evaluated_key": page.get("LastEvaluatedKey"),
                     },
                 )
+                logger.log(LogReference.REPOSITORY028a, result=page)
 
                 for item in page["Items"]:
                     try:
@@ -493,10 +502,12 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         Update a DocumentPointer resource
         """
         try:
-            self.table.put_item(
+            result = self.table.put_item(
                 Item=item.dict(),
                 ConditionExpression="attribute_exists(pk) AND attribute_exists(sk)",
+                ReturnConsumedCapacity="INDEXES",
             )
+            logger.log(LogReference.REPOSITORY029a, result=result)
         except ClientError as exc:
             logger.log(
                 LogReference.REPOSITORY023,

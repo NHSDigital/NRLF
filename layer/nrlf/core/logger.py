@@ -11,9 +11,7 @@ from nrlf.core.log_references import LogReference
 class SplunkFormatter(LambdaPowertoolsFormatter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.splunk_index = os.getenv("SPLUNK_INDEX")
-        if not self.splunk_index:
-            raise ValueError("SPLUNK_INDEX environment variable is required")
+        self.splunk_index = os.getenv("SPLUNK_INDEX", "aws_recordlocator_dev")
 
     def serialize(self, log: LogRecord) -> str:
         """

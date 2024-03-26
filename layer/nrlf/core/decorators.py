@@ -125,7 +125,7 @@ def request_handler(
 
             if skip_request_verification:
                 logger.log(LogReference.HANDLER013)
-                response = func(**kwargs)
+                response = func(event, context)
                 logger.log(
                     LogReference.HANDLER999,
                     status_code=response.statusCode,

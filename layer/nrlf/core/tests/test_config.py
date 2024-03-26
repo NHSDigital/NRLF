@@ -9,6 +9,7 @@ from nrlf.core.config import Config
 def test_config_valid():
     # Arrange
     env_vars = {
+        "AUTH_STORE": "auth-store",
         "AWS_REGION": "eu-west-2",
         "PREFIX": "nrlf",
         "ENVIRONMENT": "production",
@@ -20,6 +21,7 @@ def test_config_valid():
     config = Config(**env_vars)
 
     # Assert
+    assert env_vars["AUTH_STORE"] == config.AUTH_STORE
     assert env_vars["AWS_REGION"] == config.AWS_REGION
     assert env_vars["PREFIX"] == config.PREFIX
     assert env_vars["ENVIRONMENT"] == config.ENVIRONMENT
@@ -43,6 +45,7 @@ def test_config_missing_env_vars():
 def test_config_invalid_env_vars():
     # Arrange
     env_vars = {
+        "AUTH_STORE": "auth-store",
         "AWS_REGION": "eu-west-2",
         "PREFIX": "nrlf",
         "ENVIRONMENT": "production",
@@ -66,6 +69,7 @@ def test_config_invalid_env_vars():
 def test_config_reads_from_env_variables():
     # Arrange
     env_vars = {
+        "AUTH_STORE": "auth-store",
         "AWS_REGION": "eu-west-2",
         "PREFIX": "nrlf",
         "ENVIRONMENT": "production",

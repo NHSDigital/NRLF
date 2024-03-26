@@ -98,10 +98,13 @@ class LogReference(Enum):
     REPOSITORY022 = _Reference("EXCEPTION", "An error occurred whilst performing query")
     REPOSITORY023 = _Reference("DEBUG", "Saving new resource to DynamoDB")
     REPOSITORY024 = _Reference("DEBUG", "Saving updated resource in DynamoDB")
+
     REPOSITORY025 = _Reference("DEBUG", "Deleting resource from DynamoDB")
     REPOSITORY026 = _Reference("EXCEPTION", "Failed to delete resource from DynamoDB")
     REPOSITORY027 = _Reference("INFO", "Successfully deleted item from DynamoDB")
     REPOSITORY028 = _Reference("INFO", "Received page of search results")
+    REPOSITORY028a = _Reference("DEBUG", "Received page of search results with result")
+    REPOSITORY029a = _Reference("DEBUG", "Updated item with result")
 
     # Model logs
     DOCPOINTER001 = _Reference("DEBUG", "Extracting custodian suffix from custodian")
