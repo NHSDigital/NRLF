@@ -71,6 +71,7 @@ test-features-integration: check-warn ## Run the BDD feature tests in the integr
 	behave --define="integration_test=true" --define="env=$(TF_WORKSPACE)" $(FEATURE_TEST_ARGS)
 
 test-performance-prepare:
+	mkdir -p $(DIST_PATH)
 	poetry run python tests/performance/environment.py setup $(TF_WORKSPACE)
 
 test-performance: check-warn test-performance-baseline test-performance-stress ## Run the performance tests
