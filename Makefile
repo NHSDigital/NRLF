@@ -11,6 +11,8 @@ DIST_PATH ?= ./dist
 TEST_ARGS ?= --cov --cov-report=term-missing
 FEATURE_TEST_ARGS ?= ./tests/features --format progress2
 TF_WORKSPACE ?= $(shell terraform -chdir=terraform/infrastructure workspace show)
+
+
 export PATH := $(PATH):$(PWD)/.venv/bin
 
 default: build
@@ -68,6 +70,32 @@ test-features-integration: check-warn ## Run the BDD feature tests in the integr
 	@echo "Running feature tests in the integration environment"
 	behave --define="integration_test=true" --define="env=$(TF_WORKSPACE)" $(FEATURE_TEST_ARGS)
 
+test-performance-prepare:
+	mkdir -p $(DIST_PATH)
+	poetry run python tests/performance/environment.py setup $(TF_WORKSPACE)
+
+test-performance: check-warn test-performance-baseline test-performance-stress ## Run the performance tests
+
+test-performance-baseline:
+	@echo "Running performance baseline test"
+	k6 run --out csv=$(DIST_PATH)/consumer-baseline.csv tests/performance/consumer/baseline.js -e HOST=$(HOST) -e ENV_TYPE=$(ENV_TYPE)
+
+test-performance-stress:
+	@echo "Running performance stress test"
+	k6 run --out csv=$(DIST_PATH)/consumer-stress.csv tests/performance/consumer/stress.js -e HOST=$(HOST) -e ENV_TYPE=$(ENV_TYPE)
+
+test-performance-soak:
+	@echo "Running performance soak test"
+	k6 run --out csv=$(DIST_PATH)/consumer-soak.csv tests/performance/consumer/soak.js -e HOST=$(HOST) -e ENV_TYPE=$(ENV_TYPE)
+
+test-performance-output: ## Process outputs from the performance tests
+	@echo "Processing performance test outputs"
+	poetry run python tests/performance/process_results.py baseline $(DIST_PATH)/consumer-baseline.csv
+	poetry run python tests/performance/process_results.py stress $(DIST_PATH)/consumer-stress.csv
+
+test-performance-cleanup:
+	poetry run python tests/performance/environment.py cleanup $(TF_WORKSPACE)
+
 
 lint: check-warn ## Lint the project
 	pre-commit run --all-files
@@ -78,7 +106,7 @@ clean: ## Remove all generated and temporary files
 		rmdir $(DIST_PATH) 2>/dev/null || true
 
 get-access-token: check-warn ## Get an access token for an environment
-	@python tests/utilities/get_access_token.py $(ENV) $(APP_ALIAS)
+	@poetry run python tests/utilities/get_access_token.py $(ENV) $(APP_ALIAS)
 
 truststore-build-all: check-warn ## Build all truststore resources
 	@./scripts/truststore.sh build-all
@@ -88,9 +116,6 @@ truststore-build-ca: check-warn ## Build a CA (Certificate Authority)
 
 truststore-build-cert: check-warn ## Build a certificate
 	@./scripts/truststore.sh build-cert "$(CA_NAME)" "$(CERT_NAME)" "$(CERT_SUBJECT)"
-
-truststore-pull-all: check-warn ## Pull all truststore resources
-	@./scripts/truststore.sh pull-all "$(ENV)"
 
 truststore-pull-server: check-warn ## Pull a server certificate
 	@./scripts/truststore.sh pull-server "$(ENV)"

@@ -70,3 +70,6 @@ dist
 # Allure results
 allure-results/*
 allure-report/*
+
+# Performance test ref data
+tests/performance/reference-data.json
