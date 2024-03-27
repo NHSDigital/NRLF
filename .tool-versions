@@ -6,3 +6,4 @@ terraform 1.3.4
 java zulu-jre-17.42.19
 yq 4.42.1
 allure 2.27.0
+k6 0.50.0

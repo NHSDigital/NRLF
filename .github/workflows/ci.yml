@@ -196,7 +196,7 @@ jobs:
 
   performance-test:
     name: Run Performance Tests
-    needs: [integration-test]
+    needs: [set-uniquish-id, integration-test]
     runs-on: [self-hosted, ci]
 
     steps:
@@ -212,6 +212,55 @@ jobs:
           key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
           restore-keys: |
             ${{ runner.os }}-asdf-
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
+      - name: Pull Client Certificates
+        run: make truststore-pull-client ENV=dev
+
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+
+      - name: Configure Dev Account Credentials
+        id: configure-dev-account-credentials
+        run: |
+          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ steps.get_account_id.outputs.aws_account_id }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} --output json)
+          echo "aws_access_key_id=$(echo $aws_credentials | jq -r '.Credentials.AccessKeyId')" >> "$GITHUB_OUTPUT"
+          echo "aws_secret_access_key=$(echo $aws_credentials | jq -r '.Credentials.SecretAccessKey')" >> "$GITHUB_OUTPUT"
+          echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Environment Test Data
+        run: make test-performance-prepare
+        env:
+          AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
+          AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}
+
+      - name: Run Performance Test - Baseline
+        run: make test-performance-baseline HOST=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}.api.record-locator.dev.national.nhs.uk ENV_TYPE=dev
+
+      - name: Run Performance Test - Stress
+        run: make test-performance-stress HOST=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}.api.record-locator.dev.national.nhs.uk ENV_TYPE=dev
+
+      - name: Process Performance Test Outputs
+        run: make test-performance-output
+
+      - name: Store Performance Test Outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-test-outputs
+          path: dist/*.png
+
+      - name: Cleanup Environment Test Data
+        run: make test-performance-cleanup
+        env:
+          AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
+          AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}
 
   destroy:
     name: Destroy CI Environment
