@@ -3,11 +3,10 @@ resource "aws_lambda_function" "lambda_function" {
   runtime          = "python3.12"
   handler          = var.handler
   role             = aws_iam_role.lambda_role.arn
-  filename         = "${path.module}/../../../../dist/${var.name}.zip"
-  source_code_hash = filebase64sha256("${path.module}/../../../../dist/${var.name}.zip")
+  filename         = "${path.module}/../../../../dist/${local.api_type}-${var.name}.zip"
+  source_code_hash = filebase64sha256("${path.module}/../../../../dist/${local.api_type}-${var.name}.zip")
   timeout          = local.lambda_timeout
   memory_size      = 512
-  # publish = true
 
 
   environment {
@@ -28,12 +27,6 @@ resource "aws_lambda_function" "lambda_function" {
     }
   }
 }
-
-# resource "aws_lambda_provisioned_concurrency_config" "provisioned_concurrency" {
-#   function_name = aws_lambda_function.lambda_function.function_name
-#   provisioned_concurrent_executions = 1
-#   qualifier = aws_lambda_function.lambda_function.version
-# }
 
 resource "aws_lambda_permission" "lambda_permission" {
   count         = length(var.api_gateway_source_arn)

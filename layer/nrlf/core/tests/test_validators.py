@@ -13,7 +13,7 @@ from nrlf.producer.fhir.r4.model import (
     OperationOutcomeIssue,
     RequestQueryType,
 )
-from nrlf.tests.utilities import load_json_file
+from nrlf.tests.data import load_document_reference_json
 
 
 def test_validate_type_system_valid():
@@ -137,7 +137,7 @@ def test_document_reference_validator_init():
 
 def test_document_reference_validator_parse_valid():
     validator = DocumentReferenceValidator()
-    document_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
     result = validator.parse(document_ref_data)
 
@@ -150,7 +150,7 @@ def test_document_reference_validator_parse_valid():
 
 def test_document_reference_validator_parse_invalid():
     validator = DocumentReferenceValidator()
-    document_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
     document_ref_data["id"] = {"value": "invalid"}
     document_ref_data["type"] = "invalid"
@@ -195,7 +195,7 @@ def test_document_reference_validator_parse_invalid():
 
 def test_validate_document_reference_valid():
     validator = DocumentReferenceValidator()
-    document_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
     result = validator.validate(document_ref_data)
 
@@ -206,7 +206,7 @@ def test_validate_document_reference_valid():
 
 def test_validate_document_reference_missing_fields():
     validator = DocumentReferenceValidator()
-    document_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
     del document_ref_data["id"]
     del document_ref_data["type"]
@@ -245,7 +245,7 @@ def test_validate_document_reference_missing_fields():
 
 def test_validate_document_reference_missing_fields_stops_validation():
     validator = DocumentReferenceValidator()
-    document_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
     validator._validate_no_extra_fields = Mock()
     validator._validate_identifiers = Mock()
@@ -263,7 +263,7 @@ def test_validate_document_reference_missing_fields_stops_validation():
 
 def test_validate_document_reference_extra_fields():
     validator = DocumentReferenceValidator()
-    document_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
     document_ref_data["extra_field"] = "extra_value"
 
@@ -290,7 +290,7 @@ def test_validate_document_reference_extra_fields():
 
 def test_validate_identifiers_no_custodian_identifier():
     validator = DocumentReferenceValidator()
-    document_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
     del document_ref_data["custodian"]["identifier"]
 
@@ -318,7 +318,7 @@ def test_validate_identifiers_no_custodian_identifier():
 
 def test_validate_identifiers_no_subject_identifier():
     validator = DocumentReferenceValidator()
-    document_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
     del document_ref_data["subject"]["identifier"]
 
@@ -346,7 +346,7 @@ def test_validate_identifiers_no_subject_identifier():
 
 def test_validate_identifiers_invalid_systems():
     validator = DocumentReferenceValidator()
-    document_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
     document_ref_data["custodian"]["identifier"]["system"] = "invalid"
     document_ref_data["subject"]["identifier"]["system"] = "invalid"
@@ -390,7 +390,7 @@ def test_validate_identifiers_invalid_systems():
 
 def test_validate_relates_to_valid():
     validator = DocumentReferenceValidator()
-    document_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
     document_ref_data["relatesTo"] = [
         {
@@ -411,7 +411,7 @@ def test_validate_relates_to_valid():
 
 def test_validate_relates_to_invalid_code():
     validator = DocumentReferenceValidator()
-    document_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
     document_ref_data["relatesTo"] = [
         {
@@ -448,7 +448,7 @@ def test_validate_relates_to_invalid_code():
 
 def test_validate_relates_to_no_target_identifier():
     validator = DocumentReferenceValidator()
-    document_ref_data = load_json_file("Y05868-736253002-Valid.json")
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
     document_ref_data["relatesTo"] = [{"code": "replaces", "target": {}}]
 
