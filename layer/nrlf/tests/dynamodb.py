@@ -1,5 +1,4 @@
-import boto3
-
+from nrlf.core.boto import get_dynamodb_resource
 from nrlf.core.config import Config
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
 from nrlf.core.types import DynamoDBServiceResource
@@ -45,12 +44,10 @@ def create_document_pointer_table(config: Config, dynamodb: DynamoDBServiceResou
 def mock_repository(func):
     def wrapped_function(*args, **kwargs):
         config = Config()
-        dynamodb = boto3.resource("dynamodb")
+        dynamodb = get_dynamodb_resource()
         create_document_pointer_table(config, dynamodb)
 
-        repository = DocumentPointerRepository(
-            dynamodb=dynamodb, environment_prefix=config.PREFIX
-        )
+        repository = DocumentPointerRepository(environment_prefix=config.PREFIX)
 
         return func(*args, **kwargs, repository=repository)
 

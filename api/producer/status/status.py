@@ -1,7 +1,5 @@
 import sys
 
-import boto3
-
 from nrlf.core.config import Config
 from nrlf.core.decorators import DocumentPointerRepository, request_handler
 from nrlf.core.logger import LogReference, logger
@@ -19,9 +17,7 @@ def handler(event, context) -> Response:
         config = Config()
 
         logger.log(LogReference.STATUS002)
-        repository = DocumentPointerRepository(
-            dynamodb=boto3.resource("dynamodb"), environment_prefix=config.PREFIX
-        )
+        repository = DocumentPointerRepository(environment_prefix=config.PREFIX)
         repository.get("D#NULL")
 
         response = Response(statusCode="200", body="OK")

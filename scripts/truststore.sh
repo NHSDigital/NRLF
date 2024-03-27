@@ -1,15 +1,3 @@
-# This handles issues with Mac/Linux using different date commands
-DATE="date"
-if [[ ! "$($DATE +%N)" =~ ^[0-9]+$ ]]; then
-    DATE="$(brew --prefix)/opt/coreutils/libexec/gnubin/date"
-
-    if [ ! -f "$DATE" ]; then
-        echo "coreutils is not installed. re-run 'nrlf brew install'"
-        exit 1
-    fi
-fi
-
-# The name of the bucket in Mgmt
 BUCKET="nhsd-nrlf--truststore"
 
 function _truststore_help() {
@@ -53,6 +41,8 @@ function _truststore_build_ca() {
 
     substitute_env_in_file ./truststore/config/ca.conf /tmp/ca.conf
 
+    echo -e "🚧 Building CA: $ca \t(FQDN: $fqdn)"
+
     openssl req -newkey rsa:4096 \
         -nodes \
         -keyout ./truststore/ca/$ca.key \
@@ -62,9 +52,10 @@ function _truststore_build_ca() {
         -out ./truststore/ca/$ca.crt \
         -config /tmp/ca.conf \
         -extensions v3_req \
-        -extensions v3_ca
+        -extensions v3_ca &> /dev/null
 
     rm /tmp/ca.conf
+    echo -e "✅ Successfully Built CA: $ca"
 }
 
 # buld a certificate
@@ -81,6 +72,8 @@ function _truststore_build_cert() {
 
     substitute_env_in_file ./truststore/config/client.conf /tmp/client.conf
 
+    echo -e "🚧 Generating $client keypair"
+
     openssl req \
         -newkey rsa:4096 \
         -nodes \
@@ -89,7 +82,7 @@ function _truststore_build_cert() {
         -out truststore/client/$client.csr \
         -config /tmp/client.conf \
         -extensions v3_req \
-        -extensions usr_cert
+        -extensions usr_cert &> /dev/null
 
     openssl x509 \
         -req \
@@ -102,21 +95,22 @@ function _truststore_build_cert() {
         -sha256 \
         -extfile /tmp/client.conf \
         -extensions v3_req \
-        -extensions usr_cert
+        -extensions usr_cert &> /dev/null
 
     cat truststore/client/$client.crt truststore/ca/$ca.crt > truststore/server/$client.pem
 
+    echo -e "✅ Successfully generated $client keypair"
     rm /tmp/client.conf
 }
 
 
 function _truststore_build_all() {
-    _truststore_build_ca "prod"     "record-locator.national.nhs.uk"
+    _truststore_build_ca "prod" "record-locator.national.nhs.uk"
     _truststore_build_ca "int"  "record-locator.int.national.nhs.uk"
     _truststore_build_ca "ref"  "record-locator.ref.national.nhs.uk"
     _truststore_build_ca "dev"  "record-locator.dev.national.nhs.uk"
 
-    _truststore_build_cert "prod" "prod"         "api.record-locator.national.nhs.uk"
+    _truststore_build_cert "prod" "prod" "api.record-locator.national.nhs.uk"
     _truststore_build_cert "int"  "int"  "int.api.record-locator.int.national.nhs.uk"
     _truststore_build_cert "ref"  "ref"  "ref.api.record-locator.ref.national.nhs.uk"
     _truststore_build_cert "dev"  "dev"  "dev.api.record-locator.dev.national.nhs.uk"
@@ -139,6 +133,13 @@ function _truststore_pull_server() {
     aws s3 cp "s3://${BUCKET}/server/${env}.pem" "truststore/server/${env}.pem"
 }
 
+function _truststore_pull_all() {
+    env=$1
+    _truststore_pull_ca $env
+    _truststore_pull_client $env
+    _truststore_pull_server $env
+}
+
 function _truststore() {
     local command=$1
     local args=(${@:2})
@@ -147,9 +148,12 @@ function _truststore() {
         "build-all") _truststore_build_all $args ;;
         "build-ca") _truststore_build_ca $args ;;
         "build-client") _truststore_build_cert $args ;;
+        "pull-all") _truststore_pull_all $args ;;
         "pull-server") _truststore_pull_server $args ;;
         "pull-client") _truststore_pull_client $args ;;
         "pull-ca") _truststore_pull_server $args ;;
         *) _truststore_help $args ;;
     esac
 }
+
+_truststore "${@:1}"

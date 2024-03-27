@@ -5,7 +5,6 @@ description = ""
 authors = ["NHS Digital"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "nrlf", from = "layer"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -103,13 +102,3 @@ env = [
     "AUTH_STORE=auth-store",
 ]
 pythonpath = ["."]
-
-
-[tool.pytest-env]
-AWS_REGION = "eu-west-2"
-PREFIX = "nrlf"
-ENVIRONMENT = {value = "pytest", skip_if_set = true}
-SPLUNK_INDEX = "logs"
-SOURCE = "app"
-AUTH_STORE = "auth-store"
-AWS_DEFAULT_REGION = {value = "eu-west-2", skip_if_set = true}

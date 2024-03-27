@@ -1,8 +1,17 @@
 #!/bin/bash
 
+AWS_REGION_NAME="eu-west-2"
+PROFILE_PREFIX="nhsd-nrlf"
+TERRAFORM_ROLE_NAME="terraform"
+MGMT_ACCOUNT_ID_LOCATION="${PROFILE_PREFIX}--mgmt--mgmt-account-id"
+PROD_ACCOUNT_ID_LOCATION="${PROFILE_PREFIX}--mgmt--prod-account-id"
+TEST_ACCOUNT_ID_LOCATION="${PROFILE_PREFIX}--mgmt--test-account-id"
+DEV_ACCOUNT_ID_LOCATION="${PROFILE_PREFIX}--mgmt--dev-account-id"
+
+
 function _bootstrap_help() {
     echo
-    echo "nrlf bootstrap <command> [options]"
+    echo "bootstrap.sh <command> [options]"
     echo
     echo "commands:"
     echo "  help                           - this help screen"
@@ -23,7 +32,7 @@ function _check_mgmt() {
 }
 
 function _check_non_mgmt() {
-    if [[ "$(aws iam list-account-aliases --query 'AccountAliases[0]' --output text)"] != 'nhsd-nrlf-mgmt' ]]; then
+    if [[ "$(aws iam list-account-aliases --query 'AccountAliases[0]' --output text)" != 'nhsd-ddc-spine-nrlf-mgmt' ]]; then
     echo "Please log in as a non-mgmt account" >&2
     return 1
   fi
@@ -187,3 +196,5 @@ function _bootstrap() {
     *) _bootstrap_help ;;
     esac
 }
+
+_bootstrap "${@:1}"

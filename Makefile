@@ -76,3 +76,27 @@ clean: ## Remove all generated and temporary files
 	[ -n "$(DIST_PATH)" ] && \
 		rm -rf $(DIST_PATH)/*.zip && \
 		rmdir $(DIST_PATH) 2>/dev/null || true
+
+get-access-token: check-warn ## Get an access token for an environment
+	@python tests/utilities/get_access_token.py $(ENV) $(APP_ALIAS)
+
+truststore-build-all: check-warn ## Build all truststore resources
+	@./scripts/truststore.sh build-all
+
+truststore-build-ca: check-warn ## Build a CA (Certificate Authority)
+	@./scripts/truststore.sh build-ca "$(CA_NAME)" "$(CA_SUBJECT)"
+
+truststore-build-cert: check-warn ## Build a certificate
+	@./scripts/truststore.sh build-cert "$(CA_NAME)" "$(CERT_NAME)" "$(CERT_SUBJECT)"
+
+truststore-pull-all: check-warn ## Pull all truststore resources
+	@./scripts/truststore.sh pull-all "$(ENV)"
+
+truststore-pull-server: check-warn ## Pull a server certificate
+	@./scripts/truststore.sh pull-server "$(ENV)"
+
+truststore-pull-client: check-warn ## Pull a client certificate
+	@./scripts/truststore.sh pull-client "$(ENV)"
+
+truststore-pull-ca: check-warn ## Pull a CA certificate
+	@./scripts/truststore.sh pull-ca "$(ENV)"
