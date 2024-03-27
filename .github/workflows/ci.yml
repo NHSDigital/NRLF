@@ -213,6 +213,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-asdf-
 
+      - name: Install asdf and tools
+        uses: asdf-vm/actions/install@v3.0.2
+
       - name: Setup Python environment
         run: |
           poetry install --no-root
