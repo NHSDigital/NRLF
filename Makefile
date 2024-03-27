@@ -71,7 +71,7 @@ test-features-integration: check-warn ## Run the BDD feature tests in the integr
 	behave --define="integration_test=true" --define="env=$(TF_WORKSPACE)" $(FEATURE_TEST_ARGS)
 
 test-performance-prepare:
-	python tests/performance/environment.py setup $(TF_WORKSPACE)
+	poetry run python tests/performance/environment.py setup $(TF_WORKSPACE)
 
 test-performance: check-warn test-performance-baseline test-performance-stress ## Run the performance tests
 
@@ -89,11 +89,11 @@ test-performance-soak:
 
 test-performance-output: ## Process outputs from the performance tests
 	@echo "Processing performance test outputs"
-	python tests/performance/process_results.py baseline $(DIST_PATH)/consumer-baseline.csv
-	python tests/performance/process_results.py stress $(DIST_PATH)/consumer-stress.csv
+	poetry run python tests/performance/process_results.py baseline $(DIST_PATH)/consumer-baseline.csv
+	poetry run python tests/performance/process_results.py stress $(DIST_PATH)/consumer-stress.csv
 
 test-performance-cleanup:
-	python tests/performance/environment.py cleanup $(TF_WORKSPACE)
+	poetry run python tests/performance/environment.py cleanup $(TF_WORKSPACE)
 
 
 lint: check-warn ## Lint the project
@@ -105,7 +105,7 @@ clean: ## Remove all generated and temporary files
 		rmdir $(DIST_PATH) 2>/dev/null || true
 
 get-access-token: check-warn ## Get an access token for an environment
-	@python tests/utilities/get_access_token.py $(ENV) $(APP_ALIAS)
+	@poetry run python tests/utilities/get_access_token.py $(ENV) $(APP_ALIAS)
 
 truststore-build-all: check-warn ## Build all truststore resources
 	@./scripts/truststore.sh build-all
