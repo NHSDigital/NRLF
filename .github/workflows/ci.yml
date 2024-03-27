@@ -244,7 +244,7 @@ jobs:
           echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
 
       - name: Setup Environment Test Data
-        run: make test-performance-prepare
+        run: make test-performance-prepare TF_WORKSPACE=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
@@ -266,7 +266,7 @@ jobs:
           path: dist/*.png
 
       - name: Cleanup Environment Test Data
-        run: make test-performance-cleanup
+        run: make test-performance-cleanup TF_WORKSPACE=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
