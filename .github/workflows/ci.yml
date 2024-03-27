@@ -221,6 +221,13 @@ jobs:
           poetry install --no-root
           source $(poetry env info --path)/bin/activate
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+
       - name: Pull Client Certificates
         run: make truststore-pull-client ENV=dev
 
