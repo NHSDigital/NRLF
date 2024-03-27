@@ -1,8 +1,13 @@
 import json
 
+from freezegun import freeze_time
 from moto import mock_aws
+from pytest import mark
 
-from api.producer.createDocumentReference.create_document_reference import handler
+from api.producer.createDocumentReference.create_document_reference import (
+    _set_create_time_fields,
+    handler,
+)
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
 from nrlf.producer.fhir.r4.model import (
     DocumentReferenceRelatesTo,
@@ -20,6 +25,7 @@ from nrlf.tests.events import (
 
 @mock_aws
 @mock_repository
+@freeze_time("2024-03-21T12:34:56.789")
 def test_create_document_reference_happy_path(repository: DocumentPointerRepository):
     doc_ref_data = load_document_reference_data("Y05868-736253002-Valid")
 
@@ -61,7 +67,15 @@ def test_create_document_reference_happy_path(repository: DocumentPointerReposit
     created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
-    assert json.loads(created_doc_pointer.document) == json.loads(doc_ref_data)
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
+    assert created_doc_pointer.updated_on is None
+    assert json.loads(created_doc_pointer.document) == {
+        **json.loads(doc_ref_data),
+        "meta": {
+            "lastUpdated": "2024-03-21T12:34:56.789000Z",
+        },
+        "date": "2024-03-21T12:34:56.789000Z",
+    }
 
 
 def test_create_document_reference_no_body():
@@ -740,3 +754,242 @@ def test_create_document_reference_create_relatesto_not_replaces(
 
     old_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
     assert old_doc_pointer is not None
+
+
+@mock_aws
+@mock_repository
+@freeze_time("2024-03-21T12:34:56.789")
+def test_create_document_reference_with_date_ignored(
+    repository: DocumentPointerRepository,
+):
+    doc_ref_data = load_document_reference_data("Y05868-736253002-Valid-with-date")
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(),
+        body=doc_ref_data,
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "201",
+        "headers": {},
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "information",
+                "code": "informational",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "RESOURCE_CREATED",
+                            "display": "Resource created",
+                            "system": "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
+                        }
+                    ],
+                },
+                "diagnostics": "The document has been created",
+            }
+        ],
+    }
+
+    created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
+
+    assert created_doc_pointer is not None
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
+    assert created_doc_pointer.updated_on is None
+    assert json.loads(created_doc_pointer.document) == {
+        **json.loads(doc_ref_data),
+        "meta": {
+            "lastUpdated": "2024-03-21T12:34:56.789000Z",
+        },
+        "date": "2024-03-21T12:34:56.789000Z",
+    }
+
+
+@mock_aws
+@mock_repository
+@freeze_time("2024-03-21T12:34:56.789")
+def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
+    repository: DocumentPointerRepository,
+):
+    doc_ref_data = load_document_reference_data(
+        "Y05868-736253002-Valid-with-date-and-meta-lastupdated"
+    )
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(),
+        body=doc_ref_data,
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "201",
+        "headers": {},
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "information",
+                "code": "informational",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "RESOURCE_CREATED",
+                            "display": "Resource created",
+                            "system": "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
+                        }
+                    ],
+                },
+                "diagnostics": "The document has been created",
+            }
+        ],
+    }
+
+    created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
+
+    assert created_doc_pointer is not None
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
+    assert created_doc_pointer.updated_on is None
+    assert json.loads(created_doc_pointer.document) == {
+        **json.loads(doc_ref_data),
+        "meta": {
+            "lastUpdated": "2024-03-21T12:34:56.789000Z",
+        },
+        "date": "2024-03-21T12:34:56.789000Z",
+    }
+
+
+@mock_aws
+@mock_repository
+@freeze_time("2024-03-21T12:34:56.789")
+def test_create_document_reference_with_date_overidden(
+    repository: DocumentPointerRepository,
+):
+    doc_ref_data = load_document_reference_data("Y05868-736253002-Valid-with-date")
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(nrl_permissions=["audit-dates-from-payload"]),
+        body=doc_ref_data,
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "201",
+        "headers": {},
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "information",
+                "code": "informational",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "RESOURCE_CREATED",
+                            "display": "Resource created",
+                            "system": "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
+                        }
+                    ],
+                },
+                "diagnostics": "The document has been created",
+            }
+        ],
+    }
+
+    created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
+
+    assert created_doc_pointer is not None
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
+    assert created_doc_pointer.updated_on is None
+    assert json.loads(created_doc_pointer.document) == {
+        **json.loads(doc_ref_data),
+        "meta": {
+            "lastUpdated": "2024-03-21T12:34:56.789000Z",
+        },
+        "date": "2024-03-20T00:00:01.000000Z",
+    }
+
+
+@freeze_time("2024-03-25")
+@mark.parametrize(
+    "doc_ref_name",
+    [
+        "Y05868-736253002-Valid",
+        "Y05868-736253002-Valid-with-date",
+        "Y05868-736253002-Valid-with-date-and-meta-lastupdated",
+    ],
+)
+def test__set_create_time_fields(doc_ref_name: str):
+    test_time = "2024-03-24T12:34:56.789000Z"
+    test_doc_ref = load_document_reference(doc_ref_name)
+    test_perms = []
+
+    response = _set_create_time_fields(test_time, test_doc_ref, test_perms)
+
+    assert response.dict(exclude_none=True) == {
+        **test_doc_ref.dict(exclude_none=True),
+        "meta": {
+            "lastUpdated": "2024-03-24T12:34:56.789000Z",
+        },
+        "date": "2024-03-24T12:34:56.789000Z",
+    }
+
+
+@freeze_time("2024-03-25")
+@mark.parametrize(
+    "doc_ref_name",
+    [
+        "Y05868-736253002-Valid-with-date",
+        "Y05868-736253002-Valid-with-date-and-meta-lastupdated",
+    ],
+)
+def test__set_create_time_fields_when_doc_has_date_and_perms(doc_ref_name: str):
+    test_time = "2024-03-24T12:34:56.789000Z"
+    test_doc_ref = load_document_reference(doc_ref_name)
+    test_perms = ["audit-dates-from-payload"]
+
+    response = _set_create_time_fields(test_time, test_doc_ref, test_perms)
+
+    assert response.dict(exclude_none=True) == {
+        **test_doc_ref.dict(exclude_none=True),
+        "meta": {
+            "lastUpdated": test_time,
+        },
+        "date": test_doc_ref.date,
+    }
+
+
+@freeze_time("2024-03-25")
+def test__set_create_time_fields_when_no_date_but_perms():
+    test_time = "2024-03-24T12:34:56.789000Z"
+    test_doc_ref = load_document_reference("Y05868-736253002-Valid")
+    test_perms = ["audit-dates-from-payload"]
+
+    response = _set_create_time_fields(test_time, test_doc_ref, test_perms)
+
+    assert response.dict(exclude_none=True) == {
+        **test_doc_ref.dict(exclude_none=True),
+        "meta": {
+            "lastUpdated": test_time,
+        },
+        "date": test_time,
+    }

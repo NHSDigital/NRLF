@@ -1,10 +1,38 @@
+from nrlf.core.constants import PERMISSION_AUDIT_DATES_FROM_PAYLOAD
 from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
 from nrlf.core.logger import LogReference, logger
 from nrlf.core.model import ConnectionMetadata
 from nrlf.core.response import NRLResponse, Response, SpineErrorResponse
+from nrlf.core.utils import create_fhir_instant
 from nrlf.core.validators import DocumentReferenceValidator
-from nrlf.producer.fhir.r4.model import DocumentReference
+from nrlf.producer.fhir.r4.model import DocumentReference, Meta
+
+
+def _set_create_time_fields(
+    create_time: str, document_reference: DocumentReference, nrl_permissions: list[str]
+) -> DocumentReference:
+    """
+    Set the date and lastUpdated timestamps on the provided DocumentReference
+    """
+    if not document_reference.meta:
+        document_reference.meta = Meta()
+    document_reference.meta.lastUpdated = create_time
+
+    if (
+        document_reference.date
+        and PERMISSION_AUDIT_DATES_FROM_PAYLOAD in nrl_permissions
+    ):
+        # Perserving the original date if it exists and the permission is set
+        logger.log(
+            LogReference.PROCREATE011,
+            id=document_reference.id,
+            date=document_reference.date,
+        )
+    else:
+        document_reference.date = create_time
+
+    return document_reference
 
 
 @request_handler(body=DocumentReference)
@@ -34,7 +62,16 @@ def handler(
         logger.log(LogReference.PROCREATE002)
         return Response.from_issues(issues=result.issues, statusCode="400")
 
-    core_model = DocumentPointer.from_document_reference(result.resource)
+    creation_time = create_fhir_instant()
+    document_reference = _set_create_time_fields(
+        creation_time,
+        document_reference=result.resource,
+        nrl_permissions=metadata.nrl_permissions,
+    )
+
+    core_model = DocumentPointer.from_document_reference(
+        document_reference, created_on=creation_time
+    )
 
     if metadata.ods_code_parts != tuple(core_model.producer_id.split("|")):
         logger.log(

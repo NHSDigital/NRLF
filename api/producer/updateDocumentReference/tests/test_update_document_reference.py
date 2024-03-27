@@ -1,8 +1,13 @@
 import json
 
+from freezegun import freeze_time
 from moto import mock_aws
+from pytest import mark
 
-from api.producer.updateDocumentReference.update_document_reference import handler
+from api.producer.updateDocumentReference.update_document_reference import (
+    _set_update_time_fields,
+    handler,
+)
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
 from nrlf.producer.fhir.r4.model import DocumentReference
 from nrlf.tests.data import load_document_reference
@@ -16,6 +21,7 @@ from nrlf.tests.events import (
 
 @mock_aws
 @mock_repository
+@freeze_time("2024-03-21T12:34:56.789")
 def test_update_document_reference_happy_path(repository: DocumentPointerRepository):
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_pointer = DocumentPointer.from_document_reference(doc_ref)
@@ -66,6 +72,10 @@ def test_update_document_reference_happy_path(repository: DocumentPointerReposit
 
     updated_doc_ref = DocumentReference.parse_raw(updated_doc_pointer.document)
     assert updated_doc_ref.docStatus == "entered-in-error"
+
+    assert updated_doc_ref.meta.lastUpdated == "2024-03-21T12:34:56.789000Z"
+    assert updated_doc_pointer.updated_on == "2024-03-21T12:34:56.789000Z"
+    assert updated_doc_pointer.created_on == existing_doc_pointer.created_on
 
 
 def test_create_document_reference_no_body():
@@ -400,6 +410,66 @@ def test_update_document_reference_immutable_fields(repository):
 
 @mock_aws
 @mock_repository
+@freeze_time("2024-03-21T12:34:56.789")
+def test_update_document_reference_with_meta_lastupdated_ignored(
+    repository: DocumentPointerRepository,
+):
+    doc_ref = load_document_reference("Y05868-736253002-Valid-with-meta-lastupdated")
+    doc_pointer = DocumentPointer.from_document_reference(doc_ref)
+    repository.create(doc_pointer)
+
+    existing_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
+    assert existing_doc_pointer is not None
+
+    existing_doc_ref = DocumentReference.parse_raw(existing_doc_pointer.document)
+    assert existing_doc_ref.docStatus == "final"
+
+    doc_ref.docStatus = "entered-in-error"
+    event = create_test_api_gateway_event(
+        headers=create_headers(),
+        path_parameters={"id": "Y05868-99999-99999-999999"},
+        body=doc_ref.json(),
+    )
+
+    result = handler(event, create_mock_context())
+
+    body = result.pop("body")
+
+    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "information",
+                "code": "informational",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "RESOURCE_UPDATED",
+                            "display": "Resource updated",
+                            "system": "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
+                        }
+                    ]
+                },
+                "diagnostics": "The DocumentReference has been updated",
+            }
+        ],
+    }
+
+    updated_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
+    assert updated_doc_pointer is not None
+
+    updated_doc_ref = DocumentReference.parse_raw(updated_doc_pointer.document)
+    assert updated_doc_ref.docStatus == "entered-in-error"
+
+    assert updated_doc_ref.meta.lastUpdated == "2024-03-21T12:34:56.789000Z"
+    assert updated_doc_pointer.updated_on == "2024-03-21T12:34:56.789000Z"
+    assert updated_doc_pointer.created_on == existing_doc_pointer.created_on
+
+
+@mock_aws
+@mock_repository
 def test_update_document_reference_existing_invalid_json(
     repository: DocumentPointerRepository,
 ):
@@ -440,4 +510,27 @@ def test_update_document_reference_existing_invalid_json(
                 "diagnostics": "An error occurred whilst parsing the existing document reference",
             }
         ],
+    }
+
+
+@freeze_time("2024-03-25")
+@mark.parametrize(
+    "doc_ref_name",
+    [
+        "Y05868-736253002-Valid-with-date",
+        "Y05868-736253002-Valid-with-date-and-meta-lastupdated",
+    ],
+)
+def test__set_update_time_fields(doc_ref_name: str):
+    test_time = "2024-03-24T12:34:56.789000Z"
+    test_doc_ref = load_document_reference(doc_ref_name)
+
+    response = _set_update_time_fields(test_time, test_doc_ref)
+
+    assert response.dict(exclude_none=True) == {
+        **test_doc_ref.dict(exclude_none=True),
+        "meta": {
+            "lastUpdated": test_time,
+        },
+        "date": test_doc_ref.date,
     }

@@ -38,7 +38,7 @@ repos:
           - "--exclude=.git,__pycache__,dist,.venv,scripts/*,packages/feature_documentation/*,layer/psycopg2/*,changelog/scripts/changelog.py"
 
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 24.3.0
     hooks:
       - id: black
         language_version: python3
