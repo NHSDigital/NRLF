@@ -1223,6 +1223,17 @@ unicode = ["unicodedata2 (>=15.1.0)"]
 woff = ["brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "zopfli (>=0.1.4)"]
 
 [[package]]
+name = "freeze-uuid"
+version = "0.3.0"
+description = "Python package for mocking uuid."
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "freeze-uuid-0.3.0.tar.gz", hash = "sha256:3404bb75369136c87a97f767e333ca03a7cd76b833a947f04bc05fffd3fb1aa7"},
+    {file = "freeze_uuid-0.3.0-py3-none-any.whl", hash = "sha256:f57ebb6d4ae16e0a30732fc69c27f677594c63c2e8cf7f9354412790bc6ff8c0"},
+]
+
+[[package]]
 name = "freezegun"
 version = "1.4.0"
 description = "Let your Python tests travel through time"
@@ -2472,4 +2483,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "d4f3942010b34614dc82bd0c4817e583301bde9cb294ed73c50be5a3125b3117"
+content-hash = "ec1cc28082fe81dbb1c0f87ebde24caa8d75bd84c3ab616fb7ebfd51deee2868"
