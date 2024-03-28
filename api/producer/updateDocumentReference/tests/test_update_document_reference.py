@@ -73,8 +73,8 @@ def test_update_document_reference_happy_path(repository: DocumentPointerReposit
     updated_doc_ref = DocumentReference.parse_raw(updated_doc_pointer.document)
     assert updated_doc_ref.docStatus == "entered-in-error"
 
-    assert updated_doc_ref.meta.lastUpdated == "2024-03-21T12:34:56.789000Z"
-    assert updated_doc_pointer.updated_on == "2024-03-21T12:34:56.789000Z"
+    assert updated_doc_ref.meta.lastUpdated == "2024-03-21T12:34:56.789Z"
+    assert updated_doc_pointer.updated_on == "2024-03-21T12:34:56.789Z"
     assert updated_doc_pointer.created_on == existing_doc_pointer.created_on
 
 
@@ -463,8 +463,8 @@ def test_update_document_reference_with_meta_lastupdated_ignored(
     updated_doc_ref = DocumentReference.parse_raw(updated_doc_pointer.document)
     assert updated_doc_ref.docStatus == "entered-in-error"
 
-    assert updated_doc_ref.meta.lastUpdated == "2024-03-21T12:34:56.789000Z"
-    assert updated_doc_pointer.updated_on == "2024-03-21T12:34:56.789000Z"
+    assert updated_doc_ref.meta.lastUpdated == "2024-03-21T12:34:56.789Z"
+    assert updated_doc_pointer.updated_on == "2024-03-21T12:34:56.789Z"
     assert updated_doc_pointer.created_on == existing_doc_pointer.created_on
 
 
@@ -522,7 +522,7 @@ def test_update_document_reference_existing_invalid_json(
     ],
 )
 def test__set_update_time_fields(doc_ref_name: str):
-    test_time = "2024-03-24T12:34:56.789000Z"
+    test_time = "2024-03-24T12:34:56.789Z"
     test_doc_ref = load_document_reference(doc_ref_name)
 
     response = _set_update_time_fields(test_time, test_doc_ref)

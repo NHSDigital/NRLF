@@ -137,6 +137,7 @@ function _swagger() {
         allowed_types="producer consumer"
         local type=$2
         if [[ " ${allowed_types[*]} " =~ " $2 " ]]; then
+            set -x
             cat ./swagger/${type}.yaml |
                 # Remove commented lines
                 grep -v "^\s*#" |
@@ -149,6 +150,7 @@ function _swagger() {
                 yq 'del(.components.schemas.*.discriminator)' |
                 yq '(.. | select(style == "single")) style |= "double"' \
                     > ./swagger/${type}.tmp.yaml
+            set +x
 
             # Merge in the narrative, and save for internal use (i.e. including status endpoint)
             yq eval-all '. as $item ireduce ({}; . * $item)' \

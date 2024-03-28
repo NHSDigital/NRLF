@@ -17,6 +17,7 @@ pip install \
     -r "${dist_path}/dependency_layer/requirements.txt"
 
 cd "${dist_path}/dependency_layer/" && \
+    rm -f "${dist_path}/dependency_layer.zip" && \
     zip -q -r "${dist_path}/dependency_layer.zip" . \
         -x **tests**\* **scripts**\* **__pycache__**\*
 

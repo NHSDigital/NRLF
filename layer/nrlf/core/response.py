@@ -5,6 +5,7 @@ from typing import List
 from pydantic import BaseModel, Field
 
 from nrlf.core.codes import NRLResponseConcept, SpineErrorConcept
+from nrlf.core.constants import PRODUCER_URL_PATH
 from nrlf.producer.fhir.r4 import model as producer_model
 
 
@@ -58,7 +59,7 @@ class Response(BaseModel):
 
 class NRLResponse(Response):
     @classmethod
-    def RESOURCE_CREATED(cls):
+    def RESOURCE_CREATED(cls, resource_id: str):
         return cls.from_issues(
             issues=[
                 producer_model.OperationOutcomeIssue(
@@ -69,10 +70,11 @@ class NRLResponse(Response):
                 )
             ],
             statusCode="201",
+            headers={"Location": f"{PRODUCER_URL_PATH}/{resource_id}"},
         )
 
     @classmethod
-    def RESOURCE_SUPERSEDED(cls):
+    def RESOURCE_SUPERSEDED(cls, resource_id: str):
         return cls.from_issues(
             issues=[
                 producer_model.OperationOutcomeIssue(
@@ -83,6 +85,7 @@ class NRLResponse(Response):
                 )
             ],
             statusCode="201",
+            headers={"Location": f"{PRODUCER_URL_PATH}/{resource_id}"},
         )
 
     @classmethod

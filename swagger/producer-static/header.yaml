@@ -39,8 +39,6 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
-      security:
-        - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -64,8 +62,6 @@ paths:
           $ref: "#/components/responses/Success"
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
-      security:
-        - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -89,8 +85,6 @@ paths:
           $ref: "#/components/responses/Success"
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
-      security:
-        - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -123,8 +117,6 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/DocumentReference"
-      security:
-        - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -151,8 +143,6 @@ paths:
           $ref: "#/components/responses/Success"
       requestBody:
         $ref: "#/components/requestBodies/DocumentReference"
-      security:
-        - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -177,8 +167,6 @@ paths:
           $ref: "#/components/responses/Success"
         "204":
           $ref: "#/components/responses/Success"
-      security:
-        - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
@@ -215,8 +203,6 @@ paths:
             application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
-      security:
-        - ${authoriser_name}: []
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST
