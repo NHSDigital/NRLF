@@ -12,6 +12,7 @@ mkdir -p "${dist_path}/${package_name}-layer/python/${package_name}"
 cp -r "${layer_src_path}"/* "${dist_path}/${package_name}-layer/python/${package_name}"
 
 cd "${dist_path}/${package_name}-layer/" && \
+    rm -f ${dist_path}/${package_name}.zip && \
     zip -q -r "${dist_path}/${package_name}.zip" . \
         -x **tests**\* **scripts**\* **__pycache__**\*
 
