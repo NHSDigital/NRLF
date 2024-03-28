@@ -69,14 +69,14 @@ def test_create_document_reference_happy_path(repository: DocumentPointerReposit
     created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
-    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789Z"
     assert created_doc_pointer.updated_on is None
     assert json.loads(created_doc_pointer.document) == {
         **json.loads(doc_ref_data),
         "meta": {
-            "lastUpdated": "2024-03-21T12:34:56.789000Z",
+            "lastUpdated": "2024-03-21T12:34:56.789Z",
         },
-        "date": "2024-03-21T12:34:56.789000Z",
+        "date": "2024-03-21T12:34:56.789Z",
     }
 
 
@@ -851,14 +851,14 @@ def test_create_document_reference_with_date_ignored(
     created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
-    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789Z"
     assert created_doc_pointer.updated_on is None
     assert json.loads(created_doc_pointer.document) == {
         **json.loads(doc_ref_data),
         "meta": {
-            "lastUpdated": "2024-03-21T12:34:56.789000Z",
+            "lastUpdated": "2024-03-21T12:34:56.789Z",
         },
-        "date": "2024-03-21T12:34:56.789000Z",
+        "date": "2024-03-21T12:34:56.789Z",
     }
 
 
@@ -912,14 +912,14 @@ def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
     created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
-    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789Z"
     assert created_doc_pointer.updated_on is None
     assert json.loads(created_doc_pointer.document) == {
         **json.loads(doc_ref_data),
         "meta": {
-            "lastUpdated": "2024-03-21T12:34:56.789000Z",
+            "lastUpdated": "2024-03-21T12:34:56.789Z",
         },
-        "date": "2024-03-21T12:34:56.789000Z",
+        "date": "2024-03-21T12:34:56.789Z",
     }
 
 
@@ -971,14 +971,14 @@ def test_create_document_reference_with_date_overidden(
     created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
-    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789Z"
     assert created_doc_pointer.updated_on is None
     assert json.loads(created_doc_pointer.document) == {
         **json.loads(doc_ref_data),
         "meta": {
-            "lastUpdated": "2024-03-21T12:34:56.789000Z",
+            "lastUpdated": "2024-03-21T12:34:56.789Z",
         },
-        "date": "2024-03-20T00:00:01.000000Z",
+        "date": "2024-03-20T00:00:01.000Z",
     }
 
 
@@ -1001,9 +1001,9 @@ def test__set_create_time_fields(doc_ref_name: str):
     assert response.dict(exclude_none=True) == {
         **test_doc_ref.dict(exclude_none=True),
         "meta": {
-            "lastUpdated": "2024-03-24T12:34:56.789000Z",
+            "lastUpdated": "2024-03-24T12:34:56.789Z",
         },
-        "date": "2024-03-24T12:34:56.789000Z",
+        "date": "2024-03-24T12:34:56.789Z",
     }
 
 
@@ -1016,7 +1016,7 @@ def test__set_create_time_fields(doc_ref_name: str):
     ],
 )
 def test__set_create_time_fields_when_doc_has_date_and_perms(doc_ref_name: str):
-    test_time = "2024-03-24T12:34:56.789000Z"
+    test_time = "2024-03-24T12:34:56.789Z"
     test_doc_ref = load_document_reference(doc_ref_name)
     test_perms = ["audit-dates-from-payload"]
 
@@ -1033,7 +1033,7 @@ def test__set_create_time_fields_when_doc_has_date_and_perms(doc_ref_name: str):
 
 @freeze_time("2024-03-25")
 def test__set_create_time_fields_when_no_date_but_perms():
-    test_time = "2024-03-24T12:34:56.789000Z"
+    test_time = "2024-03-24T12:34:56.789Z"
     test_doc_ref = load_document_reference("Y05868-736253002-Valid")
     test_perms = ["audit-dates-from-payload"]
 

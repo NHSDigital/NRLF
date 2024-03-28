@@ -15,7 +15,7 @@ def test_create_fhir_instant_with_time():
 
     result = create_fhir_instant(time)
 
-    assert result == "2022-01-01T12:00:00.000000Z"
+    assert result == "2022-01-01T12:00:00.000Z"
     assert match(SPEC_REGEX, result) != None
 
 
@@ -23,5 +23,5 @@ def test_create_fhir_instant_with_time():
 def test_create_fhir_instant_no_time():
     result = create_fhir_instant()
 
-    assert result == "2021-01-01T00:00:00.000000Z"
+    assert result == "2021-01-01T00:00:00.000Z"
     assert match(SPEC_REGEX, result) != None
