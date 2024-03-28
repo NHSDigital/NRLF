@@ -2,14 +2,14 @@ Feature: Consumer - countDocumentReference - Failure Scenarios
 
   Scenario: No query parameters provided
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'Yorkshire Ambulance Service' (ODS Code 'RX898') is authorised to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
-    When the organisation 'RX898' requests to count DocumentReferences with parameters:
+    When consumer 'RX898' counts DocumentReferences with parameters:
       | parameter | value |
     Then the response status code is 400
     And the response is an OperationOutcome with 1 issue
-    And the OperationOutcome contains the following issue:
+    And the OperationOutcome contains the issue:
       """
       {
         "severity": "error",
@@ -28,15 +28,15 @@ Feature: Consumer - countDocumentReference - Failure Scenarios
 
   Scenario: Invalid NHS number provided
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'Yorkshire Ambulance Service' (ODS Code 'RX898') is authorised to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
-    When the organisation 'RX898' requests to count DocumentReferences with parameters:
+    When consumer 'RX898' counts DocumentReferences with parameters:
       | parameter          | value                                  |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|123 |
     Then the response status code is 400
     And the response is an OperationOutcome with 1 issue
-    And the OperationOutcome contains the following issue:
+    And the OperationOutcome contains the issue:
       """
       {
         "severity": "error",
@@ -55,14 +55,14 @@ Feature: Consumer - countDocumentReference - Failure Scenarios
 
   Scenario: Organisation has no permissions
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'Yorkshire Ambulance Service' (ODS Code 'RX898') is authorised to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system | value |
-    When the organisation 'RX898' requests to count DocumentReferences with parameters:
+    When consumer 'RX898' counts DocumentReferences with parameters:
       | parameter          | value                                        |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|999999999 |
     Then the response status code is 403
     And the response is an OperationOutcome with 1 issue
-    And the OperationOutcome contains the following issue:
+    And the OperationOutcome contains the issue:
       """
       {
         "severity": "error",
@@ -81,12 +81,14 @@ Feature: Consumer - countDocumentReference - Failure Scenarios
   Scenario: Organisation has no permissions in S3
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
     And the application is configured to lookup permissions from S3
-    When the organisation 'RX898' requests to count DocumentReferences with parameters:
+    And the organisation 'RX898' is authorised in S3 to access pointer types
+      | system | value |
+    When consumer 'RX898' counts DocumentReferences with parameters:
       | parameter          | value                                        |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|999999999 |
     Then the response status code is 403
     And the response is an OperationOutcome with 1 issue
-    And the OperationOutcome contains the following issue:
+    And the OperationOutcome contains the issue:
       """
       {
         "severity": "error",
