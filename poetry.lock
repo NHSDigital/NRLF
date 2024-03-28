@@ -1161,7 +1161,6 @@ six = "*"
 termcolor = "*"
 
 [[package]]
-<<<<<<< Updated upstream
 name = "fonttools"
 version = "4.50.0"
 description = "Tools to manipulate font files"
@@ -1227,8 +1226,6 @@ unicode = ["unicodedata2 (>=15.1.0)"]
 woff = ["brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "zopfli (>=0.1.4)"]
 
 [[package]]
-=======
->>>>>>> Stashed changes
 name = "freeze-uuid"
 version = "0.3.0"
 description = "Python package for mocking uuid."
@@ -2500,8 +2497,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-<<<<<<< Updated upstream
 content-hash = "ec1cc28082fe81dbb1c0f87ebde24caa8d75bd84c3ab616fb7ebfd51deee2868"
-=======
-content-hash = "e55daed8f6f1d0152820970e7c19fe711e3d55e0f15b7b42213b7001d66a51ff"
->>>>>>> Stashed changes

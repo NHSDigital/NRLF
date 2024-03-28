@@ -163,9 +163,9 @@ def handler(
         )
         saved_model = repository.supersede(core_model, ids_to_delete)
         logger.log(LogReference.PROCREATE999)
-        return NRLResponse.RESOURCE_SUPERSEDED()
+        return NRLResponse.RESOURCE_SUPERSEDED(resource_id=result.resource.id)
 
     logger.log(LogReference.PROCREATE009, pointer_id=result.resource.id)
     saved_model = repository.create(core_model)
     logger.log(LogReference.PROCREATE999)
-    return NRLResponse.RESOURCE_CREATED()
+    return NRLResponse.RESOURCE_CREATED(resource_id=result.resource.id)
