@@ -230,7 +230,7 @@ def test_create_document_reference_invalid_resource():
     }
 
 
-def test_create_document_reference_invalid_resource():
+def test_create_document_reference_with_no_custodian():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_ref.custodian = None
 

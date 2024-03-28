@@ -225,7 +225,48 @@ def test_create_document_reference_invalid_resource():
     }
 
 
-def test_create_document_reference_invalid_odscode_in_():
+def test_create_document_reference_invalid_producer_id():
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+    doc_ref.id = "X26-99999-99999-999999"
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(),
+        body=doc_ref.json(exclude_none=True),
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "400",
+        "headers": {},
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "error",
+                "code": "invalid",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "BAD_REQUEST",
+                            "display": "Bad request",
+                            "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                        }
+                    ]
+                },
+                "diagnostics": "The id of the provided DocumentReference does not include the expected ODS code for this organisation",
+            }
+        ],
+    }
+
+
+def test_create_document_reference_with_no_custodian():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_ref.custodian = None
 
