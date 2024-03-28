@@ -1,11 +1,10 @@
 import json
 
-from freeze_uuid import freeze_uuid
 from freezegun import freeze_time
 from moto import mock_aws
 from pytest import mark
 
-from api.producer.createDocumentReference.create_document_reference import (
+from api.producer.upsertDocumentReference.upsert_document_reference import (
     _set_create_time_fields,
     handler,
 )
@@ -27,7 +26,6 @@ from nrlf.tests.events import (
 @mock_aws
 @mock_repository
 @freeze_time("2024-03-21T12:34:56.789")
-@freeze_uuid("00000000-0000-0000-0000-000000000001")
 def test_create_document_reference_happy_path(repository: DocumentPointerRepository):
     doc_ref_data = load_document_reference_data("Y05868-736253002-Valid")
 
@@ -41,9 +39,7 @@ def test_create_document_reference_happy_path(repository: DocumentPointerReposit
 
     assert result == {
         "statusCode": "201",
-        "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
-        },
+        "headers": {},
         "isBase64Encoded": False,
     }
 
@@ -68,9 +64,7 @@ def test_create_document_reference_happy_path(repository: DocumentPointerReposit
         ],
     }
 
-    created_doc_pointer = repository.get_by_id(
-        "Y05868-00000000-0000-0000-0000-000000000001"
-    )
+    created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
     assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
@@ -81,7 +75,6 @@ def test_create_document_reference_happy_path(repository: DocumentPointerReposit
             "lastUpdated": "2024-03-21T12:34:56.789000Z",
         },
         "date": "2024-03-21T12:34:56.789000Z",
-        "id": "Y05868-00000000-0000-0000-0000-000000000001",
     }
 
 
@@ -230,7 +223,7 @@ def test_create_document_reference_invalid_resource():
     }
 
 
-def test_create_document_reference_invalid_resource():
+def test_create_document_reference_invalid_odscode_in_():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_ref.custodian = None
 
@@ -463,7 +456,7 @@ def test_create_document_reference_invalid_relatesto_not_exists(repository):
             code="transforms",
             target=Reference(
                 reference=None,
-                identifier=Identifier(value="Y05868-123456-123456-123456"),
+                identifier=Identifier(value="Y05868-99999-99999-999999"),
             ),
         )
     ]
@@ -635,7 +628,6 @@ def test_create_document_reference_invalid_relatesto_type(
 
 @mock_aws
 @mock_repository
-@freeze_uuid("00000000-0000-0000-0000-000000000001")
 def test_create_document_reference_supersede_deletes_old_pointers_replace(
     repository: DocumentPointerRepository,
 ):
@@ -669,9 +661,7 @@ def test_create_document_reference_supersede_deletes_old_pointers_replace(
 
     assert result == {
         "statusCode": "201",
-        "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
-        },
+        "headers": {},
         "isBase64Encoded": False,
     }
 
@@ -703,7 +693,6 @@ def test_create_document_reference_supersede_deletes_old_pointers_replace(
 
 @mock_aws
 @mock_repository
-@freeze_uuid("00000000-0000-0000-0000-000000000001")
 def test_create_document_reference_create_relatesto_not_replaces(
     repository: DocumentPointerRepository,
 ):
@@ -737,9 +726,7 @@ def test_create_document_reference_create_relatesto_not_replaces(
 
     assert result == {
         "statusCode": "201",
-        "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
-        },
+        "headers": {},
         "isBase64Encoded": False,
     }
 
@@ -772,7 +759,6 @@ def test_create_document_reference_create_relatesto_not_replaces(
 @mock_aws
 @mock_repository
 @freeze_time("2024-03-21T12:34:56.789")
-@freeze_uuid("00000000-0000-0000-0000-000000000001")
 def test_create_document_reference_with_date_ignored(
     repository: DocumentPointerRepository,
 ):
@@ -788,9 +774,7 @@ def test_create_document_reference_with_date_ignored(
 
     assert result == {
         "statusCode": "201",
-        "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
-        },
+        "headers": {},
         "isBase64Encoded": False,
     }
 
@@ -815,9 +799,7 @@ def test_create_document_reference_with_date_ignored(
         ],
     }
 
-    created_doc_pointer = repository.get_by_id(
-        "Y05868-00000000-0000-0000-0000-000000000001"
-    )
+    created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
     assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
@@ -828,14 +810,12 @@ def test_create_document_reference_with_date_ignored(
             "lastUpdated": "2024-03-21T12:34:56.789000Z",
         },
         "date": "2024-03-21T12:34:56.789000Z",
-        "id": "Y05868-00000000-0000-0000-0000-000000000001",
     }
 
 
 @mock_aws
 @mock_repository
 @freeze_time("2024-03-21T12:34:56.789")
-@freeze_uuid("00000000-0000-0000-0000-000000000001")
 def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
     repository: DocumentPointerRepository,
 ):
@@ -853,9 +833,7 @@ def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
 
     assert result == {
         "statusCode": "201",
-        "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
-        },
+        "headers": {},
         "isBase64Encoded": False,
     }
 
@@ -880,9 +858,7 @@ def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
         ],
     }
 
-    created_doc_pointer = repository.get_by_id(
-        "Y05868-00000000-0000-0000-0000-000000000001"
-    )
+    created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
     assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
@@ -893,14 +869,12 @@ def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
             "lastUpdated": "2024-03-21T12:34:56.789000Z",
         },
         "date": "2024-03-21T12:34:56.789000Z",
-        "id": "Y05868-00000000-0000-0000-0000-000000000001",
     }
 
 
 @mock_aws
 @mock_repository
 @freeze_time("2024-03-21T12:34:56.789")
-@freeze_uuid("00000000-0000-0000-0000-000000000001")
 def test_create_document_reference_with_date_overidden(
     repository: DocumentPointerRepository,
 ):
@@ -916,9 +890,7 @@ def test_create_document_reference_with_date_overidden(
 
     assert result == {
         "statusCode": "201",
-        "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
-        },
+        "headers": {},
         "isBase64Encoded": False,
     }
 
@@ -943,9 +915,7 @@ def test_create_document_reference_with_date_overidden(
         ],
     }
 
-    created_doc_pointer = repository.get_by_id(
-        "Y05868-00000000-0000-0000-0000-000000000001"
-    )
+    created_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
 
     assert created_doc_pointer is not None
     assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789000Z"
@@ -956,7 +926,6 @@ def test_create_document_reference_with_date_overidden(
             "lastUpdated": "2024-03-21T12:34:56.789000Z",
         },
         "date": "2024-03-20T00:00:01.000000Z",
-        "id": "Y05868-00000000-0000-0000-0000-000000000001",
     }
 
 

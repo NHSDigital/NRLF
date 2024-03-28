@@ -58,7 +58,7 @@ def handler(
 
     logger.log(LogReference.PROCREATE001, resource=body)
 
-    ods_prefix = metadata.ods_code.split("-")[0]
+    ods_prefix = metadata.ods_code_parts[0]
     body.id = f"{ods_prefix}-{uuid4()}"
 
     validator = DocumentReferenceValidator()
@@ -78,16 +78,6 @@ def handler(
     core_model = DocumentPointer.from_document_reference(
         document_reference, created_on=creation_time
     )
-
-    if metadata.ods_code_parts != tuple(core_model.producer_id.split("|")):
-        logger.log(
-            LogReference.PROCREATE003,
-            ods_code_parts=metadata.ods_code_parts,
-            producer_id=core_model.producer_id,
-        )
-        return SpineErrorResponse.BAD_REQUEST(
-            diagnostics="The id of the provided DocumentReference does not include the expected ODS code for this organisation"
-        )
 
     custodian_parts = tuple(
         filter(None, (core_model.custodian, core_model.custodian_suffix))
