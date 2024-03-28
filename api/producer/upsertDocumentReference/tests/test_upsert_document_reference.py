@@ -992,7 +992,7 @@ def test_create_document_reference_with_date_overidden(
     ],
 )
 def test__set_create_time_fields(doc_ref_name: str):
-    test_time = "2024-03-24T12:34:56.789000Z"
+    test_time = "2024-03-24T12:34:56.789Z"
     test_doc_ref = load_document_reference(doc_ref_name)
     test_perms = []
 
