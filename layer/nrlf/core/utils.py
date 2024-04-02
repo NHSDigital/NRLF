@@ -11,4 +11,4 @@ def create_fhir_instant(time: datetime = None) -> str:
     if time is None:
         time = datetime.now(timezone.utc)
 
-    return time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    return time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"

@@ -240,7 +240,7 @@ paths:
           description: Create / Supersede successful response
           $ref: "#/components/responses/Success"
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               example:
                 resourceType: OperationOutcome
                 id: 76db24dc-324a-468a-bf02-c06e82279488
@@ -273,7 +273,7 @@ paths:
 
             The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               schema:
                 $ref: "#/components/schemas/OperationOutcome"
               example:
@@ -417,7 +417,7 @@ paths:
         "200":
           description: successful response
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
               example:
@@ -604,7 +604,7 @@ paths:
 
             The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               schema:
                 $ref: "#/components/schemas/OperationOutcome"
               example:
@@ -641,7 +641,7 @@ paths:
           $ref: "#/components/responses/Success"
           description: Create / Supersede successful response
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               example:
                 resourceType: OperationOutcome
                 id: 76db24dc-324a-468a-bf02-c06e82279488
@@ -674,7 +674,7 @@ paths:
 
             The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               schema:
                 $ref: "#/components/schemas/OperationOutcome"
               example:
@@ -744,7 +744,7 @@ paths:
         "200":
           description: Successful response
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               schema:
                 $ref: "#/components/schemas/Bundle"
               example:
@@ -931,7 +931,7 @@ paths:
 
             The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               schema:
                 $ref: "#/components/schemas/OperationOutcome"
               example:
@@ -975,7 +975,7 @@ paths:
         "200":
           description: Successful response
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               schema:
                 $ref: "#/components/schemas/DocumentReference"
               example:
@@ -1065,7 +1065,7 @@ paths:
 
             The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               schema:
                 $ref: "#/components/schemas/OperationOutcome"
               example:
@@ -1098,7 +1098,7 @@ paths:
           description: Successful response
           $ref: "#/components/responses/Success"
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               example:
                 resourceType: OperationOutcome
                 id: fc39effb-144c-4342-bdf2-4214f0cb728b
@@ -1118,7 +1118,7 @@ paths:
           description: Successful response
           $ref: "#/components/responses/Success"
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               example:
                 resourceType: OperationOutcome
                 id: fc39effb-144c-4342-bdf2-4214f0cb728b
@@ -1150,7 +1150,7 @@ paths:
 
             The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               schema:
                 $ref: "#/components/schemas/OperationOutcome"
               example:
@@ -1198,7 +1198,7 @@ paths:
           description: Successful response
           $ref: "#/components/responses/Success"
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               example:
                 resourceType: OperationOutcome
                 id: c6113a50-70bf-436e-b417-7c8024d2e8bf
@@ -1218,7 +1218,7 @@ paths:
           $ref: "#/components/responses/Success"
           description: Successful response
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               example:
                 resourceType: OperationOutcome
                 id: c6113a50-70bf-436e-b417-7c8024d2e8bf
@@ -1248,7 +1248,7 @@ paths:
 
             The Error Code comes from https://fhir.nhs.uk/STU3/CodeSystem/Spine-ErrorOrWarningCode-1
           content:
-            application/fhir+json;version=1:
+            application/fhir+json:
               schema:
                 $ref: "#/components/schemas/OperationOutcome"
               example:
@@ -1269,7 +1269,7 @@ components:
   requestBodies:
     DocumentReference:
       content:
-        application/fhir+json;version=1:
+        application/fhir+json:
           schema:
             $ref: "#/components/schemas/DocumentReference"
           example:
@@ -1367,7 +1367,7 @@ components:
       required:
         - resourceType
         - issue
-    OperationOutcomeIssue:
+    OperationOutcome_Issue:
       type: object
       properties:
         id:
@@ -1551,7 +1551,7 @@ components:
       required:
         - resourceType
         - type
-    BundleEntry:
+    Bundle_Entry:
       type: object
       properties:
         id:
@@ -1579,7 +1579,7 @@ components:
         response:
           $ref: "#/components/schemas/BundleEntryResponse"
           description: Indicates the results of processing the corresponding 'request' entry in the batch or transaction being responded to or what the results of an operation where when returning history.
-    BundleEntryResponse:
+    Bundle_Entry_Response:
       type: object
       properties:
         id:
@@ -1607,7 +1607,7 @@ components:
           description: An OperationOutcome containing hints and warnings produced as part of processing this entry in a batch or transaction.
       required:
         - status
-    BundleEntryRequest:
+    Bundle_Entry_Request:
       type: object
       properties:
         id:
@@ -1641,7 +1641,7 @@ components:
       required:
         - method
         - url
-    BundleEntrySearch:
+    Bundle_Entry_Search:
       type: object
       properties:
         id:
@@ -1655,7 +1655,7 @@ components:
         score:
           type: number
           description: When searching, the server's search ranking score for the entry.
-    BundleLink:
+    Bundle_Link:
       type: object
       properties:
         id:
@@ -1673,7 +1673,7 @@ components:
       required:
         - relation
         - url
-    DocumentReferenceContext:
+    DocumentReference_Context:
       type: object
       properties:
         id:
@@ -1707,7 +1707,7 @@ components:
           items:
             $ref: "#/components/schemas/Reference"
             description: Related identifiers or resources associated with the DocumentReference.
-    DocumentReferenceContent:
+    DocumentReference_Content:
       type: object
       properties:
         id:
@@ -1722,7 +1722,7 @@ components:
           description: An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.
       required:
         - attachment
-    DocumentReferenceRelatesTo:
+    DocumentReference_RelatesTo:
       type: object
       properties:
         id:
@@ -2050,7 +2050,6 @@ components:
     RequestHeaderCorrelationId:
       type: string
       example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
-  securitySchemes: {}
   parameters:
     id:
       name: id
@@ -2181,7 +2180,7 @@ components:
         X-Request-Id:
           $ref: "#/components/headers/RequestId"
       content:
-        application/fhir+json;version=1:
+        application/fhir+json:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
     Error:
@@ -2192,7 +2191,7 @@ components:
         X-Request-Id:
           $ref: "#/components/headers/RequestId"
       content:
-        application/fhir+json;version=1:
+        application/fhir+json:
           schema:
             $ref: "#/components/schemas/OperationOutcome"
   headers:
