@@ -3,7 +3,6 @@
   "id": "Y05868-99999-99999-999999",
   "status": "current",
   "docStatus": "final",
-  "date": "2024-03-20T00:00:01.000Z",
   "type": {
     "coding": [
       {
@@ -61,7 +60,7 @@
       "attachment": {
         "contentType": "application/pdf",
         "language": "en-US",
-        "url": "https://spine-proxy.national.ncrs.nhs.uk/https%3A%2F%2Fp1.nhs.uk%2FMentalhealthCrisisPlanReport.pdf",
+        "url": "ssp://spine-proxy.national.ncrs.nhs.uk/https%3A%2F%2Fp1.nhs.uk%2FMentalhealthCrisisPlanReport.pdf",
         "size": 3654,
         "hash": "2jmj7l5rSw0yVb/vlWAYkK/YBwk=",
         "title": "Mental health crisis plan report",
@@ -89,6 +88,14 @@
         "system": "https://fhir.nhs.uk/Id/nhs-number",
         "value": "6700028191"
       }
-    }
+    },
+    "related": [
+      {
+        "identifier": {
+          "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
+          "value": "012345678910"
+        }
+      }
+    ]
   }
 }

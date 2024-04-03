@@ -38,12 +38,6 @@
         "system": "https://fhir.nhs.uk/Id/ods-organization-code",
         "value": "Y05868"
       }
-    },
-    {
-      "identifier": {
-        "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
-        "value": "012345678910"
-      }
     }
   ],
   "custodian": {

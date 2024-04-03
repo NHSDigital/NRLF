@@ -95,9 +95,6 @@ components:
               - identifier:
                   system: https://fhir.nhs.uk/Id/ods-organization-code
                   value: Y05868
-              - identifier:
-                  system: https://fhir.nhs.uk/Id/nhsSpineASID
-                  value: 012345678910
             custodian:
               identifier:
                 system: https://fhir.nhs.uk/Id/ods-organization-code
@@ -131,6 +128,10 @@ components:
                 identifier:
                   system: https://fhir.nhs.uk/Id/nhs-number
                   value: "6700028191"
+              related:
+                - identifier:
+                  system: https://fhir.nhs.uk/Id/nhsSpineASID
+                  value: 012345678910
       required: true
   responses:
     Success:

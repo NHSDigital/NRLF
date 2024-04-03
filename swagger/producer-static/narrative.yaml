@@ -285,7 +285,6 @@ paths:
           ]
           ```
         * `author` SHOULD have an entry with an `Organization` reference using a valid ODS code.
-        * `author` MUST include an ASID if the document is to be accessed via SSP, e.g.
           ```
           "author": [
             {
@@ -293,14 +292,21 @@ paths:
                 "system": "https://fhir.nhs.uk/Id/ods-organization-code",
                 "value": "Y05868"
               }
-            },
-            {
-              "identifier": {
-                "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
-                "value": "230811201350"
-              }
             }
           ]
+          ```
+        * `context` MUST include a `related` entry containing the ASID if the document is to be accessed via SSP, e.g.
+          ```
+          "context": {
+            "related": [
+              {
+                "identifier": {
+                  "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
+                  "value": "230811201350"
+                }
+              }
+            ]
+          }
           ```
 
         To supersede existing pointers you must further specify:

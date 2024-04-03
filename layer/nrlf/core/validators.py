@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from re import match
 from typing import Any, Dict, List, Optional
 
 from pydantic import ValidationError
@@ -26,6 +27,14 @@ def validate_type_system(
     ]
 
     return type_system in pointer_type_systems
+
+
+def _is_ssp_content(content: producer_model.DocumentReferenceContent) -> bool:
+    return content.attachment.url and content.attachment.url.startswith("ssp://")
+
+
+def _is_asid_reference(reference: producer_model.Reference) -> bool:
+    return reference.identifier.system == "https://fhir.nhs.uk/Id/nhsSpineASID"
 
 
 @dataclass
@@ -113,6 +122,7 @@ class DocumentReferenceValidator:
             self._validate_no_extra_fields(resource, data)
             self._validate_identifiers(resource)
             self._validate_relates_to(resource)
+            self._validate_ssp_asid(resource)
 
         except StopValidationError:
             logger.log(LogReference.VALIDATOR003)
@@ -252,3 +262,57 @@ class DocumentReferenceValidator:
                     field=f"relatesTo[{index}].target.identifier.value",
                 )
                 continue
+
+    def _validate_ssp_asid(self, model: DocumentReference):
+        """"""
+
+        ssp_content = next(
+            filter(
+                _is_ssp_content,
+                model.content,
+            ),
+            None,
+        )
+
+        if not ssp_content:
+            logger.log(
+                LogReference.VALIDATOR001, step="ssp_asid", reason="no_ssp_content"
+            )
+            return
+
+        logger.log(LogReference.VALIDATOR001, step="ssp_asid")
+
+        if not getattr(model.context, "related", None):
+            self.result.add_error(
+                issue_code="required",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Missing context.related. It must be provided and contain a valid ASID identifier when content contains an SSP URL",
+                field="context.related",
+            )
+            return
+
+        asid_reference = next(
+            filter(
+                _is_asid_reference,
+                getattr(model.context, "related", []),
+            ),
+            None,
+        )
+        if not asid_reference:
+            self.result.add_error(
+                issue_code="required",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Missing ASID identifier. context.related must contain a valid ASID identifier when content contains an SSP URL",
+                field="context.related",
+            )
+            return
+
+        asid_value = getattr(asid_reference.identifier, "value", "")
+        if not match(r"^\d{12}$", asid_value):
+            self.result.add_error(
+                issue_code="value",
+                error_code="INVALID_IDENTIFIER_VALUE",
+                diagnostics=f"Invalid ASID value {asid_value}. context.related must contain a valid ASID identifier when content contains an SSP URL",
+                field="context.related[].identifier.value",
+            )
+            return
