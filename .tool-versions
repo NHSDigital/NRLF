@@ -7,3 +7,4 @@ java zulu-jre-17.42.19
 yq 4.35.2
 allure 2.27.0
 k6 0.50.0
+nodejs 20.12.0
