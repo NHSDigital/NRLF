@@ -55,11 +55,11 @@ jobs:
       - name: Run Linting
         run: make lint
 
-      - name: Run Unit Tests
-        run: make test
-
       - name: Build Project
         run: make build
+
+      - name: Run Unit Tests
+        run: make test
 
       - name: Save Build Artifacts
         uses: actions/upload-artifact@v4
