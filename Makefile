@@ -63,6 +63,11 @@ build-api-packages: ./api/consumer/* ./api/producer/*
 	done
 
 build-fhirguard-metadata: check-warn
+	@poetry run fhirguard package pull hl7.fhir.r4.core@4.0.1
+	@poetry run fhirguard package pull fhir.r4.ukcore.stu2@1.1.3
+	@poetry run fhirguard package pull uk.nhsdigital.r4@2.8.0
+	@poetry run fhirguard package pull hl7.terminology@latest
+
 	@poetry run fhirguard metadata generate hl7.fhir.r4.core@4.0.1 fhir.r4.ukcore.stu2@1.1.3 uk.nhsdigital.r4@2.8.0 \
 		--reference hl7.terminology@latest \
 		--reference ihe.formatcode.fhir@1.1.0 \
