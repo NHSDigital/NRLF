@@ -70,7 +70,6 @@ build-fhirguard-metadata: check-warn
 
 	@poetry run fhirguard metadata generate hl7.fhir.r4.core@4.0.1 fhir.r4.ukcore.stu2@1.1.3 uk.nhsdigital.r4@2.8.0 \
 		--reference hl7.terminology@latest \
-		--reference ihe.formatcode.fhir@1.1.0 \
 		--output $(DIST_PATH)/fhirguard-metadata/
 
 	@cd $(DIST_PATH)/ && zip -q -r fhirguard-metadata.zip fhirguard-metadata
