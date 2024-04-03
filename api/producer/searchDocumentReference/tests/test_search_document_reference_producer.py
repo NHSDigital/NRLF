@@ -70,33 +70,23 @@ def test_search_document_reference_no_results(repository: DocumentPointerReposit
 def test_search_document_reference_missing_nhs_number(
     repository: DocumentPointerRepository,
 ):
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+    doc_pointer = DocumentPointer.from_document_reference(doc_ref)
+    repository.create(doc_pointer)
+
     event = create_test_api_gateway_event(headers=create_headers())
 
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
 
     parsed_body = json.loads(body)
     assert parsed_body == {
-        "resourceType": "OperationOutcome",
-        "issue": [
-            {
-                "severity": "error",
-                "code": "invalid",
-                "details": {
-                    "coding": [
-                        {
-                            "code": "INVALID_NHS_NUMBER",
-                            "display": "Invalid NHS number",
-                            "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
-                        }
-                    ]
-                },
-                "diagnostics": "A valid NHS number is required to search for document references",
-                "expression": ["subject:identifier"],
-            }
-        ],
+        "resourceType": "Bundle",
+        "total": 1,
+        "type": "searchset",
+        "entry": [{"resource": doc_ref.dict(exclude_none=True)}],
     }
 
 
@@ -133,7 +123,7 @@ def test_search_document_reference_invalid_nhs_number(
                         }
                     ]
                 },
-                "diagnostics": "A valid NHS number is required to search for document references",
+                "diagnostics": "Invalid NHS number provided in the search parameters",
                 "expression": ["subject:identifier"],
             }
         ],

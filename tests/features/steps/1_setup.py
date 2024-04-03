@@ -2,7 +2,7 @@ import json
 
 from behave import *  # noqa
 from behave.runner import Context
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from nrlf.core.boto import get_s3_client
 from nrlf.core.dynamodb.model import DocumentPointer

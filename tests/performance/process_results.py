@@ -4,7 +4,7 @@ from statistics import mean
 import fire
 import matplotlib.pyplot as plt
 import numpy as np
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 
 class K6OutputRow(BaseModel):

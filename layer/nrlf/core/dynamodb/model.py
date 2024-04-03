@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Any, Dict, Optional
 
 from nhs_number import is_valid as is_valid_nhs_number
-from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
+from pydantic.v1 import BaseModel, Field, PrivateAttr, root_validator, validator
 
 from nrlf.core.constants import VALID_SOURCES
 from nrlf.core.logger import LogReference, logger

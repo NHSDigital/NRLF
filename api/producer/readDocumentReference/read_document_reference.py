@@ -1,7 +1,7 @@
 import sys
 import urllib.parse
 
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.decorators import DocumentPointerRepository, request_handler

@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from nrlf.core.config import Config
 

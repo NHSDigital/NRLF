@@ -4,7 +4,7 @@ module "consumer__readDocumentReference" {
   name                   = "readDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
@@ -30,7 +30,7 @@ module "consumer__countDocumentReference" {
   name                   = "countDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/_count"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
@@ -56,7 +56,7 @@ module "consumer__searchDocumentReference" {
   name                   = "searchDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
@@ -82,7 +82,7 @@ module "consumer__searchPostDocumentReference" {
   name                   = "searchPostDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/POST/DocumentReference/_search"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
@@ -108,7 +108,7 @@ module "producer__createDocumentReference" {
   name                   = "createDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/POST/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
@@ -136,7 +136,7 @@ module "producer__deleteDocumentReference" {
   name                   = "deleteDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/DELETE/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
@@ -163,7 +163,7 @@ module "producer__readDocumentReference" {
   name                   = "readDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
@@ -189,7 +189,7 @@ module "producer__searchDocumentReference" {
   name                   = "searchDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
@@ -215,7 +215,7 @@ module "producer__searchPostDocumentReference" {
   name                   = "searchPostDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/POST/DocumentReference/_search"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
@@ -241,7 +241,7 @@ module "producer__updateDocumentReference" {
   name                   = "updateDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
@@ -274,7 +274,7 @@ module "producer__upsertDocumentReference" {
   name                   = "upsertDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
@@ -301,7 +301,7 @@ module "consumer__status" {
   name                   = "status"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/_status"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
@@ -329,7 +329,7 @@ module "producer__status" {
   name                   = "status"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn, module.fhirguard_metadata.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/_status"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {

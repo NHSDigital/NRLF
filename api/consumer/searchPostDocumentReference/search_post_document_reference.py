@@ -1,4 +1,4 @@
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from nrlf.consumer.fhir.r4.model import Bundle, DocumentReference
 from nrlf.core.codes import SpineErrorConcept

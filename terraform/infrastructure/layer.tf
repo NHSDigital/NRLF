@@ -9,3 +9,9 @@ module "third_party" {
   name   = "dependency_layer"
   prefix = local.prefix
 }
+
+module "fhirguard_metadata" {
+  source = "./modules/layer"
+  name   = "fhirguard-metadata"
+  prefix = local.prefix
+}

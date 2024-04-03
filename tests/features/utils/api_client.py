@@ -4,7 +4,7 @@ from typing import Literal
 
 import requests
 from behave.runner import Context
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from nrlf.core.model import ConnectionMetadata
 

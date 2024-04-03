@@ -1,7 +1,7 @@
 import json
 
 import pytest
-from pydantic import BaseModel, ValidationError
+from pydantic.v1 import BaseModel, ValidationError
 
 from nrlf.core.errors import OperationOutcomeError, ParseError
 from nrlf.core.response import Response

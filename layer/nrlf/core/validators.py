@@ -1,14 +1,26 @@
 from dataclasses import dataclass
+from functools import cache
 from typing import Any, Dict, List, Optional
 
-from pydantic import ValidationError
+from fhir.resources.R4B.documentreference import (
+    DocumentReference as FHIRDocumentReference,
+)
+from fhirguard import FHIRGuard
+from pydantic.v1 import ValidationError
 
 from nrlf.core.codes import SpineErrorConcept
+from nrlf.core.config import Config
 from nrlf.core.constants import REQUIRED_CREATE_FIELDS
 from nrlf.core.errors import ParseError
 from nrlf.core.logger import LogReference, logger
 from nrlf.core.types import DocumentReference, OperationOutcomeIssue, RequestQueryType
 from nrlf.producer.fhir.r4 import model as producer_model
+
+
+@cache
+def get_fhirguard() -> FHIRGuard:
+    config = Config()
+    return FHIRGuard(config.FHIRGUARD_METADATA_PATH)
 
 
 def validate_type_system(
@@ -76,6 +88,7 @@ class DocumentReferenceValidator:
 
     def __init__(self):
         self.result = ValidationResult(resource=self.MODEL.construct(), issues=[])
+        self.fhirguard = get_fhirguard()
 
     @classmethod
     def parse(cls, data: Dict[str, Any]):
@@ -113,6 +126,7 @@ class DocumentReferenceValidator:
             self._validate_no_extra_fields(resource, data)
             self._validate_identifiers(resource)
             self._validate_relates_to(resource)
+            self._validate_fhirguard(resource)
 
         except StopValidationError:
             logger.log(LogReference.VALIDATOR003)
@@ -252,3 +266,23 @@ class DocumentReferenceValidator:
                     field=f"relatesTo[{index}].target.identifier.value",
                 )
                 continue
+
+    def _validate_fhirguard(self, resource: DocumentReference):
+        """
+        Validate the resource against the FHIRGuard metadata
+        """
+        logger.log(LogReference.VALIDATOR001, step="fhirguard")
+        model = FHIRDocumentReference.construct(**resource.dict(exclude_none=True))
+        validator = self.fhirguard.validator(model)
+
+        validator.code("status", valueset="DocumentReferenceStatus")
+
+        for issue in validator.issues:
+            self.result.add_error(
+                issue_code=issue.code,
+                error_code="INVALID_RESOURCE",
+                diagnostics=issue.diagnostics,
+                field=(
+                    issue.location[0] if issue.location else None
+                ),  # TODO: Rework to expression
+            )

@@ -39,7 +39,7 @@ check: # Check the build environment is setup correctly
 check-warn:
 	@SHOULD_WARN_ONLY=true ./scripts/check-build-environment.sh
 
-build: check-warn build-api-packages build-layers build-dependency-layer ## Build the project
+build: check-warn build-api-packages build-layers build-dependency-layer build-fhirguard-metadata ## Build the project
 
 build-dependency-layer:
 	@echo "Building Lambda dependency layer"
@@ -61,6 +61,15 @@ build-api-packages: ./api/consumer/* ./api/producer/*
 		[ ! -d "$$api" ] && continue; \
 		./scripts/build-lambda-package.sh $${api} $(DIST_PATH); \
 	done
+
+build-fhirguard-metadata: check-warn
+	@poetry run fhirguard metadata generate hl7.fhir.r4.core@4.0.1 fhir.r4.ukcore.stu2@1.1.3 uk.nhsdigital.r4@2.8.0 \
+		--reference hl7.terminology@latest \
+		--reference ihe.formatcode.fhir@1.1.0 \
+		--output $(DIST_PATH)/fhirguard-metadata/
+
+	@cd $(DIST_PATH)/ && zip -q -r fhirguard-metadata.zip fhirguard-metadata
+	@echo "Generated FHIR metadata at $(DIST_PATH)/fhirguard-metadata.zip"
 
 test: check-warn ## Run the unit tests
 	@echo "Running unit tests"

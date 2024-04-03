@@ -1,4 +1,4 @@
-from pydantic import BaseSettings, Field
+from pydantic.v1 import BaseSettings, Field
 
 
 class Config(BaseSettings):
@@ -19,3 +19,6 @@ class Config(BaseSettings):
     SPLUNK_INDEX: str = Field(default=..., env="SPLUNK_INDEX")
     SOURCE: str = Field(default=..., env="SOURCE")
     AUTH_STORE: str = Field(default=..., env="AUTH_STORE")
+    FHIRGUARD_METADATA_PATH: str = Field(
+        default="/opt/fhirguard-metadata", env="FHIRGUARD_METADATA_PATH"
+    )

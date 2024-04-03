@@ -1,7 +1,7 @@
 import sys
 import urllib.parse
 
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from nrlf.consumer.fhir.r4.model import DocumentReference
 from nrlf.core.decorators import request_handler

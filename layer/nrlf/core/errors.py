@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from nrlf.core.response import Response
 from nrlf.core.types import CodeableConcept

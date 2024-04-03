@@ -2,7 +2,7 @@
 
 from typing import List
 
-from pydantic import BaseModel, Field
+from pydantic.v1 import BaseModel, Field
 
 from nrlf.core.codes import NRLResponseConcept, SpineErrorConcept
 from nrlf.core.constants import PRODUCER_URL_PATH

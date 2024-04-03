@@ -3,7 +3,7 @@ from abc import ABC
 from typing import Generic, Iterator, List, Optional, Type, TypeVar
 
 from botocore.exceptions import ClientError
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from nrlf.core.boto import get_dynamodb_resource, get_dynamodb_table
 from nrlf.core.codes import SpineErrorConcept

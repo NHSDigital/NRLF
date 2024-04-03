@@ -10,7 +10,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     event_source,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 
 from nrlf.core.authoriser import get_pointer_types
 from nrlf.core.codes import SpineErrorConcept

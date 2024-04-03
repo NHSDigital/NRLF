@@ -1,7 +1,7 @@
 import json
 from typing import Dict, Type
 
-from pydantic import BaseModel, ValidationError
+from pydantic.v1 import BaseModel, ValidationError
 
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA

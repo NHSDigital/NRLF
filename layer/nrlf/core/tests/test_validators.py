@@ -471,3 +471,30 @@ def test_validate_relates_to_no_target_identifier():
         "diagnostics": "relatesTo code 'replaces' must have a target identifier",
         "expression": ["relatesTo[0].target.identifier.value"],
     }
+
+
+def test_validate_fhirguard_invalid_status():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["status"] = "invalid"
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "code-invalid",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "Code 'invalid' not found in valueset 'DocumentReferenceStatus'",
+        "expression": ["status"],
+    }

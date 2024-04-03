@@ -1,7 +1,7 @@
 import json
 import warnings
 
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 from pytest_mock import MockerFixture
 
 from nrlf.core.codes import SpineErrorConcept
