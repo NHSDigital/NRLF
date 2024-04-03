@@ -5,7 +5,7 @@ from moto import mock_aws
 from pytest import mark
 
 from api.producer.upsertDocumentReference.upsert_document_reference import (
-    _set_create_time_fields,
+    _set_upsert_time_fields,
     handler,
 )
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
@@ -996,7 +996,7 @@ def test__set_create_time_fields(doc_ref_name: str):
     test_doc_ref = load_document_reference(doc_ref_name)
     test_perms = []
 
-    response = _set_create_time_fields(test_time, test_doc_ref, test_perms)
+    response = _set_upsert_time_fields(test_time, test_doc_ref, test_perms)
 
     assert response.dict(exclude_none=True) == {
         **test_doc_ref.dict(exclude_none=True),
@@ -1020,7 +1020,7 @@ def test__set_create_time_fields_when_doc_has_date_and_perms(doc_ref_name: str):
     test_doc_ref = load_document_reference(doc_ref_name)
     test_perms = ["audit-dates-from-payload"]
 
-    response = _set_create_time_fields(test_time, test_doc_ref, test_perms)
+    response = _set_upsert_time_fields(test_time, test_doc_ref, test_perms)
 
     assert response.dict(exclude_none=True) == {
         **test_doc_ref.dict(exclude_none=True),
@@ -1037,7 +1037,7 @@ def test__set_create_time_fields_when_no_date_but_perms():
     test_doc_ref = load_document_reference("Y05868-736253002-Valid")
     test_perms = ["audit-dates-from-payload"]
 
-    response = _set_create_time_fields(test_time, test_doc_ref, test_perms)
+    response = _set_upsert_time_fields(test_time, test_doc_ref, test_perms)
 
     assert response.dict(exclude_none=True) == {
         **test_doc_ref.dict(exclude_none=True),

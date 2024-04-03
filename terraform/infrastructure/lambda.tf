@@ -292,7 +292,7 @@ module "producer__upsertDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "index.handler"
+  handler = "upsert_document_reference.handler"
 }
 
 module "consumer__status" {

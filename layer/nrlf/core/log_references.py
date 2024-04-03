@@ -224,6 +224,47 @@ class LogReference(Enum):
         "INFO", "Successfully completed producer createDocumentReference"
     )
 
+    # Producer - UpsertDocumentReference
+    PROUPSERT000 = _Reference(
+        "INFO", "Starting to process producer upsertDocumentReference"
+    )
+    PROUPSERT001 = _Reference("DEBUG", "Validating DocumentReference resource")
+    PROUPSERT002 = _Reference("WARN", "DocumentReference resource failed validation")
+    PROUPSERT003 = _Reference(
+        "WARN", "ODS code in headers does not match ODS code in resource ID"
+    )
+    PROUPSERT004 = _Reference(
+        "WARN", "ODS code in headers does not match ODWS code in resource custodian"
+    )
+    PROUPSERT005 = _Reference(
+        "WARN", "Organisation is not allowed to upsert pointer type"
+    )  #
+    PROUPSERT006 = _Reference("DEBUG", "Performing relatesTo validation on resource")
+    PROUPSERT007a = _Reference(
+        "WARN", "RelatesTo validation failed - no target identifier value"
+    )
+    PROUPSERT007b = _Reference(
+        "WARN", "RelatesTo validation failed - invalid producer for target identifier"
+    )
+    PROUPSERT007c = _Reference(
+        "WARN", "RelatesTo validation failed - no pointer exists with target identifier"
+    )
+    PROUPSERT007d = _Reference(
+        "WARN", "RelatesTo validation failed - relating pointer NHS number mismatch"
+    )
+    PROUPSERT007e = _Reference(
+        "WARN", "RelatesTo validation failed - relating pointer document type mismatch"
+    )
+    PROUPSERT008 = _Reference("INFO", "Selecting document as target to be superseded")
+    PROUPSERT009 = _Reference("INFO", "Upserting new document reference")
+    PROUPSERT010 = _Reference("INFO", "Superseding document reference")
+    PROUPSERT011 = _Reference(
+        "INFO", "Preserved .date field when creating new document reference"
+    )
+    PROUPSERT999 = _Reference(
+        "INFO", "Successfully completed producer createDocumentReference"
+    )
+
     # Producer - DeleteDocumentReference
     PRODELETE000 = _Reference(
         "INFO", "Starting to process producer deleteDocumentReference"

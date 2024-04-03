@@ -9,15 +9,15 @@ from nrlf.core.validators import DocumentReferenceValidator
 from nrlf.producer.fhir.r4.model import DocumentReference, Meta
 
 
-def _set_create_time_fields(
-    create_time: str, document_reference: DocumentReference, nrl_permissions: list[str]
+def _set_upsert_time_fields(
+    upsert_time: str, document_reference: DocumentReference, nrl_permissions: list[str]
 ) -> DocumentReference:
     """
     Set the date and lastUpdated timestamps on the provided DocumentReference
     """
     if not document_reference.meta:
         document_reference.meta = Meta()
-    document_reference.meta.lastUpdated = create_time
+    document_reference.meta.lastUpdated = upsert_time
 
     if (
         document_reference.date
@@ -25,12 +25,12 @@ def _set_create_time_fields(
     ):
         # Perserving the original date if it exists and the permission is set
         logger.log(
-            LogReference.PROCREATE011,
+            LogReference.PROUPSERT011,
             id=document_reference.id,
             date=document_reference.date,
         )
     else:
-        document_reference.date = create_time
+        document_reference.date = upsert_time
 
     return document_reference
 
@@ -42,20 +42,20 @@ def handler(
     body: DocumentReference,
 ) -> Response:
     """
-    Entrypoint for the createDocumentReference function
+    Entrypoint for the upsertDocumentReference function
     """
-    logger.log(LogReference.PROCREATE000)
+    logger.log(LogReference.PROUPSERT000)
 
-    logger.log(LogReference.PROCREATE001, resource=body)
+    logger.log(LogReference.PROUPSERT001, resource=body)
     validator = DocumentReferenceValidator()
     result = validator.validate(body)
 
     if not result.is_valid:
-        logger.log(LogReference.PROCREATE002)
+        logger.log(LogReference.PROUPSERT002)
         return Response.from_issues(issues=result.issues, statusCode="400")
 
     creation_time = create_fhir_instant()
-    document_reference = _set_create_time_fields(
+    document_reference = _set_upsert_time_fields(
         creation_time,
         document_reference=result.resource,
         nrl_permissions=metadata.nrl_permissions,
@@ -67,7 +67,7 @@ def handler(
 
     if metadata.ods_code_parts != tuple(core_model.producer_id.split("|")):
         logger.log(
-            LogReference.PROCREATE003,
+            LogReference.PROUPSERT003,
             ods_code_parts=metadata.ods_code_parts,
             producer_id=core_model.producer_id,
         )
@@ -80,7 +80,7 @@ def handler(
     )
     if metadata.ods_code_parts != custodian_parts:
         logger.log(
-            LogReference.PROCREATE004,
+            LogReference.PROUPSERT004,
             ods_code_parts=metadata.ods_code_parts,
             custodian_parts=custodian_parts,
         )
@@ -91,7 +91,7 @@ def handler(
 
     if core_model.type not in metadata.pointer_types:
         logger.log(
-            LogReference.PROCREATE005,
+            LogReference.PROUPSERT005,
             ods_code=metadata.ods_code,
             type=core_model.type,
             pointer_types=metadata.pointer_types,
@@ -104,11 +104,11 @@ def handler(
     ids_to_delete = []
 
     if result.resource.relatesTo:
-        logger.log(LogReference.PROCREATE006, relatesTo=result.resource.relatesTo)
+        logger.log(LogReference.PROUPSERT006, relatesTo=result.resource.relatesTo)
 
         for idx, relates_to in enumerate(result.resource.relatesTo):
             if not (identifier := getattr(relates_to.target.identifier, "value", None)):
-                logger.log(LogReference.PROCREATE007a)
+                logger.log(LogReference.PROUPSERT007a)
                 return SpineErrorResponse.BAD_REQUEST(
                     diagnostics="No identifier value provided for relatesTo target",
                     expression=f"relatesTo[{idx}].target.identifier.value",
@@ -117,7 +117,7 @@ def handler(
             producer_id = identifier.split("-", 1)[0]
             if metadata.ods_code_parts != tuple(producer_id.split("|")):
                 logger.log(
-                    LogReference.PROCREATE007b,
+                    LogReference.PROUPSERT007b,
                     related_identifier=identifier,
                     ods_code_parts=metadata.ods_code_parts,
                 )
@@ -127,21 +127,21 @@ def handler(
                 )
 
             if not (existing_pointer := repository.get_by_id(identifier)):
-                logger.log(LogReference.PROCREATE007c, related_identifier=identifier)
+                logger.log(LogReference.PROUPSERT007c, related_identifier=identifier)
                 return SpineErrorResponse.BAD_REQUEST(
                     diagnostics="The relatesTo target document does not exist",
                     expression=f"relatesTo[{idx}].target.identifier.value",
                 )
 
             if existing_pointer.nhs_number != core_model.nhs_number:
-                logger.log(LogReference.PROCREATE007d, related_identifier=identifier)
+                logger.log(LogReference.PROUPSERT007d, related_identifier=identifier)
                 return SpineErrorResponse.BAD_REQUEST(
                     diagnostics="The relatesTo target document NHS number does not match the NHS number in the request",
                     expression=f"relatesTo[{idx}].target.identifier.value",
                 )
 
             if existing_pointer.type != core_model.type:
-                logger.log(LogReference.PROCREATE007e, related_identifier=identifier)
+                logger.log(LogReference.PROUPSERT007e, related_identifier=identifier)
                 return SpineErrorResponse.BAD_REQUEST(
                     diagnostics="The relatesTo target document type does not match the type in the request",
                     expression=f"relatesTo[{idx}].target.identifier.value",
@@ -149,7 +149,7 @@ def handler(
 
             if relates_to.code == "replaces":
                 logger.log(
-                    LogReference.PROCREATE008,
+                    LogReference.PROUPSERT008,
                     relates_to_code=relates_to.code,
                     identifier=identifier,
                 )
@@ -157,15 +157,15 @@ def handler(
 
     if ids_to_delete:
         logger.log(
-            LogReference.PROCREATE010,
+            LogReference.PROUPSERT010,
             pointer_id=result.resource.id,
             ids_to_delete=ids_to_delete,
         )
         saved_model = repository.supersede(core_model, ids_to_delete)
-        logger.log(LogReference.PROCREATE999)
-        return NRLResponse.RESOURCE_SUPERSEDED(resource_id=result.resource.id)
+        logger.log(LogReference.PROUPSERT999)
+        return NRLResponse.RESOURCE_SUPERSEDED(resource_id=saved_model.id)
 
-    logger.log(LogReference.PROCREATE009, pointer_id=result.resource.id)
+    logger.log(LogReference.PROUPSERT009, pointer_id=result.resource.id)
     saved_model = repository.create(core_model)
-    logger.log(LogReference.PROCREATE999)
-    return NRLResponse.RESOURCE_CREATED(resource_id=result.resource.id)
+    logger.log(LogReference.PROUPSERT999)
+    return NRLResponse.RESOURCE_CREATED(resource_id=saved_model.id)
