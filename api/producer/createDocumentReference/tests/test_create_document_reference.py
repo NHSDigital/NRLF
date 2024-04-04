@@ -28,15 +28,73 @@ from nrlf.tests.events import (
 @mock_repository
 @freeze_time("2024-03-21T12:34:56.789")
 @freeze_uuid("00000000-0000-0000-0000-000000000001")
-@mark.parametrize(
-    "doc_ref_name",
-    [
-        "Y05868-736253002-Valid",
-        "Y05868-736253002-Valid-with-ssp-content",
-    ],
-)
 def test_create_document_reference_happy_path(repository: DocumentPointerRepository):
     doc_ref_data = load_document_reference_data("Y05868-736253002-Valid")
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(),
+        body=doc_ref_data,
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "201",
+        "headers": {
+            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+        },
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "information",
+                "code": "informational",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "RESOURCE_CREATED",
+                            "display": "Resource created",
+                            "system": "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
+                        }
+                    ],
+                },
+                "diagnostics": "The document has been created",
+            }
+        ],
+    }
+
+    created_doc_pointer = repository.get_by_id(
+        "Y05868-00000000-0000-0000-0000-000000000001"
+    )
+
+    assert created_doc_pointer is not None
+    assert created_doc_pointer.created_on == "2024-03-21T12:34:56.789Z"
+    assert created_doc_pointer.updated_on is None
+    assert json.loads(created_doc_pointer.document) == {
+        **json.loads(doc_ref_data),
+        "meta": {
+            "lastUpdated": "2024-03-21T12:34:56.789Z",
+        },
+        "date": "2024-03-21T12:34:56.789Z",
+        "id": "Y05868-00000000-0000-0000-0000-000000000001",
+    }
+
+
+@mock_aws
+@mock_repository
+@freeze_time("2024-03-21T12:34:56.789")
+@freeze_uuid("00000000-0000-0000-0000-000000000001")
+def test_create_document_reference_happy_path_with_ssp(
+    repository: DocumentPointerRepository,
+):
+    doc_ref_data = load_document_reference_data(
+        "Y05868-736253002-Valid-with-ssp-content"
+    )
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
