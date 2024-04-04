@@ -264,7 +264,9 @@ class DocumentReferenceValidator:
                 continue
 
     def _validate_ssp_asid(self, model: DocumentReference):
-        """"""
+        """
+        Validate that the document contains a valid ASID in the context.related field when the content contains an SSP URL
+        """
 
         ssp_content = next(
             filter(
@@ -289,7 +291,7 @@ class DocumentReferenceValidator:
                 diagnostics="Missing context.related. It must be provided and contain a valid ASID identifier when content contains an SSP URL",
                 field="context.related",
             )
-            return
+            raise StopValidationError()
 
         asid_reference = next(
             filter(
@@ -305,7 +307,7 @@ class DocumentReferenceValidator:
                 diagnostics="Missing ASID identifier. context.related must contain a valid ASID identifier when content contains an SSP URL",
                 field="context.related",
             )
-            return
+            raise StopValidationError()
 
         asid_value = getattr(asid_reference.identifier, "value", "")
         if not match(r"^\d{12}$", asid_value):
@@ -315,4 +317,4 @@ class DocumentReferenceValidator:
                 diagnostics=f"Invalid ASID value {asid_value}. context.related must contain a valid ASID identifier when content contains an SSP URL",
                 field="context.related[].identifier.value",
             )
-            return
+            raise StopValidationError()
