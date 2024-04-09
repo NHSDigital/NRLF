@@ -508,7 +508,7 @@ def test_validate_ssp_content_without_any_context_related():
                 }
             ]
         },
-        "diagnostics": "Missing context.related. It must be provided and contain a valid ASID identifier when content contains an SSP URL",
+        "diagnostics": "Missing context.related. It must be provided and contain a single valid ASID identifier when content contains an SSP URL",
         "expression": ["context.related"],
     }
 
@@ -544,7 +544,7 @@ def test_validate_ssp_content_without_asid_in_context_related():
                 }
             ]
         },
-        "diagnostics": "Missing ASID identifier. context.related must contain a valid ASID identifier when content contains an SSP URL",
+        "diagnostics": "Missing ASID identifier. context.related must contain a single valid ASID identifier when content contains an SSP URL",
         "expression": ["context.related"],
     }
 
@@ -575,6 +575,97 @@ def test_validate_ssp_content_with_invalid_asid_value():
                 }
             ]
         },
-        "diagnostics": "Invalid ASID value TEST_INVALID_ASID. context.related must contain a valid ASID identifier when content contains an SSP URL",
-        "expression": ["context.related[].identifier.value"],
+        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+        "expression": ["context.related[0].identifier.value"],
+    }
+
+
+def test_validate_ssp_content_with_invalid_asid_value_and_multiple_related():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json(
+        "Y05868-736253002-Valid-with-ssp-content"
+    )
+
+    document_ref_data["context"]["related"] = [
+        {
+            "identifier": {
+                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "value": "Y05868",
+            }
+        }
+    ]
+    document_ref_data["context"]["related"].append(
+        {
+            "identifier": {
+                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "value": "Y09999",
+            }
+        }
+    )
+    document_ref_data["context"]["related"].append(
+        {
+            "identifier": {
+                "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
+                "value": "TEST_INVALID_ASID",
+            }
+        }
+    )
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "value",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_IDENTIFIER_VALUE",
+                    "display": "Invalid identifier value",
+                }
+            ]
+        },
+        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+        "expression": ["context.related[2].identifier.value"],
+    }
+
+
+def test_validate_ssp_content_with_multiple_asids():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json(
+        "Y05868-736253002-Valid-with-ssp-content"
+    )
+
+    document_ref_data["context"]["related"][0]["identifier"][
+        "value"
+    ] = "TEST_INVALID_ASID"
+    document_ref_data["context"]["related"].append(
+        {
+            "identifier": {
+                "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
+                "value": "09876543210",
+            }
+        }
+    )
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "invalid",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "Multiple ASID identifiers provided. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+        "expression": ["context.related"],
     }

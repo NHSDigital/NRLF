@@ -29,14 +29,6 @@ def validate_type_system(
     return type_system in pointer_type_systems
 
 
-def _is_ssp_content(content: producer_model.DocumentReferenceContent) -> bool:
-    return content.attachment.url and content.attachment.url.startswith("ssp://")
-
-
-def _is_asid_reference(reference: producer_model.Reference) -> bool:
-    return reference.identifier.system == "https://fhir.nhs.uk/Id/nhsSpineASID"
-
-
 @dataclass
 class ValidationResult:
     resource: DocumentReference
@@ -268,17 +260,16 @@ class DocumentReferenceValidator:
         Validate that the document contains a valid ASID in the context.related field when the content contains an SSP URL
         """
 
-        ssp_content = next(
-            filter(
-                _is_ssp_content,
-                model.content,
-            ),
-            None,
+        ssp_content = any(
+            [
+                content
+                for content in model.content
+                if content.attachment.url.startswith("ssp://")
+            ]
         )
-
         if not ssp_content:
             logger.log(
-                LogReference.VALIDATOR001, step="ssp_asid", reason="no_ssp_content"
+                LogReference.VALIDATOR001a, step="ssp_asid", reason="no_ssp_content"
             )
             return
 
@@ -288,33 +279,40 @@ class DocumentReferenceValidator:
             self.result.add_error(
                 issue_code="required",
                 error_code="INVALID_RESOURCE",
-                diagnostics="Missing context.related. It must be provided and contain a valid ASID identifier when content contains an SSP URL",
+                diagnostics="Missing context.related. It must be provided and contain a single valid ASID identifier when content contains an SSP URL",
                 field="context.related",
             )
-            raise StopValidationError()
+            return
 
-        asid_reference = next(
-            filter(
-                _is_asid_reference,
-                getattr(model.context, "related", []),
-            ),
-            None,
-        )
-        if not asid_reference:
+        asid_references = [
+            (idx, related)
+            for idx, related in enumerate(getattr(model.context, "related", []))
+            if related.identifier.system == "https://fhir.nhs.uk/Id/nhsSpineASID"
+        ]
+        if not asid_references:
             self.result.add_error(
                 issue_code="required",
                 error_code="INVALID_RESOURCE",
-                diagnostics="Missing ASID identifier. context.related must contain a valid ASID identifier when content contains an SSP URL",
+                diagnostics="Missing ASID identifier. context.related must contain a single valid ASID identifier when content contains an SSP URL",
                 field="context.related",
             )
-            raise StopValidationError()
+            return
+        if len(asid_references) > 1:
+            self.result.add_error(
+                issue_code="invalid",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Multiple ASID identifiers provided. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+                field="context.related",
+            )
+            return
 
+        idx, asid_reference = asid_references[0]
         asid_value = getattr(asid_reference.identifier, "value", "")
         if not match(r"^\d{12}$", asid_value):
             self.result.add_error(
                 issue_code="value",
                 error_code="INVALID_IDENTIFIER_VALUE",
-                diagnostics=f"Invalid ASID value {asid_value}. context.related must contain a valid ASID identifier when content contains an SSP URL",
-                field="context.related[].identifier.value",
+                diagnostics=f"Invalid ASID value '{asid_value}'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+                field=f"context.related[{idx}].identifier.value",
             )
-            raise StopValidationError()
+            return

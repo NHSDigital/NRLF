@@ -506,7 +506,7 @@ def test_update_document_reference_with_no_context_related_for_ssp_url(repositor
                         }
                     ]
                 },
-                "diagnostics": "Missing context.related. It must be provided and contain a valid ASID identifier when content contains an SSP URL",
+                "diagnostics": "Missing context.related. It must be provided and contain a single valid ASID identifier when content contains an SSP URL",
                 "expression": ["context.related"],
             }
         ],
@@ -561,7 +561,7 @@ def test_create_document_reference_with_no_asid_in_for_ssp_url(
                         }
                     ]
                 },
-                "diagnostics": "Missing ASID identifier. context.related must contain a valid ASID identifier when content contains an SSP URL",
+                "diagnostics": "Missing ASID identifier. context.related must contain a single valid ASID identifier when content contains an SSP URL",
                 "expression": ["context.related"],
             }
         ],
@@ -616,8 +616,8 @@ def test_create_document_reference_with_invalid_asid_for_ssp_url(
                         }
                     ]
                 },
-                "diagnostics": "Invalid ASID value not-a-valid-asid. context.related must contain a valid ASID identifier when content contains an SSP URL",
-                "expression": ["context.related[].identifier.value"],
+                "diagnostics": "Invalid ASID value 'not-a-valid-asid'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+                "expression": ["context.related[0].identifier.value"],
             }
         ],
     }
