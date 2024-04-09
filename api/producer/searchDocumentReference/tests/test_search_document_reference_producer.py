@@ -75,28 +75,14 @@ def test_search_document_reference_missing_nhs_number(
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
 
     parsed_body = json.loads(body)
     assert parsed_body == {
-        "resourceType": "OperationOutcome",
-        "issue": [
-            {
-                "severity": "error",
-                "code": "invalid",
-                "details": {
-                    "coding": [
-                        {
-                            "code": "INVALID_NHS_NUMBER",
-                            "display": "Invalid NHS number",
-                            "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
-                        }
-                    ]
-                },
-                "diagnostics": "A valid NHS number is required to search for document references",
-                "expression": ["subject:identifier"],
-            }
-        ],
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "total": 0,
+        "entry": [],
     }
 
 
@@ -133,7 +119,7 @@ def test_search_document_reference_invalid_nhs_number(
                         }
                     ]
                 },
-                "diagnostics": "A valid NHS number is required to search for document references",
+                "diagnostics": "Invalid NHS number provided in the search parameters",
                 "expression": ["subject:identifier"],
             }
         ],

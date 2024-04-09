@@ -30,12 +30,12 @@ def handler(
 
     logger.log(LogReference.PROSEARCH000)
 
-    if not params.nhs_number:
+    if params.subject_identifier and not params.nhs_number:
         logger.log(
             LogReference.PROSEARCH001, subject_identifier=params.subject_identifier
         )
         return SpineErrorResponse.INVALID_NHS_NUMBER(
-            diagnostics="A valid NHS number is required to search for document references",
+            diagnostics="Invalid NHS number provided in the search parameters",
             expression="subject:identifier",
         )
 
