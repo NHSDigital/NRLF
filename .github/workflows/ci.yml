@@ -7,26 +7,13 @@ permissions:
   contents: read
   actions: write
 
-env:
-  BASE_CACHE_NAME: base-cache
-  CACHE_NAME: cache
-  BASE_ARTIFACT_NAME: base-artifact
-  ARTIFACT_NAME: artifact
-  TF_ARTIFACT_NAME: terraform-artifact
-  AWS_DEFAULT_REGION: eu-west-2
-  # Default github env vars are not working for some reason. This is here to get branch names from the trigger event
-  BASE_BRANCH_NAME: ${{ github.event.pull_request.base.ref }}
-  BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
-  TF_CLI_ARGS: -no-color
-  RUNNING_IN_CI: 1
-
 jobs:
   set-uniquish-id:
     # Set a uniquish ID - good enough for our purposes since it must be close enough to unique for
     # a) Terraform / AWS to allow clean build/destroys without side-effects (e.g. we don't
     #    want resources marked for deletion to be recreated in another CI run)
     # b) Not to fall foul of character limits on AWS resource names: the ID must be short
-    name: Set a uniquish ID
+    name: Set Unique Environment ID
     runs-on: [self-hosted, ci]
     steps:
       - name: Set a uniquish ID
@@ -37,478 +24,295 @@ jobs:
     outputs:
       uniqish_id: ${{ steps.set_uniqish_id.outputs.uniqish_id }}
 
-  check-release:
-    name: Check if release branch
-    runs-on: [self-hosted, ci]
-    steps:
-      - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.BRANCH_NAME }}
-
-      - name: Is release branch
-        run: |
-          if [[ ${{ github.event.pull_request.head.ref }} == release/* || ${{ github.event.pull_request.head.ref }} == hotfix/* ]];
-            then
-              echo "Branch is a release branch, checking names match";
-            else
-              echo "Regular branch, exiting release check"
-              exit 0;
-          fi
-          prefix="release/"
-          branchname=${{ env.BRANCH_NAME }}
-          releasedate=${branchname#"$prefix"}
-          if grep "$releasedate" CHANGELOG.md ; then
-            echo "Branch is a release and matches the latest release details in CHANGELOG.md, continuing"
-            exit 0
-          else
-            echo "Branch name does not match the latest release details in CHANGELOG.md, exiting"
-            exit 1;
-          fi
-
-  cache-base:
-    name: Cache (base)
-    needs: [check-release]
-    runs-on: [self-hosted, ci]
-
-    steps:
-      - name: Git clone - ${{ env.BASE_BRANCH_NAME }}
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.BASE_BRANCH_NAME }}
-
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Install dependencies
-        run: |
-          source nrlf.sh
-          nrlf make install
-
-      - name: Create cache - ${{ env.BASE_CACHE_NAME }}
-        uses: ./.github/actions/caching/
-        with:
-          path: .venv
-          name: ${{ env.BASE_CACHE_NAME }}
-
-  cache:
-    name: Cache (head)
-    needs: [check-release]
-    runs-on: [self-hosted, ci]
-
-    steps:
-      - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.BRANCH_NAME }}
-
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Install dependencies
-        run: |
-          source nrlf.sh
-          nrlf make install
-
-      - name: Create cache - ${{ env.CACHE_NAME }}
-        uses: ./.github/actions/caching/
-        with:
-          path: .venv
-          name: ${{ env.CACHE_NAME }}
-
-  lint-check:
-    needs: [cache]
-    name: Linting check (head)
-    runs-on: [self-hosted, ci]
-
-    steps:
-      - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.BRANCH_NAME }}
-
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Download cache - ${{ env.CACHE_NAME }}
-        uses: ./.github/actions/caching/
-        with:
-          path: .venv
-          name: ${{ env.CACHE_NAME }}
-
-      - name: Run linting
-        run: |
-          source .venv/bin/activate
-          source nrlf.sh
-          nrlf lint check
-
-  unit-test:
-    needs: [cache]
-    name: Unit test (head)
-    runs-on: [self-hosted, ci]
-
-    steps:
-      - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.BRANCH_NAME }}
-
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Download cache - ${{ env.CACHE_NAME }}
-        uses: ./.github/actions/caching/
-        with:
-          path: .venv
-          name: ${{ env.CACHE_NAME }}
-
-      - name: Run test
-        run: |
-          source .venv/bin/activate
-          source nrlf.sh
-          nrlf test unit --runslow
-
-  feature-test-local:
-    needs: [cache]
-    name: Local Feature Test (head)
-    runs-on: [self-hosted, ci]
-
-    steps:
-      - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.BRANCH_NAME }}
-
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Download cache - ${{ env.CACHE_NAME }}
-        uses: ./.github/actions/caching/
-        with:
-          path: .venv
-          name: ${{ env.CACHE_NAME }}
-
-      - name: Run test
-        run: |
-          source .venv/bin/activate
-          source nrlf.sh
-          nrlf test feature local
-
-  build-base:
-    needs: [cache-base]
-    name: Build (base)
-    runs-on: [self-hosted, ci]
-
-    steps:
-      - name: Git clone - ${{ env.BASE_BRANCH_NAME }}
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.BASE_BRANCH_NAME }}
-
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Download cache - ${{ env.BASE_CACHE_NAME }}
-        uses: ./.github/actions/caching/
-        with:
-          path: .venv
-          name: ${{ env.BASE_CACHE_NAME }}
-
-      - name: Build
-        run: |
-          source .venv/bin/activate
-          source nrlf.sh
-          nrlf make build
-
-      - name: Upload artifact - ${{ env.BASE_ARTIFACT_NAME }}
-        uses: ./.github/actions/upload-artifact/
-        with:
-          name: ${{ env.BASE_ARTIFACT_NAME }}
-          path: ./**/dist/*.zip
-
   build:
-    needs: [cache]
-    name: Build (head)
+    name: Build Application
     runs-on: [self-hosted, ci]
-
     steps:
-      - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
+        uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_NAME }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Download cache - ${{ env.CACHE_NAME }}
-        uses: ./.github/actions/caching/
+      - name: Setup asdf cache
+        uses: actions/cache@v4
         with:
-          path: .venv
-          name: ${{ env.CACHE_NAME }}
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
 
-      - name: Build
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
         run: |
-          source .venv/bin/activate
-          source nrlf.sh
-          nrlf make build
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
 
-      - name: Upload artifact - ${{ env.ARTIFACT_NAME }}
-        uses: ./.github/actions/upload-artifact/
+      - name: Run Linting
+        run: make lint
+
+      - name: Run Unit Tests
+        run: make test
+
+      - name: Build Project
+        run: make build
+
+      - name: Save Build Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ./**/dist/*.zip
+          name: build-artifacts
+          path: dist/*.zip
 
-  terraform-base:
-    needs:
-      [build-base, unit-test, feature-test-local, lint-check, set-uniquish-id]
-    name: Terraform (base)
+  deploy:
+    name: Deploy CI Environment
     runs-on: [self-hosted, ci]
-
+    needs: [set-uniquish-id, build]
     steps:
-      - name: Git clone - ${{ env.BASE_BRANCH_NAME }}
-        uses: actions/checkout@v3
+      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
+        uses: actions/checkout@v4
         with:
-          ref: ${{ env.BASE_BRANCH_NAME }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Download artifacts - ${{ env.BASE_ARTIFACT_NAME }}
-        uses: ./.github/actions/download-artifact/
+      - name: Setup asdf cache
+        uses: actions/cache@v4
         with:
-          name: ${{ env.BASE_ARTIFACT_NAME }}
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
 
-      - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
         with:
+          name: build-artifacts
+          path: dist
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
-          aws-region: eu-west-2
 
-      - name: Terraform apply
+      - name: Retrieve Server Certificates
+        run: aws s3 cp s3://nhsd-nrlf--truststore/server/dev.pem truststore/server/dev.pem
+
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+
+      - name: Terraform Init
         run: |
-          source nrlf.sh
-          nrlf truststore pull-server ref
-          nrlf terraform ciinit "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
-          nrlf terraform ciplan "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
-          nrlf terraform ciapply "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          terraform -chdir=terraform/infrastructure init
+          terraform -chdir=terraform/infrastructure workspace new ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} || \
+          terraform -chdir=terraform/infrastructure workspace select ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
 
-  terraform-apply:
-    needs:
-      [
-        build,
-        unit-test,
-        lint-check,
-        feature-test-local,
-        terraform-base,
-        set-uniquish-id,
-      ]
-    name: Terraform (head)
-    runs-on: [self-hosted, ci]
-
-    steps:
-      - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.BRANCH_NAME }}
-
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Download artifacts - ${{ env.ARTIFACT_NAME }}
-        uses: ./.github/actions/download-artifact/
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-
-      - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
-          aws-region: eu-west-2
-
-      - name: Terraform apply
+      - name: Terraform Plan
         run: |
-          source nrlf.sh
-          nrlf truststore pull-server ref
-          nrlf terraform ciinit "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
-          nrlf terraform ciplan "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
-          nrlf terraform ciapply "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}" || echo "ok"
-          nrlf terraform ciplan "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
-          nrlf terraform ciapply "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          terraform -chdir=terraform/infrastructure plan \
+            --var-file=etc/dev.tfvars \
+            --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
+            --var assume_role=terraform \
+            -out tfplan
 
-      - name: Upload artifact
-        uses: ./.github/actions/upload-artifact/
+      - name: Store Terraform Plan Output
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.TF_ARTIFACT_NAME }}
-          path: ./terraform/infrastructure/output.json
+          name: tfplan-output
+          path: terraform/infrastructure/tfplan*
+
+      - name: Terraform Apply
+        run: |
+          terraform -chdir=terraform/infrastructure apply tfplan
+
+      - name: Store Terraform Outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-outputs
+          path: terraform/infrastructure/output.json
 
   integration-test:
-    needs: [terraform-apply, set-uniquish-id]
-    name: Integration test (head)
+    name: Run Integration Tests
+    needs: [set-uniquish-id, deploy]
     runs-on: [self-hosted, ci]
 
     steps:
-      - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
+        uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_NAME }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Download artifacts - ${{ env.TF_ARTIFACT_NAME }}
-        uses: ./.github/actions/download-artifact/
+      - name: Setup asdf cache
+        uses: actions/cache@v4
         with:
-          name: ${{ env.TF_ARTIFACT_NAME }}
-          path: ./terraform/infrastructure/
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
 
-      - name: Download cache - ${{ env.CACHE_NAME }}
-        uses: ./.github/actions/caching/
-        with:
-          path: .venv
-          name: ${{ env.CACHE_NAME }}
+      - name: Install asdf and tools
+        uses: asdf-vm/actions/install@v3.0.2
 
-      - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Python Dependency Install
+        run: poetry install --no-root
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
+          aws-region: eu-west-2
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
-          aws-region: eu-west-2
 
-      - name: Run test
+      - name: Retrieve Client Certificates
         run: |
-          source .venv/bin/activate
-          source nrlf.sh
-          nrlf truststore pull-client ref
-          nrlf test integration
+          aws s3 cp s3://nhsd-nrlf--truststore/client/dev.key truststore/client/dev.key
+          aws s3 cp s3://nhsd-nrlf--truststore/client/dev.crt truststore/client/dev.crt
 
-  feature-test-integration:
-    needs: [integration-test, set-uniquish-id]
-    name: Feature integration test (head)
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+
+      - name: Configure Dev Account Credentials
+        id: configure-dev-account-credentials
+        run: |
+          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ steps.get_account_id.outputs.aws_account_id }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} --output json)
+          echo "aws_access_key_id=$(echo $aws_credentials | jq -r '.Credentials.AccessKeyId')" >> "$GITHUB_OUTPUT"
+          echo "aws_secret_access_key=$(echo $aws_credentials | jq -r '.Credentials.SecretAccessKey')" >> "$GITHUB_OUTPUT"
+          echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
+
+      - name: Run Integration Tests
+        run: make test-features-integration TF_WORKSPACE=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
+          AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}
+
+  performance-test:
+    name: Run Performance Tests
+    needs: [set-uniquish-id, integration-test]
     runs-on: [self-hosted, ci]
 
     steps:
-      - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
+        uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_NAME }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Download artifacts - ${{ env.TF_ARTIFACT_NAME }}
-        uses: ./.github/actions/download-artifact/
+      - name: Setup asdf cache
+        uses: actions/cache@v4
         with:
-          name: ${{ env.TF_ARTIFACT_NAME }}
-          path: ./terraform/infrastructure/
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
 
-      - name: Download cache - ${{ env.CACHE_NAME }}
-        uses: ./.github/actions/caching/
-        with:
-          path: .venv
-          name: ${{ env.CACHE_NAME }}
+      - name: Install asdf and tools
+        uses: asdf-vm/actions/install@v3.0.2
 
-      - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
+          aws-region: eu-west-2
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
-          aws-region: eu-west-2
 
-      - name: Run test
+      - name: Pull Client Certificates
+        run: make truststore-pull-client ENV=dev
+
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+
+      - name: Configure Dev Account Credentials
+        id: configure-dev-account-credentials
         run: |
-          source .venv/bin/activate
-          source nrlf.sh
-          nrlf truststore pull-client ref
-          nrlf test feature integration
+          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ steps.get_account_id.outputs.aws_account_id }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} --output json)
+          echo "aws_access_key_id=$(echo $aws_credentials | jq -r '.Credentials.AccessKeyId')" >> "$GITHUB_OUTPUT"
+          echo "aws_secret_access_key=$(echo $aws_credentials | jq -r '.Credentials.SecretAccessKey')" >> "$GITHUB_OUTPUT"
+          echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
 
-  firehose-integration-test:
-    needs: [terraform-apply, set-uniquish-id]
-    name: Firehose integration test (head)
+      - name: Setup Environment Test Data
+        run: make test-performance-prepare TF_WORKSPACE=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
+          AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}
+
+      - name: Run Performance Test - Baseline
+        run: make test-performance-baseline HOST=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}.api.record-locator.dev.national.nhs.uk ENV_TYPE=dev
+
+      - name: Run Performance Test - Stress
+        run: make test-performance-stress HOST=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}.api.record-locator.dev.national.nhs.uk ENV_TYPE=dev
+
+      - name: Process Performance Test Outputs
+        run: make test-performance-output
+
+      - name: Store Performance Test Outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-test-outputs
+          path: dist/*.png
+
+      - name: Cleanup Environment Test Data
+        run: make test-performance-cleanup TF_WORKSPACE=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
+          AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}
+
+  destroy:
+    name: Destroy CI Environment
+    needs: [set-uniquish-id, deploy, integration-test, performance-test]
     runs-on: [self-hosted, ci]
-
-    steps:
-      - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.BRANCH_NAME }}
-
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Download artifacts - ${{ env.TF_ARTIFACT_NAME }}
-        uses: ./.github/actions/download-artifact/
-        with:
-          name: ${{ env.TF_ARTIFACT_NAME }}
-          path: ./terraform/infrastructure/
-
-      - name: Download cache - ${{ env.CACHE_NAME }}
-        uses: ./.github/actions/caching/
-        with:
-          path: .venv
-          name: ${{ env.CACHE_NAME }}
-
-      - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
-          aws-region: eu-west-2
-
-      - name: Run test
-        run: |
-          source .venv/bin/activate
-          source nrlf.sh
-          nrlf truststore pull-client ref
-          nrlf test firehose
-
-  terraform-destroy:
-    needs:
-      [feature-test-integration, firehose-integration-test, set-uniquish-id]
     if: ${{ always() }}
-    name: Terraform destroy
-    runs-on: [self-hosted, ci]
 
     steps:
-      - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
+      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
+        uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_NAME }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Runner setup
-        uses: ./.github/actions/runner-setup/
-
-      - name: Download artifacts - ${{ env.ARTIFACT_NAME }}
-        uses: ./.github/actions/download-artifact/
+      - name: Setup asdf cache
+        uses: actions/cache@v4
         with:
-          name: ${{ env.ARTIFACT_NAME }}
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
 
-      - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
+          aws-region: eu-west-2
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
-          aws-region: eu-west-2
 
-      - name: Terraform destroy
+      - name: Get AWS Account ID
+        id: get_account_id
+        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+
+      - name: Terraform Init
         run: |
-          source nrlf.sh
-          nrlf terraform ciinit "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
-          nrlf terraform cidestroy "ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}"
+          terraform -chdir=terraform/infrastructure init
+          terraform -chdir=terraform/infrastructure workspace new ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} || \
+          terraform -chdir=terraform/infrastructure workspace select ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
 
-  clear-cache:
-    name: Clear Caches
-    needs: [feature-test-integration, firehose-integration-test]
-    if: ${{ always() }}
-    runs-on: [self-hosted, ci]
-    steps:
-      - name: Git clone - ${{ env.BRANCH_NAME }}
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.BRANCH_NAME }}
-
-      - name: Clear cache
-        uses: ./.github/actions/clear-cache/
-        with:
-          name: ${{ env.BASE_CACHE_NAME }},${{ env.CACHE_NAME }}
+      - name: Terraform Destroy
+        run: |
+          terraform -chdir=terraform/infrastructure destroy \
+            --var-file=etc/dev.tfvars \
+            --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
+            --var assume_role=terraform \
+            -auto-approve

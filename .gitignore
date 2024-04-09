@@ -1,7 +1,9 @@
-# Local .terraform directories
+# Local .terraform directories and files
 **/.terraform/*
 **/tfplan
-**/terraform/**/output.json
+terraform/**/output.json
+terraform/**/.terraform.lock.hcl
+terraform/**/*.tfplan
 
 # documentation
 report/
@@ -64,9 +66,13 @@ __pycache__
 build
 dist
 
+.coverage
 .hypothesis
 .firehose
 
 # Allure results
 allure-results/*
 allure-report/*
+
+# Performance test ref data
+tests/performance/reference-data.json

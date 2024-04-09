@@ -1,12 +1,13 @@
 resource "aws_lambda_function" "lambda_function" {
   function_name    = substr("${var.prefix}--${replace(var.parent_path, "/", "--")}--${var.name}", 0, 64)
-  runtime          = "python3.9"
+  runtime          = "python3.12"
   handler          = var.handler
   role             = aws_iam_role.lambda_role.arn
-  filename         = "${path.module}/../../../../${var.parent_path}/${var.name}/dist/${var.name}.zip"
-  source_code_hash = filebase64sha256("${path.module}/../../../../${var.parent_path}/${var.name}/dist/${var.name}.zip")
+  filename         = "${path.module}/../../../../dist/${local.api_type}-${var.name}.zip"
+  source_code_hash = filebase64sha256("${path.module}/../../../../dist/${local.api_type}-${var.name}.zip")
   timeout          = local.lambda_timeout
   memory_size      = 512
+
 
   environment {
     variables = merge(var.environment_variables, { "SOURCE" : "${var.prefix}--${replace(var.parent_path, "/", "--")}--${var.name}" })
@@ -26,7 +27,6 @@ resource "aws_lambda_function" "lambda_function" {
     }
   }
 }
-
 
 resource "aws_lambda_permission" "lambda_permission" {
   count         = length(var.api_gateway_source_arn)

@@ -4,14 +4,15 @@ module "consumer__readDocumentReference" {
   name                   = "readDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -20,7 +21,7 @@ module "consumer__readDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.consumer.readDocumentReference.index.handler"
+  handler = "read_document_reference.handler"
 }
 
 module "consumer__countDocumentReference" {
@@ -29,14 +30,15 @@ module "consumer__countDocumentReference" {
   name                   = "countDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/_count"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -45,7 +47,7 @@ module "consumer__countDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.consumer.countDocumentReference.index.handler"
+  handler = "count_document_reference.handler"
 }
 
 module "consumer__searchDocumentReference" {
@@ -54,14 +56,15 @@ module "consumer__searchDocumentReference" {
   name                   = "searchDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -70,7 +73,7 @@ module "consumer__searchDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.consumer.searchDocumentReference.index.handler"
+  handler = "search_document_reference.handler"
 }
 
 module "consumer__searchPostDocumentReference" {
@@ -79,14 +82,15 @@ module "consumer__searchPostDocumentReference" {
   name                   = "searchPostDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/POST/DocumentReference/_search"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -95,7 +99,7 @@ module "consumer__searchPostDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.consumer.searchPostDocumentReference.index.handler"
+  handler = "search_post_document_reference.handler"
 }
 
 module "producer__createDocumentReference" {
@@ -104,14 +108,16 @@ module "producer__createDocumentReference" {
   name                   = "createDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/POST/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    ENDPOINT_URL         = "${local.public_domain}/nrl-producer-api/FHIR/R4/DocumentReference"
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-write.arn,
@@ -121,7 +127,7 @@ module "producer__createDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.createDocumentReference.index.handler"
+  handler = "create_document_reference.handler"
 }
 
 module "producer__deleteDocumentReference" {
@@ -130,14 +136,15 @@ module "producer__deleteDocumentReference" {
   name                   = "deleteDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/DELETE/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-write.arn,
@@ -147,7 +154,7 @@ module "producer__deleteDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.deleteDocumentReference.index.handler"
+  handler = "delete_document_reference.handler"
 }
 
 module "producer__readDocumentReference" {
@@ -156,14 +163,15 @@ module "producer__readDocumentReference" {
   name                   = "readDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -172,7 +180,7 @@ module "producer__readDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.readDocumentReference.index.handler"
+  handler = "read_document_reference.handler"
 }
 
 module "producer__searchDocumentReference" {
@@ -181,14 +189,15 @@ module "producer__searchDocumentReference" {
   name                   = "searchDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -197,7 +206,7 @@ module "producer__searchDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.searchDocumentReference.index.handler"
+  handler = "search_document_reference.handler"
 }
 
 module "producer__searchPostDocumentReference" {
@@ -206,14 +215,15 @@ module "producer__searchPostDocumentReference" {
   name                   = "searchPostDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/POST/DocumentReference/_search"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -222,7 +232,7 @@ module "producer__searchPostDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.searchPostDocumentReference.index.handler"
+  handler = "search_post_document_reference.handler"
 }
 
 module "producer__updateDocumentReference" {
@@ -231,14 +241,15 @@ module "producer__updateDocumentReference" {
   name                   = "updateDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -248,7 +259,7 @@ module "producer__updateDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.updateDocumentReference.index.handler"
+  handler = "update_document_reference.handler"
 
   depends_on = [
     aws_iam_policy.document-pointer__dynamodb-read,
@@ -263,14 +274,15 @@ module "producer__upsertDocumentReference" {
   name                   = "upsertDocumentReference"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-write.arn,
@@ -280,57 +292,7 @@ module "producer__upsertDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.upsertDocumentReference.index.handler"
-}
-
-module "producer__authoriser_lambda" {
-  source      = "./modules/lambda"
-  parent_path = "api/producer"
-  name        = "authoriser"
-  region      = local.region
-  prefix      = local.prefix
-  layers      = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  kms_key_id  = module.kms__cloudwatch.kms_arn
-  environment_variables = {
-    PREFIX       = "${local.prefix}--"
-    ENVIRONMENT  = local.environment
-    SPLUNK_INDEX = module.firehose__processor.splunk.index
-    AUTH_STORE   = aws_s3_bucket.authorization-store.id
-  }
-  additional_policies = [
-    aws_iam_policy.read-authorization-store-s3.arn,
-  ]
-  firehose_subscriptions = [
-    module.firehose__processor.firehose_subscription
-  ]
-  handler = "api.producer.authoriser.index.handler"
-  depends_on = [
-  ]
-}
-
-module "consumer__authoriser_lambda" {
-  source      = "./modules/lambda"
-  parent_path = "api/consumer"
-  name        = "authoriser"
-  region      = local.region
-  prefix      = local.prefix
-  layers      = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
-  kms_key_id  = module.kms__cloudwatch.kms_arn
-  environment_variables = {
-    PREFIX       = "${local.prefix}--"
-    ENVIRONMENT  = local.environment
-    SPLUNK_INDEX = module.firehose__processor.splunk.index
-    AUTH_STORE   = aws_s3_bucket.authorization-store.id
-  }
-  additional_policies = [
-    aws_iam_policy.read-authorization-store-s3.arn,
-  ]
-  firehose_subscriptions = [
-    module.firehose__processor.firehose_subscription
-  ]
-  handler = "api.consumer.authoriser.index.handler"
-  depends_on = [
-  ]
+  handler = "upsert_document_reference.handler"
 }
 
 module "consumer__status" {
@@ -339,15 +301,16 @@ module "consumer__status" {
   name                   = "status"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/_status"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
-    DYNAMODB_TIMEOUT            = local.dynamodb_timeout_seconds
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    DYNAMODB_TIMEOUT     = local.dynamodb_timeout_seconds
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -356,7 +319,7 @@ module "consumer__status" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.consumer.status.index.handler"
+  handler = "status.handler"
 }
 
 
@@ -366,15 +329,16 @@ module "producer__status" {
   name                   = "status"
   region                 = local.region
   prefix                 = local.prefix
-  layers                 = [module.lambda-utils.layer_arn, module.nrlf.layer_arn, module.third_party.layer_arn]
+  layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
   api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/_status"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
-    DOCUMENT_POINTER_TABLE_NAME = aws_dynamodb_table.document-pointer.name
-    PREFIX                      = "${local.prefix}--"
-    ENVIRONMENT                 = local.environment
-    SPLUNK_INDEX                = module.firehose__processor.splunk.index
-    DYNAMODB_TIMEOUT            = local.dynamodb_timeout_seconds
+    PREFIX               = "${local.prefix}--"
+    ENVIRONMENT          = local.environment
+    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    POWERTOOLS_LOG_LEVEL = local.log_level
+    SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    DYNAMODB_TIMEOUT     = local.dynamodb_timeout_seconds
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -383,5 +347,5 @@ module "producer__status" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "api.producer.status.index.handler"
+  handler = "status.handler"
 }
