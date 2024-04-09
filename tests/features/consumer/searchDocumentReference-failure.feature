@@ -2,16 +2,16 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
 
   Scenario: Search fails to return a bundle when extra parameters are found
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'Yorkshire Ambulance Service' (ODS Code 'RX898') is authorised to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
-    When the organisation 'RX898' requests to search for DocumentReferences with parameters:
+    When consumer 'RX898' searches for DocumentReferences with parameters:
       | parameter | value      |
       | subject   | 9278693472 |
       | extra     | parameter  |
     Then the response status code is 400
     And the response is an OperationOutcome with 1 issue
-    And the OperationOutcome contains the following issue:
+    And the OperationOutcome contains the issue:
       """
       {
         "severity": "error",
@@ -30,14 +30,14 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
 
   Scenario: Search fails to return a bundle when no subject:identifier is provided
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'Yorkshire Ambulance Service' (ODS Code 'RX898') is authorised to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
-    When the organisation 'RX898' requests to search for DocumentReferences with parameters:
+    When consumer 'RX898' searches for DocumentReferences with parameters:
       | parameter | value |
     Then the response status code is 400
     And the response is an OperationOutcome with 1 issue
-    And the OperationOutcome contains the following issue:
+    And the OperationOutcome contains the issue:
       """
       {
         "severity": "error",
@@ -56,16 +56,16 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
 
   Scenario: Search rejects request with type system they are not allowed to use
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'Yorkshire Ambulance Service' (ODS Code 'RX898') is authorised to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
-    When the organisation 'RX898' requests to search for DocumentReferences with parameters:
+    When consumer 'RX898' searches for DocumentReferences with parameters:
       | parameter | value                                |
       | subject   | 9278693472                           |
       | type      | http://incorrect.info/sct\|736253002 |
     Then the response status code is 400
     And the response is an OperationOutcome with 1 issue
-    And the OperationOutcome contains the following issue:
+    And the OperationOutcome contains the issue:
       """
       {
         "severity": "error",
@@ -84,15 +84,15 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
 
   Scenario: Search rejects request when the NHS number provided is invalid
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'Yorkshire Ambulance Service' (ODS Code 'RX898') is authorised to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
-    When the organisation 'RX898' requests to search for DocumentReferences with parameters:
+    When consumer 'RX898' searches for DocumentReferences with parameters:
       | parameter | value |
       | subject   | 123   |
     Then the response status code is 400
     And the response is an OperationOutcome with 1 issue
-    And the OperationOutcome contains the following issue:
+    And the OperationOutcome contains the issue:
       """
       {
         "severity": "error",
@@ -111,14 +111,14 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
 
   Scenario: Search rejects request if the organisation has no registered pointer types
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'Yorkshire Ambulance Service' (ODS Code 'RX898') is authorised to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system | value |
-    When the organisation 'RX898' requests to search for DocumentReferences with parameters:
+    When consumer 'RX898' searches for DocumentReferences with parameters:
       | parameter | value      |
       | subject   | 9278693472 |
     Then the response status code is 403
     And the response is an OperationOutcome with 1 issue
-    And the OperationOutcome contains the following issue:
+    And the OperationOutcome contains the issue:
       """
       {
         "severity": "error",
@@ -137,8 +137,7 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
   Scenario: Search ignores pointer type header if S3 lookup is enabled
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
     And the application is configured to lookup permissions from S3
-    And no pointer types are configured in S3 for the organisation 'RX898'
-    And the organisation 'Yorkshire Ambulance Service' (ODS Code 'RX898') is authorised to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And a DocumentReference resource exists with values:
@@ -150,13 +149,13 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
       | contentType | application/pdf                   |
       | url         | https://example.org/my-doc.pdf    |
       | custodian   | 8FW23                             |
-    When the organisation 'RX898' requests to search for DocumentReferences with parameters:
+    When consumer 'RX898' searches for DocumentReferences with parameters:
       | parameter | value      |
       | subject   | 9278693472 |
       | type      | 736253002  |
     Then the response status code is 403
     And the response is an OperationOutcome with 1 issue
-    And the OperationOutcome contains the following issue:
+    And the OperationOutcome contains the issue:
       """
       {
         "severity": "error",
@@ -175,12 +174,12 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
   Scenario: Search rejects request if the organisation has no registered pointer types in S3
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
     And the application is configured to lookup permissions from S3
-    When the organisation 'RX898' requests to search for DocumentReferences with parameters:
+    When consumer 'RX898' searches for DocumentReferences with parameters:
       | parameter | value      |
       | subject   | 9278693472 |
     Then the response status code is 403
     And the response is an OperationOutcome with 1 issue
-    And the OperationOutcome contains the following issue:
+    And the OperationOutcome contains the issue:
       """
       {
         "severity": "error",

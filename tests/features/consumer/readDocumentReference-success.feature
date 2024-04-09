@@ -1,12 +1,8 @@
-# Read document reference by ID - Same ODS Code
-# Read document reference by ID - Different ODS Code
-# Read document reference by ID - urlencoded
-# Read document reference by ID - no pointer found
 Feature: Consumer - readDocumentReference - Success Scenarios
 
   Scenario: Read document reference by ID - Requesting org is custodian
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'Yorkshire Ambulance Service' (ODS Code 'RX898') is authorised to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And a DocumentReference resource exists with values:
@@ -18,7 +14,7 @@ Feature: Consumer - readDocumentReference - Success Scenarios
       | contentType | application/pdf                          |
       | url         | https://example.org/my-doc.pdf           |
       | custodian   | RX898                                    |
-    When the organisation 'RX898' requests to read a DocumentReference with ID 'RX898-9999999999-ReadDocRefSameCustodian'
+    When consumer 'RX898' reads a DocumentReference with ID 'RX898-9999999999-ReadDocRefSameCustodian'
     Then the response status code is 200
     And the response is a DocumentReference with JSON value:
       """
@@ -59,7 +55,7 @@ Feature: Consumer - readDocumentReference - Success Scenarios
 
   Scenario: Read document reference by ID - Requesting org is not custodian
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'Yorkshire Ambulance Service' (ODS Code 'RX898') is authorised to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And a DocumentReference resource exists with values:
@@ -71,7 +67,7 @@ Feature: Consumer - readDocumentReference - Success Scenarios
       | contentType | application/pdf                        |
       | url         | https://example.org/my-doc.pdf         |
       | custodian   | X26                                    |
-    When the organisation 'RX898' requests to read a DocumentReference with ID 'X26-9999999999-ReadDocRefDiffCustodian'
+    When consumer 'RX898' reads a DocumentReference with ID 'X26-9999999999-ReadDocRefDiffCustodian'
     Then the response status code is 200
     And the response is a DocumentReference with JSON value:
       """
@@ -112,7 +108,7 @@ Feature: Consumer - readDocumentReference - Success Scenarios
 
   Scenario: Read document reference by ID - urlencoded
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'Yorkshire Ambulance Service' (ODS Code 'RX898') is authorised to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And a DocumentReference resource exists with values:
@@ -124,5 +120,5 @@ Feature: Consumer - readDocumentReference - Success Scenarios
       | contentType | application/pdf                            |
       | url         | https://example.org/my-doc.pdf             |
       | custodian   | RX898\|001                                 |
-    When the organisation 'RX898' requests to read a DocumentReference with ID 'RX898%7C001-1234567890-ReadDocRefUrlEncoded'
+    When consumer 'RX898' reads a DocumentReference with ID 'RX898%7C001-1234567890-ReadDocRefUrlEncoded'
     Then the response status code is 200

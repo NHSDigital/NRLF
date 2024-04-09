@@ -58,8 +58,8 @@ def handler(
 
     logger.log(LogReference.PROCREATE001, resource=body)
 
-    ods_prefix = metadata.ods_code_parts[0]
-    body.id = f"{ods_prefix}-{uuid4()}"
+    id_prefix = "|".join(metadata.ods_code_parts)
+    body.id = f"{id_prefix}-{uuid4()}"
 
     validator = DocumentReferenceValidator()
     result = validator.validate(body)
