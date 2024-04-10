@@ -67,7 +67,7 @@ jobs:
             --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
             --var assume_role=terraform \
             -auto-approve
-      
+
       - name: Add Failure Pull Request Comment
         uses: actions/github-script@v7
         if: ${{ failure() }}
