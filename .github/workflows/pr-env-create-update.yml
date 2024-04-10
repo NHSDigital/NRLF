@@ -1,5 +1,5 @@
 name: Create PR Environment
-run-name: "${{ github.event.action == 'synchronize ' && 'Update' || 'Create' }} PR Environment - #${{ github.event.pull_request.number }} (${{ github.event.pull_request.title }})"
+run-name: "${{ github.event.action == 'synchronize' && 'Update' || 'Create' }} PR Environment - #${{ github.event.pull_request.number }} (${{ github.event.pull_request.title }})"
 
 on:
   pull_request:
