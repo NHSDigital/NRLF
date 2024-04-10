@@ -1,6 +1,9 @@
-name: CI
+name: Create PR Environment
+run-name: ${{ github.event_path }} Create PR Environment - \#${{ github.event.pull_request.id }} (${{ github.event.pull_request.title }} )
 
-on: pull_request
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
 
 permissions:
   id-token: write
@@ -8,21 +11,15 @@ permissions:
   actions: write
 
 jobs:
-  set-uniquish-id:
-    # Set a uniquish ID - good enough for our purposes since it must be close enough to unique for
-    # a) Terraform / AWS to allow clean build/destroys without side-effects (e.g. we don't
-    #    want resources marked for deletion to be recreated in another CI run)
-    # b) Not to fall foul of character limits on AWS resource names: the ID must be short
-    name: Set Unique Environment ID
+  set-environment-id:
+    name: Set Environment ID
     runs-on: [self-hosted, ci]
     steps:
-      - name: Set a uniquish ID
-        id: set_uniqish_id
-        run: |
-          TIME_IN_SECONDS_SINCE_MIDNIGHT=$(date -d "1970-01-01 UTC $(date +%T)" +%s)
-          echo "uniqish_id=${GITHUB_SHA::7}-${TIME_IN_SECONDS_SINCE_MIDNIGHT}" >> $GITHUB_OUTPUT
+      - name: Set a ID based on the branch name
+        id: set_environment_id
+        run: echo "environment_id=$(echo '${{ github.ref }}' | sed 's/refs\/heads\///' | sed 's/feature\///')" > $GITHUB_OUTPUT
     outputs:
-      uniqish_id: ${{ steps.set_uniqish_id.outputs.uniqish_id }}
+      environment_id: ${{ steps.set_environment_id.outputs.environment_id }}
 
   build:
     name: Build Application
@@ -67,10 +64,24 @@ jobs:
           name: build-artifacts
           path: dist/*.zip
 
+      - name: Add Failure Pull Request Comment
+        uses: actions/github-script@v7
+        if: ${{ failure() }}
+        with:
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `💥 Something went wrong while building the pull request environment.\n[Check Output Logs](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
+            })
+
   deploy:
     name: Deploy CI Environment
     runs-on: [self-hosted, ci]
-    needs: [set-uniquish-id, build]
+    needs: [set-environment-id, build]
+    concurrency:
+      group: terraform-${{ github.ref_name }}
     steps:
       - name: Git Clone - ${{ github.event.pull_request.head.ref }}
         uses: actions/checkout@v4
@@ -99,7 +110,7 @@ jobs:
         with:
           aws-region: eu-west-2
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+          role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Retrieve Server Certificates
         run: aws s3 cp s3://nhsd-nrlf--truststore/server/dev.pem truststore/server/dev.pem
@@ -111,8 +122,8 @@ jobs:
       - name: Terraform Init
         run: |
           terraform -chdir=terraform/infrastructure init
-          terraform -chdir=terraform/infrastructure workspace new ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} || \
-          terraform -chdir=terraform/infrastructure workspace select ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+          terraform -chdir=terraform/infrastructure workspace new ${{ needs.set-environment-id.outputs.environment_id }} || \
+          terraform -chdir=terraform/infrastructure workspace select ${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Terraform Plan
         run: |
@@ -129,6 +140,7 @@ jobs:
           path: terraform/infrastructure/tfplan*
 
       - name: Terraform Apply
+        id: terraform-apply
         run: |
           terraform -chdir=terraform/infrastructure apply tfplan
 
@@ -137,11 +149,37 @@ jobs:
         with:
           name: terraform-outputs
           path: terraform/infrastructure/output.json
+      
+      - name: Add Failure Pull Request Comment
+        uses: actions/github-script@v7
+        if: ${{ success() }}
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "🚀 PR environment successfully created.\nURL: ${{ needs.set-environment-id.outputs.environment_id }}.api.record-locator.dev.national.nhs.uk"
+            })
+
+      - name: Add Failure Pull Request Comment
+        uses: actions/github-script@v7
+        if: ${{ failure() }}
+        with:
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `💥 Something went wrong while deploying the pull request environment.\n[Check Output Logs](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
+            })
 
   integration-test:
     name: Run Integration Tests
-    needs: [set-uniquish-id, deploy]
+    needs: [set-environment-id, deploy]
     runs-on: [self-hosted, ci]
+    concurrency:
+      group: integrationtest-${{ github.ref_name }}
 
     steps:
       - name: Git Clone - ${{ github.event.pull_request.head.ref }}
@@ -168,7 +206,7 @@ jobs:
         with:
           aws-region: eu-west-2
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+          role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Retrieve Client Certificates
         run: |
@@ -182,13 +220,13 @@ jobs:
       - name: Configure Dev Account Credentials
         id: configure-dev-account-credentials
         run: |
-          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ steps.get_account_id.outputs.aws_account_id }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} --output json)
+          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ steps.get_account_id.outputs.aws_account_id }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }} --output json)
           echo "aws_access_key_id=$(echo $aws_credentials | jq -r '.Credentials.AccessKeyId')" >> "$GITHUB_OUTPUT"
           echo "aws_secret_access_key=$(echo $aws_credentials | jq -r '.Credentials.SecretAccessKey')" >> "$GITHUB_OUTPUT"
           echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
 
       - name: Run Integration Tests
-        run: make test-features-integration TF_WORKSPACE=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+        run: make test-features-integration TF_WORKSPACE=${{ needs.set-environment-id.outputs.environment_id }}
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
@@ -196,8 +234,10 @@ jobs:
 
   performance-test:
     name: Run Performance Tests
-    needs: [set-uniquish-id, integration-test]
+    needs: [set-environment-id, integration-test]
     runs-on: [self-hosted, ci]
+    concurrency:
+      group: performancetest-${{ github.ref_name }}
 
     steps:
       - name: Git Clone - ${{ github.event.pull_request.head.ref }}
@@ -226,7 +266,7 @@ jobs:
         with:
           aws-region: eu-west-2
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+          role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Pull Client Certificates
         run: make truststore-pull-client ENV=dev
@@ -238,23 +278,23 @@ jobs:
       - name: Configure Dev Account Credentials
         id: configure-dev-account-credentials
         run: |
-          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ steps.get_account_id.outputs.aws_account_id }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} --output json)
+          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ steps.get_account_id.outputs.aws_account_id }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }} --output json)
           echo "aws_access_key_id=$(echo $aws_credentials | jq -r '.Credentials.AccessKeyId')" >> "$GITHUB_OUTPUT"
           echo "aws_secret_access_key=$(echo $aws_credentials | jq -r '.Credentials.SecretAccessKey')" >> "$GITHUB_OUTPUT"
           echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
 
       - name: Setup Environment Test Data
-        run: make test-performance-prepare TF_WORKSPACE=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+        run: make test-performance-prepare TF_WORKSPACE=${{ needs.set-environment-id.outputs.environment_id }}
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
           AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}
 
       - name: Run Performance Test - Baseline
-        run: make test-performance-baseline HOST=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}.api.record-locator.dev.national.nhs.uk ENV_TYPE=dev
+        run: make test-performance-baseline HOST=${{ needs.set-environment-id.outputs.environment_id }}.api.record-locator.dev.national.nhs.uk ENV_TYPE=dev
 
       - name: Run Performance Test - Stress
-        run: make test-performance-stress HOST=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}.api.record-locator.dev.national.nhs.uk ENV_TYPE=dev
+        run: make test-performance-stress HOST=${{ needs.set-environment-id.outputs.environment_id }}.api.record-locator.dev.national.nhs.uk ENV_TYPE=dev
 
       - name: Process Performance Test Outputs
         run: make test-performance-output
@@ -266,53 +306,8 @@ jobs:
           path: dist/*.png
 
       - name: Cleanup Environment Test Data
-        run: make test-performance-cleanup TF_WORKSPACE=ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
+        run: make test-performance-cleanup TF_WORKSPACE=${{ needs.set-environment-id.outputs.environment_id }}
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
           AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}
-
-  destroy:
-    name: Destroy CI Environment
-    needs: [set-uniquish-id, deploy, integration-test, performance-test]
-    runs-on: [self-hosted, ci]
-    if: ${{ always() }}
-
-    steps:
-      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: Setup asdf cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.asdf
-          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
-          restore-keys: |
-            ${{ runner.os }}-asdf-
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
-
-      - name: Get AWS Account ID
-        id: get_account_id
-        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
-
-      - name: Terraform Init
-        run: |
-          terraform -chdir=terraform/infrastructure init
-          terraform -chdir=terraform/infrastructure workspace new ci-${{ needs.set-uniquish-id.outputs.uniqish_id }} || \
-          terraform -chdir=terraform/infrastructure workspace select ci-${{ needs.set-uniquish-id.outputs.uniqish_id }}
-
-      - name: Terraform Destroy
-        run: |
-          terraform -chdir=terraform/infrastructure destroy \
-            --var-file=etc/dev.tfvars \
-            --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
-            --var assume_role=terraform \
-            -auto-approve
