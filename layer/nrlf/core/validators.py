@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from re import match
 from typing import Any, Dict, List, Optional
 
 from pydantic import ValidationError
@@ -113,6 +114,7 @@ class DocumentReferenceValidator:
             self._validate_no_extra_fields(resource, data)
             self._validate_identifiers(resource)
             self._validate_relates_to(resource)
+            self._validate_ssp_asid(resource)
 
         except StopValidationError:
             logger.log(LogReference.VALIDATOR003)
@@ -252,3 +254,65 @@ class DocumentReferenceValidator:
                     field=f"relatesTo[{index}].target.identifier.value",
                 )
                 continue
+
+    def _validate_ssp_asid(self, model: DocumentReference):
+        """
+        Validate that the document contains a valid ASID in the context.related field when the content contains an SSP URL
+        """
+
+        ssp_content = any(
+            [
+                content
+                for content in model.content
+                if content.attachment.url.startswith("ssp://")
+            ]
+        )
+        if not ssp_content:
+            logger.log(
+                LogReference.VALIDATOR001a, step="ssp_asid", reason="no_ssp_content"
+            )
+            return
+
+        logger.log(LogReference.VALIDATOR001, step="ssp_asid")
+
+        if not getattr(model.context, "related", None):
+            self.result.add_error(
+                issue_code="required",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Missing context.related. It must be provided and contain a single valid ASID identifier when content contains an SSP URL",
+                field="context.related",
+            )
+            return
+
+        asid_references = [
+            (idx, related)
+            for idx, related in enumerate(getattr(model.context, "related", []))
+            if related.identifier.system == "https://fhir.nhs.uk/Id/nhsSpineASID"
+        ]
+        if not asid_references:
+            self.result.add_error(
+                issue_code="required",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Missing ASID identifier. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+                field="context.related",
+            )
+            return
+        if len(asid_references) > 1:
+            self.result.add_error(
+                issue_code="invalid",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Multiple ASID identifiers provided. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+                field="context.related",
+            )
+            return
+
+        idx, asid_reference = asid_references[0]
+        asid_value = getattr(asid_reference.identifier, "value", "")
+        if not match(r"^\d{12}$", asid_value):
+            self.result.add_error(
+                issue_code="value",
+                error_code="INVALID_IDENTIFIER_VALUE",
+                diagnostics=f"Invalid ASID value '{asid_value}'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+                field=f"context.related[{idx}].identifier.value",
+            )
+            return
