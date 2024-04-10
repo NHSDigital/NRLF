@@ -5,6 +5,9 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
 
+concurrency:
+  group: environment-${{ github.ref_name }}
+
 permissions:
   id-token: write
   contents: read
@@ -17,7 +20,7 @@ jobs:
     steps:
       - name: Set a ID based on the branch name
         id: set_environment_id
-        run: echo "environment_id=$(echo '${{ github.ref }}' | sed 's/refs\/heads\///' | sed 's/feature\///')" > $GITHUB_OUTPUT
+        run: echo "environment_id=$(echo '${{ github.event.pull_request.head.ref }}' | sed 's/refs\/heads\///' | sed 's/feature\///')" > $GITHUB_OUTPUT
     outputs:
       environment_id: ${{ steps.set_environment_id.outputs.environment_id }}
 
@@ -80,8 +83,7 @@ jobs:
     name: Deploy CI Environment
     runs-on: [self-hosted, ci]
     needs: [set-environment-id, build]
-    concurrency:
-      group: terraform-${{ github.ref_name }}
+
     steps:
       - name: Git Clone - ${{ github.event.pull_request.head.ref }}
         uses: actions/checkout@v4
@@ -178,8 +180,6 @@ jobs:
     name: Run Integration Tests
     needs: [set-environment-id, deploy]
     runs-on: [self-hosted, ci]
-    concurrency:
-      group: integrationtest-${{ github.ref_name }}
 
     steps:
       - name: Git Clone - ${{ github.event.pull_request.head.ref }}
@@ -236,8 +236,6 @@ jobs:
     name: Run Performance Tests
     needs: [set-environment-id, integration-test]
     runs-on: [self-hosted, ci]
-    concurrency:
-      group: performancetest-${{ github.ref_name }}
 
     steps:
       - name: Git Clone - ${{ github.event.pull_request.head.ref }}
