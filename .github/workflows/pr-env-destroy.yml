@@ -24,8 +24,8 @@ jobs:
       - name: Set a ID based on the branch name
         id: set_environment_id
         run: |
-          JIRA_TICKET=$(echo '${{ github.ref }}' | grep '[A-Z]{3,4}-[0-9]{3,5}')
-          BRANCH_HASH=$(echo '${{ github.ref }}' | sha256sum | head -c 8)
+          JIRA_TICKET=$(echo '${{ github.event.pull_request.head.ref }}' | grep '[A-Z]{3,4}-[0-9]{3,5}')
+          BRANCH_HASH=$(echo '${{ github.event.pull_request.head.ref }}' | sha256sum | head -c 8)
 
           if [ -z "$JIRA_TICKET" ]; then
             echo "environment_id=pr-${BRANCH_HASH}" > $GITHUB_OUTPUT
