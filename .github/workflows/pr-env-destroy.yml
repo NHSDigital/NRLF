@@ -37,7 +37,7 @@ jobs:
       environment_id: ${{ steps.set_environment_id.outputs.environment_id }}
 
   destroy:
-    name: Destroy CI Environment
+    name: Destroy PR Environment
     needs: [set-environment-id]
     runs-on: [self-hosted, ci]
 
