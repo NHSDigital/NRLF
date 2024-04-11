@@ -23,7 +23,7 @@ jobs:
       - name: Set a ID based on the branch name
         id: set_environment_id
         run: |
-          JIRA_TICKET=$(echo '${{ github.event.pull_request.head.ref }}' | grep -Po --color=none '[A-z]{3,4}-[0-9]{3,5}' || true)
+          JIRA_TICKET=$(echo '${{ github.event.pull_request.head.ref }}' | grep -Po --color=none '[A-z]{3,4}-[0-9]{3,5}' | tr '[:upper:]' '[:lower:]' || true)
           BRANCH_HASH=$(echo '${{ github.event.pull_request.head.ref }}' | sha256sum | head -c 6)
 
           if [ -z "$JIRA_TICKET" ]; then
