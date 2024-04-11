@@ -1,5 +1,5 @@
 name: Create PR Environment
-run-name: Destroy PR Environment - \#${{ github.event.pull_request.id }} (${{ github.event.pull_request.title }} )
+run-name: Destroy PR Environment - #${{ github.event.pull_request.number }} (${{ github.event.pull_request.title }})"
 
 on:
   pull_request:
@@ -24,8 +24,8 @@ jobs:
       - name: Set a ID based on the branch name
         id: set_environment_id
         run: |
-          JIRA_TICKET=$(echo '${{ github.event.pull_request.head.ref }}' | grep '[A-Z]{3,4}-[0-9]{3,5}' || true)
-          BRANCH_HASH=$(echo '${{ github.event.pull_request.head.ref }}' | sha256sum | head -c 8)
+          JIRA_TICKET=$(echo '${{ github.event.pull_request.head.ref }}' | grep -Po --color=none '[A-z]{3,4}-[0-9]{3,5}' || true)
+          BRANCH_HASH=$(echo '${{ github.event.pull_request.head.ref }}' | sha256sum | head -c 6)
 
           if [ -z "$JIRA_TICKET" ]; then
             echo "environment_id=pr-${BRANCH_HASH}" > $GITHUB_OUTPUT

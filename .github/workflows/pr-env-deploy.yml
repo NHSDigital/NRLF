@@ -23,8 +23,8 @@ jobs:
       - name: Set a ID based on the branch name
         id: set_environment_id
         run: |
-          JIRA_TICKET=$(echo '${{ github.event.pull_request.head.ref }}' | grep '[A-Z]{3,4}-[0-9]{3,5}' || true)
-          BRANCH_HASH=$(echo '${{ github.event.pull_request.head.ref }}' | sha256sum | head -c 8)
+          JIRA_TICKET=$(echo '${{ github.event.pull_request.head.ref }}' | grep -Po --color=none '[A-z]{3,4}-[0-9]{3,5}' || true)
+          BRANCH_HASH=$(echo '${{ github.event.pull_request.head.ref }}' | sha256sum | head -c 6)
 
           if [ -z "$JIRA_TICKET" ]; then
             echo "environment_id=pr-${BRANCH_HASH}" > $GITHUB_OUTPUT
@@ -90,7 +90,7 @@ jobs:
             })
 
   deploy:
-    name: Deploy CI Environment
+    name: Deploy PR Environment
     runs-on: [self-hosted, ci]
     needs: [set-environment-id, build]
 
@@ -162,7 +162,7 @@ jobs:
           name: terraform-outputs
           path: terraform/infrastructure/output.json
 
-      - name: Add Failure Pull Request Comment - Create
+      - name: Add Success Pull Request Comment - Create
         uses: actions/github-script@v7
         if: ${{ success() && github.event.action != 'synchronize' }}
         with:
@@ -186,7 +186,7 @@ jobs:
               body: `💥 Something went wrong while deploying the pull request environment.\n[Check Output Logs](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
             })
 
-      - name: Add Failure Pull Request Comment - Update
+      - name: Add Success Pull Request Comment - Update
         uses: actions/github-script@v7
         if: ${{ success() && github.event.action == 'synchronize' }}
         with:
