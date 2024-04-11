@@ -80,6 +80,10 @@ def create_post_document_reference_step(context: Context, ods_code: str):
     doc_ref = create_test_document_reference(items)
     context.response = client.create(doc_ref.dict(exclude_none=True))
 
+    if context.response.status_code == 201:
+        doc_ref_id = context.response.headers["Location"].split("/")[-1]
+        context.add_cleanup(lambda: context.repository.delete_by_id(doc_ref_id))
+
 
 @when("producer '{ods_code}' reads a DocumentReference with ID '{doc_ref_id}'")
 def producer_read_document_reference_step(
