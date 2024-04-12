@@ -57,7 +57,6 @@ def setup(
     patient_count: int = 100,
     documents_per_type: int = 10,
     ods_code: str = "Y05868",
-    cleanup: bool = False,
     out: str = "tests/performance/reference-data.json",
 ):
     print(f"Creating Test Data in environment '{env}'")

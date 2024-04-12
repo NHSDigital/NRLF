@@ -253,7 +253,6 @@ class DocumentReferenceValidator:
                     diagnostics="relatesTo code 'replaces' must have a target identifier",
                     field=f"relatesTo[{index}].target.identifier.value",
                 )
-                continue
 
     def _validate_ssp_asid(self, model: DocumentReference):
         """

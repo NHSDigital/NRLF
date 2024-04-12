@@ -1,6 +1,5 @@
 import http from "k6/http";
 import { ALL_POINTER_TYPES, ODS_CODE } from "../constants.js";
-import { check } from "k6";
 
 function getBaseURL() {
   return `https://${__ENV.HOST}/producer/DocumentReference`;
