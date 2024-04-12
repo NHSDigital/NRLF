@@ -214,6 +214,9 @@ class LogReference(Enum):
     PROCREATE007e = _Reference(
         "WARN", "RelatesTo validation failed - relating pointer document type mismatch"
     )
+    PROCREATE007f = _Reference(
+        "INFO", "Ignoring missing relatesTo target as permitted by NRL permissions"
+    )
     PROCREATE008 = _Reference("INFO", "Selecting document as target to be superseded")
     PROCREATE009 = _Reference("INFO", "Creating new document reference")
     PROCREATE010 = _Reference("INFO", "Superseding document reference")

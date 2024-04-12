@@ -314,4 +314,3 @@ class DocumentReferenceValidator:
                 diagnostics=f"Invalid ASID value '{asid_value}'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
                 field=f"context.related[{idx}].identifier.value",
             )
-            return
