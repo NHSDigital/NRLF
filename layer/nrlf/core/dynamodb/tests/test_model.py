@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import pytest
 from freezegun import freeze_time
 
+from nrlf.core.constants import PointerTypes
 from nrlf.core.dynamodb.model import DocumentPointer, DynamoDBModel
 from nrlf.producer.fhir.r4.model import DocumentReference
 from nrlf.tests.data import load_document_reference, load_document_reference_json
@@ -89,7 +90,7 @@ def test_DocumentPointer_from_document_reference_valid():
         "producer_id": "Y05868",
         "schemas": [],
         "source": "NRLF",
-        "type": "http://snomed.info/sct|736253002",
+        "type": PointerTypes.MENTAL_HEALTH_PLAN,
         "updated_on": None,
         "version": 1,
         "pk": "D#Y05868#99999-99999-999999",
@@ -121,7 +122,7 @@ def test_DocumentPointer_from_document_reference_valid_with_created_on():
         "producer_id": "Y05868",
         "schemas": [],
         "source": "NRLF",
-        "type": "http://snomed.info/sct|736253002",
+        "type": PointerTypes.MENTAL_HEALTH_PLAN,
         "updated_on": None,
         "version": 1,
         "pk": "D#Y05868#99999-99999-999999",

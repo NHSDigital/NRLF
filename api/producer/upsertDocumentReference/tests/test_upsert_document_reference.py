@@ -8,6 +8,7 @@ from api.producer.upsertDocumentReference.upsert_document_reference import (
     _set_upsert_time_fields,
     handler,
 )
+from nrlf.core.constants import PointerTypes
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
 from nrlf.producer.fhir.r4.model import (
     DocumentReferenceRelatesTo,
@@ -690,8 +691,8 @@ def test_create_document_reference_invalid_relatesto_type(
     event = create_test_api_gateway_event(
         headers=create_headers(
             pointer_types=[
-                "http://snomed.info/sct|861421000000109",
-                "http://snomed.info/sct|736253002",
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
             ]
         ),
         body=doc_ref.json(exclude_none=True),
@@ -742,8 +743,8 @@ def test_create_document_reference_with_no_context_related_for_ssp_url(
     event = create_test_api_gateway_event(
         headers=create_headers(
             pointer_types=[
-                "http://snomed.info/sct|861421000000109",
-                "http://snomed.info/sct|736253002",
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
             ]
         ),
         body=doc_ref.json(exclude_none=True),
@@ -801,8 +802,8 @@ def test_create_document_reference_with_no_asid_in_for_ssp_url(
     event = create_test_api_gateway_event(
         headers=create_headers(
             pointer_types=[
-                "http://snomed.info/sct|861421000000109",
-                "http://snomed.info/sct|736253002",
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
             ]
         ),
         body=doc_ref.json(exclude_none=True),
@@ -860,8 +861,8 @@ def test_create_document_reference_with_invalid_asid_for_ssp_url(
     event = create_test_api_gateway_event(
         headers=create_headers(
             pointer_types=[
-                "http://snomed.info/sct|861421000000109",
-                "http://snomed.info/sct|736253002",
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
             ]
         ),
         body=doc_ref.json(exclude_none=True),
@@ -923,8 +924,8 @@ def test_create_document_reference_supersede_deletes_old_pointers_replace(
     event = create_test_api_gateway_event(
         headers=create_headers(
             pointer_types=[
-                "http://snomed.info/sct|861421000000109",
-                "http://snomed.info/sct|736253002",
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
             ]
         ),
         body=doc_ref.json(exclude_none=True),
@@ -990,8 +991,8 @@ def test_create_document_reference_create_relatesto_not_replaces(
     event = create_test_api_gateway_event(
         headers=create_headers(
             pointer_types=[
-                "http://snomed.info/sct|861421000000109",
-                "http://snomed.info/sct|736253002",
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
             ]
         ),
         body=doc_ref.json(exclude_none=True),
