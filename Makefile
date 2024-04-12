@@ -98,7 +98,7 @@ test-performance-cleanup:
 
 
 lint: check-warn ## Lint the project
-	pre-commit run --all-files
+	SKIP="no-commit-to-branch" pre-commit run --all-files
 
 clean: ## Remove all generated and temporary files
 	[ -n "$(DIST_PATH)" ] && \
