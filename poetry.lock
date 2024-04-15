@@ -2,43 +2,43 @@
 
 [[package]]
 name = "allure-behave"
-version = "2.13.3"
+version = "2.13.5"
 description = "Allure behave integration"
 optional = false
 python-versions = "*"
 files = [
-    {file = "allure-behave-2.13.3.tar.gz", hash = "sha256:9d44db789e1c1d994ff6fa3b86246e037720460464d2ddb06879da0675a3e30e"},
-    {file = "allure_behave-2.13.3-py3-none-any.whl", hash = "sha256:49c36b691076d3807c6a4d8e5e7dc3ee039a07d8e55acb36cdaafa6528c18c7e"},
+    {file = "allure-behave-2.13.5.tar.gz", hash = "sha256:338ca2cc7395d1ee3dd72f5d7d92d8920f1ade0e07ddebc637b38e61e06dc8dc"},
+    {file = "allure_behave-2.13.5-py3-none-any.whl", hash = "sha256:8b04291f435af536b46c3cbd20d33e61b27f5e25dd2fff2fdc1dc3fa2474e23e"},
 ]
 
 [package.dependencies]
-allure-python-commons = "2.13.3"
+allure-python-commons = "2.13.5"
 behave = ">=1.2.5"
 
 [[package]]
 name = "allure-pytest"
-version = "2.13.3"
+version = "2.13.5"
 description = "Allure pytest integration"
 optional = false
 python-versions = "*"
 files = [
-    {file = "allure-pytest-2.13.3.tar.gz", hash = "sha256:59cae25239907b3b57f72bd66476d670ce73a6fd3c339f80ed3fac78b4aa32a5"},
-    {file = "allure_pytest-2.13.3-py3-none-any.whl", hash = "sha256:48dead8667587f10d75ff94d89be9c1f948f605f266e1376e436f4b47aba2440"},
+    {file = "allure-pytest-2.13.5.tar.gz", hash = "sha256:0ef8e1790c44a988db6b83c4d4f5e91451e2c4c8ea10601dfa88528d23afcf6e"},
+    {file = "allure_pytest-2.13.5-py3-none-any.whl", hash = "sha256:94130bac32964b78058e62cf4b815ad97a5ac82a065e6dd2d43abac2be7640fc"},
 ]
 
 [package.dependencies]
-allure-python-commons = "2.13.3"
+allure-python-commons = "2.13.5"
 pytest = ">=4.5.0"
 
 [[package]]
 name = "allure-python-commons"
-version = "2.13.3"
+version = "2.13.5"
 description = "('Contains the API for end users as well as helper functions and classes to build Allure adapters for Python test frameworks',)"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "allure-python-commons-2.13.3.tar.gz", hash = "sha256:2a22c6071bd3700bb380bf5288d8a81697ba3e8e4918836aa4cc4b4b17a99a7e"},
-    {file = "allure_python_commons-2.13.3-py3-none-any.whl", hash = "sha256:ee890a6ad6b820819ec11e702bb9fb64dd855de5e57925a2601ac66de65ef5f1"},
+    {file = "allure-python-commons-2.13.5.tar.gz", hash = "sha256:a232e7955811f988e49a4c1dd6c16cce7e9b81d0ea0422b1e5654d3254e2caf3"},
+    {file = "allure_python_commons-2.13.5-py3-none-any.whl", hash = "sha256:8b0e837b6e32d810adec563f49e1d04127a5b6770e0232065b7cb09b9953980d"},
 ]
 
 [package.dependencies]
@@ -2496,4 +2496,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "b9f9eacfd48601da234594c1add64fcf956a757b673d8c1959f23cba51f72b36"
+content-hash = "8f15e3a2195d11c89a5549d04e338bfac26751bca9db796e7687c08141a2654f"
