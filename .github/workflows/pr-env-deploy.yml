@@ -152,22 +152,10 @@ jobs:
             --var assume_role=terraform \
             -out tfplan
 
-      - name: Store Terraform Plan Output
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan-output
-          path: terraform/infrastructure/tfplan*
-
       - name: Terraform Apply
         id: terraform-apply
         run: |
           terraform -chdir=terraform/infrastructure apply tfplan
-
-      - name: Store Terraform Outputs
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-outputs
-          path: terraform/infrastructure/output.json
 
       - name: Add Success Pull Request Comment
         uses: actions/github-script@v7
