@@ -51,7 +51,7 @@ jobs:
       - name: Git Clone - ${{ github.event.pull_request.head.ref }}
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.merged && github.event.pull_request.base.ref || github.event.pull_request.head.ref }}
 
       - name: Setup asdf cache
         uses: actions/cache@v4
