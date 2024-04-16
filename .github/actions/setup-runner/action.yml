@@ -1,0 +1,82 @@
+name: "Setup Runner"
+inputs:
+  ref:
+    description: "The git ref to checkout"
+    required: true
+
+  create-asdf-cache:
+    description: "Cache the asdf installation and tools"
+    default: true
+
+  create-poetry-cache:
+    description: "Cache poetry and dependencies"
+    default: true
+
+  environment-id:
+    description: "Override the generated environment ID"
+    default: null
+
+outputs:
+  environment-id:
+    description: "The ID of the environment"
+    value: ${{ inputs.environment-id && inputs.environment-id || steps.generate-environment-id.outputs.environment-id }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.ref }}
+
+    - name: Setup asdf cache
+      if: ${{ inputs.create-asdf-cache }}
+      uses: actions/cache@v4
+      with:
+        path: ~/.asdf
+        key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+        restore-keys: |
+          ${{ runner.os }}-asdf-
+
+    - name: Setup poetry cache
+      if: ${{ inputs.create-poetry-cache }}
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/.venv
+        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-poetry-
+
+    - name: Install asdf
+      uses: asdf-vm/actions/install@v3.0.2
+
+    - name: Setup Python environment
+      run: poetry install --no-root
+
+    - name: Install zip
+      run: sudo apt-get install zip
+
+    - name: Add .venv to path
+      run: echo "${{ github.workspace }}/.venv/bin" >> $GITHUB_PATH
+
+    - name: Generate Environment ID
+      if: ${{ inputs.environment-id == null }}
+      id: generate-environment-id
+      run: |
+        JIRA_TICKET=$(
+          echo '${{ inputs.branch-name }}' | \
+          grep -Po --color=none '[A-z]{3,4}-[0-9]{3,5}' | \
+          sed 's/-//g' | \
+          tr '[:upper:]' '[:lower:]' || \
+          true
+        )
+        BRANCH_HASH=$(echo '${{ inputs.branch-name }}${{ inputs.pull-request-id }}' | sha256sum | head -c 6)
+        if [ -z "$JIRA_TICKET" ]; then
+          echo "environment-id=${BRANCH_HASH}" > $GITHUB_OUTPUT
+        else
+          echo "environment-id=${JIRA_TICKET}-${BRANCH_HASH}" > $GITHUB_OUTPUT
+        fi
+
+    - name: Populate environment variables
+      run: |
+        ENV_NAME=${{ inputs.environment-id && inputs.environment-id || steps.generate-environment-id.outputs.environment-id }}
+        echo "TF_WORKSPACE=${ENV_NAME}" >> $GITHUB_ENV
