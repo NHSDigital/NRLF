@@ -22,6 +22,7 @@ runs:
 
   steps:
     - name: Save Artifact to S3
+      shell: bash
       run: |
         RUN_NAME=run-${{ github.run_number }}--attempt-${{ github.run_attempt }}
         S3_URI=s3://${{ inputs.s3_bucket }}/${{ inputs.environment }}/${RUN_NAME}/${{ inputs.name }}

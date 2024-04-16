@@ -42,17 +42,21 @@ runs:
       uses: asdf-vm/actions/install@v3.0.2
 
     - name: Setup Python environment
+      shell: bash
       run: poetry install --no-root
 
     - name: Install zip
+      shell: bash
       run: sudo apt-get install zip
 
     - name: Add .venv to path
+      shell: bash
       run: echo "${{ github.workspace }}/.venv/bin" >> $GITHUB_PATH
 
     - name: Generate Environment ID
       if: ${{ inputs.environment-id == null }}
       id: generate-environment-id
+      shell: bash
       run: |
         JIRA_TICKET=$(
           echo '${{ inputs.branch-name }}' | \
@@ -69,6 +73,7 @@ runs:
         fi
 
     - name: Populate environment variables
+      shell: bash
       run: |
         ENV_NAME=${{ inputs.environment-id && inputs.environment-id || steps.generate-environment-id.outputs.environment-id }}
         echo "TF_WORKSPACE=${ENV_NAME}" >> $GITHUB_ENV

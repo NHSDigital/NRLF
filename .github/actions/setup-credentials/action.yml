@@ -27,6 +27,7 @@ runs:
     - name: Get Target Account ID
       id: get-account-id
       if: ${{ inputs.aws_account_name != null }}
+      shell: bash
       run: |
         TARGET_ACCOUNT_ID=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--${{ inputs.aws-account-name }}-account-id --query SecretString --output text)
         echo "::add-mask::${TARGET_ACCOUNT_ID}"
