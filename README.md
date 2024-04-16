@@ -8,43 +8,14 @@ This project uses the `Makefile` to build, test and deploy. This will ensure tha
 
 ## Table of Contents
 
-1. [Setup](#setup)
-   1. [Prerequisites](#1-prerequisites)
-      1. [ASDF Tool Manager](#1-asdf-tool-manager)
-      2. [If you prefer to get your local machine running manually the requirements are...](#2-if-you-prefer-to-get-your-local-machine-running-manually-the-requirements-are)
-   2. [WSL and PowerShell installation](#2-wsl-and-powershell-installation)
-      1. [Step 1: Install PowerShell](#step-1-install-powershell)
-      2. [Step 2: Install Windows Subsystem for Linux (WSL)](#step-2-install-windows-subsystem-for-linux-wsl)
-      3. [Step 3: Verify Your Installation](#step-3-verify-your-installation)
-   3. [Linux set up](#3-linux-set-up)
-      1. [Java:](#1-java)
-      2. [Poetry:](#2-poetry)
-      3. [pyenv:](#3-pyenv)
-      4. [terraform](#4-terraform)
-      5. [tfenv:](#5-tfenv)
-      6. [yq:](#6-yq)
-   4. [Install python dependencies](#2-install-python-dependencies)
-2. [Initialise shell environment](#initialise-shell-environment)
-3. [Login to AWS](#login-to-aws)
-4. [Build, Test & Run the API](#build-test--run-the-api)
-
-   1. [Run unit tests](#1-run-the-unit-tests)
-   2. [Deploy NRLF](#2-deploy-the-nrlf)
-   3. [Run integration tests](#3-run-the-integration-tests)
-   4. [Run feature tests](#4-run-the-feature-tests)
-   5. [Feature test reports](#5-feature-test-reports)
-   6. [Feature test rules](#6-feature-test-rules)
-
-5. [Smoke tests and oauth tokens for Postman requests](#smoke-tests-and-oauth-tokens)
-6. [Logging](#logging)
-7. [Data Contracts](#data-contracts)
-8. [Route 53 & Hosted zones](#route53--hosted-zones)
-9. [Sandbox](#sandbox)
-10. [Firehose](#firehose)
-11. [Releases](#releases)
-12. [MI System and Reports](#management-information-mi-system)
-
----
+- [Setup](#setup)
+- [Getting Started](#getting-started)
+- [Deploying](#deploying)
+- [Feature Tests](#feature-tests)
+- [OAuth Tokens for API request](#oauth-tokens-for-api-requests)
+- [Route53 & Hosted Zones](#route53--hosted-zones)
+- [Sandbox](#sandbox)
+- [Releases](#releases)
 
 ## Setup
 
