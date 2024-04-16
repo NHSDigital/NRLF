@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Set Environment ID
         id: set-environment-id
-        uses: ./.github/actions/set-environment-id
+        uses: ./.github/actions/set-environment-id/
         with:
           branch-name: ${{ github.event.pull_request.head.ref }}
           pull-request-id: ${{ github.event.pull_request.number }}
@@ -40,10 +40,10 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Setup Cache
-        uses: ../actions/setup-cache.yml
+        uses: ./.github/actions/setup-cache/
 
       - name: Install Tools
-        uses: ../actions/install-tools.yml
+        uses: ./.github/actions/install-tools/
 
       - name: Run Linting
         run: make lint
@@ -55,7 +55,7 @@ jobs:
         run: make build
 
       - name: Save Build Artifacts
-        uses: ../actions/upload-artifact.yml
+        uses: ./.github/actions/upload-artifact/
         with:
           name: build-artifacts
           path: dist/*.zip
@@ -85,13 +85,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Install Tools
-        uses: ../actions/install-tools.yml
+        uses: ./.github/actions/install-tools/
 
       - name: Setup Management Credentials
-        uses: ../actions/setup-credentials.yml
+        uses: ./.github/actions/setup-credentials/
 
       - name: Download Build Artifacts
-        uses: ../actions/download-artifact.yml
+        uses: ./.github/actions/download-artifact/
         with:
           name: build-artifacts
           path: dist
@@ -121,7 +121,7 @@ jobs:
 <<<<<<< HEAD
 =======
       - name: Store Terraform Plan Output
-        uses: ../actions/upload-artifact.yml
+        uses: ./.github/actions/upload-artifact/
         with:
           name: tfplan-output
           path: terraform/infrastructure/tfplan*
@@ -168,16 +168,16 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Install Tools
-        uses: ../actions/install-tools.yml
+        uses: ./.github/actions/install-tools/
 
       - name: Configure Management Credentials
-        uses: ../actions/setup-credentials.yml
+        uses: ./.github/actions/setup-credentials/
 
       - name: Retrieve Client Certificates
         run: make truststore-pull-client ENV=dev
 
       - name: Configure Dev Account Credentials
-        uses: ../actions/setup-credentials.yml
+        uses: ./.github/actions/setup-credentials/
         with:
           aws-account-name: dev
           skip-mgmt: true
@@ -196,16 +196,16 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Install Tools
-        uses: ../actions/install-tools.yml
+        uses: ./.github/actions/install-tools/
 
       - name: Configure Management Credentials
-        uses: ../actions/setup-credentials.yml
+        uses: ./.github/actions/setup-credentials/
 
       - name: Pull Client Certificates
         run: make truststore-pull-client ENV=dev
 
       - name: Configure Dev Account Credentials
-        uses: ../actions/setup-credentials.yml
+        uses: ./.github/actions/setup-credentials/
         with:
           aws-account-name: dev
           skip-mgmt: true
@@ -223,7 +223,7 @@ jobs:
         run: make test-performance-output
 
       - name: Store Performance Test Outputs
-        uses: ../actions/upload-artifact.yml
+        uses: ./.github/actions/upload-artifact/
         with:
           name: performance-test
           path: dist/*.png
