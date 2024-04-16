@@ -27,8 +27,10 @@ runs:
         RUN_NAME=run-${{ github.run_number }}--attempt-${{ github.run_attempt }}
         S3_URI=s3://${{ inputs.s3_bucket }}/${{ inputs.environment }}/${RUN_NAME}/${{ inputs.name }}
 
+        aws sts get-caller-identity
+
         for filename in ${{ inputs.path }}; do
-          aws s3 cp $filename $S3_URI
+          aws s3 cp $filename $S3_URI/$(basename $filename)
         done
 
     - name: Save Artifact to GitHub
