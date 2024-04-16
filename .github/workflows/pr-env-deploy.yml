@@ -88,10 +88,10 @@ jobs:
         uses: ./.github/actions/install-tools
 
       - name: Setup Management Credentials
-        uses: .github/actions/setup-credentials
+        uses: ./.github/actions/setup-credentials
 
       - name: Download Build Artifacts
-        uses: .github/actions/download-artifact
+        uses: ./.github/actions/download-artifact
         with:
           name: build-artifacts
           path: dist
@@ -158,16 +158,16 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Install Tools
-        uses: .github/actions/install-tools
+        uses: ./.github/actions/install-tools
 
       - name: Configure Management Credentials
-        uses: .github/actions/setup-credentials
+        uses: ./.github/actions/setup-credentials
 
       - name: Retrieve Client Certificates
         run: make truststore-pull-client ENV=dev
 
       - name: Configure Dev Account Credentials
-        uses: .github/actions/setup-credentials
+        uses: ./.github/actions/setup-credentials
         with:
           aws-account-name: dev
           skip-mgmt: true
@@ -186,7 +186,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Install Tools
-        uses: .github/actions/install-tools
+        uses: ./.github/actions/install-tools
 
       - name: Configure Management Credentials
         uses: ./.github/actions/setup-credentials
