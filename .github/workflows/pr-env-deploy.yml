@@ -20,54 +20,30 @@ jobs:
   set-environment-id:
     name: Set Environment ID
     runs-on: [self-hosted, ci]
-    steps:
-      - name: Set a ID based on the branch name
-        id: set_environment_id
-        run: |
-          JIRA_TICKET=$(
-            echo '${{ github.event.pull_request.head.ref }}' | \
-            grep -Po --color=none '[A-z]{3,4}-[0-9]{3,5}' | \
-            sed 's/-//g' | \
-            tr '[:upper:]' '[:lower:]' || \
-            true
-          )
-          BRANCH_HASH=$(echo '${{ github.event.pull_request.head.ref }}${{ github.event.pull_request.id }}' | sha256sum | head -c 6)
-
-          if [ -z "$JIRA_TICKET" ]; then
-            echo "environment_id=${BRANCH_HASH}" > $GITHUB_OUTPUT
-          else
-            echo "environment_id=${JIRA_TICKET}-${BRANCH_HASH}" > $GITHUB_OUTPUT
-          fi
     outputs:
-      environment_id: ${{ steps.set_environment_id.outputs.environment_id }}
+      environment_id: ${{ steps.set-environment-id.outputs.environment-id }}
+    steps:
+      - name: Set Environment ID
+        id: set-environment-id
+        uses: ./.github/actions/set-environment-id
+        with:
+          branch-name: ${{ github.event.pull_request.head.ref }}
+          pull-request-id: ${{ github.event.pull_request.number }}
 
   build:
     name: Build Application
     runs-on: [self-hosted, ci]
+    needs: [set-environment-id]
     steps:
-      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Setup asdf cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.asdf
-          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
-          restore-keys: |
-            ${{ runner.os }}-asdf-
+      - name: Setup Cache
+        uses: ./.github/actions/setup-cache
 
-      - name: Install asdf
-        uses: asdf-vm/actions/install@v3.0.2
-
-      - name: Install zip
-        run: sudo apt-get install zip
-
-      - name: Setup Python environment
-        run: |
-          poetry install --no-root
-          source $(poetry env info --path)/bin/activate
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
 
       - name: Run Linting
         run: make lint
@@ -79,10 +55,12 @@ jobs:
         run: make build
 
       - name: Save Build Artifacts
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/upload-artifact
         with:
           name: build-artifacts
           path: dist/*.zip
+          environment: ${{ needs.set-environment-id.outputs.environment_id }}
+          sensitive: false
 
       - name: Add Failure Pull Request Comment
         uses: actions/github-script@v7
@@ -102,34 +80,22 @@ jobs:
     needs: [set-environment-id, build]
 
     steps:
-      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Setup asdf cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.asdf
-          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
-          restore-keys: |
-            ${{ runner.os }}-asdf-
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
 
-      - name: Install asdf
-        uses: asdf-vm/actions/install@v3.0.2
+      - name: Setup Management Credentials
+        uses: .github/actions/setup-credentials
 
-      - name: Download Artifacts
-        uses: actions/download-artifact@v4
+      - name: Download Build Artifacts
+        uses: .github/actions/download-artifact
         with:
           name: build-artifacts
           path: dist
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
+          environment: ${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Retrieve Server Certificates
         run: aws s3 cp s3://nhsd-nrlf--truststore/server/dev.pem truststore/server/dev.pem
@@ -187,55 +153,27 @@ jobs:
     runs-on: [self-hosted, ci]
 
     steps:
-      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Setup asdf cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.asdf
-          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
-          restore-keys: |
-            ${{ runner.os }}-asdf-
+      - name: Install Tools
+        uses: .github/actions/install-tools
 
-      - name: Install asdf and tools
-        uses: asdf-vm/actions/install@v3.0.2
-
-      - name: Python Dependency Install
-        run: poetry install --no-root
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
+      - name: Configure Management Credentials
+        uses: .github/actions/setup-credentials
 
       - name: Retrieve Client Certificates
-        run: |
-          aws s3 cp s3://nhsd-nrlf--truststore/client/dev.key truststore/client/dev.key
-          aws s3 cp s3://nhsd-nrlf--truststore/client/dev.crt truststore/client/dev.crt
-
-      - name: Get AWS Account ID
-        id: get_account_id
-        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+        run: make truststore-pull-client ENV=dev
 
       - name: Configure Dev Account Credentials
-        id: configure-dev-account-credentials
-        run: |
-          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ steps.get_account_id.outputs.aws_account_id }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }} --output json)
-          echo "aws_access_key_id=$(echo $aws_credentials | jq -r '.Credentials.AccessKeyId')" >> "$GITHUB_OUTPUT"
-          echo "aws_secret_access_key=$(echo $aws_credentials | jq -r '.Credentials.SecretAccessKey')" >> "$GITHUB_OUTPUT"
-          echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
+        uses: .github/actions/setup-credentials
+        with:
+          aws-account-name: dev
+          skip-mgmt: true
 
       - name: Run Integration Tests
         run: make test-features-integration TF_WORKSPACE=${{ needs.set-environment-id.outputs.environment_id }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
-          AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}
 
   performance-test:
     name: Run Performance Tests
@@ -243,55 +181,27 @@ jobs:
     runs-on: [self-hosted, ci]
 
     steps:
-      - name: Git Clone - ${{ github.event.pull_request.head.ref }}
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Setup asdf cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.asdf
-          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
-          restore-keys: |
-            ${{ runner.os }}-asdf-
+      - name: Install Tools
+        uses: .github/actions/install-tools
 
-      - name: Install asdf and tools
-        uses: asdf-vm/actions/install@v3.0.2
-
-      - name: Setup Python environment
-        run: |
-          poetry install --no-root
-          source $(poetry env info --path)/bin/activate
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
+      - name: Configure Management Credentials
+        uses: ./.github/actions/setup-credentials
 
       - name: Pull Client Certificates
         run: make truststore-pull-client ENV=dev
 
-      - name: Get AWS Account ID
-        id: get_account_id
-        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
-
       - name: Configure Dev Account Credentials
-        id: configure-dev-account-credentials
-        run: |
-          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ steps.get_account_id.outputs.aws_account_id }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }} --output json)
-          echo "aws_access_key_id=$(echo $aws_credentials | jq -r '.Credentials.AccessKeyId')" >> "$GITHUB_OUTPUT"
-          echo "aws_secret_access_key=$(echo $aws_credentials | jq -r '.Credentials.SecretAccessKey')" >> "$GITHUB_OUTPUT"
-          echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
+        uses: ./.github/actions/setup-credentials
+        with:
+          aws-account-name: dev
+          skip-mgmt: true
 
       - name: Setup Environment Test Data
         run: make test-performance-prepare TF_WORKSPACE=${{ needs.set-environment-id.outputs.environment_id }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
-          AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}
 
       - name: Run Performance Test - Baseline
         run: make test-performance-baseline HOST=${{ needs.set-environment-id.outputs.environment_id }}.api.record-locator.dev.national.nhs.uk ENV_TYPE=dev
@@ -303,14 +213,11 @@ jobs:
         run: make test-performance-output
 
       - name: Store Performance Test Outputs
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/upload-artifact
         with:
-          name: performance-test-outputs
+          name: performance-test
           path: dist/*.png
+          environment: ${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Cleanup Environment Test Data
         run: make test-performance-cleanup TF_WORKSPACE=${{ needs.set-environment-id.outputs.environment_id }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
-          AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}

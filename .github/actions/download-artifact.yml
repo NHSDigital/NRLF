@@ -1,0 +1,27 @@
+name: Upload Artifact
+description: Upload an artifact to GitHub Actions and/or S3
+inputs:
+  name:
+    description: "The name of the artifact"
+    required: true
+  environment:
+    description: "The name of the environment"
+    required: true
+  path:
+    description: "The path to the artifact"
+    required: true
+  s3_bucket:
+    description: "The S3 bucket to download artifacts from"
+    default: "nhsd-nrlf--mgmt--github-ci-logging"
+
+runs:
+  using: composite
+
+  steps:
+    - name: Download Artifact from S3
+      run: |
+        RUN_NAME=run-${{ github.run_number }}--attempt-${{ github.run_attempt }}
+        S3_URI=s3://${{ inputs.s3_bucket }}/${{ inputs.environment }}/${RUN_NAME}/${{ inputs.name }}
+
+        mkdir -p ${{ inputs.path }} || exit 0
+        aws s3 sync $S3_URI ${{ inputs.path }}

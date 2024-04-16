@@ -1,0 +1,38 @@
+name: Upload Artifact
+description: Upload an artifact to GitHub Actions and/or S3
+inputs:
+  name:
+    description: "The name of the artifact"
+    required: true
+  environment:
+    description: "The name of the environment"
+    required: true
+  path:
+    description: "The path to the artifact"
+    required: true
+  s3_bucket:
+    description: "The S3 bucket to save artifacts to"
+    default: "nhsd-nrlf--mgmt--github-ci-logging"
+  sensitive:
+    description: "Whether the artifact is sensitive"
+    default: false
+
+runs:
+  using: composite
+
+  steps:
+    - name: Save Artifact to S3
+      run: |
+        RUN_NAME=run-${{ github.run_number }}--attempt-${{ github.run_attempt }}
+        S3_URI=s3://${{ inputs.s3_bucket }}/${{ inputs.environment }}/${RUN_NAME}/${{ inputs.name }}
+
+        for filename in ${{ inputs.path }}; do
+          aws s3 cp $filename $S3_URI
+        done
+
+    - name: Save Artifact to GitHub
+      if: ${{ !inputs.sensitive }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
