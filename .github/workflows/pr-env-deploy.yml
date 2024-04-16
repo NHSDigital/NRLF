@@ -42,6 +42,9 @@ jobs:
         id: setup-runner
         uses: ./.github/actions/setup-runner/
 
+      - name: Setup Management Credentials
+        uses: ./.github/actions/setup-credentials/
+
       - name: Run Linting
         run: make lint
 

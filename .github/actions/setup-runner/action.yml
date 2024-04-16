@@ -59,13 +59,13 @@ runs:
       shell: bash
       run: |
         JIRA_TICKET=$(
-          echo '${{ inputs.branch-name }}' | \
+          echo '${{ github.event.pull_request.head.ref }}' | \
           grep -Po --color=none '[A-z]{3,4}-[0-9]{3,5}' | \
           sed 's/-//g' | \
           tr '[:upper:]' '[:lower:]' || \
           true
         )
-        BRANCH_HASH=$(echo '${{ inputs.branch-name }}${{ inputs.pull-request-id }}' | sha256sum | head -c 6)
+        BRANCH_HASH=$(echo '${{ github.event.pull_request.head.ref }}${{ github.event.pull_request.number }}' | sha256sum | head -c 6)
         if [ -z "$JIRA_TICKET" ]; then
           echo "environment-id=${BRANCH_HASH}" > $GITHUB_OUTPUT
         else
