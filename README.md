@@ -436,8 +436,6 @@ The `records` property is derived by first deploying to a specific environment, 
 
 ## Sandbox
 
-TODO-NOW Update sandbox notes
-
 The public-facing sandbox is an additional persistent workspace (`int-sandbox`) deployed in our UAT (`int` / `test`) environment, alongside the persistent workspace named `ref`. It is identical to our live API, except it is open to the world via Apigee (which implements rate limiting on our behalf).
 
 ### Sandbox deployment
@@ -464,10 +462,15 @@ Additionally, and less importantly, there are also fixed organization details in
 
 ## Releases
 
-TODO-NOW Update releases notes
+The process to create a new release is as follows:
 
-When you create a release branch in the form of `release/yyyy-mm-dd` or `hotfix/yyyy-mm-dd` then you need to update the RELEASE file in the top level of the repository to match that release name
+1. In [Github Releases](https://github.com/NHSDigital/NRLF/releases), press the "Draft new release" button.
+2. Press "Choose a tag" and enter the version of the release, say `v3.0.1`. This will be the tag we use to release from.
+3. Select `develop` for the release Target
+4. Press "Generate release notes" button. This will populate the description with everything that's changed since the last release.
+5. Enter the version of the release into the Release Title field, say `v3.0.1`
+6. Arrange and update the description to accuruately represent the highlights of the release.
+7. Make sure the "Set as the latest release" checkbox it set
+8. Press the "Publish release" button to complete the release process
 
-The CI pipeline will check to make sure you have done this to prevent any mistakes - if you have made a release or hotfix branch it will check that the value in the RELEASE file matches or not
-
-This is because it will use that value to tag the commit once its been merged into main as a reference point, and this is how it tracks which release it is as github actions struggles with post merge branch identification
+Once your new release has been created, you can then deploy this release through the NRLF environments using the "Persistent Environment Deploy" Github Action.
