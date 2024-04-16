@@ -34,11 +34,13 @@ jobs:
     name: Build Application
     runs-on: [self-hosted, ci]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
       - name: Setup Runner
         id: setup-runner
         uses: ./.github/actions/setup-runner/
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Run Linting
         run: make lint
@@ -75,11 +77,13 @@ jobs:
     needs: [build]
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
       - name: Setup Runner
         id: setup-runner
         uses: ./.github/actions/setup-runner/
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Setup Management Credentials
         uses: ./.github/actions/setup-credentials/
@@ -154,11 +158,13 @@ jobs:
     runs-on: [self-hosted, ci]
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
       - name: Setup Runner
         id: setup-runner
         uses: ./.github/actions/setup-runner/
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Configure Management Credentials
         uses: ./.github/actions/setup-credentials/
@@ -181,11 +187,13 @@ jobs:
     runs-on: [self-hosted, ci]
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
       - name: Setup Runner
         id: setup-runner
         uses: ./.github/actions/setup-runner/
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Configure Management Credentials
         uses: ./.github/actions/setup-credentials/

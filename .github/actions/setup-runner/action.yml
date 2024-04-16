@@ -1,9 +1,5 @@
 name: "Setup Runner"
 inputs:
-  ref:
-    description: "The git ref to checkout"
-    required: true
-
   create-asdf-cache:
     description: "Cache the asdf installation and tools"
     default: true
@@ -24,10 +20,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v4
-      with:
-        ref: ${{ inputs.ref }}
-
     - name: Setup asdf cache
       if: ${{ inputs.create-asdf-cache }}
       uses: actions/cache@v4
