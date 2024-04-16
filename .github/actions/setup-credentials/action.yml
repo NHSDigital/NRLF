@@ -4,7 +4,10 @@ inputs:
   aws-account-name:
     description: "The target AWS account to setup credentials for. Default to the management account."
     default: null
-  role-name:
+  mgmt-role-name:
+    description: "The role to assume within the management account"
+    default: "terraform"
+  target-role-name:
     description: "The role to assume within the target account"
     default: "terraform"
   skip-mgmt:
@@ -19,7 +22,7 @@ runs:
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: eu-west-2
-        role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+        role-to-assume: ${{ inputs.mgmt-role-name }}
         role-session-name: github-actions-ci-run${{ github.run_number }}-attempt${{ github.run_attempt }}
         mask-aws-account-id: true
         unset-current-credentials: true

@@ -17,19 +17,6 @@ permissions:
   pull-requests: write
 
 jobs:
-  # set-environment-id:
-  #   name: Set Environment ID
-  #   runs-on: [self-hosted, ci]
-  #   outputs:
-  #     environment_id: ${{ steps.set-environment-id.outputs.environment-id }}
-  #   steps:
-  #     - name: Set Environment ID
-  #       id: set-environment-id
-  #       uses: ./.github/actions/set-environment-id/
-  #       with:
-  #         branch-name: ${{ github.event.pull_request.head.ref }}
-  #         pull-request-id: ${{ github.event.pull_request.number }}
-
   build:
     name: Build Application
     runs-on: [self-hosted, ci]
@@ -44,6 +31,8 @@ jobs:
 
       - name: Setup Management Credentials
         uses: ./.github/actions/setup-credentials/
+        with:
+          mgmt-role-name: ${{ secrets.CI_ROLE_NAME }}
 
       - name: Run Linting
         run: make lint
@@ -90,6 +79,8 @@ jobs:
 
       - name: Setup Management Credentials
         uses: ./.github/actions/setup-credentials/
+        with:
+          mgmt-role-name: ${{ secrets.CI_ROLE_NAME }}
 
       - name: Download Build Artifacts
         uses: ./.github/actions/download-artifact/
@@ -171,6 +162,8 @@ jobs:
 
       - name: Configure Management Credentials
         uses: ./.github/actions/setup-credentials/
+        with:
+          mgmt-role-name: ${{ secrets.CI_ROLE_NAME }}
 
       - name: Retrieve Client Certificates
         run: make truststore-pull-client ENV=dev
@@ -200,6 +193,8 @@ jobs:
 
       - name: Configure Management Credentials
         uses: ./.github/actions/setup-credentials/
+        with:
+          mgmt-role-name: ${{ secrets.CI_ROLE_NAME }}
 
       - name: Pull Client Certificates
         run: make truststore-pull-client ENV=dev
