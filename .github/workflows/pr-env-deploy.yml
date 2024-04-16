@@ -118,8 +118,6 @@ jobs:
             --var assume_role=terraform \
             -out tfplan
 
-<<<<<<< HEAD
-=======
       - name: Store Terraform Plan Output
         uses: ./.github/actions/upload-artifact/
         with:
@@ -127,7 +125,6 @@ jobs:
           path: terraform/infrastructure/tfplan*
           sensitive: true
 
->>>>>>> d0000dd (NRL-611 Use relative paths for actions)
       - name: Terraform Apply
         id: terraform-apply
         run: |
