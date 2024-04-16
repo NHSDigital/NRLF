@@ -40,10 +40,10 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Setup Cache
-        uses: ./.github/actions/setup-cache
+        uses: ../actions/setup-cache.yml
 
       - name: Install Tools
-        uses: ./.github/actions/install-tools
+        uses: ../actions/install-tools.yml
 
       - name: Run Linting
         run: make lint
@@ -55,7 +55,7 @@ jobs:
         run: make build
 
       - name: Save Build Artifacts
-        uses: ./.github/actions/upload-artifact
+        uses: ../actions/upload-artifact.yml
         with:
           name: build-artifacts
           path: dist/*.zip
@@ -85,13 +85,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Install Tools
-        uses: ./.github/actions/install-tools
+        uses: ../actions/install-tools.yml
 
       - name: Setup Management Credentials
-        uses: ./.github/actions/setup-credentials
+        uses: ../actions/setup-credentials.yml
 
       - name: Download Build Artifacts
-        uses: ./.github/actions/download-artifact
+        uses: ../actions/download-artifact.yml
         with:
           name: build-artifacts
           path: dist
@@ -118,6 +118,16 @@ jobs:
             --var assume_role=terraform \
             -out tfplan
 
+<<<<<<< HEAD
+=======
+      - name: Store Terraform Plan Output
+        uses: ../actions/upload-artifact.yml
+        with:
+          name: tfplan-output
+          path: terraform/infrastructure/tfplan*
+          sensitive: true
+
+>>>>>>> d0000dd (NRL-611 Use relative paths for actions)
       - name: Terraform Apply
         id: terraform-apply
         run: |
@@ -158,16 +168,16 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Install Tools
-        uses: ./.github/actions/install-tools
+        uses: ../actions/install-tools.yml
 
       - name: Configure Management Credentials
-        uses: ./.github/actions/setup-credentials
+        uses: ../actions/setup-credentials.yml
 
       - name: Retrieve Client Certificates
         run: make truststore-pull-client ENV=dev
 
       - name: Configure Dev Account Credentials
-        uses: ./.github/actions/setup-credentials
+        uses: ../actions/setup-credentials.yml
         with:
           aws-account-name: dev
           skip-mgmt: true
@@ -186,16 +196,16 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Install Tools
-        uses: ./.github/actions/install-tools
+        uses: ../actions/install-tools.yml
 
       - name: Configure Management Credentials
-        uses: ./.github/actions/setup-credentials
+        uses: ../actions/setup-credentials.yml
 
       - name: Pull Client Certificates
         run: make truststore-pull-client ENV=dev
 
       - name: Configure Dev Account Credentials
-        uses: ./.github/actions/setup-credentials
+        uses: ../actions/setup-credentials.yml
         with:
           aws-account-name: dev
           skip-mgmt: true
@@ -213,7 +223,7 @@ jobs:
         run: make test-performance-output
 
       - name: Store Performance Test Outputs
-        uses: ./.github/actions/upload-artifact
+        uses: ../actions/upload-artifact.yml
         with:
           name: performance-test
           path: dist/*.png
