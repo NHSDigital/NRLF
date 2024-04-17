@@ -125,3 +125,9 @@ truststore-pull-client: check-warn ## Pull a client certificate
 
 truststore-pull-ca: check-warn ## Pull a CA certificate
 	@./scripts/truststore.sh pull-ca "$(ENV)"
+
+swagger-merge: check-warn ## Generate Swagger Documentation
+	@./scripts/swagger.sh merge "$(TYPE)"
+
+generate-model: check-warn ## Generate Pydantic Models
+	@./scripts/swagger.sh generate-model "$(TYPE)"
