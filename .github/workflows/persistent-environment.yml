@@ -128,12 +128,6 @@ jobs:
             --var assume_role=terraform \
             -out tfplan
 
-      - name: Store Terraform Plan Output
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan-output
-          path: terraform/infrastructure/tfplan*
-
   terraform-apply:
     name: Terraform Apply - ${{ inputs.environment }}
     needs: [terraform-plan]
