@@ -54,6 +54,7 @@ data "aws_iam_policy_document" "allow-authorizer-lambda-to-read" {
         "arn:aws:iam::${var.assume_account}:role/${module.producer__searchDocumentReference.lambda_role_name}",
         "arn:aws:iam::${var.assume_account}:role/${module.producer__searchPostDocumentReference.lambda_role_name}",
         "arn:aws:iam::${var.assume_account}:role/${module.producer__updateDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${var.assume_account}:role/${module.producer__upsertDocumentReference.lambda_role_name}",
       ]
     }
 
