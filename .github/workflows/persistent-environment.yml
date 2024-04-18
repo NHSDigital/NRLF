@@ -8,14 +8,8 @@ on:
         description: "Environment to deploy to"
         required: true
         default: "dev"
-        type: choice
-        options:
-          - dev
-          - ref
-          - int
-          - dev-sandbox
-          - ref-sandbox
-          - int-sandbox
+        type: environment
+
       branch_name:
         description: Branch to deploy
         required: true
@@ -128,6 +122,12 @@ jobs:
             --var assume_role=terraform \
             -out tfplan
 
+      - name: Save Terraform Plan
+        run: |
+          terraform show terraform/infrastructure/tfplan > terraform/infrastructure/tfplan.txt
+          aws s3 cp terraform/infrastructure/tfplan s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan
+          aws s3 cp terraform/infrastructure/tfplan.txt s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan.txt
+
   terraform-apply:
     name: Terraform Apply - ${{ inputs.environment }}
     needs: [terraform-plan]
@@ -157,18 +157,15 @@ jobs:
           name: build-artifacts
           path: dist
 
-      - name: Download Terraform Plan artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan-output
-          path: terraform/infrastructure
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-2
           role-to-assume: ${{ secrets.CI_ROLE_NAME }}
           role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
+
+      - name: Download Terraform Plan artifact
+        run: s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan terraform/infrastructure/tfplan
 
       - name: Get AWS Account ID
         id: get_account_id
