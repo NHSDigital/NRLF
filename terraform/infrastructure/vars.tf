@@ -2,12 +2,6 @@ variable "account_name" {
   type = string
 }
 
-variable "assume_account" {
-  sensitive = true
-}
-
-variable "assume_role" {}
-
 # What domain should the APIs be hosted under
 variable "domain" {
   type = string
