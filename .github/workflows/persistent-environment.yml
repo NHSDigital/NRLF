@@ -165,7 +165,7 @@ jobs:
           role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
 
       - name: Download Terraform Plan artifact
-        run: s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan terraform/infrastructure/tfplan
+        run: aws s3 cp s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan terraform/infrastructure/tfplan
 
       - name: Get AWS Account ID
         id: get_account_id
