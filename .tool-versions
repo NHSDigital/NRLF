@@ -1,4 +1,4 @@
-awscli latest
+awscli 2.15.36
 poetry 1.5.1
 jq latest
 python 3.9.15

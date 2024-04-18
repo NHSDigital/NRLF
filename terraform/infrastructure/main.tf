@@ -21,4 +21,16 @@ terraform {
     key                  = "terraform-state-infrastructure"
     workspace_key_prefix = "nhsd-nrlf"
   }
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
+  }
 }
