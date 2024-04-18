@@ -124,7 +124,7 @@ jobs:
 
       - name: Save Terraform Plan
         run: |
-          terraform show terraform/infrastructure/tfplan > terraform/infrastructure/tfplan.txt
+          terraform -chdir=terraform/infrastructure show -no-color tfplan > terraform/infrastructure/tfplan.txt
           aws s3 cp terraform/infrastructure/tfplan s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan
           aws s3 cp terraform/infrastructure/tfplan.txt s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan.txt
 
