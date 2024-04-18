@@ -212,12 +212,13 @@ def test_validate_document_reference_missing_fields():
     del document_ref_data["type"]
     del document_ref_data["custodian"]
     del document_ref_data["subject"]
+    del document_ref_data["category"]
 
     result = validator.validate(document_ref_data)
 
     assert result.is_valid is False
     assert result.resource.id is None
-    assert len(result.issues) == 4
+    assert len(result.issues) == 5
     assert result.issues[0].dict(exclude_none=True) == {
         "severity": "error",
         "code": "required",
@@ -240,6 +241,7 @@ def test_validate_document_reference_missing_fields():
         "The required field 'id' is missing",
         "The required field 'type' is missing",
         "The required field 'subject' is missing",
+        "The required field 'category' is missing",
     ]
 
 
@@ -341,6 +343,212 @@ def test_validate_identifiers_no_subject_identifier():
         },
         "diagnostics": "Subject must have an identifier",
         "expression": ["subject.identifier"],
+    }
+
+
+def test_validate_category_no_category():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    del document_ref_data["category"]
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert result.resource.id == "Y05868-99999-99999-999999"
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "required",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "The required field 'category' is missing",
+        "expression": ["category"],
+    }
+
+
+def test_validate_category_too_many_category():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["category"].append(
+        {
+            "coding": [
+                {
+                    "system": "http://snomed.info/sct",
+                    "code": "734163000",
+                    "display": "Care plan",
+                }
+            ]
+        }
+    )
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert result.resource.id == "Y05868-99999-99999-999999"
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "invalid",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "Invalid category length: 2",
+        "expression": ["category"],
+    }
+
+
+def test_validate_category_coding_display_mismatch_care_plan():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["category"][0] = {
+        "coding": [
+            {
+                "system": "http://snomed.info/sct",
+                "code": "734163000",
+                "display": "some random display name",
+            }
+        ]
+    }
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert result.resource.id == "Y05868-99999-99999-999999"
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "value",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "category code '734163000' must have a display value of 'Care plan'",
+        "expression": ["category[0].coding[0].display"],
+    }
+
+
+def test_validate_category_coding_display_mismatch_observations():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["category"][0] = {
+        "coding": [
+            {
+                "system": "http://snomed.info/sct",
+                "code": "1102421000000108",
+                "display": "some random display name",
+            }
+        ]
+    }
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert result.resource.id == "Y05868-99999-99999-999999"
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "value",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "category code '1102421000000108' must have a display value of 'Observations'",
+        "expression": ["category[0].coding[0].display"],
+    }
+
+
+def test_validate_category_coding_invalid_code():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["category"][0] = {
+        "coding": [
+            {"system": "http://snomed.info/sct", "code": "1234", "display": "Care plan"}
+        ]
+    }
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert result.resource.id == "Y05868-99999-99999-999999"
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "value",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "Invalid category code: 1234",
+        "expression": ["category[0].coding[0].code"],
+    }
+
+
+def test_validate_category_coding_invalid_system():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["category"][0] = {
+        "coding": [
+            {
+                "system": "http://snoooooomed/sctfffffg",
+                "code": "734163000",
+                "display": "Care plan",
+            }
+        ]
+    }
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert result.resource.id == "Y05868-99999-99999-999999"
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "value",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "Invalid category system: http://snoooooomed/sctfffffg",
+        "expression": ["category[0].coding[0].system"],
     }
 
 

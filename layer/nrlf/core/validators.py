@@ -115,6 +115,7 @@ class DocumentReferenceValidator:
             self._validate_identifiers(resource)
             self._validate_relates_to(resource)
             self._validate_ssp_asid(resource)
+            self._validate_category(resource)
 
         except StopValidationError:
             logger.log(LogReference.VALIDATOR003)
@@ -316,3 +317,67 @@ class DocumentReferenceValidator:
                 field=f"context.related[{idx}].identifier.value",
             )
             return
+
+    def _validate_category(self, model: DocumentReference):
+        """
+        Validate the category field contains an appropriate coding systen, code and display.
+        """
+
+        if len(model.category) > 1:
+            logger.log(
+                LogReference.VALIDATOR001, step="category", reason="category_too_long"
+            )
+            self.result.add_error(
+                issue_code="invalid",
+                error_code="INVALID_RESOURCE",
+                diagnostics=f"Invalid category length: {len(model.category)}",
+                field=f"category",
+            )
+            return
+
+        logger.log(LogReference.VALIDATOR001, step="category")
+
+        logger.debug("Validating category")
+
+        for index, coding in enumerate(model.category[0].coding):
+            if coding.system != "http://snomed.info/sct":
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"Invalid category system: {coding.system}",
+                    field=f"category[0].coding[{index}].system",
+                )
+                continue
+
+            if coding.code not in [
+                "734163000",
+                "1102421000000108",
+            ]:
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"Invalid category code: {coding.code}",
+                    field=f"category[0].coding[{index}].code",
+                )
+                continue
+
+            if coding.code == "734163000" and not coding.display == "Care plan":
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics="category code '734163000' must have a display value of 'Care plan'",
+                    field=f"category[0].coding[{index}].display",
+                )
+                continue
+
+            elif (
+                coding.code == "1102421000000108"
+                and not coding.display == "Observations"
+            ):
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics="category code '1102421000000108' must have a display value of 'Observations'",
+                    field=f"category[0].coding[{index}].display",
+                )
+                continue
