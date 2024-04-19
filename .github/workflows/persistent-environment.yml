@@ -95,7 +95,7 @@ jobs:
       - name: Retrieve Server Certificates
         run: |
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
-          aws s3 cp s3://nhsd-nrlf--truststore/server/${account}.pem truststore/server/${account}.pem
+          make truststore-pull-server ENV=${account}
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -165,7 +165,6 @@ jobs:
         run: |
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
           make truststore-pull-server ENV=${account}
-          aws s3 cp s3://nhsd-nrlf--truststore/server/${account}.pem truststore/server/${account}.pem
 
       - name: Terraform Init
         run: |

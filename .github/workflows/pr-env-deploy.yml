@@ -133,7 +133,7 @@ jobs:
           role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Retrieve Server Certificates
-        run: aws s3 cp s3://nhsd-nrlf--truststore/server/dev.pem truststore/server/dev.pem
+        run: make truststore-pull-server ENV=dev
 
       - name: Terraform Init
         run: |
