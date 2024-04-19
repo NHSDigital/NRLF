@@ -5,7 +5,7 @@ module "consumer__readDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"
@@ -31,7 +31,7 @@ module "consumer__countDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/_count"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference/_count"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"
@@ -57,7 +57,7 @@ module "consumer__searchDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.consumer__gateway.api_gateway_id}/*/GET/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"
@@ -83,7 +83,7 @@ module "consumer__searchPostDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/POST/DocumentReference/_search"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.consumer__gateway.api_gateway_id}/*/POST/DocumentReference/_search"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"
@@ -109,7 +109,7 @@ module "producer__createDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/POST/DocumentReference"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.producer__gateway.api_gateway_id}/*/POST/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"
@@ -137,7 +137,7 @@ module "producer__deleteDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/DELETE/DocumentReference/{id}"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.producer__gateway.api_gateway_id}/*/DELETE/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"
@@ -164,7 +164,7 @@ module "producer__readDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"
@@ -190,7 +190,7 @@ module "producer__searchDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.producer__gateway.api_gateway_id}/*/GET/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"
@@ -216,7 +216,7 @@ module "producer__searchPostDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/POST/DocumentReference/_search"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.producer__gateway.api_gateway_id}/*/POST/DocumentReference/_search"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"
@@ -242,7 +242,7 @@ module "producer__updateDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference/{id}"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference/{id}"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"
@@ -275,7 +275,7 @@ module "producer__upsertDocumentReference" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.producer__gateway.api_gateway_id}/*/PUT/DocumentReference"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"
@@ -302,7 +302,7 @@ module "consumer__status" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.consumer__gateway.api_gateway_id}/*/GET/_status"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.consumer__gateway.api_gateway_id}/*/GET/_status"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"
@@ -330,7 +330,7 @@ module "producer__status" {
   region                 = local.region
   prefix                 = local.prefix
   layers                 = [module.nrlf.layer_arn, module.third_party.layer_arn]
-  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${var.assume_account}:${module.producer__gateway.api_gateway_id}/*/GET/_status"]
+  api_gateway_source_arn = ["arn:aws:execute-api:${local.region}:${local.aws_account_id}:${module.producer__gateway.api_gateway_id}/*/GET/_status"]
   kms_key_id             = module.kms__cloudwatch.kms_arn
   environment_variables = {
     PREFIX               = "${local.prefix}--"

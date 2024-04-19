@@ -39,4 +39,5 @@ locals {
 
   development_environments = ["dev", "dev-sandbox", "v2"]
   log_level                = contains(local.persistent_environments, local.environment) ? (contains(local.development_environments, local.environment) ? "DEBUG" : "INFO") : "DEBUG"
+  aws_account_id           = data.aws_caller_identity.current.account_id
 }
