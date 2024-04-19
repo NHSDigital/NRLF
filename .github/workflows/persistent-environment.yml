@@ -112,7 +112,7 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform -chdir=terraform/infrastructure plan \
-            --var-file=etc/${{ github.env.ACCOUNT_NAME }}.tfvars \
+            --var-file=etc/${{ env.ACCOUNT_NAME }}.tfvars \
             --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} \
             -out tfplan
 
