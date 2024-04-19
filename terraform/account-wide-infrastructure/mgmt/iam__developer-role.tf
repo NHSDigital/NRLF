@@ -77,7 +77,8 @@ module "developer_policy" {
       ]
       Effect = "Allow"
       Resource = [
-        data.aws_secretsmanager_secret.dev_account_id.arn
+        data.aws_secretsmanager_secret.dev_account_id.arn,
+        data.aws_secretsmanager_secret.test_account_id.arn
       ]
     },
     {
