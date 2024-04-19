@@ -110,7 +110,11 @@ jobs:
           terraform -chdir=terraform/infrastructure workspace select ${{ inputs.environment }}
 
       - name: Terraform Plan
-        run: terraform -chdir=terraform/infrastructure plan --var-file=etc/dev.tfvars --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} -out tfplan
+        run: |
+          terraform -chdir=terraform/infrastructure plan \
+            --var-file=etc/${{ github.env.ACCOUNT_NAME }}.tfvars \
+            --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} \
+            -out tfplan
 
       - name: Save Terraform Plan
         run: |
