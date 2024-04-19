@@ -37,7 +37,3 @@ data "aws_secretsmanager_secret_version" "dev_account_id" {
 data "aws_secretsmanager_secret_version" "test_account_id" {
   secret_id = data.aws_secretsmanager_secret.test_account_id.name
 }
-
-data "aws_secretsmanager_secret_version" "prod_account_id" {
-  secret_id = data.aws_secretsmanager_secret.prod_account_id.name
-}

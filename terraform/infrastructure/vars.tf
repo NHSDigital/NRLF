@@ -3,7 +3,8 @@ variable "account_name" {
 }
 
 variable "assume_role_arn" {
-  type = string
+  type      = string
+  sensitive = true
 }
 
 # What domain should the APIs be hosted under
