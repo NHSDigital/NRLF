@@ -211,6 +211,7 @@ jobs:
       - name: Configure Dev Account Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
+          aws-region: eu-west-2
           role-chaining: true
           role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
@@ -259,6 +260,7 @@ jobs:
       - name: Configure Dev Account Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
+          aws-region: eu-west-2
           role-chaining: true
           role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}

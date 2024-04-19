@@ -85,7 +85,7 @@ jobs:
       - name: Install asdf
         uses: asdf-vm/actions/install@v3.0.2
 
-      - name: Configure AWS Credentials
+      - name: Configure Management Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-2
@@ -147,7 +147,7 @@ jobs:
           name: build-artifacts
           path: dist
 
-      - name: Configure AWS Credentials
+      - name: Configure Management Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-2
@@ -157,10 +157,10 @@ jobs:
       - name: Download Terraform Plan artifact
         run: aws s3 cp s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan terraform/infrastructure/tfplan
 
-      - name: Get AWS Account ID
-        id: get_account_id
+      - name: Retrieve Server Certificates
         run: |
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
+          make truststore-pull-server ENV=${account}
           aws s3 cp s3://nhsd-nrlf--truststore/server/${account}.pem truststore/server/${account}.pem
 
       - name: Terraform Init
