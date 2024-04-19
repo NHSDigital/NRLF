@@ -26,7 +26,7 @@ data "aws_iam_policy_document" "kms_default_policy" {
       type = "AWS"
 
       identifiers = [
-        "arn:aws:iam::${var.assume_account}:root",
+        "arn:aws:iam::${local.aws_account_id}:root",
       ]
     }
 

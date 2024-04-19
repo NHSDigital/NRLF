@@ -103,13 +103,6 @@ jobs:
           name: build-artifacts
           path: dist
 
-      - name: Configure Deployment Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_ARN }}
-          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id }}
-
       - name: Terraform Init
         run: |
           terraform -chdir=terraform/infrastructure init
@@ -117,7 +110,7 @@ jobs:
           terraform -chdir=terraform/infrastructure workspace select ${{ inputs.environment }}
 
       - name: Terraform Plan
-        run: terraform -chdir=terraform/infrastructure plan --var-file=etc/dev.tfvars -out tfplan
+        run: terraform -chdir=terraform/infrastructure plan --var-file=etc/dev.tfvars --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} -out tfplan
 
       - name: Save Terraform Plan
         run: |
@@ -169,13 +162,6 @@ jobs:
         run: |
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
           aws s3 cp s3://nhsd-nrlf--truststore/server/${account}.pem truststore/server/${account}.pem
-
-      - name: Configure Deployment Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_ARN }}
-          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id }}
 
       - name: Terraform Init
         run: |

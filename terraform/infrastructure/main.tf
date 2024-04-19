@@ -1,8 +1,8 @@
 provider "aws" {
   region = local.region
-  # assume_role {
-  #   role_arn = "arn:aws:iam::${var.assume_account}:role/${var.assume_role}"
-  # }
+  assume_role {
+    role_arn = var.assume_role_arn
+  }
 
   default_tags {
     tags = {

@@ -135,13 +135,6 @@ jobs:
       - name: Retrieve Server Certificates
         run: aws s3 cp s3://nhsd-nrlf--truststore/server/dev.pem truststore/server/dev.pem
 
-      - name: Configure Deployment Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_ARN }}
-          role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
-
       - name: Terraform Init
         run: |
           terraform -chdir=terraform/infrastructure init
@@ -149,7 +142,7 @@ jobs:
           terraform -chdir=terraform/infrastructure workspace select ${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Terraform Plan
-        run: terraform -chdir=terraform/infrastructure plan --var-file=etc/dev.tfvars -out tfplan
+        run: terraform -chdir=terraform/infrastructure plan --var-file=etc/dev.tfvars --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} -out tfplan
 
       - name: Terraform Apply
         id: terraform-apply
@@ -218,8 +211,8 @@ jobs:
       - name: Configure Dev Account Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_ARN }}
+          role-chaining: true
+          role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Run Integration Tests
@@ -266,8 +259,8 @@ jobs:
       - name: Configure Dev Account Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_ARN }}
+          role-chaining: true
+          role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Setup Environment Test Data

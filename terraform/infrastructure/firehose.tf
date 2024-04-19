@@ -1,6 +1,6 @@
 module "firehose__processor" {
   source             = "./modules/firehose"
-  assume_account     = var.assume_account
+  assume_account     = local.aws_account_id
   prefix             = local.prefix
   region             = local.region
   environment        = local.environment
