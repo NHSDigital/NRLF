@@ -99,6 +99,7 @@ jobs:
   deploy:
     name: Deploy PR Environment
     runs-on: [self-hosted, ci]
+    environment: pull-request
     needs: [set-environment-id, build]
 
     steps:
@@ -124,19 +125,15 @@ jobs:
           name: build-artifacts
           path: dist
 
-      - name: Configure AWS Credentials
+      - name: Configure Management Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Retrieve Server Certificates
-        run: aws s3 cp s3://nhsd-nrlf--truststore/server/dev.pem truststore/server/dev.pem
-
-      - name: Get AWS Account ID
-        id: get_account_id
-        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+        run: make truststore-pull-server ENV=dev
 
       - name: Terraform Init
         run: |
@@ -145,17 +142,11 @@ jobs:
           terraform -chdir=terraform/infrastructure workspace select ${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Terraform Plan
-        run: |
-          terraform -chdir=terraform/infrastructure plan \
-            --var-file=etc/dev.tfvars \
-            --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
-            --var assume_role=terraform \
-            -out tfplan
+        run: terraform -chdir=terraform/infrastructure plan --var-file=etc/dev.tfvars --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} -out tfplan
 
       - name: Terraform Apply
         id: terraform-apply
-        run: |
-          terraform -chdir=terraform/infrastructure apply tfplan
+        run: terraform -chdir=terraform/infrastructure apply tfplan
 
       - name: Add Success Pull Request Comment
         uses: actions/github-script@v7
@@ -184,6 +175,7 @@ jobs:
   integration-test:
     name: Run Integration Tests
     needs: [set-environment-id, deploy]
+    environment: pull-request
     runs-on: [self-hosted, ci]
 
     steps:
@@ -206,40 +198,31 @@ jobs:
       - name: Python Dependency Install
         run: poetry install --no-root
 
-      - name: Configure AWS Credentials
+      - name: Configure Management Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Retrieve Client Certificates
-        run: |
-          aws s3 cp s3://nhsd-nrlf--truststore/client/dev.key truststore/client/dev.key
-          aws s3 cp s3://nhsd-nrlf--truststore/client/dev.crt truststore/client/dev.crt
-
-      - name: Get AWS Account ID
-        id: get_account_id
-        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+        run: make truststore-pull-client ENV=dev
 
       - name: Configure Dev Account Credentials
-        id: configure-dev-account-credentials
-        run: |
-          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ steps.get_account_id.outputs.aws_account_id }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }} --output json)
-          echo "aws_access_key_id=$(echo $aws_credentials | jq -r '.Credentials.AccessKeyId')" >> "$GITHUB_OUTPUT"
-          echo "aws_secret_access_key=$(echo $aws_credentials | jq -r '.Credentials.SecretAccessKey')" >> "$GITHUB_OUTPUT"
-          echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-chaining: true
+          role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Run Integration Tests
         run: make test-features-integration TF_WORKSPACE=${{ needs.set-environment-id.outputs.environment_id }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
-          AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}
 
   performance-test:
     name: Run Performance Tests
     needs: [set-environment-id, integration-test]
+    environment: pull-request
     runs-on: [self-hosted, ci]
 
     steps:
@@ -268,30 +251,22 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Pull Client Certificates
         run: make truststore-pull-client ENV=dev
 
-      - name: Get AWS Account ID
-        id: get_account_id
-        run: echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--dev-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
-
       - name: Configure Dev Account Credentials
-        id: configure-dev-account-credentials
-        run: |
-          aws_credentials=$(aws sts assume-role --role-arn arn:aws:iam::${{ steps.get_account_id.outputs.aws_account_id }}:role/terraform --role-session-name github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }} --output json)
-          echo "aws_access_key_id=$(echo $aws_credentials | jq -r '.Credentials.AccessKeyId')" >> "$GITHUB_OUTPUT"
-          echo "aws_secret_access_key=$(echo $aws_credentials | jq -r '.Credentials.SecretAccessKey')" >> "$GITHUB_OUTPUT"
-          echo "aws_session_token=$(echo $aws_credentials | jq -r '.Credentials.SessionToken')" >> "$GITHUB_OUTPUT"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-chaining: true
+          role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Setup Environment Test Data
         run: make test-performance-prepare TF_WORKSPACE=${{ needs.set-environment-id.outputs.environment_id }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
-          AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}
 
       - name: Run Performance Test - Baseline
         run: make test-performance-baseline HOST=${{ needs.set-environment-id.outputs.environment_id }}.api.record-locator.dev.national.nhs.uk ENV_TYPE=dev
@@ -310,7 +285,3 @@ jobs:
 
       - name: Cleanup Environment Test Data
         run: make test-performance-cleanup TF_WORKSPACE=${{ needs.set-environment-id.outputs.environment_id }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ steps.configure-dev-account-credentials.outputs.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ steps.configure-dev-account-credentials.outputs.aws_secret_access_key }}
-          AWS_SESSION_TOKEN: ${{ steps.configure-dev-account-credentials.outputs.aws_session_token }}

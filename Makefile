@@ -11,7 +11,8 @@ DIST_PATH ?= ./dist
 TEST_ARGS ?= --cov --cov-report=term-missing
 FEATURE_TEST_ARGS ?= ./tests/features --format progress2
 TF_WORKSPACE ?= $(shell terraform -chdir=terraform/infrastructure workspace show)
-
+ENV ?= dev
+APP_ALIAS ?= default
 
 export PATH := $(PATH):$(PWD)/.venv/bin
 
@@ -125,3 +126,9 @@ truststore-pull-client: check-warn ## Pull a client certificate
 
 truststore-pull-ca: check-warn ## Pull a CA certificate
 	@./scripts/truststore.sh pull-ca "$(ENV)"
+
+swagger-merge: check-warn ## Generate Swagger Documentation
+	@./scripts/swagger.sh merge "$(TYPE)"
+
+generate-model: check-warn ## Generate Pydantic Models
+	@./scripts/swagger.sh generate-model "$(TYPE)"
