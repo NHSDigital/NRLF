@@ -1,8 +1,3 @@
-output "assume_account_id" {
-  value     = var.assume_account
-  sensitive = true
-}
-
 output "account_name" {
   value = local.account_name
 }

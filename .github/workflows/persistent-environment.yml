@@ -65,6 +65,7 @@ jobs:
   terraform-plan:
     name: Terraform Plan - ${{ inputs.environment }}
     needs: [build]
+    environment: ${{ inputs.environment }}
     runs-on: [self-hosted, ci]
 
     steps:
@@ -84,23 +85,17 @@ jobs:
       - name: Install asdf
         uses: asdf-vm/actions/install@v3.0.2
 
-      - name: Configure AWS Credentials
+      - name: Configure Management Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
-          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
-
-      - name: Get AWS Account ID
-        id: get_account_id
-        run: |
-          account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
-
-          echo "account=${account}" >> "$GITHUB_OUTPUT"
-          echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--${account}-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id }}
 
       - name: Retrieve Server Certificates
-        run: aws s3 cp s3://nhsd-nrlf--truststore/server/${{ steps.get_account_id.outputs.account }}.pem truststore/server/${{ steps.get_account_id.outputs.account }}.pem
+        run: |
+          account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
+          make truststore-pull-server ENV=${account}
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -117,9 +112,8 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform -chdir=terraform/infrastructure plan \
-            --var-file=etc/dev.tfvars \
-            --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
-            --var assume_role=terraform \
+            --var-file=etc/${{ vars.ACCOUNT_NAME }}.tfvars \
+            --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} \
             -out tfplan
 
       - name: Save Terraform Plan
@@ -157,26 +151,20 @@ jobs:
           name: build-artifacts
           path: dist
 
-      - name: Configure AWS Credentials
+      - name: Configure Management Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-2
-          role-to-assume: ${{ secrets.CI_ROLE_NAME }}
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
 
       - name: Download Terraform Plan artifact
         run: aws s3 cp s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan terraform/infrastructure/tfplan
 
-      - name: Get AWS Account ID
-        id: get_account_id
+      - name: Retrieve Server Certificates
         run: |
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
-
-          echo "account=${account}" >> "$GITHUB_OUTPUT"
-          echo "aws_account_id=$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--${account}-account-id --query SecretString --output text)" >> "$GITHUB_OUTPUT"
-
-      - name: Retrieve Server Certificates
-        run: aws s3 cp s3://nhsd-nrlf--truststore/server/${{ steps.get_account_id.outputs.account }}.pem truststore/server/${{ steps.get_account_id.outputs.account }}.pem
+          make truststore-pull-server ENV=${account}
 
       - name: Terraform Init
         run: |
