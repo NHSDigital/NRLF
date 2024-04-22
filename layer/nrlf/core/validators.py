@@ -361,7 +361,7 @@ class DocumentReferenceValidator:
                 )
                 continue
 
-            if coding.code == "734163000" and not coding.display == "Care plan":
+            if coding.code == "734163000" and coding.display != "Care plan":
                 self.result.add_error(
                     issue_code="value",
                     error_code="INVALID_RESOURCE",
@@ -370,10 +370,7 @@ class DocumentReferenceValidator:
                 )
                 continue
 
-            elif (
-                coding.code == "1102421000000108"
-                and not coding.display == "Observations"
-            ):
+            elif coding.code == "1102421000000108" and coding.display != "Observations":
                 self.result.add_error(
                     issue_code="value",
                     error_code="INVALID_RESOURCE",
