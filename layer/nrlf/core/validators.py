@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import ValidationError
 
 from nrlf.core.codes import SpineErrorConcept
-from nrlf.core.constants import REQUIRED_CREATE_FIELDS
+from nrlf.core.constants import CATEGORIES, REQUIRED_CREATE_FIELDS
 from nrlf.core.errors import ParseError
 from nrlf.core.logger import LogReference, logger
 from nrlf.core.types import DocumentReference, OperationOutcomeIssue, RequestQueryType
@@ -330,7 +330,7 @@ class DocumentReferenceValidator:
             self.result.add_error(
                 issue_code="invalid",
                 error_code="INVALID_RESOURCE",
-                diagnostics=f"Invalid category length: {len(model.category)}",
+                diagnostics=f"Invalid category length: {len(model.category)} Category must only contain a single value",
                 field=f"category",
             )
             return
@@ -344,37 +344,25 @@ class DocumentReferenceValidator:
                 self.result.add_error(
                     issue_code="value",
                     error_code="INVALID_RESOURCE",
-                    diagnostics=f"Invalid category system: {coding.system}",
+                    diagnostics=f"Invalid category system: {coding.system} Category system must be 'http://snomed.info/sct'",
                     field=f"category[0].coding[{index}].system",
                 )
                 continue
 
-            if coding.code not in [
-                "734163000",
-                "1102421000000108",
-            ]:
+            if coding.code not in CATEGORIES.keys():
                 self.result.add_error(
                     issue_code="value",
                     error_code="INVALID_RESOURCE",
-                    diagnostics=f"Invalid category code: {coding.code}",
+                    diagnostics=f"Invalid category code: {coding.code} Category code must be '734163000' or '1102421000000108'.",
                     field=f"category[0].coding[{index}].code",
                 )
                 continue
 
-            if coding.code == "734163000" and coding.display != "Care plan":
+            if coding.display != CATEGORIES.get(coding.code):
                 self.result.add_error(
                     issue_code="value",
                     error_code="INVALID_RESOURCE",
-                    diagnostics="category code '734163000' must have a display value of 'Care plan'",
-                    field=f"category[0].coding[{index}].display",
-                )
-                continue
-
-            elif coding.code == "1102421000000108" and coding.display != "Observations":
-                self.result.add_error(
-                    issue_code="value",
-                    error_code="INVALID_RESOURCE",
-                    diagnostics="category code '1102421000000108' must have a display value of 'Observations'",
+                    diagnostics=f"category code '{coding.code}' must have a display value of '{CATEGORIES.get(coding.code)}'",
                     field=f"category[0].coding[{index}].display",
                 )
                 continue

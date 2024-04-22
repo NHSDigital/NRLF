@@ -407,7 +407,7 @@ def test_validate_category_too_many_category():
                 }
             ]
         },
-        "diagnostics": "Invalid category length: 2",
+        "diagnostics": "Invalid category length: 2 Category must only contain a single value",
         "expression": ["category"],
     }
 
@@ -511,7 +511,7 @@ def test_validate_category_coding_invalid_code():
                 }
             ]
         },
-        "diagnostics": "Invalid category code: 1234",
+        "diagnostics": "Invalid category code: 1234 Category code must be '734163000' or '1102421000000108'.",
         "expression": ["category[0].coding[0].code"],
     }
 
@@ -547,7 +547,7 @@ def test_validate_category_coding_invalid_system():
                 }
             ]
         },
-        "diagnostics": "Invalid category system: http://snoooooomed/sctfffffg",
+        "diagnostics": "Invalid category system: http://snoooooomed/sctfffffg Category system must be 'http://snomed.info/sct'",
         "expression": ["category[0].coding[0].system"],
     }
 
