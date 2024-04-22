@@ -320,7 +320,7 @@ class DocumentReferenceValidator:
 
     def _validate_category(self, model: DocumentReference):
         """
-        Validate the category field contains an appropriate coding systen, code and display.
+        Validate the category field contains an appropriate coding system, code and display.
         """
 
         if len(model.category) > 1:
