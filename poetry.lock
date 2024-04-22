@@ -80,17 +80,17 @@ tests-no-zope = ["attrs[tests-mypy]", "cloudpickle", "hypothesis", "pympler", "p
 
 [[package]]
 name = "aws-lambda-powertools"
-version = "2.35.1"
+version = "2.37.0"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 optional = false
-python-versions = ">=3.8,<4.0.0"
+python-versions = "<4.0.0,>=3.8"
 files = [
-    {file = "aws_lambda_powertools-2.35.1-py3-none-any.whl", hash = "sha256:70ff17435a973d9dffff9f99c513477de190c675ad8c0297f67951f0724adcda"},
-    {file = "aws_lambda_powertools-2.35.1.tar.gz", hash = "sha256:dc58bbe8a81c22f8cf525cac5c09fa3fcabfd1a4b2ec2abbfeb4c445e0912aa5"},
+    {file = "aws_lambda_powertools-2.37.0-py3-none-any.whl", hash = "sha256:6845995d7b0debc5b85c6d97b4336d9c536ade723d45cdc5a081477e4daa65e2"},
+    {file = "aws_lambda_powertools-2.37.0.tar.gz", hash = "sha256:a49dacba249e6db860d59314e4620648c1691727cf43e465e8f0907f699dc5e8"},
 ]
 
 [package.dependencies]
-typing-extensions = ">=4.6.2,<5.0.0"
+typing-extensions = ">=4.11.0,<5.0.0"
 
 [package.extras]
 all = ["aws-xray-sdk (>=2.8.0,<3.0.0)", "fastjsonschema (>=2.14.5,<3.0.0)", "pydantic (>=1.8.2,<2.0.0)"]
@@ -2436,13 +2436,13 @@ files = [
 
 [[package]]
 name = "typing-extensions"
-version = "4.10.0"
+version = "4.11.0"
 description = "Backported and Experimental Type Hints for Python 3.8+"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "typing_extensions-4.10.0-py3-none-any.whl", hash = "sha256:69b1a937c3a517342112fb4c6df7e72fc39a38e7891a5730ed4985b5214b5475"},
-    {file = "typing_extensions-4.10.0.tar.gz", hash = "sha256:b0abd7c89e8fb96f98db18d86106ff1d90ab692004eb746cf6eda2682f91b3cb"},
+    {file = "typing_extensions-4.11.0-py3-none-any.whl", hash = "sha256:c1f94d72897edaf4ce775bb7558d5b79d8126906a14ea5ed1635921406c0387a"},
+    {file = "typing_extensions-4.11.0.tar.gz", hash = "sha256:83f085bd5ca59c80295fc2a82ab5dac679cbe02b9f33f7d83af68e241bea51b0"},
 ]
 
 [[package]]
@@ -2513,4 +2513,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "82a574b6db873942a1e324f7806f9c21e8d21e2e032df5ebd8fa76857bb16eba"
+content-hash = "ff13b9f19b3b499d7eace09a4881865b1c41e5b03fa049e06b184d15f78693f8"
