@@ -31,8 +31,9 @@ asdf-install: ## Install the required tools via ASDF
 	done
 	asdf install
 
-configure: check-warn ## Configure this project repo
+configure: asdf-install check-warn ## Configure this project repo, including install dependencies
 	cp scripts/commit-msg.py .git/hooks/prepare-commit-msg && chmod ug+x .git/hooks/*
+	poetry install
 
 check: # Check the build environment is setup correctly
 	@./scripts/check-build-environment.sh
@@ -68,6 +69,9 @@ test: check-warn ## Run the unit tests
 	pytest -m "not integration and not legacy and not smoke" --ignore=mi $(TEST_ARGS)
 
 test-features-integration: check-warn ## Run the BDD feature tests in the integration environment
+	[ ! -f ./truststore/client/$(ENV) ] && \
+		$(MAKE) ENV=$(ENV) truststore-pull-client
+
 	@echo "Running feature tests in the integration environment"
 	behave --define="integration_test=true" --define="env=$(TF_WORKSPACE)" $(FEATURE_TEST_ARGS)
 
@@ -100,6 +104,9 @@ test-performance-cleanup:
 
 lint: check-warn ## Lint the project
 	SKIP="no-commit-to-branch" pre-commit run --all-files
+
+deploy: check-warn ## Deploy the project
+	cd terraform/infrastructure && $(MAKE) ENV=$(ENV) apply
 
 clean: ## Remove all generated and temporary files
 	[ -n "$(DIST_PATH)" ] && \

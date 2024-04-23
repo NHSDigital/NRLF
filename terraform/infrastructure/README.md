@@ -10,6 +10,7 @@ This project also use three "persistent environments". These are equivalent to t
 
 - `prod` environment is deployed to prod AWS account with variables in `etc/prod.tfvars`
 - `ref` environment is deployed to test AWS account with variables in `etc/test.tfvars`
+- `int` environment is deployed to test AWS account with variables in `etc/uat.tfvars`
 - `dev` environment is deployed to dev AWS account with variables in `etc/dev.tfvars`
 
 CI pipeline creates infrastructure in the test AWS account. These will have workspace id of `<first six char of commit hash>-ci` and use variables in `etc/test.tfvars`
@@ -17,139 +18,77 @@ CI pipeline creates infrastructure in the test AWS account. These will have work
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
-2. [Initialise shell environment](#initialise-shell-environment)
-3. [Deploy infrastructure](#deploy-infrastructure)
-   1. [Build artifacts](#1-build-artifacts-for-deployment)
-   2. [Login to AWS](#2-login-to-aws-for-deployment)
-   3. [Initialise terraform](#3-initialise-terraform-for-deployment)
-   4. [Create a terraform plan](#4-create-a-terraform-plan)
-   5. [Apply terraform plan](#5-apply-terraform-plan)
-4. [Tear down infrastructure](#tear-down-infrastructure)
-   1. [Build artifacts](#1-build-artifacts-for-teardown)
-   2. [Login to AWS](#2-login-to-aws-for-teardown)
-   3. [Initialise terraform](#3-initialise-terraform-for-teardown)
-   4. [Teardown infrastructure](#4-teardown-infrastructure)
+2. [Deploy infrastructure](#deploy-infrastructure)
+3. [Teardown infrastructure](#teardown-infrastructure)
 
 ## Prerequisites
 
-- Initial AWS account [bootstrap](../bootstrap/README.md) completed
-- Required packages installed to enable running of `nrlf.sh` shell script see [Setup](../../README.md#setup)
+Before you begin deploying NRLF infrastructure, you will need:
 
-## Initialise shell environment
-
-To use `nrlf` shell script commands. We must initialise the shell environment. Ensure all packages are installed, run the following commands at the root of the repository.
-
-```shell
-poetry shell
-source nrlf.sh
-```
-
-This will enable the `nrlf` commands.
-
-## Deploy infrastructure
-
-Before performing deployment, ensure you have [initialised the shell environment](#initialise-shell-environment).
+- An NRLF-enabled AWS account, ideally `dev`. See [bootstrap](../bootstrap/README.md) for details on setting up a new account.
+- The required packages to build NRLF, see [the Setup section in README.md](../../README.md#setup).
+- To be logged into the AWS mgmt account on the CLI that you are deploying from.
 
 If infrastructure changes require account wide AWS resources. Please deploy the corresponding [NRLF account wide infrastructure](../account-wide-infrastructure/README.md) first.
 
-### 1. Build artifacts for deployment
+## Deploy infrastructure
 
-To build the artifacts that will be used by terraform.
+To deploy the infrastructure, you need to build the NRLF artifacts and then deployment them with Terraform.
 
-```
-nrlf make build
-```
+The steps are as follows:
 
-### 2. Login to AWS for deployment
+### Build artifacts for deployment
 
-For normal development, login to the normal `mgmt` role. This role can only deploy to dev AWS account which stops accidental deployments to test or prod AWS accounts.
+First, build the NRLF artifacts that will be deployed by Terraform:
 
 ```shell
-nrlf aws login mgmt <mfa code>
+$ make build-artifacts
 ```
 
-If manual deployments to test or prod AWS accounts are required. Login with `mgmt-admin` role instead.
+### Init your local workspace
+
+On the first deployment, you will need to initialise and select your workspace. To do this, run:
 
 ```shell
-nrlf aws login mgmt-admin <mfa code>
+$ make init
 ```
 
-### 3. Initialise terraform for deployment
+If your Terraform provider config changes, you may need to run `make init` again.
+
+### Create a Terraform plan
+
+To create a Terraform plan:
 
 ```shell
-nrlf terraform init
+$ make plan
 ```
 
-### 4. Create a terraform plan
+### Apply the changes with Terraform
 
-To create a terraform plan for your own workspace (Default workspace id will be the hash of your computer's username).
-
-```shell
-nrlf terraform plan
-```
-
-Alternatively, to create a plan to a specific workspace, pass in a workspace id.
+To apply your changes:
 
 ```shell
-nrlf terraform plan <workspace id>
-```
-
-### 5. Apply terraform plan
-
-To deploy the terraform plan for your own workspace (Default workspace id will be the hash of your computer's username).
-
-```shell
-nrlf terraform apply
-```
-
-Alternatively, to deploy to a specific workspace, pass in a workspace id.
-
-```shell
-nrlf terraform apply <workspace id>
+$ make apply
 ```
 
 ## Tear down infrastructure
 
-Before performing teardown, ensure you have [initialised the shell environment](#initialise-shell-environment).
+To tear down the infrastructure, you need to use Terraform to destroy the resources in your Terraform workspace.
 
-### 1. Build artifacts for teardown
+To do this, follow these steps:
 
-To build the artifacts that will be used by terraform.
+### Init your local workspace
 
-```
-nrlf make build
-```
-
-### 2. Login to AWS for teardown
-
-For normal development, login to the normal `mgmt` role. This role can only teardown infrastructure deployed in dev AWS account.
+On the first deployment, you will need to initialise and select your workspace. To do this, run:
 
 ```shell
-nrlf aws login mgmt <mfa code>
+$ make init
 ```
 
-If manual teardown to test or prod AWS accounts are required. Login with `mgmt-admin` role instead.
+### Teardown infrastructure
 
-```shell
-nrlf aws login mgmt-admin <mfa code>
+To teardown the infrastructure, do the following:
+
 ```
-
-### 3. Initialise terraform for teardown
-
-```shell
-nrlf terraform init
-```
-
-### 4. Teardown infrastructure
-
-To deploy your own infrastructure (Default workspace id will be the hash of your computer's username).
-
-```shell
-nrlf terraform destroy
-```
-
-Alternatively, to destroy a specific workspace infrastructure, pass in a workspace id.
-
-```shell
-nrlf terraform destroy <workspace id>
+$ make destroy
 ```

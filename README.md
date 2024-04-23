@@ -283,6 +283,16 @@ To run the feature integration tests:
 $ make test-features-integration
 ```
 
+## API Documentation
+
+If the API changes, the API documentation needs to be updated in the appropriate API repo. This is done by making changes to the API specification `.yaml` files in each repo.
+
+For Consumer API changes, update (NRL Consumer API - consumer.yaml)[https://github.com/NHSDigital/nrl-consumer-api/blob/master/specification/record-locator/consumer.yaml]
+
+For Producer API changes, update (NRL Producer API - producer.yaml)[https://github.com/NHSDigital/nrl-producer-api/blob/master/specification/record-locator/producer.yaml]
+
+Changes to the files in those repos will be reflected when each one is released. See the documentation in each repo for this process.
+
 ## Deploying
 
 The NRLF is deployed using terraform. The infrastructure is split into two parts.
@@ -445,3 +455,7 @@ The process to create a new release is as follows:
 8. Press the "Publish release" button to complete the release process
 
 Once your new release has been created, you can then deploy this release through the NRLF environments using the "Persistent Environment Deploy" Github Action.
+
+If the Consumer API has changed, or the documentation for that API has changed, you will also need to release (NRL Consumer API)[https://github.com/NHSDigital/nrl-consumer-api].
+
+If the Producer API has changed, or the documentation for that API has changed, you will also need to release (NRL Producer API)[https://github.com/NHSDigital/nrl-producer-api].

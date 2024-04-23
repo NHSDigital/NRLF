@@ -29,7 +29,6 @@ BUILD_DEPENDENCIES="
     pytest
     python
     terraform
-    tfenv
     yq
     zip
 "

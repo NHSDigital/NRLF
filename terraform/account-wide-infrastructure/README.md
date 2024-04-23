@@ -15,64 +15,63 @@ Each subdirectory corresponds to each AWS account (`mgmt`, `prod`, `test` and `d
 
 ## Prerequisites
 
+Before deploying the NRLF account-wide infrastructure, you will need:
+
 - Initial AWS account [bootstrap](../bootstrap/README.md) completed
-- Required packages installed to enable running of `nrlf.sh` shell script see [Setup](../../README.md#setup)
-
-## Initialise shell environment
-
-To use `nrlf` shell script commands. We must initialise the shell environment. Ensure all packages are installed, run the following commands at the root of the repository.
-
-```shell
-poetry shell
-source nrlf.sh
-```
-
-This will enable the `nrlf` commands.
+- The required packages to build NRLF, see [the Setup section in README.md](../../README.md#setup).
 
 ## Deploy account wide resources
 
-Login to `mgmt` account as admin.
+To deploy the account wide resources, first login to the AWS mgmt account on the CLI.
+
+Then, initialise your terraform workspace with:
 
 ```shell
-nrlf aws login mgmt-adminyour
+$ cd ACCOUNT_NAME
+$ terraform init && ( \
+    terraform workspace new account_wide || \
+    terraform workspace select account_wide )
 ```
 
-Update account wide resources for accounts (e.g. `dev`, `test`, `prod`, `mgmt`)
+Replacing ACCOUNT_NAME with the name of your account, e.g `dev`, `test` etc.
 
-Initialise terraform
+Once you have your workspace, you can plan your changes with:
 
 ```shell
-nrlf terraform init <account> account_wide
+$ terraform plan \
+    -var 'assume_account=AWS_ACCOUNT_ID' \
+    -var 'assume_role=terraform'
 ```
 
-Create a terraform plan
+Replacing AWS_ACCOUNT_ID with the AWS account number of your account.
+
+Once you're happy with your planned changes, you can apply them with:
 
 ```shell
-nrlf terraform plan <account> account_wide
+$ terraform apply \
+    -var 'assume_account=AWS_ACCOUNT_ID' \
+    -var 'assume_role=terraform'
 ```
 
-After confirming the changes from the terraform plan output, apply changes
-
-```shell
-nrlf terraform apply <account> account_wide
-```
+Replacing AWS_ACCOUNT_ID with the AWS account number of your account.
 
 ## Tear down account wide resources
 
-Login to `mgmt` account as admin.
+To tear down account-wide resources, first login to the AWS mgmt account on the CLI.
+
+Then, initialise your terraform workspace with:
 
 ```shell
-nrlf aws login mgmt-adminyour
+$ cd ACCOUNT_NAME
+$ terraform init && ( \
+    terraform workspace new account_wide || \
+    terraform workspace select account_wide )
 ```
 
-Initialise terraform
+And then, to tear down:
 
 ```shell
-nrlf terraform init <account> account_wide
-```
-
-Tear down
-
-```shell
-nrlf terraform destroy <account> account_wide
+$ terraform destroy \
+    -var 'assume_account=AWS_ACCOUNT_ID' \
+    -var 'assume_role=terraform'
 ```
