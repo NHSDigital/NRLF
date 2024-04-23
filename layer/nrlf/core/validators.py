@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import ValidationError
 
 from nrlf.core.codes import SpineErrorConcept
-from nrlf.core.constants import REQUIRED_CREATE_FIELDS
+from nrlf.core.constants import CATEGORIES, REQUIRED_CREATE_FIELDS
 from nrlf.core.errors import ParseError
 from nrlf.core.logger import LogReference, logger
 from nrlf.core.types import DocumentReference, OperationOutcomeIssue, RequestQueryType
@@ -115,6 +115,7 @@ class DocumentReferenceValidator:
             self._validate_identifiers(resource)
             self._validate_relates_to(resource)
             self._validate_ssp_asid(resource)
+            self._validate_category(resource)
 
         except StopValidationError:
             logger.log(LogReference.VALIDATOR003)
@@ -316,3 +317,52 @@ class DocumentReferenceValidator:
                 field=f"context.related[{idx}].identifier.value",
             )
             return
+
+    def _validate_category(self, model: DocumentReference):
+        """
+        Validate the category field contains an appropriate coding system, code and display.
+        """
+
+        if len(model.category) > 1:
+            logger.log(
+                LogReference.VALIDATOR001, step="category", reason="category_too_long"
+            )
+            self.result.add_error(
+                issue_code="invalid",
+                error_code="INVALID_RESOURCE",
+                diagnostics=f"Invalid category length: {len(model.category)} Category must only contain a single value",
+                field=f"category",
+            )
+            return
+
+        logger.log(LogReference.VALIDATOR001, step="category")
+
+        logger.debug("Validating category")
+
+        for index, coding in enumerate(model.category[0].coding):
+            if coding.system != "http://snomed.info/sct":
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"Invalid category system: {coding.system} Category system must be 'http://snomed.info/sct'",
+                    field=f"category[0].coding[{index}].system",
+                )
+                continue
+
+            if coding.code not in CATEGORIES.keys():
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"Invalid category code: {coding.code} Category must be a member of the England-NRLRecordCategory value set (https://fhir.nhs.uk/England/CodeSystem/England-NRLRecordCategory)",
+                    field=f"category[0].coding[{index}].code",
+                )
+                continue
+
+            if coding.display != CATEGORIES.get(coding.code):
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"category code '{coding.code}' must have a display value of '{CATEGORIES.get(coding.code)}'",
+                    field=f"category[0].coding[{index}].display",
+                )
+                continue
