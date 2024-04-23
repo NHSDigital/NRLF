@@ -511,7 +511,7 @@ def test_validate_category_coding_invalid_code():
                 }
             ]
         },
-        "diagnostics": "Invalid category code: 1234 Category code must be '734163000' or '1102421000000108'.",
+        "diagnostics": "Invalid category code: 1234 Category must be a member of the England-NRLRecordCategory value set (https://fhir.nhs.uk/England/CodeSystem/England-NRLRecordCategory)",
         "expression": ["category[0].coding[0].code"],
     }
 

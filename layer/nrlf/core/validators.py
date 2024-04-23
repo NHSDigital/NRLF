@@ -353,7 +353,7 @@ class DocumentReferenceValidator:
                 self.result.add_error(
                     issue_code="value",
                     error_code="INVALID_RESOURCE",
-                    diagnostics=f"Invalid category code: {coding.code} Category code must be '734163000' or '1102421000000108'.",
+                    diagnostics=f"Invalid category code: {coding.code} Category must be a member of the England-NRLRecordCategory value set (https://fhir.nhs.uk/England/CodeSystem/England-NRLRecordCategory)",
                     field=f"category[0].coding[{index}].code",
                 )
                 continue
