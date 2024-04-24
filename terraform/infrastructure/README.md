@@ -33,7 +33,7 @@ If infrastructure changes require account wide AWS resources. Please deploy the 
 
 ## Deploy infrastructure
 
-To deploy the infrastructure, you need to build the NRLF artifacts and then deployment them with Terraform.
+To deploy the infrastructure, you need to build the NRLF artifacts and then deploy them with Terraform.
 
 The steps are as follows:
 
