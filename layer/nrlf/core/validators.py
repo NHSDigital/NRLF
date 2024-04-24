@@ -268,7 +268,21 @@ class DocumentReferenceValidator:
                 if content.attachment.url.startswith("ssp://")
             ]
         )
-        if not ssp_content:
+        does_related_exist = getattr(model.context, "related", None)
+        does_asid_exist = False
+        if does_related_exist:
+            asid_references = [
+                (idx, related)
+                for idx, related in enumerate(getattr(model.context, "related", []))
+                if related.identifier.system == "https://fhir.nhs.uk/Id/nhsSpineASID"
+            ]
+            if len(asid_references) > 0:
+                _, asid_reference = asid_references[0]
+                does_asid_exist = bool(
+                    getattr(asid_reference.identifier, "value", None)
+                )
+
+        if not does_asid_exist and not ssp_content:
             logger.log(
                 LogReference.VALIDATOR001a, step="ssp_asid", reason="no_ssp_content"
             )
