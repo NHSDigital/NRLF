@@ -35,11 +35,17 @@ configure: asdf-install check-warn ## Configure this project repo, including ins
 	cp scripts/commit-msg.py .git/hooks/prepare-commit-msg && chmod ug+x .git/hooks/*
 	poetry install
 
-check: # Check the build environment is setup correctly
+check: ## Check the build environment is setup correctly
 	@./scripts/check-build-environment.sh
 
 check-warn:
 	@SHOULD_WARN_ONLY=true ./scripts/check-build-environment.sh
+
+check-deploy: ## check the deploy environment is setup correctly
+	@./scripts/check-deploy-environment.sh
+
+check-deploy-warn:
+	@SHOULD_WARN_ONLY=true ./scripts/check-deploy-environment.sh
 
 build: check-warn build-api-packages build-layers build-dependency-layer ## Build the project
 
@@ -105,8 +111,8 @@ test-performance-cleanup:
 lint: check-warn ## Lint the project
 	SKIP="no-commit-to-branch" pre-commit run --all-files
 
-deploy: check-warn ## Deploy the project
-	cd terraform/infrastructure && $(MAKE) ENV=$(ENV) apply
+deploy: check-deploy-warn ## Deploy the project
+	cd terraform/infrastructure && $(MAKE) ENV=$(ENV) TF_WORKSPACE=$(TF_WORKSPACE) apply
 
 clean: ## Remove all generated and temporary files
 	[ -n "$(DIST_PATH)" ] && \
