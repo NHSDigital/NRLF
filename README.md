@@ -371,6 +371,12 @@ Once you have your access token, you provide it as a bearer token in your API re
 Authorization: Bearer <token>
 ```
 
+If you need to get an API token for the `nrl_sync` application, the command is:
+
+```
+$ make ENV=[env-name] APP_ALIAS=nrl_sync get-access-token
+```
+
 ## Route53 & Hosted Zones
 
 There are 2 parts to the Route53 configuration:
