@@ -256,54 +256,12 @@ class DocumentReferenceValidator:
                 )
                 continue
 
-    def _validate_ssp_asid(self, model: DocumentReference):
+    def _validate_asid(self, asid_references: list):
         """
-        Validate that the document contains a valid ASID in the context.related field when the content contains an SSP URL
+        Validate that the ASID provided in the document is valid
         """
-
-        ssp_content = any(
-            [
-                content
-                for content in model.content
-                if content.attachment.url.startswith("ssp://")
-            ]
-        )
-        does_related_exist = getattr(model.context, "related", None)
-        does_asid_exist = False
-        if does_related_exist:
-            asid_references = [
-                (idx, related)
-                for idx, related in enumerate(getattr(model.context, "related", []))
-                if related.identifier.system == "https://fhir.nhs.uk/Id/nhsSpineASID"
-            ]
-            if len(asid_references) > 0:
-                _, asid_reference = asid_references[0]
-                does_asid_exist = bool(
-                    getattr(asid_reference.identifier, "value", None)
-                )
-
-        if not does_asid_exist and not ssp_content:
-            logger.log(
-                LogReference.VALIDATOR001a, step="ssp_asid", reason="no_ssp_content"
-            )
-            return
-
         logger.log(LogReference.VALIDATOR001, step="ssp_asid")
 
-        if not getattr(model.context, "related", None):
-            self.result.add_error(
-                issue_code="required",
-                error_code="INVALID_RESOURCE",
-                diagnostics="Missing context.related. It must be provided and contain a single valid ASID identifier when content contains an SSP URL",
-                field="context.related",
-            )
-            return
-
-        asid_references = [
-            (idx, related)
-            for idx, related in enumerate(getattr(model.context, "related", []))
-            if related.identifier.system == "https://fhir.nhs.uk/Id/nhsSpineASID"
-        ]
         if not asid_references:
             self.result.add_error(
                 issue_code="required",
@@ -312,6 +270,7 @@ class DocumentReferenceValidator:
                 field="context.related",
             )
             return
+
         if len(asid_references) > 1:
             self.result.add_error(
                 issue_code="invalid",
@@ -329,6 +288,47 @@ class DocumentReferenceValidator:
                 error_code="INVALID_IDENTIFIER_VALUE",
                 diagnostics=f"Invalid ASID value '{asid_value}'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
                 field=f"context.related[{idx}].identifier.value",
+            )
+            return
+
+    def _validate_ssp_asid(self, model: DocumentReference):
+        """
+        Validate that the document contains a valid ASID in the context.related field when the content contains an SSP URL
+        """
+
+        ssp_content = any(
+            [
+                content
+                for content in model.content
+                if content.attachment.url.startswith("ssp://")
+            ]
+        )
+
+        logger.log(LogReference.VALIDATOR001, step="ssp_content_and_asid_exists")
+
+        does_related_exist = getattr(model.context, "related", None)
+        does_asid_exist = False
+        if does_related_exist:
+            asid_references = [
+                (idx, related)
+                for idx, related in enumerate(getattr(model.context, "related", []))
+                if related.identifier.system == "https://fhir.nhs.uk/Id/nhsSpineASID"
+            ]
+            does_asid_exist = True
+            self._validate_asid(asid_references)
+
+        if not does_asid_exist and not ssp_content:
+            logger.log(
+                LogReference.VALIDATOR001a, step="ssp_asid", reason="no_ssp_content"
+            )
+            return
+
+        if ssp_content and not does_asid_exist:
+            self.result.add_error(
+                issue_code="required",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Missing context.related. It must be provided and contain a single valid ASID identifier when content contains an SSP URL",
+                field="context.related",
             )
             return
 

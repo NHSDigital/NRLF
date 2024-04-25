@@ -721,7 +721,7 @@ def test_validate_ssp_content_without_any_context_related():
     }
 
 
-def test_validate_ssp_content_without_asid_in_context_related():
+def test_validate_asid_with_no_ssp_content():
     validator = DocumentReferenceValidator()
     document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
 
@@ -755,7 +755,7 @@ def test_validate_ssp_content_without_asid_in_context_related():
     }
 
 
-def test_validate_asid_with_no_ssp_content():
+def test_validate_ssp_content_without_asid_in_context_related():
     validator = DocumentReferenceValidator()
     document_ref_data = load_document_reference_json(
         "Y05868-736253002-Valid-with-ssp-content"
