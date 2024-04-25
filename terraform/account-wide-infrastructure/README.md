@@ -17,7 +17,7 @@ Each subdirectory corresponds to each AWS account (`mgmt`, `prod`, `test` and `d
 
 Before deploying the NRLF account-wide infrastructure, you will need:
 
-- Initial AWS account [bootstrap](../bootstrap/README.md) completed
+- AWS accounts that have already been bootstrapped, as described in [bootstrap/README.md](../bootstrap/README.md). This is a one-time account setup step.
 - The required packages to build NRLF, see [the Setup section in README.md](../../README.md#setup).
 
 ## Deploy account wide resources
@@ -56,6 +56,10 @@ $ terraform apply \
 Replacing AWS_ACCOUNT_ID with the AWS account number of your account.
 
 ## Tear down account wide resources
+
+WARNING - This action will destroy all account-wide resources from the AWS account. This should
+only be done if you are sure that this is safe and are sure that you are signed into the correct
+AWS account.
 
 To tear down account-wide resources, first login to the AWS mgmt account on the CLI.
 
