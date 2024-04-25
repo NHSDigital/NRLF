@@ -768,7 +768,7 @@ def test_validate_asid_with_no_ssp_content():
                 }
             ]
         },
-        "diagnostics": "Invalid ASID value '1234'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+        "diagnostics": "Invalid ASID value '1234'. Only a single valid ASID identifier can be provided in the context.related.",
         "expression": ["context.related[0].identifier.value"],
     }
 
@@ -835,7 +835,7 @@ def test_validate_ssp_content_with_invalid_asid_value():
                 }
             ]
         },
-        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. Only a single valid ASID identifier can be provided in the context.related.",
         "expression": ["context.related[0].identifier.value"],
     }
 
@@ -887,7 +887,7 @@ def test_validate_ssp_content_with_invalid_asid_value_and_multiple_related():
                 }
             ]
         },
-        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. Only a single valid ASID identifier can be provided in the context.related.",
         "expression": ["context.related[2].identifier.value"],
     }
 
@@ -926,6 +926,6 @@ def test_validate_ssp_content_with_multiple_asids():
                 }
             ]
         },
-        "diagnostics": "Multiple ASID identifiers provided. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+        "diagnostics": "Multiple ASID identifiers provided. Only a single valid ASID identifier can be provided in the context.related.",
         "expression": ["context.related"],
     }

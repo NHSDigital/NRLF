@@ -266,7 +266,7 @@ class DocumentReferenceValidator:
             self.result.add_error(
                 issue_code="invalid",
                 error_code="INVALID_RESOURCE",
-                diagnostics="Multiple ASID identifiers provided. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+                diagnostics="Multiple ASID identifiers provided. Only a single valid ASID identifier can be provided in the context.related.",
                 field="context.related",
             )
             return
@@ -277,7 +277,7 @@ class DocumentReferenceValidator:
             self.result.add_error(
                 issue_code="value",
                 error_code="INVALID_IDENTIFIER_VALUE",
-                diagnostics=f"Invalid ASID value '{asid_value}'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+                diagnostics=f"Invalid ASID value '{asid_value}'. Only a single valid ASID identifier can be provided in the context.related.",
                 field=f"context.related[{idx}].identifier.value",
             )
             return
