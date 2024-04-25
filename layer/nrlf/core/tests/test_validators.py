@@ -692,6 +692,24 @@ def test_validate_ssp_content_with_asid():
     assert result.is_valid is True
 
 
+def test_validate_with_context_related_but_no_asid():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["context"]["related"] = [
+        {
+            "identifier": {
+                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "value": "Y05868",
+            }
+        }
+    ]
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is True
+
+
 def test_validate_ssp_content_without_any_context_related():
     validator = DocumentReferenceValidator()
     document_ref_data = load_document_reference_json(

@@ -262,15 +262,6 @@ class DocumentReferenceValidator:
         """
         logger.log(LogReference.VALIDATOR001, step="ssp_asid")
 
-        if not asid_references:
-            self.result.add_error(
-                issue_code="required",
-                error_code="INVALID_RESOURCE",
-                diagnostics="Missing ASID identifier. context.related must contain a single valid ASID identifier when content contains an SSP URL",
-                field="context.related",
-            )
-            return
-
         if len(asid_references) > 1:
             self.result.add_error(
                 issue_code="invalid",
@@ -314,8 +305,9 @@ class DocumentReferenceValidator:
                 for idx, related in enumerate(getattr(model.context, "related", []))
                 if related.identifier.system == "https://fhir.nhs.uk/Id/nhsSpineASID"
             ]
-            does_asid_exist = True
-            self._validate_asid(asid_references)
+            if len(asid_references) > 0:
+                does_asid_exist = True
+                self._validate_asid(asid_references)
 
         if not does_asid_exist and not ssp_content:
             logger.log(
@@ -323,11 +315,20 @@ class DocumentReferenceValidator:
             )
             return
 
-        if ssp_content and not does_asid_exist:
+        if ssp_content and not does_related_exist:
             self.result.add_error(
                 issue_code="required",
                 error_code="INVALID_RESOURCE",
                 diagnostics="Missing context.related. It must be provided and contain a single valid ASID identifier when content contains an SSP URL",
+                field="context.related",
+            )
+            return
+
+        if ssp_content and does_related_exist and not does_asid_exist:
+            self.result.add_error(
+                issue_code="required",
+                error_code="INVALID_RESOURCE",
+                diagnostics="Missing ASID identifier. context.related must contain a single valid ASID identifier when content contains an SSP URL",
                 field="context.related",
             )
             return
