@@ -616,7 +616,7 @@ def test_create_document_reference_with_invalid_asid_for_ssp_url(
                         }
                     ]
                 },
-                "diagnostics": "Invalid ASID value 'not-a-valid-asid'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+                "diagnostics": "Invalid ASID value 'not-a-valid-asid'. Only a single valid ASID identifier can be provided in the context.related.",
                 "expression": ["context.related[0].identifier.value"],
             }
         ],
