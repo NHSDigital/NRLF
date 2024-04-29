@@ -692,6 +692,24 @@ def test_validate_ssp_content_with_asid():
     assert result.is_valid is True
 
 
+def test_validate_with_context_related_but_no_asid():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["context"]["related"] = [
+        {
+            "identifier": {
+                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "value": "Y05868",
+            }
+        }
+    ]
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is True
+
+
 def test_validate_ssp_content_without_any_context_related():
     validator = DocumentReferenceValidator()
     document_ref_data = load_document_reference_json(
@@ -718,6 +736,40 @@ def test_validate_ssp_content_without_any_context_related():
         },
         "diagnostics": "Missing context.related. It must be provided and contain a single valid ASID identifier when content contains an SSP URL",
         "expression": ["context.related"],
+    }
+
+
+def test_validate_asid_with_no_ssp_content():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["context"]["related"] = [
+        {
+            "identifier": {
+                "system": "https://fhir.nhs.uk/Id/nhsSpineASID",
+                "value": "1234",
+            }
+        }
+    ]
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "value",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_IDENTIFIER_VALUE",
+                    "display": "Invalid identifier value",
+                }
+            ]
+        },
+        "diagnostics": "Invalid ASID value '1234'. Only a single valid ASID identifier can be provided in the context.related.",
+        "expression": ["context.related[0].identifier.value"],
     }
 
 
@@ -783,7 +835,7 @@ def test_validate_ssp_content_with_invalid_asid_value():
                 }
             ]
         },
-        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. Only a single valid ASID identifier can be provided in the context.related.",
         "expression": ["context.related[0].identifier.value"],
     }
 
@@ -835,7 +887,7 @@ def test_validate_ssp_content_with_invalid_asid_value_and_multiple_related():
                 }
             ]
         },
-        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. Only a single valid ASID identifier can be provided in the context.related.",
         "expression": ["context.related[2].identifier.value"],
     }
 
@@ -874,6 +926,6 @@ def test_validate_ssp_content_with_multiple_asids():
                 }
             ]
         },
-        "diagnostics": "Multiple ASID identifiers provided. context.related must contain a single valid ASID identifier when content contains an SSP URL",
+        "diagnostics": "Multiple ASID identifiers provided. Only a single valid ASID identifier can be provided in the context.related.",
         "expression": ["context.related"],
     }
