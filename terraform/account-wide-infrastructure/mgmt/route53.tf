@@ -61,6 +61,24 @@ resource "aws_route53_record" "int_zone" {
   type = "NS"
 }
 
+resource "aws_route53_zone" "test_zone" {
+  name = "record-locator.test.national.nhs.uk"
+
+  tags = {
+    Environment = terraform.workspace
+  }
+}
+
+resource "aws_route53_record" "test_zone" {
+  zone_id = aws_route53_zone.test_zone.zone_id
+  name    = "api.record-locator.test.national.nhs.uk"
+  records = [
+    // TODO-NOW - Create the zone in test account and add NS here
+  ]
+  ttl  = 300
+  type = "NS"
+}
+
 resource "aws_route53_zone" "dev_zone" {
   name = "record-locator.dev.national.nhs.uk"
 

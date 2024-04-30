@@ -55,6 +55,7 @@ resource "aws_s3_bucket_versioning" "api_truststore" {
   }
 }
 
+// TODO-NOW - Add keys for new ref environment (or create a new test key)
 resource "aws_s3_object" "api_truststore" {
   bucket = aws_s3_bucket.api_truststore.bucket
   key    = "certificates.pem"
