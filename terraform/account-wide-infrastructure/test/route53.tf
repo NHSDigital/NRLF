@@ -1,6 +1,5 @@
-// TODO-NOW - Make sure this zone is created and delegated to us
-resource "aws_route53_zone" "test-ns" {
-  name = "api.record-locator.test.national.nhs.uk"
+resource "aws_route53_zone" "test-qa-ns" {
+  name = "api.record-locator.qa.national.nhs.uk"
 }
 
 resource "aws_route53_zone" "test-int-ns" {

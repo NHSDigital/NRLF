@@ -423,11 +423,11 @@ The `records` property is derived by first deploying to a specific environment, 
 
 ## Sandbox
 
-The public-facing sandbox is an additional persistent workspace (`int-sandbox`) deployed in our UAT (`int` / `test`) environment, alongside the persistent workspace named `ref`. It is identical to our live API, except it is open to the world via Apigee (which implements rate limiting on our behalf).
+The public-facing sandbox is an additional persistent workspace (`int-sandbox`) deployed in our INT (`int` / `test`) environment, alongside the persistent workspace named `ref`. It is identical to our live API, except it is open to the world via Apigee (which implements rate limiting on our behalf).
 
 ### Sandbox deployment
 
-In order to deploy to a sandbox environment (`dev-sandbox`, `ref-sandbox`, `int-sandbox`, `production-sandbox`) you should use the GitHub Action for persistent environments, where you should select the option to deploy to the sandbox workspace.
+In order to deploy to a sandbox environment (`dev-sandbox`, `qa-sandbox`, `int-sandbox`) you should use the GitHub Action for persistent environments, where you should select the option to deploy to the sandbox workspace.
 
 ### Sandbox database clear and reseed
 

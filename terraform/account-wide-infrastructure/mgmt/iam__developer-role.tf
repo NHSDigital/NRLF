@@ -46,7 +46,7 @@ module "developer_policy" {
       Resource = [
         "${data.aws_s3_bucket.terraform_state.arn}/${local.project}/prod/*",
         "${data.aws_s3_bucket.terraform_state.arn}/${local.project}/test/*",
-        "${data.aws_s3_bucket.terraform_state.arn}/${local.project}/ref/*", // TODO-NOW Is this resource correct? If not, remove it
+        "${data.aws_s3_bucket.terraform_state.arn}/${local.project}/ref/*",
         "${data.aws_s3_bucket.terraform_state.arn}/${local.project}/mgmt/*",
         "${data.aws_s3_bucket.terraform_state.arn}/${local.project}/dev/terraform-state-infrastructure"
       ]
