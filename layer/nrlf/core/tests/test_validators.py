@@ -814,7 +814,7 @@ def test_validate_asid_with_no_ssp_content():
                 }
             ]
         },
-        "diagnostics": "Invalid ASID value '1234'. Only a single valid ASID identifier can be provided in the context.related.",
+        "diagnostics": "Invalid ASID value '1234'. A single ASID consisting of 12 digits can be provided in the context.related field.",
         "expression": ["context.related[0].identifier.value"],
     }
 
@@ -881,7 +881,7 @@ def test_validate_ssp_content_with_invalid_asid_value():
                 }
             ]
         },
-        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. Only a single valid ASID identifier can be provided in the context.related.",
+        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. A single ASID consisting of 12 digits can be provided in the context.related field.",
         "expression": ["context.related[0].identifier.value"],
     }
 
@@ -933,7 +933,7 @@ def test_validate_ssp_content_with_invalid_asid_value_and_multiple_related():
                 }
             ]
         },
-        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. Only a single valid ASID identifier can be provided in the context.related.",
+        "diagnostics": "Invalid ASID value 'TEST_INVALID_ASID'. A single ASID consisting of 12 digits can be provided in the context.related field.",
         "expression": ["context.related[2].identifier.value"],
     }
 
