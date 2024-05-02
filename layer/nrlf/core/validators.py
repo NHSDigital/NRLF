@@ -277,7 +277,7 @@ class DocumentReferenceValidator:
             self.result.add_error(
                 issue_code="value",
                 error_code="INVALID_IDENTIFIER_VALUE",
-                diagnostics=f"Invalid ASID value '{asid_value}'. Only a single valid ASID identifier can be provided in the context.related.",
+                diagnostics=f"Invalid ASID value '{asid_value}'. A single ASID consisting of 12 digits can be provided in the context.related field.",
                 field=f"context.related[{idx}].identifier.value",
             )
             return

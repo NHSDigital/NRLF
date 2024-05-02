@@ -263,15 +263,17 @@ paths:
           ```
         * `category` MUST indicate the broader class of the Document Type as agreed during [onboarding](#api-description__onboarding). e.g.
           ```
-          "category": {
-            "coding": [
-              {
-                "system": "http://snomed.info/sct",
-                "code": "1102421000000108",
-                "display": "Observations"
-              }
-            ]
-          }
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "1102421000000108",
+                  "display": "Observations"
+                }
+              ]
+            }
+          ]
           ```
         * `content` MUST have at least one entry.
         * `content[].format[]` SHOULD indicate whether the data is structured or not, e.g.
