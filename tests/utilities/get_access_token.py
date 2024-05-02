@@ -17,7 +17,6 @@ _DEFAULT_APP_FOR_APIGEE_ENV = {
     "internal-qa": _DEFAULT_APP_DEV,
     "internal-qa-sandbox": _DEFAULT_APP_DEV,
     "ref": _DEFAULT_APP_DEV,
-    "ref-sandbox": _DEFAULT_APP_DEV,
     "int": _DEFAULT_APP_PROD,
     "int-sandbox": _DEFAULT_APP_PROD,
     "prod": _DEFAULT_APP_PROD,
@@ -35,7 +34,7 @@ _NRL_SYNC_APP_FOR_APIGEE_ENV = {
 
 AWS_ACCOUNT_FOR_ENV = {
     "dev": "dev",
-    "test": "test",
+    "qa": "test",
     "ref": "test",
     "int": "test",
     "prod": "prod",
@@ -43,10 +42,9 @@ AWS_ACCOUNT_FOR_ENV = {
 APIGEE_ENV_FOR_ENV = {
     "dev": "internal-dev",
     "dev-sandbox": "internal-dev-sandbox",
-    "test": "internal-qa",
-    "test-sandbox": "internal-qa-sandbox",
+    "qa": "internal-qa",
+    "qa-sandbox": "internal-qa-sandbox",
     "ref": "ref",
-    "ref-sandbox": "ref-sandbox",
     "int": "int",
     "int-sandbox": "sandbox",
     "prod": "prod",

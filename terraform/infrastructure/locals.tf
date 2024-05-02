@@ -24,21 +24,21 @@ locals {
   }
   dynamodb_timeout_seconds = "3"
   # Logic / vars for splunk environment
-  persistent_environments = ["dev", "dev-sandbox", "test", "test-sandbox", "ref", "ref-sandbox", "int", "int-sandbox", "prod"]
+  persistent_environments = ["dev", "dev-sandbox", "qa", "qa-sandbox", "ref", "int", "int-sandbox", "prod"]
   environment_no_hyphen   = replace(local.environment, "-", "")
   splunk_environment      = contains(local.persistent_environments, local.environment) ? local.environment_no_hyphen : "dev" # dev is the default splunk env
   splunk_index            = "aws_recordlocator_${local.splunk_environment}"
   public_domain_map = {
     "int"         = "int.api.service.nhs.uk",
-    "dev"         = "internal-dev.api.service.nhs.uk", // TODO-NOW - Is this domain correct? Everywhere else references it as dev.api.service.nhs.uk
-    "test"        = "test.api.service.nhs.uk",
+    "dev"         = "internal-dev.api.service.nhs.uk",
+    "qa"          = "internal-qa.api.service.nhs.uk",
     "ref"         = "ref.api.service.nhs.uk",
     "int-sandbox" = "sandbox.api.service.nhs.uk",
     "prod"        = "api.service.nhs.uk",
   }
   public_domain = try(local.public_domain_map[terraform.workspace], local.apis.domain)
 
-  development_environments = ["dev", "dev-sandbox", "v2"] // TODO-NOW - Can we remove v2 from this list now?
+  development_environments = ["dev", "dev-sandbox"]
   log_level                = contains(local.persistent_environments, local.environment) ? (contains(local.development_environments, local.environment) ? "DEBUG" : "INFO") : "DEBUG"
   aws_account_id           = data.aws_caller_identity.current.account_id
 }
