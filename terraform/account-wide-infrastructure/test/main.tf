@@ -22,4 +22,11 @@ terraform {
     key                  = "terraform-state-account-wide-infrastructure"
     workspace_key_prefix = "nhsd-nrlf"
   }
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+  }
 }
