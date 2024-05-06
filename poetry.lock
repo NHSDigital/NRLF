@@ -1224,13 +1224,13 @@ woff = ["brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "zopfli (>=0.1.4)"]
 
 [[package]]
 name = "freeze-uuid"
-version = "0.3.0"
+version = "0.4.3"
 description = "Python package for mocking uuid."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "freeze-uuid-0.3.0.tar.gz", hash = "sha256:3404bb75369136c87a97f767e333ca03a7cd76b833a947f04bc05fffd3fb1aa7"},
-    {file = "freeze_uuid-0.3.0-py3-none-any.whl", hash = "sha256:f57ebb6d4ae16e0a30732fc69c27f677594c63c2e8cf7f9354412790bc6ff8c0"},
+    {file = "freeze_uuid-0.4.3-py3-none-any.whl", hash = "sha256:19e28068cafb4f1ca0f1632aee2d82103b6f56c353c6b4d297406eb15dd4f6cd"},
+    {file = "freeze_uuid-0.4.3.tar.gz", hash = "sha256:fc229deb02e3bf41918ad9c377b304af79403ac6e3b8779c1212da2788be48ca"},
 ]
 
 [[package]]
@@ -2513,4 +2513,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "82a574b6db873942a1e324f7806f9c21e8d21e2e032df5ebd8fa76857bb16eba"
+content-hash = "226e359e60c02329f7501d87af9de71b8fa6621831388c59d8ff08d7578da9c0"
