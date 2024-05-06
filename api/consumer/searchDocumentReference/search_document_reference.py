@@ -54,7 +54,7 @@ def handler(
         )
 
     custodian_id = (
-        params.custodian_identifier.__root__.split("|", maxsplit=1)[0]
+        params.custodian_identifier.__root__.split("|", maxsplit=1)[1]
         if params.custodian_identifier
         else None
     )
