@@ -41,6 +41,7 @@ def handler(
             diagnostics="A valid NHS number is required to search for document references",
             expression="subject:identifier",
         )
+    self_link = f"record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/{params.nhs_number}"
 
     if not validate_type_system(params.type, metadata.pointer_types):
         logger.log(
@@ -54,12 +55,16 @@ def handler(
         )
 
     custodian_id = (
-        params.custodian_identifier.__root__.split("|", maxsplit=1)[0]
+        params.custodian_identifier.__root__.split("|", maxsplit=1)[1]
         if params.custodian_identifier
         else None
     )
-    bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
+    if custodian_id:
+        self_link.append(f"&custodian:identifier={params.custodian_identifier}")
+
     pointer_types = [params.type.__root__] if params.type else metadata.pointer_types
+
+    bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
 
     logger.log(
         LogReference.CONSEARCH003,
