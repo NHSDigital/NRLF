@@ -1,7 +1,10 @@
 
 ENV ?= dev
 TF_WORKSPACE ?= $(shell (whoami || hostname ) | head -c 5)-$(ENV)
-ENV_ACCOUNT_ID ?= $(shell aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--$(ENV)-account-id --query SecretString --output text)
+ENV_ACCOUNT_NAME ?= $(shell ../../scripts/get-account-name-for-env.sh $(ENV))
+ENV_ACCOUNT_ID ?= $(shell aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--$(ENV_ACCOUNT_NAME)-account-id --query SecretString --output text)
+
+export ENV ENV_ACCOUNT_NAME
 
 help: ## Show this help message
 	@echo "Usage: make [target]"
@@ -19,7 +22,7 @@ build-artifacts: ## Build the NRLF artifacts to deploy
 	(cd ../.. && $(MAKE) build)
 
 init: check-warn ## Initialise the Terraform workspace
-	(cd ../.. && $(MAKE) ENV=$(ENV) truststore-pull-server)
+	-(cd ../.. && $(MAKE) ENV=$(ENV) truststore-pull-server)
 	terraform init
 	terraform workspace select $(TF_WORKSPACE) \
 		|| terraform workspace new $(TF_WORKSPACE)

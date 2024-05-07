@@ -24,7 +24,7 @@ resource "aws_secretsmanager_secret" "qa_splunk_configuration" {
   description = "Splunk configuration for the aws_recordlocator_qa index"
 }
 
-resource "aws_secretsmanager_secret" "test_sandbox_splunk_configuration" {
+resource "aws_secretsmanager_secret" "qa_sandbox_splunk_configuration" {
   name        = "${local.project}--qasandbox--splunk-configuration"
   description = "Splunk configuration for the aws_recordlocator_qasandbox index"
 }

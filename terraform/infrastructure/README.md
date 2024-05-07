@@ -6,11 +6,12 @@ NRLF project uses terraform workspaces to handle multiple "environments". Enviro
 
 Each developer/QA can create their own instance of NRLF infrastructure. These are deployed to the dev AWS account and use variables in `etc/dev.tfvars`
 
-This project also use three "persistent environments". These are equivalent to traditional dev, ref and prod environments. The persistent environments are deployed to the following AWS accounts:
+This project also uses "persistent environments". These are equivalent to traditional dev, ref and prod environments. The persistent environments are deployed to the following AWS accounts:
 
 - `prod` environment is deployed to prod AWS account with variables in `etc/prod.tfvars`
-- `ref` environment is deployed to test AWS account with variables in `etc/test.tfvars`
-- `int` environment is deployed to test AWS account with variables in `etc/uat.tfvars`
+- `ref` environment is deployed to test AWS account with variables in `etc/ref.tfvars`
+- `int` environment is deployed to test AWS account with variables in `etc/int.tfvars`
+- `qa` environment is deployed to test AWS account with variables in `etc/qa.tfvar`
 - `dev` environment is deployed to dev AWS account with variables in `etc/dev.tfvars`
 
 CI pipeline creates infrastructure in the test AWS account. These will have workspace id of `<first six char of commit hash>-ci` and use variables in `etc/test.tfvars`
