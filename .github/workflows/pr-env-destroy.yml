@@ -1,4 +1,4 @@
-name: Create PR Environment
+name: Destroy PR Environment
 run-name: "Destroy PR Environment - #${{ github.event.pull_request.number }} (${{ github.event.pull_request.title }})"
 
 on:
@@ -45,6 +45,7 @@ jobs:
   destroy:
     name: Destroy PR Environment
     needs: [set-environment-id]
+    environment: pull-request
     runs-on: [self-hosted, ci]
 
     steps:
