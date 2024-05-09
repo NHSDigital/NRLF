@@ -83,9 +83,7 @@ jobs:
         run: |
           terraform -chdir=terraform/infrastructure destroy \
             --var-file=etc/dev.tfvars \
-            --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
             --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} \
-            --var assume_role=terraform \
             -auto-approve
 
       - name: Add Failure Pull Request Comment
