@@ -352,6 +352,10 @@ class LogReference(Enum):
     PROUPDATE006 = _Reference(
         "WARN", "Cannot update DocumentReference as immutable fields have changed"
     )
+    PROUPDATE007 = _Reference(
+        "WARN",
+        "Update provided for DocumentReference with invalid preserved field, ignoring",
+    )
     PROUPDATE999 = _Reference(
         "INFO", "Successfully completed producer updateDocumentReference"
     )
