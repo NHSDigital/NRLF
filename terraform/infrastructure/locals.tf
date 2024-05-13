@@ -9,12 +9,9 @@ locals {
     deletion_window_in_days = 7
   }
   apis = {
-    # e.g. api.record-locator.dev.national.nhs.uk
     zone = var.domain
-    # If terraform workspace = root workspace then don't use sub-domain
-    # e.g. 00d5ff61.api.record-locator.dev.national.nhs.uk for PR
-    #      api.record-locator.dev.national.nhs.uk for dev
-    domain = "${terraform.workspace}.${var.domain}"
+    # TODO - Move all other environments onto new domain structure
+    domain = (local.environment == "qa") ? "api.${var.domain}" : "${terraform.workspace}.${var.domain}"
     consumer = {
       path = var.consumer_api_path
     }
@@ -31,12 +28,12 @@ locals {
   public_domain_map = {
     "int"         = "int.api.service.nhs.uk",
     "dev"         = "internal-dev.api.service.nhs.uk",
-    "qa"          = "internal-qa.api.service.nhs.uk",
     "ref"         = "ref.api.service.nhs.uk",
     "int-sandbox" = "sandbox.api.service.nhs.uk",
     "prod"        = "api.service.nhs.uk",
   }
-  public_domain = try(local.public_domain_map[terraform.workspace], local.apis.domain)
+  # TODO - Move all other environments onto new domain structure
+  public_domain = (local.environment == "qa") ? var.public_domain : try(local.public_domain_map[terraform.workspace], local.apis.domain)
 
   development_environments = ["dev", "dev-sandbox"]
   log_level                = contains(local.persistent_environments, local.environment) ? (contains(local.development_environments, local.environment) ? "DEBUG" : "INFO") : "DEBUG"

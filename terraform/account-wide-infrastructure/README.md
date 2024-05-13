@@ -68,8 +68,8 @@ Then, initialise your terraform workspace with:
 ```shell
 $ cd ACCOUNT_NAME
 $ terraform init && ( \
-    terraform workspace new account_wide || \
-    terraform workspace select account_wide )
+    terraform workspace new ACCOUNT_NAME || \
+    terraform workspace select ACCOUNT_NAME )
 ```
 
 And then, to tear down:
