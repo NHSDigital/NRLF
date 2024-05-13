@@ -18,6 +18,12 @@ variable "public_domain" {
   default = ""
 }
 
+# TODO - Remove default once all environments are on new domain structure
+variable "public_sandbox_domain" {
+  type    = string
+  default = ""
+}
+
 variable "consumer_api_path" {
   type    = string
   default = "consumer"

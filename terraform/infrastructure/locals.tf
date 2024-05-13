@@ -8,10 +8,18 @@ locals {
   kms = {
     deletion_window_in_days = 7
   }
+
+  # TODO - Remove once all environments are on new domain structure
+  env_on_new_dns_zone = ["qa", "qa-sandbox"]
+  new_domain_map = {
+    "qa" : "api.${var.domain}",
+    "qa-sandbox" : "sandbox-api.${var.domain}",
+  }
+
   apis = {
     zone = var.domain
     # TODO - Move all other environments onto new domain structure
-    domain = (local.environment == "qa") ? "api.${var.domain}" : "${terraform.workspace}.${var.domain}"
+    domain = contains(local.env_on_new_dns_zone, local.environment) ? local.new_domain_map[local.environment] : "${terraform.workspace}.${var.domain}"
     consumer = {
       path = var.consumer_api_path
     }
@@ -26,14 +34,16 @@ locals {
   splunk_environment      = contains(local.persistent_environments, local.environment) ? local.environment_no_hyphen : "dev" # dev is the default splunk env
   splunk_index            = "aws_recordlocator_${local.splunk_environment}"
   public_domain_map = {
-    "int"         = "int.api.service.nhs.uk",
-    "dev"         = "internal-dev.api.service.nhs.uk",
-    "ref"         = "ref.api.service.nhs.uk",
-    "int-sandbox" = "sandbox.api.service.nhs.uk",
-    "prod"        = "api.service.nhs.uk",
+    "dev"         = var.public_domain,
+    "dev-sandbox" = var.public_sandbox_domain,
+    "qa"          = var.public_domain,
+    "qa-sandbox"  = var.public_sandbox_domain,
+    "int"         = var.public_domain,
+    "int-sandbox" = var.public_sandbox_domain,
+    "ref"         = var.public_domain
+    "prod"        = var.public_domain,
   }
-  # TODO - Move all other environments onto new domain structure
-  public_domain = (local.environment == "qa") ? var.public_domain : try(local.public_domain_map[terraform.workspace], local.apis.domain)
+  public_domain = try(local.public_domain_map[terraform.workspace], local.apis.domain)
 
   development_environments = ["dev", "dev-sandbox"]
   log_level                = contains(local.persistent_environments, local.environment) ? (contains(local.development_environments, local.environment) ? "DEBUG" : "INFO") : "DEBUG"

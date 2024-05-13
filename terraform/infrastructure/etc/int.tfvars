@@ -2,3 +2,6 @@
 account_name        = "int"
 domain              = "api.record-locator.int.national.nhs.uk"
 deletion_protection = true
+
+public_domain         = "int.api.service.nhs.uk"
+public_sandbox_domain = "sandbox.api.service.nhs.uk"
