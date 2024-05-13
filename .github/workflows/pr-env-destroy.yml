@@ -1,4 +1,4 @@
-name: Create PR Environment
+name: Destroy PR Environment
 run-name: "Destroy PR Environment - #${{ github.event.pull_request.number }} (${{ github.event.pull_request.title }})"
 
 on:
@@ -45,6 +45,7 @@ jobs:
   destroy:
     name: Destroy PR Environment
     needs: [set-environment-id]
+    environment: pull-request
     runs-on: [self-hosted, ci]
 
     steps:
@@ -82,9 +83,13 @@ jobs:
         run: |
           terraform -chdir=terraform/infrastructure destroy \
             --var-file=etc/dev.tfvars \
-            --var assume_account=${{ steps.get_account_id.outputs.aws_account_id }} \
-            --var assume_role=terraform \
+            --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} \
             -auto-approve
+
+      - name: Cleanup Terraform Workspace
+        run: |
+          terraform -chdir=terraform/infrastructure workspace select default
+          terraform -chdir=terraform/infrastructure workspace delete ${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Add Failure Pull Request Comment
         uses: actions/github-script@v7
