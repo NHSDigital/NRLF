@@ -2,115 +2,80 @@
 
 This directory contains files needed for initial setup for brand new AWS accounts. Directory is split in to two sub directories. `mgmt` directory contains files required for initial bootstrap of the `mgmt` account. `non-mgmt` directory contains files required for initial bootstrap of `prod`, `test` and `dev` accounts.
 
-The setup creates AWS resources to enable the `nrlf.sh` shell script to be run and enable terraform deployments to AWS accounts. This should only be required to be performed once.
+The setup creates AWS resources to enable terraform deployments to AWS accounts. This should only be required to be performed once.
 
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
-2. [Initialise shell environment](#initialise-shell-environment)
-3. [Running initial project setup](#running-initial-project-setup)
-   1. [Setup mgmt account resources](#1-setup-mgmt-account-resources)
-   2. [Create trust role for non mgmt accounts](#2-create-trust-role-for-mgmt-for-your-prod-test-and-dev-accounts)
-4. [Tearing down setup](#tearing-down-setup)
-   1. [Tear down mgmt account resources](#1-tear-down-mgmt-account-resources)
-   2. [Tear down non mgmt account resources](#2-tear-down-prod-test-and-dev-account-resources)
+2. [Bootstrapping the environments](#bootstrapping-the-environments)
+3. [Tearing down the environments](#tearing-down-the-environments)
 
 ## Prerequisites
 
+Before you begin deploying NRLF bootstrap components, you will need:
+
 - Four AWS accounts created. These will be assigned as: mgmt, prod, test and dev
-- Required packages installed to enable running of `nrlf.sh` shell script see [Setup](../../README.md#setup)
+- The required packages to build NRLF, see [the Setup section in README.md](../../README.md#setup).
 
-## Initialise shell environment
+## Bootstrapping the environments
 
-To use `nrlf` shell script commands. We must initialise the shell environment. Ensure all packages are installed, run the following commands at the root of the repository.
-
-```shell
-poetry shell
-source nrlf.sh
-```
-
-This will enable the `nrlf` commands.
-
-## Running initial project setup
-
-Before performing initial setup, ensure you have [initialised the shell environment](#initialise-shell-environment).
+To bootstrap the environments, you need to follow these steps.
 
 **These steps should only need to be run once when starting the project**
 
-### 1. Setup mgmt account resources
+### Setup mgmt account resources
 
-This will set up your terraform state buckets and import them into your project.
-
-Login to `mgmt` account:
-
-```shell
-nrlf aws login mgmt-admin
-```
-
-Create resources on mgmt account required for terraform to work. This includes:
+This will set up your terraform state buckets and import them into your project. It
+will create resources on mgmt account required for terraform to work. This includes:
 
 - terraform state bucket
 - terraform state lock table
 - secret managers to hold account ids for the non-mgmt accounts
 
+To create these resource, first login to the AWS mgmt account on your CLI and then run:
+
 ```shell
-nrlf bootstrap create-mgmt
+./scripts/bootstrap.sh create-mgmt
 ```
 
-Now log on to AWS web console and manually add the aws account ids to each respective secrets
-`nhsd-nrlf--mgmt--mgmt-account-id`, `nhsd-nrlf--mgmt--prod-account-id`, `nhsd-nrlf--mgmt--test-account-id` and `nhsd-nrlf--mgmt--dev-account-id`
+Now log on to AWS web console and manually add the aws account ids to each respective secrets:
 
-### 2. Create trust role for `mgmt` for your `prod`, `test` and `dev` accounts
+- `nhsd-nrlf--mgmt--mgmt-account-id`
+- `nhsd-nrlf--mgmt--prod-account-id`
+- `nhsd-nrlf--mgmt--test-account-id`
+- `nhsd-nrlf--mgmt--dev-account-id`
+
+### Create trust role for `mgmt` for your `prod`, `test` and `dev` accounts
 
 In order to allow `mgmt` to create resources in `prod`, `test` and `dev` accounts you
 need to create a trust role in each of these accounts.
 
-Log in to your non-mgmt account (e.g. `dev`):
+To create this role, first login to your non-mgmt account on your CLI and then run:
 
 ```shell
-nrlf aws login <non-mgmt-account>-admin
+./scripts/bootstrap.sh create-non-mgmt
 ```
 
-Create the trust role:
-
-```shell
-nrlf bootstrap create-non-mgmt
-```
-
-## Tearing down setup
+## Tearing down the environments
 
 When closing AWS accounts, resources created by this setup will need to be torn down.
 
-Before performing the teardown, ensure you have [initialised the shell environment](#initialise-shell-environment).
+### Tear down `prod`, `test` and `dev` account resources
 
-### 1. Tear down mgmt account resources
+This will tear down resources created in this [step](#create-trust-role-for-mgmt-for-your-prod-test-and-dev-accounts)
 
-This will tear down resources created in this [step](#1-setup-mgmt-account-resources)
-
-Log in to your `mgmt` account:
+To tear down the non-mgmt account, first login to that non-mgmt AWS account on your CLI and then run:
 
 ```shell
-nrlf aws login mgmt-admin
+./scripts/bootstrap.sh delete-non-mgmt
 ```
 
-Run tear down script
+### Tear down mgmt account resources
+
+This will tear down resources created in this [step](#setup-mgmt-account-resources).
+
+To tear down management resource, first login to the AWS mgmt account on your CLI and then run:
 
 ```shell
-nrlf bootstrap delete-mgmt
-```
-
-### 2. Tear down `prod`, `test` and `dev` account resources
-
-This will tear down resources created in this [step](#2-create-trust-role-for-mgmt-for-your-prod-test-and-dev-accounts)
-
-Log in to your non-mgmt account (e.g. `dev`):
-
-```shell
-nrlf aws login <non-mgmt-account>-admin
-```
-
-Run tear down script
-
-```shell
-nrlf bootstrap delete-non-mgmt
+./scripts/bootstrap.sh delete-mgmt
 ```

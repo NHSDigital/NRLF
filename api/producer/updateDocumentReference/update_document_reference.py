@@ -90,6 +90,18 @@ def handler(
             diagnostics="An error occurred whilst parsing the existing document reference",
         )
 
+    preserved_fields = ["date"]
+    for field in preserved_fields:
+        provided_field = getattr(result.resource, field, None)
+        existing_field = getattr(existing_resource, field, None)
+        if provided_field and provided_field != existing_field:
+            logger.log(
+                LogReference.PROUPDATE007,
+                field=field,
+                provided=provided_field,
+            )
+        setattr(document_reference, field, existing_field)
+
     immutable_fields = [
         "masterIdentifier",
         "id",
@@ -97,12 +109,10 @@ def handler(
         "status",
         "type",
         "subject",
-        "date",
         "custodian",
         "relatesTo",
         "author",
     ]
-
     for field in immutable_fields:
         if getattr(result.resource, field) != getattr(existing_resource, field):
             logger.log(LogReference.PROUPDATE006, field=field)
@@ -111,10 +121,13 @@ def handler(
                 expression=field,
             )
 
-    core_model.created_on = existing_model.created_on
-    core_model.updated_on = update_time
+    document_pointer_update = DocumentPointer.from_document_reference(
+        document_reference
+    )
+    document_pointer_update.created_on = existing_model.created_on
+    document_pointer_update.updated_on = update_time
 
-    repository.update(core_model)
+    repository.update(document_pointer_update)
 
     logger.log(LogReference.PROUPDATE999)
     return NRLResponse.RESOURCE_UPDATED()

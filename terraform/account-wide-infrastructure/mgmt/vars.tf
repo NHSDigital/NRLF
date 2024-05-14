@@ -1,9 +1,3 @@
-variable "assume_account" {
-  sensitive = true
-}
-
-variable "assume_role" {}
-
 variable "private_subnet_cidr_blocks" {
   description = "Available CIDR blocks for private subnets"
   type        = list(string)

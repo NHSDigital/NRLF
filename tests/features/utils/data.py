@@ -59,7 +59,17 @@ def create_test_document_reference(items: dict) -> DocumentReference:
     if items.get("category"):
         base_doc_ref.category = [
             CodeableConcept(
-                coding=[Coding(system="http://snomed.info/sct", code=items["category"])]
+                coding=[
+                    Coding(
+                        system="http://snomed.info/sct",
+                        code=items["category"],
+                        display=(
+                            "Care plan"
+                            if items["category"] == "734163000"
+                            else "Observations"
+                        ),
+                    )
+                ]
             )
         ]
 

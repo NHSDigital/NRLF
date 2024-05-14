@@ -44,16 +44,17 @@ data "aws_iam_policy_document" "allow-authorizer-lambda-to-read" {
     principals {
       type = "AWS"
       identifiers = [
-        "arn:aws:iam::${var.assume_account}:role/${module.consumer__readDocumentReference.lambda_role_name}",
-        "arn:aws:iam::${var.assume_account}:role/${module.consumer__countDocumentReference.lambda_role_name}",
-        "arn:aws:iam::${var.assume_account}:role/${module.consumer__searchDocumentReference.lambda_role_name}",
-        "arn:aws:iam::${var.assume_account}:role/${module.consumer__searchPostDocumentReference.lambda_role_name}",
-        "arn:aws:iam::${var.assume_account}:role/${module.producer__createDocumentReference.lambda_role_name}",
-        "arn:aws:iam::${var.assume_account}:role/${module.producer__deleteDocumentReference.lambda_role_name}",
-        "arn:aws:iam::${var.assume_account}:role/${module.producer__readDocumentReference.lambda_role_name}",
-        "arn:aws:iam::${var.assume_account}:role/${module.producer__searchDocumentReference.lambda_role_name}",
-        "arn:aws:iam::${var.assume_account}:role/${module.producer__searchPostDocumentReference.lambda_role_name}",
-        "arn:aws:iam::${var.assume_account}:role/${module.producer__updateDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${local.aws_account_id}:role/${module.consumer__readDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${local.aws_account_id}:role/${module.consumer__countDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${local.aws_account_id}:role/${module.consumer__searchDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${local.aws_account_id}:role/${module.consumer__searchPostDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${local.aws_account_id}:role/${module.producer__createDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${local.aws_account_id}:role/${module.producer__deleteDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${local.aws_account_id}:role/${module.producer__readDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${local.aws_account_id}:role/${module.producer__searchDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${local.aws_account_id}:role/${module.producer__searchPostDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${local.aws_account_id}:role/${module.producer__updateDocumentReference.lambda_role_name}",
+        "arn:aws:iam::${local.aws_account_id}:role/${module.producer__upsertDocumentReference.lambda_role_name}",
       ]
     }
 
