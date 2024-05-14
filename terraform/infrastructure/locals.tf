@@ -28,24 +28,20 @@ locals {
     }
   }
   dynamodb_timeout_seconds = "3"
-  # Logic / vars for splunk environment
-  persistent_environments = ["dev", "dev-sandbox", "qa", "qa-sandbox", "ref", "int", "int-sandbox", "prod"]
-  environment_no_hyphen   = replace(local.environment, "-", "")
-  splunk_environment      = contains(local.persistent_environments, local.environment) ? local.environment_no_hyphen : "dev" # dev is the default splunk env
-  splunk_index            = "aws_recordlocator_${local.splunk_environment}"
-  public_domain_map = {
-    "dev"         = var.public_domain,
-    "dev-sandbox" = var.public_sandbox_domain,
-    "qa"          = var.public_domain,
-    "qa-sandbox"  = var.public_sandbox_domain,
-    "int"         = var.public_domain,
-    "int-sandbox" = var.public_sandbox_domain,
-    "ref"         = var.public_domain
-    "prod"        = var.public_domain,
-  }
-  public_domain = try(local.public_domain_map[terraform.workspace], local.apis.domain)
 
-  development_environments = ["dev", "dev-sandbox"]
-  log_level                = contains(local.persistent_environments, local.environment) ? (contains(local.development_environments, local.environment) ? "DEBUG" : "INFO") : "DEBUG"
-  aws_account_id           = data.aws_caller_identity.current.account_id
+  persistent_environments = ["dev", "dev-sandbox", "qa", "qa-sandbox", "ref", "int", "int-sandbox", "prod"]
+  is_persistent_env       = contains(local.persistent_environments, local.environment)
+  is_sandbox_env          = length(regexall("-sandbox", local.environment)) > 0
+  is_dev_env              = local.environment == "dev" || local.environment == "dev-sandbox"
+
+  public_domain = local.is_persistent_env ? local.is_sandbox_env ? var.public_sandbox_domain : var.public_domain : local.apis.domain
+
+  # Logic / vars for splunk environment
+  environment_no_hyphen = replace(local.environment, "-", "")
+  splunk_environment    = local.is_persistent_env ? local.environment_no_hyphen : "dev" # dev is the default splunk env
+  splunk_index          = "aws_recordlocator_${local.splunk_environment}"
+
+  log_level = local.is_persistent_env ? local.is_dev_env ? "DEBUG" : "INFO" : "DEBUG"
+
+  aws_account_id = data.aws_caller_identity.current.account_id
 }

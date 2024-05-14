@@ -12,16 +12,15 @@ variable "domain" {
   type = string
 }
 
-# TODO - Remove default once all environments are on new domain structure
 variable "public_domain" {
-  type    = string
-  default = ""
+  type        = string
+  description = "The public domain for the persistent environment"
 }
 
-# TODO - Remove default once all environments are on new domain structure
 variable "public_sandbox_domain" {
-  type    = string
-  default = ""
+  type        = string
+  description = "The public domain for the sandbox environment (optional)"
+  nullable    = true
 }
 
 variable "consumer_api_path" {

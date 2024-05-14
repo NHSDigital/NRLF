@@ -6,13 +6,18 @@ NRLF project uses terraform workspaces to handle multiple "environments". Enviro
 
 Each developer/QA can create their own instance of NRLF infrastructure. These are deployed to the dev AWS account and use variables in `etc/dev.tfvars`
 
-This project also uses "persistent environments". These are equivalent to traditional dev, ref and prod environments. The persistent environments are deployed to the following AWS accounts:
+This project also uses "persistent environments". These are equivalent to traditional dev, ref and prod environments. The persistent environments are deployed as follows:
 
-- `prod` environment is deployed to prod AWS account with variables in `etc/prod.tfvars`
-- `ref` environment is deployed to test AWS account with variables in `etc/ref.tfvars`
-- `int` environment is deployed to test AWS account with variables in `etc/int.tfvars`
-- `qa` environment is deployed to test AWS account with variables in `etc/qa.tfvar`
-- `dev` environment is deployed to dev AWS account with variables in `etc/dev.tfvars`
+| Environment  | TF Workspace | TF Config         | AWS Account | Internal Domain                      | Public Domain                             |
+| ------------ | ------------ | ----------------- | ----------- | ------------------------------------ | ----------------------------------------- |
+| internal-dev | dev          | `etc/dev.tfvars`  | dev         | `record-locator.dev.national.nhs.uk` | `internal-dev.api.service.nhs.uk`         |
+| dev-sandbox  | dev-sandbox  | `etc/dev.tfvars`  | dev         | `record-locator.dev.national.nhs.uk` | `internal-dev-sandbox.api.service.nhs.uk` |
+| internal-qa  | qa           | `etc/qa.tfvars`   | test        | `qa.record-locator.national.nhs.uk`  | `internal-qa.api.service.nhs.uk`          |
+| qa-sandbox   | qa-sandbox   | `etc/qa.tfvars`   | test        | `qa.record-locator.national.nhs.uk`  | `internal-qa-sandbox.api.service.nhs.uk`  |
+| int          | int          | `etc/int.tfvars`  | test        | `record-locator.int.national.nhs.uk` | `int.api.service.nhs.uk`                  |
+| sandbox      | int-sandbox  | `etc/int.tfvars`  | test        | `record-locator.int.national.nhs.uk` | `sandbox.api.service.nhs.uk`              |
+| ref          | ref          | `etc/ref.tfvars`  | test        | `record-locator.ref.national.nhs.uk` | `ref.api.service.nhs.uk`                  |
+| prod         | prod         | `etc/prod.tfvars` | prod        | `record-locator.national.nhs.uk`     | `api.service.nhs.uk`                      |
 
 CI pipeline creates infrastructure in the test AWS account. These will have workspace id of `<first six char of commit hash>-ci` and use variables in `etc/test.tfvars`
 
