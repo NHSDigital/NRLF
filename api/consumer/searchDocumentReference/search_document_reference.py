@@ -2,6 +2,7 @@ from pydantic import ValidationError
 
 from nrlf.consumer.fhir.r4.model import Bundle, DocumentReference
 from nrlf.core.codes import SpineErrorConcept
+from nrlf.core.config import Config
 from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
 from nrlf.core.errors import OperationOutcomeError
@@ -41,7 +42,9 @@ def handler(
             diagnostics="A valid NHS number is required to search for document references",
             expression="subject:identifier",
         )
-    self_link = f"record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/{params.nhs_number}"
+    config = Config()
+    base_url = f"https://{config.ENVIRONMENT}.api.service.nhs.uk/"
+    self_link = f"{base_url}record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/{params.nhs_number}"
 
     if not validate_type_system(params.type, metadata.pointer_types):
         logger.log(

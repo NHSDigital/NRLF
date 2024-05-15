@@ -69,12 +69,13 @@ def assert_bundle_total_step(context: Context, total: str):
     )
 
 
-@then("the Bundle has a self link of {rel_url}")
+@then("the Bundle has a self link matching {rel_url}")
 def assert_bundle_self(context: Context, rel_url: str):
     assert (
         context.bundle is not None
     ), "The Bundle has not been yet parsed from the response"
     expected_self_url = f"{context.base_url}{rel_url}"
+    expected_link = {"relation": "self", "url": expected_self_url}
     assert context.bundle.link is not None, format_error(
         "No links present in the Bundle",
         expected_self_url,
@@ -88,7 +89,7 @@ def assert_bundle_self(context: Context, rel_url: str):
         f"{len(context.bundle.link)} entries",
         context.response.text,
     )
-    expected_link = {"relation": "self", "url": expected_self_url}
+
     assert (
         context.bundle.link[0].dict(exclude_none=True) == expected_link
     ), format_error(
