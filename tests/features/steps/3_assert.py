@@ -69,6 +69,36 @@ def assert_bundle_total_step(context: Context, total: str):
     )
 
 
+@then("the Bundle has a self link of {rel_url}")
+def assert_bundle_self(context: Context, rel_url: str):
+    assert (
+        context.bundle is not None
+    ), "The Bundle has not been yet parsed from the response"
+    expected_self_url = f"{context.base_url}{rel_url}"
+    assert context.bundle.link is not None, format_error(
+        "No links present in the Bundle",
+        expected_self_url,
+        "None",
+        context.response.text,
+    )
+
+    assert len(context.bundle.link) == 1, format_error(
+        "The Bundle's link array should contain a single item if no pagination is used",
+        "1 entry",
+        f"{len(context.bundle.link)} entries",
+        context.response.text,
+    )
+    expected_link = {"relation": "self", "url": expected_self_url}
+    assert (
+        context.bundle.link[0].dict(exclude_none=True) == expected_link
+    ), format_error(
+        "Unexpected content in the Bundle's self link",
+        json.dumps(expected_link),
+        context.bundle.link[0],
+        context.response.text,
+    )
+
+
 @then("the Bundle has {num_entries} entry")
 @then("the Bundle has {num_entries} entries")
 def assert_bundle_entries_step(context: Context, num_entries: str):
