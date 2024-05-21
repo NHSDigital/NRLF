@@ -277,7 +277,7 @@ class DocumentReferenceValidator:
             self.result.add_error(
                 issue_code="value",
                 error_code="INVALID_IDENTIFIER_VALUE",
-                diagnostics=f"Invalid ASID value '{asid_value}'. Only a single valid ASID identifier can be provided in the context.related.",
+                diagnostics=f"Invalid ASID value '{asid_value}'. A single ASID consisting of 12 digits can be provided in the context.related field.",
                 field=f"context.related[{idx}].identifier.value",
             )
             return
@@ -354,30 +354,39 @@ class DocumentReferenceValidator:
 
         logger.debug("Validating category")
 
-        for index, coding in enumerate(model.category[0].coding):
-            if coding.system != "http://snomed.info/sct":
-                self.result.add_error(
-                    issue_code="value",
-                    error_code="INVALID_RESOURCE",
-                    diagnostics=f"Invalid category system: {coding.system} Category system must be 'http://snomed.info/sct'",
-                    field=f"category[0].coding[{index}].system",
-                )
-                continue
+        if len(model.category[0].coding) > 1:
+            self.result.add_error(
+                issue_code="invalid",
+                error_code="INVALID_RESOURCE",
+                diagnostics=f"Invalid category coding length: {len(model.category[0].coding)} Category Coding must only contain a single value",
+                field=f"category[0].coding",
+            )
+            return
 
-            if coding.code not in CATEGORIES.keys():
-                self.result.add_error(
-                    issue_code="value",
-                    error_code="INVALID_RESOURCE",
-                    diagnostics=f"Invalid category code: {coding.code} Category must be a member of the England-NRLRecordCategory value set (https://fhir.nhs.uk/England/CodeSystem/England-NRLRecordCategory)",
-                    field=f"category[0].coding[{index}].code",
-                )
-                continue
+        coding = model.category[0].coding[0]
+        if coding.system != "http://snomed.info/sct":
+            self.result.add_error(
+                issue_code="value",
+                error_code="INVALID_RESOURCE",
+                diagnostics=f"Invalid category system: {coding.system} Category system must be 'http://snomed.info/sct'",
+                field=f"category[0].coding[{0}].system",
+            )
+            return
 
-            if coding.display != CATEGORIES.get(coding.code):
-                self.result.add_error(
-                    issue_code="value",
-                    error_code="INVALID_RESOURCE",
-                    diagnostics=f"category code '{coding.code}' must have a display value of '{CATEGORIES.get(coding.code)}'",
-                    field=f"category[0].coding[{index}].display",
-                )
-                continue
+        if coding.code not in CATEGORIES.keys():
+            self.result.add_error(
+                issue_code="value",
+                error_code="INVALID_RESOURCE",
+                diagnostics=f"Invalid category code: {coding.code} Category must be a member of the England-NRLRecordCategory value set (https://fhir.nhs.uk/England/CodeSystem/England-NRLRecordCategory)",
+                field=f"category[0].coding[{0}].code",
+            )
+            return
+
+        if coding.display != CATEGORIES.get(coding.code):
+            self.result.add_error(
+                issue_code="value",
+                error_code="INVALID_RESOURCE",
+                diagnostics=f"category code '{coding.code}' must have a display value of '{CATEGORIES.get(coding.code)}'",
+                field=f"category[0].coding[{0}].display",
+            )
+            return
