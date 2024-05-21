@@ -48,7 +48,7 @@ def handler(
 
     config = Config()
     base_url = f"https://{config.ENVIRONMENT}.api.service.nhs.uk/"
-    self_link = f"{base_url}record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/{body.nhs_number}"
+    self_link = f"{base_url}record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/Id/nhs-number|{body.nhs_number}"
 
     if not validate_type_system(body.type, metadata.pointer_types):
         logger.log(

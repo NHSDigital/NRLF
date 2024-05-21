@@ -45,7 +45,7 @@ def test_search_post_document_reference_happy_path(
         "link": [
             {
                 "relation": "self",
-                "url": "https://pytest.api.service.nhs.uk/record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/6700028191",
+                "url": "https://pytest.api.service.nhs.uk/record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/Id/nhs-number|6700028191",
             }
         ],
         "total": 1,
@@ -77,7 +77,7 @@ def test_search_document_reference_no_results(repository: DocumentPointerReposit
         "link": [
             {
                 "relation": "self",
-                "url": "https://pytest.api.service.nhs.uk/record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/6700028191",
+                "url": "https://pytest.api.service.nhs.uk/record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/Id/nhs-number|6700028191",
             }
         ],
         "total": 0,
