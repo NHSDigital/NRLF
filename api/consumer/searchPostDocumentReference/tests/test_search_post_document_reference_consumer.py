@@ -42,6 +42,12 @@ def test_search_post_document_reference_happy_path(
     assert parsed_body == {
         "resourceType": "Bundle",
         "type": "searchset",
+        "link": [
+            {
+                "relation": "self",
+                "url": "https://pytest.api.service.nhs.uk/record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/6700028191",
+            }
+        ],
         "total": 1,
         "entry": [{"resource": doc_ref.dict(exclude_none=True)}],
     }
@@ -68,6 +74,12 @@ def test_search_document_reference_no_results(repository: DocumentPointerReposit
     assert parsed_body == {
         "resourceType": "Bundle",
         "type": "searchset",
+        "link": [
+            {
+                "relation": "self",
+                "url": "https://pytest.api.service.nhs.uk/record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/6700028191",
+            }
+        ],
         "total": 0,
         "entry": [],
     }

@@ -66,8 +66,16 @@ def handler(
         self_link.append(f"&custodian:identifier={params.custodian_identifier}")
 
     pointer_types = [params.type.__root__] if params.type else metadata.pointer_types
+    if params.type:
+        self_link.append(f"&type={params.type}")
 
-    bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
+    bundle = {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "link": [{"relation": "self", "url": self_link}],
+        "total": 0,
+        "entry": [],
+    }
 
     logger.log(
         LogReference.CONSEARCH003,
