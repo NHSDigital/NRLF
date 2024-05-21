@@ -310,9 +310,9 @@ paths:
             ]
           }
           ```
-        * `category` SHOULD indicate the broader class of the Document Type as agreed during [onboarding](#api-description__onboarding). e.g.
+        * `category` MUST indicate the broader class of the Document Type as agreed during [onboarding](#api-description__onboarding). e.g.
           ```
-          "type": {
+          "category": {
             "coding": [
               {
                 "system": "http://snomed.info/sct",
