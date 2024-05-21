@@ -67,11 +67,11 @@ def handler(
         else None
     )
     if custodian_id:
-        self_link.append(f"&custodian:identifier={body.custodian_identifier}")
+        self_link += f"&custodian:identifier=https://fhir.nhs.uk/Id/ods-organization-code|{custodian_id}"
 
     pointer_types = [body.type.__root__] if body.type else metadata.pointer_types
     if body.type:
-        self_link.append(f"&type={body.type}")
+        self_link += f"&type={body.type.__root__}"
 
     bundle = {
         "resourceType": "Bundle",

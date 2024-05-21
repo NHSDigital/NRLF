@@ -81,6 +81,51 @@ def test_search_post_document_reference_happy_path_with_custodian(
     assert parsed_body == {
         "resourceType": "Bundle",
         "type": "searchset",
+        "link": [
+            {
+                "relation": "self",
+                "url": "https://pytest.api.service.nhs.uk/record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/Id/nhs-number|6700028191&custodian:identifier=https://fhir.nhs.uk/Id/ods-organization-code|Y05868",
+            }
+        ],
+        "total": 1,
+        "entry": [{"resource": doc_ref.dict(exclude_none=True)}],
+    }
+
+
+@mock_aws
+@mock_repository
+def test_search_post_document_reference_happy_path_with_type(
+    repository: DocumentPointerRepository,
+):
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+    doc_pointer = DocumentPointer.from_document_reference(doc_ref)
+    repository.create(doc_pointer)
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(),
+        body=json.dumps(
+            {
+                "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|6700028191",
+                "type": "http://snomed.info/sct|736253002",
+            },
+        ),
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "link": [
+            {
+                "relation": "self",
+                "url": "https://pytest.api.service.nhs.uk/record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/Id/nhs-number|6700028191&type=http://snomed.info/sct|736253002",
+            }
+        ],
         "total": 1,
         "entry": [{"resource": doc_ref.dict(exclude_none=True)}],
     }
