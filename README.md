@@ -2,6 +2,8 @@
 
 ## Overview
 
+NOTE - THIS BRANCH IS A SPIKE
+
 This project has been given the name `nrlf` which stands for `National Records Locator (Futures)` as a replacement of the existing NRL.
 
 This project uses the `Makefile` to build, test and deploy. This will ensure that a developer can reproduce any operation that the CI/CD pipelines does, meaning they can test the application locally or on their own deployed dev environment.
