@@ -74,7 +74,6 @@ def assert_bundle_self(context: Context, rel_url: str):
     assert (
         context.bundle is not None
     ), "The Bundle has not yet been parsed from the response"
-    expected_link = {"relation": "self", "url": expected_self_url}
     assert context.bundle.link is not None, format_error(
         "No links present in the Bundle",
         f"{context.base_url}{rel_url}",
