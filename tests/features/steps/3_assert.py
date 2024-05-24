@@ -89,25 +89,19 @@ def assert_bundle_self(context: Context, rel_url: str):
     )
 
     link_entry = context.bundle.link[0].dict(exclude_none=True)
-    assert (
-        link_entry.get("relation") == "self",
-        format_error(
-            "Link should specify a 'self' type relation",
-            "self",
-            link_entry.get("relation"),
-            context.response.text,
-        ),
+    assert link_entry.get("relation") == "self", format_error(
+        "Link should specify a 'self' type relation",
+        "self",
+        link_entry.get("relation"),
+        context.response.text,
     )
 
     actual_url_params = link_entry.get("url").split("consumer/FHIR/R4/")[-1]
-    assert (
-        actual_url_params == "self",
-        format_error(
-            "Link url does not specify the search parameters expected",
-            rel_url,
-            actual_url_params,
-            context.response.text,
-        ),
+    assert actual_url_params == "self", format_error(
+        "Link url does not specify the search parameters expected",
+        rel_url,
+        actual_url_params,
+        context.response.text,
     )
 
 
