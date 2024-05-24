@@ -19,7 +19,7 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
       | subject   | 9278693472 |
     Then the response status code is 200
     And the response is a searchset Bundle
-    And the Bundle has a self link matching consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/Id/nhs-number|9278693472"
+    And the Bundle has a self link matching 'DocumentReference?subject:identifier=https://fhir.nhs.uk/Id/nhs-number|9278693472'
     And the Bundle has a total of 1
     And the Bundle has 1 entry
     And the Bundle contains an DocumentReference with values
@@ -69,6 +69,7 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
       | subject   | 9278693472 |
     Then the response status code is 200
     And the response is a searchset Bundle
+    And the Bundle has a self link matching 'DocumentReference?subject:identifier=https://fhir.nhs.uk/Id/nhs-number|9278693472'
     And the Bundle has a total of 2
     And the Bundle has 2 entries
     And the Bundle contains an DocumentReference with values

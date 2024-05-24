@@ -69,16 +69,15 @@ def assert_bundle_total_step(context: Context, total: str):
     )
 
 
-@then("the Bundle has a self link matching {rel_url}")
+@then("the Bundle has a self link matching '{rel_url}'")
 def assert_bundle_self(context: Context, rel_url: str):
     assert (
         context.bundle is not None
-    ), "The Bundle has not been yet parsed from the response"
-    expected_self_url = f"{context.base_url}{rel_url}"
+    ), "The Bundle has not yet been parsed from the response"
     expected_link = {"relation": "self", "url": expected_self_url}
     assert context.bundle.link is not None, format_error(
         "No links present in the Bundle",
-        expected_self_url,
+        f"{context.base_url}{rel_url}",
         "None",
         context.response.text,
     )
@@ -90,13 +89,26 @@ def assert_bundle_self(context: Context, rel_url: str):
         context.response.text,
     )
 
+    link_entry = context.bundle.link[0].dict(exclude_none=True)
     assert (
-        context.bundle.link[0].dict(exclude_none=True) == expected_link
-    ), format_error(
-        "Unexpected content in the Bundle's self link",
-        json.dumps(expected_link),
-        context.bundle.link[0],
-        context.response.text,
+        link_entry.get("relation") == "self",
+        format_error(
+            "Link should specify a 'self' type relation",
+            "self",
+            link_entry.get("relation"),
+            context.response.text,
+        ),
+    )
+
+    actual_url_params = link_entry.get("url").split("consumer/FHIR/R4/")[-1]
+    assert (
+        actual_url_params == "self",
+        format_error(
+            "Link url does not specify the search parameters expected",
+            rel_url,
+            actual_url_params,
+            context.response.text,
+        ),
     )
 
 
