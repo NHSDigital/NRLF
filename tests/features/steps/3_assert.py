@@ -97,7 +97,7 @@ def assert_bundle_self(context: Context, rel_url: str):
     )
 
     actual_url_params = link_entry.get("url").split("consumer/FHIR/R4/")[-1]
-    assert actual_url_params == "self", format_error(
+    assert actual_url_params == rel_url, format_error(
         "Link url does not specify the search parameters expected",
         rel_url,
         actual_url_params,
