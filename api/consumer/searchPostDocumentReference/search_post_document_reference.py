@@ -2,6 +2,7 @@ from pydantic import ValidationError
 
 from nrlf.consumer.fhir.r4.model import Bundle, DocumentReference
 from nrlf.core.codes import SpineErrorConcept
+from nrlf.core.config import Config
 from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
 from nrlf.core.errors import OperationOutcomeError
@@ -45,6 +46,10 @@ def handler(
             expression="subject:identifier",
         )
 
+    config = Config()
+    base_url = f"https://{config.ENVIRONMENT}.api.service.nhs.uk/"
+    self_link = f"{base_url}record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/Id/nhs-number|{body.nhs_number}"
+
     if not validate_type_system(body.type, metadata.pointer_types):
         logger.log(
             LogReference.CONPOSTSEARCH002,
@@ -61,9 +66,20 @@ def handler(
         if body.custodian_identifier
         else None
     )
+    if custodian_id:
+        self_link += f"&custodian:identifier=https://fhir.nhs.uk/Id/ods-organization-code|{custodian_id}"
 
-    bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
     pointer_types = [body.type.__root__] if body.type else metadata.pointer_types
+    if body.type:
+        self_link += f"&type={body.type.__root__}"
+
+    bundle = {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "link": [{"relation": "self", "url": self_link}],
+        "total": 0,
+        "entry": [],
+    }
 
     logger.log(
         LogReference.CONPOSTSEARCH003,
