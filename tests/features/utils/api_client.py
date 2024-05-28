@@ -204,6 +204,50 @@ class ProducerClient(APIClient):
             cert=self.config.client_cert,
         )
 
+    def upsert(self, doc_ref):
+        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
+        client_rp_details = connection_metadata.pop("client_rp_details")
+
+        return requests.put(
+            f"{self.config.base_url}producer/DocumentReference",
+            json=doc_ref,
+            headers={
+                "Authorization": "Bearer TestToken",
+                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
+                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
+            },
+            cert=self.config.client_cert,
+        )
+
+    def update(self, doc_ref, doc_ref_id: str):
+        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
+        client_rp_details = connection_metadata.pop("client_rp_details")
+
+        return requests.put(
+            f"{self.config.base_url}producer/DocumentReference/{doc_ref_id}",
+            json=doc_ref,
+            headers={
+                "Authorization": "Bearer TestToken",
+                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
+                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
+            },
+            cert=self.config.client_cert,
+        )
+
+    def delete(self, doc_ref_id: str):
+        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
+        client_rp_details = connection_metadata.pop("client_rp_details")
+
+        return requests.delete(
+            f"{self.config.base_url}producer/DocumentReference/{doc_ref_id}",
+            headers={
+                "Authorization": "Bearer TestToken",
+                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
+                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
+            },
+            cert=self.config.client_cert,
+        )
+
     def read(self, doc_ref_id: str):
         connection_metadata = self.config.connection_metadata.dict(by_alias=True)
         client_rp_details = connection_metadata.pop("client_rp_details")

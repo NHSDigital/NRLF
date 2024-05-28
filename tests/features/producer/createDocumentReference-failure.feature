@@ -9,8 +9,83 @@
 # Invalid document reference - invalid relatesTo target
 # Invalid document reference - multiple type.coding
 # Invalid document reference - invalid custodian suffix
-# Invalid document reference - producer id and custodian mismatch
-# Invalid document reference - invalid NHS number
+Feature: Producer - createDocumentReference - Failure Scenarios
+
+  Scenario: Producer and custodian ODS mismatch
+    Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
+    And the organisation 'ANGY1' is authorised to access pointer types:
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    When producer 'ANGY1' creates a DocumentReference with values:
+      | property  | value                          |
+      | subject   | 1234567890                     |
+      | status    | current                        |
+      | type      | 736253002                      |
+      | category  | 734163000                      |
+      | custodian | N0TANGY                        |
+      | author    | HAR1                           |
+      | url       | https://example.org/my-doc.pdf |
+    Then the response status code is 400
+    And the response is an OperationOutcome with 1 issue
+    And the OperationOutcome contains the issue:
+      """
+      {
+      "resourceType": "OperationOutcome",
+      "issue": [
+          {
+          "severity": "error",
+          "code": "invalid",
+          "details": {
+              "coding": [
+              {
+                  "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                  "code": "BAD_REQUEST",
+                  "display": "Bad request"
+              }
+              ]
+          },
+          "diagnostics": "The custodian of the provided DocumentReference does not match the expected ODS code for this organisation",
+          "expression": [
+              "custodian.identifier.value"
+          ]
+          }
+      """
+
+  # Invalid document reference - invalid NHS number
+  Scenario: Invalid NHS number (correct length but not valid)
+    Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
+    And the organisation 'ANGY1' is authorised to access pointer types:
+      | system                 | value     |
+      | http://snomed.info/sct | 736253002 |
+    When producer 'ANGY1' creates a DocumentReference with values:
+      | property  | value                          |
+      | subject   | 1234567890                     |
+      | status    | current                        |
+      | type      | 736253002                      |
+      | category  | 734163000                      |
+      | custodian | ANGY1                          |
+      | author    | HAR1                           |
+      | url       | https://example.org/my-doc.pdf |
+    Then the response status code is 400
+    And the response is an OperationOutcome with 1 issue
+    And the OperationOutcome contains the issue:
+      """
+      {
+        "severity": "error",
+        "code": "informational",
+        "details": {
+          "coding": [
+            {
+              "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+              "code": "BAD_REQUEST",
+              "display": "Bad request"
+            }
+          ]
+        },
+        "diagnostics": "Invalid NHS number"
+      }
+      """
+
 # Invalid document reference - invalid producer ID
 # Invalid document reference - invalid custodian ID
 # Invalid document reference - invalid relatesTo target

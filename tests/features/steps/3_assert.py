@@ -356,3 +356,14 @@ def assert_resource_in_location_header_exists_with_values(context: Context):
     assert_document_reference_matches_value(
         context, DocumentReference.parse_raw(resource.document), items
     )
+
+
+@then("the resource with id '{doc_ref_id}' does not exist")
+def assert_resource_absent(context: Context, doc_ref_id: str):
+    resource = context.repository.get_by_id(doc_ref_id)
+    assert resource is None, format_error(
+        "Resource that should be absent is found in database by id",
+        None,
+        doc_ref_id,
+        DocumentReference.parse_raw(resource.document),
+    )

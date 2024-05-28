@@ -4,6 +4,7 @@ from nrlf.producer.fhir.r4.model import (
     Coding,
     DocumentReference,
     DocumentReferenceContent,
+    DocumentReferenceRelatesTo,
     Identifier,
     Reference,
 )
@@ -70,6 +71,20 @@ def create_test_document_reference(items: dict) -> DocumentReference:
                         ),
                     )
                 ]
+            )
+        ]
+
+    if items.get("supercedes"):
+        base_doc_ref.relatesTo = [
+            DocumentReferenceRelatesTo(
+                code="replaces",
+                target=Reference(
+                    type="DocumentReference",
+                    identifier=Identifier(
+                        system="https://fhir.nhs.uk/Id/ods-organization-code",
+                        value=items["supercedes"],
+                    ),
+                ),
             )
         ]
 
