@@ -53,48 +53,68 @@ $ make build-artifacts
 
 ### Init your local workspace
 
-On the first deployment, you will need to initialise and select your workspace. To do this, run:
+On the first deployment, you will need to initialise and create your workspace. To create a new ephemeral dev workspace, run:
 
 ```shell
 $ make init
 ```
 
-If your Terraform provider config changes, you may need to run `make init` again.
+If you want to use an existing workspace, or if you want to use the workspace of a persistent environment, do the following:
+
+```shell
+$ make ENV={ENV_NAME} TF_WORKSPACE_NAME={WORKSPACE_NAME} init
+```
+
+replacing `{ENV_NAME}` with the environment name (e.g. `dev`, `qa`, `qa-sandbox` etc) and `{WORKSPACE_NAME}` with the name of the workspace you want to use.
+
+So, for example, if you want to use the `qa` environment, you'd do you the following:
+
+```shell
+$ make ENV=qa TF_WORKSPACE_NAME=qa init
+```
+
+If your Terraform provider config changes, you may need to reinitialise your workspace.
 
 ### Create a Terraform plan
 
-To create a Terraform plan:
+To create a Terraform plan for a dev workspace:
 
 ```shell
 $ make plan
 ```
 
+To create a Terraform plan for a workspace in another environment:
+
+```shell
+$ make ENV={ENV_NAME} plan
+```
+
+replacing `{ENV_NAME}` with the environment name (e.g. `dev`, `qa`, `qa-sandbox` etc).
+
 ### Apply the changes with Terraform
 
-To apply your changes:
+To apply your changes to a dev workspace:
 
 ```shell
 $ make apply
 ```
 
+To apply your changes to a workspace in another environment:
+
+```shell
+$ make ENV={ENV_NAME} apply
+```
+
+replacing `{ENV_NAME}` with the environment name (e.g. `dev`, `qa`, `qa-sandbox` etc).
+
 ## Tear down infrastructure
 
 To tear down the infrastructure, you need to use Terraform to destroy the resources in your Terraform workspace.
 
-To do this, follow these steps:
-
-### Init your local workspace
-
-On the first deployment, you will need to initialise and select your workspace. To do this, run:
-
-```shell
-$ make init
-```
-
-### Teardown infrastructure
-
 To teardown the infrastructure, do the following:
 
 ```
-$ make destroy
+$ make ENV={ENV_NAME} TF_WORKSPACE_NAME={WORKSPACE_NAME} init destroy
 ```
+
+replacing `{ENV_NAME}` with the environment name (e.g. `dev`, `qa`, `qa-sandbox` etc) and `{WORKSPACE_NAME}` with the name of the workspace you want to destroy.
