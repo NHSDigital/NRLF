@@ -13,6 +13,8 @@ FEATURE_TEST_ARGS ?= ./tests/features --format progress2
 TF_WORKSPACE ?= $(shell terraform -chdir=terraform/infrastructure workspace show)
 ENV ?= dev
 APP_ALIAS ?= default
+HOST ?= $(TF_WORKSPACE).api.record-locator.$(ENV).national.nhs.uk
+ENV_TYPE ?= $(ENV)
 
 export PATH := $(PATH):$(PWD)/.venv/bin
 
@@ -85,15 +87,17 @@ test-performance-prepare:
 test-performance: check-warn test-performance-baseline test-performance-stress ## Run the performance tests
 
 test-performance-baseline:
-	@echo "Running performance baseline test"
+	@echo "Running consumer performance baseline test"
 	k6 run --out csv=$(DIST_PATH)/consumer-baseline.csv tests/performance/consumer/baseline.js -e HOST=$(HOST) -e ENV_TYPE=$(ENV_TYPE)
 
 test-performance-stress:
-	@echo "Running performance stress test"
+	@echo "Running consumer performance stress test"
 	k6 run --out csv=$(DIST_PATH)/consumer-stress.csv tests/performance/consumer/stress.js -e HOST=$(HOST) -e ENV_TYPE=$(ENV_TYPE)
+	@echo "Running producer performance stress test"
+	k6 run --out csv=$(DIST_PATH)/producer-stress.csv tests/performance/producer/stress.js -e HOST=$(HOST) -e ENV_TYPE=$(ENV_TYPE)
 
 test-performance-soak:
-	@echo "Running performance soak test"
+	@echo "Running consumer performance soak test"
 	k6 run --out csv=$(DIST_PATH)/consumer-soak.csv tests/performance/consumer/soak.js -e HOST=$(HOST) -e ENV_TYPE=$(ENV_TYPE)
 
 test-performance-output: ## Process outputs from the performance tests
