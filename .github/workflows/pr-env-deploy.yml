@@ -217,7 +217,7 @@ jobs:
           role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Run Integration Tests
-        run: make test-features-integration TF_WORKSPACE=${{ needs.set-environment-id.outputs.environment_id }}
+        run: make test-features-integration TF_WORKSPACE_NAME=${{ needs.set-environment-id.outputs.environment_id }}
 
   performance-test:
     name: Run Performance Tests
@@ -266,7 +266,7 @@ jobs:
           role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Setup Environment Test Data
-        run: make test-performance-prepare TF_WORKSPACE=${{ needs.set-environment-id.outputs.environment_id }}
+        run: make test-performance-prepare TF_WORKSPACE_NAME=${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Run Performance Test - Baseline
         run: make test-performance-baseline HOST=${{ needs.set-environment-id.outputs.environment_id }}.api.record-locator.dev.national.nhs.uk ENV_TYPE=dev
@@ -284,4 +284,4 @@ jobs:
           path: dist/*.png
 
       - name: Cleanup Environment Test Data
-        run: make test-performance-cleanup TF_WORKSPACE=${{ needs.set-environment-id.outputs.environment_id }}
+        run: make test-performance-cleanup TF_WORKSPACE_NAME=${{ needs.set-environment-id.outputs.environment_id }}
