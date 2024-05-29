@@ -93,8 +93,6 @@ test-performance-baseline:
 test-performance-stress:
 	@echo "Running consumer performance stress test"
 	k6 run --out csv=$(DIST_PATH)/consumer-stress.csv tests/performance/consumer/stress.js -e HOST=$(HOST) -e ENV_TYPE=$(ENV_TYPE)
-	@echo "Running producer performance stress test"
-	k6 run --out csv=$(DIST_PATH)/producer-stress.csv tests/performance/producer/stress.js -e HOST=$(HOST) -e ENV_TYPE=$(ENV_TYPE)
 
 test-performance-soak:
 	@echo "Running consumer performance soak test"

@@ -3,8 +3,12 @@ export const DEFAULT_TEST_RECORD = open(
 );
 export const ODS_CODE = "Y05868";
 export const REFERENCE_DATA = JSON.parse(open("./reference-data.json"));
-export const POINTER_DOCUMENTS = REFERENCE_DATA["documents"];
-export const ALL_POINTER_IDS = Object.keys(POINTER_DOCUMENTS);
+export const POINTER_DOCUMENTS =
+  "documents" in REFERENCE_DATA ? REFERENCE_DATA["documents"] : {};
+export const ALL_POINTER_IDS =
+  "pointer_ids" in REFERENCE_DATA
+    ? REFERENCE_DATA["pointer_ids"]
+    : Object.keys(POINTER_DOCUMENTS);
 export const POINTERS_TO_DELETE = ALL_POINTER_IDS.slice(0, 3500);
 export const POINTER_IDS = ALL_POINTER_IDS.slice(3500);
 export const NHS_NUMBERS = REFERENCE_DATA["nhs_numbers"];

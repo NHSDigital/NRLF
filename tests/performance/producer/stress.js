@@ -1,5 +1,10 @@
 export * from "./client.js";
 
+/*
+ * NOTE - To run the producer K6 tests, you need to prepare the data by setting
+ * the output_full_pointers flag to true in the environment.py:setup() method.
+ */
+
 export const options = {
   tlsAuth: [
     {

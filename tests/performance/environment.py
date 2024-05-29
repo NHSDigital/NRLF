@@ -58,6 +58,7 @@ def setup(
     documents_per_type: int = 10,
     ods_code: str = "Y05868",
     out: str = "tests/performance/reference-data.json",
+    output_full_pointers: bool = False,
 ):
     print(f"Creating Test Data in environment '{env}'")
 
@@ -77,7 +78,13 @@ def setup(
             nhs_numbers.add(pointer.nhs_number)
 
     print(f"Created {len(documents)} documents for {len(nhs_numbers)} patients")
-    output = json.dumps({"documents": documents, "nhs_numbers": list(nhs_numbers)})
+
+    if output_full_pointers:
+        output = json.dumps({"documents": documents, "nhs_numbers": list(nhs_numbers)})
+    else:
+        output = json.dumps(
+            {"pointer_ids": list(documents.keys()), "nhs_numbers": list(nhs_numbers)}
+        )
 
     output_path = pathlib.Path(out)
     output_path.write_text(output)
@@ -88,12 +95,15 @@ def cleanup(env: str, input: str = "tests/performance/reference-data.json"):
     input_path = pathlib.Path(input)
     data = json.loads(input_path.read_text())
 
-    documents = data["documents"]
+    if "documents" in data:
+        pointer_ids = data["documents"].keys()
+    else:
+        pointer_ids = data["pointer_ids"]
 
-    print(f"Cleaning up {len(documents)} document pointers in environment '{env}'")
+    print(f"Cleaning up {len(pointer_ids)} document pointers in environment '{env}'")
     table = DYNAMODB.Table(f"nhsd-nrlf--{env}--document-pointer")
     with table.batch_writer() as batch:
-        for id in documents.keys():
+        for id in pointer_ids:
             ods_code, document_id = id.split("-", maxsplit=1)
             pk = f"D#{ods_code}#{document_id}"
             batch.delete_item(Key={"pk": pk, "sk": pk})
