@@ -69,6 +69,42 @@ def assert_bundle_total_step(context: Context, total: str):
     )
 
 
+@then("the Bundle has a self link matching '{rel_url}'")
+def assert_bundle_self(context: Context, rel_url: str):
+    assert (
+        context.bundle is not None
+    ), "The Bundle has not yet been parsed from the response"
+    assert context.bundle.link is not None, format_error(
+        "No links present in the Bundle",
+        f"{context.base_url}{rel_url}",
+        "None",
+        context.response.text,
+    )
+
+    assert len(context.bundle.link) == 1, format_error(
+        "The Bundle's link array should contain a single item if no pagination is used",
+        "1 entry",
+        f"{len(context.bundle.link)} entries",
+        context.response.text,
+    )
+
+    link_entry = context.bundle.link[0].dict(exclude_none=True)
+    assert link_entry.get("relation") == "self", format_error(
+        "Link should specify a 'self' type relation",
+        "self",
+        link_entry.get("relation"),
+        context.response.text,
+    )
+
+    actual_url_params = link_entry.get("url").split("consumer/FHIR/R4/")[-1]
+    assert actual_url_params == rel_url, format_error(
+        "Link url does not specify the search parameters expected",
+        rel_url,
+        actual_url_params,
+        context.response.text,
+    )
+
+
 @then("the Bundle has {num_entries} entry")
 @then("the Bundle has {num_entries} entries")
 def assert_bundle_entries_step(context: Context, num_entries: str):

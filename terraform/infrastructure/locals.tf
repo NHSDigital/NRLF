@@ -8,13 +8,18 @@ locals {
   kms = {
     deletion_window_in_days = 7
   }
+
+  # TODO - Remove once all environments are on new domain structure
+  env_on_new_dns_zone = ["qa", "qa-sandbox"]
+  new_domain_map = {
+    "qa" : "api.${var.domain}",
+    "qa-sandbox" : "sandbox-api.${var.domain}",
+  }
+
   apis = {
-    # e.g. api.record-locator.dev.national.nhs.uk
     zone = var.domain
-    # If terraform workspace = root workspace then don't use sub-domain
-    # e.g. 00d5ff61.api.record-locator.dev.national.nhs.uk for PR
-    #      api.record-locator.dev.national.nhs.uk for dev
-    domain = "${terraform.workspace}.${var.domain}"
+    # TODO - Move all other environments onto new domain structure
+    domain = contains(local.env_on_new_dns_zone, local.environment) ? local.new_domain_map[local.environment] : "${terraform.workspace}.${var.domain}"
     consumer = {
       path = var.consumer_api_path
     }
@@ -23,21 +28,20 @@ locals {
     }
   }
   dynamodb_timeout_seconds = "3"
-  # Logic / vars for splunk environment
-  persistent_environments = ["dev", "dev-sandbox", "ref", "ref-sandbox", "int", "int-sandbox", "prod"]
-  environment_no_hyphen   = replace(local.environment, "-", "")
-  splunk_environment      = contains(local.persistent_environments, local.environment) ? local.environment_no_hyphen : "dev" # dev is the default splunk env
-  splunk_index            = "aws_recordlocator_${local.splunk_environment}"
-  public_domain_map = {
-    "int"         = "int.api.service.nhs.uk",
-    "dev"         = "internal-dev.api.service.nhs.uk",
-    "ref"         = "ref.api.service.nhs.uk",
-    "int-sandbox" = "sandbox.api.service.nhs.uk",
-    "prod"        = "api.service.nhs.uk",
-  }
-  public_domain = try(local.public_domain_map[terraform.workspace], local.apis.domain)
 
-  development_environments = ["dev", "dev-sandbox", "v2"]
-  log_level                = contains(local.persistent_environments, local.environment) ? (contains(local.development_environments, local.environment) ? "DEBUG" : "INFO") : "DEBUG"
-  aws_account_id           = data.aws_caller_identity.current.account_id
+  persistent_environments = ["dev", "dev-sandbox", "qa", "qa-sandbox", "ref", "int", "int-sandbox", "prod"]
+  is_persistent_env       = contains(local.persistent_environments, local.environment)
+  is_sandbox_env          = length(regexall("-sandbox", local.environment)) > 0
+  is_dev_env              = local.environment == "dev" || local.environment == "dev-sandbox"
+
+  public_domain = local.is_persistent_env ? local.is_sandbox_env ? var.public_sandbox_domain : var.public_domain : local.apis.domain
+
+  # Logic / vars for splunk environment
+  environment_no_hyphen = replace(local.environment, "-", "")
+  splunk_environment    = local.is_persistent_env ? local.environment_no_hyphen : "dev" # dev is the default splunk env
+  splunk_index          = "aws_recordlocator_${local.splunk_environment}"
+
+  log_level = local.is_persistent_env ? local.is_dev_env ? "DEBUG" : "INFO" : "DEBUG"
+
+  aws_account_id = data.aws_caller_identity.current.account_id
 }

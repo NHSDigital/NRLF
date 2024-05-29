@@ -45,10 +45,7 @@ module "developer_policy" {
       Effect = "Deny"
       Resource = [
         "${data.aws_s3_bucket.terraform_state.arn}/${local.project}/prod/*",
-        "${data.aws_s3_bucket.terraform_state.arn}/${local.project}/test/*",
-        "${data.aws_s3_bucket.terraform_state.arn}/${local.project}/ref/*",
         "${data.aws_s3_bucket.terraform_state.arn}/${local.project}/mgmt/*",
-        "${data.aws_s3_bucket.terraform_state.arn}/${local.project}/dev/terraform-state-infrastructure"
       ]
     },
     {

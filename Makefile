@@ -10,7 +10,7 @@ SHELL := /bin/bash
 DIST_PATH ?= ./dist
 TEST_ARGS ?= --cov --cov-report=term-missing
 FEATURE_TEST_ARGS ?= ./tests/features --format progress2
-TF_WORKSPACE ?= $(shell terraform -chdir=terraform/infrastructure workspace show)
+TF_WORKSPACE_NAME ?= $(shell terraform -chdir=terraform/infrastructure workspace show)
 ENV ?= dev
 APP_ALIAS ?= default
 HOST ?= $(TF_WORKSPACE).api.record-locator.$(ENV).national.nhs.uk
@@ -78,11 +78,11 @@ test: check-warn ## Run the unit tests
 
 test-features-integration: check-warn ## Run the BDD feature tests in the integration environment
 	@echo "Running feature tests in the integration environment"
-	behave --define="integration_test=true" --define="env=$(TF_WORKSPACE)" $(FEATURE_TEST_ARGS)
+	behave --define="integration_test=true" --define="env=$(TF_WORKSPACE_NAME)" $(FEATURE_TEST_ARGS)
 
 test-performance-prepare:
 	mkdir -p $(DIST_PATH)
-	poetry run python tests/performance/environment.py setup $(TF_WORKSPACE)
+	poetry run python tests/performance/environment.py setup $(TF_WORKSPACE_NAME)
 
 test-performance: check-warn test-performance-baseline test-performance-stress ## Run the performance tests
 
@@ -106,14 +106,10 @@ test-performance-output: ## Process outputs from the performance tests
 	poetry run python tests/performance/process_results.py stress $(DIST_PATH)/consumer-stress.csv
 
 test-performance-cleanup:
-	poetry run python tests/performance/environment.py cleanup $(TF_WORKSPACE)
-
+	poetry run python tests/performance/environment.py cleanup $(TF_WORKSPACE_NAME)
 
 lint: check-warn ## Lint the project
 	SKIP="no-commit-to-branch" pre-commit run --all-files
-
-deploy: check-deploy-warn ## Deploy the project
-	cd terraform/infrastructure && $(MAKE) ENV=$(ENV) TF_WORKSPACE=$(TF_WORKSPACE) apply
 
 clean: ## Remove all generated and temporary files
 	[ -n "$(DIST_PATH)" ] && \

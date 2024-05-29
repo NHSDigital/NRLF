@@ -2,6 +2,7 @@ from pydantic import ValidationError
 
 from nrlf.consumer.fhir.r4.model import Bundle, DocumentReference
 from nrlf.core.codes import SpineErrorConcept
+from nrlf.core.config import Config
 from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
 from nrlf.core.errors import OperationOutcomeError
@@ -41,6 +42,9 @@ def handler(
             diagnostics="A valid NHS number is required to search for document references",
             expression="subject:identifier",
         )
+    config = Config()
+    base_url = f"https://{config.ENVIRONMENT}.api.service.nhs.uk/"
+    self_link = f"{base_url}record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/Id/nhs-number|{params.nhs_number}"
 
     if not validate_type_system(params.type, metadata.pointer_types):
         logger.log(
@@ -58,8 +62,20 @@ def handler(
         if params.custodian_identifier
         else None
     )
-    bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
+    if custodian_id:
+        self_link += f"&custodian:identifier=https://fhir.nhs.uk/Id/ods-organization-code|{custodian_id}"
+
     pointer_types = [params.type.__root__] if params.type else metadata.pointer_types
+    if params.type:
+        self_link += f"&type={params.type.__root__}"
+
+    bundle = {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "link": [{"relation": "self", "url": self_link}],
+        "total": 0,
+        "entry": [],
+    }
 
     logger.log(
         LogReference.CONSEARCH003,

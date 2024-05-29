@@ -8,7 +8,7 @@ class Config(BaseSettings):
     All Environment Variables are validated using pydantic, and will result in
     a 500 Internal Server Error if validation fails.
 
-    To add a new Environment Variable simply a new pydantic compatible
+    To add a new Environment Variable simply add a new pydantic compatible
     definition below, and pydantic should allow for even complex validation
     logic to be supported.
     """
