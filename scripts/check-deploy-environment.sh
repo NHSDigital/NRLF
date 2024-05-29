@@ -5,6 +5,7 @@ set -o errexit -o pipefail -o nounset
 
 : "${SHOULD_WARN_ONLY:="false"}"
 : "${ENV:="dev"}"
+: "${ENV_ACCOUNT_NAME:="dev"}"
 
 function success() {
   [ "${SHOULD_WARN_ONLY}" == "true" ] && return
@@ -41,13 +42,13 @@ done
 
 # Check the mgmt account has the environments account id
 set +e
-env_account_id="$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--${ENV}-account-id --query SecretString --output text)"
+env_account_id="$(aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--${ENV_ACCOUNT_NAME}-account-id --query SecretString --output text)"
 set -e
 if [ -n "${env_account_id}" ]
 then
-    success "${ENV} account id found in mgmt account"
+    success "${ENV_ACCOUNT_NAME} account id found in mgmt account"
 else
-    warning "${ENV} account id not found in mgmt account. Check you are logged into the NRLF mgmt account."
+    warning "${ENV_ACCOUNT_NAME} account id not found in mgmt account. Check you are logged into the NRLF mgmt account."
 fi
 
 # Check the Terraform workspace is set
@@ -55,10 +56,14 @@ set +e
 tf_workspace="$(cd terraform/infrastructure && terraform workspace show)"
 set -e
 case "${tf_workspace}" in
-    dev|int|ref|prod)
+    dev|qa|int|ref|prod)
         warning "Terraform workspace set to persistent environment '${tf_workspace}'"
+        if [ "${tf_workspace}" != "${ENV}" ]
+        then
+            warning "Terraform workspace '${tf_workspace}' does not match deployment environment '${ENV}'"
+        fi
         ;;
-    dev-sandbox|ref-sandbox|int-sandbox)
+    dev-sandbox|qa-sandbox|int-sandbox)
         warning "Terraform workspace set to sandbox environment '${tf_workspace}'"
         ;;
     account_wide|default)

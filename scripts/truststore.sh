@@ -1,13 +1,17 @@
+#!/bin/bash
+# Script to manage the NRLF truststore files
+set -o errexit -o pipefail -o nounset
+
 BUCKET="nhsd-nrlf--truststore"
 
 function _truststore_help() {
     echo
-    echo "nrlf truststore <command> [options]"
+    echo "$0 <command> [options]"
     echo
     echo "commands:"
     echo "  help                            - this help screen"
     echo "  build-ca <name> <fqdn>          - Build a single CA cert"
-    echo "  build-client <name> <ca> <fqdn> - Build a single client cert + private key"
+    echo "  build-cert <name> <ca> <fqdn>   - Build a single client cert + private key"
     echo "  build-all                       - Build the standard trust store certs"
     echo "  pull-ca <ca>                    - Pull the certificate authority"
     echo "  pull-client <env>               - pull the files needed for a client connection"
@@ -32,7 +36,7 @@ EOF
 # build a certificate authority
 function _truststore_build_ca() {
     if [ $# -ne 2 ]; then
-        echo "Usage nrlf truststore ca <name> <fqdn>"
+        echo "Usage: $0 build-ca <name> <fqdn>"
         exit 1
     fi
 
@@ -61,14 +65,14 @@ function _truststore_build_ca() {
 # buld a certificate
 function _truststore_build_cert() {
     if [ $# -ne 3 ]; then
-        echo "Usage nrlf truststore client <name> <ca> <fqdn>"
+        echo "Usage: $0 build-cert <name> <ca> <fqdn>"
         exit 1;
     fi
 
     client=$1
     ca=$2
     fqdn=$3
-    serial=$("$DATE" +%s%3N)
+    serial=$(date +%s%3N)
 
     substitute_env_in_file ./truststore/config/client.conf /tmp/client.conf
 
@@ -108,11 +112,13 @@ function _truststore_build_all() {
     _truststore_build_ca "prod" "record-locator.national.nhs.uk"
     _truststore_build_ca "int"  "record-locator.int.national.nhs.uk"
     _truststore_build_ca "ref"  "record-locator.ref.national.nhs.uk"
+    _truststore_build_ca "qa"   "qa.record-locator.national.nhs.uk"
     _truststore_build_ca "dev"  "record-locator.dev.national.nhs.uk"
 
     _truststore_build_cert "prod" "prod" "api.record-locator.national.nhs.uk"
     _truststore_build_cert "int"  "int"  "int.api.record-locator.int.national.nhs.uk"
     _truststore_build_cert "ref"  "ref"  "ref.api.record-locator.ref.national.nhs.uk"
+    _truststore_build_cert "qa"   "qa"   "api.qa.record-locator.national.nhs.uk"
     _truststore_build_cert "dev"  "dev"  "dev.api.record-locator.dev.national.nhs.uk"
 }
 
@@ -141,13 +147,13 @@ function _truststore_pull_all() {
 }
 
 function _truststore() {
-    local command=$1
-    local args=(${@:2})
+    local command=$1; shift
+    local args=$@
 
     case $command in
         "build-all") _truststore_build_all $args ;;
         "build-ca") _truststore_build_ca $args ;;
-        "build-client") _truststore_build_cert $args ;;
+        "build-cert") _truststore_build_cert $args ;;
         "pull-all") _truststore_pull_all $args ;;
         "pull-server") _truststore_pull_server $args ;;
         "pull-client") _truststore_pull_client $args ;;
@@ -156,4 +162,4 @@ function _truststore() {
     esac
 }
 
-_truststore "${@:1}"
+_truststore $@
