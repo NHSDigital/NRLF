@@ -13,7 +13,7 @@ FEATURE_TEST_ARGS ?= ./tests/features --format progress2
 TF_WORKSPACE_NAME ?= $(shell terraform -chdir=terraform/infrastructure workspace show)
 ENV ?= dev
 APP_ALIAS ?= default
-HOST ?= $(TF_WORKSPACE).api.record-locator.$(ENV).national.nhs.uk
+HOST ?= $(TF_WORKSPACE_NAME).api.record-locator.$(ENV).national.nhs.uk
 ENV_TYPE ?= $(ENV)
 
 export PATH := $(PATH):$(PWD)/.venv/bin
