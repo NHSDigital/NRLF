@@ -970,6 +970,131 @@ def test_create_document_reference_supersede_deletes_old_pointers_replace(
 
 @mock_aws
 @mock_repository
+def test_create_document_reference_supersede_succeeds_with_toggle(
+    repository: DocumentPointerRepository,
+):
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+
+    # Add reference to a non-existing pointer
+    doc_ref.relatesTo = [
+        DocumentReferenceRelatesTo(
+            code="replaces",
+            target=Reference(
+                reference=None, identifier=Identifier(value="Y05868-99999-99999-000000")
+            ),
+        )
+    ]
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(
+            pointer_types=[
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
+            ],
+            nrl_permissions=["supersede-ignore-delete-fail"],
+        ),
+        body=doc_ref.json(exclude_none=True),
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "201",
+        "headers": {
+            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-99999-99999-999999"
+        },
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "information",
+                "code": "informational",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "RESOURCE_CREATED",
+                            "display": "Resource created",
+                            "system": "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
+                        }
+                    ]
+                },
+                "diagnostics": "The document has been created",
+            }
+        ],
+    }
+
+    non_existent_pointer = repository.get_by_id("Y05868-99999-99999-000000")
+    assert non_existent_pointer is None
+
+
+@mock_aws
+@mock_repository
+def test_create_document_reference_supersede_fails_without_toggle(
+    repository: DocumentPointerRepository,
+):
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+
+    # Add reference to a non-existing pointer
+    doc_ref.relatesTo = [
+        DocumentReferenceRelatesTo(
+            code="replaces",
+            target=Reference(
+                reference=None, identifier=Identifier(value="Y05868-99999-99999-000000")
+            ),
+        )
+    ]
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(
+            pointer_types=[
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
+            ]
+        ),
+        body=doc_ref.json(exclude_none=True),
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "400",
+        "headers": {},
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "error",
+                "code": "invalid",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "BAD_REQUEST",
+                            "display": "Bad request",
+                            "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                        }
+                    ]
+                },
+                "diagnostics": "The relatesTo target document does not exist",
+                "expression": ["relatesTo[0].target.identifier.value"],
+            }
+        ],
+    }
+
+
+@mock_aws
+@mock_repository
 def test_create_document_reference_create_relatesto_not_replaces(
     repository: DocumentPointerRepository,
 ):

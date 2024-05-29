@@ -107,78 +107,112 @@ def _get_document_ids_to_supersede(
     ids_to_delete = []
 
     for idx, relates_to in enumerate(resource.relatesTo):
-        if not (identifier := getattr(relates_to.target.identifier, "value", None)):
-            logger.log(LogReference.PROCREATE007a)
-            raise OperationOutcomeError(
-                severity="error",
-                code="invalid",
-                details=SpineErrorConcept.from_code("BAD_REQUEST"),
-                diagnostics="No identifier value provided for relatesTo target",
-                expression=[f"relatesTo[{idx}].target.identifier.value"],
-            )
+        identifier = _validate_identifier(relates_to, idx)
+        _validate_producer_id(identifier, metadata, idx)
+        existing_pointer = _check_existing_pointer(
+            identifier, repository, metadata, idx
+        )
 
-        producer_id = identifier.split("-", 1)[0]
-        if metadata.ods_code_parts != tuple(producer_id.split("|")):
-            logger.log(
-                LogReference.PROCREATE007b,
-                related_identifier=identifier,
-                ods_code_parts=metadata.ods_code_parts,
-            )
-            raise OperationOutcomeError(
-                severity="error",
-                code="invalid",
-                details=SpineErrorConcept.from_code("BAD_REQUEST"),
-                diagnostics="The relatesTo target identifier value does not include the expected ODS code for this organisation",
-                expression=[f"relatesTo[{idx}].target.identifier.value"],
-            )
-
-        existing_pointer = repository.get_by_id(identifier)
-        if (
-            not existing_pointer
-            and PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL in metadata.nrl_permissions
-        ):
-            logger.log(LogReference.PROCREATE007f, related_identifier=identifier)
+        if existing_pointer is None:
             continue
 
-        if not (existing_pointer := repository.get_by_id(identifier)):
-            logger.log(LogReference.PROCREATE007c, related_identifier=identifier)
-            raise OperationOutcomeError(
-                severity="error",
-                code="invalid",
-                details=SpineErrorConcept.from_code("BAD_REQUEST"),
-                diagnostics="The relatesTo target document does not exist",
-                expression=[f"relatesTo[{idx}].target.identifier.value"],
-            )
+        _validate_pointer_details(existing_pointer, core_model, identifier, idx)
 
-        if existing_pointer.nhs_number != core_model.nhs_number:
-            logger.log(LogReference.PROCREATE007d, related_identifier=identifier)
-            raise OperationOutcomeError(
-                severity="error",
-                code="invalid",
-                details=SpineErrorConcept.from_code("BAD_REQUEST"),
-                diagnostics="The relatesTo target document NHS number does not match the NHS number in the request",
-                expression=[f"relatesTo[{idx}].target.identifier.value"],
-            )
-
-        if existing_pointer.type != core_model.type:
-            logger.log(LogReference.PROCREATE007e, related_identifier=identifier)
-            raise OperationOutcomeError(
-                severity="error",
-                code="invalid",
-                details=SpineErrorConcept.from_code("BAD_REQUEST"),
-                diagnostics="The relatesTo target document type does not match the type in the request",
-                expression=[f"relatesTo[{idx}].target.identifier.value"],
-            )
-
-        if relates_to.code == "replaces":
-            logger.log(
-                LogReference.PROCREATE008,
-                relates_to_code=relates_to.code,
-                identifier=identifier,
-            )
-            ids_to_delete.append(identifier)
+        _append_id_if_replaces(relates_to, ids_to_delete, identifier)
 
     return ids_to_delete
+
+
+def _validate_identifier(relates_to, idx):
+    """
+    Validate that there is a identifier in relatesTo target
+    """
+    identifier = getattr(relates_to.target.identifier, "value", None)
+    if not identifier:
+        logger.log(LogReference.PROCREATE007a)
+        _raise_operation_outcome_error(
+            "No identifier value provided for relatesTo target", idx
+        )
+    return identifier
+
+
+def _validate_producer_id(identifier, metadata, idx):
+    """
+    Validate that there is an ODS code in the relatesTo target identifier
+    """
+    producer_id = identifier.split("-", 1)[0]
+    if metadata.ods_code_parts != tuple(producer_id.split("|")):
+        logger.log(
+            LogReference.PROCREATE007b,
+            related_identifier=identifier,
+            ods_code_parts=metadata.ods_code_parts,
+        )
+        _raise_operation_outcome_error(
+            "The relatesTo target identifier value does not include the expected ODS code for this organisation",
+            idx,
+        )
+
+
+def _check_existing_pointer(identifier, repository, metadata, idx):
+    """
+    Check that there is an existing pointer that will be deleted when superseding
+    """
+    existing_pointer = repository.get_by_id(identifier)
+    if not existing_pointer:
+        if PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL in metadata.nrl_permissions:
+            logger.log(LogReference.PROCREATE007f, related_identifier=identifier)
+            return None
+
+        logger.log(LogReference.PROCREATE007c, related_identifier=identifier)
+        _raise_operation_outcome_error(
+            "The relatesTo target document does not exist", idx
+        )
+    return existing_pointer
+
+
+def _validate_pointer_details(existing_pointer, core_model, identifier, idx):
+    """
+    Validate that the nhs numbers and type matches between the existing pointer and the requested one.
+    """
+    if existing_pointer.nhs_number != core_model.nhs_number:
+        logger.log(LogReference.PROCREATE007d, related_identifier=identifier)
+        _raise_operation_outcome_error(
+            "The relatesTo target document NHS number does not match the NHS number in the request",
+            idx,
+        )
+
+    if existing_pointer.type != core_model.type:
+        logger.log(LogReference.PROCREATE007e, related_identifier=identifier)
+        _raise_operation_outcome_error(
+            "The relatesTo target document type does not match the type in the request",
+            idx,
+        )
+
+
+def _append_id_if_replaces(relates_to, ids_to_delete, identifier):
+    """
+    Append pointer ID if the if the relatesTo code is 'replaces'
+    """
+    if relates_to.code == "replaces":
+        logger.log(
+            LogReference.PROCREATE008,
+            relates_to_code=relates_to.code,
+            identifier=identifier,
+        )
+        ids_to_delete.append(identifier)
+
+
+def _raise_operation_outcome_error(diagnostics, idx):
+    """
+    General function to raise an operation outcome error
+    """
+    raise OperationOutcomeError(
+        severity="error",
+        code="invalid",
+        details=SpineErrorConcept.from_code("BAD_REQUEST"),
+        diagnostics=diagnostics,
+        expression=[f"relatesTo[{idx}].target.identifier.value"],
+    )
 
 
 @request_handler(body=DocumentReference)
