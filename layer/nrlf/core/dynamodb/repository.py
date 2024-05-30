@@ -377,7 +377,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         self,
         item: DocumentPointer,
         ids_to_delete: List[str],
-        can_ignore_delete_fail: list[str] = [],
+        can_ignore_delete_fail: bool = False,
     ) -> DocumentPointer:
         """ """
         saved_item = self.create(item)
