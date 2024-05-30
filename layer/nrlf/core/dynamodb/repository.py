@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from nrlf.core.boto import get_dynamodb_resource, get_dynamodb_table
 from nrlf.core.codes import SpineErrorConcept
+from nrlf.core.constants import PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL
 from nrlf.core.dynamodb.model import DocumentPointer, DynamoDBModel
 from nrlf.core.errors import OperationOutcomeError
 from nrlf.core.logger import LogReference, logger
@@ -374,12 +375,18 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         return self.update(item)
 
     def supersede(
-        self, item: DocumentPointer, ids_to_delete: List[str]
+        self,
+        item: DocumentPointer,
+        ids_to_delete: List[str],
+        nrl_permissions: list[str] = [],
     ) -> DocumentPointer:
         """ """
         saved_item = self.create(item)
+        can_ignore_delete_fail = (
+            PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL in nrl_permissions
+        )
         for id_ in ids_to_delete:
-            self.delete_by_id(id_)
+            self.delete_by_id(id_, can_ignore_delete_fail)
 
         return saved_item
 
@@ -411,12 +418,34 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                 details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
             ) from exc
 
-    def delete_by_id(self, id_: str):
+    def delete_by_id(self, id_: str, can_ignore_delete_fail: bool):
         """ """
         producer_id, document_id = id_.split("-", 1)
         ods_code_parts = producer_id.split(".")
         partition_key = "D#" + "#".join([*ods_code_parts, document_id])
-        self.table.delete_item(Key={"pk": partition_key, "sk": partition_key})
+        try:
+            self.table.delete_item(Key={"pk": partition_key, "sk": partition_key})
+        except ClientError as exc:
+            if can_ignore_delete_fail:
+                logger.log(
+                    LogReference.REPOSITORY026a,
+                    exc_info=sys.exc_info(),
+                    stacklevel=5,
+                    error=str(exc),
+                )
+                return
+            logger.log(
+                LogReference.REPOSITORY026,
+                exc_info=sys.exc_info(),
+                stacklevel=5,
+                error=str(exc),
+            )
+            raise OperationOutcomeError(
+                status_code="500",
+                severity="error",
+                code="exception",
+                details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
+            ) from exc
 
     def _query(self, **kwargs) -> Iterator[DocumentPointer]:
         """
