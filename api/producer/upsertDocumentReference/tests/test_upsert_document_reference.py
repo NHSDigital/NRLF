@@ -8,6 +8,7 @@ from api.producer.upsertDocumentReference.upsert_document_reference import (
     _set_upsert_time_fields,
     handler,
 )
+from nrlf.core.constants import PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
 from nrlf.producer.fhir.r4.model import (
     DocumentReferenceRelatesTo,
@@ -598,6 +599,63 @@ def test_create_document_reference_invalid_relatesto_not_exists(repository):
                 },
                 "diagnostics": "The relatesTo target document does not exist",
                 "expression": ["relatesTo[0].target.identifier.value"],
+            }
+        ],
+    }
+
+
+@mock_aws
+@mock_repository
+def test_create_document_reference_invalid_relatesto_not_exists_still_creates_with_ignore_perm(
+    repository,
+):
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+    doc_ref.relatesTo = [
+        DocumentReferenceRelatesTo(
+            code="transforms",
+            target=Reference(
+                reference=None,
+                identifier=Identifier(value="Y05868-99999-99999-999999"),
+            ),
+        )
+    ]
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(
+            nrl_permissions=[PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL]
+        ),
+        body=doc_ref.json(exclude_none=True),
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "201",
+        "headers": {
+            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-99999-99999-999999"
+        },
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "information",
+                "code": "informational",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "RESOURCE_CREATED",
+                            "display": "Resource created",
+                            "system": "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
+                        }
+                    ]
+                },
+                "diagnostics": "The document has been created",
             }
         ],
     }

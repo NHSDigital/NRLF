@@ -1,4 +1,7 @@
-from nrlf.core.constants import PERMISSION_AUDIT_DATES_FROM_PAYLOAD
+from nrlf.core.constants import (
+    PERMISSION_AUDIT_DATES_FROM_PAYLOAD,
+    PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL,
+)
 from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
 from nrlf.core.logger import LogReference, logger
@@ -105,6 +108,9 @@ def handler(
 
     if result.resource.relatesTo:
         logger.log(LogReference.PROUPSERT006, relatesTo=result.resource.relatesTo)
+        can_ignore_delete_fail = (
+            PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL in metadata.nrl_permissions
+        )
 
         for idx, relates_to in enumerate(result.resource.relatesTo):
             if not (identifier := getattr(relates_to.target.identifier, "value", None)):
@@ -125,27 +131,33 @@ def handler(
                     diagnostics="The relatesTo target identifier value does not include the expected ODS code for this organisation",
                     expression=f"relatesTo[{idx}].target.identifier.value",
                 )
+            if not can_ignore_delete_fail:
+                if not (existing_pointer := repository.get_by_id(identifier)):
+                    logger.log(
+                        LogReference.PROCREATE007c, related_identifier=identifier
+                    )
+                    return SpineErrorResponse.BAD_REQUEST(
+                        diagnostics="The relatesTo target document does not exist",
+                        expression=f"relatesTo[{idx}].target.identifier.value",
+                    )
 
-            if not (existing_pointer := repository.get_by_id(identifier)):
-                logger.log(LogReference.PROUPSERT007c, related_identifier=identifier)
-                return SpineErrorResponse.BAD_REQUEST(
-                    diagnostics="The relatesTo target document does not exist",
-                    expression=f"relatesTo[{idx}].target.identifier.value",
-                )
+                if existing_pointer.nhs_number != core_model.nhs_number:
+                    logger.log(
+                        LogReference.PROUPSERT007d, related_identifier=identifier
+                    )
+                    return SpineErrorResponse.BAD_REQUEST(
+                        diagnostics="The relatesTo target document NHS number does not match the NHS number in the request",
+                        expression=f"relatesTo[{idx}].target.identifier.value",
+                    )
 
-            if existing_pointer.nhs_number != core_model.nhs_number:
-                logger.log(LogReference.PROUPSERT007d, related_identifier=identifier)
-                return SpineErrorResponse.BAD_REQUEST(
-                    diagnostics="The relatesTo target document NHS number does not match the NHS number in the request",
-                    expression=f"relatesTo[{idx}].target.identifier.value",
-                )
-
-            if existing_pointer.type != core_model.type:
-                logger.log(LogReference.PROUPSERT007e, related_identifier=identifier)
-                return SpineErrorResponse.BAD_REQUEST(
-                    diagnostics="The relatesTo target document type does not match the type in the request",
-                    expression=f"relatesTo[{idx}].target.identifier.value",
-                )
+                if existing_pointer.type != core_model.type:
+                    logger.log(
+                        LogReference.PROUPSERT007e, related_identifier=identifier
+                    )
+                    return SpineErrorResponse.BAD_REQUEST(
+                        diagnostics="The relatesTo target document type does not match the type in the request",
+                        expression=f"relatesTo[{idx}].target.identifier.value",
+                    )
 
             if relates_to.code == "replaces":
                 logger.log(
@@ -161,7 +173,9 @@ def handler(
             pointer_id=result.resource.id,
             ids_to_delete=ids_to_delete,
         )
-        saved_model = repository.supersede(core_model, ids_to_delete)
+        saved_model = repository.supersede(
+            core_model, ids_to_delete, can_ignore_delete_fail
+        )
         logger.log(LogReference.PROUPSERT999)
         return NRLResponse.RESOURCE_SUPERSEDED(resource_id=saved_model.id)
 

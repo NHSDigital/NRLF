@@ -101,6 +101,9 @@ class LogReference(Enum):
 
     REPOSITORY025 = _Reference("DEBUG", "Deleting resource from DynamoDB")
     REPOSITORY026 = _Reference("EXCEPTION", "Failed to delete resource from DynamoDB")
+    REPOSITORY026a = _Reference(
+        "EXCEPTION", "Ignoring failure to delete resource from DynamoDB"
+    )
     REPOSITORY027 = _Reference("INFO", "Successfully deleted item from DynamoDB")
     REPOSITORY028 = _Reference("INFO", "Received page of search results")
     REPOSITORY028a = _Reference("DEBUG", "Received page of search results with result")
