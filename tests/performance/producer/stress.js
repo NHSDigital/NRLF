@@ -58,23 +58,5 @@ export const options = {
         { target: 10, duration: "1m" },
       ],
     },
-    /*searchDocumentReference: {
-      exec: "searchDocumentReference",
-      executor: "ramping-vus",
-      startVUs: 1,
-      stages: [
-        { target: 10, duration: "5s" },
-        //{ target: 10, duration: "1m" },
-      ],
-    },
-    /*searchPostDocumentReference: {
-      exec: "searchPostDocumentReference",
-      executor: "ramping-vus",
-      startVUs: 1,
-      stages: [
-        { target: 10, duration: "30s" },
-        { target: 10, duration: "1m" },
-      ],
-    },*/
   },
 };
