@@ -418,7 +418,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                 details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
             ) from exc
 
-    def delete_by_id(self, id_: str, can_ignore_delete_fail: bool):
+    def delete_by_id(self, id_: str, can_ignore_delete_fail: bool = False):
         """ """
         producer_id, document_id = id_.split("-", 1)
         ods_code_parts = producer_id.split(".")
