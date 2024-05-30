@@ -7,7 +7,6 @@ from pydantic import ValidationError
 
 from nrlf.core.boto import get_dynamodb_resource, get_dynamodb_table
 from nrlf.core.codes import SpineErrorConcept
-from nrlf.core.constants import PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL
 from nrlf.core.dynamodb.model import DocumentPointer, DynamoDBModel
 from nrlf.core.errors import OperationOutcomeError
 from nrlf.core.logger import LogReference, logger
@@ -378,13 +377,11 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         self,
         item: DocumentPointer,
         ids_to_delete: List[str],
-        nrl_permissions: list[str] = [],
+        can_ignore_delete_fail: list[str] = [],
     ) -> DocumentPointer:
         """ """
         saved_item = self.create(item)
-        can_ignore_delete_fail = (
-            PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL in nrl_permissions
-        )
+
         for id_ in ids_to_delete:
             self.delete_by_id(id_, can_ignore_delete_fail)
 
@@ -434,18 +431,6 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                     error=str(exc),
                 )
                 return
-            logger.log(
-                LogReference.REPOSITORY026,
-                exc_info=sys.exc_info(),
-                stacklevel=5,
-                error=str(exc),
-            )
-            raise OperationOutcomeError(
-                status_code="500",
-                severity="error",
-                code="exception",
-                details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
-            ) from exc
 
     def _query(self, **kwargs) -> Iterator[DocumentPointer]:
         """

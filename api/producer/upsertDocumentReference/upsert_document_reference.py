@@ -108,6 +108,9 @@ def handler(
 
     if result.resource.relatesTo:
         logger.log(LogReference.PROUPSERT006, relatesTo=result.resource.relatesTo)
+        can_ignore_delete_fail = (
+            PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL in metadata.nrl_permissions
+        )
 
         for idx, relates_to in enumerate(result.resource.relatesTo):
             if not (identifier := getattr(relates_to.target.identifier, "value", None)):
@@ -128,7 +131,7 @@ def handler(
                     diagnostics="The relatesTo target identifier value does not include the expected ODS code for this organisation",
                     expression=f"relatesTo[{idx}].target.identifier.value",
                 )
-            if PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL not in metadata.nrl_permissions:
+            if not can_ignore_delete_fail:
                 if not (existing_pointer := repository.get_by_id(identifier)):
                     logger.log(
                         LogReference.PROCREATE007c, related_identifier=identifier
@@ -171,7 +174,7 @@ def handler(
             ids_to_delete=ids_to_delete,
         )
         saved_model = repository.supersede(
-            core_model, ids_to_delete, metadata.nrl_permissions
+            core_model, ids_to_delete, can_ignore_delete_fail
         )
         logger.log(LogReference.PROUPSERT999)
         return NRLResponse.RESOURCE_SUPERSEDED(resource_id=saved_model.id)
