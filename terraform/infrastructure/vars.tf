@@ -12,6 +12,17 @@ variable "domain" {
   type = string
 }
 
+variable "public_domain" {
+  type        = string
+  description = "The public domain for the persistent environment"
+}
+
+variable "public_sandbox_domain" {
+  type        = string
+  description = "The public domain for the sandbox environment (optional)"
+  nullable    = true
+}
+
 variable "consumer_api_path" {
   type    = string
   default = "consumer"

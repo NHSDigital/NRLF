@@ -374,12 +374,16 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         return self.update(item)
 
     def supersede(
-        self, item: DocumentPointer, ids_to_delete: List[str]
+        self,
+        item: DocumentPointer,
+        ids_to_delete: List[str],
+        can_ignore_delete_fail: bool = False,
     ) -> DocumentPointer:
         """ """
         saved_item = self.create(item)
+
         for id_ in ids_to_delete:
-            self.delete_by_id(id_)
+            self.delete_by_id(id_, can_ignore_delete_fail)
 
         return saved_item
 
@@ -411,12 +415,22 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                 details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
             ) from exc
 
-    def delete_by_id(self, id_: str):
+    def delete_by_id(self, id_: str, can_ignore_delete_fail: bool = False):
         """ """
         producer_id, document_id = id_.split("-", 1)
         ods_code_parts = producer_id.split(".")
         partition_key = "D#" + "#".join([*ods_code_parts, document_id])
-        self.table.delete_item(Key={"pk": partition_key, "sk": partition_key})
+        try:
+            self.table.delete_item(Key={"pk": partition_key, "sk": partition_key})
+        except ClientError as exc:
+            if can_ignore_delete_fail:
+                logger.log(
+                    LogReference.REPOSITORY026a,
+                    exc_info=sys.exc_info(),
+                    stacklevel=5,
+                    error=str(exc),
+                )
+                return
 
     def _query(self, **kwargs) -> Iterator[DocumentPointer]:
         """
