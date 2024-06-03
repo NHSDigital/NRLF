@@ -3,6 +3,8 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, Optional
 
+from core.codes import SpineErrorConcept
+from core.errors import OperationOutcomeError
 from nhs_number import is_valid as is_valid_nhs_number
 from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
@@ -77,7 +79,13 @@ class DocumentPointer(DynamoDBModel):
         custodian = getattr(custodian_identifier, "value")
 
         if len(coding) > 1:
-            raise ValueError("DocumentReference.type.coding must have exactly one item")
+            raise OperationOutcomeError(
+                status_code="400",
+                severity="error",
+                code="invalid",
+                details=SpineErrorConcept.from_code("INVALID_RESOURCE"),
+                diagnostics="DocumentReference.type.coding must have exactly one item",
+            ) from None
 
         pointer_type = f"{coding[0].system}|{coding[0].code}"
 

@@ -1,5 +1,7 @@
 from uuid import uuid4
 
+from core.errors import OperationOutcomeError
+
 from nrlf.core.constants import PERMISSION_AUDIT_DATES_FROM_PAYLOAD
 from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
@@ -74,10 +76,20 @@ def handler(
         document_reference=result.resource,
         nrl_permissions=metadata.nrl_permissions,
     )
-
-    core_model = DocumentPointer.from_document_reference(
-        document_reference, created_on=creation_time
-    )
+    try:
+        core_model = DocumentPointer.from_document_reference(
+            document_reference, created_on=creation_time
+        )
+    except OperationOutcomeError as exc:
+        return SpineErrorResponse.BAD_REQUEST(
+            diagnostics=exc.diagnostics,
+            expression="DocumentReference.type.coding",
+        )
+    except Exception as exc:
+        return SpineErrorResponse.BAD_REQUEST(
+            diagnostics=f"Parsing of Document Pointer has raised exception with message: '{str(exc)}'.",
+            expression="DocumentReference",
+        )
 
     custodian_parts = tuple(
         filter(None, (core_model.custodian, core_model.custodian_suffix))
