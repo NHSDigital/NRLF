@@ -329,11 +329,9 @@ def assert_header_starts_with(context: Context, header_name: str, starts_with: s
 def assert_resource_in_location_header_exists_with_values(context: Context):
     location = context.response.headers.get("Location")
 
-    assert location.startswith(
-        "/nrl-producer-api/FHIR/R4/DocumentReference/"
-    ), format_error(
+    assert location.startswith("/producer/FHIR/R4/DocumentReference/"), format_error(
         "Unexpected Location header",
-        "/nrl-producer-api/FHIR/R4/DocumentReference/",
+        "/producer/FHIR/R4/DocumentReference/",
         location,
         context.response.text,
     )
@@ -352,6 +350,26 @@ def assert_resource_in_location_header_exists_with_values(context: Context):
 
     items = {row["property"]: row["value"] for row in context.table}
     items["id"] = resource_id
+
+    assert_document_reference_matches_value(
+        context, DocumentReference.parse_raw(resource.document), items
+    )
+
+
+@then("the Document Reference '{doc_ref_id}' exists with values")
+def assert_resource_exists_with_values(context: Context, doc_ref_id: str):
+    resource = context.repository.get_by_id(doc_ref_id)
+    assert resource is not None, format_error(
+        "Resource does not exist",
+        doc_ref_id,
+        None,
+        context.response.text,
+    )
+
+    if not context.table:
+        raise ValueError("No DocumentReference table provided")
+
+    items = {row["property"]: row["value"] for row in context.table}
 
     assert_document_reference_matches_value(
         context, DocumentReference.parse_raw(resource.document), items

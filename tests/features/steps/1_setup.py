@@ -1,4 +1,5 @@
 import json
+from contextlib import suppress
 
 from behave import *  # noqa
 from behave.runner import Context
@@ -62,4 +63,10 @@ def create_document_reference_step(context: Context):
     doc_pointer = DocumentPointer.from_document_reference(base_doc_ref)
 
     context.repository.create(doc_pointer)
-    context.add_cleanup(lambda: context.repository.delete(doc_pointer))
+    context.add_cleanup(clean_up_test_pointer, context, doc_pointer)
+
+
+def clean_up_test_pointer(context: Context, doc_pointer: DocumentPointer):
+    """Remove a pointer during cleanup without failing if it has already been deleted"""
+    with suppress(Exception):
+        context.repository.delete(doc_pointer)

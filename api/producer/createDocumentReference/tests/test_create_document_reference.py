@@ -42,7 +42,7 @@ def test_create_document_reference_happy_path(repository: DocumentPointerReposit
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
         },
         "isBase64Encoded": False,
     }
@@ -107,7 +107,7 @@ def test_create_document_reference_happy_path_with_ssp(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
         },
         "isBase64Encoded": False,
     }
@@ -905,7 +905,7 @@ def test_create_document_reference_supersede_deletes_old_pointers_replace(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
         },
         "isBase64Encoded": False,
     }
@@ -973,7 +973,7 @@ def test_create_document_reference_create_relatesto_not_replaces(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
         },
         "isBase64Encoded": False,
     }
@@ -1024,7 +1024,7 @@ def test_create_document_reference_with_date_ignored(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
         },
         "isBase64Encoded": False,
     }
@@ -1089,7 +1089,7 @@ def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
         },
         "isBase64Encoded": False,
     }
@@ -1152,7 +1152,7 @@ def test_create_document_reference_with_date_overidden(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
         },
         "isBase64Encoded": False,
     }

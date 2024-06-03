@@ -18,7 +18,7 @@ Feature: Producer - createDocumentReference - Failure Scenarios
       | http://snomed.info/sct | 736253002 |
     When producer 'ANGY1' creates a DocumentReference with values:
       | property  | value                          |
-      | subject   | 1234567890                     |
+      | subject   | 9999999999                     |
       | status    | current                        |
       | type      | 736253002                      |
       | category  | 734163000                      |
@@ -30,28 +30,26 @@ Feature: Producer - createDocumentReference - Failure Scenarios
     And the OperationOutcome contains the issue:
       """
       {
-      "resourceType": "OperationOutcome",
-      "issue": [
-          {
-          "severity": "error",
-          "code": "invalid",
-          "details": {
-              "coding": [
-              {
-                  "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
-                  "code": "BAD_REQUEST",
-                  "display": "Bad request"
-              }
-              ]
-          },
-          "diagnostics": "The custodian of the provided DocumentReference does not match the expected ODS code for this organisation",
-          "expression": [
-              "custodian.identifier.value"
-          ]
-          }
+        "severity": "error",
+        "code": "invalid",
+        "details": {
+            "coding": [
+            {
+                "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                "code": "BAD_REQUEST",
+                "display": "Bad request"
+            }
+            ]
+        },
+        "diagnostics": "The custodian of the provided DocumentReference does not match the expected ODS code for this organisation",
+        "expression": [
+            "custodian.identifier.value"
+        ]
+      }
       """
 
   # Invalid document reference - invalid NHS number
+  # Known to currently fail - Bug NRL-
   Scenario: Invalid NHS number (correct length but not valid)
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
     And the organisation 'ANGY1' is authorised to access pointer types:
