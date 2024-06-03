@@ -158,7 +158,7 @@ def request_handler(
                     severity="error",
                     code="forbidden",
                     details=SpineErrorConcept.from_code("ACCESS DENIED"),
-                    diagnostics=f"Your organisation '{kwargs['metadata'].ods_code}' does not have permission to access this resource. Contact the onboarding team.",
+                    diagnostics=f"Your organisation '{metadata.ods_code}' does not have permission to access this resource. Contact the onboarding team.",
                 )
 
             kwargs = {
