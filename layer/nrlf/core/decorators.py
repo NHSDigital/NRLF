@@ -69,7 +69,9 @@ def load_connection_metadata(headers: Dict[str, str], config: Config):
     logger.log(LogReference.HANDLER003, metadata=metadata.dict())
     if metadata.nrl_permissions:
         logger.log(LogReference.HANDLER004a)
-        metadata.pointer_types = list(POINTER_TYPES.values())
+        metadata.pointer_types = [
+            f"http://snomed.info/sct|{key}" for key in list(POINTER_TYPES.keys())
+        ]
         return metadata
     if metadata.enable_authorization_lookup:
         logger.log(LogReference.HANDLER004)
