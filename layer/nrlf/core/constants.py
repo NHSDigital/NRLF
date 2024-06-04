@@ -33,3 +33,12 @@ PERMISSION_AUDIT_DATES_FROM_PAYLOAD = "audit-dates-from-payload"
 PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL = "supersede-ignore-delete-fail"
 
 PRODUCER_URL_PATH = "/nrl-producer-api/FHIR/R4/DocumentReference"
+POINTER_TYPES = {
+    "736253002": "Mental Health Crisis Plan",
+    "1363501000000100": "Royal College of Physicians NEWS2 (National Early Warning Score 2) chart",
+    "1382601000000107": "ReSPECT (Recommended Summary Plan for Emergency Care and Treatment) form",
+    "325691000000100": "Contingency plan",
+    "736373009": "End of life care plan",
+    "861421000000109": "End of Life Care Coordination Summary",
+    "887701000000100": "Emergency Health Care Plans",
+}

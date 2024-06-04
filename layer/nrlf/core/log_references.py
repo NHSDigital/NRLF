@@ -15,6 +15,7 @@ class LogReference(Enum):
     HANDLER002 = _Reference("DEBUG", "Attempting to parse request headers")
     HANDLER003 = _Reference("INFO", "Parsed metadata from request headers")
     HANDLER004 = _Reference("INFO", "Authorisation lookup enabled")
+    HANDLER004a = _Reference("INFO", "Authorisation lookup skipped for sync request")
     HANDLER005 = _Reference("WARN", "Rejecting request due to missing pointer types")
     HANDLER006 = _Reference("DEBUG", "Attempting to parse request parameters")
     HANDLER007 = _Reference("INFO", "Parsed request parameters")
