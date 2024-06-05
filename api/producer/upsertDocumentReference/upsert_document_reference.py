@@ -94,6 +94,7 @@ def _get_document_ids_to_supersede(
     core_model: DocumentPointer,
     metadata: ConnectionMetadata,
     repository: DocumentPointerRepository,
+    can_ignore_delete_fail: bool,
 ):
     """
     Get the list of document IDs to supersede based on the relatesTo field
@@ -105,18 +106,22 @@ def _get_document_ids_to_supersede(
     ids_to_delete = []
 
     for idx, relates_to in enumerate(resource.relatesTo):
-        identifier = _validate_identifier(relates_to, idx)
-        _validate_producer_id(identifier, metadata, idx)
-        existing_pointer = _check_existing_pointer(
-            identifier, repository, metadata, idx
-        )
+        try:
+            identifier = _validate_identifier(relates_to, idx)
+            _validate_producer_id(identifier, metadata, idx)
+            existing_pointer = _check_existing_pointer(identifier, repository, idx)
 
-        if existing_pointer is None:
-            continue
+            if existing_pointer is None:
+                continue
 
-        _validate_pointer_details(existing_pointer, core_model, identifier, idx)
+            _validate_pointer_details(existing_pointer, core_model, identifier, idx)
 
-        _append_id_if_replaces(relates_to, ids_to_delete, identifier)
+            _append_id_if_replaces(relates_to, ids_to_delete, identifier)
+        except OperationOutcomeError:
+            if can_ignore_delete_fail:
+                logger.log(LogReference.PROUPSERT007f, relatesTo=resource.relatesTo)
+                continue
+            raise
 
     return ids_to_delete
 
@@ -151,16 +156,12 @@ def _validate_producer_id(identifier, metadata, idx):
         )
 
 
-def _check_existing_pointer(identifier, repository, metadata, idx):
+def _check_existing_pointer(identifier, repository, idx):
     """
     Check that there is an existing pointer that will be deleted when superseding
     """
     existing_pointer = repository.get_by_id(identifier)
     if not existing_pointer:
-        if PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL in metadata.nrl_permissions:
-            logger.log(LogReference.PROUPSERT007f, related_identifier=identifier)
-            return None
-
         logger.log(LogReference.PROUPSERT007c, related_identifier=identifier)
         _raise_operation_outcome_error(
             "The relatesTo target document does not exist", idx
@@ -247,15 +248,21 @@ def handler(
     if error_response := _check_permissions(core_model, metadata):
         return error_response
 
+    can_ignore_delete_fail = (
+        PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL in metadata.nrl_permissions
+    )
+
     if ids_to_delete := _get_document_ids_to_supersede(
-        result.resource, core_model, metadata, repository
+        result.resource, core_model, metadata, repository, can_ignore_delete_fail
     ):
         logger.log(
             LogReference.PROUPSERT010,
             pointer_id=result.resource.id,
             ids_to_delete=ids_to_delete,
         )
-        saved_model = repository.supersede(core_model, ids_to_delete)
+        saved_model = repository.supersede(
+            core_model, ids_to_delete, can_ignore_delete_fail
+        )
         logger.log(LogReference.PROUPSERT999)
         return NRLResponse.RESOURCE_SUPERSEDED(resource_id=saved_model.id)
 

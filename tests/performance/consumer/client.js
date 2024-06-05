@@ -77,7 +77,7 @@ export function searchDocumentReference() {
   const identifier = encodeURIComponent(
     `https://fhir.nhs.uk/Id/nhs-number|${nhsNumber}`
   );
-  const type = encodeURIComponent(pointer_type);
+  const type = encodeURIComponent(`http://snomed.info/sct|${pointer_type}`);
 
   const res = http.get(
     `https://${__ENV.HOST}/consumer/DocumentReference?subject:identifier=${identifier}&type=${type}`,
@@ -118,7 +118,7 @@ export function searchPostDocumentReference() {
 
   const body = JSON.stringify({
     "subject:identifier": `https://fhir.nhs.uk/Id/nhs-number|${nhsNumber}`,
-    type: pointer_type,
+    type: `http://snomed.info/sct|${pointer_type}`,
   });
 
   const res = http.post(

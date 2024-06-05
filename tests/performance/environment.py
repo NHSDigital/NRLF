@@ -58,6 +58,7 @@ def setup(
     documents_per_type: int = 10,
     ods_code: str = "Y05868",
     out: str = "tests/performance/reference-data.json",
+    output_full_pointers: bool = False,
 ):
     print(f"Creating Test Data in environment '{env}'")
 
@@ -65,7 +66,7 @@ def setup(
     print(f"Documents Per Type: {documents_per_type}")
 
     table = DYNAMODB.Table(f"nhsd-nrlf--{env}--document-pointer")
-    document_ids = set()
+    documents = {}
     nhs_numbers = set()
 
     with table.batch_writer() as batch:
@@ -73,13 +74,17 @@ def setup(
             pointer = DocumentPointer.from_document_reference(record)
             batch.put_item(Item=pointer.dict())
 
-            document_ids.add(pointer.id)
+            documents[pointer.id] = record.dict(exclude_none=True)
             nhs_numbers.add(pointer.nhs_number)
 
-    print(
-        f"Created {len(document_ids)} document pointers for {len(nhs_numbers)} patients"
-    )
-    output = json.dumps({"ids": list(document_ids), "nhs_numbers": list(nhs_numbers)})
+    print(f"Created {len(documents)} documents for {len(nhs_numbers)} patients")
+
+    if output_full_pointers:
+        output = json.dumps({"documents": documents, "nhs_numbers": list(nhs_numbers)})
+    else:
+        output = json.dumps(
+            {"pointer_ids": list(documents.keys()), "nhs_numbers": list(nhs_numbers)}
+        )
 
     output_path = pathlib.Path(out)
     output_path.write_text(output)
@@ -90,10 +95,15 @@ def cleanup(env: str, input: str = "tests/performance/reference-data.json"):
     input_path = pathlib.Path(input)
     data = json.loads(input_path.read_text())
 
-    print(f"Cleaning up {len(data['ids'])} document pointers in environment '{env}'")
+    if "documents" in data:
+        pointer_ids = data["documents"].keys()
+    else:
+        pointer_ids = data["pointer_ids"]
+
+    print(f"Cleaning up {len(pointer_ids)} document pointers in environment '{env}'")
     table = DYNAMODB.Table(f"nhsd-nrlf--{env}--document-pointer")
     with table.batch_writer() as batch:
-        for id in data["ids"]:
+        for id in pointer_ids:
             ods_code, document_id = id.split("-", maxsplit=1)
             pk = f"D#{ods_code}#{document_id}"
             batch.delete_item(Key={"pk": pk, "sk": pk})

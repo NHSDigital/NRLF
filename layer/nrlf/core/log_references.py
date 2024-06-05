@@ -101,6 +101,9 @@ class LogReference(Enum):
 
     REPOSITORY025 = _Reference("DEBUG", "Deleting resource from DynamoDB")
     REPOSITORY026 = _Reference("EXCEPTION", "Failed to delete resource from DynamoDB")
+    REPOSITORY026a = _Reference(
+        "EXCEPTION", "Ignoring failure to delete resource from DynamoDB"
+    )
     REPOSITORY027 = _Reference("INFO", "Successfully deleted item from DynamoDB")
     REPOSITORY028 = _Reference("INFO", "Received page of search results")
     REPOSITORY028a = _Reference("DEBUG", "Received page of search results with result")
@@ -215,7 +218,8 @@ class LogReference(Enum):
         "WARN", "RelatesTo validation failed - relating pointer document type mismatch"
     )
     PROCREATE007f = _Reference(
-        "INFO", "Ignoring missing relatesTo target as permitted by NRL permissions"
+        "INFO",
+        "Ignoring related pointer (supersede) OperationOutcome errors as permitted by NRL permissions",
     )
     PROCREATE008 = _Reference("INFO", "Selecting document as target to be superseded")
     PROCREATE009 = _Reference("INFO", "Creating new document reference")
@@ -259,7 +263,8 @@ class LogReference(Enum):
         "WARN", "RelatesTo validation failed - relating pointer document type mismatch"
     )
     PROUPSERT007f = _Reference(
-        "INFO", "Ignoring missing relatesTo target as permitted by NRL permissions"
+        "INFO",
+        "Ignoring related pointer (supersede) OperationOutcome errors as permitted by NRL permissions",
     )
     PROUPSERT008 = _Reference("INFO", "Selecting document as target to be superseded")
     PROUPSERT009 = _Reference("INFO", "Upserting new document reference")
