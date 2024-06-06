@@ -7,7 +7,6 @@ import boto3
 import fire
 from nhs_number import generate
 
-from nrlf.core.constants import POINTER_TYPES
 from nrlf.core.dynamodb.repository import DocumentPointer
 from nrlf.core.logger import logger
 from nrlf.tests.data import load_document_reference
@@ -19,6 +18,17 @@ DYNAMODB = boto3.resource("dynamodb", region_name="eu-west-2")
 
 class LogReference:
     pass
+
+
+POINTER_TYPES = {
+    "736253002": "Mental Health Crisis Plan",
+    "1363501000000100": "Royal College of Physicians NEWS2 (National Early Warning Score 2) chart",
+    "1382601000000107": "ReSPECT (Recommended Summary Plan for Emergency Care and Treatment) form",
+    "325691000000100": "Contingency plan",
+    "736373009": "End of life care plan",
+    "861421000000109": "End of Life Care Coordination Summary",
+    "887701000000100": "Emergency Health Care Plans",
+}
 
 
 def _generate_record(nhs_number: str, pointer_type: str, ods_code: str):
