@@ -422,7 +422,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         partition_key = "D#" + "#".join([*ods_code_parts, document_id])
         try:
             self.table.delete_item(Key={"pk": partition_key, "sk": partition_key})
-        except ClientError as exc:
+        except Exception as exc:
             if can_ignore_delete_fail:
                 logger.log(
                     LogReference.REPOSITORY026a,

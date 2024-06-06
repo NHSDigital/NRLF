@@ -232,49 +232,49 @@ class LogReference(Enum):
     PROUPSERT000 = _Reference(
         "INFO", "Starting to process producer upsertDocumentReference"
     )
-    PROUPSERT001 = _Reference("DEBUG", "Upsert - Validating DocumentReference resource")
+    PROUPSERT001 = _Reference(
+        "DEBUG", "Validating DocumentReference resource for upsert"
+    )
     PROUPSERT002 = _Reference(
-        "WARN", "Upsert -DocumentReference resource failed validation"
+        "WARN", "DocumentReference resource failed validation for upsert"
     )
     PROUPSERT003 = _Reference(
-        "WARN", "Upsert - ODS code in headers does not match ODS code in resource ID"
+        "WARN", "ODS code in headers does not match ODS code in resource ID for upsert"
     )
     PROUPSERT004 = _Reference(
         "WARN",
-        "Upsert - ODS code in headers does not match ODWS code in resource custodian",
+        "ODS code in headers does not match ODWS code in resource custodian for upsert",
     )
     PROUPSERT005 = _Reference(
-        "WARN", "Upsert - Organisation is not allowed to upsert pointer type"
+        "WARN", "Organisation is not allowed to upsert pointer type for upsert"
     )  #
     PROUPSERT006 = _Reference(
-        "DEBUG", "Upsert - Performing relatesTo validation on resource"
+        "DEBUG", "Performing relatesTo validation on resource for upsert"
     )
     PROUPSERT007a = _Reference(
-        "WARN", "Upsert - RelatesTo validation failed - no target identifier value"
+        "WARN", "RelatesTo validation failed - no target identifier value for upsert"
     )
     PROUPSERT007b = _Reference(
         "WARN",
-        "Upsert - Upsert - RelatesTo validation failed - invalid producer for target identifier",
+        "RelatesTo validation failed - invalid producer for target identifier for upsert",
     )
     PROUPSERT007c = _Reference(
         "WARN",
-        "Upsert - elatesTo validation failed - no pointer exists with target identifier",
+        "RelatesTo validation failed - no pointer exists with target identifier for upsert",
     )
     PROUPSERT007d = _Reference(
         "WARN",
-        "Upsert - RelatesTo validation failed - relating pointer NHS number mismatch",
+        "RelatesTo validation failed - relating pointer NHS number mismatch for upsert",
     )
     PROUPSERT007e = _Reference(
         "WARN",
-        "Upsert - RelatesTo validation failed - relating pointer document type mismatch",
+        "RelatesTo validation failed - relating pointer document type mismatch for upsert",
     )
-    PROUPSERT008 = _Reference(
-        "INFO", "Upsert - Selecting document as target to be superseded"
-    )
+    PROUPSERT008 = _Reference("INFO", "Selecting document as target to be superseded")
     PROUPSERT009 = _Reference("INFO", "Upserting new document reference")
-    PROUPSERT010 = _Reference("INFO", "Upsert - Superseding document reference")
+    PROUPSERT010 = _Reference("INFO", "Superseding document reference for upsert")
     PROUPSERT011 = _Reference(
-        "INFO", "Upsert - Preserved .date field when creating new document reference"
+        "INFO", "Preserved .date field when creating new document reference for upsert"
     )
     PROUPSERT999 = _Reference(
         "INFO", "Successfully completed producer upsertDocumentReference"

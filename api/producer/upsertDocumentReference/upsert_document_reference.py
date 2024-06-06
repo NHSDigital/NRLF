@@ -172,6 +172,7 @@ def handler(
             LogReference.PROUPSERT010,
             pointer_id=result.resource.id,
             ids_to_delete=ids_to_delete,
+            can_ignore_delete_fail=can_ignore_delete_fail,
         )
         saved_model = repository.supersede(
             core_model, ids_to_delete, can_ignore_delete_fail
