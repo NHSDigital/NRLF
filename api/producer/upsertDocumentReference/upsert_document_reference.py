@@ -109,7 +109,11 @@ def _get_document_ids_to_supersede(
         identifier = _validate_identifier(relates_to, idx)
         _validate_producer_id(identifier, metadata, idx)
         if can_ignore_delete_fail:
-            logger.log(LogReference.PROUPSERT006a, relatesTo=resource.relatesTo)
+            logger.log(
+                LogReference.PROUPSERT006a,
+                pointer_id=resource.id,
+                relatesTo=resource.relatesTo,
+            )
         else:
             existing_pointer = _check_existing_pointer(identifier, repository, idx)
             _validate_pointer_details(existing_pointer, core_model, identifier, idx)
