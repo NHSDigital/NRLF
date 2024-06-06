@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from nrlf.core.authoriser import get_pointer_types
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.config import Config
-from nrlf.core.constants import POINTER_TYPES
+from nrlf.core.constants import PERMISSION_ALLOW_ALL_POINTER_TYPES, POINTER_TYPES
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
 from nrlf.core.errors import OperationOutcomeError, ParseError
 from nrlf.core.logger import LogReference, logger
@@ -67,7 +67,7 @@ def load_connection_metadata(headers: Dict[str, str], config: Config):
     logger.log(LogReference.HANDLER002, headers=headers)
     metadata = parse_headers(headers)
     logger.log(LogReference.HANDLER003, metadata=metadata.dict())
-    if metadata.nrl_permissions:
+    if PERMISSION_ALLOW_ALL_POINTER_TYPES in metadata.nrl_permissions:
         logger.log(LogReference.HANDLER004a)
         metadata.pointer_types = [
             f"http://snomed.info/sct|{key}" for key in list(POINTER_TYPES.keys())

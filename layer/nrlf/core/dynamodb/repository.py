@@ -430,7 +430,6 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                     stacklevel=5,
                     error=str(exc),
                 )
-                return
 
     def _query(self, **kwargs) -> Iterator[DocumentPointer]:
         """
