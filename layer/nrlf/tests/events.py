@@ -7,7 +7,7 @@ from nrlf.core.constants import PointerTypes
 
 def create_headers(
     ods_code: str = "Y05868",
-    pointer_types: Optional[List[str]] = [PointerTypes.MENTAL_HEALTH_PLAN],
+    pointer_types: Optional[List[str]] = [PointerTypes.MENTAL_HEALTH_PLAN.value],
     nrl_permissions: Optional[List[str]] = [],
     app_name: Optional[str] = "TestApp",
     app_id: Optional[str] = "12345",

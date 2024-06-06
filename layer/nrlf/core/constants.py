@@ -37,7 +37,7 @@ PERMISSION_ALLOW_ALL_POINTER_TYPES = "allow-all-pointer-types"
 PRODUCER_URL_PATH = "/nrl-producer-api/FHIR/R4/DocumentReference"
 
 
-class PointerTypes:
+class PointerTypes(Enum):
     MENTAL_HEALTH_PLAN = "http://snomed.info/sct|736253002"
     EMERGENCY_HEALTHCARE_PLAN = "http://snomed.info/sct|887701000000100"
     EOL_COORDINATION_SUMMARY = "http://snomed.info/sct|861421000000109"
@@ -46,3 +46,7 @@ class PointerTypes:
     CONTINGENCY_PLAN = "http://snomed.info/sct|325691000000100"
     EOL_CARE_PLAN = "http://snomed.info/sct|736373009"
     LLOYD_GEORGE_FOLDER = "http://snomed.info/sct|16521000000101"
+
+    @staticmethod
+    def list():
+        return list(map(lambda type: type.value, PointerTypes))

@@ -395,7 +395,7 @@ class RequestQueryCustodian(BaseModel):
 
 
 class RequestQueryType(BaseModel):
-    __root__: Annotated[str, Field(example=PointerTypes.MENTAL_HEALTH_PLAN)]
+    __root__: Annotated[str, Field(example=PointerTypes.MENTAL_HEALTH_PLAN.value)]
 
 
 class NextPageToken(BaseModel):

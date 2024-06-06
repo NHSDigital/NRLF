@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.config import Config
-from nrlf.core.constants import PERMISSION_ALLOW_ALL_POINTER_TYPES
+from nrlf.core.constants import PERMISSION_ALLOW_ALL_POINTER_TYPES, PointerTypes
 from nrlf.core.decorators import (
     deprecated,
     error_handler,
@@ -435,15 +435,7 @@ def test_request_load_connection_metadata_with_permission_headers():
         config=Config(),
     )
 
-    assert expected_metdata.pointer_types == [
-        "http://snomed.info/sct|736253002",
-        "http://snomed.info/sct|1363501000000100",
-        "http://snomed.info/sct|1382601000000107",
-        "http://snomed.info/sct|325691000000100",
-        "http://snomed.info/sct|736373009",
-        "http://snomed.info/sct|861421000000109",
-        "http://snomed.info/sct|887701000000100",
-    ]
+    assert expected_metdata.pointer_types == PointerTypes.list()
 
 
 def test_request_load_connection_metadata_with_no_permission_headers():

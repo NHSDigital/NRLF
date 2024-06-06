@@ -251,6 +251,9 @@ class LogReference(Enum):
     PROUPSERT006 = _Reference(
         "DEBUG", "Performing relatesTo validation on resource for upsert"
     )
+    PROUPSERT006a = _Reference(
+        "DEBUG", "Skipping relatesTo validation on resource for sync upsert request"
+    )
     PROUPSERT007a = _Reference(
         "WARN", "RelatesTo validation failed - no target identifier value for upsert"
     )

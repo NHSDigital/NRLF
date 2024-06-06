@@ -233,7 +233,7 @@ def test_search_document_reference_filters_by_type(
         body=json.dumps(
             {
                 "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|6700028191",
-                "type": PointerTypes.MENTAL_HEALTH_PLAN,
+                "type": PointerTypes.MENTAL_HEALTH_PLAN.value,
             }
         ),
     )
@@ -262,7 +262,9 @@ def test_search_document_reference_filters_by_pointer_types(
     repository.create(doc_pointer)
 
     event = create_test_api_gateway_event(
-        headers=create_headers(pointer_types=[PointerTypes.EOL_COORDINATION_SUMMARY]),
+        headers=create_headers(
+            pointer_types=[PointerTypes.EOL_COORDINATION_SUMMARY.value]
+        ),
         body=json.dumps(
             {
                 "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|6700028191",
