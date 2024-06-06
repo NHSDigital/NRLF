@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.config import Config
+from nrlf.core.constants import PERMISSION_ALLOW_ALL_POINTER_TYPES
 from nrlf.core.decorators import (
     deprecated,
     error_handler,
@@ -430,7 +431,8 @@ def test_request_handler_with_invalid_headers():
 
 def test_request_load_connection_metadata_with_permission_headers():
     expected_metdata = load_connection_metadata(
-        headers=create_headers(nrl_permissions=["somePermission"]), config=Config()
+        headers=create_headers(nrl_permissions=[PERMISSION_ALLOW_ALL_POINTER_TYPES]),
+        config=Config(),
     )
 
     assert expected_metdata.pointer_types == [
