@@ -217,10 +217,6 @@ class LogReference(Enum):
     PROCREATE007e = _Reference(
         "WARN", "RelatesTo validation failed - relating pointer document type mismatch"
     )
-    PROCREATE007f = _Reference(
-        "INFO",
-        "Ignoring related pointer (supersede) OperationOutcome errors as permitted by NRL permissions",
-    )
     PROCREATE008 = _Reference("INFO", "Selecting document as target to be superseded")
     PROCREATE009 = _Reference("INFO", "Creating new document reference")
     PROCREATE010 = _Reference("INFO", "Superseding document reference")
@@ -261,10 +257,6 @@ class LogReference(Enum):
     )
     PROUPSERT007e = _Reference(
         "WARN", "RelatesTo validation failed - relating pointer document type mismatch"
-    )
-    PROUPSERT007f = _Reference(
-        "INFO",
-        "Ignoring related pointer (supersede) OperationOutcome errors as permitted by NRL permissions",
     )
     PROUPSERT008 = _Reference("INFO", "Selecting document as target to be superseded")
     PROUPSERT009 = _Reference("INFO", "Upserting new document reference")

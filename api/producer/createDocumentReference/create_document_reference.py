@@ -108,22 +108,14 @@ def _get_document_ids_to_supersede(
     ids_to_delete = []
 
     for idx, relates_to in enumerate(resource.relatesTo):
-        try:
-            identifier = _validate_identifier(relates_to, idx)
-            _validate_producer_id(identifier, metadata, idx)
+        identifier = _validate_identifier(relates_to, idx)
+        _validate_producer_id(identifier, metadata, idx)
+
+        if not can_ignore_delete_fail:
             existing_pointer = _check_existing_pointer(identifier, repository, idx)
-
-            if existing_pointer is None:
-                continue
-
             _validate_pointer_details(existing_pointer, core_model, identifier, idx)
 
-            _append_id_if_replaces(relates_to, ids_to_delete, identifier)
-        except OperationOutcomeError:
-            if can_ignore_delete_fail:
-                logger.log(LogReference.PROCREATE007f, related_identifier=identifier)
-                continue
-            raise
+        _append_id_if_replaces(relates_to, ids_to_delete, identifier)
 
     return ids_to_delete
 

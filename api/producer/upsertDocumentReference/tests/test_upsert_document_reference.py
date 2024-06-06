@@ -1075,13 +1075,13 @@ def test_create_document_reference_supersede_succeeds_with_toggle(
                 "details": {
                     "coding": [
                         {
-                            "code": "RESOURCE_CREATED",
-                            "display": "Resource created",
+                            "code": "RESOURCE_SUPERSEDED",
+                            "display": "Resource created and resource(s) deleted",
                             "system": "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
                         }
                     ]
                 },
-                "diagnostics": "The document has been created",
+                "diagnostics": "The document has been superseded by a new version",
             }
         ],
     }
