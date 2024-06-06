@@ -26,11 +26,6 @@ def assert_response_status_code_step(context: Context, status_code: str):
     )
 
 
-# @then("the response contains the key '{key}'")
-# def assert_response_key_in_response_step(context: Context, key: str):
-#     assert key in context.response.json(), f"Key {key} not in response"
-
-
 @then("the response does not contain the key '{key}'")
 def assert_response_no_key_in_response_step(context: Context, key: str):
     assert key not in context.response.json(), f"Key {key} found in response"
@@ -47,7 +42,7 @@ def assert_bundle_step(context: Context, bundle_type: str):
         context.response.text,
     )
     assert body["type"] == bundle_type, format_error(
-        f"Unexpected type",
+        "Unexpected type",
         bundle_type,
         body["type"],
         context.response.text,

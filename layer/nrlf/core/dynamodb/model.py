@@ -185,8 +185,7 @@ class DocumentPointer(DynamoDBModel):
         custodian_suffix = values.get("custodian_suffix")
 
         if custodian and custodian_suffix:
-            if producer_id.split(".") != (custodian, custodian_suffix):
-                # TODO: Original Error MalformedProducerId
+            if tuple(producer_id.split(".")) != (custodian, custodian_suffix):
                 raise ValueError(
                     f"Producer ID {producer_id} (extracted from '{id_}') is not correctly formed. "
                     "It is expected to be composed in the form '<custodian_id>.<custodian_suffix>'"

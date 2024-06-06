@@ -4,12 +4,13 @@ from datetime import datetime, timezone
 import pytest
 from freezegun import freeze_time
 
+from nrlf.core.constants import PointerTypes
 from nrlf.core.dynamodb.model import DocumentPointer, DynamoDBModel
 from nrlf.producer.fhir.r4.model import DocumentReference
 from nrlf.tests.data import load_document_reference, load_document_reference_json
 
 
-def test_DynamoDBModel_init():
+def test_dynamodb_model_init():
     model = DynamoDBModel()
 
     assert model.kebab() == "dynamo-d-b-model"
@@ -20,7 +21,7 @@ def test_DynamoDBModel_init():
     assert model.dict() == {}
 
 
-def test_DynamoDBModel_init_from_dynamo():
+def test_dynamodb_model_init_from_dynamo():
     model = DynamoDBModel(_from_dynamo=True)
     assert model.kebab() == "dynamo-d-b-model"
     assert model.public_alias() == "DynamoDBModel"
@@ -31,7 +32,7 @@ def test_DynamoDBModel_init_from_dynamo():
 
 
 @freeze_time("2024-01-01")
-def test_DocumentPointer_init():
+def test_document_pointer_init():
     model = DocumentPointer(
         id="X26-999999-999999-99999999",
         nhs_number="9999999999",
@@ -73,7 +74,7 @@ def test_DocumentPointer_init():
 
 
 @freeze_time("2024-01-01")
-def test_DocumentPointer_from_document_reference_valid():
+def test_document_pointer_from_document_reference_valid():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     model = DocumentPointer.from_document_reference(doc_ref)
 
@@ -89,7 +90,7 @@ def test_DocumentPointer_from_document_reference_valid():
         "producer_id": "Y05868",
         "schemas": [],
         "source": "NRLF",
-        "type": "http://snomed.info/sct|736253002",
+        "type": PointerTypes.MENTAL_HEALTH_PLAN,
         "updated_on": None,
         "version": 1,
         "pk": "D#Y05868#99999-99999-999999",
@@ -103,7 +104,7 @@ def test_DocumentPointer_from_document_reference_valid():
     assert json.loads(document) == doc_ref.dict(exclude_none=True)
 
 
-def test_DocumentPointer_from_document_reference_valid_with_created_on():
+def test_document_pointer_from_document_reference_valid_with_created_on():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     model = DocumentPointer.from_document_reference(
         doc_ref, created_on="2024-02-02T12:34:56.000+00:00Z"
@@ -121,7 +122,7 @@ def test_DocumentPointer_from_document_reference_valid_with_created_on():
         "producer_id": "Y05868",
         "schemas": [],
         "source": "NRLF",
-        "type": "http://snomed.info/sct|736253002",
+        "type": PointerTypes.MENTAL_HEALTH_PLAN,
         "updated_on": None,
         "version": 1,
         "pk": "D#Y05868#99999-99999-999999",
@@ -135,7 +136,7 @@ def test_DocumentPointer_from_document_reference_valid_with_created_on():
     assert json.loads(document) == doc_ref.dict(exclude_none=True)
 
 
-def test_DocumentPointer_from_document_reference_invalid():
+def test_document_pointer_from_document_reference_invalid():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_ref.type = None
 
@@ -147,7 +148,7 @@ def test_DocumentPointer_from_document_reference_invalid():
     assert str(error.value) == "'NoneType' object has no attribute 'coding'"
 
 
-def test_DocumentPointer_from_document_reference_multiple_types():
+def test_document_pointer_from_document_reference_multiple_types():
     doc_ref_data = load_document_reference_json("Y05868-736253002-Valid")
     doc_ref = DocumentReference.parse_obj(
         {
@@ -169,7 +170,7 @@ def test_DocumentPointer_from_document_reference_multiple_types():
     )
 
 
-def test_DocumentPointer_extract_custodian_suffix_no_suffix():
+def test_document_pointer_extract_custodian_suffix_no_suffix():
     values = {"custodian": "X26", "custodian_suffix": None}
 
     assert DocumentPointer.extract_custodian_suffix(values) == {
@@ -178,7 +179,7 @@ def test_DocumentPointer_extract_custodian_suffix_no_suffix():
     }
 
 
-def test_DocumentPointer_extract_custodian_suffix_suffix():
+def test_document_pointer_extract_custodian_suffix_suffix():
     values = {"custodian": "X26.001", "custodian_suffix": None}
 
     assert DocumentPointer.extract_custodian_suffix(values) == {
@@ -187,7 +188,7 @@ def test_DocumentPointer_extract_custodian_suffix_suffix():
     }
 
 
-def test_DocumentPointer_extract_custodian_suffix_existing_suffix():
+def test_document_pointer_extract_custodian_suffix_existing_suffix():
     values = {"custodian": "X26", "custodian_suffix": "001"}
 
     assert DocumentPointer.extract_custodian_suffix(values) == {
@@ -196,7 +197,7 @@ def test_DocumentPointer_extract_custodian_suffix_existing_suffix():
     }
 
 
-def test_DocumentPointer_extract_custodian_suffix_multiple_suffix():
+def test_document_pointer_extract_custodian_suffix_multiple_suffix():
     values = {"custodian": "X26.001.002", "custodian_suffix": None}
 
     assert DocumentPointer.extract_custodian_suffix(values) == {
@@ -205,7 +206,7 @@ def test_DocumentPointer_extract_custodian_suffix_multiple_suffix():
     }
 
 
-def test_DocumentPointer_inject_producer_id():
+def test_document_pointer_inject_producer_id():
     values = {"id": "X26-999999-999999-99999999", "producer_id": None}
 
     assert DocumentPointer.inject_producer_id(values) == {
@@ -215,7 +216,7 @@ def test_DocumentPointer_inject_producer_id():
     }
 
 
-def test_DocumentPointer_inject_producer_id_existing_producer_id():
+def test_document_pointer_inject_producer_id_existing_producer_id():
     values = {"id": "X26-999999-999999-99999999", "producer_id": "X26"}
 
     with pytest.raises(ValueError) as error:
@@ -227,7 +228,7 @@ def test_DocumentPointer_inject_producer_id_existing_producer_id():
     )
 
 
-def test_DocumentPointer_inject_producer_id_existing_producer_id_from_dynamo():
+def test_document_pointer_inject_producer_id_existing_producer_id_from_dynamo():
     values = {
         "_from_dynamo": True,
         "id": "X26-999999-999999-9999999",
