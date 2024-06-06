@@ -35,12 +35,14 @@ PERMISSION_ALLOW_ALL_POINTER_TYPES = "allow-all-pointer-types"
 
 
 PRODUCER_URL_PATH = "/nrl-producer-api/FHIR/R4/DocumentReference"
-POINTER_TYPES = {
-    "736253002": "Mental Health Crisis Plan",
-    "1363501000000100": "Royal College of Physicians NEWS2 (National Early Warning Score 2) chart",
-    "1382601000000107": "ReSPECT (Recommended Summary Plan for Emergency Care and Treatment) form",
-    "325691000000100": "Contingency plan",
-    "736373009": "End of life care plan",
-    "861421000000109": "End of Life Care Coordination Summary",
-    "887701000000100": "Emergency Health Care Plans",
-}
+
+
+class PointerTypes:
+    MENTAL_HEALTH_PLAN = "http://snomed.info/sct|736253002"
+    EMERGENCY_HEALTHCARE_PLAN = "http://snomed.info/sct|887701000000100"
+    EOL_COORDINATION_SUMMARY = "http://snomed.info/sct|861421000000109"
+    RESPECT_FORM = "http://snomed.info/sct|1382601000000107"
+    NEWS2_CHART = "http://snomed.info/sct|1363501000000100"
+    CONTINGENCY_PLAN = "http://snomed.info/sct|325691000000100"
+    EOL_CARE_PLAN = "http://snomed.info/sct|736373009"
+    LLOYD_GEORGE_FOLDER = "http://snomed.info/sct|16521000000101"

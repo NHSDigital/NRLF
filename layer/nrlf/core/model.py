@@ -17,7 +17,6 @@ class _NhsNumberMixin:
 
         if not is_valid_nhs_number(nhs_number):
             return None
-            # raise ValueError(f"Not a valid NHS Number: {nhs_number}")
 
         return nhs_number
 
@@ -29,8 +28,6 @@ class ProducerRequestParams(producer_model.RequestParams, _NhsNumberMixin):
 class ConsumerRequestParams(consumer_model.RequestParams, _NhsNumberMixin):
     class Config:
         extra = Extra.forbid
-
-    pass
 
 
 class CountRequestParams(consumer_model.CountRequestParams, _NhsNumberMixin):

@@ -486,7 +486,7 @@ def test_request_handler_with_custom_repository(mocker: MockerFixture):
 def test_deprecated_decorator():
     @deprecated("This function is deprecated.")
     def deprecated_function():
-        pass
+        """This function is deprecated."""
 
     with warnings.catch_warnings(record=True) as warning_list:
         deprecated_function()

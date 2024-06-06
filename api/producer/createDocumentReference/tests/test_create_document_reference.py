@@ -9,6 +9,7 @@ from api.producer.createDocumentReference.create_document_reference import (
     _set_create_time_fields,
     handler,
 )
+from nrlf.core.constants import PointerTypes
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
 from nrlf.producer.fhir.r4.model import (
     DocumentReferenceRelatesTo,
@@ -658,8 +659,8 @@ def test_create_document_reference_invalid_relatesto_type(
     event = create_test_api_gateway_event(
         headers=create_headers(
             pointer_types=[
-                "http://snomed.info/sct|861421000000109",
-                "http://snomed.info/sct|736253002",
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
             ]
         ),
         body=doc_ref.json(exclude_none=True),
@@ -710,8 +711,8 @@ def test_create_document_reference_with_no_context_related_for_ssp_url(
     event = create_test_api_gateway_event(
         headers=create_headers(
             pointer_types=[
-                "http://snomed.info/sct|861421000000109",
-                "http://snomed.info/sct|736253002",
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
             ]
         ),
         body=doc_ref.json(exclude_none=True),
@@ -769,8 +770,8 @@ def test_create_document_reference_with_no_asid_in_for_ssp_url(
     event = create_test_api_gateway_event(
         headers=create_headers(
             pointer_types=[
-                "http://snomed.info/sct|861421000000109",
-                "http://snomed.info/sct|736253002",
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
             ]
         ),
         body=doc_ref.json(exclude_none=True),
@@ -828,8 +829,8 @@ def test_create_document_reference_with_invalid_asid_for_ssp_url(
     event = create_test_api_gateway_event(
         headers=create_headers(
             pointer_types=[
-                "http://snomed.info/sct|861421000000109",
-                "http://snomed.info/sct|736253002",
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
             ]
         ),
         body=doc_ref.json(exclude_none=True),
@@ -892,8 +893,8 @@ def test_create_document_reference_supersede_deletes_old_pointers_replace(
     event = create_test_api_gateway_event(
         headers=create_headers(
             pointer_types=[
-                "http://snomed.info/sct|861421000000109",
-                "http://snomed.info/sct|736253002",
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
             ]
         ),
         body=doc_ref.json(exclude_none=True),
@@ -939,6 +940,132 @@ def test_create_document_reference_supersede_deletes_old_pointers_replace(
 @mock_aws
 @mock_repository
 @freeze_uuid("00000000-0000-0000-0000-000000000001")
+def test_create_document_reference_supersede_succeeds_with_toggle(
+    repository: DocumentPointerRepository,
+):
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+
+    # Add reference to a non-existing pointer
+    doc_ref.relatesTo = [
+        DocumentReferenceRelatesTo(
+            code="replaces",
+            target=Reference(
+                reference=None, identifier=Identifier(value="Y05868-99999-99999-000000")
+            ),
+        )
+    ]
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(
+            pointer_types=[
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
+            ],
+            nrl_permissions=["supersede-ignore-delete-fail"],
+        ),
+        body=doc_ref.json(exclude_none=True),
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "201",
+        "headers": {
+            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+        },
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "information",
+                "code": "informational",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "RESOURCE_SUPERSEDED",
+                            "display": "Resource created and resource(s) deleted",
+                            "system": "https://fhir.nhs.uk/ValueSet/NRL-ResponseCode",
+                        }
+                    ]
+                },
+                "diagnostics": "The document has been superseded by a new version",
+            }
+        ],
+    }
+
+    non_existent_pointer = repository.get_by_id("Y05868-99999-99999-000000")
+    assert non_existent_pointer is None
+
+
+@mock_aws
+@mock_repository
+def test_create_document_reference_supersede_fails_without_toggle(
+    repository: DocumentPointerRepository,
+):
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+
+    # Add reference to a non-existing pointer
+    doc_ref.relatesTo = [
+        DocumentReferenceRelatesTo(
+            code="replaces",
+            target=Reference(
+                reference=None, identifier=Identifier(value="Y05868-99999-99999-000000")
+            ),
+        )
+    ]
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(
+            pointer_types=[
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
+            ]
+        ),
+        body=doc_ref.json(exclude_none=True),
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "400",
+        "headers": {},
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "error",
+                "code": "invalid",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "BAD_REQUEST",
+                            "display": "Bad request",
+                            "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                        }
+                    ]
+                },
+                "diagnostics": "The relatesTo target document does not exist",
+                "expression": ["relatesTo[0].target.identifier.value"],
+            }
+        ],
+    }
+
+
+@mock_aws
+@mock_repository
+@freeze_uuid("00000000-0000-0000-0000-000000000001")
 def test_create_document_reference_create_relatesto_not_replaces(
     repository: DocumentPointerRepository,
 ):
@@ -960,8 +1087,8 @@ def test_create_document_reference_create_relatesto_not_replaces(
     event = create_test_api_gateway_event(
         headers=create_headers(
             pointer_types=[
-                "http://snomed.info/sct|861421000000109",
-                "http://snomed.info/sct|736253002",
+                PointerTypes.EOL_COORDINATION_SUMMARY,
+                PointerTypes.MENTAL_HEALTH_PLAN,
             ]
         ),
         body=doc_ref.json(exclude_none=True),

@@ -6,7 +6,7 @@ from nrlf.core.model import (
 )
 
 
-def test_ConnectionMetadata():
+def test_connection_metadata():
     metadata = ConnectionMetadata.parse_obj(
         {
             "nrl.pointer-types": ["test"],
@@ -33,7 +33,7 @@ def test_ConnectionMetadata():
     assert metadata.ods_code_parts == ("test", "test")
 
 
-def test_ProducerRequestParams():
+def test_producer_request_params():
     params = ProducerRequestParams.parse_obj(
         {
             "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|9999999999",
@@ -59,7 +59,7 @@ def test_ProducerRequestParams():
     assert params.nhs_number == "9999999999"
 
 
-def test_ConsumerRequestParams():
+def test_consumer_request_params():
     params = ConsumerRequestParams.parse_obj(
         {
             "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|9999999999",
@@ -92,7 +92,7 @@ def test_ConsumerRequestParams():
     assert params.nhs_number == "9999999999"
 
 
-def test_CountRequestParams():
+def test_count_request_params():
     params = CountRequestParams.parse_obj(
         {
             "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|9999999999",

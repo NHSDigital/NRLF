@@ -20,11 +20,10 @@ class Response(BaseModel):
     isBase64Encoded: bool = Field(default=False)
 
     @classmethod
-    def from_resource(
-        cls, resource: BaseModel, statusCode: str = "200", **kwargs
-    ) -> "Response":
+    def from_resource(cls, resource: BaseModel, **kwargs) -> "Response":
+        status_code = kwargs.pop("statusCode", "200")
         return cls(
-            statusCode=statusCode,
+            statusCode=status_code,
             body=resource.json(indent=2, exclude_none=True, exclude_defaults=True),
             **kwargs,
         )
