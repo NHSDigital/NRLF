@@ -110,7 +110,9 @@ def test_read_document_reference_unauthorised_for_type(
     repository.create(doc_pointer)
 
     event = create_test_api_gateway_event(
-        headers=create_headers(pointer_types=[PointerTypes.EMERGENCY_HEALTHCARE_PLAN]),
+        headers=create_headers(
+            pointer_types=[PointerTypes.EMERGENCY_HEALTHCARE_PLAN.value]
+        ),
         path_parameters={"id": doc_pointer.id},
     )
 
@@ -155,7 +157,7 @@ def test_document_reference_invalid_json(repository: DocumentPointerRepository):
     repository.create(doc_pointer)
 
     event = create_test_api_gateway_event(
-        headers=create_headers(pointer_types=[PointerTypes.MENTAL_HEALTH_PLAN]),
+        headers=create_headers(pointer_types=[PointerTypes.MENTAL_HEALTH_PLAN.value]),
         path_parameters={"id": doc_pointer.id},
     )
 

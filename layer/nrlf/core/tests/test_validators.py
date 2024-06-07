@@ -18,10 +18,10 @@ from nrlf.tests.data import load_document_reference_json
 
 
 def test_validate_type_system_valid():
-    type_ = RequestQueryType(__root__=PointerTypes.MENTAL_HEALTH_PLAN)
+    type_ = RequestQueryType(__root__=PointerTypes.MENTAL_HEALTH_PLAN.value)
     pointer_types = [
-        PointerTypes.MENTAL_HEALTH_PLAN,
-        PointerTypes.EOL_CARE_PLAN,
+        PointerTypes.MENTAL_HEALTH_PLAN.value,
+        PointerTypes.EOL_CARE_PLAN.value,
     ]
     assert validate_type_system(type_, pointer_types) is True
 
@@ -29,8 +29,8 @@ def test_validate_type_system_valid():
 def test_validate_type_system_invalid():
     type_ = RequestQueryType(__root__="http://snomed.info/invalid|736373009")
     pointer_types = [
-        PointerTypes.EOL_CARE_PLAN,
-        PointerTypes.EOL_CARE_PLAN,
+        PointerTypes.EOL_CARE_PLAN.value,
+        PointerTypes.EOL_CARE_PLAN.value,
     ]
     assert validate_type_system(type_, pointer_types) is False
 

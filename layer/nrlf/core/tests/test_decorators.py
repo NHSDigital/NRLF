@@ -5,7 +5,14 @@ from pydantic import BaseModel
 from pytest_mock import MockerFixture
 
 from nrlf.core.codes import SpineErrorConcept
-from nrlf.core.decorators import deprecated, error_handler, request_handler
+from nrlf.core.config import Config
+from nrlf.core.constants import PERMISSION_ALLOW_ALL_POINTER_TYPES, PointerTypes
+from nrlf.core.decorators import (
+    deprecated,
+    error_handler,
+    load_connection_metadata,
+    request_handler,
+)
 from nrlf.core.errors import OperationOutcomeError
 from nrlf.core.response import Response
 from nrlf.tests.events import (
@@ -420,6 +427,23 @@ def test_request_handler_with_invalid_headers():
             }
         ],
     }
+
+
+def test_request_load_connection_metadata_with_permission_headers():
+    expected_metdata = load_connection_metadata(
+        headers=create_headers(nrl_permissions=[PERMISSION_ALLOW_ALL_POINTER_TYPES]),
+        config=Config(),
+    )
+
+    assert expected_metdata.pointer_types == PointerTypes.list()
+
+
+def test_request_load_connection_metadata_with_no_permission_headers():
+    expected_metdata = load_connection_metadata(
+        headers=create_headers(), config=Config()
+    )
+
+    assert expected_metdata.pointer_types == ["http://snomed.info/sct|736253002"]
 
 
 def test_request_handler_with_custom_repository(mocker: MockerFixture):
