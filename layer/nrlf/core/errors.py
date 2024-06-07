@@ -19,6 +19,7 @@ class OperationOutcomeError(Exception):
         code: str,
         details: CodeableConcept,
         diagnostics: Optional[str] = None,
+        expression: Optional[list[str]] = None,
         status_code: str = "400",
     ):
         self.operation_outcome = OperationOutcome(
@@ -29,6 +30,7 @@ class OperationOutcomeError(Exception):
                     code=code,
                     details=details,  # type: ignore
                     diagnostics=diagnostics,
+                    expression=expression,
                 )
             ],
         )

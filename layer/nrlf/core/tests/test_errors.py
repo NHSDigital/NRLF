@@ -13,9 +13,12 @@ def test_operation_outcome_error():
     code = "invalid"
     details = CodeableConcept(text="Invalid input")
     diagnostics = "Invalid input provided"
+    expression = ["expression"]
     status_code = "400"
 
-    error = OperationOutcomeError(severity, code, details, diagnostics, status_code)
+    error = OperationOutcomeError(
+        severity, code, details, diagnostics, expression, status_code
+    )
 
     assert isinstance(error, Exception)
     assert error.status_code == status_code
@@ -28,6 +31,7 @@ def test_operation_outcome_error():
                 "code": code,
                 "details": {"text": "Invalid input"},
                 "diagnostics": diagnostics,
+                "expression": expression,
             }
         ],
     }

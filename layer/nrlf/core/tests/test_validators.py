@@ -2,6 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
+from nrlf.core.constants import PointerTypes
 from nrlf.core.errors import ParseError
 from nrlf.core.validators import (
     DocumentReferenceValidator,
@@ -17,10 +18,10 @@ from nrlf.tests.data import load_document_reference_json
 
 
 def test_validate_type_system_valid():
-    type_ = RequestQueryType(__root__="http://snomed.info/sct|736253002")
+    type_ = RequestQueryType(__root__=PointerTypes.MENTAL_HEALTH_PLAN.value)
     pointer_types = [
-        "http://snomed.info/sct|736253002",
-        "http://snomed.info/sct|736373009",
+        PointerTypes.MENTAL_HEALTH_PLAN.value,
+        PointerTypes.EOL_CARE_PLAN.value,
     ]
     assert validate_type_system(type_, pointer_types) is True
 
@@ -28,8 +29,8 @@ def test_validate_type_system_valid():
 def test_validate_type_system_invalid():
     type_ = RequestQueryType(__root__="http://snomed.info/invalid|736373009")
     pointer_types = [
-        "http://snomed.info/sct|736373009",
-        "http://snomed.info/sct|736373009",
+        PointerTypes.EOL_CARE_PLAN.value,
+        PointerTypes.EOL_CARE_PLAN.value,
     ]
     assert validate_type_system(type_, pointer_types) is False
 

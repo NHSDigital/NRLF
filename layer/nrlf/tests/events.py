@@ -2,10 +2,12 @@ import json
 from typing import Dict, List, Optional
 from unittest.mock import Mock
 
+from nrlf.core.constants import PointerTypes
+
 
 def create_headers(
     ods_code: str = "Y05868",
-    pointer_types: Optional[List[str]] = ["http://snomed.info/sct|736253002"],
+    pointer_types: Optional[List[str]] = [PointerTypes.MENTAL_HEALTH_PLAN.value],
     nrl_permissions: Optional[List[str]] = [],
     app_name: Optional[str] = "TestApp",
     app_id: Optional[str] = "12345",

@@ -15,6 +15,7 @@ class LogReference(Enum):
     HANDLER002 = _Reference("DEBUG", "Attempting to parse request headers")
     HANDLER003 = _Reference("INFO", "Parsed metadata from request headers")
     HANDLER004 = _Reference("INFO", "Authorisation lookup enabled")
+    HANDLER004a = _Reference("INFO", "Authorisation lookup skipped for sync request")
     HANDLER005 = _Reference("WARN", "Rejecting request due to missing pointer types")
     HANDLER006 = _Reference("DEBUG", "Attempting to parse request parameters")
     HANDLER007 = _Reference("INFO", "Parsed request parameters")
@@ -231,41 +232,55 @@ class LogReference(Enum):
     PROUPSERT000 = _Reference(
         "INFO", "Starting to process producer upsertDocumentReference"
     )
-    PROUPSERT001 = _Reference("DEBUG", "Validating DocumentReference resource")
-    PROUPSERT002 = _Reference("WARN", "DocumentReference resource failed validation")
+    PROUPSERT001 = _Reference(
+        "DEBUG", "Validating DocumentReference resource for upsert"
+    )
+    PROUPSERT002 = _Reference(
+        "WARN", "DocumentReference resource failed validation for upsert"
+    )
     PROUPSERT003 = _Reference(
-        "WARN", "ODS code in headers does not match ODS code in resource ID"
+        "WARN", "ODS code in headers does not match ODS code in resource ID for upsert"
     )
     PROUPSERT004 = _Reference(
-        "WARN", "ODS code in headers does not match ODWS code in resource custodian"
+        "WARN",
+        "ODS code in headers does not match ODWS code in resource custodian for upsert",
     )
     PROUPSERT005 = _Reference(
-        "WARN", "Organisation is not allowed to upsert pointer type"
+        "WARN", "Organisation is not allowed to upsert pointer type for upsert"
     )  #
-    PROUPSERT006 = _Reference("DEBUG", "Performing relatesTo validation on resource")
+    PROUPSERT006 = _Reference(
+        "DEBUG", "Performing relatesTo validation on resource for upsert"
+    )
+    PROUPSERT006a = _Reference(
+        "DEBUG", "Skipping relatesTo validation on resource for sync upsert request"
+    )
     PROUPSERT007a = _Reference(
-        "WARN", "RelatesTo validation failed - no target identifier value"
+        "WARN", "RelatesTo validation failed - no target identifier value for upsert"
     )
     PROUPSERT007b = _Reference(
-        "WARN", "RelatesTo validation failed - invalid producer for target identifier"
+        "WARN",
+        "RelatesTo validation failed - invalid producer for target identifier for upsert",
     )
     PROUPSERT007c = _Reference(
-        "WARN", "RelatesTo validation failed - no pointer exists with target identifier"
+        "WARN",
+        "RelatesTo validation failed - no pointer exists with target identifier for upsert",
     )
     PROUPSERT007d = _Reference(
-        "WARN", "RelatesTo validation failed - relating pointer NHS number mismatch"
+        "WARN",
+        "RelatesTo validation failed - relating pointer NHS number mismatch for upsert",
     )
     PROUPSERT007e = _Reference(
-        "WARN", "RelatesTo validation failed - relating pointer document type mismatch"
+        "WARN",
+        "RelatesTo validation failed - relating pointer document type mismatch for upsert",
     )
     PROUPSERT008 = _Reference("INFO", "Selecting document as target to be superseded")
     PROUPSERT009 = _Reference("INFO", "Upserting new document reference")
-    PROUPSERT010 = _Reference("INFO", "Superseding document reference")
+    PROUPSERT010 = _Reference("INFO", "Superseding document reference for upsert")
     PROUPSERT011 = _Reference(
-        "INFO", "Preserved .date field when creating new document reference"
+        "INFO", "Preserved .date field when creating new document reference for upsert"
     )
     PROUPSERT999 = _Reference(
-        "INFO", "Successfully completed producer createDocumentReference"
+        "INFO", "Successfully completed producer upsertDocumentReference"
     )
 
     # Producer - DeleteDocumentReference

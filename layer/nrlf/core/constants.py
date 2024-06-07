@@ -31,5 +31,22 @@ CLIENT_RP_DETAILS = "nhsd-client-rp-details"
 CONNECTION_METADATA = "nhsd-connection-metadata"
 PERMISSION_AUDIT_DATES_FROM_PAYLOAD = "audit-dates-from-payload"
 PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL = "supersede-ignore-delete-fail"
+PERMISSION_ALLOW_ALL_POINTER_TYPES = "allow-all-pointer-types"
+
 
 PRODUCER_URL_PATH = "/producer/FHIR/R4/DocumentReference"
+
+
+class PointerTypes(Enum):
+    MENTAL_HEALTH_PLAN = "http://snomed.info/sct|736253002"
+    EMERGENCY_HEALTHCARE_PLAN = "http://snomed.info/sct|887701000000100"
+    EOL_COORDINATION_SUMMARY = "http://snomed.info/sct|861421000000109"
+    RESPECT_FORM = "http://snomed.info/sct|1382601000000107"
+    NEWS2_CHART = "http://snomed.info/sct|1363501000000100"
+    CONTINGENCY_PLAN = "http://snomed.info/sct|325691000000100"
+    EOL_CARE_PLAN = "http://snomed.info/sct|736373009"
+    LLOYD_GEORGE_FOLDER = "http://snomed.info/sct|16521000000101"
+
+    @staticmethod
+    def list():
+        return list(map(lambda type: type.value, PointerTypes))

@@ -5,6 +5,7 @@ from moto import mock_aws
 from api.producer.searchPostDocumentReference.search_post_document_reference import (
     handler,
 )
+from nrlf.core.constants import PointerTypes
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
 from nrlf.tests.data import load_document_reference
 from nrlf.tests.dynamodb import mock_repository
@@ -232,7 +233,7 @@ def test_search_document_reference_filters_by_type(
         body=json.dumps(
             {
                 "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|6700028191",
-                "type": "http://snomed.info/sct|736253002",
+                "type": PointerTypes.MENTAL_HEALTH_PLAN.value,
             }
         ),
     )
@@ -262,7 +263,7 @@ def test_search_document_reference_filters_by_pointer_types(
 
     event = create_test_api_gateway_event(
         headers=create_headers(
-            pointer_types=["http://snomed.info/sct|861421000000109"]
+            pointer_types=[PointerTypes.EOL_COORDINATION_SUMMARY.value]
         ),
         body=json.dumps(
             {

@@ -254,7 +254,6 @@ class DocumentReferenceValidator:
                     diagnostics="relatesTo code 'replaces' must have a target identifier",
                     field=f"relatesTo[{index}].target.identifier.value",
                 )
-                continue
 
     def _validate_asid(self, asid_references: list):
         """
@@ -389,4 +388,3 @@ class DocumentReferenceValidator:
                 diagnostics=f"category code '{coding.code}' must have a display value of '{CATEGORIES.get(coding.code)}'",
                 field=f"category[0].coding[{0}].display",
             )
-            return

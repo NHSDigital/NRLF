@@ -7,6 +7,8 @@ from __future__ import annotations
 from pydantic import BaseModel, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing_extensions import Annotated, Literal
 
+from nrlf.core.constants import PointerTypes
+
 
 class LocationItem(BaseModel):
     __root__: Annotated[
@@ -329,7 +331,7 @@ class RequestQuerySubject(BaseModel):
 
 
 class RequestQueryType(BaseModel):
-    __root__: Annotated[StrictStr, Field(example="http://snomed.info/sct|736253002")]
+    __root__: Annotated[StrictStr, Field(example=PointerTypes.MENTAL_HEALTH_PLAN.value)]
 
 
 class NextPageToken(BaseModel):

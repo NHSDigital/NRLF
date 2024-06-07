@@ -6,6 +6,7 @@ from pydantic import BaseModel, ValidationError
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.constants import CLIENT_RP_DETAILS, CONNECTION_METADATA
 from nrlf.core.errors import OperationOutcomeError, ParseError
+from nrlf.core.logger import LogReference, logger
 from nrlf.core.model import ClientRpDetails, ConnectionMetadata
 
 
@@ -42,11 +43,23 @@ def parse_headers(headers: Dict[str, str]) -> ConnectionMetadata:
 
 
 def parse_params(
-    model: Type[BaseModel],
+    model: Type[BaseModel] | None,
     query_string_params: Dict[str, str] | None,
-):
+) -> BaseModel | None:
+    if not model:
+        return None
+
+    logger.log(
+        LogReference.HANDLER006,
+        params=query_string_params,
+        model=model.__name__,
+    )
+
     try:
-        return model.parse_obj(query_string_params or {})
+        result = model.parse_obj(query_string_params or {})
+        logger.log(LogReference.HANDLER007, parsed_params=result.dict())
+        return result
+
     except ValidationError as exc:
         raise ParseError.from_validation_error(
             exc,
@@ -56,9 +69,14 @@ def parse_params(
 
 
 def parse_body(
-    model: Type[BaseModel],
+    model: Type[BaseModel] | None,
     body: str | None,
-):
+) -> BaseModel | None:
+    if not model:
+        return None
+
+    logger.log(LogReference.HANDLER008, body=body, model=model.__name__)
+
     if not body:
         raise OperationOutcomeError(
             status_code="400",
@@ -69,7 +87,10 @@ def parse_body(
         )
 
     try:
-        return model.parse_raw(body)
+        result = model.parse_raw(body)
+        logger.log(LogReference.HANDLER009, parsed_body=result.dict())
+        return result
+
     except ValidationError as exc:
         raise ParseError.from_validation_error(
             exc,
@@ -79,11 +100,23 @@ def parse_body(
 
 
 def parse_path(
-    model: Type[BaseModel],
+    model: Type[BaseModel] | None,
     path_params: Dict[str, str] | None,
-):
+) -> BaseModel | None:
+    if not model:
+        return None
+
+    logger.log(
+        LogReference.HANDLER010,
+        path=path_params,
+        model=model.__name__,
+    )
+
     try:
-        return model.parse_obj(path_params or {})
+        result = model.parse_obj(path_params or {})
+        logger.log(LogReference.HANDLER011, parsed_path=result.dict())
+        return result
+
     except ValidationError as exc:
         raise ParseError.from_validation_error(
             exc,
