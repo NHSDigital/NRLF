@@ -1059,7 +1059,7 @@ def test_create_document_reference_supersede_succeeds_with_toggle(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/nrl-producer-api/FHIR/R4/DocumentReference/Y05868-99999-99999-999999"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999"
         },
         "isBase64Encoded": False,
     }
