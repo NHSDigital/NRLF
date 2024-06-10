@@ -599,6 +599,195 @@ def test_validate_category_coding_invalid_system():
     }
 
 
+def test_validate_content_extension_too_many_extensions():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["content"][0]["extension"].append(
+        {
+            "url": "https://fhir.nhs.uk/England/StructureDefinition/Extension-England-ContentStability",
+            "valueCodeableConcept": {
+                "coding": [
+                    {
+                        "system": "https://fhir.nhs.uk/England/CodeSystem/England-NRLContentStability",
+                        "code": "static",
+                        "display": "static",
+                    }
+                ]
+            },
+        }
+    )
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert result.resource.id == "Y05868-99999-99999-999999"
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "invalid",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "Invalid content extension length: 2 Extension must only contain a single value",
+        "expression": ["content[0].extension"],
+    }
+
+
+def test_validate_content_extension_invalid_code():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["content"][0]["extension"][0] = {
+        "url": "https://fhir.nhs.uk/England/StructureDefinition/Extension-England-ContentStability",
+        "valueCodeableConcept": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/England/CodeSystem/England-NRLContentStability",
+                    "code": "invalid",
+                    "display": "invalid",
+                }
+            ]
+        },
+    }
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert result.resource.id == "Y05868-99999-99999-999999"
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "value",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "Invalid content extension code: invalid Extension code must be 'static' or 'dynamic'",
+        "expression": ["content[0].extension[0].valueCodeableConcept.coding[0].code"],
+    }
+
+
+def test_validate_content_extension_invalid_system():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["content"][0]["extension"][0] = {
+        "url": "https://fhir.nhs.uk/England/StructureDefinition/Extension-England-ContentStability",
+        "valueCodeableConcept": {
+            "coding": [
+                {
+                    "system": "invalid",
+                    "code": "static",
+                    "display": "static",
+                }
+            ]
+        },
+    }
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert result.resource.id == "Y05868-99999-99999-999999"
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "value",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "Invalid content extension system: invalid Extension system must be 'https://fhir.nhs.uk/England/CodeSystem/England-NRLContentStability'",
+        "expression": ["content[0].extension[0].valueCodeableConcept.coding[0].system"],
+    }
+
+
+def test_validate_content_extension_invalid_url():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["content"][0]["extension"][0] = {
+        "url": "invalid",
+        "valueCodeableConcept": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/England/CodeSystem/England-NRLContentStability",
+                    "code": "static",
+                    "display": "static",
+                }
+            ]
+        },
+    }
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert result.resource.id == "Y05868-99999-99999-999999"
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "value",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "Invalid content extension url: invalid Extension url must be 'https://fhir.nhs.uk/England/StructureDefinition/Extension-England-ContentStability'",
+        "expression": ["content[0].extension[0].url"],
+    }
+
+
+def test_validate_content_extension_missing_coding():
+    validator = DocumentReferenceValidator()
+    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
+
+    document_ref_data["content"][0]["extension"][0] = {
+        "url": "https://fhir.nhs.uk/England/StructureDefinition/Extension-England-ContentStability",
+        "valueCodeableConcept": {"coding": []},
+    }
+
+    result = validator.validate(document_ref_data)
+
+    assert result.is_valid is False
+    assert result.resource.id == "Y05868-99999-99999-999999"
+    assert len(result.issues) == 1
+    assert result.issues[0].dict(exclude_none=True) == {
+        "severity": "error",
+        "code": "required",
+        "details": {
+            "coding": [
+                {
+                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                    "code": "INVALID_RESOURCE",
+                    "display": "Invalid validation of resource",
+                }
+            ]
+        },
+        "diagnostics": "Missing content[0].extension[0].valueCodeableConcept.coding, extension must have at least one coding.",
+        "expression": ["content[0].extension.valueCodeableConcept.coding"],
+    }
+
+
 def test_validate_identifiers_invalid_systems():
     validator = DocumentReferenceValidator()
     document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
