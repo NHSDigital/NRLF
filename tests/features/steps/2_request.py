@@ -82,6 +82,9 @@ def create_post_document_reference_step(context: Context, ods_code: str):
 
     if context.response.status_code == 201:
         doc_ref_id = context.response.headers["Location"].split("/")[-1]
+        doc_ref_id.replace(
+            "|", "."
+        )  # NRL-766 define and resolve custodian suffix behaviour
         context.add_cleanup(lambda: context.repository.delete_by_id(doc_ref_id))
 
 

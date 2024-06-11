@@ -332,6 +332,7 @@ def assert_resource_in_location_header_exists_with_values(context: Context):
     )
 
     resource_id = location.split("/")[-1]
+    resource_id.replace("|", ".")  # NRL-766 define and verify custodian suffix formats
     resource = context.repository.get_by_id(resource_id)
     assert resource is not None, format_error(
         "Resource does not exist",
