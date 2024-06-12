@@ -204,6 +204,21 @@ class ProducerClient(APIClient):
             cert=self.config.client_cert,
         )
 
+    def create_text(self, doc_ref):
+        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
+        client_rp_details = connection_metadata.pop("client_rp_details")
+
+        return requests.post(
+            f"{self.config.base_url}producer/DocumentReference",
+            data=doc_ref,
+            headers={
+                "Authorization": "Bearer TestToken",
+                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
+                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
+            },
+            cert=self.config.client_cert,
+        )
+
     def upsert(self, doc_ref):
         connection_metadata = self.config.connection_metadata.dict(by_alias=True)
         client_rp_details = connection_metadata.pop("client_rp_details")

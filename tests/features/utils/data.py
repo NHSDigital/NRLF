@@ -8,6 +8,18 @@ from nrlf.producer.fhir.r4.model import (
     Identifier,
     Reference,
 )
+from tests.features.utils.constants import (
+    DEFAULT_TEST_AUTHOR,
+    DEFAULT_TEST_CATEGORY,
+    DEFAULT_TEST_CONTENT,
+    DEFAULT_TEST_CONTEXT,
+    DEFAULT_TEST_CUSTODIAN,
+    DEFAULT_TEST_DESCRIPTION,
+    DEFAULT_TEST_MASTER_ID,
+    DEFAULT_TEST_SECURITY_LABEL,
+    DEFAULT_TEST_SUBJECT,
+    DEFAULT_TEST_TYPE,
+)
 
 
 def create_test_document_reference(items: dict) -> DocumentReference:
@@ -89,3 +101,31 @@ def create_test_document_reference(items: dict) -> DocumentReference:
         ]
 
     return base_doc_ref
+
+
+def create_test_document_reference_with_defaults(
+    section: str, custom_data: str, pointer_id: str = "TSTCUS-sample-id-00000"
+) -> str:
+    """
+    Builds a DocumentReference request body for testing purposes,
+    using a valid example DocumentReference body as a default, but
+    with one top-level section of the resource overwritten by a json string
+    """
+
+    doc_ref_text = f"""{{ "resourceType": "DocumentReference",
+      "id": "{pointer_id}",
+      "status": "current",
+      "docStatus": "final",
+      {custom_data if section=="masterIdentifier" else DEFAULT_TEST_MASTER_ID},
+      {custom_data if section=="subject" else DEFAULT_TEST_SUBJECT},
+      {custom_data if section=="custodian" else DEFAULT_TEST_CUSTODIAN},
+      {custom_data if section=="author" else DEFAULT_TEST_AUTHOR},
+      {custom_data if section=="type" else DEFAULT_TEST_TYPE},
+      {custom_data if section=="category" else DEFAULT_TEST_CATEGORY},
+      {custom_data if section=="description" else DEFAULT_TEST_DESCRIPTION},
+      {custom_data if section=="security" else DEFAULT_TEST_SECURITY_LABEL},
+      {custom_data if section=="content" else DEFAULT_TEST_CONTENT},
+      {custom_data if section=="context" else DEFAULT_TEST_CONTEXT}
+    }}"""
+
+    return doc_ref_text

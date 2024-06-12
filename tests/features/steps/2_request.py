@@ -2,7 +2,10 @@ from behave import *  # noqa
 from behave.runner import Context
 
 from tests.features.utils.api_client import ConsumerClient, ProducerClient
-from tests.features.utils.data import create_test_document_reference
+from tests.features.utils.data import (
+    create_test_document_reference,
+    create_test_document_reference_with_defaults,
+)
 
 
 @when("consumer '{ods_code}' counts DocumentReferences with parameters")
@@ -79,6 +82,26 @@ def create_post_document_reference_step(context: Context, ods_code: str):
 
     doc_ref = create_test_document_reference(items)
     context.response = client.create(doc_ref.dict(exclude_none=True))
+
+    if context.response.status_code == 201:
+        doc_ref_id = context.response.headers["Location"].split("/")[-1]
+        doc_ref_id.replace(
+            "|", "."
+        )  # NRL-766 define and resolve custodian suffix behaviour
+        context.add_cleanup(lambda: context.repository.delete_by_id(doc_ref_id))
+
+
+@when(
+    "producer 'TSTCUS' requests creation of a DocumentReference with default test values except '{section}' is"
+)
+def create_post_body_step(context: Context, section: str):
+    client = ProducerClient.from_context(context, "TSTCUS")
+
+    if not context.text:
+        raise ValueError("No document reference text snippet provided")
+
+    doc_ref = create_test_document_reference_with_defaults(section, context.text)
+    context.response = client.create_text(doc_ref)
 
     if context.response.status_code == 201:
         doc_ref_id = context.response.headers["Location"].split("/")[-1]
