@@ -37,7 +37,7 @@ Feature: Producer - upsertDocumentReference - Success Scenarios
         "diagnostics": "The document has been created"
       }
       """
-    And the DocumentReference 'ANGY1-testid-upsert-0001-0001' exists with values:
+    And the Document Reference 'ANGY1-testid-upsert-0001-0001' exists with values:
       | property  | value                          |
       | id        | ANGY1-testid-upsert-0001-0001  |
       | subject   | 9278693472                     |
