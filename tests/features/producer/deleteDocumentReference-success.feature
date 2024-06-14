@@ -4,8 +4,9 @@ Feature: Producer - deleteDocumentReference - Success Scenarios
   Scenario: Successfully delete a Document Pointer by logical ID
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
     And the organisation 'DK94' is authorised to access pointer types:
-      | system                 | value     |
-      | http://snomed.info/sct | 736253002 |
+      | system                 | value           |
+      | http://snomed.info/sct | 736253002       |
+      | http://snomed.info/sct | 861421000000109 |
     And a DocumentReference resource exists with values:
       | property    | value                          |
       | id          | DK94-111-DeleteDocRefTest1     |
