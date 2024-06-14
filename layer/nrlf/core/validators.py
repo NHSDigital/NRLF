@@ -462,6 +462,23 @@ class DocumentReferenceValidator:
                 return
 
             if (
+                content.extension[0].valueCodeableConcept.coding[0].code
+                != content.extension[0].valueCodeableConcept.coding[0].display.lower()
+            ):
+                logger.log(
+                    LogReference.VALIDATOR001,
+                    step=f"content[{i}].extension.valueCodeableConcept.coding[0].display",
+                    reason="extension_coding_display_invalid",
+                )
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"Invalid content extension display: {content.extension[0].valueCodeableConcept.coding[0].display} Extension display must be the same as code either 'static' or 'dynamic'",
+                    field=f"content[{i}].extension[0].valueCodeableConcept.coding[0].display",
+                )
+                return
+
+            if (
                 content.extension[0].url
                 != "https://fhir.nhs.uk/England/StructureDefinition/Extension-England-ContentStability"
             ):
