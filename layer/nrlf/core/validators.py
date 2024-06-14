@@ -440,7 +440,7 @@ class DocumentReferenceValidator:
                     issue_code="value",
                     error_code="INVALID_RESOURCE",
                     diagnostics=f"Invalid content extension system: {content.extension[0].valueCodeableConcept.coding[0].system} Extension system must be 'https://fhir.nhs.uk/England/CodeSystem/England-NRLContentStability'",
-                    field=f"content[0].extension[0].valueCodeableConcept.coding[0].system",
+                    field=f"content[{i}].extension[0].valueCodeableConcept.coding[0].system",
                 )
                 return
 
