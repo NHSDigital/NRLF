@@ -121,7 +121,7 @@ def create_put_document_reference_step(context: Context, ods_code: str):
     items = {row["property"]: row["value"] for row in context.table}
 
     doc_ref = create_test_document_reference(items)
-    doc_ref_id = items.get(id)
+    doc_ref_id = items.get("id")
     context.response = client.upsert(doc_ref.dict(exclude_none=True))
 
     if context.response.status_code == 201:
