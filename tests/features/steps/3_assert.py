@@ -324,16 +324,15 @@ def assert_header_starts_with(context: Context, header_name: str, starts_with: s
 def assert_resource_in_location_header_exists_with_values(context: Context):
     location = context.response.headers.get("Location")
 
-    assert location.startswith(
-        "/nrl-producer-api/FHIR/R4/DocumentReference/"
-    ), format_error(
+    assert location.startswith("/producer/FHIR/R4/DocumentReference/"), format_error(
         "Unexpected Location header",
-        "/nrl-producer-api/FHIR/R4/DocumentReference/",
+        "/producer/FHIR/R4/DocumentReference/",
         location,
         context.response.text,
     )
 
     resource_id = location.split("/")[-1]
+    resource_id.replace("|", ".")  # NRL-766 define and verify custodian suffix formats
     resource = context.repository.get_by_id(resource_id)
     assert resource is not None, format_error(
         "Resource does not exist",
@@ -350,4 +349,35 @@ def assert_resource_in_location_header_exists_with_values(context: Context):
 
     assert_document_reference_matches_value(
         context, DocumentReference.parse_raw(resource.document), items
+    )
+
+
+@then("the Document Reference '{doc_ref_id}' exists with values")
+def assert_resource_exists_with_values(context: Context, doc_ref_id: str):
+    resource = context.repository.get_by_id(doc_ref_id)
+    assert resource is not None, format_error(
+        "Resource does not exist",
+        doc_ref_id,
+        None,
+        context.response.text,
+    )
+
+    if not context.table:
+        raise ValueError("No DocumentReference table provided")
+
+    items = {row["property"]: row["value"] for row in context.table}
+
+    assert_document_reference_matches_value(
+        context, DocumentReference.parse_raw(resource.document), items
+    )
+
+
+@then("the resource with id '{doc_ref_id}' does not exist")
+def assert_resource_absent(context: Context, doc_ref_id: str):
+    resource = context.repository.get_by_id(doc_ref_id)
+    assert resource is None, format_error(
+        "Resource that should be absent is found in database by id",
+        None,
+        doc_ref_id,
+        DocumentReference.parse_raw(resource.document),
     )

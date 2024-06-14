@@ -34,7 +34,7 @@ PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL = "supersede-ignore-delete-fail"
 PERMISSION_ALLOW_ALL_POINTER_TYPES = "allow-all-pointer-types"
 
 
-PRODUCER_URL_PATH = "/nrl-producer-api/FHIR/R4/DocumentReference"
+PRODUCER_URL_PATH = "/producer/FHIR/R4/DocumentReference"
 
 
 class PointerTypes(Enum):
