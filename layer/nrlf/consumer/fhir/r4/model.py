@@ -424,6 +424,36 @@ class RequestHeaderCorrelationId(BaseModel):
     __root__: Annotated[str, Field(example="11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA")]
 
 
+class CodeableConcept(BaseModel):
+    id: Annotated[
+        str | None,
+        Field(
+            description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+            regex="[A-Za-z0-9\\-\\.]{1,64}",
+        ),
+    ] = None
+    coding: list[Coding] | None = None
+    text: Annotated[
+        str | None,
+        Field(
+            description="A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.",
+            regex="[ \\r\\n\\t\\S]+",
+        ),
+    ] = None
+
+
+class Extension(BaseModel):
+    valueCodeableConcept: Annotated[
+        CodeableConcept,
+        Field(
+            description="Details about the extension.",
+        ),
+    ]
+    url: Annotated[
+        str, Field(description="The reference link for the details.", regex="\\S*")
+    ]
+
+
 class DocumentReferenceContent(BaseModel):
     id: Annotated[
         str | None,
@@ -444,22 +474,10 @@ class DocumentReferenceContent(BaseModel):
             description="An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType."
         ),
     ] = None
-
-
-class CodeableConcept(BaseModel):
-    id: Annotated[
-        str | None,
+    extension: Annotated[
+        list[Extension] | None,
         Field(
-            description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
-        ),
-    ] = None
-    coding: list[Coding] | None = None
-    text: Annotated[
-        str | None,
-        Field(
-            description="A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.",
-            regex="[ \\r\\n\\t\\S]+",
+            description="Additional code system information for the document content."
         ),
     ] = None
 

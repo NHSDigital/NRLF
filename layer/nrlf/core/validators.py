@@ -116,6 +116,8 @@ class DocumentReferenceValidator:
             self._validate_relates_to(resource)
             self._validate_ssp_asid(resource)
             self._validate_category(resource)
+            if resource.content[0].extension:
+                self._validate_content_extension(resource)
 
         except StopValidationError:
             logger.log(LogReference.VALIDATOR003)
@@ -388,3 +390,107 @@ class DocumentReferenceValidator:
                 diagnostics=f"category code '{coding.code}' must have a display value of '{CATEGORIES.get(coding.code)}'",
                 field=f"category[0].coding[{0}].display",
             )
+
+    def _validate_content_extension(self, model: DocumentReference):
+        """
+        Validate the content.extension field contains an appropriate coding.
+        """
+        logger.log(LogReference.VALIDATOR001, step="content extension")
+
+        logger.debug("Validating extension")
+        for i, content in enumerate(model.content):
+            if len(content.extension) > 1:
+                logger.log(
+                    LogReference.VALIDATOR001,
+                    step=f"content[{i}].extension",
+                    reason="extension_too_long",
+                )
+                self.result.add_error(
+                    issue_code="invalid",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"Invalid content extension length: {len(content.extension)} Extension must only contain a single value",
+                    field=f"content[{i}].extension",
+                )
+                return
+
+            if len(content.extension[0].valueCodeableConcept.coding) < 1:
+                logger.log(
+                    LogReference.VALIDATOR001,
+                    step=f"content[{i}].extension.valueCodeableConcept.coding",
+                    reason="extension_coding_does_not_exist",
+                )
+                self.result.add_error(
+                    issue_code="required",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"Missing content[{i}].extension[0].valueCodeableConcept.coding, extension must have at least one coding.",
+                    field=f"content[{i}].extension.valueCodeableConcept.coding",
+                )
+                return
+
+            if (
+                content.extension[0].valueCodeableConcept.coding[0].system
+                != "https://fhir.nhs.uk/England/CodeSystem/England-NRLContentStability"
+            ):
+                logger.log(
+                    LogReference.VALIDATOR001,
+                    step=f"content[{i}].extension.valueCodeableConcept.coding[0].system",
+                    reason="extension_coding_system_invalid",
+                )
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"Invalid content extension system: {content.extension[0].valueCodeableConcept.coding[0].system} Extension system must be 'https://fhir.nhs.uk/England/CodeSystem/England-NRLContentStability'",
+                    field=f"content[{i}].extension[0].valueCodeableConcept.coding[0].system",
+                )
+                return
+
+            if content.extension[0].valueCodeableConcept.coding[0].code not in [
+                "static",
+                "dynamic",
+            ]:
+                logger.log(
+                    LogReference.VALIDATOR001,
+                    step=f"content[{i}].extension.valueCodeableConcept.coding[0].code",
+                    reason="extension_coding_code_invalid",
+                )
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"Invalid content extension code: {content.extension[0].valueCodeableConcept.coding[0].code} Extension code must be 'static' or 'dynamic'",
+                    field=f"content[{i}].extension[0].valueCodeableConcept.coding[0].code",
+                )
+                return
+
+            if (
+                content.extension[0].valueCodeableConcept.coding[0].code
+                != content.extension[0].valueCodeableConcept.coding[0].display.lower()
+            ):
+                logger.log(
+                    LogReference.VALIDATOR001,
+                    step=f"content[{i}].extension.valueCodeableConcept.coding[0].display",
+                    reason="extension_coding_display_invalid",
+                )
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"Invalid content extension display: {content.extension[0].valueCodeableConcept.coding[0].display} Extension display must be the same as code either 'static' or 'dynamic'",
+                    field=f"content[{i}].extension[0].valueCodeableConcept.coding[0].display",
+                )
+                return
+
+            if (
+                content.extension[0].url
+                != "https://fhir.nhs.uk/England/StructureDefinition/Extension-England-ContentStability"
+            ):
+                logger.log(
+                    LogReference.VALIDATOR001,
+                    step=f"content[{i}].extension.url",
+                    reason="extension_url_invalid",
+                )
+                self.result.add_error(
+                    issue_code="value",
+                    error_code="INVALID_RESOURCE",
+                    diagnostics=f"Invalid content extension url: {content.extension[0].url} Extension url must be 'https://fhir.nhs.uk/England/StructureDefinition/Extension-England-ContentStability'",
+                    field=f"content[{i}].extension[0].url",
+                )
+                return
