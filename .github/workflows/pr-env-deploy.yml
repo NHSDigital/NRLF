@@ -143,7 +143,6 @@ jobs:
       - name: Add S3 Permissions to Lambda
         run: |
           make get-s3-perms ENV=dev
-          deactivate
 
       - name: Terraform Init
         run: |

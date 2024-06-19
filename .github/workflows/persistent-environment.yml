@@ -175,7 +175,6 @@ jobs:
         run: |
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
           make get-s3-perms ENV=${account}
-          deactivate
 
       - name: Terraform Init
         run: |
