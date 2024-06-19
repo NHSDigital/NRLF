@@ -5,49 +5,12 @@ from pathlib import Path
 import boto3
 import fire
 
-_DEFAULT_APP_DEV = "4e41d2d9-3ef6-48dc-8406-5faba77ffd83"
-_DEFAULT_APP_PROD = "7a4ad8c7-3927-4259-af7b-ac9d305a86ad"
-_DEFAULT_APP_FOR_APIGEE_ENV = {
-    "internal-dev": _DEFAULT_APP_DEV,
-    "internal-dev-sandbox": _DEFAULT_APP_DEV,
-    "internal-qa": _DEFAULT_APP_DEV,
-    "internal-qa-sandbox": _DEFAULT_APP_DEV,
-    "ref": _DEFAULT_APP_DEV,
-    "int": _DEFAULT_APP_PROD,
-    "int-sandbox": _DEFAULT_APP_PROD,
-    "prod": _DEFAULT_APP_PROD,
-}
-
-_NRL_SYNC_APP_DEV = "94492ef7-40a5-47bb-a18b-b9023bd4ec9a"
-_NRL_SYNC_APP_PROD = "f9822096-11ec-479f-8d95-fcc8dd22048d"
-_NRL_SYNC_APP_FOR_APIGEE_ENV = {
-    "internal-dev": _NRL_SYNC_APP_DEV,
-    "internal-qa": _NRL_SYNC_APP_DEV,
-    "ref": _NRL_SYNC_APP_DEV,
-    "int": _NRL_SYNC_APP_PROD,
-    "prod": _NRL_SYNC_APP_PROD,
-}
-
 AWS_ACCOUNT_FOR_ENV = {
     "dev": "dev",
     "qa": "test",
     "ref": "test",
     "int": "test",
     "prod": "prod",
-}
-APIGEE_ENV_FOR_ENV = {
-    "dev": "internal-dev",
-    "dev-sandbox": "internal-dev-sandbox",
-    "qa": "internal-qa",
-    "qa-sandbox": "internal-qa-sandbox",
-    "ref": "ref",
-    "int": "int",
-    "int-sandbox": "sandbox",
-    "prod": "prod",
-}
-APP_FOR_ALIAS = {
-    "default": _DEFAULT_APP_FOR_APIGEE_ENV,
-    "nrl_sync": _NRL_SYNC_APP_FOR_APIGEE_ENV,
 }
 
 
