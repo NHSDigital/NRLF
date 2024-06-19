@@ -135,8 +135,15 @@ jobs:
       - name: Retrieve Server Certificates
         run: make truststore-pull-server ENV=dev
 
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
       - name: Add S3 Permissions to Lambda
-        run: make get-s3-perms ENV=dev
+        run: |
+          make get-s3-perms ENV=dev
+          deactivate
 
       - name: Terraform Init
         run: |
