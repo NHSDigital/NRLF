@@ -88,7 +88,7 @@ def download_files(s3_client, bucket_name, local_path, file_names, folders):
         s3_client.download_file(bucket_name, file_name, str(file_path))
 
 
-def main(env: str):
+def main(env: str, path_to_store: str):
     bucket = f"nhsd-nrlf--{env}--authorization-store"
     account_id = get_account_id(env)
 
@@ -97,7 +97,9 @@ def main(env: str):
     s3 = boto_session.client("s3")
     files, folders = get_file_folders(s3, bucket)
 
-    download_files(s3, bucket, path.abspath(path.join("/tmp/s3")), files, folders)
+    download_files(
+        s3, bucket, path.abspath(path.join(path_to_store + "/s3")), files, folders
+    )
     print(f"Downloaded S3 permissions...")
 
 

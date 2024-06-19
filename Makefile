@@ -49,7 +49,7 @@ check-deploy: ## check the deploy environment is setup correctly
 check-deploy-warn:
 	@SHOULD_WARN_ONLY=true ./scripts/check-deploy-environment.sh
 
-build: check-warn get-s3-perms build-api-packages build-layers build-dependency-layer ## Build the project
+build: check-warn build-api-packages build-layers build-dependency-layer ## Build the project
 
 build-dependency-layer:
 	@echo "Building Lambda dependency layer"
@@ -118,7 +118,9 @@ get-access-token: check-warn ## Get an access token for an environment
 	@poetry run python tests/utilities/get_access_token.py $(ENV) $(APP_ALIAS)
 
 get-s3-perms: check-warn ## Get s3 permissions for an environment
-	@poetry run python scripts/get_s3_permissions.py $(ENV)
+	@poetry run python scripts/get_s3_permissions.py $(ENV) $(DIST_PATH)
+	@echo "Updating Lambda NRLF layer"
+	./scripts/add-perms-to-lambda.sh $(DIST_PATH)
 
 truststore-build-all: check-warn ## Build all truststore resources
 	@./scripts/truststore.sh build-all
