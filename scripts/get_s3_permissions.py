@@ -100,7 +100,7 @@ def main(env: str, path_to_store: str):
     download_files(
         s3, bucket, path.abspath(path.join(path_to_store + "/s3")), files, folders
     )
-    print(f"Downloaded S3 permissions...")
+    print("Downloaded S3 permissions...")
 
 
 if __name__ == "__main__":
