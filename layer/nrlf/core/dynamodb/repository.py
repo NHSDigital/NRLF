@@ -14,6 +14,10 @@ from nrlf.core.logger import LogReference, logger
 RepositoryModel = TypeVar("RepositoryModel", bound=DynamoDBModel)
 
 
+def _get_cat_for_type(pointer_type: str) -> str:
+    return "734163000"
+
+
 class Repository(ABC, Generic[RepositoryModel]):
     ITEM_TYPE: Type[RepositoryModel]
 
@@ -74,30 +78,19 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
         return item
 
-    def get_by_id(self, id_: str) -> Optional[DocumentPointer]:
+    def get_by_id(self, id: str) -> Optional[DocumentPointer]:
         """
         Get a DocumentPointer resource by ID
         """
-        producer_id, document_id = id_.split("-", 1)
-        ods_code_parts = producer_id.split(".")
-        partition_key = "D#" + "#".join([*ods_code_parts, document_id])
-        return self.get(partition_key)
 
-    def get(self, partition_key: str) -> Optional[DocumentPointer]:
-        """
-        Return a single record by partition key
-        """
-        query = {
-            "KeyConditionExpression": "pk = :pk",
-            "ExpressionAttributeValues": {":pk": partition_key},
-        }
-
-        logger.log(LogReference.REPOSITORY006, partition_key=partition_key, query=query)
+        ods_code, doc_id = id.split("-")
+        doc_key = f"O#{ods_code}#D#{doc_id}"
 
         try:
             result = self.table.query(
-                KeyConditionExpression="pk = :pk",
-                ExpressionAttributeValues={":pk": partition_key},
+                IndexName="dockey_gsi",
+                KeyConditionExpression="doc_key = :doc_key",
+                ExpressionAttributeValues={":doc_key": doc_key},
                 ReturnConsumedCapacity="INDEXES",
             )
         except ClientError as exc:
@@ -108,8 +101,6 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                 error=str(exc),
             )
             raise exc
-
-        logger.log(LogReference.REPOSITORY009, result=result)
 
         if result["Count"] == 0:
             logger.log(LogReference.REPOSITORY012)
@@ -130,7 +121,6 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             logger.log(LogReference.REPOSITORY011)
             logger.log(LogReference.REPOSITORY011a, result=parsed_item.dict())
             return parsed_item
-
         except ValidationError as exc:
             logger.log(
                 LogReference.REPOSITORY010,
@@ -159,39 +149,36 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             pointer_types=pointer_types,
         )
 
-        key_conditions = ["pk_1 = :pk_1"]
+        key_conditions = ["pk = :pk"]
         filter_expressions = []
-        expression_attribute_names = {}
-        expression_attribute_values = {":pk_1": f"P#{nhs_number}"}
+        expression_names = {}
+        expression_values = {":pk": f"P#{nhs_number}"}
 
-        logger.log(
-            LogReference.REPOSITORY014,
-            key_conditions=key_conditions,
-            filter_expressions=filter_expressions,
-            expression_attribute_names=expression_attribute_names,
-            expression_attribute_values=expression_attribute_values,
-        )
+        if len(pointer_types) == 1:
+            # Optimisation for single pointer type
+            category = _get_cat_for_type(pointer_types[0])
+            sort_key = f"C#{category}#T#{pointer_types[0]}"
+            key_conditions.append("begins_with(sk, :sk)")
+            expression_values[":sk"] = sort_key
 
-        if pointer_types:
-            pointer_type_filters = []
-            expression_attribute_names["#pointer_type"] = "type"
-
-            for i, pointer_type in enumerate(pointer_types):
-                pointer_type_filters.append(f"#pointer_type = :type_{i}")
-                expression_attribute_values[f":type_{i}"] = pointer_type
-
-            expression = f"({' OR '.join(pointer_type_filters)})"
-            logger.log(
-                LogReference.REPOSITORY016, expression=expression, values=pointer_types
-            )
-            filter_expressions.append(expression)
+        # Handle multiple categories and pointer types with filter expressions
+        if len(pointer_types) > 1:
+            # TODO - Is it quicker to do multi searches?
+            expression_names["#pointer_type"] = "type"
+            types_filters = [
+                f"#pointer_type = :type_{i}" for i in range(len(pointer_types))
+            ]
+            types_filter_values = {
+                f":type_{i}": pointer_types[i] for i in range(len(pointer_types))
+            }
+            filter_expressions.append(f"({' OR '.join(types_filters)})")
+            expression_values.update(types_filter_values)
 
         query = {
-            "IndexName": "idx_gsi_1",
             "KeyConditionExpression": " AND ".join(key_conditions),
             "FilterExpression": " AND ".join(filter_expressions),
-            "ExpressionAttributeNames": expression_attribute_names or None,
-            "ExpressionAttributeValues": expression_attribute_values,
+            "ExpressionAttributeNames": expression_names or None,
+            "ExpressionAttributeValues": expression_values,
             "Select": "COUNT",
             "ReturnConsumedCapacity": "INDEXES",
         }
@@ -223,7 +210,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         self,
         nhs_number: str,
         custodian: Optional[str] = None,
-        pointer_types: Optional[List[str]] = None,
+        pointer_types: Optional[List[str]] = [],
     ) -> Iterator[DocumentPointer]:
         """"""
         logger.log(
@@ -233,18 +220,30 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             pointer_types=pointer_types,
         )
 
-        key_conditions = ["pk_1 = :pk_1"]
+        key_conditions = ["pk = :pk"]
         filter_expressions = []
-        expression_attribute_names = {}
-        expression_attribute_values = {":pk_1": f"P#{nhs_number}"}
+        expression_names = {}
+        expression_values = {":pk": f"P#{nhs_number}"}
 
-        logger.log(
-            LogReference.REPOSITORY014,
-            key_conditions=key_conditions,
-            filter_expressions=filter_expressions,
-            expression_attribute_names=expression_attribute_names,
-            expression_attribute_values=expression_attribute_values,
-        )
+        if len(pointer_types) == 1:
+            # Optimisation for single pointer type
+            category = _get_cat_for_type(pointer_types[0])
+            sort_key = f"C#{category}#T#{pointer_types[0]}"
+            key_conditions.append("begins_with(sk, :sk)")
+            expression_values[":sk"] = sort_key
+
+        # Handle multiple categories and pointer types with filter expressions
+        if len(pointer_types) > 1:
+            # TODO - Is it quicker to do multi searches?
+            expression_names["#pointer_type"] = "type"
+            types_filters = [
+                f"#pointer_type = :type_{i}" for i in range(len(pointer_types))
+            ]
+            types_filter_values = {
+                f":type_{i}": pointer_types[i] for i in range(len(pointer_types))
+            }
+            filter_expressions.append(f"({' OR '.join(types_filters)})")
+            expression_values.update(types_filter_values)
 
         if custodian:
             logger.log(
@@ -253,114 +252,17 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                 values=["custodian"],
             )
             filter_expressions.append("custodian = :custodian")
-            expression_attribute_values[":custodian"] = custodian
-
-        if pointer_types:
-            pointer_type_filters = []
-            expression_attribute_names["#pointer_type"] = "type"
-
-            for i, pointer_type in enumerate(pointer_types):
-                pointer_type_filters.append(f"#pointer_type = :type_{i}")
-                expression_attribute_values[f":type_{i}"] = pointer_type
-
-            expression = f"({' OR '.join(pointer_type_filters)})"
-            logger.log(
-                LogReference.REPOSITORY016, expression=expression, values=pointer_types
-            )
-            filter_expressions.append(expression)
+            expression_values[":custodian"] = custodian
 
         query = {
-            "IndexName": "idx_gsi_1",
             "KeyConditionExpression": " AND ".join(key_conditions),
             "FilterExpression": " AND ".join(filter_expressions),
-            "ExpressionAttributeNames": expression_attribute_names,
-            "ExpressionAttributeValues": expression_attribute_values,
+            "ExpressionAttributeNames": expression_names or None,
+            "ExpressionAttributeValues": expression_values,
             "ReturnConsumedCapacity": "INDEXES",
         }
 
         yield from self._query(**query)
-
-    def search_by_custodian(
-        self,
-        custodian: str,
-        custodian_suffix: Optional[str] = None,
-        pointer_types: Optional[List[str]] = None,
-        nhs_number: Optional[str] = None,
-    ) -> Iterator[DocumentPointer]:
-        """ """
-        key_conditions = ["pk_2 = :pk_2"]
-        filter_expressions = []
-        expression_attribute_names = {}
-        expression_attribute_values = {
-            ":pk_2": f"O#{custodian}",
-        }
-
-        if custodian_suffix:
-            expression_attribute_values[":pk_2"] = f"O#{custodian}#{custodian_suffix}"
-
-        logger.log(
-            LogReference.REPOSITORY014,
-            key_conditions=key_conditions,
-            filter_expressions=filter_expressions,
-            expression_attribute_names=expression_attribute_names,
-            expression_attribute_values=expression_attribute_values,
-        )
-
-        if pointer_types is not None:
-            pointer_type_filters = []
-            expression_attribute_names["#pointer_type"] = "type"
-
-            for i, pointer_type in enumerate(pointer_types):
-                pointer_type_filters.append(f"#pointer_type = :type_{i}")
-                expression_attribute_values[f":type_{i}"] = pointer_type
-
-            expression = f"({' OR '.join(pointer_type_filters)})"
-            logger.log(
-                LogReference.REPOSITORY016, expression=expression, values=pointer_types
-            )
-            filter_expressions.append(expression)
-
-        if nhs_number:
-            logger.log(
-                LogReference.REPOSITORY016,
-                expression="nhs_number = :nhs_number",
-                values=[nhs_number],
-            )
-            filter_expressions.append("nhs_number = :nhs_number")
-            expression_attribute_values[":nhs_number"] = nhs_number
-
-        query = {
-            "IndexName": "idx_gsi_2",
-            "FilterExpression": " AND ".join(filter_expressions),
-            "KeyConditionExpression": " AND ".join(key_conditions),
-            "ExpressionAttributeNames": expression_attribute_names,
-            "ExpressionAttributeValues": expression_attribute_values,
-            "ReturnConsumedCapacity": "INDEXES",
-        }
-
-        yield from self._query(**query)
-
-    def find_by_nhs_number(self, nhs_number: str) -> Iterator[DocumentPointer]:
-        """
-        Find all DocumentPointer records by NHS number
-        """
-        yield from self._query(
-            IndexName="idx_gsi_1",
-            KeyConditionExpression="pk_1 = :pk_1",
-            ExpressionAttributeValues={":pk_1": f"P#{nhs_number}"},
-            ReturnConsumedCapacity="INDEXES",
-        )
-
-    def find_by_custodian(self, custodian: str) -> Iterator[DocumentPointer]:
-        """
-        Find all DocumentPointer records by custodian
-        """
-        yield from self._query(
-            IndexName="idx_gsi_2",
-            KeyConditionExpression="pk_2 = :pk_2",
-            ExpressionAttributeValues={":pk_2": f"C#{custodian}"},
-            ReturnConsumedCapacity="INDEXES",
-        )
 
     def save(self, item: DocumentPointer) -> DocumentPointer:
         """
@@ -376,18 +278,18 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
     def supersede(
         self,
         item: DocumentPointer,
-        ids_to_delete: List[str],
+        pointers_to_delete: List[str],
         can_ignore_delete_fail: bool = False,
     ) -> DocumentPointer:
         """ """
         saved_item = self.create(item)
 
-        for id_ in ids_to_delete:
-            self.delete_by_id(id_, can_ignore_delete_fail)
+        for pointer in pointers_to_delete:
+            self.delete(pointer, ignore_fail=can_ignore_delete_fail)
 
         return saved_item
 
-    def delete(self, item: DocumentPointer) -> None:
+    def delete(self, item: DocumentPointer, ignore_fail: bool = False) -> None:
         """
         Delete a DocumentPointer
         """
@@ -408,28 +310,16 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                 stacklevel=5,
                 error=str(exc),
             )
+
+            if ignore_fail:
+                return
+
             raise OperationOutcomeError(
                 status_code="500",
                 severity="error",
                 code="exception",
                 details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
             ) from exc
-
-    def delete_by_id(self, id_: str, can_ignore_delete_fail: bool = False):
-        """ """
-        producer_id, document_id = id_.split("-", 1)
-        ods_code_parts = producer_id.split(".")
-        partition_key = "D#" + "#".join([*ods_code_parts, document_id])
-        try:
-            self.table.delete_item(Key={"pk": partition_key, "sk": partition_key})
-        except Exception as exc:
-            if can_ignore_delete_fail:
-                logger.log(
-                    LogReference.REPOSITORY026a,
-                    exc_info=sys.exc_info(),
-                    stacklevel=5,
-                    error=str(exc),
-                )
 
     def _query(self, **kwargs) -> Iterator[DocumentPointer]:
         """

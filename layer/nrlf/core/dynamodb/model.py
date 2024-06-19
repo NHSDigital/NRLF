@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Optional
 
@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 from nrlf.core.constants import VALID_SOURCES
 from nrlf.core.logger import LogReference, logger
 from nrlf.core.types import DocumentReference
+from nrlf.core.utils import create_fhir_instant
 
 
 class DBPrefix(str, Enum):
@@ -16,8 +17,9 @@ class DBPrefix(str, Enum):
     Patient = "P"
     CreatedOn = "CO"
     Organisation = "O"
-    Contract = "C"
-    Version = "V"
+    Category = "C"
+    Type = "T"
+    MasterIdentifier = "MI"
 
 
 KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
@@ -45,7 +47,12 @@ class DocumentPointer(DynamoDBModel):
     custodian: str
     custodian_suffix: Optional[str] = None
     producer_id: str
+    category_id: str
+    category: str
+    type_id: str
     type: str
+    master_identifier: str
+    author: str
     source: str
     version: int
     document: str
@@ -72,14 +79,20 @@ class DocumentPointer(DynamoDBModel):
         coding = getattr(resource.type, "coding")
         subject_identifier = getattr(resource.subject, "identifier")
         custodian_identifier = getattr(resource.custodian, "identifier")
+        author_identifier = getattr(resource.author[0], "identifier")
 
         nhs_number = getattr(subject_identifier, "value")
         custodian = getattr(custodian_identifier, "value")
+        author = getattr(author_identifier, "value")
 
         if len(coding) > 1:
             raise ValueError("DocumentReference.type.coding must have exactly one item")
 
+        pointer_category = f"{resource.category[0].coding[0].system}|{resource.category[0].coding[0].code}"
         pointer_type = f"{coding[0].system}|{coding[0].code}"
+
+        category_id = f"{resource.category[0].coding[0].code}"
+        type_id = f"{resource.type.coding[0].code}"
 
         core_model = cls(
             producer_id=None,  # type: ignore - handled by validators
@@ -87,12 +100,15 @@ class DocumentPointer(DynamoDBModel):
             id=resource_id,
             nhs_number=nhs_number,
             custodian=custodian,
+            author=author,
             type=pointer_type,
+            category=pointer_category,
+            category_id=category_id,
+            type_id=type_id,
             source="NRLF",
             version=1,
             document=resource.json(exclude_none=True),
-            created_on=created_on
-            or datetime.now(tz=timezone.utc).isoformat(timespec="milliseconds") + "Z",
+            created_on=created_on or create_fhir_instant(),
         )
 
         logger.log(
@@ -275,105 +291,67 @@ class DocumentPointer(DynamoDBModel):
         return {
             "pk": self.pk,
             "sk": self.sk,
-            "pk_1": self.pk_1,
-            "sk_1": self.sk_1,
-            "pk_2": self.pk_2,
-            "sk_2": self.sk_2,
+            "doc_key": self.doc_key,
+            "masterid_key": self.masterid_key,
         }
 
     @property
     def pk(self) -> str:
         """
         Returns the pk (partition key) for the DocumentPointer
-        Uses the custodian, custodian suffix (if applicable) and document_id to create the pk
-
-        Examples:
-        - D#<custodian>#<custodian_suffix>#<document_id>
-        - D#<custodian>#<document_id>
+        TODO-NOW: Add docs
         """
-        if self.custodian_suffix:
-            return "#".join(
-                [
-                    DBPrefix.DocumentPointer.value,
-                    self.custodian,
-                    self.custodian_suffix,
-                    self.document_id,
-                ]
-            )
 
-        return "#".join(
-            [DBPrefix.DocumentPointer.value, self.custodian, self.document_id]
-        )
+        return "#".join([DBPrefix.Patient.value, self.nhs_number])
 
     @property
     def sk(self) -> str:
         """
         Returns the sk (sort key) for the DocumentPointer
-        Identical to the primary key for DocumentPointer
+        TODO-NOW: Add docs
         """
-        return self.pk
-
-    @property
-    def pk_1(self) -> str:
-        """
-        Returns the pk_1 value used for the partition key in the idx_gsi_1 index
-
-        Example: P#<nhs_number>
-        """
-        return f"{DBPrefix.Patient.value}#{self.nhs_number}"
-
-    @property
-    def sk_1(self) -> str:
-        """
-        Returns the sk_1 value used for the sort key in the idx_gsi_1 index
-
-        Example:
-        - CO#<created_on>#<custodian>#<custodian_suffix>#<document_id>
-        - CO#<created_on>#<custodian>#<document_id>
-        """
-        if self.custodian_suffix:
-            return "#".join(
-                [
-                    DBPrefix.CreatedOn.value,
-                    self.created_on,
-                    self.custodian,
-                    self.custodian_suffix,
-                    self.document_id,
-                ]
-            )
-
         return "#".join(
             [
+                DBPrefix.Category.value,
+                self.category_id,
+                DBPrefix.Type.value,
+                self.type_id,
                 DBPrefix.CreatedOn.value,
                 self.created_on,
-                self.custodian,
+                DBPrefix.DocumentPointer.value,
                 self.document_id,
             ]
         )
 
     @property
-    def pk_2(self) -> str:
+    def doc_key(self) -> str:
         """
-        Returns the pk_2 value used for the partition key in the idx_gsi_2 index
-
-        Example:
-        - O#<custodian>
-        - O#<custodian>#<custodian_suffix>
+        Returns the doc_key for the DocumentPointer
+        TODO-NOW: Add docs
         """
-        if self.custodian_suffix:
-            return "#".join(
-                [DBPrefix.Organisation.value, self.custodian, self.custodian_suffix]
-            )
-
-        return "#".join([DBPrefix.Organisation.value, self.custodian])
+        return "#".join(
+            [
+                DBPrefix.Organisation.value,
+                self.custodian,
+                DBPrefix.DocumentPointer.value,
+                self.document_id,
+            ]
+        )
 
     @property
-    def sk_2(self) -> str:
+    def masterid_key(self) -> str:
         """
-        Returns the sk_2 value used for the sort key in the idx_gsi_2 index
-        Identical to the sort key for idx_gsi_1
+        Returns the doc_key for the DocumentPointer
+        TODO-NOW: Add docs
         """
-        return self.sk_1
+        return "#".join(
+            [
+                DBPrefix.Organisation.value,
+                self.custodian,
+                DBPrefix.MasterIdentifier.value,
+                self.master_identifier,
+            ]
+        )
 
     @classmethod
     def public_alias(cls) -> str:

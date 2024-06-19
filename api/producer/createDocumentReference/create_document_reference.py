@@ -91,13 +91,13 @@ def _check_permissions(
         )
 
 
-def _get_document_ids_to_supersede(
+def _get_documents_to_supersede(
     resource: DocumentReference,
     core_model: DocumentPointer,
     metadata: ConnectionMetadata,
     repository: DocumentPointerRepository,
     can_ignore_delete_fail: bool,
-):
+) -> list[DocumentPointer]:
     """
     Get the list of document IDs to supersede based on the relatesTo field
     """
@@ -105,7 +105,7 @@ def _get_document_ids_to_supersede(
         return []
 
     logger.log(LogReference.PROCREATE006, relatesTo=resource.relatesTo)
-    ids_to_delete = []
+    pointers_to_delete = []
 
     for idx, relates_to in enumerate(resource.relatesTo):
         identifier = _validate_identifier(relates_to, idx)
@@ -115,9 +115,15 @@ def _get_document_ids_to_supersede(
             existing_pointer = _check_existing_pointer(identifier, repository, idx)
             _validate_pointer_details(existing_pointer, core_model, identifier, idx)
 
-        _append_id_if_replaces(relates_to, ids_to_delete, identifier)
+            if relates_to.code == "replaces":
+                logger.log(
+                    LogReference.PROCREATE008,
+                    relates_to_code=relates_to.code,
+                    identifier=identifier,
+                )
+                pointers_to_delete.append(existing_pointer)
 
-    return ids_to_delete
+    return pointers_to_delete
 
 
 def _validate_identifier(relates_to, idx):
@@ -186,13 +192,6 @@ def _append_id_if_replaces(relates_to, ids_to_delete, identifier):
     """
     Append pointer ID if the if the relatesTo code is 'replaces'
     """
-    if relates_to.code == "replaces":
-        logger.log(
-            LogReference.PROCREATE008,
-            relates_to_code=relates_to.code,
-            identifier=identifier,
-        )
-        ids_to_delete.append(identifier)
 
 
 def _raise_operation_outcome_error(diagnostics, idx):
@@ -246,15 +245,15 @@ def handler(
         PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL in metadata.nrl_permissions
     )
 
-    if ids_to_delete := _get_document_ids_to_supersede(
+    if pointers_to_delete := _get_documents_to_supersede(
         result.resource, core_model, metadata, repository, can_ignore_delete_fail
     ):
         logger.log(
             LogReference.PROCREATE010,
             pointer_id=result.resource.id,
-            ids_to_delete=ids_to_delete,
+            pointers_to_delete=pointers_to_delete,
         )
-        repository.supersede(core_model, ids_to_delete, can_ignore_delete_fail)
+        repository.supersede(core_model, pointers_to_delete, can_ignore_delete_fail)
         logger.log(LogReference.PROCREATE999)
         return NRLResponse.RESOURCE_SUPERSEDED(resource_id=result.resource.id)
 
