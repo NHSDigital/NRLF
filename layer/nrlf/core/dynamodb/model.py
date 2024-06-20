@@ -91,7 +91,7 @@ class DocumentPointer(DynamoDBModel):
         # Get identifiers
         subject_identifier = getattr(resource.subject, "identifier")
         custodian_identifier = getattr(resource.custodian, "identifier")
-        if len(resource.author) != 1:
+        if not resource.author or len(resource.author) != 1:
             raise ValueError("DocumentReference.author must have exactly one item")
         author_identifier = getattr(resource.author[0], "identifier")
 
@@ -103,7 +103,7 @@ class DocumentPointer(DynamoDBModel):
 
         # Get type fields
         type_coding = getattr(resource.type, "coding")
-        if len(type_coding) != 1:
+        if not type_coding or len(type_coding) != 1:
             raise ValueError("DocumentReference.type.coding must have exactly one item")
         pointer_type = f"{type_coding[0].system}|{type_coding[0].code}"
         type_system_id = get_id_for_system(
@@ -112,10 +112,10 @@ class DocumentPointer(DynamoDBModel):
         type_id = f"{type_system_id}-{type_coding[0].code}"
 
         # Get category fields
-        if len(resource.category) != 1:
+        if not resource.category or len(resource.category) != 1:
             raise ValueError("DocumentReference.category must have exactly one item")
         category_coding = getattr(resource.category[0], "coding")
-        if len(category_coding) != 1:
+        if not category_coding or len(category_coding) != 1:
             raise ValueError(
                 "DocumentReference.category.coding must have exactly one item"
             )

@@ -425,3 +425,29 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             ) from exc
 
         return item
+
+    def delete_by_id(self, id: str):
+        """
+        Delete a DocumentPointer resource by ID.
+        """
+        pointer = self.get_by_id(id)
+
+        if pointer is None:
+            return
+
+        try:
+            result = self.table.delete_item(
+                Key={"pk": pointer.pk, "sk": pointer.sk},
+                ConditionExpression="attribute_exists(doc_key)",
+                ReturnConsumedCapacity="INDEXES",
+            )
+        except ClientError as exc:
+            logger.log(
+                LogReference.REPOSITORY026,
+                exc_info=sys.exc_info(),
+                stacklevel=5,
+                error=str(exc),
+            )
+            raise exc
+
+        return result
