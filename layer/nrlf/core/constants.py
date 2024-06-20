@@ -33,6 +33,7 @@ PERMISSION_AUDIT_DATES_FROM_PAYLOAD = "audit-dates-from-payload"
 PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL = "supersede-ignore-delete-fail"
 PERMISSION_ALLOW_ALL_POINTER_TYPES = "allow-all-pointer-types"
 
+
 PRODUCER_URL_PATH = "/producer/FHIR/R4/DocumentReference"
 
 
@@ -66,5 +67,6 @@ TYPE_CATEGORIES = {
     PointerTypes.LLOYD_GEORGE_FOLDER.value: Categories.CARE_PLAN.value,
     PointerTypes.NEWS2_CHART.value: Categories.OBSERVATIONS.value,
 }
+
 
 SYSTEM_SHORT_IDS = {"http://snomed.info/sct": "SCT"}
