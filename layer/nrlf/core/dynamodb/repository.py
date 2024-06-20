@@ -178,7 +178,6 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         query = {
             "IndexName": "patient_gsi",
             "KeyConditionExpression": " AND ".join(key_conditions),
-            "ExpressionAttributeNames": expression_names,
             "ExpressionAttributeValues": expression_values,
             "Select": "COUNT",
             "ReturnConsumedCapacity": "INDEXES",
@@ -186,6 +185,9 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
         if filter_expressions:
             query["FilterExpression"] = " AND ".join(filter_expressions)
+
+        if expression_names:
+            query["ExpressionAttributeNames"] = expression_names
 
         logger.log(LogReference.REPOSITORY017, query=query)
 
@@ -270,11 +272,15 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         query = {
             "IndexName": "patient_gsi",
             "KeyConditionExpression": " AND ".join(key_conditions),
-            "FilterExpression": " AND ".join(filter_expressions),
-            "ExpressionAttributeNames": expression_names or None,
             "ExpressionAttributeValues": expression_values,
             "ReturnConsumedCapacity": "INDEXES",
         }
+
+        if filter_expressions:
+            query["FilterExpression"] = " AND ".join(filter_expressions)
+
+        if expression_names:
+            query["ExpressionAttributeNames"] = expression_names
 
         yield from self._query(**query)
 

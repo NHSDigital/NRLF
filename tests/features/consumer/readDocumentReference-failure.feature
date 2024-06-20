@@ -90,9 +90,11 @@ Feature: Consumer - readDocumentReference - Failure Scenarios
       | subject     | 9278693472                             |
       | status      | current                                |
       | type        | 887701000000100                        |
+      | category    | 734163000                              |
       | contentType | application/pdf                        |
       | url         | https://example.org/my-doc.pdf         |
       | custodian   | 02V                                    |
+      | author      | 02V                                    |
     When consumer 'RX898' reads a DocumentReference with ID '02V-1111111111-ReadDocRefNoAuthForType'
     Then the response status code is 403
     And the response is an OperationOutcome with 1 issue
@@ -152,9 +154,11 @@ Feature: Consumer - readDocumentReference - Failure Scenarios
       | subject     | 9278693472                               |
       | status      | current                                  |
       | type        | 887701000000100                          |
+      | category    | 734163000                                |
       | contentType | application/pdf                          |
       | url         | https://example.org/my-doc.pdf           |
       | custodian   | 02V                                      |
+      | author      | 02V                                      |
     When consumer 'RX898' reads a DocumentReference with ID '02V-1111111111-ReadDocRefNoAuthForTypeS3'
     Then the response status code is 403
     And the response is an OperationOutcome with 1 issue

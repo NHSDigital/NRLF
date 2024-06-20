@@ -141,9 +141,11 @@ Feature: Producer - readDocumentReference - Failure Scenarios
       | subject     | 9999999999                              |
       | status      | current                                 |
       | type        | 736253002                               |
+      | category    | 734163000                               |
       | contentType | application/pdf                         |
       | url         | https://example.org/my-doc.pdf          |
       | custodian   | RX898.001                               |
+      | author      | X26                                     |
     When producer 'RX898.001' reads a DocumentReference with ID 'RX898.001-1234567890-CustSuffixMismatch'
     Then the response status code is 200
     When producer 'RX898.002' reads a DocumentReference with ID 'RX898.001-1234567890-CustSuffixMismatch'
