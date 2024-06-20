@@ -98,7 +98,11 @@ def main(env: str, path_to_store: str):
     files, folders = get_file_folders(s3, bucket)
 
     download_files(
-        s3, bucket, path.abspath(path.join(path_to_store + "/s3")), files, folders
+        s3,
+        bucket,
+        path.abspath(path.join(path_to_store + "/python/nrlf/s3")),
+        files,
+        folders,
     )
     print("Downloaded S3 permissions...")
 
