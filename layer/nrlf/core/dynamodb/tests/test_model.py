@@ -71,9 +71,10 @@ def test_document_pointer_init():
         "version": 1,
         "document": "document",
         "created_on": "2024-01-01T00:00:00.000Z",
-        "pk": "P#9999999999",
-        "sk": "C#SCT-987654321#T#SCT-123456789#CO#2024-01-01T00:00:00.000Z#D#X26-999999-999999-99999999",
-        "doc_key": "D#X26-999999-999999-99999999",
+        "pk": "D#X26-999999-999999-99999999",
+        "sk": "D#X26-999999-999999-99999999",
+        "patient_key": "P#9999999999",
+        "patient_sort": "C#SCT-987654321#T#SCT-123456789#CO#2024-01-01T00:00:00.000Z#D#X26-999999-999999-99999999",
         "masterid_key": "O#X26#MI#1111-11111-111111",
         "schemas": [],
         "updated_on": None,
@@ -105,9 +106,10 @@ def test_document_pointer_from_document_reference_valid():
         "category_id": "SCT-734163000",
         "updated_on": None,
         "version": 1,
-        "pk": "P#6700028191",
-        "sk": "C#SCT-734163000#T#SCT-736253002#CO#2024-01-01T00:00:00.000Z#D#Y05868-99999-99999-999999",
-        "doc_key": "D#Y05868-99999-99999-999999",
+        "pk": "D#Y05868-99999-99999-999999",
+        "sk": "D#Y05868-99999-99999-999999",
+        "patient_key": "P#6700028191",
+        "patient_sort": "C#SCT-734163000#T#SCT-736253002#CO#2024-01-01T00:00:00.000Z#D#Y05868-99999-99999-999999",
     }
 
     assert json.loads(document) == doc_ref.dict(exclude_none=True)
@@ -139,9 +141,10 @@ def test_document_pointer_from_document_reference_valid_with_created_on():
         "category_id": "SCT-734163000",
         "updated_on": None,
         "version": 1,
-        "pk": "P#6700028191",
-        "sk": "C#SCT-734163000#T#SCT-736253002#CO#2024-02-02T12:34:56.000Z#D#Y05868-99999-99999-999999",
-        "doc_key": "D#Y05868-99999-99999-999999",
+        "pk": "D#Y05868-99999-99999-999999",
+        "sk": "D#Y05868-99999-99999-999999",
+        "patient_key": "P#6700028191",
+        "patient_sort": "C#SCT-734163000#T#SCT-736253002#CO#2024-02-02T12:34:56.000Z#D#Y05868-99999-99999-999999",
     }
 
     assert json.loads(document) == doc_ref.dict(exclude_none=True)

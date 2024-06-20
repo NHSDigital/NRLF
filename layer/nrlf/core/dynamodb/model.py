@@ -320,7 +320,12 @@ class DocumentPointer(DynamoDBModel):
 
     @property
     def indexes(self) -> Dict[str, str]:
-        indexes = {"pk": self.pk, "sk": self.sk, "doc_key": self.doc_key}
+        indexes = {
+            "pk": self.pk,
+            "sk": self.sk,
+            "patient_key": self.patient_key,
+            "patient_sort": self.patient_sort,
+        }
 
         if self.masterid_key:
             indexes["masterid_key"] = self.masterid_key
@@ -331,15 +336,28 @@ class DocumentPointer(DynamoDBModel):
     def pk(self) -> str:
         """
         Returns the pk (partition key) for the DocumentPointer
-        TODO-NOW: Add docs
         """
-
-        return "#".join([DBPrefix.Patient.value, self.nhs_number])
+        return "#".join([DBPrefix.DocumentPointer.value, self.id])
 
     @property
     def sk(self) -> str:
         """
         Returns the sk (sort key) for the DocumentPointer
+        """
+        return "#".join([DBPrefix.DocumentPointer.value, self.id])
+
+    @property
+    def patient_key(self) -> str:
+        """
+        Returns the patient gsi pk (partition key) for the DocumentPointer
+        TODO-NOW: Add docs
+        """
+        return "#".join([DBPrefix.Patient.value, self.nhs_number])
+
+    @property
+    def patient_sort(self) -> str:
+        """
+        Returns the patient gsi sk (sort key) for the DocumentPointer
         TODO-NOW: Add docs
         """
         return "#".join(
@@ -354,14 +372,6 @@ class DocumentPointer(DynamoDBModel):
                 self.id,
             ]
         )
-
-    @property
-    def doc_key(self) -> str:
-        """
-        Returns the doc_key for the DocumentPointer
-        TODO-NOW: Add docs
-        """
-        return "#".join([DBPrefix.DocumentPointer.value, self.id])
 
     @property
     def masterid_key(self) -> str | None:

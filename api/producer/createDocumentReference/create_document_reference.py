@@ -91,24 +91,23 @@ def _check_permissions(
         )
 
 
-def _get_documents_to_supersede(
+def _get_document_ids_to_supersede(
     resource: DocumentReference,
     core_model: DocumentPointer,
     metadata: ConnectionMetadata,
     repository: DocumentPointerRepository,
     can_ignore_delete_fail: bool,
-) -> list[DocumentPointer]:
+):
     """
-    Validate the relates_to field and get the list of document IDs to supersede based on the relatesTo field
+    Get the list of document IDs to supersede based on the relatesTo field
     """
     if not resource.relatesTo:
         return []
 
     logger.log(LogReference.PROCREATE006, relatesTo=resource.relatesTo)
-    documents_to_superseded = []
+    ids_to_delete = []
 
     for idx, relates_to in enumerate(resource.relatesTo):
-        # TODO - Move relates_to validation into a validator
         identifier = _validate_identifier(relates_to, idx)
         _validate_producer_id(identifier, metadata, idx)
 
@@ -116,15 +115,9 @@ def _get_documents_to_supersede(
             existing_pointer = _check_existing_pointer(identifier, repository, idx)
             _validate_pointer_details(existing_pointer, core_model, identifier, idx)
 
-            if relates_to.code == "replaces":
-                logger.log(
-                    LogReference.PROCREATE008,
-                    relates_to_code=relates_to.code,
-                    identifier=identifier,
-                )
-                documents_to_superseded.append(existing_pointer)
+        _append_id_if_replaces(relates_to, ids_to_delete, identifier)
 
-    return documents_to_superseded
+    return ids_to_delete
 
 
 def _validate_identifier(relates_to, idx):
@@ -193,6 +186,13 @@ def _append_id_if_replaces(relates_to, ids_to_delete, identifier):
     """
     Append pointer ID if the if the relatesTo code is 'replaces'
     """
+    if relates_to.code == "replaces":
+        logger.log(
+            LogReference.PROCREATE008,
+            relates_to_code=relates_to.code,
+            identifier=identifier,
+        )
+        ids_to_delete.append(identifier)
 
 
 def _raise_operation_outcome_error(diagnostics, idx):
@@ -246,19 +246,15 @@ def handler(
         PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL in metadata.nrl_permissions
     )
 
-    pointers_to_delete = _get_documents_to_supersede(
+    if ids_to_delete := _get_document_ids_to_supersede(
         result.resource, core_model, metadata, repository, can_ignore_delete_fail
-    )
-
-    if result.resource.relatesTo and "replaces" in [
-        relates_to.code for relates_to in result.resource.relatesTo
-    ]:
+    ):
         logger.log(
             LogReference.PROCREATE010,
             pointer_id=result.resource.id,
-            pointers_to_delete=pointers_to_delete,
+            ids_to_delete=ids_to_delete,
         )
-        repository.supersede(core_model, pointers_to_delete, can_ignore_delete_fail)
+        repository.supersede(core_model, ids_to_delete, can_ignore_delete_fail)
         logger.log(LogReference.PROCREATE999)
         return NRLResponse.RESOURCE_SUPERSEDED(resource_id=result.resource.id)
 
