@@ -20,7 +20,12 @@ resource "aws_dynamodb_table" "document-pointer" {
   }
 
   attribute {
-    name = "doc_key"
+    name = "patient_key"
+    type = "S"
+  }
+
+  attribute {
+    name = "patient_sort"
     type = "S"
   }
 
@@ -30,8 +35,9 @@ resource "aws_dynamodb_table" "document-pointer" {
   }
 
   global_secondary_index {
-    name            = "dockey_gsi"
-    hash_key        = "doc_key"
+    name            = "patient_gsi"
+    hash_key        = "patient_key"
+    range_key       = "patient_sort"
     projection_type = "ALL"
   }
 

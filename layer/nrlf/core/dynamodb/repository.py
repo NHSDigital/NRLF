@@ -100,10 +100,8 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         doc_key = f"D#{id}"
 
         try:
-            result = self.table.query(
-                IndexName="dockey_gsi",
-                KeyConditionExpression="doc_key = :doc_key",
-                ExpressionAttributeValues={":doc_key": doc_key},
+            result = self.table.get_item(
+                Key={"pk": doc_key, "sk": doc_key},
                 ReturnConsumedCapacity="INDEXES",
             )
         except ClientError as exc:
@@ -115,20 +113,11 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             )
             raise exc
 
-        if result["Count"] == 0:
+        if "Item" not in result:
             logger.log(LogReference.REPOSITORY012)
             return None
 
-        if result["Count"] > 1:
-            logger.log(LogReference.REPOSITORY008)
-            raise OperationOutcomeError(
-                status_code="500",
-                severity="error",
-                code="exception",
-                details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
-            )
-
-        item = result["Items"][0]
+        item = result["Item"]
         try:
             parsed_item = self.ITEM_TYPE.parse_obj({"_from_dynamo": True, **item})
             logger.log(LogReference.REPOSITORY011)
@@ -162,17 +151,17 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             pointer_types=pointer_types,
         )
 
-        key_conditions = ["pk = :pk"]
+        key_conditions = ["patient_key = :patient_key"]
         filter_expressions = []
         expression_names = {}
-        expression_values = {":pk": f"P#{nhs_number}"}
+        expression_values = {":patient_key": f"P#{nhs_number}"}
 
         if len(pointer_types) == 1:
             # Optimisation for single pointer type
             category_id, type_id = _get_sk_ids_for_type(pointer_types[0])
-            sort_key = f"C#{category_id}#T#{type_id}"
-            key_conditions.append("begins_with(sk, :sk)")
-            expression_values[":sk"] = sort_key
+            patient_sort = f"C#{category_id}#T#{type_id}"
+            key_conditions.append("begins_with(patient_sort, :patient_sort)")
+            expression_values[":patient_sort"] = patient_sort
 
         # Handle multiple categories and pointer types with filter expressions
         if len(pointer_types) > 1:
@@ -187,6 +176,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             expression_values.update(types_filter_values)
 
         query = {
+            "IndexName": "patient_gsi",
             "KeyConditionExpression": " AND ".join(key_conditions),
             "ExpressionAttributeNames": expression_names,
             "ExpressionAttributeValues": expression_values,
@@ -235,21 +225,20 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             pointer_types=pointer_types,
         )
 
-        key_conditions = ["pk = :pk"]
+        key_conditions = ["patient_key = :patient_key"]
         filter_expressions = []
         expression_names = {}
-        expression_values = {":pk": f"P#{nhs_number}"}
+        expression_values = {":patient_key": f"P#{nhs_number}"}
 
         if len(pointer_types) == 1:
             # Optimisation for single pointer type
             category_id, type_id = _get_sk_ids_for_type(pointer_types[0])
-            sort_key = f"C#{category_id}#T#{type_id}"
-            key_conditions.append("begins_with(sk, :sk)")
-            expression_values[":sk"] = sort_key
+            patient_sort = f"C#{category_id}#T#{type_id}"
+            key_conditions.append("begins_with(patient_sort, :patient_sort)")
+            expression_values[":patient_sort"] = patient_sort
 
         # Handle multiple categories and pointer types with filter expressions
         if len(pointer_types) > 1:
-            # TODO - Is it quicker to do multi searches?
             expression_names["#pointer_type"] = "type"
             types_filters = [
                 f"#pointer_type = :type_{i}" for i in range(len(pointer_types))
@@ -279,6 +268,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             expression_values[":custodian_suffix"] = custodian_suffix
 
         query = {
+            "IndexName": "patient_gsi",
             "KeyConditionExpression": " AND ".join(key_conditions),
             "FilterExpression": " AND ".join(filter_expressions),
             "ExpressionAttributeNames": expression_names or None,
@@ -302,18 +292,18 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
     def supersede(
         self,
         item: DocumentPointer,
-        pointers_to_delete: List[str],
+        ids_to_delete: List[str],
         can_ignore_delete_fail: bool = False,
     ) -> DocumentPointer:
         """ """
         saved_item = self.create(item)
 
-        for pointer in pointers_to_delete:
-            self.delete(pointer, ignore_fail=can_ignore_delete_fail)
+        for id_ in ids_to_delete:
+            self.delete_by_id(id_, can_ignore_delete_fail)
 
         return saved_item
 
-    def delete(self, item: DocumentPointer, ignore_fail: bool = False) -> None:
+    def delete(self, item: DocumentPointer) -> None:
         """
         Delete a DocumentPointer
         """
@@ -335,15 +325,26 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
                 error=str(exc),
             )
 
-            if ignore_fail:
-                return
-
             raise OperationOutcomeError(
                 status_code="500",
                 severity="error",
                 code="exception",
                 details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
             ) from exc
+
+    def delete_by_id(self, id_: str, can_ignore_delete_fail: bool = False):
+        """ """
+        key = f"D#{id_}"
+        try:
+            self.table.delete_item(Key={"pk": key, "sk": key})
+        except Exception as exc:
+            if can_ignore_delete_fail:
+                logger.log(
+                    LogReference.REPOSITORY026a,
+                    exc_info=sys.exc_info(),
+                    stacklevel=5,
+                    error=str(exc),
+                )
 
     def _query(self, **kwargs) -> Iterator[DocumentPointer]:
         """
@@ -425,29 +426,3 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             ) from exc
 
         return item
-
-    def delete_by_id(self, id: str):
-        """
-        Delete a DocumentPointer resource by ID.
-        """
-        pointer = self.get_by_id(id)
-
-        if pointer is None:
-            return
-
-        try:
-            result = self.table.delete_item(
-                Key={"pk": pointer.pk, "sk": pointer.sk},
-                ConditionExpression="attribute_exists(doc_key)",
-                ReturnConsumedCapacity="INDEXES",
-            )
-        except ClientError as exc:
-            logger.log(
-                LogReference.REPOSITORY026,
-                exc_info=sys.exc_info(),
-                stacklevel=5,
-                error=str(exc),
-            )
-            raise exc
-
-        return result

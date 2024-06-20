@@ -14,15 +14,17 @@ def create_document_pointer_table(config: Config, dynamodb: DynamoDBServiceResou
         AttributeDefinitions=[
             {"AttributeName": "pk", "AttributeType": "S"},
             {"AttributeName": "sk", "AttributeType": "S"},
-            {"AttributeName": "doc_key", "AttributeType": "S"},
+            {"AttributeName": "patient_key", "AttributeType": "S"},
+            {"AttributeName": "patient_sort", "AttributeType": "S"},
             {"AttributeName": "masterid_key", "AttributeType": "S"},
         ],
         ProvisionedThroughput={"ReadCapacityUnits": 5, "WriteCapacityUnits": 5},
         GlobalSecondaryIndexes=[
             {
-                "IndexName": "dockey_gsi",
+                "IndexName": "patient_gsi",
                 "KeySchema": [
-                    {"AttributeName": "doc_key", "KeyType": "HASH"},
+                    {"AttributeName": "patient_key", "KeyType": "HASH"},
+                    {"AttributeName": "patient_sort", "KeyType": "RANGE"},
                 ],
                 "Projection": {"ProjectionType": "ALL"},
             },
