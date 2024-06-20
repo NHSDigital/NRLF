@@ -25,7 +25,7 @@ resource "aws_dynamodb_table" "document-pointer" {
   }
 
   attribute {
-    name = "created_sk"
+    name = "masterid_key"
     type = "S"
   }
 

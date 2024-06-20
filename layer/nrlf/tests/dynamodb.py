@@ -14,26 +14,22 @@ def create_document_pointer_table(config: Config, dynamodb: DynamoDBServiceResou
         AttributeDefinitions=[
             {"AttributeName": "pk", "AttributeType": "S"},
             {"AttributeName": "sk", "AttributeType": "S"},
-            {"AttributeName": "pk_1", "AttributeType": "S"},
-            {"AttributeName": "sk_1", "AttributeType": "S"},
-            {"AttributeName": "pk_2", "AttributeType": "S"},
-            {"AttributeName": "sk_2", "AttributeType": "S"},
+            {"AttributeName": "doc_key", "AttributeType": "S"},
+            {"AttributeName": "masterid_key", "AttributeType": "S"},
         ],
         ProvisionedThroughput={"ReadCapacityUnits": 5, "WriteCapacityUnits": 5},
         GlobalSecondaryIndexes=[
             {
-                "IndexName": "idx_gsi_1",
+                "IndexName": "dockey_gsi",
                 "KeySchema": [
-                    {"AttributeName": "pk_1", "KeyType": "HASH"},
-                    {"AttributeName": "sk_1", "KeyType": "RANGE"},
+                    {"AttributeName": "doc_key", "KeyType": "HASH"},
                 ],
                 "Projection": {"ProjectionType": "ALL"},
             },
             {
-                "IndexName": "idx_gsi_2",
+                "IndexName": "masterid_gsi",
                 "KeySchema": [
-                    {"AttributeName": "pk_2", "KeyType": "HASH"},
-                    {"AttributeName": "sk_2", "KeyType": "RANGE"},
+                    {"AttributeName": "masterid_key", "KeyType": "HASH"},
                 ],
                 "Projection": {"ProjectionType": "ALL"},
             },
