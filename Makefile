@@ -119,7 +119,7 @@ get-access-token: check-warn ## Get an access token for an environment
 
 get-s3-perms: check-warn ## Get s3 permissions for an environment
 	@poetry run python scripts/get_s3_permissions.py $(ENV) $(DIST_PATH)
-	@echo "Updating Lambda NRLF layer"
+	@echo "Creating new Lambda NRLF permissions layer zip"
 	./scripts/add-perms-to-lambda.sh $(DIST_PATH)
 
 truststore-build-all: check-warn ## Build all truststore resources

@@ -100,7 +100,7 @@ def main(env: str, path_to_store: str):
     download_files(
         s3,
         bucket,
-        path.abspath(path.join(path_to_store + "/python/nrlf/s3")),
+        path.abspath(path.join(path_to_store + "/nrlf_permissions")),
         files,
         folders,
     )

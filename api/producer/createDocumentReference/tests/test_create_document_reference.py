@@ -658,10 +658,11 @@ def test_create_document_reference_invalid_relatesto_type(
 
     event = create_test_api_gateway_event(
         headers=create_headers(
+            app_id="123456",
             pointer_types=[
                 PointerTypes.EOL_COORDINATION_SUMMARY.value,
                 PointerTypes.MENTAL_HEALTH_PLAN.value,
-            ]
+            ],
         ),
         body=doc_ref.json(exclude_none=True),
     )
