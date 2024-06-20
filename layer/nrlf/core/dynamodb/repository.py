@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from nrlf.core.boto import get_dynamodb_resource, get_dynamodb_table
 from nrlf.core.codes import SpineErrorConcept
+from nrlf.core.constants import SYSTEM_SHORT_IDS, TYPE_CATEGORIES
 from nrlf.core.dynamodb.model import DocumentPointer, DynamoDBModel
 from nrlf.core.errors import OperationOutcomeError
 from nrlf.core.logger import LogReference, logger
@@ -14,8 +15,22 @@ from nrlf.core.logger import LogReference, logger
 RepositoryModel = TypeVar("RepositoryModel", bound=DynamoDBModel)
 
 
-def _get_cat_for_type(pointer_type: str) -> str:
-    return "734163000"
+def _get_sk_ids_for_type(pointer_type: str) -> tuple:
+    if pointer_type not in TYPE_CATEGORIES:
+        raise ValueError(f"Cannot find category for pointer type: {pointer_type}")
+
+    category = TYPE_CATEGORIES[pointer_type]
+    category_system, category_code = category.split("|")
+    if category_system not in SYSTEM_SHORT_IDS:
+        raise ValueError(f"Unknown system for category: {category_system}")
+    category_id = SYSTEM_SHORT_IDS[category_system] + "-" + category_code
+
+    type_system, type_code = pointer_type.split("|")
+    if type_system not in SYSTEM_SHORT_IDS:
+        raise ValueError(f"Unknown system for type: {type_system}")
+    type_id = SYSTEM_SHORT_IDS[type_system] + "-" + type_code
+
+    return category_id, type_id
 
 
 class Repository(ABC, Generic[RepositoryModel]):
@@ -82,9 +97,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         """
         Get a DocumentPointer resource by ID
         """
-
-        ods_code, doc_id = id.split("-")
-        doc_key = f"O#{ods_code}#D#{doc_id}"
+        doc_key = f"D#{id}"
 
         try:
             result = self.table.query(
@@ -156,14 +169,13 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
         if len(pointer_types) == 1:
             # Optimisation for single pointer type
-            category = _get_cat_for_type(pointer_types[0])
-            sort_key = f"C#{category}#T#{pointer_types[0]}"
+            category_id, type_id = _get_sk_ids_for_type(pointer_types[0])
+            sort_key = f"C#{category_id}#T#{type_id}"
             key_conditions.append("begins_with(sk, :sk)")
             expression_values[":sk"] = sort_key
 
         # Handle multiple categories and pointer types with filter expressions
         if len(pointer_types) > 1:
-            # TODO - Is it quicker to do multi searches?
             expression_names["#pointer_type"] = "type"
             types_filters = [
                 f"#pointer_type = :type_{i}" for i in range(len(pointer_types))
@@ -176,12 +188,14 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
         query = {
             "KeyConditionExpression": " AND ".join(key_conditions),
-            "FilterExpression": " AND ".join(filter_expressions),
-            "ExpressionAttributeNames": expression_names or None,
+            "ExpressionAttributeNames": expression_names,
             "ExpressionAttributeValues": expression_values,
             "Select": "COUNT",
             "ReturnConsumedCapacity": "INDEXES",
         }
+
+        if filter_expressions:
+            query["FilterExpression"] = " AND ".join(filter_expressions)
 
         logger.log(LogReference.REPOSITORY017, query=query)
 
@@ -210,6 +224,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         self,
         nhs_number: str,
         custodian: Optional[str] = None,
+        custodian_suffix: Optional[str] = None,
         pointer_types: Optional[List[str]] = [],
     ) -> Iterator[DocumentPointer]:
         """"""
@@ -227,8 +242,8 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
         if len(pointer_types) == 1:
             # Optimisation for single pointer type
-            category = _get_cat_for_type(pointer_types[0])
-            sort_key = f"C#{category}#T#{pointer_types[0]}"
+            category_id, type_id = _get_sk_ids_for_type(pointer_types[0])
+            sort_key = f"C#{category_id}#T#{type_id}"
             key_conditions.append("begins_with(sk, :sk)")
             expression_values[":sk"] = sort_key
 
@@ -253,6 +268,15 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
             )
             filter_expressions.append("custodian = :custodian")
             expression_values[":custodian"] = custodian
+
+        if custodian_suffix:
+            logger.log(
+                LogReference.REPOSITORY016,
+                expression="custodian_suffix = :custodian_suffix",
+                values=["custodian_suffix"],
+            )
+            filter_expressions.append("custodian_suffix = :custodian_suffix")
+            expression_values[":custodian_suffix"] = custodian_suffix
 
         query = {
             "KeyConditionExpression": " AND ".join(key_conditions),

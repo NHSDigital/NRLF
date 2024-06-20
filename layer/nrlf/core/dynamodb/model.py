@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 from nhs_number import is_valid as is_valid_nhs_number
 from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
 
-from nrlf.core.constants import VALID_SOURCES
+from nrlf.core.constants import SYSTEM_SHORT_IDS, VALID_SOURCES
 from nrlf.core.logger import LogReference, logger
 from nrlf.core.types import DocumentReference
 from nrlf.core.utils import create_fhir_instant
@@ -20,6 +20,17 @@ class DBPrefix(str, Enum):
     Category = "C"
     Type = "T"
     MasterIdentifier = "MI"
+
+
+def get_id_for_system(system: str, attr_placement: str) -> str | None:
+    """
+    Get the id for a given system
+    """
+    if system not in SYSTEM_SHORT_IDS:
+        # TODO-NOW - Log this -logger.log(LogReference.DOCPOINTER006, system=system)
+        raise ValueError(f"Unsupported system defined in {attr_placement}")
+
+    return SYSTEM_SHORT_IDS.get(system)
 
 
 KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
@@ -51,7 +62,7 @@ class DocumentPointer(DynamoDBModel):
     category: str
     type_id: str
     type: str
-    master_identifier: str
+    master_identifier: Optional[str] = None
     author: str
     source: str
     version: int
@@ -76,23 +87,43 @@ class DocumentPointer(DynamoDBModel):
         cls, resource: DocumentReference, created_on: Optional[str] = None
     ) -> "DocumentPointer":
         resource_id = getattr(resource, "id")
-        coding = getattr(resource.type, "coding")
+
+        # Get identifiers
         subject_identifier = getattr(resource.subject, "identifier")
         custodian_identifier = getattr(resource.custodian, "identifier")
+        if len(resource.author) != 1:
+            raise ValueError("DocumentReference.author must have exactly one item")
         author_identifier = getattr(resource.author[0], "identifier")
 
+        # Get identifier values
         nhs_number = getattr(subject_identifier, "value")
         custodian = getattr(custodian_identifier, "value")
         author = getattr(author_identifier, "value")
+        master_identifier = getattr(resource.masterIdentifier, "value", None)
 
-        if len(coding) > 1:
+        # Get type fields
+        type_coding = getattr(resource.type, "coding")
+        if len(type_coding) != 1:
             raise ValueError("DocumentReference.type.coding must have exactly one item")
+        pointer_type = f"{type_coding[0].system}|{type_coding[0].code}"
+        type_system_id = get_id_for_system(
+            type_coding[0].system, "DocumentReference.type.coding[0].system"
+        )
+        type_id = f"{type_system_id}-{type_coding[0].code}"
 
-        pointer_category = f"{resource.category[0].coding[0].system}|{resource.category[0].coding[0].code}"
-        pointer_type = f"{coding[0].system}|{coding[0].code}"
-
-        category_id = f"{resource.category[0].coding[0].code}"
-        type_id = f"{resource.type.coding[0].code}"
+        # Get category fields
+        if len(resource.category) != 1:
+            raise ValueError("DocumentReference.category must have exactly one item")
+        category_coding = getattr(resource.category[0], "coding")
+        if len(category_coding) != 1:
+            raise ValueError(
+                "DocumentReference.category.coding must have exactly one item"
+            )
+        pointer_category = f"{category_coding[0].system}|{category_coding[0].code}"
+        category_system_id = get_id_for_system(
+            category_coding[0].system, "DocumentReference.category.coding[0].system"
+        )
+        category_id = f"{category_system_id}-{category_coding[0].code}"
 
         core_model = cls(
             producer_id=None,  # type: ignore - handled by validators
@@ -101,10 +132,11 @@ class DocumentPointer(DynamoDBModel):
             nhs_number=nhs_number,
             custodian=custodian,
             author=author,
+            master_identifier=master_identifier,
             type=pointer_type,
+            type_id=type_id,
             category=pointer_category,
             category_id=category_id,
-            type_id=type_id,
             source="NRLF",
             version=1,
             document=resource.json(exclude_none=True),
@@ -288,12 +320,12 @@ class DocumentPointer(DynamoDBModel):
 
     @property
     def indexes(self) -> Dict[str, str]:
-        return {
-            "pk": self.pk,
-            "sk": self.sk,
-            "doc_key": self.doc_key,
-            "masterid_key": self.masterid_key,
-        }
+        indexes = {"pk": self.pk, "sk": self.sk, "doc_key": self.doc_key}
+
+        if self.masterid_key:
+            indexes["masterid_key"] = self.masterid_key
+
+        return indexes
 
     @property
     def pk(self) -> str:
@@ -319,7 +351,7 @@ class DocumentPointer(DynamoDBModel):
                 DBPrefix.CreatedOn.value,
                 self.created_on,
                 DBPrefix.DocumentPointer.value,
-                self.document_id,
+                self.id,
             ]
         )
 
@@ -329,21 +361,17 @@ class DocumentPointer(DynamoDBModel):
         Returns the doc_key for the DocumentPointer
         TODO-NOW: Add docs
         """
-        return "#".join(
-            [
-                DBPrefix.Organisation.value,
-                self.custodian,
-                DBPrefix.DocumentPointer.value,
-                self.document_id,
-            ]
-        )
+        return "#".join([DBPrefix.DocumentPointer.value, self.id])
 
     @property
-    def masterid_key(self) -> str:
+    def masterid_key(self) -> str | None:
         """
         Returns the doc_key for the DocumentPointer
         TODO-NOW: Add docs
         """
+        if not self.master_identifier:
+            return None
+
         return "#".join(
             [
                 DBPrefix.Organisation.value,
