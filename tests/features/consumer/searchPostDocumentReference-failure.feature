@@ -146,9 +146,11 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
       | subject     | 9278693472                        |
       | status      | current                           |
       | type        | 736253002                         |
+      | category    | 734163000                         |
       | contentType | application/pdf                   |
       | url         | https://example.org/my-doc.pdf    |
       | custodian   | 8FW23                             |
+      | author      | 8FW23                             |
     When consumer 'RX898' searches for DocumentReferences using POST with request body:
       | key     | value      |
       | subject | 9278693472 |

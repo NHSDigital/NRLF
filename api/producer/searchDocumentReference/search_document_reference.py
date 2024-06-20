@@ -39,6 +39,15 @@ def handler(
             expression="subject:identifier",
         )
 
+    if not params.nhs_number:
+        logger.log(
+            LogReference.PROSEARCH001, subject_identifier=params.subject_identifier
+        )
+        return SpineErrorResponse.INVALID_NHS_NUMBER(
+            diagnostics="NHS number is missing from the search parameters",
+            expression="subject:identifier",
+        )
+
     if not validate_type_system(params.type, metadata.pointer_types):
         logger.log(
             LogReference.PROSEARCH002,
