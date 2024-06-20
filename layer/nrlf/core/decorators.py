@@ -73,7 +73,7 @@ def load_connection_metadata(headers: Dict[str, str], config: Config):
         return metadata
 
     logger.log(LogReference.HANDLER004a)
-    pointer_types = parse_permissions_file(metadata, config)
+    pointer_types = parse_permissions_file(metadata)
     if not pointer_types and metadata.enable_authorization_lookup:
         logger.log(LogReference.HANDLER004)
         pointer_types = get_pointer_types(metadata, config)

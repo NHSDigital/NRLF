@@ -56,9 +56,7 @@ def get_pointer_types(
         raise exc
 
 
-def parse_permissions_file(
-    connection_metadata: ConnectionMetadata, config: Config
-) -> list[str]:
+def parse_permissions_file(connection_metadata: ConnectionMetadata) -> list[str]:
     ods_code = ".".join(connection_metadata.ods_code)
 
     app_id = connection_metadata.client_rp_details.developer_app_id
