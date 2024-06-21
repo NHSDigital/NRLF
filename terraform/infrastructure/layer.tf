@@ -12,6 +12,6 @@ module "third_party" {
 
 module "s3" {
   source = "./modules/layer"
-  name   = "s3"
+  name   = "nrlf_permissions"
   prefix = local.prefix
 }
