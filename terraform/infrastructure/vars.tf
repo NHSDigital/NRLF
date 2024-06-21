@@ -21,6 +21,7 @@ variable "public_sandbox_domain" {
   type        = string
   description = "The public domain for the sandbox environment (optional)"
   nullable    = true
+  default     = null
 }
 
 variable "consumer_api_path" {
