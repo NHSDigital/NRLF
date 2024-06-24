@@ -97,6 +97,16 @@ jobs:
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
           make truststore-pull-server ENV=${account}
 
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
+      - name: Add S3 Permissions to Lambda
+        run: |
+          account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
+          make get-s3-perms ENV=${account}
+
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -165,16 +175,6 @@ jobs:
         run: |
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
           make truststore-pull-server ENV=${account}
-
-      - name: Setup Python environment
-        run: |
-          poetry install --no-root
-          source $(poetry env info --path)/bin/activate
-
-      - name: Add S3 Permissions to Lambda
-        run: |
-          account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
-          make get-s3-perms ENV=${account}
 
       - name: Terraform Init
         run: |
