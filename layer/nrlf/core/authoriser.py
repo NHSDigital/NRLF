@@ -70,7 +70,7 @@ def parse_permissions_file(
     else:
         key = f"{app_id}/{ods_code}.json"
 
-    file_path = f"./{path_to_search}/{key}"
+    file_path = f"{path_to_search}/{key}"
     pointer_types = []
     try:
         with open(file_path) as file:
