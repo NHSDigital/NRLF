@@ -9,3 +9,9 @@ module "third_party" {
   name   = "dependency_layer"
   prefix = local.prefix
 }
+
+module "s3" {
+  source = "./modules/layer"
+  name   = "nrlf_permissions"
+  prefix = local.prefix
+}

@@ -111,7 +111,7 @@ def test_read_document_reference_unauthorised_for_type(
 
     event = create_test_api_gateway_event(
         headers=create_headers(
-            pointer_types=[PointerTypes.EMERGENCY_HEALTHCARE_PLAN.value]
+            app_id="12356", pointer_types=[PointerTypes.EMERGENCY_HEALTHCARE_PLAN.value]
         ),
         path_parameters={"id": doc_pointer.id},
     )
