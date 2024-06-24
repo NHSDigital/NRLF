@@ -64,7 +64,7 @@ def handler(
         pointer_types=pointer_types,
     )
 
-    for result in repository.search_by_custodian(
+    for result in repository.search(
         custodian=metadata.ods_code,
         custodian_suffix=metadata.ods_code_extension,
         nhs_number=body.nhs_number,

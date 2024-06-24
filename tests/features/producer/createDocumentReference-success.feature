@@ -106,6 +106,7 @@ Feature: Producer - createDocumentReference - Success Scenarios
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
       | custodian   | ANGY1                          |
+      | author      | HAR1                           |
     When producer 'ANGY1' creates a DocumentReference with values:
       | property   | value                          |
       | subject    | 9278693472                     |

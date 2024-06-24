@@ -11,9 +11,11 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
       | subject     | 9278693472                        |
       | status      | current                           |
       | type        | 736253002                         |
+      | category    | 734163000                         |
       | contentType | application/pdf                   |
       | url         | https://example.org/my-doc.pdf    |
       | custodian   | 8FW23                             |
+      | author      | 8FW23                             |
     When consumer 'RX898' searches for DocumentReferences with parameters:
       | parameter | value      |
       | subject   | 9278693472 |
@@ -28,9 +30,11 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
       | subject     | 9278693472                        |
       | status      | current                           |
       | type        | 736253002                         |
+      | category    | 734163000                         |
       | contentType | application/pdf                   |
       | url         | https://example.org/my-doc.pdf    |
       | custodian   | 8FW23                             |
+      | author      | 8FW23                             |
 
   Scenario: Search for multiple DocumentReferences by NHS number
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
@@ -43,27 +47,33 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
       | subject     | 9278693472                            |
       | status      | current                               |
       | type        | 736253002                             |
+      | category    | 734163000                             |
       | contentType | application/pdf                       |
       | url         | https://example.org/my-doc-1.pdf      |
       | custodian   | X26                                   |
+      | author      | X26                                   |
     And a DocumentReference resource exists with values:
       | property    | value                                 |
       | id          | X26-1111111111-SearchMultipleRefTest2 |
       | subject     | 9278693472                            |
       | status      | current                               |
       | type        | 736253002                             |
+      | category    | 734163000                             |
       | contentType | application/pdf                       |
       | url         | https://example.org/my-doc-2.pdf      |
       | custodian   | X26                                   |
+      | author      | X26                                   |
     And a DocumentReference resource exists with values:
       | property    | value                                             |
       | id          | X26-1111111111-SearchMultipleRefTestDifferentType |
       | subject     | 9278693472                                        |
       | status      | current                                           |
       | type        | 887701000000100                                   |
+      | category    | 734163000                                         |
       | contentType | application/pdf                                   |
       | url         | https://example.org/my-doc-3.pdf                  |
       | custodian   | X26                                               |
+      | author      | X26                                               |
     When consumer 'RX898' searches for DocumentReferences with parameters:
       | parameter | value      |
       | subject   | 9278693472 |
@@ -77,18 +87,22 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
       | subject     | 9278693472                            |
       | status      | current                               |
       | type        | 736253002                             |
+      | category    | 734163000                             |
       | contentType | application/pdf                       |
       | url         | https://example.org/my-doc-1.pdf      |
       | custodian   | X26                                   |
+      | author      | X26                                   |
     And the Bundle contains an DocumentReference with values
       | property    | value                                 |
       | id          | X26-1111111111-SearchMultipleRefTest2 |
       | subject     | 9278693472                            |
       | status      | current                               |
       | type        | 736253002                             |
+      | category    | 734163000                             |
       | contentType | application/pdf                       |
       | url         | https://example.org/my-doc-2.pdf      |
       | custodian   | X26                                   |
+      | author      | X26                                   |
     And the Bundle does not contain a DocumentReference with ID 'X26-1111111111-SearchMultipleRefTestDifferentType'
 
   Scenario: Search for multiple DocumentReferences by NHS number - S3 authorisation
@@ -103,27 +117,33 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
       | subject     | 9278693472                            |
       | status      | current                               |
       | type        | 736253002                             |
+      | category    | 734163000                             |
       | contentType | application/pdf                       |
       | url         | https://example.org/my-doc-1.pdf      |
       | custodian   | X26                                   |
+      | author      | X26                                   |
     And a DocumentReference resource exists with values:
       | property    | value                                 |
       | id          | X26-1111111111-SearchMultipleRefTest2 |
       | subject     | 9278693472                            |
       | status      | current                               |
       | type        | 736253002                             |
+      | category    | 734163000                             |
       | contentType | application/pdf                       |
       | url         | https://example.org/my-doc-2.pdf      |
       | custodian   | X26                                   |
+      | author      | X26                                   |
     And a DocumentReference resource exists with values:
       | property    | value                                             |
       | id          | X26-1111111111-SearchMultipleRefTestDifferentType |
       | subject     | 9278693472                                        |
       | status      | current                                           |
       | type        | 887701000000100                                   |
+      | category    | 734163000                                         |
       | contentType | application/pdf                                   |
       | url         | https://example.org/my-doc-3.pdf                  |
       | custodian   | X26                                               |
+      | author      | X26                                               |
     When consumer 'RX898' searches for DocumentReferences with parameters:
       | parameter | value      |
       | subject   | 9278693472 |
@@ -137,18 +157,22 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
       | subject     | 9278693472                            |
       | status      | current                               |
       | type        | 736253002                             |
+      | category    | 734163000                             |
       | contentType | application/pdf                       |
       | url         | https://example.org/my-doc-1.pdf      |
       | custodian   | X26                                   |
+      | author      | X26                                   |
     And the Bundle contains an DocumentReference with values
       | property    | value                                 |
       | id          | X26-1111111111-SearchMultipleRefTest2 |
       | subject     | 9278693472                            |
       | status      | current                               |
       | type        | 736253002                             |
+      | category    | 734163000                             |
       | contentType | application/pdf                       |
       | url         | https://example.org/my-doc-2.pdf      |
       | custodian   | X26                                   |
+      | author      | X26                                   |
     And the Bundle does not contain a DocumentReference with ID 'X26-1111111111-SearchMultipleRefTestDifferentType'
 
 # No pointers found

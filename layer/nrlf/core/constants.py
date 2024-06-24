@@ -50,3 +50,23 @@ class PointerTypes(Enum):
     @staticmethod
     def list():
         return list(map(lambda type: type.value, PointerTypes))
+
+
+class Categories(Enum):
+    CARE_PLAN = "http://snomed.info/sct|734163000"
+    OBSERVATIONS = "http://snomed.info/sct|1102421000000108"
+
+
+TYPE_CATEGORIES = {
+    PointerTypes.MENTAL_HEALTH_PLAN.value: Categories.CARE_PLAN.value,
+    PointerTypes.EMERGENCY_HEALTHCARE_PLAN.value: Categories.CARE_PLAN.value,
+    PointerTypes.EOL_COORDINATION_SUMMARY.value: Categories.CARE_PLAN.value,
+    PointerTypes.RESPECT_FORM.value: Categories.CARE_PLAN.value,
+    PointerTypes.CONTINGENCY_PLAN.value: Categories.CARE_PLAN.value,
+    PointerTypes.EOL_CARE_PLAN.value: Categories.CARE_PLAN.value,
+    PointerTypes.LLOYD_GEORGE_FOLDER.value: Categories.CARE_PLAN.value,
+    PointerTypes.NEWS2_CHART.value: Categories.OBSERVATIONS.value,
+}
+
+
+SYSTEM_SHORT_IDS = {"http://snomed.info/sct": "SCT"}
