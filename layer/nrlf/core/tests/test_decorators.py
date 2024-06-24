@@ -4,6 +4,7 @@ import warnings
 from pydantic import BaseModel
 from pytest_mock import MockerFixture
 
+from nrlf.core.authoriser import parse_permissions_file
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.config import Config
 from nrlf.core.constants import PERMISSION_ALLOW_ALL_POINTER_TYPES, PointerTypes
@@ -14,6 +15,7 @@ from nrlf.core.decorators import (
     request_handler,
 )
 from nrlf.core.errors import OperationOutcomeError
+from nrlf.core.request import parse_headers
 from nrlf.core.response import Response
 from nrlf.tests.events import (
     create_headers,
@@ -443,27 +445,29 @@ def test_request_load_connection_metadata_with_no_permission_headers():
         headers=create_headers(), config=Config()
     )
 
-    assert expected_metdata.pointer_types == [
-        "http://snomed.info/sct|736253001",
-        "http://snomed.info/sct|736253002",
-        "http://snomed.info/sct|1363501000000100",
-    ]
+    assert expected_metdata.pointer_types == ["http://snomed.info/sct|736253002"]
 
 
-def test_request_load_connection_metadata_with_no_permission_file():
-    expected_metdata = load_connection_metadata(
-        headers=create_headers(ods_code="SomeCode", pointer_types=[]), config=Config()
+def test_request_parse_permission_file_with_no_permission_file():
+    expected_metdata = parse_permissions_file(
+        connection_metadata=parse_headers(
+            create_headers(ods_code="SomeCode", pointer_types=[])
+        ),
+        path_to_search="./layer/test_permissions",
     )
 
-    assert expected_metdata.pointer_types == []
+    assert expected_metdata == []
 
 
-def test_request_load_connection_metadata_with_permission_file():
-    expected_metdata = load_connection_metadata(
-        headers=create_headers(ods_code="TestCode", pointer_types=[]), config=Config()
+def test_request_parse_permission_file_with_permission_file():
+    expected_metdata = parse_permissions_file(
+        connection_metadata=parse_headers(
+            create_headers(ods_code="TestCode", pointer_types=[])
+        ),
+        path_to_search="./layer/test_permissions",
     )
 
-    assert expected_metdata.pointer_types == ["http://snomed.info/sct|736253001"]
+    assert expected_metdata == ["http://snomed.info/sct|736253001"]
 
 
 def test_request_handler_with_custom_repository(mocker: MockerFixture):
