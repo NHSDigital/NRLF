@@ -1,5 +1,4 @@
 import json
-import pathlib
 import sys
 
 from botocore.exceptions import ClientError
@@ -71,11 +70,6 @@ def parse_permissions_file(
     else:
         key = f"{app_id}/{ods_code}.json"
 
-    dir_path = pathlib.Path("/opt/python")
-    directories = dir_path.rglob("*")
-    logger.log(
-        LogReference.HANDLER004b, dirs=(f"files in opt are: {list(directories)}")
-    )
     file_path = f"{path_to_search}/{key}"
     pointer_types = []
     try:
