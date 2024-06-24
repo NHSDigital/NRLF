@@ -77,7 +77,7 @@ jobs:
       - name: Setup asdf cache
         uses: actions/cache@v4
         with:
-          path: ~/.asdf
+          path: ~/.asdfP
           key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
           restore-keys: |
             ${{ runner.os }}-asdf-
@@ -106,6 +106,12 @@ jobs:
         run: |
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
           make get-s3-perms ENV=${account}
+
+      - name: Save Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/*.zip
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
