@@ -123,6 +123,9 @@ class LogReference(Enum):
     DOCPOINTER005 = _Reference(
         "INFO", "Constructed DocumentPointer from DocumentReference resource"
     )
+    DOCPOINTER006 = _Reference(
+        "EXCEPTION", "Unsupported system defined for document reference"
+    )
 
     # Consumer - CountDocumentReference
     CONCOUNT000 = _Reference(

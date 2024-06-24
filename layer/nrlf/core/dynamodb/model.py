@@ -27,7 +27,9 @@ def get_id_for_system(system: str, attr_placement: str) -> str | None:
     Get the id for a given system
     """
     if system not in SYSTEM_SHORT_IDS:
-        # TODO-NOW - Log this -logger.log(LogReference.DOCPOINTER006, system=system)
+        logger.log(
+            LogReference.DOCPOINTER006, system=system, attr_placement=attr_placement
+        )
         raise ValueError(f"Unsupported system defined in {attr_placement}")
 
     return SYSTEM_SHORT_IDS.get(system)
@@ -350,7 +352,8 @@ class DocumentPointer(DynamoDBModel):
     def patient_key(self) -> str:
         """
         Returns the patient gsi pk (partition key) for the DocumentPointer
-        TODO-NOW: Add docs
+
+        Example: P#<nhs_number>
         """
         return "#".join([DBPrefix.Patient.value, self.nhs_number])
 
@@ -358,7 +361,8 @@ class DocumentPointer(DynamoDBModel):
     def patient_sort(self) -> str:
         """
         Returns the patient gsi sk (sort key) for the DocumentPointer
-        TODO-NOW: Add docs
+
+        Example: C#<category_id>#T#<type_id>#CO#<created_on>#D#<document_id>
         """
         return "#".join(
             [
@@ -377,7 +381,8 @@ class DocumentPointer(DynamoDBModel):
     def masterid_key(self) -> str | None:
         """
         Returns the doc_key for the DocumentPointer
-        TODO-NOW: Add docs
+
+        Example: O#<ods_code>#MI#<master_identifier>
         """
         if not self.master_identifier:
             return None
