@@ -11,9 +11,11 @@ Feature: Consumer - countDocumentReference - Success Scenarios
       | subject     | 9278693472                       |
       | status      | current                          |
       | type        | 736253002                        |
+      | category    | 734163000                        |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc.pdf   |
       | custodian   | 8FW23                            |
+      | author      | 8FW23                            |
     When consumer 'RX898' counts DocumentReferences with parameters:
       | parameter          | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |
@@ -33,9 +35,11 @@ Feature: Consumer - countDocumentReference - Success Scenarios
       | subject     | 9999999999                       |
       | status      | current                          |
       | type        | 736253002                        |
+      | category    | 734163000                        |
       | contentType | application/pdf                  |
       | url         | https://example.org/my-doc.pdf   |
       | custodian   | 8FW23                            |
+      | author      | 8FW23                            |
     When consumer 'RX898' counts DocumentReferences with parameters:
       | parameter          | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9995001624 |
@@ -56,27 +60,33 @@ Feature: Consumer - countDocumentReference - Success Scenarios
       | subject     | 9278693472                     |
       | status      | current                        |
       | type        | 736253002                      |
+      | category    | 734163000                      |
       | contentType | application/pdf                |
       | url         | https://example.org/my-doc.pdf |
       | custodian   | 8FW23                          |
+      | author      | 8FW23                          |
     And a DocumentReference resource exists with values:
       | property    | value                           |
       | id          | 8FW23-1114567890-CountMultiple2 |
       | subject     | 9278693472                      |
       | status      | current                         |
       | type        | 887701000000100                 |
+      | category    | 734163000                       |
       | contentType | application/pdf                 |
       | url         | https://example.org/my-doc2.pdf |
       | custodian   | 8FW23                           |
+      | author      | 8FW23                           |
     And a DocumentReference resource exists with values:
       | property    | value                           |
       | id          | 8FW23-1114567890-CountMultiple3 |
       | subject     | 9278693472                      |
       | status      | current                         |
       | type        | 887701000000100                 |
+      | category    | 734163000                       |
       | contentType | application/pdf                 |
       | url         | https://example.org/my-doc3.pdf |
       | custodian   | 8FW23                           |
+      | author      | 8FW23                           |
     When consumer 'RX898' counts DocumentReferences with parameters:
       | parameter          | value                                         |
       | subject:identifier | https://fhir.nhs.uk/Id/nhs-number\|9278693472 |

@@ -1,11 +1,11 @@
 import json
-from datetime import datetime, timezone
 
 import pytest
 from freezegun import freeze_time
 
 from nrlf.core.constants import PointerTypes
 from nrlf.core.dynamodb.model import DocumentPointer, DynamoDBModel
+from nrlf.core.utils import create_fhir_instant
 from nrlf.producer.fhir.r4.model import DocumentReference
 from nrlf.tests.data import load_document_reference, load_document_reference_json
 
@@ -37,13 +37,17 @@ def test_document_pointer_init():
         id="X26-999999-999999-99999999",
         nhs_number="9999999999",
         custodian="X26",
+        author="X26",
+        master_identifier="1111-11111-111111",
         producer_id=None,  # type: ignore
         type="http://snomed.info/sct|123456789",
+        type_id="SCT-123456789",
+        category="http://snomed.info/sct|987654321",
+        category_id="SCT-987654321",
         source="NRLF",
         version=1,
         document="document",
-        created_on=datetime.now(tz=timezone.utc).isoformat(timespec="milliseconds")
-        + "Z",
+        created_on=create_fhir_instant(),
         document_id="document_id",
     )
 
@@ -56,18 +60,22 @@ def test_document_pointer_init():
         "nhs_number": "9999999999",
         "custodian": "X26",
         "custodian_suffix": None,
+        "author": "X26",
         "producer_id": "X26",
         "type": "http://snomed.info/sct|123456789",
+        "type_id": "SCT-123456789",
+        "category": "http://snomed.info/sct|987654321",
+        "category_id": "SCT-987654321",
+        "master_identifier": "1111-11111-111111",
         "source": "NRLF",
         "version": 1,
         "document": "document",
-        "created_on": "2024-01-01T00:00:00.000+00:00Z",
-        "pk": "D#X26#999999-999999-99999999",
-        "sk": "D#X26#999999-999999-99999999",
-        "pk_1": "P#9999999999",
-        "sk_1": "CO#2024-01-01T00:00:00.000+00:00Z#X26#999999-999999-99999999",
-        "pk_2": "O#X26",
-        "sk_2": "CO#2024-01-01T00:00:00.000+00:00Z#X26#999999-999999-99999999",
+        "created_on": "2024-01-01T00:00:00.000Z",
+        "pk": "D#X26-999999-999999-99999999",
+        "sk": "D#X26-999999-999999-99999999",
+        "patient_key": "P#9999999999",
+        "patient_sort": "C#SCT-987654321#T#SCT-123456789#CO#2024-01-01T00:00:00.000Z#D#X26-999999-999999-99999999",
+        "masterid_key": "O#X26#MI#1111-11111-111111",
         "schemas": [],
         "updated_on": None,
     }
@@ -82,23 +90,26 @@ def test_document_pointer_from_document_reference_valid():
     document = model_data.pop("document")
 
     assert model_data == {
-        "created_on": "2024-01-01T00:00:00.000+00:00Z",
+        "created_on": "2024-01-01T00:00:00.000Z",
         "custodian": "Y05868",
         "custodian_suffix": None,
+        "author": "Y05868",
         "id": "Y05868-99999-99999-999999",
+        "master_identifier": None,
         "nhs_number": "6700028191",
         "producer_id": "Y05868",
         "schemas": [],
         "source": "NRLF",
         "type": PointerTypes.MENTAL_HEALTH_PLAN.value,
+        "type_id": "SCT-736253002",
+        "category": "http://snomed.info/sct|734163000",
+        "category_id": "SCT-734163000",
         "updated_on": None,
         "version": 1,
-        "pk": "D#Y05868#99999-99999-999999",
-        "sk": "D#Y05868#99999-99999-999999",
-        "pk_1": "P#6700028191",
-        "sk_1": "CO#2024-01-01T00:00:00.000+00:00Z#Y05868#99999-99999-999999",
-        "pk_2": "O#Y05868",
-        "sk_2": "CO#2024-01-01T00:00:00.000+00:00Z#Y05868#99999-99999-999999",
+        "pk": "D#Y05868-99999-99999-999999",
+        "sk": "D#Y05868-99999-99999-999999",
+        "patient_key": "P#6700028191",
+        "patient_sort": "C#SCT-734163000#T#SCT-736253002#CO#2024-01-01T00:00:00.000Z#D#Y05868-99999-99999-999999",
     }
 
     assert json.loads(document) == doc_ref.dict(exclude_none=True)
@@ -107,30 +118,33 @@ def test_document_pointer_from_document_reference_valid():
 def test_document_pointer_from_document_reference_valid_with_created_on():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     model = DocumentPointer.from_document_reference(
-        doc_ref, created_on="2024-02-02T12:34:56.000+00:00Z"
+        doc_ref, created_on="2024-02-02T12:34:56.000Z"
     )
 
     model_data = model.dict()
     document = model_data.pop("document")
 
     assert model_data == {
-        "created_on": "2024-02-02T12:34:56.000+00:00Z",
+        "created_on": "2024-02-02T12:34:56.000Z",
         "custodian": "Y05868",
         "custodian_suffix": None,
+        "author": "Y05868",
         "id": "Y05868-99999-99999-999999",
+        "master_identifier": None,
         "nhs_number": "6700028191",
         "producer_id": "Y05868",
         "schemas": [],
         "source": "NRLF",
         "type": PointerTypes.MENTAL_HEALTH_PLAN.value,
+        "type_id": "SCT-736253002",
+        "category": "http://snomed.info/sct|734163000",
+        "category_id": "SCT-734163000",
         "updated_on": None,
         "version": 1,
-        "pk": "D#Y05868#99999-99999-999999",
-        "sk": "D#Y05868#99999-99999-999999",
-        "pk_1": "P#6700028191",
-        "sk_1": "CO#2024-02-02T12:34:56.000+00:00Z#Y05868#99999-99999-999999",
-        "pk_2": "O#Y05868",
-        "sk_2": "CO#2024-02-02T12:34:56.000+00:00Z#Y05868#99999-99999-999999",
+        "pk": "D#Y05868-99999-99999-999999",
+        "sk": "D#Y05868-99999-99999-999999",
+        "patient_key": "P#6700028191",
+        "patient_sort": "C#SCT-734163000#T#SCT-736253002#CO#2024-02-02T12:34:56.000Z#D#Y05868-99999-99999-999999",
     }
 
     assert json.loads(document) == doc_ref.dict(exclude_none=True)

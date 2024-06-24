@@ -20,36 +20,30 @@ resource "aws_dynamodb_table" "document-pointer" {
   }
 
   attribute {
-    name = "pk_1"
+    name = "patient_key"
     type = "S"
   }
 
   attribute {
-    name = "sk_1"
+    name = "patient_sort"
     type = "S"
   }
 
   attribute {
-    name = "pk_2"
-    type = "S"
-  }
-
-  attribute {
-    name = "sk_2"
+    name = "masterid_key"
     type = "S"
   }
 
   global_secondary_index {
-    name            = "idx_gsi_1"
-    hash_key        = "pk_1"
-    range_key       = "sk_1"
+    name            = "patient_gsi"
+    hash_key        = "patient_key"
+    range_key       = "patient_sort"
     projection_type = "ALL"
   }
 
   global_secondary_index {
-    name            = "idx_gsi_2"
-    hash_key        = "pk_2"
-    range_key       = "sk_2"
+    name            = "masterid_gsi"
+    hash_key        = "masterid_key"
     projection_type = "ALL"
   }
 

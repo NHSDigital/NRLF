@@ -14,26 +14,24 @@ def create_document_pointer_table(config: Config, dynamodb: DynamoDBServiceResou
         AttributeDefinitions=[
             {"AttributeName": "pk", "AttributeType": "S"},
             {"AttributeName": "sk", "AttributeType": "S"},
-            {"AttributeName": "pk_1", "AttributeType": "S"},
-            {"AttributeName": "sk_1", "AttributeType": "S"},
-            {"AttributeName": "pk_2", "AttributeType": "S"},
-            {"AttributeName": "sk_2", "AttributeType": "S"},
+            {"AttributeName": "patient_key", "AttributeType": "S"},
+            {"AttributeName": "patient_sort", "AttributeType": "S"},
+            {"AttributeName": "masterid_key", "AttributeType": "S"},
         ],
         ProvisionedThroughput={"ReadCapacityUnits": 5, "WriteCapacityUnits": 5},
         GlobalSecondaryIndexes=[
             {
-                "IndexName": "idx_gsi_1",
+                "IndexName": "patient_gsi",
                 "KeySchema": [
-                    {"AttributeName": "pk_1", "KeyType": "HASH"},
-                    {"AttributeName": "sk_1", "KeyType": "RANGE"},
+                    {"AttributeName": "patient_key", "KeyType": "HASH"},
+                    {"AttributeName": "patient_sort", "KeyType": "RANGE"},
                 ],
                 "Projection": {"ProjectionType": "ALL"},
             },
             {
-                "IndexName": "idx_gsi_2",
+                "IndexName": "masterid_gsi",
                 "KeySchema": [
-                    {"AttributeName": "pk_2", "KeyType": "HASH"},
-                    {"AttributeName": "sk_2", "KeyType": "RANGE"},
+                    {"AttributeName": "masterid_key", "KeyType": "HASH"},
                 ],
                 "Projection": {"ProjectionType": "ALL"},
             },
