@@ -113,6 +113,13 @@ jobs:
       - name: Install asdf
         uses: asdf-vm/actions/install@v3.0.2
 
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
+
       - name: Setup Python environment
         run: |
           poetry install --no-root
@@ -133,13 +140,6 @@ jobs:
         with:
           name: build-artifacts
           path: dist
-
-      - name: Configure Management Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-west-2
-          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
-          role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Retrieve Server Certificates
         run: make truststore-pull-server ENV=dev
