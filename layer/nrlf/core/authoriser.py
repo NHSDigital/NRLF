@@ -73,7 +73,9 @@ def parse_permissions_file(
 
     dir_path = pathlib.Path("/opt/python")
     directories = dir_path.rglob("*")
-    logger.log(LogReference.HANDLER004b, dirs=(f"files in opt are: {directories}"))
+    logger.log(
+        LogReference.HANDLER004b, dirs=(f"files in opt are: {list(directories)}")
+    )
     file_path = f"{path_to_search}/{key}"
     pointer_types = []
     try:
