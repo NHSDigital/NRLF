@@ -263,7 +263,7 @@ def test_search_document_reference_filters_by_pointer_types(
 
     event = create_test_api_gateway_event(
         headers=create_headers(
-            pointer_types=[PointerTypes.EOL_COORDINATION_SUMMARY.value]
+            app_id="12356", pointer_types=[PointerTypes.EOL_COORDINATION_SUMMARY.value]
         ),
         body=json.dumps(
             {

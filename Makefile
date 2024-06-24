@@ -117,6 +117,11 @@ clean: ## Remove all generated and temporary files
 get-access-token: check-warn ## Get an access token for an environment
 	@poetry run python tests/utilities/get_access_token.py $(ENV) $(APP_ALIAS)
 
+get-s3-perms: check-warn ## Get s3 permissions for an environment
+	@poetry run python scripts/get_s3_permissions.py $(ENV) $(DIST_PATH)
+	@echo "Creating new Lambda NRLF permissions layer zip"
+	./scripts/add-perms-to-lambda.sh $(DIST_PATH)
+
 truststore-build-all: check-warn ## Build all truststore resources
 	@./scripts/truststore.sh build-all
 

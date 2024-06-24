@@ -443,7 +443,27 @@ def test_request_load_connection_metadata_with_no_permission_headers():
         headers=create_headers(), config=Config()
     )
 
-    assert expected_metdata.pointer_types == ["http://snomed.info/sct|736253002"]
+    assert expected_metdata.pointer_types == [
+        "http://snomed.info/sct|736253001",
+        "http://snomed.info/sct|736253002",
+        "http://snomed.info/sct|1363501000000100",
+    ]
+
+
+def test_request_load_connection_metadata_with_no_permission_file():
+    expected_metdata = load_connection_metadata(
+        headers=create_headers(ods_code="SomeCode", pointer_types=[]), config=Config()
+    )
+
+    assert expected_metdata.pointer_types == []
+
+
+def test_request_load_connection_metadata_with_permission_file():
+    expected_metdata = load_connection_metadata(
+        headers=create_headers(ods_code="TestCode", pointer_types=[]), config=Config()
+    )
+
+    assert expected_metdata.pointer_types == ["http://snomed.info/sct|736253001"]
 
 
 def test_request_handler_with_custom_repository(mocker: MockerFixture):
