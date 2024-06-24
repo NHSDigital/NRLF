@@ -94,7 +94,7 @@ jobs:
       - name: Setup asdf cache
         uses: actions/cache@v4
         with:
-          path: ~/.asdfP
+          path: ~/.asdf
           key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
           restore-keys: |
             ${{ runner.os }}-asdf-
