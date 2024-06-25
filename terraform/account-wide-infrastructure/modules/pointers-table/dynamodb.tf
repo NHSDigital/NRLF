@@ -1,5 +1,5 @@
-resource "aws_dynamodb_table" "document-pointer" {
-  name                        = "${var.name_prefix}--document-pointer"
+resource "aws_dynamodb_table" "pointers" {
+  name                        = "${var.name_prefix}-pointers-table"
   billing_mode                = "PAY_PER_REQUEST"
   hash_key                    = "pk"
   range_key                   = "sk"
@@ -45,7 +45,7 @@ resource "aws_dynamodb_table" "document-pointer" {
 
   server_side_encryption {
     enabled     = true
-    kms_key_arn = aws_kms_key.document-pointer.arn
+    kms_key_arn = aws_kms_key.pointers-table-key.arn
   }
 
   point_in_time_recovery {

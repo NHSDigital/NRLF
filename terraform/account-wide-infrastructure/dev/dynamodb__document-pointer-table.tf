@@ -1,9 +1,9 @@
-module "dev-document-pointer-table" {
-  source      = "../modules/document-pointer-table"
+module "dev-pointers-table" {
+  source      = "../modules/pointers-table"
   name_prefix = "nhsd-nrlf--dev"
 }
 
-module "dev-document-pointer-table" {
-  source      = "../modules/document-pointer-table"
+module "dev-sandbox-pointers-table" {
+  source      = "../modules/pointers-table"
   name_prefix = "nhsd-nrlf--dev-sandbox"
 }

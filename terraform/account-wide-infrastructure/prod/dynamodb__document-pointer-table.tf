@@ -1,5 +1,5 @@
-module "prod-document-pointer-table" {
-  source                      = "../modules/document-pointer-table"
+module "prod-pointers-table" {
+  source                      = "../modules/pointers-table"
   name_prefix                 = "nhsd-nrlf--prod"
   enable_deletion_protection  = true
   enable_pitr                 = true

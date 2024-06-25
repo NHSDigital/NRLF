@@ -1,5 +1,5 @@
-resource "aws_iam_policy" "document-pointer__dynamodb-read" {
-  name        = "${var.name_prefix}--document-pointer--dynamodb-read"
+resource "aws_iam_policy" "pointers-table-read" {
+  name        = "${var.name_prefix}-pointers-table-read"
   description = "Read the document-pointer table"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -11,7 +11,7 @@ resource "aws_iam_policy" "document-pointer__dynamodb-read" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_kms_key.document-pointer.arn
+          aws_kms_key.pointers-table-key.arn
         ]
       },
       {
@@ -22,15 +22,15 @@ resource "aws_iam_policy" "document-pointer__dynamodb-read" {
           "dynamodb:GetItem",
         ],
         Resource = [
-          "${aws_dynamodb_table.document-pointer.arn}*"
+          "${aws_dynamodb_table.pointers.arn}*"
         ]
       }
     ]
   })
 }
 
-resource "aws_iam_policy" "document-pointer__dynamodb-write" {
-  name        = "${var.name_prefix}--document-pointer--dynamodb-write"
+resource "aws_iam_policy" "pointers-table-write" {
+  name        = "${var.name_prefix}-pointers-table-write"
   description = "Write to the document-pointer table"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -42,7 +42,7 @@ resource "aws_iam_policy" "document-pointer__dynamodb-write" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_kms_key.document-pointer.arn
+          aws_kms_key.pointers-table-key.arn
         ]
       },
       {
@@ -53,16 +53,16 @@ resource "aws_iam_policy" "document-pointer__dynamodb-write" {
           "dynamodb:DeleteItem",
         ],
         Resource = [
-          "${aws_dynamodb_table.document-pointer.arn}*"
+          "${aws_dynamodb_table.pointers.arn}*"
         ]
       }
     ]
   })
 }
 
-resource "aws_iam_policy" "document-pointer__kms-read-write" {
-  name        = "${var.name_prefix}--document-pointer--kms-read-write"
-  description = "Encrypt and decrypt with the document-pointer kms key"
+resource "aws_iam_policy" "pointers-kms-read-write" {
+  name        = "${var.name_prefix}-pointers-kms-read-write"
+  description = "Encrypt and decrypt with the pointers table kms key"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -75,7 +75,7 @@ resource "aws_iam_policy" "document-pointer__kms-read-write" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_kms_key.document-pointer.arn
+          aws_kms_key.pointers-table-key.arn
         ]
       }
     ]
