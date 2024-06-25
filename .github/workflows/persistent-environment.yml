@@ -45,7 +45,9 @@ jobs:
         run: sudo apt-get install zip
 
       - name: Setup Python environment
-        run: poetry install --no-root
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
 
       - name: Run Linting
         run: make lint
@@ -62,11 +64,6 @@ jobs:
           aws-region: eu-west-2
           role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id }}
-
-      - name: Setup Python environment
-        run: |
-          poetry install --no-root
-          source $(poetry env info --path)/bin/activate
 
       - name: Add S3 Permissions to Lambda
         run: |

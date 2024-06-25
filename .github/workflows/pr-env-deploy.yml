@@ -85,11 +85,6 @@ jobs:
           role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
-      - name: Setup Python environment
-        run: |
-          poetry install --no-root
-          source $(poetry env info --path)/bin/activate
-
       - name: Add S3 Permissions to Lambda
         run: |
           make get-s3-perms ENV=dev
