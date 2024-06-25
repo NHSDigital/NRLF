@@ -78,6 +78,17 @@ jobs:
       - name: Build Project
         run: make build
 
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
+
+      - name: Add S3 Permissions to Lambda
+        run: |
+          make get-s3-perms ENV=dev
+
       - name: Save Build Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -119,12 +130,6 @@ jobs:
       - name: Install asdf
         uses: asdf-vm/actions/install@v3.0.2
 
-      - name: Download Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: dist
-
       - name: Configure Management Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -132,17 +137,14 @@ jobs:
           role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ needs.set-environment-id.outputs.environment_id }}
 
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist
+
       - name: Retrieve Server Certificates
         run: make truststore-pull-server ENV=dev
-
-      - name: Setup Python environment
-        run: |
-          poetry install --no-root
-          source $(poetry env info --path)/bin/activate
-
-      - name: Add S3 Permissions to Lambda
-        run: |
-          make get-s3-perms
 
       - name: Terraform Init
         run: |
