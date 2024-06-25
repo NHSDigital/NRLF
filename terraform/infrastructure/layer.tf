@@ -10,7 +10,7 @@ module "third_party" {
   prefix = local.prefix
 }
 
-module "s3" {
+module "nrlf_permissions" {
   source = "./modules/layer"
   name   = "nrlf_permissions"
   prefix = local.prefix

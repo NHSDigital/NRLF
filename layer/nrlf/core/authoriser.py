@@ -1,6 +1,5 @@
 import json
 import sys
-from os import path
 
 from botocore.exceptions import ClientError
 
@@ -56,7 +55,10 @@ def get_pointer_types(
         raise exc
 
 
-def parse_permissions_file(connection_metadata: ConnectionMetadata) -> list[str]:
+def parse_permissions_file(
+    connection_metadata: ConnectionMetadata,
+    path_to_search: str = "/opt/python/nrlf_permissions",
+) -> list[str]:
     ods_code = ".".join(connection_metadata.ods_code)
 
     app_id = connection_metadata.client_rp_details.developer_app_id
@@ -68,7 +70,7 @@ def parse_permissions_file(connection_metadata: ConnectionMetadata) -> list[str]
     else:
         key = f"{app_id}/{ods_code}.json"
 
-    file_path = path.abspath(path.join(f"./layer/nrlf_permissions/{key}"))
+    file_path = f"{path_to_search}/{key}"
     pointer_types = []
     try:
         with open(file_path) as file:
