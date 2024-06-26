@@ -44,5 +44,5 @@ output "certificate_domain_name" {
 
 
 output "auth_store" {
-  value = aws_s3_bucket.authorization-store.id
+  value = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
 }

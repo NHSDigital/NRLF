@@ -33,6 +33,7 @@ locals {
   is_persistent_env       = contains(local.persistent_environments, local.environment)
   is_sandbox_env          = length(regexall("-sandbox", local.environment)) > 0
   is_dev_env              = local.environment == "dev" || local.environment == "dev-sandbox"
+  use_shared_resources    = local.is_persistent_env
 
   public_domain = local.is_persistent_env ? local.is_sandbox_env ? var.public_sandbox_domain : var.public_domain : local.apis.domain
 
