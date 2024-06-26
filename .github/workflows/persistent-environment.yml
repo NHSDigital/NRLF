@@ -45,7 +45,9 @@ jobs:
         run: sudo apt-get install zip
 
       - name: Setup Python environment
-        run: poetry install --no-root
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
 
       - name: Run Linting
         run: make lint
@@ -55,6 +57,18 @@ jobs:
 
       - name: Build Project
         run: make build
+
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id }}
+
+      - name: Add S3 Permissions to Lambda
+        run: |
+          account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
+          make get-s3-perms ENV=${account}
 
       - name: Save Build Artifacts
         uses: actions/upload-artifact@v4
@@ -96,16 +110,6 @@ jobs:
         run: |
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
           make truststore-pull-server ENV=${account}
-
-      - name: Setup Python environment
-        run: |
-          poetry install --no-root
-          source $(poetry env info --path)/bin/activate
-
-      - name: Add S3 Permissions to Lambda
-        run: |
-          account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
-          make get-s3-perms ENV=${account}
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
