@@ -1,5 +1,5 @@
 output "account_name" {
-  value = local.account_name
+  value = var.account_name
 }
 
 output "workspace" {

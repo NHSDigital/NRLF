@@ -58,6 +58,6 @@ resource "aws_s3_bucket_versioning" "api_truststore" {
 resource "aws_s3_object" "api_truststore" {
   bucket = aws_s3_bucket.api_truststore.bucket
   key    = "certificates.pem"
-  source = "../../truststore/server/${local.account_name}.pem"
-  etag   = filemd5("../../truststore/server/${local.account_name}.pem")
+  source = "../../truststore/server/${var.account_name}.pem"
+  etag   = filemd5("../../truststore/server/${var.account_name}.pem")
 }
