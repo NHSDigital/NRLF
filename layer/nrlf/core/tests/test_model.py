@@ -14,6 +14,7 @@ def test_connection_metadata():
             "nrl.ods-code-extension": "test",
             "nrl.permissions": ["test"],
             "nrl.enable-authorization-lookup": True,
+            "nrl.app-id": "test-nrl",
             "client_rp_details": {
                 "developer.app.name": "test",
                 "developer.app.id": "test",
@@ -27,6 +28,7 @@ def test_connection_metadata():
     assert metadata.ods_code == "test"
     assert metadata.ods_code_extension == "test"
     assert metadata.nrl_permissions == ["test"]
+    assert metadata.nrl_app_id == "test-nrl"
     assert metadata.enable_authorization_lookup is True
     assert metadata.client_rp_details.developer_app_name == "test"
     assert metadata.client_rp_details.developer_app_id == "test"

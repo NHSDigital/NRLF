@@ -45,6 +45,7 @@ def test_parse_headers_valid_headers():
                 "nrl.ods-code-extension": "001",
                 "nrl.permissions": ["permission1", "permission2"],
                 "nrl.enable-authorization-lookup": True,
+                "nrl.app-id": "X26-TestApp-12345",
             }
         ),
         "nhsd-client-rp-details": json.dumps(
@@ -60,6 +61,7 @@ def test_parse_headers_valid_headers():
     assert metadata.pointer_types == ["pointer_type"]
     assert metadata.ods_code == "X26"
     assert metadata.ods_code_extension == "001"
+    assert metadata.nrl_app_id == "X26-TestApp-12345"
     assert metadata.nrl_permissions == ["permission1", "permission2"]
     assert metadata.enable_authorization_lookup is True
     assert metadata.client_rp_details.developer_app_name == "TestApp"
@@ -109,6 +111,7 @@ def test_parse_headers_case_insensitive():
                 "nrl.ods-code-extension": "001",
                 "nrl.permissions": ["permission1", "permission2"],
                 "nrl.enable-authorization-lookup": True,
+                "nrl.app-id": "X26-App-12345",
             }
         ),
         "NHSD-Client-RP-Details": json.dumps(
@@ -124,6 +127,7 @@ def test_parse_headers_case_insensitive():
     assert metadata.pointer_types == ["pointer_type"]
     assert metadata.ods_code == "X26"
     assert metadata.ods_code_extension == "001"
+    assert metadata.nrl_app_id == "X26-App-12345"
     assert metadata.nrl_permissions == ["permission1", "permission2"]
     assert metadata.enable_authorization_lookup is True
     assert metadata.client_rp_details.developer_app_name == "TestApp"

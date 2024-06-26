@@ -14,7 +14,7 @@ def get_pointer_types(
 ) -> list[str]:
     ods_code = ".".join(connection_metadata.ods_code)
 
-    app_id = connection_metadata.client_rp_details.developer_app_id
+    app_id = connection_metadata.nrl_app_id
     ods_code = connection_metadata.ods_code
     ods_code_extension = connection_metadata.ods_code_extension
 
@@ -61,7 +61,7 @@ def parse_permissions_file(
 ) -> list[str]:
     ods_code = ".".join(connection_metadata.ods_code)
 
-    app_id = connection_metadata.client_rp_details.developer_app_id
+    app_id = connection_metadata.nrl_app_id
     ods_code = connection_metadata.ods_code
     ods_code_extension = connection_metadata.ods_code_extension
 

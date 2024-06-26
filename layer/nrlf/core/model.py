@@ -59,6 +59,7 @@ class ConnectionMetadata(BaseModel):
     enable_authorization_lookup: bool = Field(
         alias="nrl.enable-authorization-lookup", default=False
     )
+    nrl_app_id: str = Field(alias="nrl.app-id")
     client_rp_details: ClientRpDetails
 
     @property

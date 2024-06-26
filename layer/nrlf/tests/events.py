@@ -11,6 +11,7 @@ def create_headers(
     nrl_permissions: Optional[List[str]] = [],
     app_name: Optional[str] = "TestApp",
     app_id: Optional[str] = "12345",
+    nrl_app_id: Optional[str] = "Y05868-TestApp-12345678",
 ) -> Dict[str, str]:
     return {
         "nhsd-connection-metadata": json.dumps(
@@ -18,6 +19,7 @@ def create_headers(
                 "nrl.pointer-types": pointer_types,
                 "nrl.ods-code": ods_code,
                 "nrl.permissions": nrl_permissions,
+                "nrl.app-id": nrl_app_id,
             }
         ),
         "nhsd-client-rp-details": json.dumps(
