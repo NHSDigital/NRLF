@@ -1,5 +1,6 @@
 import json
 from contextlib import suppress
+from os import path
 
 from behave import *  # noqa
 from behave.runner import Context
@@ -17,6 +18,12 @@ class Application(BaseModel):
     pointer_types: dict[str, list[str]] = {}
 
     def add_pointer_types(self, ods_code: str, pointer_types: list[str]):
+        filename = path.abspath(
+            f"layer/test_permissions/z00z-y11y-x22x/{ods_code}.json"
+        )
+        with open(filename, "w", encoding="utf-8") as file:
+            json.dump(pointer_types, file)
+
         self.pointer_types[ods_code] = pointer_types
 
 
