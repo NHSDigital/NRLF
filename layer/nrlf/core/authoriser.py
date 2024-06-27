@@ -74,10 +74,7 @@ def parse_permissions_file(
 
     if connection_metadata.is_test_event:
         file_path = path.abspath(f"layer/test_permissions/{key}")
-    logger.log(
-        LogReference.S3PERMISSIONS005,
-        debug=f"auth path: {file_path} is test: {connection_metadata.is_test_event}",
-    )
+
     pointer_types = []
     try:
         with open(file_path) as file:

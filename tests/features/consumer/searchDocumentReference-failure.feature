@@ -136,7 +136,6 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
 
   Scenario: Search ignores pointer type header if S3 lookup is enabled
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the application is configured to lookup permissions from S3
     And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
@@ -173,9 +172,8 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
       }
       """
 
-  Scenario: Search rejects request if the organisation has no registered pointer types in S3
+  Scenario: Search rejects request if the organisation has no registered pointer types
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the application is configured to lookup permissions from S3
     When consumer 'RX898' searches for DocumentReferences with parameters:
       | parameter | value      |
       | subject   | 9278693472 |

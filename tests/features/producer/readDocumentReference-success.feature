@@ -76,10 +76,9 @@ Feature: Producer - readDocumentReference - Success Scenarios
       }
       """
 
-  Scenario: Read document reference by ID - S3 permissions
+  Scenario: Read document reference by ID
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the application is configured to lookup permissions from S3
-    And the organisation 'RX898' is authorised in S3 to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And a DocumentReference resource exists with values:

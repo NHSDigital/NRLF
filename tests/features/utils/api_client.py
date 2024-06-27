@@ -68,7 +68,6 @@ class APIClient(ABC):
                         "nrl.ods-code-extension": ods_code_extension,
                         "nrl.permissions": [],
                         "nrl.app-id": context.application.app_id,
-                        "nrl.test-event": True,
                         "client_rp_details": {
                             "developer.app.name": context.application.app_name,
                             "developer.app.id": context.application.app_id,

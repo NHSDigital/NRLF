@@ -80,8 +80,7 @@ Feature: Consumer - countDocumentReference - Failure Scenarios
 
   Scenario: Organisation has no permissions in S3
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the application is configured to lookup permissions from S3
-    And the organisation 'RX898' is authorised in S3 to access pointer types
+    And the organisation 'RX898' is authorised to access pointer types
       | system | value |
     When consumer 'RX898' counts DocumentReferences with parameters:
       | parameter          | value                                        |
