@@ -9,7 +9,6 @@ from api.producer.createDocumentReference.create_document_reference import (
     _set_create_time_fields,
     handler,
 )
-from nrlf.core.constants import PointerTypes
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
 from nrlf.producer.fhir.r4.model import (
     DocumentReferenceRelatesTo,
@@ -659,10 +658,6 @@ def test_create_document_reference_invalid_relatesto_type(
     event = create_test_api_gateway_event(
         headers=create_headers(
             app_id="123456",
-            pointer_types=[
-                PointerTypes.EOL_COORDINATION_SUMMARY.value,
-                PointerTypes.MENTAL_HEALTH_PLAN.value,
-            ],
         ),
         body=doc_ref.json(exclude_none=True),
     )
@@ -710,12 +705,7 @@ def test_create_document_reference_with_no_context_related_for_ssp_url(
     del doc_ref.context.related
 
     event = create_test_api_gateway_event(
-        headers=create_headers(
-            pointer_types=[
-                PointerTypes.EOL_COORDINATION_SUMMARY.value,
-                PointerTypes.MENTAL_HEALTH_PLAN.value,
-            ]
-        ),
+        headers=create_headers(),
         body=doc_ref.json(exclude_none=True),
     )
 
@@ -769,12 +759,7 @@ def test_create_document_reference_with_no_asid_in_for_ssp_url(
     ]
 
     event = create_test_api_gateway_event(
-        headers=create_headers(
-            pointer_types=[
-                PointerTypes.EOL_COORDINATION_SUMMARY.value,
-                PointerTypes.MENTAL_HEALTH_PLAN.value,
-            ]
-        ),
+        headers=create_headers(),
         body=doc_ref.json(exclude_none=True),
     )
 
@@ -828,12 +813,7 @@ def test_create_document_reference_with_invalid_asid_for_ssp_url(
     ]
 
     event = create_test_api_gateway_event(
-        headers=create_headers(
-            pointer_types=[
-                PointerTypes.EOL_COORDINATION_SUMMARY.value,
-                PointerTypes.MENTAL_HEALTH_PLAN.value,
-            ]
-        ),
+        headers=create_headers(),
         body=doc_ref.json(exclude_none=True),
     )
 
@@ -892,12 +872,7 @@ def test_create_document_reference_supersede_deletes_old_pointers_replace(
     ]
 
     event = create_test_api_gateway_event(
-        headers=create_headers(
-            pointer_types=[
-                PointerTypes.EOL_COORDINATION_SUMMARY.value,
-                PointerTypes.MENTAL_HEALTH_PLAN.value,
-            ]
-        ),
+        headers=create_headers(),
         body=doc_ref.json(exclude_none=True),
     )
 
@@ -957,13 +932,7 @@ def test_create_document_reference_supersede_succeeds_with_toggle(
     ]
 
     event = create_test_api_gateway_event(
-        headers=create_headers(
-            pointer_types=[
-                PointerTypes.EOL_COORDINATION_SUMMARY.value,
-                PointerTypes.MENTAL_HEALTH_PLAN.value,
-            ],
-            nrl_permissions=["supersede-ignore-delete-fail"],
-        ),
+        headers=create_headers(nrl_permissions=["supersede-ignore-delete-fail"]),
         body=doc_ref.json(exclude_none=True),
     )
 
@@ -1022,12 +991,7 @@ def test_create_document_reference_supersede_fails_without_toggle(
     ]
 
     event = create_test_api_gateway_event(
-        headers=create_headers(
-            pointer_types=[
-                PointerTypes.EOL_COORDINATION_SUMMARY.value,
-                PointerTypes.MENTAL_HEALTH_PLAN.value,
-            ]
-        ),
+        headers=create_headers(),
         body=doc_ref.json(exclude_none=True),
     )
 
@@ -1086,12 +1050,7 @@ def test_create_document_reference_create_relatesto_not_replaces(
     ]
 
     event = create_test_api_gateway_event(
-        headers=create_headers(
-            pointer_types=[
-                PointerTypes.EOL_COORDINATION_SUMMARY.value,
-                PointerTypes.MENTAL_HEALTH_PLAN.value,
-            ]
-        ),
+        headers=create_headers(),
         body=doc_ref.json(exclude_none=True),
     )
 

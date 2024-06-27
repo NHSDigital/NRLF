@@ -74,12 +74,11 @@ def load_connection_metadata(headers: Dict[str, str], config: Config):
 
     logger.log(LogReference.HANDLER004b)
     pointer_types = parse_permissions_file(metadata)
-    if not pointer_types and metadata.enable_authorization_lookup:
+    if not pointer_types and not metadata.is_test_event:
         logger.log(LogReference.HANDLER004)
         pointer_types = get_pointer_types(metadata, config)
-        metadata.pointer_types = pointer_types
-    elif pointer_types:
-        metadata.pointer_types = pointer_types
+
+    metadata.pointer_types = pointer_types
 
     return metadata
 

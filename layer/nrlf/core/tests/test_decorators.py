@@ -440,20 +440,17 @@ def test_request_load_connection_metadata_with_permission_headers():
     assert expected_metdata.pointer_types == PointerTypes.list()
 
 
-def test_request_load_connection_metadata_with_no_permission_headers():
+def test_request_load_connection_metadata_with_no_permission_lookup_or_file():
     expected_metdata = load_connection_metadata(
-        headers=create_headers(), config=Config()
+        headers=create_headers(nrl_app_id="someId"), config=Config()
     )
 
-    assert expected_metdata.pointer_types == ["http://snomed.info/sct|736253002"]
+    assert expected_metdata.pointer_types == []
 
 
 def test_request_parse_permission_file_with_no_permission_file():
     expected_metdata = parse_permissions_file(
-        connection_metadata=parse_headers(
-            create_headers(ods_code="SomeCode", pointer_types=[])
-        ),
-        path_to_search="./layer/test_permissions",
+        connection_metadata=parse_headers(create_headers(ods_code="SomeCode")),
     )
 
     assert expected_metdata == []
@@ -461,10 +458,7 @@ def test_request_parse_permission_file_with_no_permission_file():
 
 def test_request_parse_permission_file_with_permission_file():
     expected_metdata = parse_permissions_file(
-        connection_metadata=parse_headers(
-            create_headers(ods_code="TestCode", pointer_types=[])
-        ),
-        path_to_search="./layer/test_permissions",
+        connection_metadata=parse_headers(create_headers(ods_code="TestCode")),
     )
 
     assert expected_metdata == ["http://snomed.info/sct|736253001"]

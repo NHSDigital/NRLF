@@ -2,12 +2,9 @@ import json
 from typing import Dict, List, Optional
 from unittest.mock import Mock
 
-from nrlf.core.constants import PointerTypes
-
 
 def create_headers(
     ods_code: str = "Y05868",
-    pointer_types: Optional[List[str]] = [PointerTypes.MENTAL_HEALTH_PLAN.value],
     nrl_permissions: Optional[List[str]] = [],
     app_name: Optional[str] = "TestApp",
     app_id: Optional[str] = "12345",
@@ -16,10 +13,10 @@ def create_headers(
     return {
         "nhsd-connection-metadata": json.dumps(
             {
-                "nrl.pointer-types": pointer_types,
                 "nrl.ods-code": ods_code,
                 "nrl.permissions": nrl_permissions,
                 "nrl.app-id": nrl_app_id,
+                "nrl.test-event": True,
             }
         ),
         "nhsd-client-rp-details": json.dumps(

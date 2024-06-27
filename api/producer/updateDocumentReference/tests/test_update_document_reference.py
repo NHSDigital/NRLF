@@ -355,7 +355,7 @@ def test_update_document_reference_invalid_resource():
 def test_update_document_reference_invalid_producer_id():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     event = create_test_api_gateway_event(
-        headers=create_headers(ods_code="X26"),
+        headers=create_headers(ods_code="RQI"),
         path_parameters={"id": "Y05868-99999-99999-999999"},
         body=doc_ref.json(exclude_none=True),
     )

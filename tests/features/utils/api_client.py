@@ -66,7 +66,6 @@ class APIClient(ABC):
                         ),
                         "nrl.ods-code": ods_code_parts[0],
                         "nrl.ods-code-extension": ods_code_extension,
-                        "nrl.enable-authorization-lookup": context.application.enable_s3_permissions_lookup,
                         "nrl.permissions": [],
                         "client_rp_details": {
                             "developer.app.name": context.application.app_name,
