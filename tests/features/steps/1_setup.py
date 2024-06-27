@@ -1,6 +1,5 @@
 import json
 from contextlib import suppress
-from os import path
 
 from behave import *  # noqa
 from behave.runner import Context
@@ -14,25 +13,16 @@ from tests.features.utils.data import create_test_document_reference
 class Application(BaseModel):
     app_id: str = "UNSET"
     app_name: str = "UNSET"
-    pointer_types: dict[str, list[str]] = {}
 
     def add_pointer_types(
         self, ods_code: str, pointer_types: list[str], context: Context
     ):
-        filename = path.abspath(
-            f"layer/test_permissions/z00z-y11y-x22x/{ods_code}.json"
-        )
-        with open(filename, "w", encoding="utf-8") as file:
-            json.dump(pointer_types, file)
-
-        self.pointer_types[ods_code] = pointer_types
-
         if not context.table:
             raise ValueError("No permissions table provided")
 
         pointer_types = [f"{system}|{value}" for system, value in context.table]
         bucket = f"nhsd-nrlf--{context.env}--authorization-store"
-        key = f"{context.application.app_id}/{ods_code}.json"
+        key = f"{self.app_id}/{ods_code}.json"
 
         s3_client = get_s3_client()
         s3_client.put_object(Bucket=bucket, Key=key, Body=json.dumps(pointer_types))

@@ -134,11 +134,11 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
       }
       """
 
-  Scenario: Search ignores pointer type header if S3 lookup is enabled
+  Scenario: Search returns 403 if permission not in S3
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
     And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
-      | http://snomed.info/sct | 736253002 |
+      | http://snomed.info/sct | 736253001 |
     And a DocumentReference resource exists with values:
       | property    | value                             |
       | id          | 8FW23-1114567890-SearchDocRefTest |
