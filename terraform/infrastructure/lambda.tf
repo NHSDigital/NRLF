@@ -12,7 +12,7 @@ module "consumer__readDocumentReference" {
     ENVIRONMENT          = local.environment
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
   }
   additional_policies = [
     aws_iam_policy.document-pointer__dynamodb-read.arn,
@@ -36,7 +36,7 @@ module "consumer__countDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
@@ -62,7 +62,7 @@ module "consumer__searchDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
@@ -88,7 +88,7 @@ module "consumer__searchPostDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
@@ -114,7 +114,7 @@ module "producer__createDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
     POWERTOOLS_LOG_LEVEL = local.log_level
     ENDPOINT_URL         = "${local.public_domain}/nrl-producer-api/FHIR/R4/DocumentReference"
@@ -142,7 +142,7 @@ module "producer__deleteDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
@@ -169,7 +169,7 @@ module "producer__readDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
@@ -195,7 +195,7 @@ module "producer__searchDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
@@ -221,7 +221,7 @@ module "producer__searchPostDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
@@ -247,7 +247,7 @@ module "producer__updateDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
@@ -280,7 +280,7 @@ module "producer__upsertDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
@@ -307,7 +307,7 @@ module "consumer__status" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
     DYNAMODB_TIMEOUT     = local.dynamodb_timeout_seconds
@@ -335,7 +335,7 @@ module "producer__status" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
     DYNAMODB_TIMEOUT     = local.dynamodb_timeout_seconds

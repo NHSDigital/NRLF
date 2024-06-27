@@ -45,4 +45,7 @@ locals {
   log_level = local.is_persistent_env ? local.is_dev_env ? "DEBUG" : "INFO" : "DEBUG"
 
   aws_account_id = data.aws_caller_identity.current.account_id
+
+  auth_store_id = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+  auth_store_arn = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].arn : module.ephemeral-resources[0].authorization_store_arn
 }

@@ -1,5 +1,5 @@
 resource "aws_s3_bucket_policy" "allow-lambda-to-read" {
-  bucket = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
+  bucket = local.auth_store_id
   policy = data.aws_iam_policy_document.allow-authorizer-lambda-to-read.json
 }
 
@@ -28,8 +28,8 @@ data "aws_iam_policy_document" "allow-authorizer-lambda-to-read" {
     ]
 
     resources = [
-      local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].arn : module.ephemeral-resources[0].authorization_store_arn,
-      "${local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].arn : module.ephemeral-resources[0].authorization_store_arn}/*",
+      local.auth_store_arn,
+      "${local.auth_store_arn}/*",
     ]
   }
 }
