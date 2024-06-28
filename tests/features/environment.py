@@ -22,6 +22,4 @@ def before_all(context: Context):
     os.environ.setdefault("TABLE_NAME", default_table_name)
 
     context.client_cert = get_cert_path_for_environment(context.env)
-    context.repository = DocumentPointerRepository(
-        table_name=default_table_name
-    )
+    context.repository = DocumentPointerRepository(table_name=default_table_name)

@@ -180,9 +180,7 @@ def request_handler(
             }
 
             if repository is not None:
-                kwargs["repository"] = repository(
-                    table_name=config.TABLE_NAME
-                )
+                kwargs["repository"] = repository(table_name=config.TABLE_NAME)
 
             function_kwargs = filter_kwargs(func, kwargs)
 
