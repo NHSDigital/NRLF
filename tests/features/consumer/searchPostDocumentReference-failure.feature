@@ -136,9 +136,9 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
 
   Scenario: Search returns 403 if permission not in S3
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'RX898' is authorised to access pointer types:
-      | system                 | value     |
-      | http://snomed.info/sct | 736253001 |
+    And the organisation 'X26' is authorised to access pointer types:
+      | system                 | value |
+      | http://snomed.info/sct | 123   |
     And a DocumentReference resource exists with values:
       | property    | value                             |
       | id          | 8FW23-1114567890-SearchDocRefTest |
@@ -150,10 +150,10 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
       | url         | https://example.org/my-doc.pdf    |
       | custodian   | 8FW23                             |
       | author      | 8FW23                             |
-    When consumer 'RX898' searches for DocumentReferences using POST with request body:
+    When consumer 'X26' searches for DocumentReferences using POST with request body:
       | key     | value      |
       | subject | 9278693472 |
-      | type    | 736253002  |
+      | type    | 123        |
     Then the response status code is 403
     And the response is an OperationOutcome with 1 issue
     And the OperationOutcome contains the issue:
