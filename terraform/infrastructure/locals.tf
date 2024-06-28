@@ -49,8 +49,8 @@ locals {
   auth_store_id  = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-s3-permission-store[0].bucket_id
   auth_store_arn = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].arn : module.ephemeral-s3-permission-store[0].bucket_arn
 
-  pointers_table_name             = local.use_shared_resources ? data.aws_dynamodb_table.pointers-table[0].name : module.ephemeral-resources[0].pointers_table_name
-  pointers_table_read_policy_arn  = local.use_shared_resources ? data.aws_iam_policy.pointers-table-read[0].arn : module.ephemeral-resources[0].pointers_table_read_policy_arn
-  pointers_table_write_policy_arn = local.use_shared_resources ? data.aws_iam_policy.pointers-table-write[0].arn : module.ephemeral-resources[0].pointers_table_write_policy_arn
-  pointers_kms_read_write_arn     = local.use_shared_resources ? data.aws_iam_policy.pointers-kms-read-write[0].arn : module.ephemeral-resources[0].pointers_kms_read_write_arn
+  pointers_table_name             = local.use_shared_resources ? data.aws_dynamodb_table.pointers-table[0].name : module.ephemeral-pointers-table[0].table_name
+  pointers_table_read_policy_arn  = local.use_shared_resources ? data.aws_iam_policy.pointers-table-read[0].arn : module.ephemeral-pointers-table[0].read_policy_arn
+  pointers_table_write_policy_arn = local.use_shared_resources ? data.aws_iam_policy.pointers-table-write[0].arn : module.ephemeral-pointers-table[0].write_policy_arn
+  pointers_kms_read_write_arn     = local.use_shared_resources ? data.aws_iam_policy.pointers-kms-read-write[0].arn : module.ephemeral-pointers-table[0].kms_read_write_policy_arn
 }
