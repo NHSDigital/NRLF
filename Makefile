@@ -80,6 +80,16 @@ test-features-integration: check-warn ## Run the BDD feature tests in the integr
 	@echo "Running feature tests in the integration environment"
 	behave --define="integration_test=true" --define="env=$(TF_WORKSPACE_NAME)" $(FEATURE_TEST_ARGS)
 
+test-smoke-internal: check-warn ## Run the smoke tests against the internal environment
+	@echo "Running smoke tests against the internal environment"
+	#ENV=$(TF_WORKSPACE_NAME) SMOKE_TEST_MODE=mtls pytest ./tests/smoke $(SMOKE_TEST_ARGS)
+	@echo "Skipping internal smoke tests (not yet implemented)"
+
+test-smoke-external: check-warn ## Run the smoke tests for the external access points
+	@echo "Running smoke tests for the external access points"
+	#ENV=$(ENV) SMOKE_TEST_MODE=apigee pytest ./tests/smoke $(SMOKE_TEST_ARGS)
+	@echo "Skipping external smoke tests (not yet implemented)"
+
 test-performance-prepare:
 	mkdir -p $(DIST_PATH)
 	poetry run python tests/performance/environment.py setup $(TF_WORKSPACE_NAME)

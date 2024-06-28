@@ -8,12 +8,11 @@ from aws_session_assume import get_boto_session
 
 def main(parameter_name: str, env: str):
     boto_session = get_boto_session(env)
-    ssm = boto_session.client("ssm")
+    sm = boto_session.client("secretsmanager")
 
-    parameter_key = f"/nhsd-nrlf-{env}/environment-config"
-    response = ssm.get_parameter(Name=parameter_key, WithDecryption=True)
-
-    parameters = json.loads(response["Parameter"]["Value"])
+    secret_key = f"nhsd-nrlf--{env}--env-config"
+    response = sm.get_secret_value(SecretId=secret_key)
+    parameters = json.loads(response["SecretString"])
 
     if parameter_name in parameters:
         print(parameters[parameter_name])
