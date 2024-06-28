@@ -84,7 +84,7 @@ def get_file_folders(s3_client, bucket_name, prefix=""):
 
 
 def add_test_files(folder, file_name, local_path):
-    print(f"Adding test files to temporary direrectory...")
+    print("Adding test files to temporary direrectory...")
     local_path = Path(local_path)
     folder_path = Path.joinpath(local_path, folder)
     # Create all folders in the path
