@@ -1,7 +1,7 @@
 module "ephemeral-resources" {
-    count  = local.use_shared_resources ? 0 : 1
-    source = "./modules/ephemeral-resources"
-    prefix = local.prefix
+  count  = local.use_shared_resources ? 0 : 1
+  source = "./modules/ephemeral-resources"
+  prefix = local.prefix
 }
 
 resource "aws_s3_bucket_policy" "allow-lambda-to-read" {
