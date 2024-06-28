@@ -65,7 +65,7 @@ def setup(
     print(f"Patient Count: {patient_count}")
     print(f"Documents Per Type: {documents_per_type}")
 
-    table = DYNAMODB.Table(f"nhsd-nrlf--{env}--document-pointer")
+    table = DYNAMODB.Table(f"nhsd-nrlf--{env}-pointers-table")
     documents = {}
     nhs_numbers = set()
 
@@ -101,7 +101,7 @@ def cleanup(env: str, input: str = "tests/performance/reference-data.json"):
         pointer_ids = data["pointer_ids"]
 
     print(f"Cleaning up {len(pointer_ids)} document pointers in environment '{env}'")
-    table = DYNAMODB.Table(f"nhsd-nrlf--{env}--document-pointer")
+    table = DYNAMODB.Table(f"nhsd-nrlf--{env}-pointers-table")
     with table.batch_writer() as batch:
         for id in pointer_ids:
             ods_code, document_id = id.split("-", maxsplit=1)

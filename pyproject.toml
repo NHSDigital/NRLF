@@ -103,5 +103,6 @@ env = [
     "SPLUNK_INDEX=logs",
     "SOURCE=app",
     "AUTH_STORE=auth-store",
+    "TABLE_NAME=unit-test-document-pointer"
 ]
 pythonpath = ["."]

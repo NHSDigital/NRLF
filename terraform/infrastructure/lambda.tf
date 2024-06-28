@@ -13,6 +13,7 @@ module "consumer__readDocumentReference" {
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
     AUTH_STORE           = local.auth_store_id
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
@@ -39,6 +40,7 @@ module "consumer__countDocumentReference" {
     AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
@@ -65,6 +67,7 @@ module "consumer__searchDocumentReference" {
     AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
@@ -91,6 +94,7 @@ module "consumer__searchPostDocumentReference" {
     AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
@@ -118,6 +122,7 @@ module "producer__createDocumentReference" {
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
     POWERTOOLS_LOG_LEVEL = local.log_level
     ENDPOINT_URL         = "${local.public_domain}/nrl-producer-api/FHIR/R4/DocumentReference"
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_write_policy_arn,
@@ -145,6 +150,7 @@ module "producer__deleteDocumentReference" {
     AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_write_policy_arn,
@@ -172,6 +178,7 @@ module "producer__readDocumentReference" {
     AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
@@ -198,6 +205,7 @@ module "producer__searchDocumentReference" {
     AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
@@ -224,6 +232,7 @@ module "producer__searchPostDocumentReference" {
     AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
@@ -250,6 +259,7 @@ module "producer__updateDocumentReference" {
     AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
@@ -277,6 +287,7 @@ module "producer__upsertDocumentReference" {
     AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_write_policy_arn,
@@ -305,6 +316,7 @@ module "consumer__status" {
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
     DYNAMODB_TIMEOUT     = local.dynamodb_timeout_seconds
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
@@ -333,6 +345,7 @@ module "producer__status" {
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
     DYNAMODB_TIMEOUT     = local.dynamodb_timeout_seconds
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,

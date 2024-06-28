@@ -19,3 +19,4 @@ class Config(BaseSettings):
     SPLUNK_INDEX: str = Field(default=..., env="SPLUNK_INDEX")
     SOURCE: str = Field(default=..., env="SOURCE")
     AUTH_STORE: str = Field(default=..., env="AUTH_STORE")
+    TABLE_NAME: str = Field(default=..., env="TABLE_NAME")

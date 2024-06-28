@@ -13,7 +13,6 @@ from nrlf.tests.data import load_document_reference, load_document_reference_jso
 def test_dynamodb_model_init():
     model = DynamoDBModel()
 
-    assert model.kebab() == "dynamo-d-b-model"
     assert model.public_alias() == "DynamoDBModel"
     assert model._from_dynamo is False
 
@@ -23,7 +22,6 @@ def test_dynamodb_model_init():
 
 def test_dynamodb_model_init_from_dynamo():
     model = DynamoDBModel(_from_dynamo=True)
-    assert model.kebab() == "dynamo-d-b-model"
     assert model.public_alias() == "DynamoDBModel"
     assert model._from_dynamo is True
 
@@ -51,7 +49,6 @@ def test_document_pointer_init():
         document_id="document_id",
     )
 
-    assert model.kebab() == "document-pointer"
     assert model.public_alias() == "DocumentReference"
     assert model._from_dynamo is False
 

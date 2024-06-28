@@ -35,19 +35,12 @@ def get_id_for_system(system: str, attr_placement: str) -> str | None:
     return SYSTEM_SHORT_IDS.get(system)
 
 
-KEBAB_CASE_RE = re.compile(r"(?<!^)(?=[A-Z])")
-
-
 class DynamoDBModel(BaseModel):
     _from_dynamo: bool = PrivateAttr(default=False)
 
     def __init__(self, **data):
         super().__init__(**data)
         self._from_dynamo = data.get("_from_dynamo", False)
-
-    @classmethod
-    def kebab(cls) -> str:
-        return KEBAB_CASE_RE.sub("-", cls.__name__).lower()
 
     @classmethod
     def public_alias(cls) -> str:

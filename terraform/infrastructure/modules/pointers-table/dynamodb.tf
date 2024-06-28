@@ -1,5 +1,5 @@
 resource "aws_dynamodb_table" "pointers" {
-  name                        = "${var.name_prefix}--document-pointer"
+  name                        = "${var.name_prefix}-pointers-table"
   billing_mode                = "PAY_PER_REQUEST"
   hash_key                    = "pk"
   range_key                   = "sk"

@@ -2,7 +2,7 @@
 
 This directory contains terraform to build the main NRLF api infrastructure.
 
-NRLF project uses terraform workspaces to handle multiple "environments". Environments are identified by their workspace id. Resources in each environment will contain workspace id in its name. (e.g. nhsd-nrlf--dev--document-pointer or nhsd-nrlf--469d5da6--document-pointer)
+NRLF project uses terraform workspaces to handle multiple "environments". Environments are identified by their workspace id. Resources in each environment will contain workspace id in its name. (e.g. nhsd-nrlf--dev-pointers-table or nhsd-nrlf--469d5da6-pointers-table)
 
 Each developer/QA can create their own instance of NRLF infrastructure. These are deployed to the dev AWS account and use variables in `etc/dev.tfvars`
 

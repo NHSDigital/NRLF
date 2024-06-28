@@ -489,7 +489,7 @@ def test_request_handler_with_custom_repository(mocker: MockerFixture):
 
     repository_mock.assert_called_once()
     assert repository_mock.call_args.kwargs == {
-        "environment_prefix": "nrlf",
+        "table_name": "unit-test-document-pointer",
     }
 
 

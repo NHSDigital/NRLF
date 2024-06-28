@@ -18,7 +18,10 @@ def before_all(context: Context):
     context.env = context.config.userdata.get("env")
     context.base_url = f"https://{context.env}.api.record-locator.dev.national.nhs.uk/"
 
+    default_table_name = f"nhsd-nrlf--{context.env}-pointers-table"
+    os.environ.setdefault("TABLE_NAME", default_table_name)
+
     context.client_cert = get_cert_path_for_environment(context.env)
     context.repository = DocumentPointerRepository(
-        environment_prefix=f"nhsd-nrlf--{context.env}--",
+        table_name=default_table_name
     )
