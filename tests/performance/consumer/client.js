@@ -1,4 +1,9 @@
-import { NHS_NUMBERS, POINTER_IDS, POINTER_TYPES } from "../constants.js";
+import {
+  NHS_NUMBERS,
+  POINTER_IDS,
+  POINTER_TYPES,
+  ODS_CODE,
+} from "../constants.js";
 import http from "k6/http";
 import { check } from "k6";
 
