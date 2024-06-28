@@ -1,5 +1,5 @@
 module "qa-pointers-table" {
-  source                     = "../modules/document-pointer-table"
+  source                     = "../modules/pointers-table"
   name_prefix                = "nhsd-nrlf--qa"
   enable_deletion_protection = true
 }
