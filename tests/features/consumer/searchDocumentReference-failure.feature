@@ -134,11 +134,8 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
       }
       """
 
-  Scenario: Search gives 403 if permission is not in S3
+  Scenario: Search gives 403 if no permission
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'Z26' is authorised to access pointer types:
-      | system                 | value |
-      | http://snomed.info/sct | 123   |
     And a DocumentReference resource exists with values:
       | property    | value                             |
       | id          | 8FW23-1114567890-SearchDocRefTest |
@@ -168,7 +165,7 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
             "display": "Access has been denied to process this request"
           }]
         },
-        "diagnostics": "Your organisation 'RX898' does not have permission to access this resource. Contact the onboarding team."
+        "diagnostics": "Your organisation 'Z26' does not have permission to access this resource. Contact the onboarding team."
       }
       """
 
