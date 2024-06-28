@@ -1,5 +1,5 @@
-resource "aws_iam_policy" "read-authorization-store-s3" {
-  name        = "${var.prefix}--read-authorization-store-s3"
+resource "aws_iam_policy" "read-s3-authorization-store" {
+  name        = "${var.name_prefix}-read-s3-authorization-store"
   description = "Read the authorization store S3 bucket"
   policy = jsonencode({
     Version = "2012-10-17"

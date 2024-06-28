@@ -1,11 +1,11 @@
 output "authorization_store_arn" {
   description = "Name of the authorization store S3 bucket"
-  value       = aws_s3_bucket.authorization-store.arn
+  value       = module.ephemeral-s3-permission-store.bucket_arn
 }
 
 output "authorization_store_id" {
   description = "Id of the authorization store S3 bucket"
-  value       = aws_s3_bucket.authorization-store.id
+  value       = module.ephemeral-s3-permission-store.bucket_id
 }
 
 output "pointers_table_name" {
