@@ -52,9 +52,7 @@ class ClientRpDetails(BaseModel):
 
 
 class ConnectionMetadata(BaseModel):
-    pointer_types: list[str] = Field(
-        alias="nrl.pointer-types", default_factory=list, default=[]
-    )
+    pointer_types: list[str] = Field(alias="nrl.pointer-types", default_factory=list)
     ods_code: str = Field(alias="nrl.ods-code")
     ods_code_extension: str | None = Field(alias="nrl.ods-code-extension", default=None)
     nrl_permissions: list[str] = Field(alias="nrl.permissions", default_factory=list)
