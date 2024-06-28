@@ -15,8 +15,8 @@ module "consumer__readDocumentReference" {
     AUTH_STORE           = local.auth_store_id
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -41,8 +41,8 @@ module "consumer__countDocumentReference" {
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -67,8 +67,8 @@ module "consumer__searchDocumentReference" {
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -93,8 +93,8 @@ module "consumer__searchPostDocumentReference" {
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -120,9 +120,9 @@ module "producer__createDocumentReference" {
     ENDPOINT_URL         = "${local.public_domain}/nrl-producer-api/FHIR/R4/DocumentReference"
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-write.arn,
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_write_policy_arn,
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -147,9 +147,9 @@ module "producer__deleteDocumentReference" {
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-write.arn,
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_write_policy_arn,
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -174,8 +174,8 @@ module "producer__readDocumentReference" {
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -200,8 +200,8 @@ module "producer__searchDocumentReference" {
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -226,8 +226,8 @@ module "producer__searchPostDocumentReference" {
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -252,20 +252,14 @@ module "producer__updateDocumentReference" {
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__dynamodb-write.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_table_write_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
   handler = "update_document_reference.handler"
-
-  depends_on = [
-    aws_iam_policy.document-pointer__dynamodb-read,
-    aws_iam_policy.document-pointer__dynamodb-write,
-    aws_iam_policy.document-pointer__kms-read-write
-  ]
 }
 
 module "producer__upsertDocumentReference" {
@@ -285,9 +279,9 @@ module "producer__upsertDocumentReference" {
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-write.arn,
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_write_policy_arn,
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -313,8 +307,8 @@ module "consumer__status" {
     DYNAMODB_TIMEOUT     = local.dynamodb_timeout_seconds
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -341,8 +335,8 @@ module "producer__status" {
     DYNAMODB_TIMEOUT     = local.dynamodb_timeout_seconds
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription

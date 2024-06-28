@@ -13,7 +13,7 @@ output "prefix" {
 output "dynamodb" {
   value = {
     document_pointer = {
-      name = aws_dynamodb_table.document-pointer.name
+      name = local.pointers_table_name
     }
   }
 }
