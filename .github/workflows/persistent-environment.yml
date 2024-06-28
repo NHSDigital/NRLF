@@ -119,9 +119,10 @@ jobs:
 
       - name: Terraform Init
         run: |
+          inactive_stack=$(python ./scripts/get-workspace-name.py inactive-stack ${{ inputs.environment }})
           terraform -chdir=terraform/infrastructure init
-          terraform -chdir=terraform/infrastructure workspace new ${{ inputs.environment }} || \
-          terraform -chdir=terraform/infrastructure workspace select ${{ inputs.environment }}
+          terraform -chdir=terraform/infrastructure workspace new ${inactive_stack} || \
+            terraform -chdir=terraform/infrastructure workspace select ${inactive_stack}
 
       - name: Terraform Plan
         run: |
@@ -182,9 +183,102 @@ jobs:
 
       - name: Terraform Init
         run: |
+          inactive_stack=$(python ./scripts/get-env-config.py inactive-stack ${{ inputs.environment }})
           terraform -chdir=terraform/infrastructure init
-          terraform -chdir=terraform/infrastructure workspace new ${{ inputs.environment }} || \
-          terraform -chdir=terraform/infrastructure workspace select ${{ inputs.environment }}
+          terraform -chdir=terraform/infrastructure workspace new ${inactive_stack} || \
+            terraform -chdir=terraform/infrastructure workspace select ${inactive_stack}
 
       - name: Terraform Apply
         run: terraform -chdir=terraform/infrastructure apply tfplan
+
+      - name: Smoke Test
+        run: make smoke-test
+
+  activate-stack:
+    name: Activate Stack - ${{ inputs.environment }}
+    needs: [terraform-apply]
+    runs-on: [self-hosted, ci]
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Git clone - ${{ inputs.branch_name }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch_name }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
+
+      - name: Terraform Init
+        run: |
+          inactive_stack=$(python ./scripts/get-env-config.py inactive-stack ${{ inputs.environment }})
+          terraform -chdir=terraform/infrastructure init
+          terraform -chdir=terraform/infrastructure workspace new ${inactive_stack} || \
+            terraform -chdir=terraform/infrastructure workspace select ${inactive_stack}
+
+      - name: Lock Environment State
+        run: |
+          python ./scripts/set-env-config.py state-lock true ${{ inputs.environment }}
+
+      - name: Activate Stack
+        run: |
+          inactive_stack=$(python ./scripts/get-env-config.py inactive-stack ${{ inputs.environment }})
+          python ./scripts/activate-stack.py ${inactive_stack} ${{ inputs.environment }}
+
+      - name: Smoke Test
+        run: |
+          make smoke-test
+
+      - name: Unlock Environment State
+        run: |
+          python ./scripts/set-env-state.py unlock ${{ inputs.environment }}
+
+  rollback-stack:
+    name: Rollback Stack - ${{ inputs.environment }}
+    # if: ${{ needs.activate-stack.result == 'failure' }}
+    runs-on: [self-hosted, ci]
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Git clone - ${{ inputs.branch_name }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch_name }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
+
+      - name: Deactivate Stack
+        run: |
+          inactive_stack_name=$(python ./scripts/get-env-config.py inactive-stack ${{ inputs.environment }})
+          python ./scripts/activate-stack.py ${inactive_stack_name}
