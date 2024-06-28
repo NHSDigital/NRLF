@@ -1,4 +1,4 @@
 module "ephemeral-pointers-table" {
-  source                     = "../../../global-modules/pointers-table"
+  source                     = "../pointers-table"
   name_prefix                = var.prefix
 }
