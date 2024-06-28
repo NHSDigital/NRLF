@@ -14,9 +14,7 @@ class Application(BaseModel):
     app_id: str = "UNSET"
     app_name: str = "UNSET"
 
-    def add_pointer_types(
-        self, ods_code: str, pointer_types: list[str], context: Context
-    ):
+    def add_pointer_types(self, ods_code: str, context: Context):
         if not context.table:
             raise ValueError("No permissions table provided")
 
@@ -39,8 +37,7 @@ def register_org_permissions_step(context: Context, ods_code: str):
     if not context.table:
         raise ValueError("No permissions table provided")
 
-    pointer_types = [f"{system}|{value}" for system, value in context.table]
-    context.application.add_pointer_types(ods_code, pointer_types, context)
+    context.application.add_pointer_types(ods_code, context)
 
 
 @given("a DocumentReference resource exists with values")
