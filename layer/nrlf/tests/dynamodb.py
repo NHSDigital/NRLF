@@ -5,7 +5,6 @@ from nrlf.core.types import DynamoDBServiceResource
 
 
 def create_document_pointer_table(config: Config, dynamodb: DynamoDBServiceResource):
-    config = Config()
     return dynamodb.create_table(
         TableName=config.TABLE_NAME,
         KeySchema=[
