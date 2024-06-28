@@ -15,13 +15,13 @@ AWS_ACCOUNT_FOR_ENV = {
 }
 
 POINTER_TYPES = [
-    "736253002",
-    "1363501000000100",
-    "1382601000000107",
-    "325691000000100",
-    "736373009",
-    "861421000000109",
-    "887701000000100",
+    "http://snomed.info/sct|736253002",
+    "http://snomed.info/sct|1363501000000100",
+    "http://snomed.info/sct|1382601000000107",
+    "http://snomed.info/sct|325691000000100",
+    "http://snomed.info/sct|736373009",
+    "http://snomed.info/sct|861421000000109",
+    "http://snomed.info/sct|887701000000100",
 ]
 
 
