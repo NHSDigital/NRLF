@@ -25,6 +25,7 @@ export function countDocumentReference() {
             "http://snomed.info/sct|861421000000109",
             "http://snomed.info/sct|887701000000100",
           ],
+          "nrl.app-id": "K6PerformanceTest",
         }),
         "NHSD-Client-RP-Details": JSON.stringify({
           "developer.app.name": "K6PerformanceTest",

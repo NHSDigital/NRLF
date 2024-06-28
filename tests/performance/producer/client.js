@@ -24,6 +24,7 @@ function getHeaders(odsCode = ODS_CODE) {
       "nrl.pointer-types": POINTER_TYPES.map(
         (type) => `http://snomed.info/sct|${type}`
       ),
+      "nrl.app-id": "K6PerformanceTest",
     }),
     "NHSD-Client-RP-Details": JSON.stringify({
       "developer.app.name": "K6PerformanceTest",
