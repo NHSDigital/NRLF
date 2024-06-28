@@ -46,8 +46,8 @@ locals {
 
   aws_account_id = data.aws_caller_identity.current.account_id
 
-  auth_store_id  = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-resources[0].authorization_store_id
-  auth_store_arn = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].arn : module.ephemeral-resources[0].authorization_store_arn
+  auth_store_id  = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-s3-permission-store[0].bucket_id
+  auth_store_arn = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].arn : module.ephemeral-s3-permission-store[0].bucket_arn
 
   pointers_table_name             = local.use_shared_resources ? data.aws_dynamodb_table.pointers-table[0].name : module.ephemeral-resources[0].pointers_table_name
   pointers_table_read_policy_arn  = local.use_shared_resources ? data.aws_iam_policy.pointers-table-read[0].arn : module.ephemeral-resources[0].pointers_table_read_policy_arn
