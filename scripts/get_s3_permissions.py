@@ -118,16 +118,26 @@ def main(env: str, path_to_store: str):
 
     boto_session = get_boto_session_for_account(account_id)
 
-    s3 = boto_session.client("s3")
-    files, folders = get_file_folders(s3, bucket)
-
-    download_files(
-        s3,
-        bucket,
-        path.abspath(path.join(path_to_store + "/nrlf_permissions")),
-        files,
-        folders,
+    permissions_path = Path(
+        path.abspath(path.join(path_to_store + "/nrlf_permissions"))
     )
+    permissions_path.mkdir(parents=True, exist_ok=True)
+    permissions_file_path = permissions_path.joinpath("permissions.toml")
+
+    s3 = boto_session.client("s3")
+    print(
+        f"Trying to download bucket: {bucket}, file: {permissions_file_path.name}, dest:  {str(permissions_file_path)}"
+    )
+    s3.download_file(bucket, permissions_file_path.name, str(permissions_file_path))
+    # files, folders = get_file_folders(s3, bucket)
+
+    # download_files(
+    #     s3,
+    #     bucket,
+    #     path.abspath(path.join(path_to_store + "/nrlf_permissions")),
+    #     files,
+    #     folders,
+    # )
     print("Downloaded S3 permissions...")
 
 
