@@ -117,6 +117,14 @@ jobs:
           name: build-artifacts
           path: dist
 
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
       - name: Terraform Init
         run: |
           inactive_stack=$(python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
@@ -181,6 +189,14 @@ jobs:
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
           make truststore-pull-server ENV=${account}
 
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
       - name: Terraform Init
         run: |
           inactive_stack=$(python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
@@ -224,6 +240,14 @@ jobs:
           role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
 
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
       - name: Activate Stack
         run: |
           inactive_stack=$(python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
@@ -259,6 +283,14 @@ jobs:
           role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
 
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
       - name: "Smoke Test"
         run: |
           make ENV=${{ inputs.environment }} test-smoke-external
@@ -292,6 +324,14 @@ jobs:
           aws-region: eu-west-2
           role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
+
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
 
       - name: Deactivate Stack
         run: |
