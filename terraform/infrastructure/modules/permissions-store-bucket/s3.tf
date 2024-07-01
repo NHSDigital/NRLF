@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "authorization-store" {
-  bucket        = "${var.name_prefix}--authorization-store"
+  bucket        = "${var.name_prefix}-authorization-store"
   force_destroy = var.enable_bucket_force_destroy
 
   tags = {
