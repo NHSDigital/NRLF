@@ -4,7 +4,7 @@ import json
 import fire
 from aws_session_assume import get_boto_session
 
-VALID_PARAMS = ["lock-state", "inactive-stack", "active-stack"]
+VALID_PARAMS = ["lock-state", "inactive-stack", "active-stack", "domain-name"]
 
 VALID_LOCK_STATES = ["locked", "open"]
 

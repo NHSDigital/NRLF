@@ -119,7 +119,7 @@ jobs:
 
       - name: Terraform Init
         run: |
-          inactive_stack=$(python ./scripts/get-workspace-name.py inactive-stack ${{ inputs.environment }})
+          inactive_stack=$(python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
           terraform -chdir=terraform/infrastructure init
           terraform -chdir=terraform/infrastructure workspace new ${inactive_stack} || \
             terraform -chdir=terraform/infrastructure workspace select ${inactive_stack}
@@ -183,7 +183,7 @@ jobs:
 
       - name: Terraform Init
         run: |
-          inactive_stack=$(python ./scripts/get-env-config.py inactive-stack ${{ inputs.environment }})
+          inactive_stack=$(python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
           terraform -chdir=terraform/infrastructure init
           terraform -chdir=terraform/infrastructure workspace new ${inactive_stack} || \
             terraform -chdir=terraform/infrastructure workspace select ${inactive_stack}
@@ -224,28 +224,14 @@ jobs:
           role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
           role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
 
-      - name: Terraform Init
-        run: |
-          inactive_stack=$(python ./scripts/get-env-config.py inactive-stack ${{ inputs.environment }})
-          terraform -chdir=terraform/infrastructure init
-          terraform -chdir=terraform/infrastructure workspace new ${inactive_stack} || \
-            terraform -chdir=terraform/infrastructure workspace select ${inactive_stack}
-
-      - name: Lock Environment State
-        run: |
-          python ./scripts/set-env-config.py state-lock true ${{ inputs.environment }}
-
       - name: Activate Stack
         run: |
-          inactive_stack=$(python ./scripts/get-env-config.py inactive-stack ${{ inputs.environment }})
-          python ./scripts/activate-stack.py ${inactive_stack} ${{ inputs.environment }}
-
-      - name: Unlock Environment State
-        run: |
-          python ./scripts/set-env-state.py unlock ${{ inputs.environment }}
+          inactive_stack=$(python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
+          python ./scripts/activate_stack.py ${inactive_stack} ${{ inputs.environment }}
 
   post-release-verify:
     name: Post Release Verification
+    needs: [activate-stack]
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
 
@@ -309,5 +295,5 @@ jobs:
 
       - name: Deactivate Stack
         run: |
-          inactive_stack_name=$(python ./scripts/get-env-config.py inactive-stack ${{ inputs.environment }})
+          inactive_stack_name=$(python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
           python ./scripts/activate-stack.py ${inactive_stack_name}

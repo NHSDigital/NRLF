@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import json
 import sys
+import traceback
 
+import aws_session_assume
 import fire
-from aws_session_assume import get_boto_session
 
 CONFIG_LOCK_STATE = "lock-state"
 CONFIG_INACTIVE_STACK = "inactive-stack"
@@ -37,21 +38,59 @@ def _update_and_unlock(environment_config: dict, parameters_key: str, sm: any):
     )
 
 
-def _switch_active_stack(stack_name: str):
+def _switch_active_stack(stack_name: str, env_domain_name: str, session: any):
     # Change API mappings for APIGW
-    print(f"Switching APIGW to point to {stack_name}")
-    # TODO
+    print(f"Gathering data about APIs for {env_domain_name} for {stack_name}....")
+    api_gw = session.client("apigateway")
+    env_apis = {
+        api["name"]: api["id"]
+        for api in api_gw.get_rest_apis(limit=100)["items"]
+        if api["name"].startswith(f"nhsd-nrlf--{stack_name}--")
+    }
+
+    if len(env_apis) != 2:
+        raise ValueError(
+            f"Expected 2 APIs for stack {stack_name}, got {env_apis.keys()}"
+        )
+
+    api_gwv2 = session.client("apigatewayv2")
+    existing_mappings = {
+        mapping["ApiMappingKey"]: mapping["ApiMappingId"]
+        for mapping in api_gwv2.get_api_mappings(DomainName=env_domain_name)["Items"]
+    }
+
+    if len(existing_mappings) != 2:
+        raise ValueError(
+            f"Expected 2 API mappings for domain {env_domain_name}, got {len(existing_mappings)}"
+        )
+    if "consumer" not in existing_mappings or "producer" not in existing_mappings:
+        raise ValueError(
+            f"Expected API mappings for consumer and producer, got {existing_mappings.keys()}"
+        )
+
+    print(f"Switching APIGW for {env_domain_name} to point to {stack_name}")
+    api_gwv2.update_api_mapping(
+        ApiId=env_apis[f"nhsd-nrlf--{stack_name}--consumer"],
+        DomainName=env_domain_name,
+        ApiMappingId=existing_mappings["consumer"],
+        Stage="production",
+    )
+    api_gwv2.update_api_mapping(
+        ApiId=env_apis[f"nhsd-nrlf--{stack_name}--producer"],
+        DomainName=env_domain_name,
+        ApiMappingId=existing_mappings["producer"],
+        Stage="production",
+    )
 
 
-def main(stack_name: str, env: str):
-    boto_session = get_boto_session(env)
-    sm = boto_session.client("secretsmanager")
+def activate_stack(stack_name: str, env: str, session: any):
+    sm = session.client("secretsmanager")
 
     parameters_key = f"nhsd-nrlf--{env}--env-config"
     response = sm.get_secret_value(SecretId=parameters_key)
 
     environment_config = json.loads(response["SecretString"])
-    print(f"Got environment config for ${env}: {environment_config}")
+    print(f"Got environment config for {env}: {environment_config}")
 
     lock_state = environment_config[CONFIG_LOCK_STATE]
     if lock_state != "open":
@@ -74,8 +113,10 @@ def main(stack_name: str, env: str):
     )
 
     try:
-        print(f"Activating stack {stack_name}....")
-        _switch_active_stack(stack_name)
+        domain_name = environment_config["domain-name"]
+
+        print(f"Activating stack {stack_name} for {domain_name}....")
+        _switch_active_stack(stack_name, env_domain_name=domain_name, session=session)
     except Exception as err:
         print(
             "Failed to switch active stack. Unlocking and bailing out....",
@@ -88,6 +129,7 @@ def main(stack_name: str, env: str):
             sm=sm,
         )
         print(f"Failed to activate stack: {err}", file=sys.stderr)
+        print(f"Stack trace: {traceback.format_exc()}", file=sys.stderr)
         return
 
     print("Updating environment config and unlocking....")
@@ -96,6 +138,11 @@ def main(stack_name: str, env: str):
     _update_and_unlock(environment_config, parameters_key=parameters_key, sm=sm)
 
     print(f"Complete. Stack {stack_name} is now the active stack for {env}")
+
+
+def main(stack_name: str, env: str):
+    boto_session = aws_session_assume.get_boto_session(env)
+    activate_stack(stack_name, env=env, session=boto_session)
 
 
 if __name__ == "__main__":

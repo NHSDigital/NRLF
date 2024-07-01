@@ -105,4 +105,4 @@ env = [
     "AUTH_STORE=auth-store",
     "TABLE_NAME=unit-test-document-pointer"
 ]
-pythonpath = ["."]
+pythonpath = [".", "./scripts"]
