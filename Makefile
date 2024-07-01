@@ -36,6 +36,7 @@ asdf-install: ## Install the required tools via ASDF
 configure: asdf-install check-warn ## Configure this project repo, including install dependencies
 	cp scripts/commit-msg.py .git/hooks/prepare-commit-msg && chmod ug+x .git/hooks/*
 	poetry install
+	poetry run pre-commit install
 
 check: ## Check the build environment is setup correctly
 	@./scripts/check-build-environment.sh
