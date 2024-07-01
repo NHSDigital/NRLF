@@ -1,6 +1,6 @@
 resource "aws_iam_policy" "pointers-table-read" {
   name        = "${var.name_prefix}-pointers-table-read"
-  description = "Read the document-pointer table"
+  description = "Read the pointers table"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -31,7 +31,7 @@ resource "aws_iam_policy" "pointers-table-read" {
 
 resource "aws_iam_policy" "pointers-table-write" {
   name        = "${var.name_prefix}-pointers-table-write"
-  description = "Write to the document-pointer table"
+  description = "Write to the pointers table"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
