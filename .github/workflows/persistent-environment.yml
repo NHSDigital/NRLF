@@ -192,7 +192,7 @@ jobs:
         run: terraform -chdir=terraform/infrastructure apply tfplan
 
       - name: Smoke Test
-        run: make ENV=${{ inputs.environment }} smoke-test-internal
+        run: make ENV=${{ inputs.environment }} test-smoke-internal
 
   activate-stack:
     name: Activate Stack - ${{ inputs.environment }}

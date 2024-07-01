@@ -9,6 +9,7 @@ import fire
 CONFIG_LOCK_STATE = "lock-state"
 CONFIG_INACTIVE_STACK = "inactive-stack"
 CONFIG_ACTIVE_STACK = "active-stack"
+CONFIG_DOMAIN_NAME = "domain-name"
 
 STATE_LOCKED = "locked"
 STATE_OPEN = "open"
@@ -113,7 +114,7 @@ def activate_stack(stack_name: str, env: str, session: any):
     )
 
     try:
-        domain_name = environment_config["domain-name"]
+        domain_name = environment_config[CONFIG_DOMAIN_NAME]
 
         print(f"Activating stack {stack_name} for {domain_name}....")
         _switch_active_stack(stack_name, env_domain_name=domain_name, session=session)
