@@ -94,6 +94,16 @@ def add_test_files(folder, file_name, local_path):
         json.dump(POINTER_TYPES, f)
 
 
+def add_test_files1(application_id, ods_code, permissions_file):
+    print("Adding test files to temporary directory...")
+    with open(permissions_file, "a") as f:
+        print(
+            f"This is what we will save: \n[{application_id}]\n{ods_code} = {POINTER_TYPES}"
+        )
+        f.write(f"\n[{application_id}]\n")
+        f.write(f"{ods_code} = {POINTER_TYPES}")
+
+
 def download_files(s3_client, bucket_name, local_path, file_names, folders):
     print(f"Downloading {len(file_names)} S3 files to temporary directory...")
     local_path = Path(local_path)
@@ -125,10 +135,8 @@ def main(env: str, path_to_store: str):
     permissions_file_path = permissions_path.joinpath("permissions.toml")
 
     s3 = boto_session.client("s3")
-    print(
-        f"Trying to download bucket: {bucket}, file: {permissions_file_path.name}, dest:  {str(permissions_file_path)}"
-    )
     s3.download_file(bucket, permissions_file_path.name, str(permissions_file_path))
+    add_test_files1("K6PerformanceTest", "Y05868", str(permissions_file_path))
     # files, folders = get_file_folders(s3, bucket)
 
     # download_files(
