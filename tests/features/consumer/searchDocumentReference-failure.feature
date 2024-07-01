@@ -150,7 +150,7 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
     When consumer 'Z26' searches for DocumentReferences with parameters:
       | parameter | value      |
       | subject   | 9278693472 |
-      | type      | 123        |
+      | type      | 736253002  |
     Then the response status code is 403
     And the response is an OperationOutcome with 1 issue
     And the OperationOutcome contains the issue:

@@ -84,7 +84,7 @@ def get_file_folders(s3_client, bucket_name, prefix=""):
 
 
 def add_test_files(folder, file_name, local_path):
-    print("Adding test files to temporary direrectory...")
+    print("Adding test files to temporary directory...")
     folder_path = Path.joinpath(local_path, folder)
     # Create all folders in the path
     folder_path.mkdir(parents=True, exist_ok=True)
@@ -95,7 +95,7 @@ def add_test_files(folder, file_name, local_path):
 
 
 def download_files(s3_client, bucket_name, local_path, file_names, folders):
-    print(f"Downloading {len(file_names)} S3 files to temporary direrectory...")
+    print(f"Downloading {len(file_names)} S3 files to temporary directory...")
     local_path = Path(local_path)
 
     for folder in folders:
