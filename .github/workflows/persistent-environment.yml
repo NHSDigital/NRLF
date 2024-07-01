@@ -76,13 +76,13 @@ jobs:
           name: build-artifacts
           path: |
             dist/*.zip
-            !dist/nrlf-permissions.zip
+            !dist/nrlf_permissions.zip
 
       - name: Save NRLF Permissions cache
         uses: actions/cache/save@v4
         with:
           key: ${{ github.run_id }}-nrlf-permissions
-          path: dist/nrlf-permissions.zip
+          path: dist/nrlf_permissions.zip
 
   terraform-plan:
     name: Terraform Plan - ${{ inputs.environment }}
@@ -129,7 +129,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           key: ${{ github.run_id }}-nrlf-permissions
-          path: dist/nrlf-permissions.zip
+          path: dist
           fail-on-cache-miss: true
 
       - name: Terraform Init
@@ -184,7 +184,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           key: ${{ github.run_id }}-nrlf-permissions
-          path: dist/nrlf-permissions.zip
+          path: dist
           fail-on-cache-miss: true
 
       - name: Configure Management Credentials
