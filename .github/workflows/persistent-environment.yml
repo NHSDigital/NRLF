@@ -211,7 +211,7 @@ jobs:
         run: make ENV=${{ inputs.environment }} test-smoke-internal
 
   activate-stack:
-    name: Activate New Stack - ${{ inputs.environment }}
+    name: Activate - ${{ inputs.environment }}
     needs: [terraform-apply]
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
@@ -254,7 +254,7 @@ jobs:
           poetry run python ./scripts/activate_stack.py ${inactive_stack} ${{ inputs.environment }}
 
   post-release-verify:
-    name: Post Release Verify - ${{ inputs.environment }}
+    name: Verify - ${{ inputs.environment }}
     needs: [activate-stack]
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
@@ -297,6 +297,7 @@ jobs:
 
   rollback-stack:
     name: Rollback - ${{ inputs.environment }}
+    needs: [post-release-verify]
     if: ${{ needs.post-release-verify.result == 'failure' }}
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
