@@ -1,63 +1,67 @@
 import json
 import os
 
-import boto3
 import pytest
-from moto import mock_aws
 
 from scripts.activate_stack import activate_stack
 
 
-@pytest.fixture(scope="session")
-def mock_aws_credentials():
-    """Mocked AWS Credentials for moto."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"  # pragma: allowlist secret
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+@pytest.fixture
+def mock_secretsmanager(mocker):
+    mock_secretsmanager = mocker.MagicMock()
+    mock_env_configs = {}
+    mock_secretsmanager.get_secret_value.side_effect = lambda SecretId: {
+        "SecretId": SecretId,
+        "SecretString": json.dumps(mock_env_configs[SecretId]),
+    }
+    mock_secretsmanager.create_secret.side_effect = lambda Name, SecretString: {
+        mock_env_configs.update({Name: json.loads(SecretString)})
+    }
+    mock_secretsmanager.put_secret_value.side_effect = lambda SecretId, SecretString: {
+        mock_env_configs.update({SecretId: json.loads(SecretString)})
+    }
+
+    return mock_secretsmanager
 
 
-@pytest.fixture(scope="session")
-def mock_boto_session(mock_aws_credentials):
-    with mock_aws():
-        yield boto3.Session(region_name="eu-west-2")
+@pytest.fixture
+def mock_apigw(mocker):
+    mock_apigw = mocker.MagicMock()
+
+    mock_rest_apis = [
+        {"name": "nhsd-nrlf--test-stack-1--consumer", "id": "consumer-id"},
+        {"name": "nhsd-nrlf--test-stack-1--producer", "id": "producer-id"},
+        {"name": "nhsd-nrlf--test-stack-2--consumer", "id": "consumer-id"},
+        {"name": "nhsd-nrlf--test-stack-2--producer", "id": "producer-id"},
+    ]
+
+    mock_apigw.get_rest_apis.return_value = {"items": mock_rest_apis}
+    return mock_apigw
 
 
-# @pytest.fixture(scope="session", autouse=True)
-# def create_mock_aws_resources(mock_boto_session):
-#    apigw = mock_boto_session.client("apigateway")
-#    apis = {}
-#    for stack in ["test-stack-1", "test-stack-2"]:
-#        consumer = apigw.create_rest_api(name=f"nhsd-nrlf--{stack}--consumer", )
-#        apigw.create_stage(restApiId=consumer["id"], deploymentId="test-1", stageName="production")
-#        producer = apigw.create_rest_api(name=f"nhsd-nrlf--{stack}--producer")
-#        apigw.create_stage(restApiId=producer["id"], deploymentId="test-1", stageName="production")
-#
-#        apis[stack] = { "consumer": consumer, "producer": producer }
-#
-#    active_stack = apis["test-stack-1"]
-#
-#    apigw_v2 = mock_boto_session.client("apigatewayv2")
-#    apigw_v2.create_domain_name(DomainName="test.domain.name")
-#    # TODO-NOW DOESN'T WORK - going to switch out moto for the mocks
-#    apigw_v2.create_api_mapping(DomainName="test.domain.name", ApiId=active_stack["consumer"]["id"], ApiMappingKey="consumer", Stage="production")
-#    apigw_v2.create_api_mapping(DomainName="test.domain.name", ApiId=active_stack["producer"]["id"], ApiMappingKey="producer", Stage="production")
+@pytest.fixture
+def mock_apigwv2(mocker):
+    mock_apigwv2 = mocker.MagicMock()
+
+    mock_api_mappings = {
+        "consumer-id": {"ApiMappingKey": "consumer", "ApiMappingId": "consumer-id"},
+        "producer-id": {"ApiMappingKey": "producer", "ApiMappingId": "producer-id"},
+    }
+
+    mock_apigwv2.get_api_mappings.return_value = {"Items": mock_api_mappings.values()}
+
+    return mock_apigwv2
 
 
-@pytest.fixture(scope="session")
-def mock_secretsmanager(mock_boto_session):
-    yield mock_boto_session.client("secretsmanager")
-
-
-@pytest.fixture(scope="session")
-def mock_api_gateway(mock_boto_session):
-    yield mock_boto_session.client("apigateway")
-
-
-@pytest.fixture(scope="session")
-def mock_api_gateway_v2(mock_boto_session):
-    yield mock_boto_session.client("apigatewayv2")
+@pytest.fixture(scope="function")
+def mock_boto_session(mocker, mock_secretsmanager, mock_apigw, mock_apigwv2):
+    mock_boto_session = mocker.MagicMock()
+    mock_boto_session.client.side_effect = lambda service_name: {
+        "secretsmanager": mock_secretsmanager,
+        "apigateway": mock_apigw,
+        "apigatewayv2": mock_apigwv2,
+    }[service_name]
+    return mock_boto_session
 
 
 def _create_mock_env_config():
@@ -69,7 +73,6 @@ def _create_mock_env_config():
     }
 
 
-@pytest.mark.skip(reason="Moto not working for apigw, going to re-write this")
 def test_happy_path(mock_boto_session, mock_secretsmanager):
     mock_env_config = _create_mock_env_config()
     mock_secretsmanager.create_secret(

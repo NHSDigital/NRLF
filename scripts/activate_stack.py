@@ -100,8 +100,8 @@ def activate_stack(stack_name: str, env: str, session: any):
         )
         return
 
-    active_stack = environment_config[CONFIG_ACTIVE_STACK]
-    if active_stack == stack_name:
+    current_active_stack = environment_config[CONFIG_ACTIVE_STACK]
+    if current_active_stack == stack_name:
         print("Cannot activate stack, stack is already active", file=sys.stderr)
         return
 
@@ -133,7 +133,7 @@ def activate_stack(stack_name: str, env: str, session: any):
         return
 
     print("Updating environment config and unlocking....")
-    environment_config[CONFIG_INACTIVE_STACK] = active_stack
+    environment_config[CONFIG_INACTIVE_STACK] = current_active_stack
     environment_config[CONFIG_ACTIVE_STACK] = stack_name
     _update_and_unlock(environment_config, parameters_key=parameters_key, sm=sm)
 
