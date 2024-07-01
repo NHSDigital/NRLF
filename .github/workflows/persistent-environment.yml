@@ -195,7 +195,7 @@ jobs:
         run: make ENV=${{ inputs.environment }} test-smoke-internal
 
   activate-stack:
-    name: Activate Stack - ${{ inputs.environment }}
+    name: Activate New Stack - ${{ inputs.environment }}
     needs: [terraform-apply]
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
@@ -230,7 +230,7 @@ jobs:
           python ./scripts/activate_stack.py ${inactive_stack} ${{ inputs.environment }}
 
   post-release-verify:
-    name: Post Release Verification
+    name: Post Release Verify - ${{ inputs.environment }}
     needs: [activate-stack]
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
@@ -264,8 +264,8 @@ jobs:
           make ENV=${{ inputs.environment }} test-smoke-external
 
   rollback-stack:
-    name: Rollback Stack - ${{ inputs.environment }}
-    # if: ${{ needs.post-release-verify.result == 'failure' }}
+    name: Rollback - ${{ inputs.environment }}
+    if: ${{ needs.post-release-verify.result == 'failure' }}
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
 
