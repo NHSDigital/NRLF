@@ -75,7 +75,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: dist/*.zip
+          path: |
+            dist/*.zip
+            !dist/nrlf-permissions.zip
+
+      - name: Save NRLF Permissions cache
+        uses: actions/cache/save@v4
+        with:
+          key: ${{ github.run_id }}-nrlf-permissions
+          path: dist/nrlf-permissions.zip
 
   terraform-plan:
     name: Terraform Plan - ${{ inputs.environment }}
@@ -125,6 +133,13 @@ jobs:
         run: |
           poetry install --no-root
           source $(poetry env info --path)/bin/activate
+
+      - name: Restore NRLF permissions cache
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ github.run_id }}-nrlf-permissions
+          path: dist/nrlf-permissions.zip
+          fail-on-cache-miss: true
 
       - name: Terraform Init
         run: |
@@ -176,6 +191,13 @@ jobs:
         with:
           name: build-artifacts
           path: dist
+
+      - name: Restore NRLF permissions cache
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ github.run_id }}-nrlf-permissions
+          path: dist/nrlf-permissions.zip
+          fail-on-cache-miss: true
 
       - name: Configure Management Credentials
         uses: aws-actions/configure-aws-credentials@v4
