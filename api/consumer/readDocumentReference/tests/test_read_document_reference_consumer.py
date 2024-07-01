@@ -3,7 +3,6 @@ import json
 from moto import mock_aws
 
 from api.consumer.readDocumentReference.read_document_reference import handler
-from nrlf.core.constants import PointerTypes
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
 from nrlf.tests.data import load_document_reference
 from nrlf.tests.dynamodb import mock_repository
@@ -105,14 +104,12 @@ def test_read_document_reference_missing_id():
 def test_read_document_reference_unauthorised_for_type(
     repository: DocumentPointerRepository,
 ):
-    doc_ref = load_document_reference("Y05868-736253002-Valid")
+    doc_ref = load_document_reference("RQI-736253002-Valid")
     doc_pointer = DocumentPointer.from_document_reference(doc_ref)
     repository.create(doc_pointer)
 
     event = create_test_api_gateway_event(
-        headers=create_headers(
-            app_id="12356", pointer_types=[PointerTypes.EMERGENCY_HEALTHCARE_PLAN.value]
-        ),
+        headers=create_headers(app_id="12356", ods_code="RQI"),
         path_parameters={"id": doc_pointer.id},
     )
 
@@ -157,7 +154,7 @@ def test_document_reference_invalid_json(repository: DocumentPointerRepository):
     repository.create(doc_pointer)
 
     event = create_test_api_gateway_event(
-        headers=create_headers(pointer_types=[PointerTypes.MENTAL_HEALTH_PLAN.value]),
+        headers=create_headers(),
         path_parameters={"id": doc_pointer.id},
     )
 

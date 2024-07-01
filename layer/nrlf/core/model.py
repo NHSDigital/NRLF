@@ -56,9 +56,8 @@ class ConnectionMetadata(BaseModel):
     ods_code: str = Field(alias="nrl.ods-code")
     ods_code_extension: str | None = Field(alias="nrl.ods-code-extension", default=None)
     nrl_permissions: list[str] = Field(alias="nrl.permissions", default_factory=list)
-    enable_authorization_lookup: bool = Field(
-        alias="nrl.enable-authorization-lookup", default=False
-    )
+    nrl_app_id: str = Field(alias="nrl.app-id")
+    is_test_event: bool = Field(alias="nrl.test-event", default=False)
     client_rp_details: ClientRpDetails
 
     @property

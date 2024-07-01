@@ -262,9 +262,7 @@ def test_search_document_reference_filters_by_pointer_types(
     repository.create(doc_pointer)
 
     event = create_test_api_gateway_event(
-        headers=create_headers(
-            app_id="12356", pointer_types=[PointerTypes.EOL_COORDINATION_SUMMARY.value]
-        ),
+        headers=create_headers(app_id="12356", ods_code="X26"),
         body=json.dumps(
             {
                 "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|6700028191",

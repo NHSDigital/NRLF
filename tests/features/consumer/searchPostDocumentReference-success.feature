@@ -105,10 +105,9 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
       | author      | X26                                   |
     And the Bundle does not contain a DocumentReference with ID 'X26-1111111111-SearchMultipleRefTestDifferentType'
 
-  Scenario: Search for multiple DocumentReferences by NHS number - S3 authorisation
+  Scenario: Search for multiple DocumentReferences by NHS number
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the application is configured to lookup permissions from S3
-    And the organisation 'RX898' is authorised in S3 to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system                 | value     |
       | http://snomed.info/sct | 736253002 |
     And a DocumentReference resource exists with values:

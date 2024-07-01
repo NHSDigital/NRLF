@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import json
 from os import path
 from pathlib import Path
 
@@ -12,6 +13,16 @@ AWS_ACCOUNT_FOR_ENV = {
     "int": "test",
     "prod": "prod",
 }
+
+POINTER_TYPES = [
+    "http://snomed.info/sct|736253002",
+    "http://snomed.info/sct|1363501000000100",
+    "http://snomed.info/sct|1382601000000107",
+    "http://snomed.info/sct|325691000000100",
+    "http://snomed.info/sct|736373009",
+    "http://snomed.info/sct|861421000000109",
+    "http://snomed.info/sct|887701000000100",
+]
 
 
 def get_account_id(env: str):
@@ -72,8 +83,19 @@ def get_file_folders(s3_client, bucket_name, prefix=""):
     return file_names, folders
 
 
+def add_test_files(folder, file_name, local_path):
+    print("Adding test files to temporary directory...")
+    folder_path = Path.joinpath(local_path, folder)
+    # Create all folders in the path
+    folder_path.mkdir(parents=True, exist_ok=True)
+    file_path = Path.joinpath(folder_path, file_name)
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(file_path, "w") as f:
+        json.dump(POINTER_TYPES, f)
+
+
 def download_files(s3_client, bucket_name, local_path, file_names, folders):
-    print(f"Downloading {len(file_names)} S3 files to temporary direrectory...")
+    print(f"Downloading {len(file_names)} S3 files to temporary directory...")
     local_path = Path(local_path)
 
     for folder in folders:
@@ -86,6 +108,8 @@ def download_files(s3_client, bucket_name, local_path, file_names, folders):
         # Create folder for parent directory
         file_path.parent.mkdir(parents=True, exist_ok=True)
         s3_client.download_file(bucket_name, file_name, str(file_path))
+
+    add_test_files("K6PerformanceTest", "Y05868.json", local_path)
 
 
 def main(env: str, path_to_store: str):

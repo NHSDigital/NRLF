@@ -101,7 +101,7 @@ def test_read_document_reference_missing_id():
 
 def test_read_document_reference_incorrect_ods_code():
     event = create_test_api_gateway_event(
-        headers=create_headers(ods_code="X26"),
+        headers=create_headers(ods_code="RQI"),
         path_parameters={"id": "Y05868-99999-99999-999999"},
     )
 

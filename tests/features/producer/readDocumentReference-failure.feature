@@ -28,7 +28,7 @@ Feature: Producer - readDocumentReference - Failure Scenarios
 
   Scenario: No pointer types registered for organisation
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the organisation 'RX898' is authorised in S3 to access pointer types:
+    And the organisation 'RX898' is authorised to access pointer types:
       | system | value |
     When producer 'RX898' reads a DocumentReference with ID 'RX898-000000000-000000000'
     Then the response status code is 403
@@ -51,35 +51,8 @@ Feature: Producer - readDocumentReference - Failure Scenarios
       }
       """
 
-  Scenario: No pointer types registered for organisation in S3
+  Scenario: No permission file exists for organisation
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the application is configured to lookup permissions from S3
-    And the organisation 'RX898' is authorised in S3 to access pointer types:
-      | system | value |
-    When producer 'RX898' reads a DocumentReference with ID 'RX898-000000000-000000000'
-    Then the response status code is 403
-    And the response is an OperationOutcome with 1 issue
-    And the OperationOutcome contains the issue:
-      """
-      {
-        "severity": "error",
-        "code": "forbidden",
-        "details": {
-          "coding": [
-            {
-              "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
-              "code": "ACCESS DENIED",
-              "display": "Access has been denied to process this request"
-            }
-          ]
-        },
-        "diagnostics": "Your organisation 'RX898' does not have permission to access this resource. Contact the onboarding team."
-      }
-      """
-
-  Scenario: No permission file exists for organisation in S3
-    Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
-    And the application is configured to lookup permissions from S3
     When producer 'RX898' reads a DocumentReference with ID 'RX898-000000000-000000000'
     Then the response status code is 403
     And the response is an OperationOutcome with 1 issue

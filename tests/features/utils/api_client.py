@@ -61,13 +61,10 @@ class APIClient(ABC):
                 client_cert=context.client_cert,
                 connection_metadata=ConnectionMetadata.parse_obj(
                     {
-                        "nrl.pointer-types": context.application.pointer_types.get(
-                            ods_code, []
-                        ),
                         "nrl.ods-code": ods_code_parts[0],
                         "nrl.ods-code-extension": ods_code_extension,
-                        "nrl.enable-authorization-lookup": context.application.enable_s3_permissions_lookup,
                         "nrl.permissions": [],
+                        "nrl.app-id": context.application.app_id,
                         "client_rp_details": {
                             "developer.app.name": context.application.app_name,
                             "developer.app.id": context.application.app_id,

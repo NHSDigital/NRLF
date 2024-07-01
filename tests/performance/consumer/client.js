@@ -1,6 +1,28 @@
-import { NHS_NUMBERS, POINTER_IDS, POINTER_TYPES } from "../constants.js";
+import {
+  NHS_NUMBERS,
+  POINTER_IDS,
+  POINTER_TYPES,
+  ODS_CODE,
+} from "../constants.js";
 import http from "k6/http";
 import { check } from "k6";
+
+function getHeaders(odsCode = ODS_CODE) {
+  return {
+    "Content-Type": "application/fhir+json",
+    "NHSD-Connection-Metadata": JSON.stringify({
+      "nrl.ods-code": odsCode,
+      "nrl.pointer-types": POINTER_TYPES.map(
+        (type) => `http://snomed.info/sct|${type}`
+      ),
+      "nrl.app-id": "K6PerformanceTest",
+    }),
+    "NHSD-Client-RP-Details": JSON.stringify({
+      "developer.app.name": "K6PerformanceTest",
+      "developer.app.id": "K6PerformanceTest",
+    }),
+  };
+}
 
 export function countDocumentReference() {
   const choice = Math.floor(Math.random() * NHS_NUMBERS.length);
@@ -12,25 +34,7 @@ export function countDocumentReference() {
   const res = http.get(
     `https://${__ENV.HOST}/consumer/DocumentReference/_count?subject:identifier=${identifier}`,
     {
-      headers: {
-        "Content-Type": "application/fhir+json",
-        "NHSD-Connection-Metadata": JSON.stringify({
-          "nrl.ods-code": "Y05868",
-          "nrl.pointer-types": [
-            "http://snomed.info/sct|736253002",
-            "http://snomed.info/sct|1363501000000100",
-            "http://snomed.info/sct|1382601000000107",
-            "http://snomed.info/sct|325691000000100",
-            "http://snomed.info/sct|736373009",
-            "http://snomed.info/sct|861421000000109",
-            "http://snomed.info/sct|887701000000100",
-          ],
-        }),
-        "NHSD-Client-RP-Details": JSON.stringify({
-          "developer.app.name": "K6PerformanceTest",
-          "developer.app.id": "K6PerformanceTest",
-        }),
-      },
+      headers: getHeaders(),
     }
   );
 
@@ -44,25 +48,7 @@ export function readDocumentReference() {
   const res = http.get(
     `https://${__ENV.HOST}/consumer/DocumentReference/${id}`,
     {
-      headers: {
-        "Content-Type": "application/fhir+json",
-        "NHSD-Connection-Metadata": JSON.stringify({
-          "nrl.ods-code": "Y05868",
-          "nrl.pointer-types": [
-            "http://snomed.info/sct|736253002",
-            "http://snomed.info/sct|1363501000000100",
-            "http://snomed.info/sct|1382601000000107",
-            "http://snomed.info/sct|325691000000100",
-            "http://snomed.info/sct|736373009",
-            "http://snomed.info/sct|861421000000109",
-            "http://snomed.info/sct|887701000000100",
-          ],
-        }),
-        "NHSD-Client-RP-Details": JSON.stringify({
-          "developer.app.name": "K6PerformanceTest",
-          "developer.app.id": "K6PerformanceTest",
-        }),
-      },
+      headers: getHeaders(),
     }
   );
 
@@ -82,25 +68,7 @@ export function searchDocumentReference() {
   const res = http.get(
     `https://${__ENV.HOST}/consumer/DocumentReference?subject:identifier=${identifier}&type=${type}`,
     {
-      headers: {
-        "Content-Type": "application/fhir+json",
-        "NHSD-Connection-Metadata": JSON.stringify({
-          "nrl.ods-code": "Y05868",
-          "nrl.pointer-types": [
-            "http://snomed.info/sct|736253002",
-            "http://snomed.info/sct|1363501000000100",
-            "http://snomed.info/sct|1382601000000107",
-            "http://snomed.info/sct|325691000000100",
-            "http://snomed.info/sct|736373009",
-            "http://snomed.info/sct|861421000000109",
-            "http://snomed.info/sct|887701000000100",
-          ],
-        }),
-        "NHSD-Client-RP-Details": JSON.stringify({
-          "developer.app.name": "K6PerformanceTest",
-          "developer.app.id": "K6PerformanceTest",
-        }),
-      },
+      headers: getHeaders(),
     }
   );
 
@@ -125,25 +93,7 @@ export function searchPostDocumentReference() {
     `https://${__ENV.HOST}/consumer/DocumentReference/_search`,
     body,
     {
-      headers: {
-        "Content-Type": "application/fhir+json",
-        "NHSD-Connection-Metadata": JSON.stringify({
-          "nrl.ods-code": "Y05868",
-          "nrl.pointer-types": [
-            "http://snomed.info/sct|736253002",
-            "http://snomed.info/sct|1363501000000100",
-            "http://snomed.info/sct|1382601000000107",
-            "http://snomed.info/sct|325691000000100",
-            "http://snomed.info/sct|736373009",
-            "http://snomed.info/sct|861421000000109",
-            "http://snomed.info/sct|887701000000100",
-          ],
-        }),
-        "NHSD-Client-RP-Details": JSON.stringify({
-          "developer.app.name": "K6PerformanceTest",
-          "developer.app.id": "K6PerformanceTest",
-        }),
-      },
+      headers: getHeaders(),
     }
   );
 
