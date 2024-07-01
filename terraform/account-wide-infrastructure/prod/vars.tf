@@ -4,6 +4,11 @@ variable "assume_account" {
 
 variable "assume_role" {}
 
+variable "prod_api_domain_name" {
+  description = "The internal DNS name of the API Gateway for the prod environment"
+  default     = "api.recordlocator.national.nhs.uk"
+}
+
 variable "private_subnet_cidr_blocks" {
   description = "Available CIDR blocks for private subnets"
   type        = list(string)
