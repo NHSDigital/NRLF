@@ -88,10 +88,3 @@ repos:
   #       language: pygrep
   #       types: [python]
   #       exclude: layer/nrlf/nrlf/core/validators.py|layer/psycopg2/.*|mi/.*
-
-  - repo: local
-    hooks:
-      - id: create_changelog
-        name: Create changelog from changelog files
-        entry: changelog/scripts/changelog-pre-commit.sh
-        language: python

@@ -16,7 +16,7 @@ def create_headers(
                 "nrl.ods-code": ods_code,
                 "nrl.permissions": nrl_permissions,
                 "nrl.app-id": nrl_app_id,
-                "nrl.test-event": True,
+                "nrl.load-test-permissions": True,
             }
         ),
         "nhsd-client-rp-details": json.dumps(

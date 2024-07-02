@@ -1,30 +1,20 @@
-import json
 from contextlib import suppress
 
 from behave import *  # noqa
 from behave.runner import Context
 from pydantic import BaseModel
+from utils.data import create_test_document_reference
 
-from nrlf.core.boto import get_s3_client
 from nrlf.core.dynamodb.model import DocumentPointer
-from tests.features.utils.data import create_test_document_reference
 
 
 class Application(BaseModel):
     app_id: str = "UNSET"
     app_name: str = "UNSET"
+    test_pointer_types: dict[str, list[str]] = {}
 
-    def add_pointer_types(self, ods_code: str, context: Context):
-        if not context.table:
-            raise ValueError("No permissions table provided")
-
-        pointer_types = [f"{system}|{value}" for system, value in context.table]
-        bucket = f"nhsd-nrlf--{context.env}--authorization-store"
-        key = f"{self.app_id}/{ods_code}.json"
-
-        s3_client = get_s3_client()
-        s3_client.put_object(Bucket=bucket, Key=key, Body=json.dumps(pointer_types))
-        context.add_cleanup(lambda: s3_client.delete_object(Bucket=bucket, Key=key))
+    def add_test_pointer_types(self, ods_code: str, pointer_types: list[str]):
+        self.test_pointer_types[ods_code] = pointer_types
 
 
 @given("the application '{app_name}' (ID '{app_id}') is registered to access the API")
@@ -37,7 +27,8 @@ def register_org_permissions_step(context: Context, ods_code: str):
     if not context.table:
         raise ValueError("No permissions table provided")
 
-    context.application.add_pointer_types(ods_code, context)
+    test_pointer_types = [f"{system}|{value}" for system, value in context.table]
+    context.application.add_test_pointer_types(ods_code, test_pointer_types)
 
 
 @given("a DocumentReference resource exists with values")

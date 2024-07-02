@@ -32,6 +32,7 @@ CONNECTION_METADATA = "nhsd-connection-metadata"
 PERMISSION_AUDIT_DATES_FROM_PAYLOAD = "audit-dates-from-payload"
 PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL = "supersede-ignore-delete-fail"
 PERMISSION_ALLOW_ALL_POINTER_TYPES = "allow-all-pointer-types"
+PERMISSIONS_FILENAME = "permissions.toml"
 
 
 PRODUCER_URL_PATH = "/producer/FHIR/R4/DocumentReference"
@@ -49,7 +50,7 @@ class PointerTypes(Enum):
 
     @staticmethod
     def list():
-        return list(map(lambda type: type.value, PointerTypes))
+        return [pointer.value for pointer in PointerTypes]
 
 
 class Categories(Enum):

@@ -12,7 +12,7 @@ from aws_lambda_powertools.utilities.data_classes import (
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from pydantic import BaseModel
 
-from nrlf.core.authoriser import get_pointer_types, parse_permissions_file
+from nrlf.core.authoriser import get_pointer_types
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.config import Config
 from nrlf.core.constants import PERMISSION_ALLOW_ALL_POINTER_TYPES, PointerTypes
@@ -73,12 +73,8 @@ def load_connection_metadata(headers: Dict[str, str], config: Config):
         return metadata
 
     logger.log(LogReference.HANDLER004b)
-    pointer_types = parse_permissions_file(metadata)
-    if not pointer_types and not metadata.is_test_event:
-        logger.log(LogReference.HANDLER004)
-        pointer_types = get_pointer_types(metadata, config)
 
-    metadata.pointer_types = pointer_types
+    metadata.pointer_types = get_pointer_types(metadata, config)
 
     return metadata
 

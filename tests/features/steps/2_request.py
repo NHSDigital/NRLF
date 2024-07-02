@@ -1,8 +1,7 @@
 from behave import *  # noqa
 from behave.runner import Context
-
-from tests.features.utils.api_client import ConsumerClient, ProducerClient
-from tests.features.utils.data import (
+from utils.api_client import ConsumerClient, ProducerClient
+from utils.data import (
     create_test_document_reference,
     create_test_document_reference_with_defaults,
 )
