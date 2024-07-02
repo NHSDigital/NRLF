@@ -17,6 +17,7 @@ HOST ?= $(TF_WORKSPACE_NAME).api.record-locator.$(ENV).national.nhs.uk
 ENV_TYPE ?= $(ENV)
 
 export PATH := $(PATH):$(PWD)/.venv/bin
+export USE_SHARED_RESOURCES := $(shell poetry run python scripts/are_resources_shared_for_stack.py $(TF_WORKSPACE_NAME))
 
 default: build
 
@@ -79,12 +80,11 @@ test: check-warn ## Run the unit tests
 
 test-features-integration: check-warn ## Run the BDD feature tests in the integration environment
 	@echo "Running feature tests in the integration environment"
-	USE_SHARED_RESOURCES="$$(poetry run python scripts/are_resources_shared_for_stack.py $(TF_WORKSPACE_NAME))" \
-		behave --define="integration_test=true" \
-			--define="env=$(TF_WORKSPACE_NAME)" \
-			--define="account_name=$(ENV)" \
-			--define="use_shared_resources=${USE_SHARED_RESOURCES}" \
-			$(FEATURE_TEST_ARGS)
+	behave --define="integration_test=true" \
+		--define="env=$(TF_WORKSPACE_NAME)" \
+		--define="account_name=$(ENV)" \
+		--define="use_shared_resources=${USE_SHARED_RESOURCES}" \
+		$(FEATURE_TEST_ARGS)
 
 test-smoke-internal: check-warn ## Run the smoke tests against the internal environment
 	@echo "Running smoke tests against the internal environment"
@@ -134,7 +134,7 @@ get-access-token: check-warn ## Get an access token for an environment
 	@poetry run python tests/utilities/get_access_token.py $(ENV) $(APP_ALIAS)
 
 get-s3-perms: check-warn ## Get s3 permissions for an environment
-	@poetry run python scripts/get_s3_permissions.py $(TF_WORKSPACE_NAME) $(DIST_PATH)
+	poetry run python scripts/get_s3_permissions.py ${USE_SHARED_RESOURCES} $(ENV) $(TF_WORKSPACE_NAME) "$(DIST_PATH)"
 	@echo "Creating new Lambda NRLF permissions layer zip"
 	./scripts/add-perms-to-lambda.sh $(DIST_PATH)
 
