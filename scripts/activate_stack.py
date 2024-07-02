@@ -93,18 +93,18 @@ def activate_stack(stack_name: str, env: str, session: any):
     environment_config = json.loads(response["SecretString"])
     print(f"Got environment config for {env}: {environment_config}")
 
+    current_active_stack = environment_config[CONFIG_ACTIVE_STACK]
+    if current_active_stack == stack_name:
+        print("Cannot activate stack, stack is already active", file=sys.stderr)
+        sys.exit(1)
+
     lock_state = environment_config[CONFIG_LOCK_STATE]
     if lock_state != "open":
         print(
             f"Unable to activate stack as lock state is not open: {lock_state}",
             file=sys.stderr,
         )
-        return
-
-    current_active_stack = environment_config[CONFIG_ACTIVE_STACK]
-    if current_active_stack == stack_name:
-        print("Cannot activate stack, stack is already active", file=sys.stderr)
-        return
+        sys.exit(1)
 
     _set_lock_state(
         STATE_LOCKED,
