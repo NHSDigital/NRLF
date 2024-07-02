@@ -1,0 +1,67 @@
+name: Rollback Stack
+run-name: Rollback to inactive stack in ${{ inputs.environment }} by ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to rollback the stack in"
+        required: true
+        default: "dev"
+        type: environment
+
+permissions:
+  id-token: write
+  contents: read
+  actions: write
+
+jobs:
+  rollback-stack:
+    name: Rollback to inactive stack for ${{ inputs.environment }}
+    runs-on: [self-hosted, ci]
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Git clone - ${{ github.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
+
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
+      - name: Get current environment config
+        run: |
+          poetry run python ./scripts/get_env_config.py all ${{ inputs.environment }}
+
+      - name: Rollback
+        run: |
+          inactive_stack_name=$(poetry run python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
+          poetry run python ./scripts/activate-stack.py ${inactive_stack_name} ${{ inputs.environment }}
+
+      - name: "Smoke Test"
+        run: |
+          make ENV=${{ inputs.environment }} test-smoke-external

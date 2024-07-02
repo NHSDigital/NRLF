@@ -131,7 +131,7 @@ def activate_stack(stack_name: str, env: str, session: any):
         )
         print(f"Failed to activate stack: {err}", file=sys.stderr)
         print(f"Stack trace: {traceback.format_exc()}", file=sys.stderr)
-        return
+        sys.exit(1)
 
     print("Updating environment config and unlocking....")
     environment_config[CONFIG_INACTIVE_STACK] = current_active_stack
