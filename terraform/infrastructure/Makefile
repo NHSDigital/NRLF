@@ -6,8 +6,7 @@ ENV_ACCOUNT_NAME ?= $(shell ../../scripts/get-account-name-for-env.sh $(ENV))
 ENV_ACCOUNT_ID ?= $(shell aws secretsmanager get-secret-value --secret-id nhsd-nrlf--mgmt--$(ENV_ACCOUNT_NAME)-account-id --query SecretString --output text)
 USE_SHARED_RESOURCES ?= $(shell poetry run python ../../scripts/are_resources_shared_for_stack.py $(TF_WORKSPACE_NAME))
 
-
-export ENV ENV_ACCOUNT_NAME
+export ENV ENV_ACCOUNT_NAME TF_WORKSPACE_NAME
 
 help: ## Show this help message
 	@echo "Usage: make [target]"
