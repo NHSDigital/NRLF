@@ -61,7 +61,7 @@ class APIClient(ABC):
                 client_cert=context.client_cert,
                 connection_metadata=ConnectionMetadata.parse_obj(
                     {
-                        "nrl.test-pointer-types": context.application.pointer_types.get(
+                        "nrl.test-pointer-types": context.application.test_pointer_types.get(
                             ods_code, []
                         ),
                         "nrl.ods-code": ods_code_parts[0],
