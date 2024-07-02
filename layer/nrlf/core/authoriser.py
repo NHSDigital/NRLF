@@ -14,6 +14,21 @@ from nrlf.core.model import ConnectionMetadata
 def get_pointer_types(
     connection_metadata: ConnectionMetadata, config: Config
 ) -> list[str]:
+    if connection_metadata.test_pointer_types:
+        return connection_metadata.test_pointer_types
+
+    pointer_types = parse_permissions_file(connection_metadata)
+
+    if not pointer_types and not connection_metadata.load_test_permissions:
+        logger.log(LogReference.HANDLER004)
+        pointer_types = get_pointer_types_from_s3(connection_metadata, config)
+
+    return pointer_types
+
+
+def get_pointer_types_from_s3(
+    connection_metadata: ConnectionMetadata, config: Config
+) -> list[str]:
     key = PERMISSIONS_FILENAME
     logger.log(LogReference.S3PERMISSIONS001, bucket=config.AUTH_STORE, key=key)
     s3_client = get_s3_client()
@@ -58,7 +73,7 @@ def parse_permissions_file(connection_metadata: ConnectionMetadata) -> list[str]
 
     file_path = f"/opt/python/nrlf_permissions/{PERMISSIONS_FILENAME}"
 
-    if connection_metadata.is_test_event:
+    if connection_metadata.load_test_permissions:
         file_path = path.abspath(f"layer/test_permissions/{PERMISSIONS_FILENAME}")
 
     pointer_types = []

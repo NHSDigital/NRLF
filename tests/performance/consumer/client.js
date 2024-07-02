@@ -12,7 +12,7 @@ function getHeaders(odsCode = ODS_CODE) {
     "Content-Type": "application/fhir+json",
     "NHSD-Connection-Metadata": JSON.stringify({
       "nrl.ods-code": odsCode,
-      "nrl.pointer-types": POINTER_TYPES.map(
+      "nrl.test-pointer-types": POINTER_TYPES.map(
         (type) => `http://snomed.info/sct|${type}`
       ),
       "nrl.app-id": "K6PerformanceTest",

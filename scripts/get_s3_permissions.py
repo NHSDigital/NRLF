@@ -46,13 +46,6 @@ def get_boto_session_for_account(account_id: str):
     )
 
 
-def add_test_files(application_id, ods_code, permissions_file):
-    print("Adding test files to permissions file...")
-    with open(permissions_file, "a") as f:
-        f.write(f"\n[{application_id}]\n")
-        f.write(f"{ods_code} = {json.dumps(PointerTypes.list())}")
-
-
 def main(env: str, path_to_store: str):
     bucket = f"nhsd-nrlf--{env}--authorization-store"
     account_id = get_account_id(env)
@@ -67,7 +60,6 @@ def main(env: str, path_to_store: str):
 
     s3 = boto_session.client("s3")
     s3.download_file(bucket, permissions_file_path.name, str(permissions_file_path))
-    add_test_files("K6PerformanceTest", "Y05868", str(permissions_file_path))
     print("Downloaded S3 permissions...")
 
 
