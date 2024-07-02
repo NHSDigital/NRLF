@@ -14,7 +14,7 @@ class Application(BaseModel):
     test_pointer_types: dict[str, list[str]] = {}
 
     def add_test_pointer_types(self, ods_code: str, pointer_types: list[str]):
-        self.test_pointer_types = pointer_types
+        self.test_pointer_types[ods_code] = pointer_types
 
 
 @given("the application '{app_name}' (ID '{app_id}') is registered to access the API")
