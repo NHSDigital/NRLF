@@ -50,21 +50,8 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Do asdf magic
-        run: |
-          rm -rf ~/.asdf1
-          git clone --depth 1 --branch master --single-branch https://github.com/asdf-vm/asdf.git ~/.asdf1
-          export ASDF_DIR="$HOME/.asdf1"
-          . "$HOME/.asdf/asdf.sh"
-          make asdf-install
-
-      - name: Setup asdf cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.asdf1/plugins
-            ~/.asdf1/installs
-          key: ${{ runner.os }}-asdfquick3-${{ hashFiles('**/.tool-versions') }}
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
 
       - name: Install zip
         run: sudo apt-get install zip
@@ -131,12 +118,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: Setup asdf cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.asdf
-          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
 
       - name: Install asdf
         uses: asdf-vm/actions/install@v3.0.2
@@ -213,12 +194,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Setup asdf cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.asdf
-          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
-
       - name: Install asdf and tools
         uses: asdf-vm/actions/install@v3.0.2
 
@@ -258,12 +233,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: Setup asdf cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.asdf
-          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
 
       - name: Install asdf and tools
         uses: asdf-vm/actions/install@v3.0.2

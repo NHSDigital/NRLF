@@ -1,6 +1,5 @@
 from behave import *  # noqa
 from behave.runner import Context
-
 from utils.api_client import ConsumerClient, ProducerClient
 from utils.data import (
     create_test_document_reference,

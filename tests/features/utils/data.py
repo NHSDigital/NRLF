@@ -1,13 +1,3 @@
-from nrlf.producer.fhir.r4.model import (
-    Attachment,
-    CodeableConcept,
-    Coding,
-    DocumentReference,
-    DocumentReferenceContent,
-    DocumentReferenceRelatesTo,
-    Identifier,
-    Reference,
-)
 from utils.constants import (
     DEFAULT_TEST_AUTHOR,
     DEFAULT_TEST_CATEGORY,
@@ -19,6 +9,17 @@ from utils.constants import (
     DEFAULT_TEST_SECURITY_LABEL,
     DEFAULT_TEST_SUBJECT,
     DEFAULT_TEST_TYPE,
+)
+
+from nrlf.producer.fhir.r4.model import (
+    Attachment,
+    CodeableConcept,
+    Coding,
+    DocumentReference,
+    DocumentReferenceContent,
+    DocumentReferenceRelatesTo,
+    Identifier,
+    Reference,
 )
 
 
