@@ -146,6 +146,14 @@ jobs:
       - name: Retrieve Server Certificates
         run: make truststore-pull-server ENV=dev
 
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
       - name: Terraform Init
         run: |
           terraform -chdir=terraform/infrastructure init
