@@ -66,13 +66,6 @@ else
     success "Not using shared resources for stack '${tf_workspace}'"
 fi
 
-if [ "${TF_WORKSPACE_NAME}" == "${tf_workspace}" ]
-then
-    success "Terraform workspace and TF_WORKSPACE_NAME set to '${tf_workspace}'"
-else
-    warning "Terraform workspace set to '${tf_workspace}' but TF_WORKSPACE_NAME is set to '${TF_WORKSPACE_NAME}'"
-fi
-
 
 # Check the Terraform workspace value
 case "${tf_workspace}" in
