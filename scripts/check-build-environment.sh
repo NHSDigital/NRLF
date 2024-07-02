@@ -21,15 +21,12 @@ echo
 echo "Checking build environment...."
 
 BUILD_DEPENDENCIES="
-    allure
     behave
     pre-commit
-    jq
     poetry
     pytest
     python
     terraform
-    yq
     zip
 "
 

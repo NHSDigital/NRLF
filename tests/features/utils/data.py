@@ -8,7 +8,7 @@ from nrlf.producer.fhir.r4.model import (
     Identifier,
     Reference,
 )
-from tests.features.utils.constants import (
+from utils.constants import (
     DEFAULT_TEST_AUTHOR,
     DEFAULT_TEST_CATEGORY,
     DEFAULT_TEST_CONTENT,

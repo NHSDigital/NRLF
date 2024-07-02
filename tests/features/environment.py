@@ -1,8 +1,7 @@
 import os
 
 from behave.runner import Context
-
-from tests.features.utils.certificates import get_cert_path_for_environment
+from utils.certificates import get_cert_path_for_environment
 
 os.environ.setdefault("POWERTOOLS_LOG_LEVEL", "ERROR")
 os.environ.setdefault("AWS_DEFAULT_REGION", "eu-west-2")

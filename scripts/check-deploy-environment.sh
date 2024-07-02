@@ -24,7 +24,6 @@ echo "Checking deployment environment...."
 
 DEPLOY_DEPENDENCIES="
     aws
-    jq
     terraform
 "
 for dep in ${DEPLOY_DEPENDENCIES}; do

@@ -3,9 +3,9 @@ from contextlib import suppress
 from behave import *  # noqa
 from behave.runner import Context
 from pydantic import BaseModel
+from utils.data import create_test_document_reference
 
 from nrlf.core.dynamodb.model import DocumentPointer
-from tests.features.utils.data import create_test_document_reference
 
 
 class Application(BaseModel):
