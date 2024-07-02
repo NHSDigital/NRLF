@@ -4,9 +4,7 @@ from os import path
 from pathlib import Path
 
 import fire
-
 from aws_session_assume import get_boto_session
-
 
 POINTER_TYPES = [
     "http://snomed.info/sct|736253002",
