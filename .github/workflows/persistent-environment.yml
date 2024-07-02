@@ -117,11 +117,20 @@ jobs:
           name: build-artifacts
           path: dist
 
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
       - name: Terraform Init
         run: |
+          inactive_stack=$(poetry run python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
           terraform -chdir=terraform/infrastructure init
-          terraform -chdir=terraform/infrastructure workspace new ${{ inputs.environment }} || \
-          terraform -chdir=terraform/infrastructure workspace select ${{ inputs.environment }}
+          terraform -chdir=terraform/infrastructure workspace new ${inactive_stack} || \
+            terraform -chdir=terraform/infrastructure workspace select ${inactive_stack}
 
       - name: Terraform Plan
         run: |
@@ -180,11 +189,152 @@ jobs:
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
           make truststore-pull-server ENV=${account}
 
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
       - name: Terraform Init
         run: |
+          inactive_stack=$(poetry run python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
           terraform -chdir=terraform/infrastructure init
-          terraform -chdir=terraform/infrastructure workspace new ${{ inputs.environment }} || \
-          terraform -chdir=terraform/infrastructure workspace select ${{ inputs.environment }}
+          terraform -chdir=terraform/infrastructure workspace new ${inactive_stack} || \
+            terraform -chdir=terraform/infrastructure workspace select ${inactive_stack}
 
       - name: Terraform Apply
         run: terraform -chdir=terraform/infrastructure apply tfplan
+
+      - name: Smoke Test
+        run: make ENV=${{ inputs.environment }} test-smoke-internal
+
+  activate-stack:
+    name: Activate - ${{ inputs.environment }}
+    needs: [terraform-apply]
+    runs-on: [self-hosted, ci]
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Git clone - ${{ inputs.branch_name }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch_name }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
+
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
+      - name: Activate Stack
+        run: |
+          inactive_stack=$(poetry run python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
+          poetry run python ./scripts/activate_stack.py ${inactive_stack} ${{ inputs.environment }}
+
+  post-release-verify:
+    name: Verify - ${{ inputs.environment }}
+    needs: [activate-stack]
+    runs-on: [self-hosted, ci]
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Git clone - ${{ inputs.branch_name }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch_name }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
+
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
+      - name: "Smoke Test"
+        run: |
+          make ENV=${{ inputs.environment }} test-smoke-external
+
+  rollback-stack:
+    name: Rollback - ${{ inputs.environment }}
+    needs: [post-release-verify]
+    if: ${{ needs.post-release-verify.result == 'failure' }}
+    runs-on: [self-hosted, ci]
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Git clone - ${{ inputs.branch_name }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch_name }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id}}
+
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
+      - name: Deactivate Stack
+        run: |
+          inactive_stack_name=$(poetry run python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
+          poetry run python ./scripts/activate-stack.py ${inactive_stack_name}

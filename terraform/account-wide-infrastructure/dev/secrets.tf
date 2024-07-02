@@ -16,3 +16,13 @@ resource "aws_secretsmanager_secret" "devsandbox_splunk_configuration" {
   name        = "${local.project}--devsandbox--splunk-configuration"
   description = "Splunk configuration for the aws_recordlocator_devsandbox index"
 }
+
+resource "aws_secretsmanager_secret" "dev_environment_configuration" {
+  name        = "${local.project}--dev--env-config"
+  description = "The environment configuration for the Dev environment"
+}
+
+resource "aws_secretsmanager_secret" "devsandbox_environment_configuration" {
+  name        = "${local.project}--devsandbox--env-config"
+  description = "The environment configuration for the Dev Sandbox environment"
+}

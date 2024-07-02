@@ -3,16 +3,8 @@ import json
 from os import path
 from pathlib import Path
 
-import boto3
 import fire
-
-AWS_ACCOUNT_FOR_ENV = {
-    "dev": "dev",
-    "qa": "test",
-    "ref": "test",
-    "int": "test",
-    "prod": "prod",
-}
+from aws_session_assume import get_boto_session
 
 POINTER_TYPES = [
     "http://snomed.info/sct|736253002",
@@ -23,35 +15,6 @@ POINTER_TYPES = [
     "http://snomed.info/sct|861421000000109",
     "http://snomed.info/sct|887701000000100",
 ]
-
-
-def get_account_id(env: str):
-    if env not in AWS_ACCOUNT_FOR_ENV:
-        raise ValueError(f"Invalid environment: {env}")
-
-    account_name = AWS_ACCOUNT_FOR_ENV[env]
-    secretsmanager = boto3.client("secretsmanager", region_name="eu-west-2")
-    secret_id = f"nhsd-nrlf--mgmt--{account_name}-account-id"
-    result = secretsmanager.get_secret_value(SecretId=secret_id)
-    account_id = result["SecretString"]
-
-    return account_id
-
-
-def get_boto_session_for_account(account_id: str):
-    sts = boto3.client("sts", region_name="eu-west-2")
-    result = sts.assume_role(
-        RoleArn=f"arn:aws:iam::{account_id}:role/terraform",
-        RoleSessionName="get-account-id",
-        DurationSeconds=900,
-    )
-    credentials = result["Credentials"]
-
-    return boto3.Session(
-        aws_access_key_id=credentials["AccessKeyId"],
-        aws_secret_access_key=credentials["SecretAccessKey"],
-        aws_session_token=credentials["SessionToken"],
-    )
 
 
 def get_file_folders(s3_client, bucket_name, prefix=""):
@@ -114,9 +77,7 @@ def download_files(s3_client, bucket_name, local_path, file_names, folders):
 
 def main(env: str, path_to_store: str):
     bucket = f"nhsd-nrlf--{env}-authorization-store"
-    account_id = get_account_id(env)
-
-    boto_session = get_boto_session_for_account(account_id)
+    boto_session = get_boto_session(env)
 
     s3 = boto_session.client("s3")
     files, folders = get_file_folders(s3, bucket)

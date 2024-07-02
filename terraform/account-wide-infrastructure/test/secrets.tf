@@ -43,3 +43,28 @@ resource "aws_secretsmanager_secret" "ref_splunk_configuration" {
   name        = "${local.project}--ref--splunk-configuration"
   description = "Splunk configuration for the aws_recordlocator_ref index"
 }
+
+resource "aws_secretsmanager_secret" "qa_environment_configuration" {
+  name        = "${local.project}--qa--env-config"
+  description = "The environment configuration for the QA environment"
+}
+
+resource "aws_secretsmanager_secret" "qasandbox_environment_configuration" {
+  name        = "${local.project}--qa-sandbox--env-config"
+  description = "The environment configuration for the QA Sandbox environment"
+}
+
+resource "aws_secretsmanager_secret" "int_environment_configuration" {
+  name        = "${local.project}--int--env-config"
+  description = "The environment configuration for the Int environment"
+}
+
+resource "aws_secretsmanager_secret" "intsandbox_environment_configuration" {
+  name        = "${local.project}--int-sandbox--env-config"
+  description = "The environment configuration for the Int Sandbox environment"
+}
+
+resource "aws_secretsmanager_secret" "ref_environment_configuration" {
+  name        = "${local.project}--ref--env-config"
+  description = "The environment configuration for the Ref environment"
+}
