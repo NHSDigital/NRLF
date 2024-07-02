@@ -12,11 +12,12 @@ module "consumer__readDocumentReference" {
     ENVIRONMENT          = local.environment
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -36,13 +37,14 @@ module "consumer__countDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -62,13 +64,14 @@ module "consumer__searchDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -88,13 +91,14 @@ module "consumer__searchPostDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -114,15 +118,16 @@ module "producer__createDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
     POWERTOOLS_LOG_LEVEL = local.log_level
     ENDPOINT_URL         = "${local.public_domain}/nrl-producer-api/FHIR/R4/DocumentReference"
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-write.arn,
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_write_policy_arn,
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -142,14 +147,15 @@ module "producer__deleteDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-write.arn,
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_write_policy_arn,
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -169,13 +175,14 @@ module "producer__readDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -195,13 +202,14 @@ module "producer__searchDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -221,13 +229,14 @@ module "producer__searchPostDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -247,25 +256,20 @@ module "producer__updateDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__dynamodb-write.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_table_write_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
   handler = "update_document_reference.handler"
-
-  depends_on = [
-    aws_iam_policy.document-pointer__dynamodb-read,
-    aws_iam_policy.document-pointer__dynamodb-write,
-    aws_iam_policy.document-pointer__kms-read-write
-  ]
 }
 
 module "producer__upsertDocumentReference" {
@@ -280,14 +284,15 @@ module "producer__upsertDocumentReference" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-write.arn,
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_write_policy_arn,
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -307,14 +312,15 @@ module "consumer__status" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
     DYNAMODB_TIMEOUT     = local.dynamodb_timeout_seconds
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -335,14 +341,15 @@ module "producer__status" {
   environment_variables = {
     PREFIX               = "${local.prefix}--"
     ENVIRONMENT          = local.environment
-    AUTH_STORE           = aws_s3_bucket.authorization-store.id
+    AUTH_STORE           = local.auth_store_id
     POWERTOOLS_LOG_LEVEL = local.log_level
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
     DYNAMODB_TIMEOUT     = local.dynamodb_timeout_seconds
+    TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [
-    aws_iam_policy.document-pointer__dynamodb-read.arn,
-    aws_iam_policy.document-pointer__kms-read-write.arn
+    local.pointers_table_read_policy_arn,
+    local.pointers_kms_read_write_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription

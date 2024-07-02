@@ -1,5 +1,5 @@
 output "account_name" {
-  value = local.account_name
+  value = var.account_name
 }
 
 output "workspace" {
@@ -13,7 +13,7 @@ output "prefix" {
 output "dynamodb" {
   value = {
     document_pointer = {
-      name = aws_dynamodb_table.document-pointer.name
+      name = local.pointers_table_name
     }
   }
 }
@@ -44,5 +44,5 @@ output "certificate_domain_name" {
 
 
 output "auth_store" {
-  value = aws_s3_bucket.authorization-store.id
+  value = local.auth_store_id
 }

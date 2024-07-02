@@ -113,7 +113,7 @@ def download_files(s3_client, bucket_name, local_path, file_names, folders):
 
 
 def main(env: str, path_to_store: str):
-    bucket = f"nhsd-nrlf--{env}--authorization-store"
+    bucket = f"nhsd-nrlf--{env}-authorization-store"
     account_id = get_account_id(env)
 
     boto_session = get_boto_session_for_account(account_id)

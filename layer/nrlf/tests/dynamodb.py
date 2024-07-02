@@ -6,7 +6,7 @@ from nrlf.core.types import DynamoDBServiceResource
 
 def create_document_pointer_table(config: Config, dynamodb: DynamoDBServiceResource):
     return dynamodb.create_table(
-        TableName=config.PREFIX + "document-pointer",
+        TableName=config.TABLE_NAME,
         KeySchema=[
             {"AttributeName": "pk", "KeyType": "HASH"},
             {"AttributeName": "sk", "KeyType": "RANGE"},
@@ -45,7 +45,7 @@ def mock_repository(func):
         dynamodb = get_dynamodb_resource()
         create_document_pointer_table(config, dynamodb)
 
-        repository = DocumentPointerRepository(environment_prefix=config.PREFIX)
+        repository = DocumentPointerRepository(table_name=config.TABLE_NAME)
 
         return func(*args, **kwargs, repository=repository)
 

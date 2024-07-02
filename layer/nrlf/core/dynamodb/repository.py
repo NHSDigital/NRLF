@@ -36,9 +36,9 @@ def _get_sk_ids_for_type(pointer_type: str) -> tuple:
 class Repository(ABC, Generic[RepositoryModel]):
     ITEM_TYPE: Type[RepositoryModel]
 
-    def __init__(self, environment_prefix: str = ""):
+    def __init__(self, table_name: str):
         self.dynamodb = get_dynamodb_resource()
-        self.table_name = environment_prefix + self.ITEM_TYPE.kebab()
+        self.table_name = table_name
         self.table = get_dynamodb_table(self.table_name)
         logger.log(
             LogReference.REPOSITORY001,

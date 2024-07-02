@@ -20,7 +20,7 @@ def handler(event, context) -> Response:
         config = Config()
 
         logger.log(LogReference.STATUS002)
-        repository = DocumentPointerRepository(environment_prefix=config.PREFIX)
+        repository = DocumentPointerRepository(table_name=config.TABLE_NAME)
         repository.get_by_id("ODSX-NULL")
 
         response = Response(statusCode="200", body="OK")

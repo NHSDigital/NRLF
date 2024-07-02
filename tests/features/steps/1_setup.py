@@ -19,7 +19,7 @@ class Application(BaseModel):
             raise ValueError("No permissions table provided")
 
         pointer_types = [f"{system}|{value}" for system, value in context.table]
-        bucket = f"nhsd-nrlf--{context.env}--authorization-store"
+        bucket = f"nhsd-nrlf--{context.env}-authorization-store"
         key = f"{self.app_id}/{ods_code}.json"
 
         s3_client = get_s3_client()
