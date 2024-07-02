@@ -75,8 +75,10 @@ def download_files(s3_client, bucket_name, local_path, file_names, folders):
     add_test_files("K6PerformanceTest", "Y05868.json", local_path)
 
 
-def main(env: str, path_to_store: str):
-    bucket = f"nhsd-nrlf--{env}-authorization-store"
+def main(use_shared_resources: str, env: str, workspace: str, path_to_store: str):
+    stack_name = env if use_shared_resources else workspace
+
+    bucket = f"nhsd-nrlf--{stack_name}-authorization-store"
     boto_session = get_boto_session(env)
 
     s3 = boto_session.client("s3")

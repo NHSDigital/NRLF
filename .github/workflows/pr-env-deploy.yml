@@ -146,6 +146,14 @@ jobs:
       - name: Retrieve Server Certificates
         run: make truststore-pull-server ENV=dev
 
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
       - name: Terraform Init
         run: |
           terraform -chdir=terraform/infrastructure init
@@ -153,7 +161,12 @@ jobs:
           terraform -chdir=terraform/infrastructure workspace select ${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Terraform Plan
-        run: terraform -chdir=terraform/infrastructure plan --var-file=etc/dev.tfvars --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} -out tfplan
+        run: |
+          terraform -chdir=terraform/infrastructure plan \
+          --var-file=etc/dev.tfvars \
+          --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} \
+          --var use_shared_resources=$(poetry run python scripts/are_resources_shared_for_stack.py ${{ needs.set-environment-id.outputs.environment_id }}) \
+          -out tfplan
 
       - name: Terraform Apply
         id: terraform-apply

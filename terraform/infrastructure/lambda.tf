@@ -121,7 +121,6 @@ module "producer__createDocumentReference" {
     AUTH_STORE           = local.auth_store_id
     SPLUNK_INDEX         = module.firehose__processor.splunk.index
     POWERTOOLS_LOG_LEVEL = local.log_level
-    ENDPOINT_URL         = "${local.public_domain}/nrl-producer-api/FHIR/R4/DocumentReference"
     TABLE_NAME           = local.pointers_table_name
   }
   additional_policies = [

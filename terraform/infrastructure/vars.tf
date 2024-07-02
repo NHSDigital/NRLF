@@ -38,3 +38,8 @@ variable "deletion_protection" {
   type    = bool
   default = false
 }
+
+variable "use_shared_resources" {
+  type    = bool
+  default = false
+}
