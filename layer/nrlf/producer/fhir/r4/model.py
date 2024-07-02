@@ -130,33 +130,33 @@ class Attachment(BaseModel):
         str | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^[A-Za-z0-9\\-\\.]{1,64}$",
         ),
     ] = None
     contentType: Annotated[
         str | None,
         Field(
             description="Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate.",
-            regex="[^\\s]+(\\s[^\\s]+)*",
+            regex="^[^\\s]+(\\s[^\\s]+)*$",
         ),
     ] = None
     language: Annotated[
         str | None,
         Field(
             description="The human language of the content. The value can be any valid value according to BCP 47.",
-            regex="[^\\s]+(\\s[^\\s]+)*",
+            regex="^[^\\s]+(\\s[^\\s]+)*$",
         ),
     ] = None
     data: Annotated[
         str | None,
         Field(
             description="The actual data of the attachment &ndash; a sequence of bytes, base64 encoded.",
-            regex="(\\s*([0-9a-zA-Z\\+/=]){4}\\s*)+",
+            regex="^(\\s*([0-9a-zA-Z\\+/=]){4}\\s*)+$",
         ),
     ] = None
     url: Annotated[
         str | None,
-        Field(description="A location where the data can be accessed.", regex="\\S*"),
+        Field(description="A location where the data can be accessed.", regex="^\\S*$"),
     ] = None
     size: Annotated[
         int | None,
@@ -168,14 +168,14 @@ class Attachment(BaseModel):
         str | None,
         Field(
             description="The calculated hash of the data using SHA&ndash;1. Represented using base64.",
-            regex="(\\s*([0-9a-zA-Z\\+/=]){4}\\s*)+",
+            regex="^(\\s*([0-9a-zA-Z\\+/=]){4}\\s*)+$",
         ),
     ] = None
     title: Annotated[
         str | None,
         Field(
             description="A label or set of text to display in place of the data.",
-            regex="[ \\r\\n\\t\\S]+",
+            regex="^[ \\r\\n\\t\\S]+$",
         ),
     ] = None
     creation: Annotated[
@@ -192,35 +192,35 @@ class Coding(BaseModel):
         str | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^[A-Za-z0-9\\-\\.]{1,64}$",
         ),
     ] = None
     system: Annotated[
         str | None,
         Field(
             description="The identification of the code system that defines the meaning of the symbol in the code.",
-            regex="\\S*",
+            regex="^\\S*$",
         ),
     ] = None
     version: Annotated[
         str | None,
         Field(
             description="The version of the code system which was used when choosing this code. Note that a well&ndash;maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.",
-            regex="[ \\r\\n\\t\\S]+",
+            regex="^[ \\r\\n\\t\\S]+$",
         ),
     ] = None
     code: Annotated[
         str | None,
         Field(
             description="A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post&ndash;coordination).",
-            regex="[^\\s]+(\\s[^\\s]+)*",
+            regex="^[^\\s]+(\\s[^\\s]+)*$",
         ),
     ] = None
     display: Annotated[
         str | None,
         Field(
             description="A representation of the meaning of the code in the system, following the rules of the system.",
-            regex="[ \\r\\n\\t\\S]+",
+            regex="^[ \\r\\n\\t\\S]+$",
         ),
     ] = None
     userSelected: Annotated[
@@ -314,14 +314,14 @@ class Meta(BaseModel):
         str | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^[A-Za-z0-9\\-\\.]{1,64}$",
         ),
     ] = None
     versionId: Annotated[
         str | None,
         Field(
             description="The version specific identifier, as it appears in the version portion of the URL. This value changes when the resource is created, updated, or deleted.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^[A-Za-z0-9\\-\\.]{1,64}$",
         ),
     ] = None
     lastUpdated: Annotated[
@@ -335,7 +335,7 @@ class Meta(BaseModel):
         str | None,
         Field(
             description="A uri that identifies the source system of the resource. This provides a minimal amount of [Provenance](provenance.html#) information that can be used to track or differentiate the source of information in the resource. The source may identify another FHIR server, document, message, database, etc.",
-            regex="\\S*",
+            regex="^\\S*$",
         ),
     ] = None
     profile: list[ProfileItem] | None = None
@@ -348,14 +348,14 @@ class Narrative(BaseModel):
         str | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^[A-Za-z0-9\\-\\.]{1,64}$",
         ),
     ] = None
     status: Annotated[
         str,
         Field(
             description="The status of the narrative &ndash; whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data.",
-            regex="[^\\s]+(\\s[^\\s]+)*",
+            regex="^[^\\s]+(\\s[^\\s]+)*$",
         ),
     ]
     div: Annotated[
@@ -367,7 +367,7 @@ class Narrative(BaseModel):
 
 
 class DocumentId(BaseModel):
-    __root__: Annotated[str, Field(regex="[A-Za-z0-9\\-\\.]{1,64}")]
+    __root__: Annotated[str, Field(regex="^[A-Za-z0-9\\-\\.]{1,64}$")]
 
 
 class RequestPathParams(BaseModel):
@@ -419,7 +419,7 @@ class CodeableConcept(BaseModel):
         str | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^[A-Za-z0-9\\-\\.]{1,64}$",
         ),
     ] = None
     coding: list[Coding] | None = None
@@ -427,7 +427,7 @@ class CodeableConcept(BaseModel):
         str | None,
         Field(
             description="A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.",
-            regex="[ \\r\\n\\t\\S]+",
+            regex="^[ \\r\\n\\t\\S]+$",
         ),
     ] = None
 
@@ -440,7 +440,7 @@ class Extension(BaseModel):
         ),
     ]
     url: Annotated[
-        str, Field(description="The reference details for the link.", regex="\\S*")
+        str, Field(description="The reference details for the link.", regex="^\\S*$")
     ]
 
 
@@ -449,7 +449,7 @@ class DocumentReferenceContent(BaseModel):
         str | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^[A-Za-z0-9\\-\\.]{1,64}$",
         ),
     ] = None
     attachment: Annotated[
@@ -569,7 +569,7 @@ class DocumentReference(BaseModel):
         str | None,
         Field(
             description="The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^[A-Za-z0-9\\-]{1,64}$",
         ),
     ] = None
     meta: Annotated[
@@ -582,14 +582,14 @@ class DocumentReference(BaseModel):
         str | None,
         Field(
             description="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.",
-            regex="\\S*",
+            regex="^\\S*$",
         ),
     ] = None
     language: Annotated[
         str | None,
         Field(
             description="The base language in which the resource is written.",
-            regex="[^\\s]+(\\s[^\\s]+)*",
+            regex="^[^\\s]+(\\s[^\\s]+)*$",
         ),
     ] = None
     text: Annotated[
@@ -609,14 +609,14 @@ class DocumentReference(BaseModel):
         str,
         Field(
             description="The status of this document reference.",
-            regex="[^\\s]+(\\s[^\\s]+)*",
+            regex="^[^\\s]+(\\s[^\\s]+)*$",
         ),
     ]
     docStatus: Annotated[
         str | None,
         Field(
             description="The status of the underlying document.",
-            regex="[^\\s]+(\\s[^\\s]+)*",
+            regex="^[^\\s]+(\\s[^\\s]+)*$",
         ),
     ] = None
     type: Annotated[
@@ -657,7 +657,7 @@ class DocumentReference(BaseModel):
         str | None,
         Field(
             description="Human&ndash;readable description of the source document.",
-            regex="[ \\r\\n\\t\\S]+",
+            regex="^[ \\r\\n\\t\\S]+$",
         ),
     ] = None
     securityLabel: list[CodeableConcept] | None = None
@@ -824,7 +824,7 @@ class DocumentReferenceContext(BaseModel):
         str | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^[A-Za-z0-9\\-\\.]{1,64}$",
         ),
     ] = None
     encounter: list[Reference] | None = None
@@ -859,14 +859,14 @@ class DocumentReferenceRelatesTo(BaseModel):
         str | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^[A-Za-z0-9\\-\\.]{1,64}$",
         ),
     ] = None
     code: Annotated[
         str,
         Field(
             description="The type of relationship that this document has with anther document.",
-            regex="[^\\s]+(\\s[^\\s]+)*",
+            regex="^[^\\s]+(\\s[^\\s]+)*$",
         ),
     ]
     target: Annotated[
@@ -879,13 +879,14 @@ class Identifier(BaseModel):
         str | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^[A-Za-z0-9\\-\\.]{1,64}$",
         ),
     ] = None
     use: Annotated[
         str | None,
         Field(
-            description="The purpose of this identifier.", regex="[^\\s]+(\\s[^\\s]+)*"
+            description="The purpose of this identifier.",
+            regex="^[^\\s]+(\\s[^\\s]+)*$",
         ),
     ] = None
     type: Annotated[
@@ -898,14 +899,14 @@ class Identifier(BaseModel):
         str | None,
         Field(
             description="Establishes the namespace for the value &ndash; that is, a URL that describes a set values that are unique.",
-            regex="\\S*",
+            regex="^\\S*$",
         ),
     ] = None
     value: Annotated[
         str | None,
         Field(
             description="The portion of the identifier typically relevant to the user and which is unique within the context of the system.",
-            regex="[ \\r\\n\\t\\S]+",
+            regex="^[A-Za-z0-9]+$",
         ),
     ] = None
     period: Annotated[
@@ -923,21 +924,21 @@ class Reference(BaseModel):
         str | None,
         Field(
             description="Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
-            regex="[A-Za-z0-9\\-\\.]{1,64}",
+            regex="^[A-Za-z0-9\\-\\.]{1,64}$",
         ),
     ] = None
     reference: Annotated[
         str | None,
         Field(
             description="A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.",
-            regex="[ \\r\\n\\t\\S]+",
+            regex="^[ \\r\\n\\t\\S]+$",
         ),
     ] = None
     type: Annotated[
         str | None,
         Field(
             description='The expected type of the target of the reference. If both Reference.type and Reference.reference are populated and Reference.reference is a FHIR URL, both SHALL be consistent.\nThe type is the Canonical URL of Resource Definition that is the type this reference refers to. References are URLs that are relative to http://hl7.org/fhir/StructureDefinition/ e.g. "Patient" is a reference to http://hl7.org/fhir/StructureDefinition/Patient. Absolute URLs are only allowed for logical models (and can only be used in references in logical models, not resources).',
-            regex="\\S*",
+            regex="^\\S*$",
         ),
     ] = None
     identifier: Annotated[
@@ -950,7 +951,7 @@ class Reference(BaseModel):
         str | None,
         Field(
             description="Plain text narrative that identifies the resource in addition to the resource reference.",
-            regex="[ \\r\\n\\t\\S]+",
+            regex="^[ \\r\\n\\t\\S]+$",
         ),
     ] = None
 
