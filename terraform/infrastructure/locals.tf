@@ -29,28 +29,23 @@ locals {
   }
   dynamodb_timeout_seconds = "3"
 
-  persistent_environments = ["dev", "dev-sandbox", "qa", "qa-sandbox", "ref", "int", "int-sandbox", "prod"]
-  is_persistent_env       = contains(local.persistent_environments, local.environment)
-  is_sandbox_env          = length(regexall("-sandbox", local.environment)) > 0
-  is_dev_env              = local.environment == "dev" || local.environment == "dev-sandbox"
-  use_shared_resources    = local.is_persistent_env
+  is_sandbox_env = length(regexall("-sandbox-", local.environment)) > 0
 
-  public_domain = local.is_persistent_env ? local.is_sandbox_env ? var.public_sandbox_domain : var.public_domain : local.apis.domain
+  public_domain = local.is_sandbox_env ? var.public_sandbox_domain : var.public_domain
 
   # Logic / vars for splunk environment
-  environment_no_hyphen = replace(local.environment, "-", "")
-  splunk_environment    = local.is_persistent_env ? local.environment_no_hyphen : "dev" # dev is the default splunk env
-  splunk_index          = "aws_recordlocator_${local.splunk_environment}"
+  splunk_environment = local.is_sandbox_env ? "${var.account_name}sandbox" : var.account_name
+  splunk_index       = "aws_recordlocator_${local.splunk_environment}"
 
-  log_level = local.is_persistent_env ? local.is_dev_env ? "DEBUG" : "INFO" : "DEBUG"
+  log_level = var.account_name == "dev" || var.account_name == "qa" ? "DEBUG" : "INFO"
 
   aws_account_id = data.aws_caller_identity.current.account_id
 
-  auth_store_id  = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-s3-permission-store[0].bucket_id
-  auth_store_arn = local.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].arn : module.ephemeral-s3-permission-store[0].bucket_arn
+  auth_store_id  = var.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].id : module.ephemeral-s3-permission-store[0].bucket_id
+  auth_store_arn = var.use_shared_resources ? data.aws_s3_bucket.authorization-store[0].arn : module.ephemeral-s3-permission-store[0].bucket_arn
 
-  pointers_table_name             = local.use_shared_resources ? data.aws_dynamodb_table.pointers-table[0].name : module.ephemeral-pointers-table[0].table_name
-  pointers_table_read_policy_arn  = local.use_shared_resources ? data.aws_iam_policy.pointers-table-read[0].arn : module.ephemeral-pointers-table[0].read_policy_arn
-  pointers_table_write_policy_arn = local.use_shared_resources ? data.aws_iam_policy.pointers-table-write[0].arn : module.ephemeral-pointers-table[0].write_policy_arn
-  pointers_kms_read_write_arn     = local.use_shared_resources ? data.aws_iam_policy.pointers-kms-read-write[0].arn : module.ephemeral-pointers-table[0].kms_read_write_policy_arn
+  pointers_table_name             = var.use_shared_resources ? data.aws_dynamodb_table.pointers-table[0].name : module.ephemeral-pointers-table[0].table_name
+  pointers_table_read_policy_arn  = var.use_shared_resources ? data.aws_iam_policy.pointers-table-read[0].arn : module.ephemeral-pointers-table[0].read_policy_arn
+  pointers_table_write_policy_arn = var.use_shared_resources ? data.aws_iam_policy.pointers-table-write[0].arn : module.ephemeral-pointers-table[0].write_policy_arn
+  pointers_kms_read_write_arn     = var.use_shared_resources ? data.aws_iam_policy.pointers-kms-read-write[0].arn : module.ephemeral-pointers-table[0].kms_read_write_policy_arn
 }

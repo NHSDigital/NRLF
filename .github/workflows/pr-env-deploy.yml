@@ -153,7 +153,12 @@ jobs:
           terraform -chdir=terraform/infrastructure workspace select ${{ needs.set-environment-id.outputs.environment_id }}
 
       - name: Terraform Plan
-        run: terraform -chdir=terraform/infrastructure plan --var-file=etc/dev.tfvars --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} -out tfplan
+        run: |
+          terraform -chdir=terraform/infrastructure plan \
+          --var-file=etc/dev.tfvars \
+          --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} \
+          --var use_shared_resources=$(poetry run python scripts/are_resources_shared_for_stack.py $(TF_WORKSPACE_NAME)) \
+          -out tfplan
 
       - name: Terraform Apply
         id: terraform-apply
