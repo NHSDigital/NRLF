@@ -103,8 +103,10 @@ def test_lock_state_not_open(mock_boto_session, mock_secretsmanager):
         Name="nhsd-nrlf--locked--env-config", SecretString=json.dumps(inital_env_config)
     )
 
-    activate_stack("test-stack-1", "locked", session=mock_boto_session)
+    with pytest.raises(SystemExit) as excinfo:
+        activate_stack("test-stack-1", "locked", session=mock_boto_session)
 
+    assert excinfo.value.code == 1
     result = mock_secretsmanager.get_secret_value(
         SecretId="nhsd-nrlf--locked--env-config"  # pragma: allowlist secret
     )
@@ -122,8 +124,10 @@ def test_stack_already_active(mock_boto_session, mock_secretsmanager):
         SecretString=json.dumps(intial_env_config),
     )
 
-    activate_stack("test-stack-2", "already-active", session=mock_boto_session)
+    with pytest.raises(SystemExit) as excinfo:
+        activate_stack("test-stack-2", "already-active", session=mock_boto_session)
 
+    assert excinfo.value.code == 1
     result = mock_secretsmanager.get_secret_value(
         SecretId="nhsd-nrlf--already-active--env-config"  # pragma: allowlist secret
     )
