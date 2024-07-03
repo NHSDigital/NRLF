@@ -23,6 +23,6 @@ resource "aws_secretsmanager_secret" "dev_environment_configuration" {
 }
 
 resource "aws_secretsmanager_secret" "devsandbox_environment_configuration" {
-  name        = "${local.project}--devsandbox--env-config"
+  name        = "${local.project}--dev-sandbox--env-config"
   description = "The environment configuration for the Dev Sandbox environment"
 }
