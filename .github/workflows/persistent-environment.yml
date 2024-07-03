@@ -339,4 +339,4 @@ jobs:
       - name: Deactivate Stack
         run: |
           inactive_stack_name=$(poetry run python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
-          poetry run python ./scripts/activate-stack.py ${inactive_stack_name} ${{ inputs.environment }}
+          poetry run python ./scripts/activate_stack.py ${inactive_stack_name} ${{ inputs.environment }}

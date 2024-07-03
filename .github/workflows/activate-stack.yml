@@ -64,4 +64,4 @@ jobs:
 
       - name: Activate Stack
         run: |
-          poetry run python ./scripts/activate-stack.py ${{ inputs.stack_name }} ${{ inputs.environment }}
+          poetry run python ./scripts/activate_stack.py ${{ inputs.stack_name }} ${{ inputs.environment }}
