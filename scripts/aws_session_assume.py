@@ -3,9 +3,12 @@ import boto3
 
 _AWS_ACCOUNT_FOR_ENV = {
     "dev": "dev",
+    "dev-sandbox": "dev",
     "qa": "test",
+    "qa-sandbox": "test",
     "ref": "test",
     "int": "test",
+    "int-sandbox": "test",
     "prod": "prod",
 }
 
