@@ -68,7 +68,8 @@ jobs:
       - name: Add S3 Permissions to Lambda
         run: |
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
-          make get-s3-perms ENV=${account}
+          inactive_stack=$(poetry run python ./scripts/get_env_config.py inactive-stack ${{ inputs.environment }})
+          make get-s3-perms ENV=${account} TF_WORKSPACE_NAME=${inactive_stack}
 
       - name: Save Build Artifacts
         uses: actions/upload-artifact@v4
