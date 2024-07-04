@@ -2,24 +2,26 @@
 
 This directory contains terraform to build the main NRLF api infrastructure.
 
-NRLF project uses terraform workspaces to handle multiple "environments". Environments are identified by their workspace id. Resources in each environment will contain workspace id in its name. (e.g. nhsd-nrlf--dev-pointers-table or nhsd-nrlf--469d5da6-pointers-table)
+NRLF project uses terraform workspaces to handle deploying multiple NRLF stacks to each of our environments. NRFL stacks are identified by their TF workspace id. Resources in each stack will contain the workspace id in its name. (e.g. nhsd-nrlf--dev-pointers-table or nhsd-nrlf--469d5da6-pointers-table).
 
-Each developer/QA can create their own instance of NRLF infrastructure. These are deployed to the dev AWS account and use variables in `etc/dev.tfvars`
+Each developer/QA can create their own ephemeral instance of the NRLF infrastructure. These are deployed as isolated NRLF stacks into the dev AWS account and use variables in `etc/dev.tfvars`.
 
-This project also uses "persistent environments". These are equivalent to traditional dev, ref and prod environments. The persistent environments are deployed as follows:
+This project has a number of "persistent environments", similar to traditional dev, ref and prod environments. Each of these environments will typically contain multiple NRLF stacks, allowing for blue/green style deployment, and have shared storage infrastructure like DynamoDB tables and S3 buckets. The persistent environments are deployed as follows:
 
-| Environment  | TF Workspace | TF Config         | AWS Account | Internal Domain                      | Public Domain                             |
-| ------------ | ------------ | ----------------- | ----------- | ------------------------------------ | ----------------------------------------- |
-| internal-dev | dev          | `etc/dev.tfvars`  | dev         | `record-locator.dev.national.nhs.uk` | `internal-dev.api.service.nhs.uk`         |
-| dev-sandbox  | dev-sandbox  | `etc/dev.tfvars`  | dev         | `record-locator.dev.national.nhs.uk` | `internal-dev-sandbox.api.service.nhs.uk` |
-| internal-qa  | qa           | `etc/qa.tfvars`   | test        | `qa.record-locator.national.nhs.uk`  | `internal-qa.api.service.nhs.uk`          |
-| qa-sandbox   | qa-sandbox   | `etc/qa.tfvars`   | test        | `qa.record-locator.national.nhs.uk`  | `internal-qa-sandbox.api.service.nhs.uk`  |
-| int          | int          | `etc/int.tfvars`  | test        | `record-locator.int.national.nhs.uk` | `int.api.service.nhs.uk`                  |
-| sandbox      | int-sandbox  | `etc/int.tfvars`  | test        | `record-locator.int.national.nhs.uk` | `sandbox.api.service.nhs.uk`              |
-| ref          | ref          | `etc/ref.tfvars`  | test        | `record-locator.ref.national.nhs.uk` | `ref.api.service.nhs.uk`                  |
-| prod         | prod         | `etc/prod.tfvars` | prod        | `record-locator.national.nhs.uk`     | `api.service.nhs.uk`                      |
+| Environment  | TF Workspace  | TF Config         | AWS Account | Internal Domain                      | Public Domain                             |
+| ------------ | ------------- | ----------------- | ----------- | ------------------------------------ | ----------------------------------------- |
+| internal-dev | dev-N         | `etc/dev.tfvars`  | dev         | `record-locator.dev.national.nhs.uk` | `internal-dev.api.service.nhs.uk`         |
+| dev-sandbox  | dev-sandbox-N | `etc/dev.tfvars`  | dev         | `record-locator.dev.national.nhs.uk` | `internal-dev-sandbox.api.service.nhs.uk` |
+| internal-qa  | qa-N          | `etc/qa.tfvars`   | test        | `qa.record-locator.national.nhs.uk`  | `internal-qa.api.service.nhs.uk`          |
+| qa-sandbox   | qa-sandbox-N  | `etc/qa.tfvars`   | test        | `qa.record-locator.national.nhs.uk`  | `internal-qa-sandbox.api.service.nhs.uk`  |
+| int          | int-N         | `etc/int.tfvars`  | test        | `record-locator.int.national.nhs.uk` | `int.api.service.nhs.uk`                  |
+| sandbox      | int-sandbox-N | `etc/int.tfvars`  | test        | `record-locator.int.national.nhs.uk` | `sandbox.api.service.nhs.uk`              |
+| ref          | ref-N         | `etc/ref.tfvars`  | test        | `record-locator.ref.national.nhs.uk` | `ref.api.service.nhs.uk`                  |
+| prod         | prod-N        | `etc/prod.tfvars` | prod        | `record-locator.national.nhs.uk`     | `api.service.nhs.uk`                      |
 
-CI pipeline creates infrastructure in the test AWS account. These will have workspace id of `<first six char of commit hash>-ci` and use variables in `etc/test.tfvars`
+The `N` in the TF workspace name repesents the stack id in that environment. So, for example, the internal-dev environment might have two stacks, `dev-1` and `dev-2` with TF workspace names matching their stack names. All resources for the `dev-1` stack will be contained within the `dev-1` TF workspace.
+
+CI pipeline creates infrastructure in the dev AWS account. These will have workspace id of `nrl<jira-id>-<first six char of commit hash>` and use variables in `etc/dev.tfvars`
 
 ## Table of Contents
 
@@ -65,12 +67,12 @@ If you want to use an existing workspace, or if you want to use the workspace of
 $ make ENV={ENV_NAME} TF_WORKSPACE_NAME={WORKSPACE_NAME} init
 ```
 
-replacing `{ENV_NAME}` with the environment name (e.g. `dev`, `qa`, `qa-sandbox` etc) and `{WORKSPACE_NAME}` with the name of the workspace you want to use.
+replacing `{ENV_NAME}` with the environment name (e.g. `dev`, `qa`, `qa-sandbox` etc) and `{WORKSPACE_NAME}` with the name of the workspace/stack you want to use.
 
-So, for example, if you want to use the `qa` environment, you'd do you the following:
+So, for example, if you want to use the `qa` environment and deploy to the `qa-1` stack, you'd do the following:
 
 ```shell
-$ make ENV=qa TF_WORKSPACE_NAME=qa init
+$ make ENV=qa TF_WORKSPACE_NAME=qa-1 init
 ```
 
 If your Terraform provider config changes, you may need to reinitialise your workspace.
@@ -117,4 +119,4 @@ To teardown the infrastructure, do the following:
 $ make ENV={ENV_NAME} TF_WORKSPACE_NAME={WORKSPACE_NAME} init destroy
 ```
 
-replacing `{ENV_NAME}` with the environment name (e.g. `dev`, `qa`, `qa-sandbox` etc) and `{WORKSPACE_NAME}` with the name of the workspace you want to destroy.
+replacing `{ENV_NAME}` with the environment name (e.g. `dev`, `qa`, `qa-sandbox` etc) and `{WORKSPACE_NAME}` with the name of the workspace/stack you want to destroy.
