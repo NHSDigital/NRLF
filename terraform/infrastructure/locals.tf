@@ -1,11 +1,9 @@
 locals {
   region              = "eu-west-2"
   project             = "nhsd-nrlf"
-  environment         = var.account_name
   stack_name          = terraform.workspace
   deletion_protection = var.deletion_protection
   prefix              = "${local.project}--${local.stack_name}"
-  shared_prefix       = "${local.project}--${local.environment}"
 
   kms = {
     deletion_window_in_days = 7
@@ -23,8 +21,10 @@ locals {
   }
   dynamodb_timeout_seconds = "3"
 
-  is_sandbox_env = length(regexall("-sandbox", local.environment)) > 0
+  is_sandbox_env = length(regexall("-sandbox-", local.stack_name)) > 0
 
+  environment   = local.is_sandbox_env ? "${var.account_name}-sandbox" : var.account_name
+  shared_prefix = "${local.project}--${local.environment}"
   public_domain = local.is_sandbox_env ? var.public_sandbox_domain : var.public_domain
 
   # Logic / vars for splunk environment
