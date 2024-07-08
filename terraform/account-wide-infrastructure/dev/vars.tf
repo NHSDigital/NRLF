@@ -10,6 +10,6 @@ variable "dev_api_domain_name" {
 }
 
 variable "devsandbox_api_domain_name" {
-  description = "The internal DNS name of the API Gateway for the dev environment"
+  description = "The internal DNS name of the API Gateway for the dev sandbox environment"
   default     = "dev-sandbox.api.record-locator.dev.national.nhs.uk"
 }

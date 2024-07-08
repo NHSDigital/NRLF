@@ -11,7 +11,8 @@ resource "aws_iam_policy" "read-s3-authorization-store" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_s3_bucket.authorization-store.arn
+          aws_s3_bucket.authorization-store.arn,
+          "${aws_s3_bucket.authorization-store.arn}/*",
         ]
       },
     ]
