@@ -465,3 +465,12 @@ Once your new release has been created, you can then deploy this release through
 If the Consumer API has changed, or the documentation for that API has changed, you will also need to release (NRL Consumer API)[https://github.com/NHSDigital/nrl-consumer-api].
 
 If the Producer API has changed, or the documentation for that API has changed, you will also need to release (NRL Producer API)[https://github.com/NHSDigital/nrl-producer-api].
+
+### Deploying releases
+
+Once you have a new release version ready, you can deploy it through our environments as follows:
+
+1. Use the "Persistent Environment Deploy" Github Action workflow to deploy the release tag to `dev`, `dev-sandbox`, `qa`, `qa-sandbox`, `int` and `int-sandbox` environments.
+2. If any issues arise in the deployment, fix the issues, create a new release version and start this process again.
+3. Once the deployments are complete, use the "Persistent Environment Deploy" Github Action workflow to deploy the release version to `ref`.
+4. Once that is complete, use the "Persistent Environment Deploy" workflow to deploy the release version to `prod`.

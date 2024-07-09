@@ -1,25 +1,17 @@
 locals {
   region              = "eu-west-2"
   project             = "nhsd-nrlf"
-  environment         = terraform.workspace
+  stack_name          = terraform.workspace
   deletion_protection = var.deletion_protection
-  prefix              = "${local.project}--${local.environment}"
-  shared_prefix       = "${local.project}--${var.account_name}"
+  prefix              = "${local.project}--${local.stack_name}"
+
   kms = {
     deletion_window_in_days = 7
   }
 
-  # TODO - Remove once all environments are on new domain structure
-  env_on_new_dns_zone = ["qa", "qa-sandbox"]
-  new_domain_map = {
-    "qa" : "api.${var.domain}",
-    "qa-sandbox" : "sandbox-api.${var.domain}",
-  }
-
   apis = {
-    zone = var.domain
-    # TODO - Move all other environments onto new domain structure
-    domain = contains(local.env_on_new_dns_zone, local.environment) ? local.new_domain_map[local.environment] : "${terraform.workspace}.${var.domain}"
+    zone   = var.domain
+    domain = "${terraform.workspace}.${var.domain}"
     consumer = {
       path = var.consumer_api_path
     }
@@ -29,8 +21,10 @@ locals {
   }
   dynamodb_timeout_seconds = "3"
 
-  is_sandbox_env = length(regexall("-sandbox-", local.environment)) > 0
+  is_sandbox_env = length(regexall("-sandbox-", local.stack_name)) > 0
 
+  environment   = local.is_sandbox_env ? "${var.account_name}-sandbox" : var.account_name
+  shared_prefix = "${local.project}--${local.environment}"
   public_domain = local.is_sandbox_env ? var.public_sandbox_domain : var.public_domain
 
   # Logic / vars for splunk environment
