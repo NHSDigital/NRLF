@@ -17,7 +17,8 @@ module "consumer__readDocumentReference" {
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -44,7 +45,8 @@ module "consumer__countDocumentReference" {
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -71,7 +73,8 @@ module "consumer__searchDocumentReference" {
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -98,7 +101,8 @@ module "consumer__searchPostDocumentReference" {
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -126,7 +130,8 @@ module "producer__createDocumentReference" {
   additional_policies = [
     local.pointers_table_write_policy_arn,
     local.pointers_table_read_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -154,7 +159,8 @@ module "producer__deleteDocumentReference" {
   additional_policies = [
     local.pointers_table_write_policy_arn,
     local.pointers_table_read_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -181,7 +187,8 @@ module "producer__readDocumentReference" {
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -208,7 +215,8 @@ module "producer__searchDocumentReference" {
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -235,7 +243,8 @@ module "producer__searchPostDocumentReference" {
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -263,7 +272,8 @@ module "producer__updateDocumentReference" {
   additional_policies = [
     local.pointers_table_read_policy_arn,
     local.pointers_table_write_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -291,7 +301,8 @@ module "producer__upsertDocumentReference" {
   additional_policies = [
     local.pointers_table_write_policy_arn,
     local.pointers_table_read_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -319,7 +330,8 @@ module "consumer__status" {
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
@@ -348,7 +360,8 @@ module "producer__status" {
   }
   additional_policies = [
     local.pointers_table_read_policy_arn,
-    local.pointers_kms_read_write_arn
+    local.pointers_kms_read_write_arn,
+    local.auth_store_read_policy_arn
   ]
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
