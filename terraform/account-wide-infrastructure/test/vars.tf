@@ -16,9 +16,10 @@ variable "qasandbox_api_domain_name" {
 
 variable "int_api_domain_name" {
   description = "The internal DNS name of the API Gateway for the int environment"
-  default     = "api.int.record-locator.national.nhs.uk"
+  default     = "int.api.record-locator.int.national.nhs.uk"
 }
 
+/*
 variable "intsandbox_api_domain_name" {
   description = "The internal DNS name of the API Gateway for the int sandbox environment"
   default     = "api-sandbox.int.record-locator.national.nhs.uk"
@@ -28,3 +29,4 @@ variable "ref_api_domain_name" {
   description = "The internal DNS name of the API Gateway for the ref environment"
   default     = "api.ref.record-locator.national.nhs.uk"
 }
+*/
