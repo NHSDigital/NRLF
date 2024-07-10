@@ -20,21 +20,3 @@ module "lambda_errors_cloudwatch_metric_alarm" {
   alarm_description   = "This metric monitors the number of Lambda errors that have occurred"
   alarm_actions       = [module.lambda_errors_sns_topic.sns_topic_arn]
 }
-
-module "lambda_errors_topic_subscription_slack" {
-  source    = "./modules/sns"
-  prefix    = local.prefix
-  name      = "slack_email_subscription"
-  topic_arn = module.lambda_errors_sns_topic.sns_topic_arn
-  protocol  = "email"
-  endpoint  = "spine-cell-sigma-noti-aaaalor2u6funj7q3a4v7cpuba@nhsdigitalcorporate.org.slack.com"
-}
-
-module "lambda_errors_topic_subscription_me" {
-  source    = "./modules/sns"
-  prefix    = local.prefix
-  name      = "me_email_subscription"
-  topic_arn = module.lambda_errors_sns_topic.sns_topic_arn
-  protocol  = "email"
-  endpoint  = "eesa.mahmood1@nhs.net"
-}
