@@ -1,10 +1,10 @@
-module "aws_sns_topic" {
+module "lambda_errors_sns_topic" {
   source = "./modules/sns"
   name   = "nrlf_lambda_errors_topic"
   prefix = local.prefix
 }
 
-module "aws_cloudwatch_metric_alarm" {
+module "lambda_errors_cloudwatch_metric_alarm" {
   source = "./modules/cloudwatch"
   name   = "nrlf_lambda_errors"
   prefix = local.prefix
@@ -18,10 +18,10 @@ module "aws_cloudwatch_metric_alarm" {
   threshold           = 0
   unit                = "Count"
   alarm_description   = "This metric monitors the number of Lambda errors that have occurred"
-  alarm_actions       = [module.aws_sns_topic.sns_topic_arn]
+  alarm_actions       = [module.lambda_errors_sns_topic.sns_topic_arn]
 }
 
-module "aws_sns_topic_subscription" {
+module "lambda_errors_topic_subscription_slack" {
   source    = "./modules/sns"
   prefix    = local.prefix
   name      = "slack_email_subscription"
@@ -30,7 +30,7 @@ module "aws_sns_topic_subscription" {
   endpoint  = "spine-cell-sigma-noti-aaaalor2u6funj7q3a4v7cpuba@nhsdigitalcorporate.org.slack.com"
 }
 
-module "aws_sns_topic_subscription" {
+module "lambda_errors_topic_subscription_me" {
   source    = "./modules/sns"
   prefix    = local.prefix
   name      = "me_email_subscription"
