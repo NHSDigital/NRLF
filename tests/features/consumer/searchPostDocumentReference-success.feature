@@ -176,4 +176,4 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
 
 # No pointers found
 # Pointers exist but no permissions
-# Search by custodian
+# Search by Custodian
