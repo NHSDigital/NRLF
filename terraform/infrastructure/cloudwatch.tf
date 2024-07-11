@@ -6,7 +6,7 @@ module "lambda_errors_sns_topic" {
 
 module "lambda_errors_cloudwatch_metric_alarm" {
   source = "./modules/cloudwatch"
-  name   = "nrlf_lambda_errors"
+  name   = "nrlf-lambda-errors"
   prefix = local.prefix
 
   comparison_operator = "GreaterThanOrEqualToThreshold"
@@ -15,7 +15,7 @@ module "lambda_errors_cloudwatch_metric_alarm" {
   namespace           = "AWS/Lambda"
   period              = 60
   statistic           = "Maximum"
-  threshold           = 0
+  threshold           = 1
   unit                = "Count"
   alarm_description   = "This metric monitors the number of Lambda errors that have occurred"
   alarm_actions       = [module.lambda_errors_sns_topic.sns_topic_arn]
