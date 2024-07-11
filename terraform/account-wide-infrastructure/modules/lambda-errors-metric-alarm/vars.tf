@@ -1,9 +1,3 @@
-variable "create_metric_alarm" {
-  description = "Whether to create the Cloudwatch metric alarm"
-  type        = bool
-  default     = true
-}
-
 variable "alarm_description" {
   description = "The description for the alarm."
   type        = string

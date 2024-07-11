@@ -11,5 +11,4 @@ module "lambda_errors_cloudwatch_metric_alarm_dev" {
   threshold           = 1
   unit                = "Count"
   alarm_description   = "This metric monitors the number of Lambda errors that have occurred"
-  alarm_actions       = [module.lambda_errors_sns_topic.sns_topic_arn]
 }

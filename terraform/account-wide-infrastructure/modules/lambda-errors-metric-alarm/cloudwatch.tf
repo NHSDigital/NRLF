@@ -1,6 +1,4 @@
 resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
-  count = var.create_metric_alarm ? 1 : 0
-
   alarm_name        = "${var.name_prefix}--lambda-errors-metric_alarm"
   alarm_description = var.alarm_description
   actions_enabled   = var.actions_enabled
