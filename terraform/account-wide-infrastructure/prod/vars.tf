@@ -4,7 +4,7 @@ variable "assume_account" {
 
 variable "assume_role" {}
 
-/*variable "prod_api_domain_name" {
+variable "prod_api_domain_name" {
   description = "The internal DNS name of the API Gateway for the prod environment"
-  default     = "api.record-locator.national.nhs.uk"
-}*/
+  default     = "prod.api.record-locator.national.nhs.uk"
+}
