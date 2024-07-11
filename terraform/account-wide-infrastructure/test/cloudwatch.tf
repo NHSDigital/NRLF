@@ -1,13 +1,6 @@
-module "lambda_errors_sns_topic" {
-  source = "./modules/sns"
-  name   = "nrlf_lambda_errors_topic"
-  prefix = local.prefix
-}
-
-module "lambda_errors_cloudwatch_metric_alarm" {
-  source = "./modules/cloudwatch"
-  name   = "nrlf-lambda-errors"
-  prefix = local.prefix
+module "lambda_errors_cloudwatch_metric_alarm_dev" {
+  source      = "./modules/lambda-errors-metric-alarm"
+  name_prefix = "nhsd-nrlf--test"
 
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 1

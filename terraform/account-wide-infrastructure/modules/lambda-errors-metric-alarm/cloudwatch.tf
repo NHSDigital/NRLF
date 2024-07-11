@@ -1,11 +1,11 @@
 resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
   count = var.create_metric_alarm ? 1 : 0
 
-  alarm_name        = "${var.prefix}--${var.name}"
+  alarm_name        = "${var.name_prefix}--lambda-errors-metric_alarm"
   alarm_description = var.alarm_description
   actions_enabled   = var.actions_enabled
 
-  alarm_actions             = var.alarm_actions
+  alarm_actions             = [aws_sns_topic.sns_topic.arn]
   ok_actions                = var.ok_actions
   insufficient_data_actions = var.insufficient_data_actions
 
