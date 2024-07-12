@@ -54,3 +54,9 @@ variable "name_prefix" {
   type        = string
   description = "The prefix to apply to all resources in the module."
 }
+
+variable "kms_deletion_window_in_days" {
+  type        = number
+  description = "The duration in days after which the key is deleted after destruction of the resource."
+  default     = 7
+}
