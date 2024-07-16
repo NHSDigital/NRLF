@@ -86,6 +86,21 @@ test-features-integration: check-warn ## Run the BDD feature tests in the integr
 		--define="use_shared_resources=${USE_SHARED_RESOURCES}" \
 		$(FEATURE_TEST_ARGS)
 
+test-features-integration-report: check-warn ## Run the BDD feature tests in the integration environment and generate allure report therafter
+	@echo "Cleaning previous Allure results and reports"
+	rm -rf ./allure-results
+	rm -rf ./allure-report
+	@echo "Running feature tests in the integration environment"
+	behave --define="integration_test=true" \
+		--define="env=$(TF_WORKSPACE_NAME)" \
+		--define="account_name=$(ENV)" \
+		--define="use_shared_resources=${USE_SHARED_RESOURCES}" \
+		$(FEATURE_TEST_ARGS)
+	@echo "Generating Allure report"
+	allure generate ./allure-results -o ./allure-report --clean
+	@echo "Opening Allure report"
+	allure open ./allure-report
+
 test-smoke-internal: check-warn ## Run the smoke tests against the internal environment
 	@echo "Running smoke tests against the internal environment"
 	#ENV=$(TF_WORKSPACE_NAME) SMOKE_TEST_MODE=mtls pytest ./tests/smoke $(SMOKE_TEST_ARGS)
