@@ -68,6 +68,8 @@ TYPE_CATEGORIES = {
     PointerTypes.EOL_CARE_PLAN.value: Categories.CARE_PLAN.value,
     PointerTypes.LLOYD_GEORGE_FOLDER.value: Categories.CARE_PLAN.value,
     PointerTypes.NEWS2_CHART.value: Categories.OBSERVATIONS.value,
+    PointerTypes.ADVANCED_CARE_PLAN.value: Categories.CARE_PLAN.value,
+    PointerTypes.TREATMENT_ESCALATION_PLAN.value: Categories.CARE_PLAN.value,
 }
 
 
