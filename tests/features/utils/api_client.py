@@ -17,6 +17,8 @@ PointerTypeCodes = Literal[
     "325691000000100",  # Contingency plan
     "736373009",  # End of life care plan
     "16521000000101",  # Lloyd George record folder
+    "736366004",  # Advanced Care Plan
+    "735324008",  # Treatement Escalation Plan
 ]
 
 

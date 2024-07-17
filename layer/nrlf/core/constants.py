@@ -46,6 +46,8 @@ class PointerTypes(Enum):
     CONTINGENCY_PLAN = "http://snomed.info/sct|325691000000100"
     EOL_CARE_PLAN = "http://snomed.info/sct|736373009"
     LLOYD_GEORGE_FOLDER = "http://snomed.info/sct|16521000000101"
+    ADVANCED_CARE_PLAN = "http://snomed.info/sct|736366004"
+    TREATMENT_ESCALATION_PLAN = "http://snomed.info/sct|735324008"
 
     @staticmethod
     def list():
