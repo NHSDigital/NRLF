@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
-  alarm_name        = "${var.name_prefix}--lambda-errors-metric_alarm"
+  alarm_name        = "${var.name_prefix}--lambda-errors-metric-alarm"
   alarm_description = var.alarm_description
 
   alarm_actions = [aws_sns_topic.sns_topic.arn]
