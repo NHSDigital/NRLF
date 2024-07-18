@@ -13,7 +13,8 @@ resource "aws_iam_policy" "lambda-errors-topic-kms-read-write" {
         ]
         Effect = "Allow"
         Resource = [
-          aws_kms_key.lambda-errors-topic-key.arn
+          aws_kms_key.lambda-errors-topic-key.arn,
+          aws_cloudwatch_metric_alarm.metric_alarm.arn
         ]
       }
     ]
