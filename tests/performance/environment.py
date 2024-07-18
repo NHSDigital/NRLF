@@ -29,7 +29,7 @@ POINTER_TYPES = {
     "861421000000109": "End of Life Care Coordination Summary",
     "887701000000100": "Emergency Health Care Plans",
     "736366004": "Advanced Care Plan",
-    "735324008": "Treatement Escalation Plan",
+    "735324008": "Treatment Escalation Plan",
 }
 
 

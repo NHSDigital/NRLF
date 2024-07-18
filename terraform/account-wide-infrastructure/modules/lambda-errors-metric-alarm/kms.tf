@@ -1,6 +1,7 @@
 resource "aws_kms_key" "lambda-errors-topic-key" {
   description             = "Lambda errors SNS topic table KMS key"
   deletion_window_in_days = var.kms_deletion_window_in_days
+  policy                  = data.aws_iam_policy_document.sns_kms_key_policy.json
 
 }
 
