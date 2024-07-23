@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import ValidationError
 
 from nrlf.core.codes import SpineErrorConcept
-from nrlf.core.constants import CATEGORIES, REQUIRED_CREATE_FIELDS
+from nrlf.core.constants import CATEGORIES, REQUIRED_CREATE_FIELDS, TYPE_CATEGORIES
 from nrlf.core.errors import ParseError
 from nrlf.core.logger import LogReference, logger
 from nrlf.core.types import DocumentReference, OperationOutcomeIssue, RequestQueryType
@@ -389,6 +389,19 @@ class DocumentReferenceValidator:
                 error_code="INVALID_RESOURCE",
                 diagnostics=f"category code '{coding.code}' must have a display value of '{CATEGORIES.get(coding.code)}'",
                 field=f"category[0].coding[{0}].display",
+            )
+            return
+
+        pointer_type = model.type.coding[0].code
+        type_category = TYPE_CATEGORIES[f"http://snomed.info/sct|{pointer_type}"].split(
+            "|"
+        )[1]
+        if type_category != coding.code:
+            self.result.add_error(
+                issue_code="value",
+                error_code="INVALID_RESOURCE",
+                diagnostics=f"category code '{coding.code}' must match the allowed category for pointer type {pointer_type} with a category value of '{type_category}'",
+                field=f"category[0].coding[{0}].code",
             )
 
     def _validate_content_extension(self, model: DocumentReference):
