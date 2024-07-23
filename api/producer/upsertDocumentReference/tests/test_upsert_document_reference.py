@@ -142,6 +142,51 @@ def test_create_document_reference_happy_path_with_ssp(
     }
 
 
+def test_create_document_reference_invalid_category_type():
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+
+    assert doc_ref.category and doc_ref.category[0].coding
+    doc_ref.category[0].coding[0].code = "1102421000000108"
+    doc_ref.category[0].coding[0].display = "Observations"
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(),
+        body=doc_ref.json(exclude_none=True),
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "400",
+        "headers": {},
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "error",
+                "code": "invalid",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "BAD_REQUEST",
+                            "display": "Bad request",
+                            "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                        }
+                    ]
+                },
+                "diagnostics": "The Category code of the provided document 'http://snomed.info/sct|1102421000000108' must match the allowed category for pointer type 'http://snomed.info/sct|736253002' with a category value of 'http://snomed.info/sct|734163000'",
+                "expression": ["category.coding[0].code"],
+            }
+        ],
+    }
+
+
 def test_create_document_reference_no_body():
     event = create_test_api_gateway_event(
         headers=create_headers(),

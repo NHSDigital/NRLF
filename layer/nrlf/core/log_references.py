@@ -260,6 +260,10 @@ class LogReference(Enum):
     PROUPSERT005 = _Reference(
         "WARN", "Organisation is not allowed to upsert pointer type for upsert"
     )  #
+    PROUPSERT005a = _Reference(
+        "WARN",
+        "Organisation is not allowed to upsert pointer type with incorrect category code",
+    )  #
     PROUPSERT006 = _Reference(
         "DEBUG", "Performing relatesTo validation on resource for upsert"
     )
