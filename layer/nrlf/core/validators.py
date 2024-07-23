@@ -390,7 +390,6 @@ class DocumentReferenceValidator:
                 diagnostics=f"category code '{coding.code}' must have a display value of '{CATEGORIES.get(coding.code)}'",
                 field=f"category[0].coding[{0}].display",
             )
-            return
 
     def _validate_content_extension(self, model: DocumentReference):
         """
