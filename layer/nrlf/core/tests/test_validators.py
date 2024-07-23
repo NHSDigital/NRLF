@@ -485,42 +485,6 @@ def test_validate_category_coding_display_mismatch_observations():
     }
 
 
-def test_validate_category_coding_and_type_mismatch():
-    validator = DocumentReferenceValidator()
-    document_ref_data = load_document_reference_json("Y05868-736253002-Valid")
-
-    document_ref_data["category"][0] = {
-        "coding": [
-            {
-                "system": "http://snomed.info/sct",
-                "code": "1102421000000108",
-                "display": "Observations",
-            }
-        ]
-    }
-
-    result = validator.validate(document_ref_data)
-
-    assert result.is_valid is False
-    assert result.resource.id == "Y05868-99999-99999-999999"
-    assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
-        "severity": "error",
-        "code": "value",
-        "details": {
-            "coding": [
-                {
-                    "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
-                    "code": "INVALID_RESOURCE",
-                    "display": "Invalid validation of resource",
-                }
-            ]
-        },
-        "diagnostics": "category code '1102421000000108' must match the allowed category for pointer type 736253002 with a category value of '734163000'",
-        "expression": ["category[0].coding[0].code"],
-    }
-
-
 def test_validate_category_coding_invalid_code():
     validator = DocumentReferenceValidator()
     document_ref_data = load_document_reference_json("Y05868-736253002-Valid")

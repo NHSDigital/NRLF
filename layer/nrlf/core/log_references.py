@@ -210,6 +210,10 @@ class LogReference(Enum):
     PROCREATE005 = _Reference(
         "WARN", "Organisation is not allowed to create pointer type"
     )  #
+    PROCREATE005a = _Reference(
+        "WARN",
+        "Organisation is not allowed to create pointer type with incorrect category",
+    )  #
     PROCREATE006 = _Reference("DEBUG", "Performing relatesTo validation on resource")
     PROCREATE007a = _Reference(
         "WARN", "RelatesTo validation failed - no target identifier value"
