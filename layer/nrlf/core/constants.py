@@ -46,6 +46,8 @@ class PointerTypes(Enum):
     CONTINGENCY_PLAN = "http://snomed.info/sct|325691000000100"
     EOL_CARE_PLAN = "http://snomed.info/sct|736373009"
     LLOYD_GEORGE_FOLDER = "http://snomed.info/sct|16521000000101"
+    ADVANCED_CARE_PLAN = "http://snomed.info/sct|736366004"
+    TREATMENT_ESCALATION_PLAN = "http://snomed.info/sct|735324008"
 
     @staticmethod
     def list():
@@ -66,6 +68,8 @@ TYPE_CATEGORIES = {
     PointerTypes.EOL_CARE_PLAN.value: Categories.CARE_PLAN.value,
     PointerTypes.LLOYD_GEORGE_FOLDER.value: Categories.CARE_PLAN.value,
     PointerTypes.NEWS2_CHART.value: Categories.OBSERVATIONS.value,
+    PointerTypes.ADVANCED_CARE_PLAN.value: Categories.CARE_PLAN.value,
+    PointerTypes.TREATMENT_ESCALATION_PLAN.value: Categories.CARE_PLAN.value,
 }
 
 

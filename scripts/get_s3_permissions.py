@@ -14,6 +14,8 @@ POINTER_TYPES = [
     "http://snomed.info/sct|736373009",
     "http://snomed.info/sct|861421000000109",
     "http://snomed.info/sct|887701000000100",
+    "http://snomed.info/sct|736366004",
+    "http://snomed.info/sct|735324008",
 ]
 
 
