@@ -23,7 +23,8 @@ module "consumer__readDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "read_document_reference.handler"
+  handler   = "read_document_reference.handler"
+  retention = local.is_ephemeral ? 90 : 15
 }
 
 module "consumer__countDocumentReference" {
@@ -51,7 +52,9 @@ module "consumer__countDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "count_document_reference.handler"
+  handler   = "count_document_reference.handler"
+  retention = local.is_ephemeral ? 90 : 15
+
 }
 
 module "consumer__searchDocumentReference" {
@@ -79,7 +82,8 @@ module "consumer__searchDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "search_document_reference.handler"
+  handler   = "search_document_reference.handler"
+  retention = local.is_ephemeral ? 90 : 15
 }
 
 module "consumer__searchPostDocumentReference" {
@@ -107,7 +111,8 @@ module "consumer__searchPostDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "search_post_document_reference.handler"
+  handler   = "search_post_document_reference.handler"
+  retention = local.is_ephemeral ? 90 : 15
 }
 
 module "producer__createDocumentReference" {
@@ -136,7 +141,8 @@ module "producer__createDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "create_document_reference.handler"
+  handler   = "create_document_reference.handler"
+  retention = local.is_ephemeral ? 90 : 15
 }
 
 module "producer__deleteDocumentReference" {
@@ -165,7 +171,8 @@ module "producer__deleteDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "delete_document_reference.handler"
+  handler   = "delete_document_reference.handler"
+  retention = local.is_ephemeral ? 90 : 15
 }
 
 module "producer__readDocumentReference" {
@@ -193,7 +200,8 @@ module "producer__readDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "read_document_reference.handler"
+  handler   = "read_document_reference.handler"
+  retention = local.is_ephemeral ? 90 : 15
 }
 
 module "producer__searchDocumentReference" {
@@ -221,7 +229,8 @@ module "producer__searchDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "search_document_reference.handler"
+  handler   = "search_document_reference.handler"
+  retention = local.is_ephemeral ? 90 : 15
 }
 
 module "producer__searchPostDocumentReference" {
@@ -249,7 +258,8 @@ module "producer__searchPostDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "search_post_document_reference.handler"
+  handler   = "search_post_document_reference.handler"
+  retention = local.is_ephemeral ? 90 : 15
 }
 
 module "producer__updateDocumentReference" {
@@ -278,7 +288,8 @@ module "producer__updateDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "update_document_reference.handler"
+  handler   = "update_document_reference.handler"
+  retention = local.is_ephemeral ? 90 : 15
 }
 
 module "producer__upsertDocumentReference" {
@@ -307,7 +318,8 @@ module "producer__upsertDocumentReference" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "upsert_document_reference.handler"
+  handler   = "upsert_document_reference.handler"
+  retention = local.is_ephemeral ? 90 : 15
 }
 
 module "consumer__status" {
@@ -336,7 +348,8 @@ module "consumer__status" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "status.handler"
+  handler   = "status.handler"
+  retention = local.is_ephemeral ? 90 : 15
 }
 
 
@@ -366,5 +379,6 @@ module "producer__status" {
   firehose_subscriptions = [
     module.firehose__processor.firehose_subscription
   ]
-  handler = "status.handler"
+  handler   = "status.handler"
+  retention = local.is_ephemeral ? 90 : 15
 }
