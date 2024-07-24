@@ -23,7 +23,7 @@ locals {
   persistent_env_list      = ["dev", "dev-sandbox", "qa", "qa-sandbox", "int", "int-sandbox", "ref", "prod"]
 
   is_sandbox_env = length(regexall("-sandbox-", local.stack_name)) > 0
-  is_ephemeral   = (contains(local.persistent_env_list, local.stack_name)) ? 0 : 1
+  is_ephemeral   = (contains(local.persistent_env_list, local.stack_name))
 
   environment   = local.is_sandbox_env ? "${var.account_name}-sandbox" : var.account_name
   shared_prefix = "${local.project}--${local.environment}"
