@@ -8,6 +8,7 @@ Feature: Producer - upsertDocumentReference - Failure Scenarios
       | http://snomed.info/sct | 736253002        |
     When producer 'X26' upserts a DocumentReference with values:
       | property  | value                          |
+      | id        | X26-testid-upsert-0001-0001    |
       | subject   | 9999999999                     |
       | status    | current                        |
       | type      | 736253002                      |
