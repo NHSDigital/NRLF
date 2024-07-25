@@ -267,7 +267,7 @@ Feature: Producer - createDocumentReference - Failure Scenarios
       | property  | value                          |
       | subject   | 9999999999                     |
       | status    | current                        |
-      | type      | 1363501000000100               |
+      | type      | 736253002                      |
       | category  | 1102421000000108               |
       | custodian | X26                            |
       | author    | HAR1                           |
