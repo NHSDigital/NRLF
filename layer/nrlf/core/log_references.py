@@ -192,7 +192,7 @@ class LogReference(Enum):
         "EXCEPTION", "The DocumentReference resource could not be parsed"
     )
     CONPOSTSEARCH999 = _Reference(
-        "INFO", "Successfully completed consumer searchDocumentReference"
+        "INFO", "Successfully completed consumer searchPostDocumentReference"
     )
 
     # Producer - CreateDocumentReference
