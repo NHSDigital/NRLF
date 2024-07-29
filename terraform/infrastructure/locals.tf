@@ -20,14 +20,18 @@ locals {
     }
   }
   dynamodb_timeout_seconds = "3"
-  persistent_env_list      = ["dev", "dev-sandbox", "qa", "qa-sandbox", "int", "int-sandbox", "ref", "prod"]
 
   is_sandbox_env = length(regexall("-sandbox-", local.stack_name)) > 0
-  is_persistent  = (contains(local.persistent_env_list, local.stack_name))
 
   environment   = local.is_sandbox_env ? "${var.account_name}-sandbox" : var.account_name
   shared_prefix = "${local.project}--${local.environment}"
   public_domain = local.is_sandbox_env ? var.public_sandbox_domain : var.public_domain
+
+  persistent_env_list = ["dev", "dev-sandbox", "qa", "qa-sandbox", "int", "int-sandbox", "ref", "prod"]
+  is_persistent       = (contains(local.persistent_env_list, local.environment))
+  is_prod             = local.environment == "prod"
+  is_ref              = local.environment == "ref"
+
 
   # Logic / vars for splunk environment
   splunk_environment = local.is_sandbox_env ? "${var.account_name}sandbox" : var.account_name
