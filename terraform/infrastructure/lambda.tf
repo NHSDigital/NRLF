@@ -24,7 +24,7 @@ module "consumer__readDocumentReference" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "read_document_reference.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
 
 module "consumer__countDocumentReference" {
@@ -53,7 +53,7 @@ module "consumer__countDocumentReference" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "count_document_reference.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
 
 module "consumer__searchDocumentReference" {
@@ -82,7 +82,7 @@ module "consumer__searchDocumentReference" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "search_document_reference.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
 
 module "consumer__searchPostDocumentReference" {
@@ -111,7 +111,7 @@ module "consumer__searchPostDocumentReference" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "search_post_document_reference.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
 
 module "producer__createDocumentReference" {
@@ -141,7 +141,7 @@ module "producer__createDocumentReference" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "create_document_reference.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
 
 module "producer__deleteDocumentReference" {
@@ -171,7 +171,7 @@ module "producer__deleteDocumentReference" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "delete_document_reference.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
 
 module "producer__readDocumentReference" {
@@ -200,7 +200,7 @@ module "producer__readDocumentReference" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "read_document_reference.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
 
 module "producer__searchDocumentReference" {
@@ -229,7 +229,7 @@ module "producer__searchDocumentReference" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "search_document_reference.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
 
 module "producer__searchPostDocumentReference" {
@@ -258,7 +258,7 @@ module "producer__searchPostDocumentReference" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "search_post_document_reference.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
 
 module "producer__updateDocumentReference" {
@@ -288,7 +288,7 @@ module "producer__updateDocumentReference" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "update_document_reference.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
 
 module "producer__upsertDocumentReference" {
@@ -318,7 +318,7 @@ module "producer__upsertDocumentReference" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "upsert_document_reference.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
 
 module "consumer__status" {
@@ -348,7 +348,7 @@ module "consumer__status" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "status.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
 
 
@@ -379,5 +379,5 @@ module "producer__status" {
     module.firehose__processor.firehose_subscription
   ]
   handler   = "status.handler"
-  retention = local.is_persistent ? (local.is_prod ? 2192 : (local.is_ref ? 30 : 90)) : 7
+  retention = var.log_retention_period
 }
