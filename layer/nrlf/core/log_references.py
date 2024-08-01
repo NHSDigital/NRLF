@@ -26,6 +26,12 @@ class LogReference(Enum):
     HANDLER011 = _Reference("INFO", "Parsed request path parameters")
     HANDLER012 = _Reference("DEBUG", "Filtered request handler function arguments")
     HANDLER013 = _Reference("INFO", "Calling lambda-specific request handler")
+    HANDLER014 = _Reference(
+        "WARN", "Rejecting request due to missing X-Request-Id header"
+    )
+    HANDLER015 = _Reference(
+        "WARN", "Rejecting request due to missing NHSD-Correlation-Id header"
+    )
     HANDLER999 = _Reference("INFO", "Request handler returned successfully")
 
     # Error Logs

@@ -3,12 +3,19 @@ from typing import Dict, List, Optional
 from unittest.mock import Mock
 
 
+def create_default_request_headers(headers: dict = {}) -> dict:
+    return {
+        **headers,
+    }
+
+
 def create_headers(
     ods_code: str = "Y05868",
     nrl_permissions: Optional[List[str]] = [],
     app_name: Optional[str] = "TestApp",
     app_id: Optional[str] = "12345",
     nrl_app_id: Optional[str] = "Y05868-TestApp-12345678",
+    addional_headers: Optional[Dict[str, str]] = {},
 ) -> Dict[str, str]:
     return {
         "nhsd-connection-metadata": json.dumps(
@@ -22,11 +29,22 @@ def create_headers(
         "nhsd-client-rp-details": json.dumps(
             {"developer.app.name": app_name, "developer.app.id": app_id}
         ),
+        "X-Request-Id": "test_request_id",
+        "NHSD-Correlation-Id": "test_correlation_id",
+        **addional_headers,
+    }
+
+
+def default_response_headers():
+    return {
+        "Content-Type": "application/json",
+        "X-Request-Id": "test_request_id",
+        "NHSD-Correlation-Id": "test_correlation_id",
     }
 
 
 def create_test_api_gateway_event(
-    headers: Optional[Dict[str, str]] = None,
+    headers: Optional[Dict[str, str]] = {},
     query_string_parameters: Optional[Dict[str, str]] = None,
     path_parameters: Optional[Dict[str, str]] = None,
     body: Optional[str] = None,
@@ -40,7 +58,7 @@ def create_test_api_gateway_event(
             "httpMethod": "GET",
             "path": "/Prod/",
         },
-        "headers": headers or {},
+        "headers": create_headers(addional_headers=headers),
         "multiValueHeaders": {},
         "queryStringParameters": query_string_parameters or {},
         "multiValueQueryStringParameters": None,

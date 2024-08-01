@@ -33,6 +33,7 @@ PERMISSION_AUDIT_DATES_FROM_PAYLOAD = "audit-dates-from-payload"
 PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL = "supersede-ignore-delete-fail"
 PERMISSION_ALLOW_ALL_POINTER_TYPES = "allow-all-pointer-types"
 
+CORRELATION_ID_PATH = 'headers."nhsd-correlation-id"'
 
 PRODUCER_URL_PATH = "/producer/FHIR/R4/DocumentReference"
 

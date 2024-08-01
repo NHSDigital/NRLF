@@ -15,7 +15,11 @@ from pydantic import BaseModel
 from nrlf.core.authoriser import get_pointer_types, parse_permissions_file
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.config import Config
-from nrlf.core.constants import PERMISSION_ALLOW_ALL_POINTER_TYPES, PointerTypes
+from nrlf.core.constants import (
+    CORRELATION_ID_PATH,
+    PERMISSION_ALLOW_ALL_POINTER_TYPES,
+    PointerTypes,
+)
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
 from nrlf.core.errors import OperationOutcomeError, ParseError
 from nrlf.core.logger import LogReference, logger
@@ -98,6 +102,30 @@ def filter_kwargs(handler_func: RequestHandler, kwargs: Dict[str, Any]):
     return function_kwargs
 
 
+def verify_request_ids(event: APIGatewayProxyEvent):
+    caller_request_id = event.get_header_value("x-request-id")
+    if not caller_request_id:
+        logger.log(LogReference.HANDLER014, headers=event.headers)
+        raise OperationOutcomeError(
+            status_code="400",
+            severity="error",
+            code="invalid",
+            details=SpineErrorConcept.from_code("MISSING_OR_INVALID_HEADER"),
+            diagnostics="The X-Request-Id header is missing or invalid",
+        )
+
+    caller_correlation_id = event.get_header_value("nhsd-correlation-id")
+    if not caller_correlation_id:
+        logger.log(LogReference.HANDLER015, headers=event.headers)
+        raise OperationOutcomeError(
+            status_code="400",
+            severity="error",
+            code="invalid",
+            details=SpineErrorConcept.from_code("MISSING_OR_INVALID_HEADER"),
+            diagnostics="The NHSD-Correlation-Id header is missing or invalid",
+        )
+
+
 def basic_handler(
     event: APIGatewayProxyEvent,
     context: LambdaContext,
@@ -151,6 +179,8 @@ def request_handler(
             if skip_request_verification:
                 return basic_handler(event, context, func, **kwargs)
 
+            verify_request_ids(event)
+
             config = Config()
             logger.log(LogReference.HANDLER001, config=config.dict())
             metadata = load_connection_metadata(event.headers, config)
@@ -195,7 +225,7 @@ def request_handler(
 
         decorators = [
             wraps(func),
-            logger.inject_lambda_context,
+            logger.inject_lambda_context(correlation_id_path=CORRELATION_ID_PATH),
             event_source(data_class=APIGatewayProxyEvent),
             error_handler,
         ]

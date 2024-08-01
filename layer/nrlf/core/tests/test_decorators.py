@@ -386,6 +386,52 @@ def test_request_handler_with_request_verification(mocker: MockerFixture):
     assert parse_headers_mock.called is False
 
 
+def test_request_handler_with_missing_request_id(mocker: MockerFixture):
+    parse_headers_mock = mocker.patch("nrlf.core.decorators.parse_headers")
+
+    @request_handler(skip_request_verification=False)
+    def decorated_function(event, context) -> Response:
+        return Response(
+            statusCode="200",
+            body=json.dumps({"message": "Hello, World!"}),
+            headers={"Content-Type": "application/json"},
+        )
+
+    event = create_test_api_gateway_event()
+    context = create_mock_context()
+
+    event["headers"].pop("X-Request-Id")
+
+    result = decorated_function(event, context)
+
+    assert result["statusCode"] == "400"
+    assert result["headers"] == {}
+    assert result["isBase64Encoded"] is False
+
+    parsed_body = json.loads(result["body"])
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "error",
+                "code": "invalid",
+                "details": {
+                    "coding": [
+                        {
+                            "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                            "code": "MISSING_OR_INVALID_HEADER",
+                            "display": "There is a required header missing or invalid",
+                        }
+                    ]
+                },
+                "diagnostics": "The X-Request-Id header is missing or invalid",
+            }
+        ],
+    }
+
+    assert parse_headers_mock.called is False
+
+
 def test_request_handler_with_invalid_headers():
     @request_handler()
     def decorated_function(event, context, config, metadata) -> Response:
