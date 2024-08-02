@@ -7,7 +7,11 @@ from pytest_mock import MockerFixture
 from nrlf.core.authoriser import parse_permissions_file
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.config import Config
-from nrlf.core.constants import PERMISSION_ALLOW_ALL_POINTER_TYPES, PointerTypes
+from nrlf.core.constants import (
+    PERMISSION_ALLOW_ALL_POINTER_TYPES,
+    X_REQUEST_ID_HEADER,
+    PointerTypes,
+)
 from nrlf.core.decorators import (
     deprecated,
     error_handler,
@@ -21,6 +25,7 @@ from nrlf.tests.events import (
     create_headers,
     create_mock_context,
     create_test_api_gateway_event,
+    default_response_headers,
 )
 
 
@@ -123,7 +128,10 @@ def test_request_handler_defaults():
     result = decorated_function(event, context)
 
     assert result["statusCode"] == "200"
-    assert result["headers"] == {"Content-Type": "application/json"}
+    assert result["headers"] == {
+        "Content-Type": "application/json",
+        **default_response_headers(),
+    }
     assert result["isBase64Encoded"] is False
 
     parsed_body = json.loads(result["body"])
@@ -153,7 +161,10 @@ def test_request_handler_with_params():
     result = decorated_function(event, context)
 
     assert result["statusCode"] == "200"
-    assert result["headers"] == {"Content-Type": "application/json"}
+    assert result["headers"] == {
+        "Content-Type": "application/json",
+        **default_response_headers(),
+    }
     assert result["isBase64Encoded"] is False
 
     parsed_body = json.loads(result["body"])
@@ -181,7 +192,7 @@ def test_request_handler_with_params_missing_params():
     result = decorated_function(event, context)
 
     assert result["statusCode"] == "400"
-    assert result["headers"] == {}
+    assert result["headers"] == default_response_headers()
     assert result["isBase64Encoded"] is False
 
     parsed_body = json.loads(result["body"])
@@ -244,7 +255,10 @@ def test_request_handler_with_body():
     result = decorated_function(event, context)
 
     assert result["statusCode"] == "200"
-    assert result["headers"] == {"Content-Type": "application/json"}
+    assert result["headers"] == {
+        "Content-Type": "application/json",
+        **default_response_headers(),
+    }
     assert result["isBase64Encoded"] is False
 
     parsed_body = json.loads(result["body"])
@@ -270,7 +284,7 @@ def test_request_handler_with_body_missing_body():
     result = decorated_function(event, context)
 
     assert result["statusCode"] == "400"
-    assert result["headers"] == {}
+    assert result["headers"] == default_response_headers()
     assert result["isBase64Encoded"] is False
 
     parsed_body = json.loads(result["body"])
@@ -318,7 +332,7 @@ def test_request_handler_with_body_invalid_body():
     result = decorated_function(event, context)
 
     assert result["statusCode"] == "400"
-    assert result["headers"] == {}
+    assert result["headers"] == default_response_headers()
     assert result["isBase64Encoded"] is False
 
     parsed_body = json.loads(result["body"])
@@ -377,7 +391,10 @@ def test_request_handler_with_request_verification(mocker: MockerFixture):
     result = decorated_function(event, context)
 
     assert result["statusCode"] == "200"
-    assert result["headers"] == {"Content-Type": "application/json"}
+    assert result["headers"] == {
+        "Content-Type": "application/json",
+        **default_response_headers(),
+    }
     assert result["isBase64Encoded"] is False
 
     parsed_body = json.loads(result["body"])
@@ -400,7 +417,7 @@ def test_request_handler_with_missing_request_id(mocker: MockerFixture):
     event = create_test_api_gateway_event()
     context = create_mock_context()
 
-    event["headers"].pop("X-Request-Id")
+    event["headers"].pop(X_REQUEST_ID_HEADER)
 
     result = decorated_function(event, context)
 
@@ -452,7 +469,7 @@ def test_request_handler_with_invalid_headers():
     result = decorated_function(event, context)
 
     assert result["statusCode"] == "401"
-    assert result["headers"] == {}
+    assert result["headers"] == default_response_headers()
     assert result["isBase64Encoded"] is False
 
     parsed_body = json.loads(result["body"])
@@ -527,7 +544,10 @@ def test_request_handler_with_custom_repository(mocker: MockerFixture):
     result = decorated_function(event, context)
 
     assert result["statusCode"] == "200"
-    assert result["headers"] == {"Content-Type": "application/json"}
+    assert result["headers"] == {
+        "Content-Type": "application/json",
+        **default_response_headers(),
+    }
     assert result["isBase64Encoded"] is False
 
     parsed_body = json.loads(result["body"])

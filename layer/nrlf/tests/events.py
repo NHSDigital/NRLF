@@ -37,9 +37,7 @@ def create_headers(
 
 def default_response_headers():
     return {
-        "Content-Type": "application/json",
         "X-Request-Id": "test_request_id",
-        "NHSD-Correlation-Id": "test_correlation_id",
     }
 
 
