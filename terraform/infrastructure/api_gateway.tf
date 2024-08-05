@@ -17,6 +17,7 @@ module "consumer__gateway" {
   depends_on = [
     aws_acm_certificate_validation.validation
   ]
+  retention = var.log_retention_period
 }
 
 module "producer__gateway" {
@@ -42,4 +43,5 @@ module "producer__gateway" {
   depends_on = [
     aws_acm_certificate_validation.validation
   ]
+  retention = var.log_retention_period
 }
