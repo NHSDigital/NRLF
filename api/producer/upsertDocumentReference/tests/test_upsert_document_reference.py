@@ -162,7 +162,7 @@ def test_upsert_document_reference_invalid_category_type():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
