@@ -1,6 +1,8 @@
 import json
 import warnings
 
+import pytest
+from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
 from pydantic import BaseModel
 from pytest_mock import MockerFixture
 
@@ -15,10 +17,14 @@ from nrlf.core.constants import (
 from nrlf.core.decorators import (
     deprecated,
     error_handler,
+    header_handler,
     load_connection_metadata,
+    logger_initialiser,
     request_handler,
+    verify_request_ids,
 )
 from nrlf.core.errors import OperationOutcomeError
+from nrlf.core.logger import LogReference
 from nrlf.core.request import parse_headers
 from nrlf.core.response import Response
 from nrlf.tests.events import (
@@ -111,6 +117,226 @@ def test_error_handler_decorator_error_handling():
             }
         ],
     }
+
+
+def test_header_handler_happy_path():
+    @header_handler
+    def decorated_function(event):
+        return {
+            "headers": {
+                "Content-Type": "application/json",
+            }
+        }
+
+    test_event = create_test_api_gateway_event()
+    event = APIGatewayProxyEvent(test_event)
+
+    response = decorated_function(event)
+
+    assert response["headers"] == {
+        **default_response_headers(),
+        "Content-Type": "application/json",
+    }
+
+
+def test_header_handler_when_correlation_id_is_also_present():
+    @header_handler
+    def decorated_function(event):
+        return {
+            "headers": {
+                "Content-Type": "application/json",
+            }
+        }
+
+    test_event = create_test_api_gateway_event(
+        headers={
+            **create_headers(),
+            "X-Correlation-Id": "test_correlation_id",
+        }
+    )
+    event = APIGatewayProxyEvent(test_event)
+
+    response = decorated_function(event)
+
+    assert response["headers"] == {
+        **default_response_headers(),
+        "Content-Type": "application/json",
+        "X-Correlation-Id": "test_correlation_id",
+    }
+
+
+def test_header_handler_when_no_response_headers():
+    @header_handler
+    def decorated_function(event):
+        return {}
+
+    test_event = create_test_api_gateway_event()
+    event = APIGatewayProxyEvent(test_event)
+
+    response = decorated_function(event)
+
+    assert response["headers"] == default_response_headers()
+
+
+def test_header_handler_when_no_echoed_headers():
+    @header_handler
+    def decorated_function(event):
+        return {
+            "headers": {
+                "Content-Type": "application/json",
+            }
+        }
+
+    test_event = create_test_api_gateway_event(headers={"X-None-Echoed-Header": "test"})
+    event = APIGatewayProxyEvent(test_event)
+
+    response = decorated_function(event)
+
+    assert response["headers"] == {
+        "Content-Type": "application/json",
+    }
+
+
+def test_header_handler_with_overwritten_response_headers():
+    @header_handler
+    def decorated_function(event):
+        return {
+            "headers": {
+                "Content-Type": "application/json",
+                "X-Request-Id": "test_request_id_overwrite_me",
+                "X-Correlation-Id": "test_correlation_id_overwrite_me",
+            }
+        }
+
+    test_event = create_test_api_gateway_event(
+        headers={
+            **create_headers(),
+            "X-Correlation-Id": "test_correlation_id",
+        }
+    )
+    event = APIGatewayProxyEvent(test_event)
+
+    response = decorated_function(event)
+
+    assert response["headers"] == {
+        "Content-Type": "application/json",
+        "X-Request-Id": "test_request_id",
+        "X-Correlation-Id": "test_correlation_id",
+    }
+
+
+def test_header_handler_when_response_header_checks_fail(mocker: MockerFixture):
+    @header_handler
+    def decorated_function(event):
+        return {
+            "headers": {
+                "Content-Type": "application/json",
+                "X-Request-Id": "test_request_id_not_overwritten",
+                "X-Correlation-Id": "test_correlation_id_not_overwritten",
+            }
+        }
+
+    event = mocker.MagicMock()
+    event.get_header_value.side_effect = Exception("Test exception")
+
+    response = decorated_function(event)
+
+    assert response["headers"] == {
+        "Content-Type": "application/json",
+        "X-Request-Id": "test_request_id_not_overwritten",
+        "X-Correlation-Id": "test_correlation_id_not_overwritten",
+    }
+
+
+def test_logger_initialiser_happy_path(mocker: MockerFixture):
+    mock_logger = mocker.patch("nrlf.core.decorators.logger")
+
+    @logger_initialiser
+    def decorated_function(event):
+        return {}
+
+    test_event = create_test_api_gateway_event()
+    event = APIGatewayProxyEvent(test_event)
+
+    decorated_function(event)
+
+    mock_logger.set_correlation_id.assert_called_once_with("test_correlation_id")
+
+
+def test_logger_initialiser_no_correletion_id(mocker: MockerFixture):
+    mock_logger = mocker.patch("nrlf.core.decorators.logger")
+
+    @logger_initialiser
+    def decorated_function(event):
+        return {}
+
+    test_event = create_test_api_gateway_event(
+        headers={
+            **create_headers(),
+            "NHSD-Correlation-Id": None,
+        }
+    )
+    event = APIGatewayProxyEvent(test_event)
+
+    decorated_function(event)
+
+    mock_logger.set_correlation_id.assert_not_called()
+    mock_logger.log.assert_called_once_with(
+        LogReference.HANDLER017,
+        id_header="NHSD-Correlation-Id",
+        headers=test_event["headers"],
+    )
+
+
+def test_verify_request_id_happy_path():
+    test_event = create_test_api_gateway_event()
+
+    event = APIGatewayProxyEvent(test_event)
+    verify_request_ids(event)
+
+
+def test_verify_request_id_no_request_id():
+    test_event = create_test_api_gateway_event()
+    test_event["headers"].pop(X_REQUEST_ID_HEADER)
+
+    event = APIGatewayProxyEvent(test_event)
+    with pytest.raises(OperationOutcomeError) as err:
+        verify_request_ids(event)
+
+    assert err.value.status_code == "400"
+    assert err.value.operation_outcome.resourceType == "OperationOutcome"
+    assert err.value.operation_outcome.issue[0].severity == "error"
+    assert err.value.operation_outcome.issue[0].code == "invalid"
+    assert err.value.operation_outcome.issue[0].details == SpineErrorConcept.from_code(
+        "MISSING_OR_INVALID_HEADER"
+    )
+    assert (
+        err.value.operation_outcome.issue[0].diagnostics
+        == "The X-Request-Id header is missing or invalid"
+    )
+    assert err.value.operation_outcome.issue[0].expression == None
+
+
+def test_verify_request_id_no_correlation_id():
+    test_event = create_test_api_gateway_event()
+    test_event["headers"].pop("NHSD-Correlation-Id")
+
+    event = APIGatewayProxyEvent(test_event)
+    with pytest.raises(OperationOutcomeError) as err:
+        verify_request_ids(event)
+
+    assert err.value.status_code == "400"
+    assert err.value.operation_outcome.resourceType == "OperationOutcome"
+    assert err.value.operation_outcome.issue[0].severity == "error"
+    assert err.value.operation_outcome.issue[0].code == "invalid"
+    assert err.value.operation_outcome.issue[0].details == SpineErrorConcept.from_code(
+        "MISSING_OR_INVALID_HEADER"
+    )
+    assert (
+        err.value.operation_outcome.issue[0].diagnostics
+        == "The NHSD-Correlation-Id header is missing or invalid"
+    )
+    assert err.value.operation_outcome.issue[0].expression == None
 
 
 def test_request_handler_defaults():
@@ -460,6 +686,7 @@ def test_request_handler_with_invalid_headers():
 
     event = create_test_api_gateway_event(
         headers={
+            **create_headers(),
             "nhsd-connection-metadata": "invalid",
             "nhsd-client-rp-details": "invalid",
         }

@@ -56,7 +56,7 @@ def create_test_api_gateway_event(
             "httpMethod": "GET",
             "path": "/Prod/",
         },
-        "headers": create_headers(addional_headers=headers),
+        "headers": headers or create_headers(),
         "multiValueHeaders": {},
         "queryStringParameters": query_string_parameters or {},
         "multiValueQueryStringParameters": None,

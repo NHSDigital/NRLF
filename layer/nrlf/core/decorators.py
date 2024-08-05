@@ -100,8 +100,8 @@ def header_handler(
 
         logger.log(
             LogReference.HANDLER016,
-            status_code=response["statusCode"],
-            headers=response["headers"],
+            status_code=getattr(response, "statusCode", ""),
+            headers=getattr(response, "headers", {}),
         )
 
         return response
