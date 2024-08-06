@@ -25,6 +25,8 @@ def before_all(context: Context):
 
     context.base_url = f"https://{context.env}.api.record-locator.dev.national.nhs.uk/"
 
+    print(f"Running tests in {context.env} environment: {context.base_url}")  # noqa
+
     default_table_name = f"nhsd-nrlf--{context.stack_name}-pointers-table"
 
     context.client_cert = get_cert_path_for_environment(context.env)

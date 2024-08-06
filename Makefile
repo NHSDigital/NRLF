@@ -79,7 +79,7 @@ test: check-warn ## Run the unit tests
 	pytest -m "not integration and not legacy and not smoke" --ignore=mi $(TEST_ARGS)
 
 test-features-integration: check-warn ## Run the BDD feature tests in the integration environment
-	@echo "Running feature tests in the integration environment"
+	@echo "Running feature tests in the integration environment ${TF_WORKSPACE_NAME}"
 	behave --define="integration_test=true" \
 		--define="env=$(TF_WORKSPACE_NAME)" \
 		--define="account_name=$(ENV)" \
