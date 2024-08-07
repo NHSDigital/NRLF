@@ -263,7 +263,7 @@ def test_logger_initialiser_happy_path(mocker: MockerFixture):
     mock_logger.set_correlation_id.assert_called_once_with("test_correlation_id")
 
 
-def test_logger_initialiser_no_correletion_id(mocker: MockerFixture):
+def test_logger_initialiser_no_correlation_id(mocker: MockerFixture):
     mock_logger = mocker.patch("nrlf.core.decorators.logger")
 
     @logger_initialiser

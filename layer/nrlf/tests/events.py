@@ -15,7 +15,7 @@ def create_headers(
     app_name: Optional[str] = "TestApp",
     app_id: Optional[str] = "12345",
     nrl_app_id: Optional[str] = "Y05868-TestApp-12345678",
-    addional_headers: Optional[Dict[str, str]] = {},
+    additional_headers: Optional[Dict[str, str]] = {},
 ) -> Dict[str, str]:
     return {
         "nhsd-connection-metadata": json.dumps(
@@ -31,7 +31,7 @@ def create_headers(
         ),
         "X-Request-Id": "test_request_id",
         "NHSD-Correlation-Id": "test_correlation_id",
-        **addional_headers,
+        **additional_headers,
     }
 
 

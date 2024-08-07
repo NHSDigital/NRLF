@@ -90,7 +90,7 @@ def header_handler(
                 if event.get_header_value(name)
             }
             response["headers"].update(echoed_headers)
-        except Exception as exc:
+        except Exception:
             logger.exception(
                 "An error occurred whilst setting response headers",
                 exc_info=sys.exc_info(),
@@ -173,7 +173,7 @@ def filter_kwargs(handler_func: RequestHandler, kwargs: Dict[str, Any]):
 
 
 def verify_request_ids(event: APIGatewayProxyEvent):
-    caller_request_id = event.get_header_value("x-request-id")
+    caller_request_id = event.get_header_value(X_REQUEST_ID_HEADER)
     if not caller_request_id:
         logger.log(LogReference.HANDLER014, headers=event.headers)
         raise OperationOutcomeError(
@@ -184,7 +184,7 @@ def verify_request_ids(event: APIGatewayProxyEvent):
             diagnostics="The X-Request-Id header is missing or invalid",
         )
 
-    caller_correlation_id = event.get_header_value("nhsd-correlation-id")
+    caller_correlation_id = event.get_header_value(NHSD_CORRELATION_ID_HEADER)
     if not caller_correlation_id:
         logger.log(LogReference.HANDLER015, headers=event.headers)
         raise OperationOutcomeError(
@@ -299,6 +299,7 @@ def request_handler(
             error_handler,
             header_handler,
             logger_initialiser,
+            logger.inject_lambda_context,
             event_source(data_class=APIGatewayProxyEvent),
         ]
 
