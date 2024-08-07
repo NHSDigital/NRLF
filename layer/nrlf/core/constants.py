@@ -59,10 +59,16 @@ class PointerTypes(Enum):
     def list():
         return list(map(lambda type: type.value, PointerTypes))
 
+    def coding_value(self):
+        return self.value.split(TYPE_SEPARATOR)[1]
+
 
 class Categories(Enum):
     CARE_PLAN = "http://snomed.info/sct|734163000"
     OBSERVATIONS = "http://snomed.info/sct|1102421000000108"
+
+    def coding_value(self):
+        return self.value.split(TYPE_SEPARATOR)[1]
 
 
 TYPE_CATEGORIES = {

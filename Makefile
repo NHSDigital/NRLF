@@ -9,6 +9,7 @@ SHELL := /bin/bash
 
 DIST_PATH ?= ./dist
 TEST_ARGS ?= --cov --cov-report=term-missing
+SMOKE_TEST_ARGS ?=
 FEATURE_TEST_ARGS ?= ./tests/features --format progress2
 TF_WORKSPACE_NAME ?= $(shell terraform -chdir=terraform/infrastructure workspace show)
 ENV ?= dev
@@ -87,14 +88,21 @@ test-features-integration: check-warn ## Run the BDD feature tests in the integr
 		$(FEATURE_TEST_ARGS)
 
 test-smoke-internal: check-warn ## Run the smoke tests against the internal environment
-	@echo "Running smoke tests against the internal environment"
-	#ENV=$(TF_WORKSPACE_NAME) SMOKE_TEST_MODE=mtls pytest ./tests/smoke $(SMOKE_TEST_ARGS)
-	@echo "Skipping internal smoke tests (not yet implemented)"
+	@echo "Running smoke tests against the internal environment ${TF_WORKSPACE_NAME}"
+	TEST_ENVIRONMENT_NAME=$(ENV) \
+	TEST_STACK_NAME=$(TF_WORKSPACE_NAME) \
+	TEST_CONNECT_MODE="internal" \
+		pytest ./tests/smoke $(SMOKE_TEST_ARGS)
+	@echo "Smoke tests completed successfully"
 
-test-smoke-external: check-warn ## Run the smoke tests for the external access points
-	@echo "Running smoke tests for the external access points"
-	#ENV=$(ENV) SMOKE_TEST_MODE=apigee pytest ./tests/smoke $(SMOKE_TEST_ARGS)
-	@echo "Skipping external smoke tests (not yet implemented)"
+test-smoke-public: check-warn ## Run the smoke tests for the external access points
+	@echo "Running smoke tests for the public endpoints ${ENV}"
+	@echo "Running smoke tests against the internal environment ${TF_WORKSPACE_NAME}"
+	TEST_ENVIRONMENT_NAME=$(ENV) \
+	TEST_STACK_NAME=$(TF_WORKSPACE_NAME) \
+	TEST_CONNECT_MODE="public" \
+		pytest ./tests/smoke $(SMOKE_TEST_ARGS)
+	@echo "Smoke tests completed successfully"
 
 test-performance-prepare:
 	mkdir -p $(DIST_PATH)

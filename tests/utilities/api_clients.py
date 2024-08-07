@@ -22,7 +22,7 @@ PointerTypeCodes = Literal[
 
 class ClientConfig(BaseModel):
     base_url: str
-    auth_token: str = "Bearer TestToken"
+    auth_token: str = "TestToken"
     client_cert: tuple[str, str]
     connection_metadata: ConnectionMetadata
 

@@ -130,6 +130,16 @@ def make_token_request(app_secrets: dict, token: str):
     return response.json()
 
 
+def get_bearer_token(account_name: str, app_id: str, env: str):
+    app_secrets = get_app_secrets(account_name, env, app_id)
+    jwt_token = generate_client_assertion(app_secrets)
+
+    response = make_token_request(app_secrets, jwt_token)
+
+    access_token = response["access_token"]
+    return access_token
+
+
 def main(env: str, app_alias: Literal["default", "nrl_sync"] = "default"):
 
     account_name, app_id = get_app_details(env, app_alias)
@@ -137,13 +147,7 @@ def main(env: str, app_alias: Literal["default", "nrl_sync"] = "default"):
     print(  # noqa: T201
         f"Requesting access token for {env} environment (App ID '{app_id}')"
     )
-
-    app_secrets = get_app_secrets(account_name, env, app_id)
-    jwt_token = generate_client_assertion(app_secrets)
-
-    response = make_token_request(app_secrets, jwt_token)
-
-    access_token = response["access_token"]
+    access_token = get_bearer_token(account_name, app_id, env)
     print(f"Access Token: {access_token}")  # noqa: T201
 
 
