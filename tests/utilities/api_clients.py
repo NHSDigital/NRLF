@@ -23,7 +23,8 @@ PointerTypeCodes = Literal[
 class ClientConfig(BaseModel):
     base_url: str
     auth_token: str = "TestToken"
-    client_cert: tuple[str, str]
+    api_path: str = ""
+    client_cert: tuple[str, str] | None = None
     connection_metadata: ConnectionMetadata
 
 
@@ -49,13 +50,14 @@ class ConsumerTestClient:
 
     def __init__(self, config: ClientConfig):
         self.config = config
+        self.api_url = f"{self.config.base_url}consumer/{self.config.api_path}"
 
     def read(self, doc_ref_id: str):
         connection_metadata = self.config.connection_metadata.dict(by_alias=True)
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.get(
-            f"{self.config.base_url}consumer/DocumentReference/{doc_ref_id}",
+            f"{self.api_url}/DocumentReference/{doc_ref_id}",
             headers={
                 "Authorization": f"Bearer {self.config.auth_token}",
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
@@ -69,7 +71,7 @@ class ConsumerTestClient:
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.get(
-            f"{self.config.base_url}consumer/DocumentReference/_count",
+            f"{self.api_url}/DocumentReference/_count",
             params=params,
             headers={
                 "Authorization": f"Bearer {self.config.auth_token}",
@@ -78,6 +80,9 @@ class ConsumerTestClient:
             },
             cert=self.config.client_cert,
         )
+
+    def count_by_patient(self, nhs_number: str):
+        return self.count()
 
     def search(
         self,
@@ -108,7 +113,7 @@ class ConsumerTestClient:
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.get(
-            f"{self.config.base_url}consumer/DocumentReference",
+            f"{self.api_url}/DocumentReference",
             params=params,
             headers={
                 "Authorization": f"Bearer {self.config.auth_token}",
@@ -147,7 +152,7 @@ class ConsumerTestClient:
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.post(
-            f"{self.config.base_url}consumer/DocumentReference/_search",
+            f"{self.api_url}/DocumentReference//_search",
             json=body,
             headers={
                 "Content-Type": "application/json",
@@ -162,13 +167,14 @@ class ConsumerTestClient:
 class ProducerTestClient:
     def __init__(self, config: ClientConfig):
         self.config = config
+        self.api_url = f"{self.config.base_url}producer/{self.config.api_path}"
 
     def create(self, doc_ref):
         connection_metadata = self.config.connection_metadata.dict(by_alias=True)
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.post(
-            f"{self.config.base_url}producer/DocumentReference",
+            f"{self.api_url}/DocumentReference",
             json=doc_ref,
             headers={
                 "Authorization": f"Bearer {self.config.auth_token}",
@@ -183,7 +189,7 @@ class ProducerTestClient:
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.post(
-            f"{self.config.base_url}producer/DocumentReference",
+            f"{self.api_url}/DocumentReference",
             data=doc_ref,
             headers={
                 "Authorization": f"Bearer {self.config.auth_token}",
@@ -198,7 +204,7 @@ class ProducerTestClient:
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.put(
-            f"{self.config.base_url}producer/DocumentReference",
+            f"{self.api_url}/DocumentReference",
             json=doc_ref,
             headers={
                 "Authorization": f"Bearer {self.config.auth_token}",
@@ -213,7 +219,7 @@ class ProducerTestClient:
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.put(
-            f"{self.config.base_url}producer/DocumentReference/{doc_ref_id}",
+            f"{self.api_url}/DocumentReference/{doc_ref_id}",
             json=doc_ref,
             headers={
                 "Authorization": f"Bearer {self.config.auth_token}",
@@ -228,7 +234,7 @@ class ProducerTestClient:
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.delete(
-            f"{self.config.base_url}producer/DocumentReference/{doc_ref_id}",
+            f"{self.api_url}/DocumentReference/{doc_ref_id}",
             headers={
                 "Authorization": f"Bearer {self.config.auth_token}",
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
@@ -242,7 +248,7 @@ class ProducerTestClient:
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.get(
-            f"{self.config.base_url}producer/DocumentReference/{doc_ref_id}",
+            f"{self.api_url}/DocumentReference/{doc_ref_id}",
             headers={
                 "Authorization": f"Bearer {self.config.auth_token}",
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
@@ -274,7 +280,7 @@ class ProducerTestClient:
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.get(
-            f"{self.config.base_url}producer/DocumentReference",
+            f"{self.api_url}/DocumentReference",
             params=params,
             headers={
                 "Authorization": f"Bearer {self.config.auth_token}",
@@ -307,7 +313,7 @@ class ProducerTestClient:
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.post(
-            f"{self.config.base_url}consumer/DocumentReference/_search",
+            f"{self.api_url}/DocumentReference/_search",
             json=body,
             headers={
                 "Content-Type": "application/json",

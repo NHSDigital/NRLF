@@ -9,9 +9,10 @@ resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
   threshold           = var.threshold
   unit                = "Count"
 
-  metric_name = "Errors"
-  namespace   = "AWS/Lambda"
-  period      = var.period
-  statistic   = "Sum"
+  metric_name         = "Errors"
+  namespace           = "AWS/Lambda"
+  period              = var.period
+  statistic           = "Sum"
+  datapoints_to_alarm = 1
 
 }
