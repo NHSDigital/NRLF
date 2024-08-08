@@ -152,7 +152,7 @@ class ConsumerTestClient:
         client_rp_details = connection_metadata.pop("client_rp_details")
 
         return requests.post(
-            f"{self.api_url}/DocumentReference//_search",
+            f"{self.api_url}/DocumentReference/_search",
             json=body,
             headers={
                 "Content-Type": "application/json",

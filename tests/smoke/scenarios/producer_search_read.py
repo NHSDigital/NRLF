@@ -41,9 +41,11 @@ def test_producer_search_read(producer_client: ProducerTestClient, test_data: di
     search_response = producer_client.search(patient_id)
     assert search_response.ok
     assert search_response.json()["total"] == len(test_pointers)
-    # TODO-NOW - Check each id maybe?
 
-    # TODO-NOW - Add a test for post search
+    # Search with POST
+    search_response = producer_client.search_post(patient_id)
+    assert search_response.ok
+    assert search_response.json()["total"] == len(test_pointers)
 
     # Read
     read_response = producer_client.read(test_pointers[0].id)

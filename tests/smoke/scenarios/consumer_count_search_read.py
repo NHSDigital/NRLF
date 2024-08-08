@@ -53,7 +53,10 @@ def test_consumer_count_search_read(
     assert search_response.json()["total"] == len(test_pointers)
     # TODO-NOW - Check each id maybe?
 
-    # TODO-NOW - Add a test for post search
+    # Search with POST
+    search_response = consumer_client.search_post(patient_id)
+    assert search_response.ok
+    assert search_response.json()["total"] == len(test_pointers)
 
     # Read
     read_response = consumer_client.read(test_pointers[0].id)
