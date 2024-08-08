@@ -77,7 +77,7 @@ build-api-packages: ./api/consumer/* ./api/producer/*
 
 test: check-warn ## Run the unit tests
 	@echo "Running unit tests"
-	pytest -m "not integration and not legacy and not smoke" --ignore=mi $(TEST_ARGS)
+	pytest --ignore=tests/smoke $(TEST_ARGS)
 
 test-features-integration: check-warn ## Run the BDD feature tests in the integration environment
 	@echo "Running feature tests in the integration environment ${TF_WORKSPACE_NAME}"

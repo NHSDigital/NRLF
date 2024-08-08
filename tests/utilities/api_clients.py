@@ -26,6 +26,7 @@ class ClientConfig(BaseModel):
     api_path: str = ""
     client_cert: tuple[str, str] | None = None
     connection_metadata: ConnectionMetadata
+    custom_headers: dict[str, str] | None = {}
 
 
 class SearchQuery:
@@ -50,34 +51,28 @@ class ConsumerTestClient:
 
     def __init__(self, config: ClientConfig):
         self.config = config
-        self.api_url = f"{self.config.base_url}consumer/{self.config.api_path}"
+        self.api_url = f"{self.config.base_url}consumer{self.config.api_path}"
+        self.connection_metadata = self.config.connection_metadata.dict(by_alias=True)
+        self.client_rp_details = self.connection_metadata.pop("client_rp_details")
+        self.request_headers = {
+            "Authorization": f"Bearer {self.config.auth_token}",
+            "NHSD-Connection-Metadata": json.dumps(self.connection_metadata),
+            "NHSD-Client-RP-Details": json.dumps(self.client_rp_details),
+            **self.config.custom_headers,
+        }
 
     def read(self, doc_ref_id: str):
-        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        client_rp_details = connection_metadata.pop("client_rp_details")
-
         return requests.get(
             f"{self.api_url}/DocumentReference/{doc_ref_id}",
-            headers={
-                "Authorization": f"Bearer {self.config.auth_token}",
-                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
-                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
-            },
+            headers=self.request_headers,
             cert=self.config.client_cert,
         )
 
     def count(self, params: dict[str, str]):
-        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        client_rp_details = connection_metadata.pop("client_rp_details")
-
         return requests.get(
             f"{self.api_url}/DocumentReference/_count",
             params=params,
-            headers={
-                "Authorization": f"Bearer {self.config.auth_token}",
-                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
-                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
-            },
+            headers=self.request_headers,
             cert=self.config.client_cert,
         )
 
@@ -109,17 +104,10 @@ class ConsumerTestClient:
             else:
                 params["type"] = f"http://snomed.info/sct|{pointer_type}"
 
-        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        client_rp_details = connection_metadata.pop("client_rp_details")
-
         return requests.get(
             f"{self.api_url}/DocumentReference",
             params=params,
-            headers={
-                "Authorization": f"Bearer {self.config.auth_token}",
-                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
-                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
-            },
+            headers=self.request_headers,
             cert=self.config.client_cert,
         )
 
@@ -148,18 +136,20 @@ class ConsumerTestClient:
             else:
                 body["type"] = f"http://snomed.info/sct|{pointer_type}"
 
-        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        client_rp_details = connection_metadata.pop("client_rp_details")
-
         return requests.post(
             f"{self.api_url}/DocumentReference/_search",
             json=body,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.config.auth_token}",
-                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
-                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
+                **self.request_headers,
             },
+            cert=self.config.client_cert,
+        )
+
+    def read_capability_statement(self):
+        return requests.get(
+            f"{self.api_url}/metadata",
+            headers=self.request_headers,
             cert=self.config.client_cert,
         )
 
@@ -167,93 +157,59 @@ class ConsumerTestClient:
 class ProducerTestClient:
     def __init__(self, config: ClientConfig):
         self.config = config
-        self.api_url = f"{self.config.base_url}producer/{self.config.api_path}"
+        self.api_url = f"{self.config.base_url}producer{self.config.api_path}"
+        self.connection_metadata = self.config.connection_metadata.dict(by_alias=True)
+        self.client_rp_details = self.connection_metadata.pop("client_rp_details")
+        self.request_headers = {
+            "Authorization": f"Bearer {self.config.auth_token}",
+            "NHSD-Connection-Metadata": json.dumps(self.connection_metadata),
+            "NHSD-Client-RP-Details": json.dumps(self.client_rp_details),
+            **self.config.custom_headers,
+        }
 
     def create(self, doc_ref):
-        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        client_rp_details = connection_metadata.pop("client_rp_details")
-
         return requests.post(
             f"{self.api_url}/DocumentReference",
             json=doc_ref,
-            headers={
-                "Authorization": f"Bearer {self.config.auth_token}",
-                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
-                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
-            },
+            headers=self.request_headers,
             cert=self.config.client_cert,
         )
 
     def create_text(self, doc_ref):
-        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        client_rp_details = connection_metadata.pop("client_rp_details")
-
         return requests.post(
             f"{self.api_url}/DocumentReference",
             data=doc_ref,
-            headers={
-                "Authorization": f"Bearer {self.config.auth_token}",
-                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
-                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
-            },
+            headers=self.request_headers,
             cert=self.config.client_cert,
         )
 
     def upsert(self, doc_ref):
-        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        client_rp_details = connection_metadata.pop("client_rp_details")
-
         return requests.put(
             f"{self.api_url}/DocumentReference",
             json=doc_ref,
-            headers={
-                "Authorization": f"Bearer {self.config.auth_token}",
-                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
-                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
-            },
+            headers=self.request_headers,
             cert=self.config.client_cert,
         )
 
     def update(self, doc_ref, doc_ref_id: str):
-        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        client_rp_details = connection_metadata.pop("client_rp_details")
-
         return requests.put(
             f"{self.api_url}/DocumentReference/{doc_ref_id}",
             json=doc_ref,
-            headers={
-                "Authorization": f"Bearer {self.config.auth_token}",
-                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
-                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
-            },
+            headers=self.request_headers,
             cert=self.config.client_cert,
         )
 
     def delete(self, doc_ref_id: str):
-        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        client_rp_details = connection_metadata.pop("client_rp_details")
-
         return requests.delete(
             f"{self.api_url}/DocumentReference/{doc_ref_id}",
-            headers={
-                "Authorization": f"Bearer {self.config.auth_token}",
-                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
-                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
-            },
+            headers=self.request_headers,
             cert=self.config.client_cert,
         )
 
     def read(self, doc_ref_id: str):
-        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        client_rp_details = connection_metadata.pop("client_rp_details")
-
         return requests.get(
             f"{self.api_url}/DocumentReference/{doc_ref_id}",
-            headers={
-                "Authorization": f"Bearer {self.config.auth_token}",
-                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
-                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
-            },
+            headers=self.request_headers,
             cert=self.config.client_cert,
         )
 
@@ -276,17 +232,10 @@ class ProducerTestClient:
             else:
                 params["type"] = f"http://snomed.info/sct|{pointer_type}"
 
-        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        client_rp_details = connection_metadata.pop("client_rp_details")
-
         return requests.get(
             f"{self.api_url}/DocumentReference",
             params=params,
-            headers={
-                "Authorization": f"Bearer {self.config.auth_token}",
-                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
-                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
-            },
+            headers=self.request_headers,
             cert=self.config.client_cert,
         )
 
@@ -309,17 +258,19 @@ class ProducerTestClient:
             else:
                 body["type"] = f"http://snomed.info/sct|{pointer_type}"
 
-        connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        client_rp_details = connection_metadata.pop("client_rp_details")
-
         return requests.post(
             f"{self.api_url}/DocumentReference/_search",
             json=body,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.config.auth_token}",
-                "NHSD-Connection-Metadata": json.dumps(connection_metadata),
-                "NHSD-Client-RP-Details": json.dumps(client_rp_details),
+                **self.request_headers,
             },
+            cert=self.config.client_cert,
+        )
+
+    def read_capability_statement(self):
+        return requests.get(
+            f"{self.api_url}/metadata",
+            headers=self.request_headers,
             cert=self.config.client_cert,
         )

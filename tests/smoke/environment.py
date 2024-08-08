@@ -48,6 +48,8 @@ class EnvironmentConfig:
             }
         )
 
+        # TODO-NOW - Add smoketest specific X-Request-Id and NHSD-Correlation-Id to the request headers
+
         if self.connect_mode == ConnectMode.INTERNAL.value:
             return ClientConfig(
                 base_url=self.internal_base_url,

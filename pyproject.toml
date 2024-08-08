@@ -51,10 +51,6 @@ dialect = "postgres"
 [tool.sqlfluff.rules.capitalisation.identifiers]
 capitalisation_policy = "consistent"
 
-[tool.pytest.ini_optons]
-addopts = "-v --cov=layer/nrlf/nrlf --cov-report=term-missing --cov-branch"
-
-
 [tool.ruff]
 line-length = 100
 

@@ -233,7 +233,9 @@ jobs:
         run: terraform -chdir=terraform/infrastructure apply tfplan
 
       - name: Smoke Test
-        run: make ENV=${{ inputs.environment }} test-smoke-internal
+        run: |
+          make ENV=${{ inputs.environment }} truststore-pull-client
+          make ENV=${{ inputs.environment }} test-smoke-internal
 
   activate-stack:
     name: Activate - ${{ inputs.environment }}
