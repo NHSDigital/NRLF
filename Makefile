@@ -1,7 +1,6 @@
 
 .EXPORT_ALL_VARIABLES:
 .NOTPARALLEL:
-.ONESHELL:
 .PHONY: *
 
 MAKEFLAGS := --no-print-directory
@@ -94,7 +93,6 @@ test-smoke-internal: check-warn ## Run the smoke tests against the internal envi
 	TEST_STACK_DOMAIN=$(shell terraform -chdir=terraform/infrastructure output -raw domain 2>/dev/null) \
 	TEST_CONNECT_MODE="internal" \
 		pytest ./tests/smoke/scenarios/* -vv $(SMOKE_TEST_ARGS)
-	@echo "Smoke tests completed successfully"
 
 test-smoke-public: check-warn ## Run the smoke tests for the external access points
 	@echo "Running smoke tests for the public endpoints ${ENV}"
@@ -102,7 +100,7 @@ test-smoke-public: check-warn ## Run the smoke tests for the external access poi
 	#TEST_STACK_NAME=$(TF_WORKSPACE_NAME) \
 	#TEST_CONNECT_MODE="public" \
 	#	pytest ./tests/smoke/consumer_api/* $(SMOKE_TEST_ARGS)
-	@echo "Smoke tests completed successfully"
+	@echo "Smoke tests skipped, not implemented yet"
 
 test-performance-prepare:
 	mkdir -p $(DIST_PATH)
