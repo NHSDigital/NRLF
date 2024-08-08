@@ -7,7 +7,6 @@ from tests.utilities.get_access_token import get_bearer_token
 
 class SmokeTestParameters:
     def __init__(self, parameters: dict[str, str]):
-        self.internal_base_url = parameters.get("internal_base_url")
         self.public_base_url = parameters.get("public_base_url")
         self.apigee_app_id = parameters.get("apigee_app_id")
         self.apigee_app_name = parameters.get("apigee_app_name")
@@ -17,7 +16,9 @@ class SmokeTestParameters:
 
 
 class ConnectMode(Enum):
+    # INTERNAL connect mode is for connecting to the NRLF via internal access methods
     INTERNAL = "internal"
+    # Public connect mode is for connecting to the NRLF via public access methods
     PUBLIC = "public"
 
 
@@ -27,6 +28,9 @@ class EnvironmentConfig:
         self.env_name = os.getenv("TEST_ENVIRONMENT_NAME")
         self.stack_name = os.getenv("TEST_STACK_NAME")
         self.connect_mode = os.getenv("TEST_CONNECT_MODE")
+
+        domain_name = os.getenv("TEST_STACK_DOMAIN")
+        self.internal_base_url = f"https://{domain_name}/"
 
     def get_parameters_name(self):
         return f"nhsd-nrlf--{self.env_name}--smoke-test-parameters"
@@ -46,7 +50,7 @@ class EnvironmentConfig:
 
         if self.connect_mode == ConnectMode.INTERNAL.value:
             return ClientConfig(
-                base_url=parameters.internal_base_url,
+                base_url=self.internal_base_url,
                 connection_metadata=connection_metadata,
                 client_cert=(
                     f"./truststore/client/{self.env_name}.crt",

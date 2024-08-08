@@ -12,6 +12,7 @@ TEST_ARGS ?= --cov --cov-report=term-missing
 SMOKE_TEST_ARGS ?=
 FEATURE_TEST_ARGS ?= ./tests/features --format progress2
 TF_WORKSPACE_NAME ?= $(shell terraform -chdir=terraform/infrastructure workspace show)
+TF_WORKSPACE_DOMAIN ?= $(shell terraform -chdir=terraform/infrastructure output -raw domain)
 ENV ?= dev
 APP_ALIAS ?= default
 HOST ?= $(TF_WORKSPACE_NAME).api.record-locator.$(ENV).national.nhs.uk
@@ -91,6 +92,7 @@ test-smoke-internal: check-warn ## Run the smoke tests against the internal envi
 	@echo "Running smoke tests against the internal environment ${TF_WORKSPACE_NAME}"
 	TEST_ENVIRONMENT_NAME=$(ENV) \
 	TEST_STACK_NAME=$(TF_WORKSPACE_NAME) \
+	TEST_STACK_DOMAIN=$(TF_WORKSPACE_DOMAIN) \
 	TEST_CONNECT_MODE="internal" \
 		pytest ./tests/smoke/scenarios/* -vv $(SMOKE_TEST_ARGS)
 	@echo "Smoke tests completed successfully"

@@ -3,6 +3,7 @@ import json
 import boto3
 import pytest
 
+from scripts.aws_session_assume import get_boto_session
 from tests.smoke.environment import EnvironmentConfig, SmokeTestParameters
 from tests.utilities.api_clients import ConsumerTestClient, ProducerTestClient
 
@@ -12,11 +13,18 @@ def environment_config():
     return EnvironmentConfig()
 
 
+@pytest.fixture(scope="session")
+def boto_session(environment_config: EnvironmentConfig) -> boto3.Session:
+    return get_boto_session(environment_config.env_name)
+
+
 @pytest.fixture(autouse=True, scope="session")
-def smoke_test_parameters(environment_config: EnvironmentConfig) -> SmokeTestParameters:
+def smoke_test_parameters(
+    environment_config: EnvironmentConfig, boto_session: boto3.Session
+) -> SmokeTestParameters:
     parameters_name = environment_config.get_parameters_name()
 
-    secretsmanager = boto3.client("secretsmanager", region_name="eu-west-2")
+    secretsmanager = boto_session.client("secretsmanager", region_name="eu-west-2")
     secret_value = secretsmanager.get_secret_value(SecretId=parameters_name)
 
     parameters = json.loads(secret_value["SecretString"])

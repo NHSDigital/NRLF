@@ -26,7 +26,7 @@ def _get_account_id(env: str):
     return account_id
 
 
-def get_boto_session(env: str):
+def get_boto_session(env: str) -> boto3.Session:
     account_id = _get_account_id(env)
 
     sts = boto3.client("sts", region_name="eu-west-2")

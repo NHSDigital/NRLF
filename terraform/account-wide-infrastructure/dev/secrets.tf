@@ -8,8 +8,13 @@ resource "aws_secretsmanager_secret" "dev_smoke_test_apigee_app" {
 }
 
 resource "aws_secretsmanager_secret" "dev_smoke_test_parameters" {
-  name        = "${local.prefix}--smoke-test-parameters"
-  description = "Parameters used to run Smoke Tests against the DEV environment"
+  name        = "${local.project}--dev--smoke-test-parameters"
+  description = "Parameters used to run Smoke Tests against the dev environment"
+}
+
+resource "aws_secretsmanager_secret" "devsandbox_smoke_test_parameters" {
+  name        = "${local.project}--dev-sandbox--smoke-test-parameters"
+  description = "Parameters used to run Smoke Tests against the dev-sandbox environment"
 }
 
 resource "aws_secretsmanager_secret" "dev_splunk_configuration" {
