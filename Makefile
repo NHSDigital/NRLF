@@ -92,7 +92,7 @@ test-smoke-internal: check-warn ## Run the smoke tests against the internal envi
 	TEST_ENVIRONMENT_NAME=$(ENV) \
 	TEST_STACK_NAME=$(TF_WORKSPACE_NAME) \
 	TEST_CONNECT_MODE="internal" \
-		pytest ./tests/smoke/consumer_api/* -vv $(SMOKE_TEST_ARGS)
+		pytest ./tests/smoke/scenarios/* -vv $(SMOKE_TEST_ARGS)
 	@echo "Smoke tests completed successfully"
 
 test-smoke-public: check-warn ## Run the smoke tests for the external access points

@@ -42,6 +42,6 @@ def consumer_client(
     )
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture
 def test_nhs_numbers(smoke_test_parameters: SmokeTestParameters) -> list[str]:
     return smoke_test_parameters.test_nhs_numbers

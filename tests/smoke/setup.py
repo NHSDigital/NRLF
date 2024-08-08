@@ -23,10 +23,8 @@ def get_consumer_client(ods_code: str = "SMOKETEST") -> ConsumerTestClient:
     return ConsumerTestClient(config=config.to_client_config(ods_code))
 
 
-def upsert_test_pointer(
-    id: str,
+def build_document_reference(
     nhs_number: str,
-    producer_client: ProducerTestClient,
     custodian: str = "SMOKETEST",
     status: str = "current",
     category: str = Categories.CARE_PLAN.coding_value(),
@@ -37,7 +35,6 @@ def upsert_test_pointer(
     replaces_id: str | None = None,
 ) -> DocumentReference:
     docref = DocumentReference(
-        id=id,
         resourceType="DocumentReference",
         status=status,
         content=[
@@ -96,6 +93,14 @@ def upsert_test_pointer(
                 ),
             )
         ]
+
+    return docref
+
+
+def upsert_test_pointer(
+    id: str, docref: DocumentReference, producer_client: ProducerTestClient
+) -> DocumentReference:
+    docref.id = id
 
     create_response = producer_client.upsert(docref.dict())
 
