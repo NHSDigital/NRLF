@@ -293,10 +293,16 @@ Before the first run of the smoke tests, you need to set the required permission
 $ make set-smoketest-perms
 ```
 
-To run the internal smoke tests against your stack:
+To run the internal smoke tests against your stack, do this:
 
 ```
 $ make test-smoke-internal
+```
+
+To run the smoke tests against the public access endpoints (via APIGEE proxies), do this:
+
+```
+$ make test-smoke-public
 ```
 
 ## API Documentation
