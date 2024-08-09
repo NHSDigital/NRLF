@@ -21,13 +21,14 @@ from nrlf.tests.events import (
     create_headers,
     create_mock_context,
     create_test_api_gateway_event,
+    default_response_headers,
 )
 
 
 @mock_aws
 @mock_repository
 @freeze_time("2024-03-21T12:34:56.789")
-def test_create_document_reference_happy_path(repository: DocumentPointerRepository):
+def test_upsert_document_reference_happy_path(repository: DocumentPointerRepository):
     doc_ref_data = load_document_reference_data("Y05868-736253002-Valid")
 
     event = create_test_api_gateway_event(
@@ -41,7 +42,8 @@ def test_create_document_reference_happy_path(repository: DocumentPointerReposit
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -84,7 +86,7 @@ def test_create_document_reference_happy_path(repository: DocumentPointerReposit
 @mock_aws
 @mock_repository
 @freeze_time("2024-03-21T12:34:56.789")
-def test_create_document_reference_happy_path_with_ssp(
+def test_upsert_document_reference_happy_path_with_ssp(
     repository: DocumentPointerRepository,
 ):
     doc_ref_data = load_document_reference_data(
@@ -102,7 +104,8 @@ def test_create_document_reference_happy_path_with_ssp(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -142,7 +145,7 @@ def test_create_document_reference_happy_path_with_ssp(
     }
 
 
-def test_create_document_reference_invalid_category_type():
+def test_upsert_document_reference_invalid_category_type():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
 
     assert doc_ref.category and doc_ref.category[0].coding
@@ -159,7 +162,7 @@ def test_create_document_reference_invalid_category_type():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -187,7 +190,7 @@ def test_create_document_reference_invalid_category_type():
     }
 
 
-def test_create_document_reference_no_body():
+def test_upsert_document_reference_no_body():
     event = create_test_api_gateway_event(
         headers=create_headers(),
     )
@@ -197,7 +200,7 @@ def test_create_document_reference_no_body():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -223,7 +226,7 @@ def test_create_document_reference_no_body():
     }
 
 
-def test_create_document_reference_invalid_body():
+def test_upsert_document_reference_invalid_body():
     event = create_test_api_gateway_event(
         headers=create_headers(),
         body="{}",
@@ -234,7 +237,7 @@ def test_create_document_reference_invalid_body():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -291,7 +294,7 @@ def test_create_document_reference_invalid_body():
     }
 
 
-def test_create_document_reference_invalid_resource():
+def test_upsert_document_reference_invalid_resource():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_ref.custodian = None
 
@@ -305,7 +308,7 @@ def test_create_document_reference_invalid_resource():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -332,7 +335,7 @@ def test_create_document_reference_invalid_resource():
     }
 
 
-def test_create_document_reference_invalid_producer_id():
+def test_upsert_document_reference_invalid_producer_id():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_ref.id = "X26-99999-99999-999999"
 
@@ -346,7 +349,7 @@ def test_create_document_reference_invalid_producer_id():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -373,7 +376,7 @@ def test_create_document_reference_invalid_producer_id():
     }
 
 
-def test_create_document_reference_with_no_custodian():
+def test_upsert_document_reference_with_no_custodian():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_ref.custodian = None
 
@@ -387,7 +390,7 @@ def test_create_document_reference_with_no_custodian():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -414,7 +417,7 @@ def test_create_document_reference_with_no_custodian():
     }
 
 
-def test_create_document_reference_invalid_custodian_id():
+def test_upsert_document_reference_invalid_custodian_id():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
 
     assert doc_ref.custodian and doc_ref.custodian.identifier
@@ -430,7 +433,7 @@ def test_create_document_reference_invalid_custodian_id():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -458,7 +461,7 @@ def test_create_document_reference_invalid_custodian_id():
     }
 
 
-def test_create_document_reference_invalid_pointer_type():
+def test_upsert_document_reference_invalid_pointer_type():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
 
     assert doc_ref.type and doc_ref.type.coding
@@ -474,7 +477,7 @@ def test_create_document_reference_invalid_pointer_type():
 
     assert result == {
         "statusCode": "403",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -502,7 +505,7 @@ def test_create_document_reference_invalid_pointer_type():
     }
 
 
-def test_create_document_reference_no_relatesto_target():
+def test_upsert_document_reference_no_relatesto_target():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_ref.relatesTo = [
         DocumentReferenceRelatesTo(
@@ -520,7 +523,7 @@ def test_create_document_reference_no_relatesto_target():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -548,7 +551,7 @@ def test_create_document_reference_no_relatesto_target():
     }
 
 
-def test_create_document_reference_invalid_relatesto_target_producer_id():
+def test_upsert_document_reference_invalid_relatesto_target_producer_id():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_ref.relatesTo = [
         DocumentReferenceRelatesTo(
@@ -569,7 +572,7 @@ def test_create_document_reference_invalid_relatesto_target_producer_id():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -599,7 +602,7 @@ def test_create_document_reference_invalid_relatesto_target_producer_id():
 
 @mock_aws
 @mock_repository
-def test_create_document_reference_invalid_relatesto_not_exists(repository):
+def test_upsert_document_reference_invalid_relatesto_not_exists(repository):
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_ref.relatesTo = [
         DocumentReferenceRelatesTo(
@@ -621,7 +624,7 @@ def test_create_document_reference_invalid_relatesto_not_exists(repository):
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -651,7 +654,7 @@ def test_create_document_reference_invalid_relatesto_not_exists(repository):
 
 @mock_aws
 @mock_repository
-def test_create_document_reference_invalid_relatesto_not_exists_still_creates_with_ignore_perm(
+def test_upsert_document_reference_invalid_relatesto_not_exists_still_creates_with_ignore_perm(
     repository,
 ):
     doc_ref = load_document_reference("Y05868-736253002-Valid")
@@ -678,7 +681,8 @@ def test_create_document_reference_invalid_relatesto_not_exists_still_creates_wi
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -708,7 +712,7 @@ def test_create_document_reference_invalid_relatesto_not_exists_still_creates_wi
 
 @mock_aws
 @mock_repository
-def test_create_document_reference_invalid_relatesto_nhs_number(
+def test_upsert_document_reference_invalid_relatesto_nhs_number(
     repository: DocumentPointerRepository,
 ):
     doc_ref = load_document_reference("Y05868-736253002-Valid")
@@ -739,7 +743,7 @@ def test_create_document_reference_invalid_relatesto_nhs_number(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -769,7 +773,7 @@ def test_create_document_reference_invalid_relatesto_nhs_number(
 
 @mock_aws
 @mock_repository
-def test_create_document_reference_invalid_relatesto_type(
+def test_upsert_document_reference_invalid_relatesto_type(
     repository: DocumentPointerRepository,
 ):
     doc_ref = load_document_reference("Y05868-736253002-Valid")
@@ -802,7 +806,7 @@ def test_create_document_reference_invalid_relatesto_type(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -832,7 +836,7 @@ def test_create_document_reference_invalid_relatesto_type(
 
 @mock_aws
 @mock_repository
-def test_create_document_reference_with_no_context_related_for_ssp_url(
+def test_upsert_document_reference_with_no_context_related_for_ssp_url(
     repository: DocumentPointerRepository,
 ):
     doc_ref = load_document_reference("Y05868-736253002-Valid-with-ssp-content")
@@ -849,7 +853,7 @@ def test_create_document_reference_with_no_context_related_for_ssp_url(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -879,7 +883,7 @@ def test_create_document_reference_with_no_context_related_for_ssp_url(
 
 @mock_aws
 @mock_repository
-def test_create_document_reference_with_no_asid_in_for_ssp_url(
+def test_upsert_document_reference_with_no_asid_in_for_ssp_url(
     repository: DocumentPointerRepository,
 ):
     doc_ref = load_document_reference("Y05868-736253002-Valid-with-ssp-content")
@@ -903,7 +907,7 @@ def test_create_document_reference_with_no_asid_in_for_ssp_url(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -933,7 +937,7 @@ def test_create_document_reference_with_no_asid_in_for_ssp_url(
 
 @mock_aws
 @mock_repository
-def test_create_document_reference_with_invalid_asid_for_ssp_url(
+def test_upsert_document_reference_with_invalid_asid_for_ssp_url(
     repository: DocumentPointerRepository,
 ):
     doc_ref = load_document_reference("Y05868-736253002-Valid-with-ssp-content")
@@ -957,7 +961,7 @@ def test_create_document_reference_with_invalid_asid_for_ssp_url(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -987,7 +991,7 @@ def test_create_document_reference_with_invalid_asid_for_ssp_url(
 
 @mock_aws
 @mock_repository
-def test_create_document_reference_supersede_deletes_old_pointers_replace(
+def test_upsert_document_reference_supersede_deletes_old_pointers_replace(
     repository: DocumentPointerRepository,
 ):
     doc_ref = load_document_reference("Y05868-736253002-Valid")
@@ -1016,7 +1020,8 @@ def test_create_document_reference_supersede_deletes_old_pointers_replace(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-111111"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-111111",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -1049,7 +1054,7 @@ def test_create_document_reference_supersede_deletes_old_pointers_replace(
 
 @mock_aws
 @mock_repository
-def test_create_document_reference_supersede_succeeds_with_toggle(
+def test_upsert_document_reference_supersede_succeeds_with_toggle(
     repository: DocumentPointerRepository,
 ):
     doc_ref = load_document_reference("Y05868-736253002-Valid")
@@ -1075,7 +1080,8 @@ def test_create_document_reference_supersede_succeeds_with_toggle(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -1108,7 +1114,7 @@ def test_create_document_reference_supersede_succeeds_with_toggle(
 
 @mock_aws
 @mock_repository
-def test_create_document_reference_supersede_fails_without_toggle(
+def test_upsert_document_reference_supersede_fails_without_toggle(
     repository: DocumentPointerRepository,
 ):
     doc_ref = load_document_reference("Y05868-736253002-Valid")
@@ -1133,7 +1139,7 @@ def test_create_document_reference_supersede_fails_without_toggle(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -1163,7 +1169,7 @@ def test_create_document_reference_supersede_fails_without_toggle(
 
 @mock_aws
 @mock_repository
-def test_create_document_reference_create_relatesto_not_replaces(
+def test_upsert_document_reference_create_relatesto_not_replaces(
     repository: DocumentPointerRepository,
 ):
     doc_ref = load_document_reference("Y05868-736253002-Valid")
@@ -1192,7 +1198,8 @@ def test_create_document_reference_create_relatesto_not_replaces(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-111111"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-111111",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -1226,7 +1233,7 @@ def test_create_document_reference_create_relatesto_not_replaces(
 @mock_aws
 @mock_repository
 @freeze_time("2024-03-21T12:34:56.789")
-def test_create_document_reference_with_date_ignored(
+def test_upsert_document_reference_with_date_ignored(
     repository: DocumentPointerRepository,
 ):
     doc_ref_data = load_document_reference_data("Y05868-736253002-Valid-with-date")
@@ -1242,7 +1249,8 @@ def test_create_document_reference_with_date_ignored(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -1285,7 +1293,7 @@ def test_create_document_reference_with_date_ignored(
 @mock_aws
 @mock_repository
 @freeze_time("2024-03-21T12:34:56.789")
-def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
+def test_upsert_document_reference_with_date_and_meta_lastupdated_ignored(
     repository: DocumentPointerRepository,
 ):
     doc_ref_data = load_document_reference_data(
@@ -1303,7 +1311,8 @@ def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -1346,7 +1355,7 @@ def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
 @mock_aws
 @mock_repository
 @freeze_time("2024-03-21T12:34:56.789")
-def test_create_document_reference_with_date_overidden(
+def test_upsert_document_reference_with_date_overidden(
     repository: DocumentPointerRepository,
 ):
     doc_ref_data = load_document_reference_data("Y05868-736253002-Valid-with-date")
@@ -1362,7 +1371,8 @@ def test_create_document_reference_with_date_overidden(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-99999-99999-999999",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }

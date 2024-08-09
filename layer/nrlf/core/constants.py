@@ -34,6 +34,12 @@ PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL = "supersede-ignore-delete-fail"
 PERMISSION_ALLOW_ALL_POINTER_TYPES = "allow-all-pointer-types"
 
 
+NHSD_REQUEST_ID_HEADER = "NHSD-Request-Id"
+NHSD_CORRELATION_ID_HEADER = "NHSD-Correlation-Id"
+X_REQUEST_ID_HEADER = "X-Request-Id"
+X_CORRELATION_ID_HEADER = "X-Correlation-Id"
+
+
 PRODUCER_URL_PATH = "/producer/FHIR/R4/DocumentReference"
 
 

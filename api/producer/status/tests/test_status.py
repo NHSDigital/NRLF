@@ -8,6 +8,7 @@ from nrlf.tests.events import (
     create_headers,
     create_mock_context,
     create_test_api_gateway_event,
+    default_response_headers,
 )
 
 
@@ -20,7 +21,7 @@ def test_status_happy_path(repository):
 
     assert result == {
         "statusCode": "200",
-        "headers": {},
+        "headers": default_response_headers(),
         "body": "OK",
         "isBase64Encoded": False,
     }
@@ -37,7 +38,7 @@ def test_status_unhandled_exception(repository):
 
     assert result == {
         "statusCode": "503",
-        "headers": {},
+        "headers": default_response_headers(),
         "body": "Service unavailable",
         "isBase64Encoded": False,
     }

@@ -10,6 +10,7 @@ from nrlf.tests.events import (
     create_headers,
     create_mock_context,
     create_test_api_gateway_event,
+    default_response_headers,
 )
 
 
@@ -30,7 +31,11 @@ def test_search_document_reference_happy_path(repository: DocumentPointerReposit
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "200",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
 
@@ -68,7 +73,11 @@ def test_search_document_reference_happy_path_with_custodian(
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "200",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {
@@ -105,7 +114,11 @@ def test_search_document_reference_happy_path_with_type(
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "200",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {
@@ -135,7 +148,11 @@ def test_search_document_reference_no_results(repository: DocumentPointerReposit
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "200",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {
@@ -162,7 +179,11 @@ def test_search_document_reference_missing_nhs_number(
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {
@@ -202,7 +223,11 @@ def test_search_document_reference_invalid_nhs_number(
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {
@@ -241,7 +266,11 @@ def test_search_document_reference_invalid_type(repository: DocumentPointerRepos
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {
@@ -285,7 +314,11 @@ def test_search_document_reference_invalid_json(repository: DocumentPointerRepos
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "500", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "500",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {

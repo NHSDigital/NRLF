@@ -21,6 +21,12 @@ PointerTypeCodes = Literal[
     "735324008",  # Treatment Escalation Plan
 ]
 
+default_request_headers = {
+    "Authorization": "Bearer TestToken",
+    "X-Request-Id": "test-request-id",
+    "NHSD-Correlation-Id": "test-correlation-id",
+}
+
 
 class ClientConfig(BaseModel):
     base_url: str
@@ -85,7 +91,7 @@ class ConsumerClient(APIClient):
         return requests.get(
             f"{self.config.base_url}consumer/DocumentReference/{doc_ref_id}",
             headers={
-                "Authorization": "Bearer TestToken",
+                **default_request_headers,
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
                 "NHSD-Client-RP-Details": json.dumps(client_rp_details),
             },
@@ -100,7 +106,7 @@ class ConsumerClient(APIClient):
             f"{self.config.base_url}consumer/DocumentReference/_count",
             params=params,
             headers={
-                "Authorization": "Bearer TestToken",
+                **default_request_headers,
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
                 "NHSD-Client-RP-Details": json.dumps(client_rp_details),
             },
@@ -139,7 +145,7 @@ class ConsumerClient(APIClient):
             f"{self.config.base_url}consumer/DocumentReference",
             params=params,
             headers={
-                "Authorization": "Bearer TestToken",
+                **default_request_headers,
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
                 "NHSD-Client-RP-Details": json.dumps(client_rp_details),
             },
@@ -179,7 +185,7 @@ class ConsumerClient(APIClient):
             json=body,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer TestToken",
+                **default_request_headers,
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
                 "NHSD-Client-RP-Details": json.dumps(client_rp_details),
             },
@@ -196,7 +202,7 @@ class ProducerClient(APIClient):
             f"{self.config.base_url}producer/DocumentReference",
             json=doc_ref,
             headers={
-                "Authorization": "Bearer TestToken",
+                **default_request_headers,
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
                 "NHSD-Client-RP-Details": json.dumps(client_rp_details),
             },
@@ -211,7 +217,7 @@ class ProducerClient(APIClient):
             f"{self.config.base_url}producer/DocumentReference",
             data=doc_ref,
             headers={
-                "Authorization": "Bearer TestToken",
+                **default_request_headers,
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
                 "NHSD-Client-RP-Details": json.dumps(client_rp_details),
             },
@@ -226,7 +232,7 @@ class ProducerClient(APIClient):
             f"{self.config.base_url}producer/DocumentReference",
             json=doc_ref,
             headers={
-                "Authorization": "Bearer TestToken",
+                **default_request_headers,
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
                 "NHSD-Client-RP-Details": json.dumps(client_rp_details),
             },
@@ -241,7 +247,7 @@ class ProducerClient(APIClient):
             f"{self.config.base_url}producer/DocumentReference/{doc_ref_id}",
             json=doc_ref,
             headers={
-                "Authorization": "Bearer TestToken",
+                **default_request_headers,
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
                 "NHSD-Client-RP-Details": json.dumps(client_rp_details),
             },
@@ -255,7 +261,7 @@ class ProducerClient(APIClient):
         return requests.delete(
             f"{self.config.base_url}producer/DocumentReference/{doc_ref_id}",
             headers={
-                "Authorization": "Bearer TestToken",
+                **default_request_headers,
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
                 "NHSD-Client-RP-Details": json.dumps(client_rp_details),
             },
@@ -269,7 +275,7 @@ class ProducerClient(APIClient):
         return requests.get(
             f"{self.config.base_url}producer/DocumentReference/{doc_ref_id}",
             headers={
-                "Authorization": "Bearer TestToken",
+                **default_request_headers,
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
                 "NHSD-Client-RP-Details": json.dumps(client_rp_details),
             },
@@ -302,7 +308,7 @@ class ProducerClient(APIClient):
             f"{self.config.base_url}producer/DocumentReference",
             params=params,
             headers={
-                "Authorization": "Bearer TestToken",
+                **default_request_headers,
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
                 "NHSD-Client-RP-Details": json.dumps(client_rp_details),
             },
@@ -335,8 +341,7 @@ class ProducerClient(APIClient):
             f"{self.config.base_url}consumer/DocumentReference/_search",
             json=body,
             headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer TestToken",
+                **default_request_headers,
                 "NHSD-Connection-Metadata": json.dumps(connection_metadata),
                 "NHSD-Client-RP-Details": json.dumps(client_rp_details),
             },
