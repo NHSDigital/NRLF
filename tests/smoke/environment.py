@@ -1,4 +1,5 @@
 import os
+import uuid
 from enum import Enum
 
 from tests.utilities.api_clients import ClientConfig, ConnectionMetadata
@@ -48,11 +49,22 @@ class EnvironmentConfig:
             }
         )
 
+        smoketest_id = str(uuid.uuid4())
+        smoketest_corelation_id = (
+            f"{smoketest_id}.smoketest.{self.stack_name}.{self.env_name}"
+        )
+        custom_headers = {
+            "X-Request-Id": smoketest_id,
+            "NHSD-Correlation-Id": smoketest_corelation_id,
+        }
+        print(f"Using smoketest_id: {smoketest_id}")  # noqa
+
         # TODO-NOW - Add smoketest specific X-Request-Id and NHSD-Correlation-Id to the request headers
 
         if self.connect_mode == ConnectMode.INTERNAL.value:
             return ClientConfig(
                 base_url=self.internal_base_url,
+                custom_headers=custom_headers,
                 connection_metadata=connection_metadata,
                 client_cert=(
                     f"./truststore/client/{self.env_name}.crt",
@@ -65,6 +77,7 @@ class EnvironmentConfig:
             )
             return ClientConfig(
                 base_url=parameters.public_base_url,
+                custom_headers=custom_headers,
                 connection_metadata=connection_metadata,
                 auth_token=auth_token,
                 api_path="/FHIR/R4",

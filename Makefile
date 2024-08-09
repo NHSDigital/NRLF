@@ -92,7 +92,7 @@ test-smoke-internal: check-warn ## Run the smoke tests against the internal envi
 	TEST_STACK_NAME=$(TF_WORKSPACE_NAME) \
 	TEST_STACK_DOMAIN=$(shell terraform -chdir=terraform/infrastructure output -raw domain 2>/dev/null) \
 	TEST_CONNECT_MODE="internal" \
-		pytest ./tests/smoke/scenarios/* -vv $(SMOKE_TEST_ARGS)
+		pytest ./tests/smoke/scenarios/* $(SMOKE_TEST_ARGS)
 
 test-smoke-public: check-warn ## Run the smoke tests for the external access points
 	@echo "Running smoke tests for the public endpoints ${ENV}"
