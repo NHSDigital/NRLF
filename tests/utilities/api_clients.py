@@ -25,7 +25,7 @@ class ClientConfig(BaseModel):
     auth_token: str = "TestToken"
     api_path: str = ""
     client_cert: tuple[str, str] | None = None
-    connection_metadata: ConnectionMetadata
+    connection_metadata: ConnectionMetadata | None = None
     custom_headers: dict[str, str] | None = {}
 
 
@@ -52,16 +52,24 @@ class ConsumerTestClient:
     def __init__(self, config: ClientConfig):
         self.config = config
         self.api_url = f"{self.config.base_url}consumer{self.config.api_path}"
-        self.connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        self.client_rp_details = self.connection_metadata.pop("client_rp_details")
+
         self.request_headers = {
             "Authorization": f"Bearer {self.config.auth_token}",
             "X-Request-Id": "test-request-id",
-            "NHSD-Correlation-Id": "test-correlation-id",
-            "NHSD-Connection-Metadata": json.dumps(self.connection_metadata),
-            "NHSD-Client-RP-Details": json.dumps(self.client_rp_details),
-            **self.config.custom_headers,
         }
+
+        if self.config.client_cert:
+            connection_metadata = self.config.connection_metadata.dict(by_alias=True)
+            client_rp_details = connection_metadata.pop("client_rp_details")
+            self.request_headers.update(
+                {
+                    "NHSD-Connection-Metadata": json.dumps(connection_metadata),
+                    "NHSD-Client-RP-Details": json.dumps(client_rp_details),
+                    "NHSD-Correlation-Id": "test-correlation-id",
+                }
+            )
+
+        self.request_headers.update(self.config.custom_headers)
 
     def read(self, doc_ref_id: str):
         return requests.get(
@@ -160,14 +168,24 @@ class ProducerTestClient:
     def __init__(self, config: ClientConfig):
         self.config = config
         self.api_url = f"{self.config.base_url}producer{self.config.api_path}"
-        self.connection_metadata = self.config.connection_metadata.dict(by_alias=True)
-        self.client_rp_details = self.connection_metadata.pop("client_rp_details")
+
         self.request_headers = {
             "Authorization": f"Bearer {self.config.auth_token}",
-            "NHSD-Connection-Metadata": json.dumps(self.connection_metadata),
-            "NHSD-Client-RP-Details": json.dumps(self.client_rp_details),
-            **self.config.custom_headers,
+            "X-Request-Id": "test-request-id",
         }
+
+        if self.config.client_cert:
+            connection_metadata = self.config.connection_metadata.dict(by_alias=True)
+            client_rp_details = connection_metadata.pop("client_rp_details")
+            self.request_headers.update(
+                {
+                    "NHSD-Connection-Metadata": json.dumps(connection_metadata),
+                    "NHSD-Client-RP-Details": json.dumps(client_rp_details),
+                    "NHSD-Correlation-Id": "test-correlation-id",
+                }
+            )
+
+        self.request_headers.update(self.config.custom_headers)
 
     def create(self, doc_ref):
         return requests.post(

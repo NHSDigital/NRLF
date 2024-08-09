@@ -96,11 +96,10 @@ test-smoke-internal: check-warn ## Run the smoke tests against the internal envi
 
 test-smoke-public: check-warn ## Run the smoke tests for the external access points
 	@echo "Running smoke tests for the public endpoints ${ENV}"
-	#TEST_ENVIRONMENT_NAME=$(ENV) \
-	#TEST_STACK_NAME=$(TF_WORKSPACE_NAME) \
-	#TEST_CONNECT_MODE="public" \
-	#	pytest ./tests/smoke/consumer_api/* $(SMOKE_TEST_ARGS)
-	@echo "Smoke tests skipped, not implemented yet"
+	TEST_ENVIRONMENT_NAME=$(ENV) \
+	TEST_STACK_NAME=$(TF_WORKSPACE_NAME) \
+	TEST_CONNECT_MODE="public" \
+		pytest ./tests/smoke/scenarios/* $(SMOKE_TEST_ARGS)
 
 test-performance-prepare:
 	mkdir -p $(DIST_PATH)
