@@ -283,6 +283,16 @@ To run the feature integration tests:
 $ make test-features-integration
 ```
 
+### Smoke testing
+
+For smoke tests, you need to have deployed your infrastructure (using Terraform).
+
+To run the internal smoke tests against your stack:
+
+```
+$ make test-smoke-internal
+```
+
 ## API Documentation
 
 If the API changes, the API documentation needs to be updated in the appropriate API repo. This is done by making changes to the API specification `.yaml` files in each repo.
