@@ -7,12 +7,6 @@ from tests.utilities.api_clients import (
     ProducerTestClient,
 )
 
-default_request_headers = {
-    "Authorization": "Bearer TestToken",
-    "X-Request-Id": "test-request-id",
-    "NHSD-Correlation-Id": "test-correlation-id",
-}
-
 
 def _config_from_context(context: Context, ods_code: str):
     ods_code_parts = ods_code.split(".", 1)
@@ -20,8 +14,14 @@ def _config_from_context(context: Context, ods_code: str):
     if len(ods_code_parts) == 2:
         ods_code_extension = ods_code_parts[1]
 
+    feature_test_headers = {
+        "X-Request-Id": context.request_id,
+        "NHSD-Correlation-Id": context.correlation_id,
+    }
+
     return ClientConfig(
         base_url=context.base_url,
+        custom_headers=feature_test_headers,
         client_cert=context.client_cert,
         connection_metadata=ConnectionMetadata.parse_obj(
             {

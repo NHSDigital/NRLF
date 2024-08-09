@@ -24,6 +24,8 @@ def before_all(context: Context):
     )
 
     context.base_url = f"https://{context.env}.api.record-locator.dev.national.nhs.uk/"
+    context.request_id = "feature-test-request-id"
+    context.correlation_id = "feature-test-correlation-id"
 
     print(f"Running tests in {context.env} environment: {context.base_url}")  # noqa
 

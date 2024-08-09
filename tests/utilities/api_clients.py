@@ -56,6 +56,8 @@ class ConsumerTestClient:
         self.client_rp_details = self.connection_metadata.pop("client_rp_details")
         self.request_headers = {
             "Authorization": f"Bearer {self.config.auth_token}",
+            "X-Request-Id": "test-request-id",
+            "NHSD-Correlation-Id": "test-correlation-id",
             "NHSD-Connection-Metadata": json.dumps(self.connection_metadata),
             "NHSD-Client-RP-Details": json.dumps(self.client_rp_details),
             **self.config.custom_headers,
