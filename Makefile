@@ -144,6 +144,10 @@ get-s3-perms: check-warn ## Get s3 permissions for an environment
 	@echo "Creating new Lambda NRLF permissions layer zip"
 	./scripts/add-perms-to-lambda.sh $(DIST_PATH)
 
+set-smoketest-perms: check-warn ## Set the permissions for the smoke tests
+	@echo "Setting permissions for smoke tests"
+	poetry run python scripts/set_smoketest_permissions.py $(ENV) $(TF_WORKSPACE_NAME)
+
 truststore-build-all: check-warn ## Build all truststore resources
 	@./scripts/truststore.sh build-all
 

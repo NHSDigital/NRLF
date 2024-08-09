@@ -287,6 +287,12 @@ $ make test-features-integration
 
 For smoke tests, you need to have deployed your infrastructure (using Terraform).
 
+Before the first run of the smoke tests, you need to set the required permissions in your deployment. You can do this by running:
+
+```
+$ make set-smoketest-perms
+```
+
 To run the internal smoke tests against your stack:
 
 ```
