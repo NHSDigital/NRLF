@@ -51,6 +51,7 @@ class EnvironmentConfig:
         )
 
         smoketest_id = str(uuid.uuid4())
+        env_resources_name = self.env_name.split("-")[0]
 
         if self.connect_mode == ConnectMode.INTERNAL.value:
             return ClientConfig(
@@ -61,14 +62,14 @@ class EnvironmentConfig:
                 },
                 connection_metadata=connection_metadata,
                 client_cert=(
-                    f"./truststore/client/{self.env_name}.crt",
-                    f"./truststore/client/{self.env_name}.key",
+                    f"./truststore/client/{env_resources_name}.crt",
+                    f"./truststore/client/{env_resources_name}.key",
                 ),
             )
         elif self.connect_mode == ConnectMode.PUBLIC.value:
-            account_name = get_account_name(self.env_name)
+            account_name = get_account_name(env_resources_name)
             auth_token = get_bearer_token(
-                account_name, parameters.apigee_app_id, self.env_name
+                account_name, parameters.apigee_app_id, env_resources_name
             )
             return ClientConfig(
                 base_url=parameters.public_base_url,

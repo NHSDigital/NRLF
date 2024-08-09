@@ -234,7 +234,8 @@ jobs:
 
       - name: Smoke Test
         run: |
-          make ENV=${{ inputs.environment }} truststore-pull-client
+          account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
+          make ENV=${account} truststore-pull-client
           make ENV=${{ inputs.environment }} test-smoke-internal
 
   activate-stack:
