@@ -40,7 +40,9 @@ def test_producer_crud(
     finally:
         # Delete
         delete_response = producer_client.delete(created_id)
-        assert delete_response.ok
+        assert (
+            delete_response.ok
+        ), f"Failed to delete document reference with ID: {created_id}. It will need to be deleted manually if it still exists."
 
         # Read again, expect a 404
         read_response = producer_client.read(created_id)

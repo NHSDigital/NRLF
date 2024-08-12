@@ -44,7 +44,10 @@ def test_1dsync_upsert_delete(
             assert upsert_response.headers["Location"].split("/")[-1] == test_docref.id
         finally:
             delete_response = producer_client_1dsync.delete(test_docref.id)
-            assert delete_response.ok
+
+            assert (
+                delete_response.ok
+            ), f"Failed to delete document reference with ID: {test_docref.id}. It will need to be deleted manually if it still exists."
 
             read_response = producer_client_1dsync.read(test_docref.id)
             assert read_response.status_code == 404
