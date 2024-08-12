@@ -18,9 +18,9 @@ class SmokeTestParameters:
 
 
 class ConnectMode(Enum):
-    # INTERNAL connect mode is for connecting to the NRLF via internal access methods
+    # INTERNAL connect mode is for connecting to NRLF via internal access methods
     INTERNAL = "internal"
-    # Public connect mode is for connecting to the NRLF via public access methods
+    # Public connect mode is for connecting to NRLF via public access methods
     PUBLIC = "public"
 
 

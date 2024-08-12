@@ -9,18 +9,7 @@ from nrlf.producer.fhir.r4.model import (
     Identifier,
     Reference,
 )
-from tests.smoke.environment import EnvironmentConfig
-from tests.utilities.api_clients import ConsumerTestClient, ProducerTestClient
-
-
-def get_producer_client(ods_code: str = "SMOKETEST") -> ProducerTestClient:
-    config = EnvironmentConfig()
-    return ProducerTestClient(config=config.to_client_config(ods_code))
-
-
-def get_consumer_client(ods_code: str = "SMOKETEST") -> ConsumerTestClient:
-    config = EnvironmentConfig()
-    return ConsumerTestClient(config=config.to_client_config(ods_code))
+from tests.utilities.api_clients import ProducerTestClient
 
 
 def build_document_reference(
