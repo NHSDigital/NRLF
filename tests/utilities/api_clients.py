@@ -86,9 +86,6 @@ class ConsumerTestClient:
             cert=self.config.client_cert,
         )
 
-    def count_by_patient(self, nhs_number: str):
-        return self.count()
-
     def search(
         self,
         nhs_number: str | None = None,
