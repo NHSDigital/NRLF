@@ -67,10 +67,13 @@ class EnvironmentConfig:
                 ),
             )
         elif self.connect_mode == ConnectMode.PUBLIC.value:
-            account_name = get_account_name(env_resources_name)
-            auth_token = get_bearer_token(
-                account_name, parameters.apigee_app_id, env_resources_name
-            )
+            auth_token = "TestToken"
+            if not self.env_name.endswith("-sandbox"):
+                account_name = get_account_name(env_resources_name)
+                auth_token = get_bearer_token(
+                    account_name, parameters.apigee_app_id, env_resources_name
+                )
+
             return ClientConfig(
                 base_url=parameters.public_base_url,
                 custom_headers={

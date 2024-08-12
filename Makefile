@@ -144,8 +144,8 @@ get-s3-perms: check-warn ## Get s3 permissions for an environment
 	./scripts/add-perms-to-lambda.sh $(DIST_PATH)
 
 set-smoketest-perms: check-warn ## Set the permissions for the smoke tests
-	@echo "Setting permissions for smoke tests"
-	poetry run python scripts/set_smoketest_permissions.py $(ENV) $(TF_WORKSPACE_NAME)
+	@echo "Setting permissions for smoke tests of env=$(ENV) stack=$(TF_WORKSPACE_NAME)...."
+	poetry run python scripts/set_smoketest_permissions.py $(ENV) $(TF_WORKSPACE_NAME) $(ENV)
 
 truststore-build-all: check-warn ## Build all truststore resources
 	@./scripts/truststore.sh build-all

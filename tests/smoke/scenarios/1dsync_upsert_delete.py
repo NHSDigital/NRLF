@@ -22,17 +22,23 @@ def producer_client_1dsync(
 
 
 def test_1dsync_upsert_delete(
-    producer_client_1dsync: ProducerTestClient, test_nhs_numbers: list[str]
+    producer_client_1dsync: ProducerTestClient,
+    smoke_test_parameters: SmokeTestParameters,
+    test_nhs_numbers: list[str],
 ):
     """
     Smoke test scenario for 1dsync upsert and delete behaviour
     """
-    test_docref = build_document_reference(nhs_number=test_nhs_numbers[0])
+    test_ods_code = smoke_test_parameters.ods_code
+    test_docref = build_document_reference(
+        nhs_number=test_nhs_numbers[0], custodian=test_ods_code
+    )
 
     for attempts in range(0, 5):
         try:
-            test_docref = build_document_reference(nhs_number=test_nhs_numbers[0])
-            test_docref.id = f"SMOKETEST-1dsync_upsert_delete_pointer_{attempts}"
+            test_docref.id = (
+                f"{test_ods_code}-smoketest_1dsync_upsert_delete_pointer_{attempts}"
+            )
             upsert_response = producer_client_1dsync.upsert(test_docref.dict())
             assert upsert_response.ok
             assert upsert_response.headers["Location"].split("/")[-1] == test_docref.id

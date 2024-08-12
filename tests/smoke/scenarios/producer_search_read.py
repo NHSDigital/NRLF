@@ -2,18 +2,24 @@ from typing import Any, Generator
 
 import pytest
 
+from tests.smoke.environment import SmokeTestParameters
 from tests.smoke.setup import build_document_reference, upsert_test_pointer
 from tests.utilities.api_clients import ProducerTestClient
 
 
 @pytest.fixture
 def test_data(
-    test_nhs_numbers: list[str], producer_client: ProducerTestClient
+    test_nhs_numbers: list[str],
+    producer_client: ProducerTestClient,
+    smoke_test_parameters: SmokeTestParameters,
 ) -> Generator[str, Any, None]:
+    test_ods_code = smoke_test_parameters.ods_code
     test_pointers = [
         upsert_test_pointer(
-            f"SMOKETEST-producer_count_search_read_pointer_{n}",
-            docref=build_document_reference(nhs_number=test_nhs_numbers[0]),
+            f"{test_ods_code}-smoketest_producer_count_search_read_pointer_{n}",
+            docref=build_document_reference(
+                nhs_number=test_nhs_numbers[0], custodian=test_ods_code
+            ),
             producer_client=producer_client,
         )
         for n in range(0, 5)
