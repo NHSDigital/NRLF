@@ -326,7 +326,7 @@ jobs:
   rollback-stack:
     name: Rollback - ${{ inputs.environment }}
     needs: [post-release-verify]
-    if: ${{ needs.post-release-verify.result == 'failure' }}
+    if: always() && ( needs.post-release-verify.result == 'failure' )
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
 
