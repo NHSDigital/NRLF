@@ -21,6 +21,7 @@ from nrlf.tests.events import (
     create_headers,
     create_mock_context,
     create_test_api_gateway_event,
+    default_response_headers,
 )
 
 
@@ -42,7 +43,8 @@ def test_create_document_reference_happy_path(repository: DocumentPointerReposit
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -107,7 +109,8 @@ def test_create_document_reference_happy_path_with_ssp(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -160,7 +163,7 @@ def test_create_document_reference_no_body():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -197,7 +200,7 @@ def test_create_document_reference_invalid_body():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -268,7 +271,7 @@ def test_create_document_reference_invalid_resource():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -309,7 +312,7 @@ def test_create_document_reference_with_no_custodian():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -352,7 +355,7 @@ def test_create_document_reference_invalid_custodian_id():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -396,7 +399,7 @@ def test_create_document_reference_invalid_pointer_type():
 
     assert result == {
         "statusCode": "403",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -424,6 +427,51 @@ def test_create_document_reference_invalid_pointer_type():
     }
 
 
+def test_create_document_reference_invalid_category_type():
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+
+    assert doc_ref.category and doc_ref.category[0].coding
+    doc_ref.category[0].coding[0].code = "1102421000000108"
+    doc_ref.category[0].coding[0].display = "Observations"
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(),
+        body=doc_ref.json(exclude_none=True),
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+
+    assert parsed_body == {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "error",
+                "code": "invalid",
+                "details": {
+                    "coding": [
+                        {
+                            "code": "BAD_REQUEST",
+                            "display": "Bad request",
+                            "system": "https://fhir.nhs.uk/ValueSet/Spine-ErrorOrWarningCode-1",
+                        }
+                    ]
+                },
+                "diagnostics": "The Category code of the provided document 'http://snomed.info/sct|1102421000000108' must match the allowed category for pointer type 'http://snomed.info/sct|736253002' with a category value of 'http://snomed.info/sct|734163000'",
+                "expression": ["category.coding[0].code"],
+            }
+        ],
+    }
+
+
 def test_create_document_reference_no_relatesto_target():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     doc_ref.relatesTo = [
@@ -442,7 +490,7 @@ def test_create_document_reference_no_relatesto_target():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -491,7 +539,7 @@ def test_create_document_reference_invalid_relatesto_target_producer_id():
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -543,7 +591,7 @@ def test_create_document_reference_invalid_relatesto_not_exists(repository):
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -604,7 +652,7 @@ def test_create_document_reference_invalid_relatesto_nhs_number(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -667,7 +715,7 @@ def test_create_document_reference_invalid_relatesto_type(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -714,7 +762,7 @@ def test_create_document_reference_with_no_context_related_for_ssp_url(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -768,7 +816,7 @@ def test_create_document_reference_with_no_asid_in_for_ssp_url(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -822,7 +870,7 @@ def test_create_document_reference_with_invalid_asid_for_ssp_url(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -882,7 +930,8 @@ def test_create_document_reference_supersede_deletes_old_pointers_replace(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -942,7 +991,8 @@ def test_create_document_reference_supersede_succeeds_with_toggle(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -1000,7 +1050,7 @@ def test_create_document_reference_supersede_fails_without_toggle(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -1060,7 +1110,8 @@ def test_create_document_reference_create_relatesto_not_replaces(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -1111,7 +1162,8 @@ def test_create_document_reference_with_date_ignored(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -1176,7 +1228,8 @@ def test_create_document_reference_with_date_and_meta_lastupdated_ignored(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }
@@ -1239,7 +1292,8 @@ def test_create_document_reference_with_date_overidden(
     assert result == {
         "statusCode": "201",
         "headers": {
-            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001"
+            "Location": "/producer/FHIR/R4/DocumentReference/Y05868-00000000-0000-0000-0000-000000000001",
+            **default_response_headers(),
         },
         "isBase64Encoded": False,
     }

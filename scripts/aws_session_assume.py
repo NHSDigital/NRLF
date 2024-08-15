@@ -13,11 +13,15 @@ _AWS_ACCOUNT_FOR_ENV = {
 }
 
 
-def _get_account_id(env: str):
+def get_account_name(env: str):
     if env not in _AWS_ACCOUNT_FOR_ENV:
         raise ValueError(f"Invalid environment: {env}")
 
-    account_name = _AWS_ACCOUNT_FOR_ENV[env]
+    return _AWS_ACCOUNT_FOR_ENV[env]
+
+
+def get_account_id(env: str):
+    account_name = get_account_name(env)
     secretsmanager = boto3.client("secretsmanager", region_name="eu-west-2")
     secret_id = f"nhsd-nrlf--mgmt--{account_name}-account-id"
     result = secretsmanager.get_secret_value(SecretId=secret_id)
@@ -26,8 +30,8 @@ def _get_account_id(env: str):
     return account_id
 
 
-def get_boto_session(env: str):
-    account_id = _get_account_id(env)
+def get_boto_session(env: str) -> boto3.Session:
+    account_id = get_account_id(env)
 
     sts = boto3.client("sts", region_name="eu-west-2")
     result = sts.assume_role(

@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-pydantic = "1.10.12"
+pydantic = "1.10.16"
 nhs-number = "1.3.4"
 aws-lambda-powertools = "^2.35.1"
 requests = "^2.31.0"
@@ -50,10 +50,6 @@ dialect = "postgres"
 
 [tool.sqlfluff.rules.capitalisation.identifiers]
 capitalisation_policy = "consistent"
-
-[tool.pytest.ini_optons]
-addopts = "-v --cov=layer/nrlf/nrlf --cov-report=term-missing --cov-branch"
-
 
 [tool.ruff]
 line-length = 100

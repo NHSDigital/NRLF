@@ -4,6 +4,7 @@ from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.constants import (
     PERMISSION_AUDIT_DATES_FROM_PAYLOAD,
     PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL,
+    TYPE_CATEGORIES,
 )
 from nrlf.core.decorators import request_handler
 from nrlf.core.dynamodb.repository import DocumentPointer, DocumentPointerRepository
@@ -88,6 +89,19 @@ def _check_permissions(
         return SpineErrorResponse.AUTHOR_CREDENTIALS_ERROR(
             diagnostics="The type of the provided DocumentReference is not in the list of allowed types for this organisation",
             expression="type.coding[0].code",
+        )
+
+    type_category = TYPE_CATEGORIES.get(core_model.type)
+    if type_category != core_model.category:
+        logger.log(
+            LogReference.PROCREATE005a,
+            ods_code=metadata.ods_code,
+            type=core_model.type,
+            category=core_model.category,
+        )
+        return SpineErrorResponse.BAD_REQUEST(
+            diagnostics=f"The Category code of the provided document '{core_model.category}' must match the allowed category for pointer type '{core_model.type}' with a category value of '{type_category}'",
+            expression="category.coding[0].code",
         )
 
 

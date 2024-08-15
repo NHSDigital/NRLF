@@ -28,6 +28,11 @@ resource "aws_lambda_function" "lambda_function" {
   }
 }
 
+resource "aws_lambda_runtime_management_config" "lambda_runtime_config" {
+  function_name     = aws_lambda_function.lambda_function.function_name
+  update_runtime_on = "FunctionUpdate"
+}
+
 resource "aws_lambda_permission" "lambda_permission" {
   count         = length(var.api_gateway_source_arn)
   statement_id  = "AllowExecutionFromAPIGateway-${count.index}"

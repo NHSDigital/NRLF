@@ -1,7 +1,6 @@
 
 .EXPORT_ALL_VARIABLES:
 .NOTPARALLEL:
-.ONESHELL:
 .PHONY: *
 
 MAKEFLAGS := --no-print-directory
@@ -9,6 +8,7 @@ SHELL := /bin/bash
 
 DIST_PATH ?= ./dist
 TEST_ARGS ?= --cov --cov-report=term-missing
+SMOKE_TEST_ARGS ?=
 FEATURE_TEST_ARGS ?= ./tests/features --format progress2
 TF_WORKSPACE_NAME ?= $(shell terraform -chdir=terraform/infrastructure workspace show)
 ENV ?= dev
@@ -76,10 +76,10 @@ build-api-packages: ./api/consumer/* ./api/producer/*
 
 test: check-warn ## Run the unit tests
 	@echo "Running unit tests"
-	pytest -m "not integration and not legacy and not smoke" --ignore=mi $(TEST_ARGS)
+	pytest --ignore=tests/smoke $(TEST_ARGS)
 
 test-features-integration: check-warn ## Run the BDD feature tests in the integration environment
-	@echo "Running feature tests in the integration environment"
+	@echo "Running feature tests in the integration environment ${TF_WORKSPACE_NAME}"
 	behave --define="integration_test=true" \
 		--define="env=$(TF_WORKSPACE_NAME)" \
 		--define="account_name=$(ENV)" \
@@ -102,14 +102,19 @@ test-features-integration-report: check-warn ## Run the BDD feature tests in the
 	allure open ./allure-report
 
 test-smoke-internal: check-warn ## Run the smoke tests against the internal environment
-	@echo "Running smoke tests against the internal environment"
-	#ENV=$(TF_WORKSPACE_NAME) SMOKE_TEST_MODE=mtls pytest ./tests/smoke $(SMOKE_TEST_ARGS)
-	@echo "Skipping internal smoke tests (not yet implemented)"
+	@echo "Running smoke tests against the internal environment ${TF_WORKSPACE_NAME}"
+	TEST_ENVIRONMENT_NAME=$(ENV) \
+	TEST_STACK_NAME=$(TF_WORKSPACE_NAME) \
+	TEST_STACK_DOMAIN=$(shell terraform -chdir=terraform/infrastructure output -raw domain 2>/dev/null) \
+	TEST_CONNECT_MODE="internal" \
+		pytest ./tests/smoke/scenarios/* $(SMOKE_TEST_ARGS)
 
-test-smoke-external: check-warn ## Run the smoke tests for the external access points
-	@echo "Running smoke tests for the external access points"
-	#ENV=$(ENV) SMOKE_TEST_MODE=apigee pytest ./tests/smoke $(SMOKE_TEST_ARGS)
-	@echo "Skipping external smoke tests (not yet implemented)"
+test-smoke-public: check-warn ## Run the smoke tests for the external access points
+	@echo "Running smoke tests for the public endpoints ${ENV}"
+	TEST_ENVIRONMENT_NAME=$(ENV) \
+	TEST_STACK_NAME=$(TF_WORKSPACE_NAME) \
+	TEST_CONNECT_MODE="public" \
+		pytest ./tests/smoke/scenarios/* $(SMOKE_TEST_ARGS)
 
 test-performance-prepare:
 	mkdir -p $(DIST_PATH)
@@ -152,6 +157,10 @@ get-s3-perms: check-warn ## Get s3 permissions for an environment
 	poetry run python scripts/get_s3_permissions.py ${USE_SHARED_RESOURCES} $(ENV) $(TF_WORKSPACE_NAME) "$(DIST_PATH)"
 	@echo "Creating new Lambda NRLF permissions layer zip"
 	./scripts/add-perms-to-lambda.sh $(DIST_PATH)
+
+set-smoketest-perms: check-warn ## Set the permissions for the smoke tests
+	@echo "Setting permissions for smoke tests of env=$(ENV) stack=$(TF_WORKSPACE_NAME)...."
+	poetry run python scripts/set_smoketest_permissions.py $(ENV) $(TF_WORKSPACE_NAME) $(ENV)
 
 truststore-build-all: check-warn ## Build all truststore resources
 	@./scripts/truststore.sh build-all

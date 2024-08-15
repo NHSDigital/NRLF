@@ -26,6 +26,14 @@ class LogReference(Enum):
     HANDLER011 = _Reference("INFO", "Parsed request path parameters")
     HANDLER012 = _Reference("DEBUG", "Filtered request handler function arguments")
     HANDLER013 = _Reference("INFO", "Calling lambda-specific request handler")
+    HANDLER014 = _Reference(
+        "WARN", "Rejecting request due to missing X-Request-Id header"
+    )
+    HANDLER015 = _Reference(
+        "WARN", "Rejecting request due to missing NHSD-Correlation-Id header"
+    )
+    HANDLER016 = _Reference("INFO", "Set response headers")
+    HANDLER017 = _Reference("WARN", "Correlation ID not found in request headers")
     HANDLER999 = _Reference("INFO", "Request handler returned successfully")
 
     # Error Logs
@@ -37,6 +45,9 @@ class LogReference(Enum):
     )
     ERROR002 = _Reference(
         "WARN", "An ParseError occurred whilst processing the request"
+    )
+    ERROR003 = _Reference(
+        "WARN", "An unhandler exception occurred whilst handling response headers"
     )
 
     # S3 Permissions Lookup Logs
@@ -210,6 +221,10 @@ class LogReference(Enum):
     PROCREATE005 = _Reference(
         "WARN", "Organisation is not allowed to create pointer type"
     )  #
+    PROCREATE005a = _Reference(
+        "WARN",
+        "Organisation is not allowed to create pointer type with incorrect category",
+    )  #
     PROCREATE006 = _Reference("DEBUG", "Performing relatesTo validation on resource")
     PROCREATE007a = _Reference(
         "WARN", "RelatesTo validation failed - no target identifier value"
@@ -255,6 +270,10 @@ class LogReference(Enum):
     )
     PROUPSERT005 = _Reference(
         "WARN", "Organisation is not allowed to upsert pointer type for upsert"
+    )  #
+    PROUPSERT005a = _Reference(
+        "WARN",
+        "Organisation is not allowed to upsert pointer type with incorrect category code",
     )  #
     PROUPSERT006 = _Reference(
         "DEBUG", "Performing relatesTo validation on resource for upsert"

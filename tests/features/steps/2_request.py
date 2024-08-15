@@ -1,7 +1,10 @@
 from behave import *  # noqa
 from behave.runner import Context
 
-from tests.features.utils.api_client import ConsumerClient, ProducerClient
+from tests.features.utils.api_client import (
+    consumer_client_from_context,
+    producer_client_from_context,
+)
 from tests.features.utils.data import (
     create_test_document_reference,
     create_test_document_reference_with_defaults,
@@ -10,7 +13,7 @@ from tests.features.utils.data import (
 
 @when("consumer '{ods_code}' counts DocumentReferences with parameters")
 def consumer_count_document_references_step(context: Context, ods_code: str):
-    client = ConsumerClient.from_context(context, ods_code)
+    client = consumer_client_from_context(context, ods_code)
 
     if not context.table:
         raise ValueError("No count query table provided")
@@ -21,7 +24,7 @@ def consumer_count_document_references_step(context: Context, ods_code: str):
 
 @when("consumer '{ods_code}' searches for DocumentReferences with parameters")
 def consumer_search_document_reference_step(context: Context, ods_code: str):
-    client = ConsumerClient.from_context(context, ods_code)
+    client = consumer_client_from_context(context, ods_code)
 
     if not context.table:
         raise ValueError("No search query table provided")
@@ -44,7 +47,7 @@ def consumer_search_document_reference_step(context: Context, ods_code: str):
     "consumer '{ods_code}' searches for DocumentReferences using POST with request body"
 )
 def consumer_search_post_document_reference_step(context: Context, ods_code: str):
-    client = ConsumerClient.from_context(context, ods_code)
+    client = consumer_client_from_context(context, ods_code)
 
     if not context.table:
         raise ValueError("No search query table provided")
@@ -67,13 +70,13 @@ def consumer_search_post_document_reference_step(context: Context, ods_code: str
 def consumer_read_document_reference_step(
     context: Context, ods_code: str, doc_ref_id: str
 ):
-    client = ConsumerClient.from_context(context, ods_code)
+    client = consumer_client_from_context(context, ods_code)
     context.response = client.read(doc_ref_id)
 
 
 @when("producer '{ods_code}' creates a DocumentReference with values")
 def create_post_document_reference_step(context: Context, ods_code: str):
-    client = ProducerClient.from_context(context, ods_code)
+    client = producer_client_from_context(context, ods_code)
 
     if not context.table:
         raise ValueError("No document reference data table provided")
@@ -95,7 +98,7 @@ def create_post_document_reference_step(context: Context, ods_code: str):
     "producer 'TSTCUS' requests creation of a DocumentReference with default test values except '{section}' is"
 )
 def create_post_body_step(context: Context, section: str):
-    client = ProducerClient.from_context(context, "TSTCUS")
+    client = producer_client_from_context(context, "TSTCUS")
 
     if not context.text:
         raise ValueError("No document reference text snippet provided")
@@ -113,7 +116,7 @@ def create_post_body_step(context: Context, section: str):
 
 @when("producer '{ods_code}' upserts a DocumentReference with values")
 def create_put_document_reference_step(context: Context, ods_code: str):
-    client = ProducerClient.from_context(context, ods_code)
+    client = producer_client_from_context(context, ods_code)
 
     if not context.table:
         raise ValueError("No document reference data table provided")
@@ -132,7 +135,7 @@ def create_put_document_reference_step(context: Context, ods_code: str):
     "producer '{ods_code}' requests to delete DocumentReference with id '{doc_ref_id}'"
 )
 def delete_document_reference_step(context: Context, ods_code: str, doc_ref_id: str):
-    client = ProducerClient.from_context(context, ods_code)
+    client = producer_client_from_context(context, ods_code)
     context.response = client.delete(doc_ref_id)
 
 
@@ -140,13 +143,13 @@ def delete_document_reference_step(context: Context, ods_code: str, doc_ref_id: 
 def producer_read_document_reference_step(
     context: Context, ods_code: str, doc_ref_id: str
 ):
-    client = ProducerClient.from_context(context, ods_code)
+    client = producer_client_from_context(context, ods_code)
     context.response = client.read(doc_ref_id)
 
 
 @when("producer '{ods_code}' searches for DocumentReferences with parameters")
 def producer_search_document_reference_step(context: Context, ods_code: str):
-    client = ProducerClient.from_context(context, ods_code)
+    client = producer_client_from_context(context, ods_code)
 
     if not context.table:
         raise ValueError("No search query table provided")

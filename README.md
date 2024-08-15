@@ -283,6 +283,28 @@ To run the feature integration tests:
 $ make test-features-integration
 ```
 
+### Smoke testing
+
+For smoke tests, you need to have deployed your infrastructure (using Terraform).
+
+Before the first run of the smoke tests, you need to set the required permissions in your deployment. You can do this by running:
+
+```
+$ make set-smoketest-perms
+```
+
+To run the internal smoke tests against your stack, do this:
+
+```
+$ make test-smoke-internal
+```
+
+To run the smoke tests against the public access endpoints (via APIGEE proxies), do this:
+
+```
+$ make test-smoke-public
+```
+
 ## API Documentation
 
 If the API changes, the API documentation needs to be updated in the appropriate API repo. This is done by making changes to the API specification `.yaml` files in each repo.

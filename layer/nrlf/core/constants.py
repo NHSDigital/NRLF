@@ -34,6 +34,12 @@ PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL = "supersede-ignore-delete-fail"
 PERMISSION_ALLOW_ALL_POINTER_TYPES = "allow-all-pointer-types"
 
 
+NHSD_REQUEST_ID_HEADER = "NHSD-Request-Id"
+NHSD_CORRELATION_ID_HEADER = "NHSD-Correlation-Id"
+X_REQUEST_ID_HEADER = "X-Request-Id"
+X_CORRELATION_ID_HEADER = "X-Correlation-Id"
+
+
 PRODUCER_URL_PATH = "/producer/FHIR/R4/DocumentReference"
 
 
@@ -46,15 +52,23 @@ class PointerTypes(Enum):
     CONTINGENCY_PLAN = "http://snomed.info/sct|325691000000100"
     EOL_CARE_PLAN = "http://snomed.info/sct|736373009"
     LLOYD_GEORGE_FOLDER = "http://snomed.info/sct|16521000000101"
+    ADVANCED_CARE_PLAN = "http://snomed.info/sct|736366004"
+    TREATMENT_ESCALATION_PLAN = "http://snomed.info/sct|735324008"
 
     @staticmethod
     def list():
         return list(map(lambda type: type.value, PointerTypes))
 
+    def coding_value(self):
+        return self.value.split(TYPE_SEPARATOR)[1]
+
 
 class Categories(Enum):
     CARE_PLAN = "http://snomed.info/sct|734163000"
     OBSERVATIONS = "http://snomed.info/sct|1102421000000108"
+
+    def coding_value(self):
+        return self.value.split(TYPE_SEPARATOR)[1]
 
 
 TYPE_CATEGORIES = {
@@ -66,6 +80,8 @@ TYPE_CATEGORIES = {
     PointerTypes.EOL_CARE_PLAN.value: Categories.CARE_PLAN.value,
     PointerTypes.LLOYD_GEORGE_FOLDER.value: Categories.CARE_PLAN.value,
     PointerTypes.NEWS2_CHART.value: Categories.OBSERVATIONS.value,
+    PointerTypes.ADVANCED_CARE_PLAN.value: Categories.CARE_PLAN.value,
+    PointerTypes.TREATMENT_ESCALATION_PLAN.value: Categories.CARE_PLAN.value,
 }
 
 
