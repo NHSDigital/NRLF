@@ -53,6 +53,7 @@ class ConsumerTestClient:
         self.config = config
         self.api_url = f"{self.config.base_url}consumer{self.config.api_path}"
 
+        # I'll delete a line here later on
         self.request_headers = {
             "Authorization": f"Bearer {self.config.auth_token}",
             "X-Request-Id": "test-request-id",
