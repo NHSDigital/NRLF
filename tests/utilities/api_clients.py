@@ -53,10 +53,9 @@ class ConsumerTestClient:
         self.config = config
         self.api_url = f"{self.config.base_url}consumer{self.config.api_path}"
 
-        # I'll delete a line here later on
+        # Line deleted to make it fail
         self.request_headers = {
-            "Authorization": f"Bearer {self.config.auth_token}",
-            "X-Request-Id": "test-request-id",
+            "Authorization": f"Bearer {self.config.auth_token}"
         }
 
         if self.config.client_cert:
