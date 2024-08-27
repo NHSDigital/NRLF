@@ -105,7 +105,7 @@ export function upsertDocumentReference() {
     headers: getHeaders(),
   });
 
-  is_success = check(res, { "create status is 201": (r) => r.status === 201 });
+  check(res, { "create status is 201": (r) => r.status === 201 });
 
   if (res.status !== 201) {
     console.warn(
