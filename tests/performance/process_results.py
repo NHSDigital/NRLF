@@ -1,3 +1,4 @@
+# flake8: noqa
 from csv import DictReader
 from statistics import mean
 
@@ -139,7 +140,7 @@ def _create_response_count_figure(data: dict, title: str):
         axes.axis("tight")
 
     fig.legend(list(fig_labels), loc="upper left")
-    return fig
+    return fig, failed_requests
 
 
 def _create_response_time_figure(data: dict, title: str):
@@ -306,7 +307,7 @@ def baseline(
     )
     fig.savefig("dist/ramp_up_performance.png")
 
-    fig = _create_response_count_figure(
+    fig, failures = _create_response_count_figure(
         baseline_data,
         f"NRL v3.0 Consumer API - Baseline Performance ({target_rps} RPS - Warm Start) - Response Count",
     )
@@ -341,7 +342,7 @@ def stress(
     )
     fig.savefig("dist/stress_ramp_up_performance.png")
 
-    fig = _create_response_count_figure(
+    fig, failures = _create_response_count_figure(
         baseline_data,
         f"NRL v3.0 Consumer API - Stress Performance ({target_vus} VUs - Warm Start) - Response Count",
     )
@@ -352,6 +353,9 @@ def stress(
         f"NRL v3.0 Consumer API - Stress Performance (Up to {target_vus} VUs - Cold Start) - Response Count",
     )
     fig.savefig("dist/stress_ramp_up_count.png")
+    if len(failures) > 0:
+        print(f"Failed requests: {len(failures)}")
+        exit(1)  # non zero exit code for failures
 
 
 if __name__ == "__main__":
