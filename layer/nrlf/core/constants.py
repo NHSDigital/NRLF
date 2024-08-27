@@ -34,6 +34,12 @@ PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL = "supersede-ignore-delete-fail"
 PERMISSION_ALLOW_ALL_POINTER_TYPES = "allow-all-pointer-types"
 
 
+NHSD_REQUEST_ID_HEADER = "NHSD-Request-Id"
+NHSD_CORRELATION_ID_HEADER = "NHSD-Correlation-Id"
+X_REQUEST_ID_HEADER = "X-Request-Id"
+X_CORRELATION_ID_HEADER = "X-Correlation-Id"
+
+
 PRODUCER_URL_PATH = "/producer/FHIR/R4/DocumentReference"
 
 
@@ -53,10 +59,16 @@ class PointerTypes(Enum):
     def list():
         return list(map(lambda type: type.value, PointerTypes))
 
+    def coding_value(self):
+        return self.value.split(TYPE_SEPARATOR)[1]
+
 
 class Categories(Enum):
     CARE_PLAN = "http://snomed.info/sct|734163000"
     OBSERVATIONS = "http://snomed.info/sct|1102421000000108"
+
+    def coding_value(self):
+        return self.value.split(TYPE_SEPARATOR)[1]
 
 
 TYPE_CATEGORIES = {

@@ -222,7 +222,7 @@ class DocumentReferenceValidator:
         """"""
         if not model.relatesTo:
             logger.log(
-                LogReference.VALIDATOR001, step="relates_to", reason="no_relates_to"
+                LogReference.VALIDATOR001a, step="relates_to", reason="no_relates_to"
             )
             return
 
@@ -338,11 +338,9 @@ class DocumentReferenceValidator:
         """
         Validate the category field contains an appropriate coding system, code and display.
         """
+        logger.log(LogReference.VALIDATOR001, step="category")
 
         if len(model.category) > 1:
-            logger.log(
-                LogReference.VALIDATOR001, step="category", reason="category_too_long"
-            )
             self.result.add_error(
                 issue_code="invalid",
                 error_code="INVALID_RESOURCE",
@@ -350,8 +348,6 @@ class DocumentReferenceValidator:
                 field=f"category",
             )
             return
-
-        logger.log(LogReference.VALIDATOR001, step="category")
 
         logger.debug("Validating category")
 
@@ -395,16 +391,11 @@ class DocumentReferenceValidator:
         """
         Validate the content.extension field contains an appropriate coding.
         """
-        logger.log(LogReference.VALIDATOR001, step="content extension")
+        logger.log(LogReference.VALIDATOR001, step="content_extension")
 
         logger.debug("Validating extension")
         for i, content in enumerate(model.content):
             if len(content.extension) > 1:
-                logger.log(
-                    LogReference.VALIDATOR001,
-                    step=f"content[{i}].extension",
-                    reason="extension_too_long",
-                )
                 self.result.add_error(
                     issue_code="invalid",
                     error_code="INVALID_RESOURCE",
@@ -414,11 +405,6 @@ class DocumentReferenceValidator:
                 return
 
             if len(content.extension[0].valueCodeableConcept.coding) < 1:
-                logger.log(
-                    LogReference.VALIDATOR001,
-                    step=f"content[{i}].extension.valueCodeableConcept.coding",
-                    reason="extension_coding_does_not_exist",
-                )
                 self.result.add_error(
                     issue_code="required",
                     error_code="INVALID_RESOURCE",
@@ -431,11 +417,6 @@ class DocumentReferenceValidator:
                 content.extension[0].valueCodeableConcept.coding[0].system
                 != "https://fhir.nhs.uk/England/CodeSystem/England-NRLContentStability"
             ):
-                logger.log(
-                    LogReference.VALIDATOR001,
-                    step=f"content[{i}].extension.valueCodeableConcept.coding[0].system",
-                    reason="extension_coding_system_invalid",
-                )
                 self.result.add_error(
                     issue_code="value",
                     error_code="INVALID_RESOURCE",
@@ -448,11 +429,6 @@ class DocumentReferenceValidator:
                 "static",
                 "dynamic",
             ]:
-                logger.log(
-                    LogReference.VALIDATOR001,
-                    step=f"content[{i}].extension.valueCodeableConcept.coding[0].code",
-                    reason="extension_coding_code_invalid",
-                )
                 self.result.add_error(
                     issue_code="value",
                     error_code="INVALID_RESOURCE",
@@ -465,11 +441,6 @@ class DocumentReferenceValidator:
                 content.extension[0].valueCodeableConcept.coding[0].code
                 != content.extension[0].valueCodeableConcept.coding[0].display.lower()
             ):
-                logger.log(
-                    LogReference.VALIDATOR001,
-                    step=f"content[{i}].extension.valueCodeableConcept.coding[0].display",
-                    reason="extension_coding_display_invalid",
-                )
                 self.result.add_error(
                     issue_code="value",
                     error_code="INVALID_RESOURCE",
@@ -482,11 +453,6 @@ class DocumentReferenceValidator:
                 content.extension[0].url
                 != "https://fhir.nhs.uk/England/StructureDefinition/Extension-England-ContentStability"
             ):
-                logger.log(
-                    LogReference.VALIDATOR001,
-                    step=f"content[{i}].extension.url",
-                    reason="extension_url_invalid",
-                )
                 self.result.add_error(
                     issue_code="value",
                     error_code="INVALID_RESOURCE",

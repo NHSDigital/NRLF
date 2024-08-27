@@ -2,7 +2,6 @@ import functools
 import inspect
 import sys
 import warnings
-from functools import wraps
 from typing import Any, Callable, Dict, Optional, Type, Union
 
 from aws_lambda_powertools.utilities.data_classes import (
@@ -15,7 +14,13 @@ from pydantic import BaseModel
 from nrlf.core.authoriser import get_pointer_types, parse_permissions_file
 from nrlf.core.codes import SpineErrorConcept
 from nrlf.core.config import Config
-from nrlf.core.constants import PERMISSION_ALLOW_ALL_POINTER_TYPES, PointerTypes
+from nrlf.core.constants import (
+    NHSD_CORRELATION_ID_HEADER,
+    PERMISSION_ALLOW_ALL_POINTER_TYPES,
+    X_CORRELATION_ID_HEADER,
+    X_REQUEST_ID_HEADER,
+    PointerTypes,
+)
 from nrlf.core.dynamodb.repository import DocumentPointerRepository
 from nrlf.core.errors import OperationOutcomeError, ParseError
 from nrlf.core.logger import LogReference, logger
@@ -60,6 +65,75 @@ def error_handler(
     return wrapper
 
 
+def header_handler(
+    wrapped_func: Callable[..., Dict[str, Any]]
+) -> Callable[..., Dict[str, Any]]:
+    """
+    Wraps the function to set the specific headers in the request and response
+    """
+
+    def wrapper(*args, **kwargs) -> Dict[str, Any]:
+        event: APIGatewayProxyEvent = args[0]
+
+        response = wrapped_func(*args, **kwargs)
+
+        try:
+            if "headers" not in response:
+                response["headers"] = {}
+
+            echoed_headers = {
+                name: event.get_header_value(name)
+                for name in [
+                    X_REQUEST_ID_HEADER,
+                    X_CORRELATION_ID_HEADER,
+                ]
+                if event.get_header_value(name)
+            }
+            response["headers"].update(echoed_headers)
+        except Exception:
+            logger.exception(
+                "An error occurred whilst setting response headers",
+                exc_info=sys.exc_info(),
+                stacklevel=5,
+                log_reference=LogReference.ERROR003.name,
+            )
+
+        logger.log(
+            LogReference.HANDLER016,
+            status_code=getattr(response, "statusCode", ""),
+            headers=getattr(response, "headers", {}),
+        )
+
+        return response
+
+    return wrapper
+
+
+def logger_initialiser(
+    wrapper_func: Callable[..., Dict[str, Any]]
+) -> Callable[..., Dict[str, Any]]:
+    """
+    Wraps the function and initialises the request logger
+    """
+
+    def wrapper(*args, **kwargs) -> Dict[str, Any]:
+        event: APIGatewayProxyEvent = args[0]
+
+        correlation_id = event.get_header_value(NHSD_CORRELATION_ID_HEADER)
+        if correlation_id:
+            logger.set_correlation_id(correlation_id)
+        else:
+            logger.log(
+                LogReference.HANDLER017,
+                id_header=NHSD_CORRELATION_ID_HEADER,
+                headers=event.headers,
+            )
+
+        return wrapper_func(*args, **kwargs)
+
+    return wrapper
+
+
 RepositoryType = Union[Type[DocumentPointerRepository], None]
 
 
@@ -96,6 +170,30 @@ def filter_kwargs(handler_func: RequestHandler, kwargs: Dict[str, Any]):
         filtered_kwargs_keys=function_kwargs.keys(),
     )
     return function_kwargs
+
+
+def verify_request_ids(event: APIGatewayProxyEvent):
+    caller_request_id = event.get_header_value(X_REQUEST_ID_HEADER)
+    if not caller_request_id:
+        logger.log(LogReference.HANDLER014, headers=event.headers)
+        raise OperationOutcomeError(
+            status_code="400",
+            severity="error",
+            code="invalid",
+            details=SpineErrorConcept.from_code("MISSING_OR_INVALID_HEADER"),
+            diagnostics="The X-Request-Id header is missing or invalid",
+        )
+
+    caller_correlation_id = event.get_header_value(NHSD_CORRELATION_ID_HEADER)
+    if not caller_correlation_id:
+        logger.log(LogReference.HANDLER015, headers=event.headers)
+        raise OperationOutcomeError(
+            status_code="400",
+            severity="error",
+            code="invalid",
+            details=SpineErrorConcept.from_code("MISSING_OR_INVALID_HEADER"),
+            diagnostics="The NHSD-Correlation-Id header is missing or invalid",
+        )
 
 
 def basic_handler(
@@ -151,6 +249,8 @@ def request_handler(
             if skip_request_verification:
                 return basic_handler(event, context, func, **kwargs)
 
+            verify_request_ids(event)
+
             config = Config()
             logger.log(LogReference.HANDLER001, config=config.dict())
             metadata = load_connection_metadata(event.headers, config)
@@ -186,6 +286,7 @@ def request_handler(
 
             logger.log(LogReference.HANDLER013)
             response = func(**function_kwargs)
+
             logger.log(
                 LogReference.HANDLER999,
                 status_code=response.statusCode,
@@ -194,10 +295,12 @@ def request_handler(
             return response.dict()
 
         decorators = [
-            wraps(func),
+            functools.wraps(func),
+            error_handler,
+            header_handler,
+            logger_initialiser,
             logger.inject_lambda_context,
             event_source(data_class=APIGatewayProxyEvent),
-            error_handler,
         ]
 
         return functools.reduce(

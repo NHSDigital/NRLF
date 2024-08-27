@@ -29,3 +29,8 @@ variable "firehose_subscriptions" {
 variable "vpc" {
   default = {}
 }
+
+variable "retention" {
+  default = 90
+  type    = number
+}

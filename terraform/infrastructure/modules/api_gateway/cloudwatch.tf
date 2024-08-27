@@ -6,7 +6,7 @@ resource "aws_cloudwatch_log_group" "api_gateway_access_logs" {
   depends_on = [
     aws_api_gateway_rest_api.api_gateway_rest_api
   ]
-
+  retention_in_days = var.retention
 }
 
 resource "aws_cloudwatch_log_group" "api_gateway_execution_logs" {
@@ -17,5 +17,5 @@ resource "aws_cloudwatch_log_group" "api_gateway_execution_logs" {
   depends_on = [
     aws_api_gateway_rest_api.api_gateway_rest_api
   ]
-
+  retention_in_days = var.retention
 }

@@ -26,6 +26,14 @@ class LogReference(Enum):
     HANDLER011 = _Reference("INFO", "Parsed request path parameters")
     HANDLER012 = _Reference("DEBUG", "Filtered request handler function arguments")
     HANDLER013 = _Reference("INFO", "Calling lambda-specific request handler")
+    HANDLER014 = _Reference(
+        "WARN", "Rejecting request due to missing X-Request-Id header"
+    )
+    HANDLER015 = _Reference(
+        "WARN", "Rejecting request due to missing NHSD-Correlation-Id header"
+    )
+    HANDLER016 = _Reference("INFO", "Set response headers")
+    HANDLER017 = _Reference("WARN", "Correlation ID not found in request headers")
     HANDLER999 = _Reference("INFO", "Request handler returned successfully")
 
     # Error Logs
@@ -37,6 +45,9 @@ class LogReference(Enum):
     )
     ERROR002 = _Reference(
         "WARN", "An ParseError occurred whilst processing the request"
+    )
+    ERROR003 = _Reference(
+        "WARN", "An unhandler exception occurred whilst handling response headers"
     )
 
     # S3 Permissions Lookup Logs

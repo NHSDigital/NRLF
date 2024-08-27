@@ -17,3 +17,8 @@ variable "path" {
 variable "capability_statement_content" {
   type = string
 }
+
+variable "retention" {
+  default = 90
+  type    = number
+}

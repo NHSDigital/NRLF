@@ -10,6 +10,7 @@ from nrlf.tests.events import (
     create_headers,
     create_mock_context,
     create_test_api_gateway_event,
+    default_response_headers,
 )
 
 
@@ -27,7 +28,11 @@ def test_delete_document_reference_happy_path(repository: DocumentPointerReposit
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "200",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {
@@ -59,7 +64,11 @@ def test_delete_document_reference_invalid_id_in_path():
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {
@@ -92,7 +101,11 @@ def test_delete_document_reference_invalid_producer_id():
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "403", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "403",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {
@@ -126,7 +139,11 @@ def test_delete_document_reference_not_exists(repository: DocumentPointerReposit
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "404", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "404",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {

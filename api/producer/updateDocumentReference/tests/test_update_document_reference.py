@@ -16,6 +16,7 @@ from nrlf.tests.events import (
     create_headers,
     create_mock_context,
     create_test_api_gateway_event,
+    default_response_headers,
 )
 
 
@@ -44,7 +45,11 @@ def test_update_document_reference_happy_path(repository: DocumentPointerReposit
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "200",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
 
     assert parsed_body == {
@@ -105,7 +110,11 @@ def test_update_document_reference_happy_path_with_ssp(
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "200",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
 
     assert parsed_body == {
@@ -150,7 +159,11 @@ def test_create_document_reference_no_body():
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
 
     assert parsed_body == {
@@ -185,7 +198,11 @@ def test_create_document_reference_invalid_body():
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
 
     assert parsed_body == {
@@ -252,7 +269,11 @@ def test_update_document_reference_no_id_in_path():
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
 
     assert parsed_body == {
@@ -289,7 +310,11 @@ def test_update_document_reference_id_mismatch():
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
 
     assert parsed_body == {
@@ -327,7 +352,11 @@ def test_update_document_reference_invalid_resource():
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
 
     assert parsed_body == {
@@ -364,7 +393,11 @@ def test_update_document_reference_invalid_producer_id():
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "403", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "403",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
 
     assert parsed_body == {
@@ -402,7 +435,11 @@ def test_update_document_reference_no_existing_pointer(repository):
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "404", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "404",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
 
     assert parsed_body == {
@@ -444,7 +481,11 @@ def test_update_document_reference_immutable_fields(repository):
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
 
     assert parsed_body == {
@@ -488,7 +529,11 @@ def test_update_document_reference_with_no_context_related_for_ssp_url(repositor
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
 
     assert parsed_body == {
@@ -540,7 +585,7 @@ def test_create_document_reference_with_no_asid_in_for_ssp_url(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -595,7 +640,7 @@ def test_create_document_reference_with_invalid_asid_for_ssp_url(
 
     assert result == {
         "statusCode": "400",
-        "headers": {},
+        "headers": default_response_headers(),
         "isBase64Encoded": False,
     }
 
@@ -650,7 +695,11 @@ def test_update_document_reference_with_meta_lastupdated_ignored(
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "200",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
     assert parsed_body == {
         "resourceType": "OperationOutcome",
@@ -712,7 +761,11 @@ def test_update_document_reference_with_invalid_date_ignored(
 
     body = result.pop("body")
 
-    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "200",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
     parsed_body = json.loads(body)
     assert parsed_body == {
         "resourceType": "OperationOutcome",
@@ -763,7 +816,11 @@ def test_update_document_reference_existing_invalid_json(
     result = handler(event, create_mock_context())
     body = result.pop("body")
 
-    assert result == {"statusCode": "500", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "500",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {

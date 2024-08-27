@@ -64,4 +64,4 @@ jobs:
 
       - name: "Smoke Test"
         run: |
-          make ENV=${{ inputs.environment }} test-smoke-external
+          make ENV=${{ inputs.environment }} test-smoke-public

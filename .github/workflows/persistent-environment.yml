@@ -233,7 +233,10 @@ jobs:
         run: terraform -chdir=terraform/infrastructure apply tfplan
 
       - name: Smoke Test
-        run: make ENV=${{ inputs.environment }} test-smoke-internal
+        run: |
+          account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
+          make ENV=${account} truststore-pull-client
+          make ENV=${{ inputs.environment }} test-smoke-internal
 
   activate-stack:
     name: Activate - ${{ inputs.environment }}
@@ -318,12 +321,12 @@ jobs:
 
       - name: "Smoke Test"
         run: |
-          make ENV=${{ inputs.environment }} test-smoke-external
+          make ENV=${{ inputs.environment }} test-smoke-public
 
   rollback-stack:
     name: Rollback - ${{ inputs.environment }}
     needs: [post-release-verify]
-    if: ${{ needs.post-release-verify.result == 'failure' }}
+    if: always() && ( needs.post-release-verify.result == 'failure' )
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
 

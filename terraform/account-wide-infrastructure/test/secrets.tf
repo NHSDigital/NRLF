@@ -18,7 +18,39 @@ resource "aws_secretsmanager_secret" "ref_smoke_test_apigee_app" {
   description = "APIGEE App used to run Smoke Tests against the REF environment"
 }
 
-// TODO-NOW - Get new splunk config for qa and rename refsandbox to qasandbox
+
+#
+# Smoke test parameters secrets
+#
+resource "aws_secretsmanager_secret" "qa_smoke_test_parameters" {
+  name        = "${local.project}--qa--smoke-test-parameters"
+  description = "Parameters used to run Smoke Tests against the QA environment"
+}
+
+resource "aws_secretsmanager_secret" "qasandbox_smoke_test_parameters" {
+  name        = "${local.project}--qa-sandbox--smoke-test-parameters"
+  description = "Parameters used to run Smoke Tests against the QA sandbox environment"
+}
+
+resource "aws_secretsmanager_secret" "int_smoke_test_parameters" {
+  name        = "${local.project}--int--smoke-test-parameters"
+  description = "Parameters used to run Smoke Tests against the int environment"
+}
+
+resource "aws_secretsmanager_secret" "intsandbox_smoke_test_parameters" {
+  name        = "${local.project}--int-sandbox--smoke-test-parameters"
+  description = "Parameters used to run Smoke Tests against the int sandbox environment"
+}
+
+resource "aws_secretsmanager_secret" "ref_smoke_test_parameters" {
+  name        = "${local.project}--ref--smoke-test-parameters"
+  description = "Parameters used to run Smoke Tests against the ref environment"
+}
+
+
+#
+# Splunk Configuration secrets
+#
 resource "aws_secretsmanager_secret" "qa_splunk_configuration" {
   name        = "${local.project}--qa--splunk-configuration"
   description = "Splunk configuration for the aws_recordlocator_qa index"
@@ -44,6 +76,9 @@ resource "aws_secretsmanager_secret" "ref_splunk_configuration" {
   description = "Splunk configuration for the aws_recordlocator_ref index"
 }
 
+#
+# Environment Configuration secrets
+#
 resource "aws_secretsmanager_secret" "qa_environment_configuration" {
   name        = "${local.project}--qa--env-config"
   description = "The environment configuration for the QA environment"

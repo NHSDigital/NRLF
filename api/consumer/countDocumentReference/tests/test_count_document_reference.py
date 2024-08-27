@@ -10,6 +10,7 @@ from nrlf.tests.events import (
     create_headers,
     create_mock_context,
     create_test_api_gateway_event,
+    default_response_headers,
 )
 
 
@@ -26,7 +27,11 @@ def test_count_document_reference_happy_path(repository: DocumentPointerReposito
     result = handler(event, create_mock_context())  # type: ignore
     body = result.pop("body")
 
-    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "200",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {"resourceType": "Bundle", "type": "searchset", "total": 0}
@@ -38,7 +43,11 @@ def test_count_document_reference_happy_path(repository: DocumentPointerReposito
     result = handler(event, create_mock_context())  # type: ignore
     body = result.pop("body")
 
-    assert result == {"statusCode": "200", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "200",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {"resourceType": "Bundle", "type": "searchset", "total": 1}
@@ -50,7 +59,11 @@ def test_count_document_reference_missing_nhs_number():
     result = handler(event, create_mock_context())  # type: ignore
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {
@@ -86,7 +99,11 @@ def test_count_document_reference_invalid_nhs_number():
     result = handler(event, create_mock_context())  # type: ignore
     body = result.pop("body")
 
-    assert result == {"statusCode": "400", "headers": {}, "isBase64Encoded": False}
+    assert result == {
+        "statusCode": "400",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
 
     parsed_body = json.loads(body)
     assert parsed_body == {

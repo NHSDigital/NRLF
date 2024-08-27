@@ -43,3 +43,8 @@ variable "use_shared_resources" {
   type    = bool
   default = false
 }
+
+variable "log_retention_period" {
+  default = 90
+  type    = number
+}
