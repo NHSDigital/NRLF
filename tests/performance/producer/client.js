@@ -39,7 +39,6 @@ function checkResponse(res) {
   if (!is_success) {
     console.warn(res.json());
     fail("Response status is not 200");
-    exit(1);
   }
 }
 
