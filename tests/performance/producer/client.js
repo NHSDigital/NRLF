@@ -7,7 +7,7 @@ import {
   POINTER_DOCUMENTS,
   POINTERS_TO_DELETE,
 } from "../constants.js";
-import { check } from "k6";
+import { check, fail } from "k6";
 import { randomItem } from "https://jslib.k6.io/k6-utils/1.2.0/index.js";
 import { crypto } from "k6/experimental/webcrypto";
 import { createRecord } from "../setup.js";
@@ -19,6 +19,8 @@ function getBaseURL() {
 function getHeaders(odsCode = ODS_CODE) {
   return {
     "Content-Type": "application/fhir+json",
+    "X-Request-Id": "K6PerformanceTest",
+    "NHSD-Correlation-Id": "K6PerformanceTest",
     "NHSD-Connection-Metadata": JSON.stringify({
       "nrl.ods-code": odsCode,
       "nrl.pointer-types": POINTER_TYPES.map(
@@ -31,6 +33,13 @@ function getHeaders(odsCode = ODS_CODE) {
       "developer.app.id": "K6PerformanceTest",
     }),
   };
+}
+function checkResponse(res) {
+  const is_success = check(res, { "status is 200": (r) => r.status === 200 });
+  if (!is_success) {
+    console.warn(res.json());
+    fail("Response status is not 200");
+  }
 }
 
 export function createDocumentReference() {
@@ -50,6 +59,7 @@ export function createDocumentReference() {
         JSON.parse(res.body).issue[0].diagnostics
       }`
     );
+    fail("Response status was not 201");
   }
 }
 
@@ -58,7 +68,7 @@ export function readDocumentReference() {
 
   const res = http.get(`${getBaseURL()}/${id}`, { headers: getHeaders() });
 
-  check(res, { "status is 200": (r) => r.status === 200 });
+  checkResponse(res);
 }
 
 export function updateDocumentReference() {
@@ -71,7 +81,7 @@ export function updateDocumentReference() {
     headers: getHeaders(),
   });
 
-  check(res, { "status is 200": (r) => r.status === 200 });
+  checkResponse(res);
 }
 
 export function deleteDocumentReference() {
@@ -81,7 +91,7 @@ export function deleteDocumentReference() {
     headers: getHeaders(),
   });
 
-  check(res, { "delete status is 200": (r) => r.status === 200 });
+  checkResponse(res);
 }
 
 export function upsertDocumentReference() {
@@ -95,7 +105,7 @@ export function upsertDocumentReference() {
     headers: getHeaders(),
   });
 
-  check(res, { "create status is 201": (r) => r.status === 201 });
+  is_success = check(res, { "create status is 201": (r) => r.status === 201 });
 
   if (res.status !== 201) {
     console.warn(
@@ -103,6 +113,7 @@ export function upsertDocumentReference() {
         JSON.parse(res.body).issue[0].diagnostics
       }`
     );
+    fail("Response status was not 201");
   }
 }
 
@@ -127,6 +138,7 @@ export function searchDocumentReference() {
     console.log(
       `Search failed with ${res.status}: ${JSON.stringify(res.body)}`
     );
+    fail("Response status was not 200");
   }
 }
 
@@ -149,5 +161,6 @@ export function searchPostDocumentReference() {
     console.log(
       `Search failed with ${res.status}: ${JSON.stringify(res.body)}`
     );
+    fail("Response status was not 200");
   }
 }
