@@ -313,11 +313,14 @@ def baseline(
     )
     fig.savefig("dist/baseline_count.png")
 
-    fig = _create_response_count_figure(
+    fig, failures = _create_response_count_figure(
         ramp_up_data,
         f"NRL v3.0 Consumer API - Ramp-Up Performance (Up to {target_rps} RPS - Cold Start) - Response Count",
     )
     fig.savefig("dist/ramp_up_count.png")
+    if len(failures) > 0:
+        print(f"Failed requests: {len(failures)}")
+        exit(1)  # non zero exit code for failures
 
 
 def stress(
@@ -348,7 +351,7 @@ def stress(
     )
     fig.savefig("dist/stress_baseline_count.png")
 
-    fig = _create_response_count_figure(
+    fig, failures = _create_response_count_figure(
         ramp_up_data,
         f"NRL v3.0 Consumer API - Stress Performance (Up to {target_vus} VUs - Cold Start) - Response Count",
     )
