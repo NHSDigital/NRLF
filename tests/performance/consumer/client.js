@@ -6,6 +6,7 @@ import {
 } from "../constants.js";
 import http from "k6/http";
 import { check, fail } from "k6";
+import exec from "k6/execution";
 
 function getHeaders(odsCode = ODS_CODE) {
   return {
@@ -30,6 +31,7 @@ function checkResponse(res) {
   if (!is_success) {
     console.log(res.json());
     fail("Response status is not 200");
+    exec.test.abort("Unexpected response status");
   }
 }
 

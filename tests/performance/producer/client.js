@@ -39,6 +39,7 @@ function checkResponse(res) {
   if (!is_success) {
     console.warn(res.json());
     fail("Response status is not 200");
+    exec.test.abort("Unexpected response status");
   }
 }
 
@@ -60,6 +61,7 @@ export function createDocumentReference() {
       }`
     );
     fail("Response status was not 201");
+    exec.test.abort("Unexpected response status");
   }
 }
 
@@ -114,6 +116,7 @@ export function upsertDocumentReference() {
       }`
     );
     fail("Response status was not 201");
+    exec.test.abort("Unexpected response status");
   }
 }
 
@@ -139,6 +142,7 @@ export function searchDocumentReference() {
       `Search failed with ${res.status}: ${JSON.stringify(res.body)}`
     );
     fail("Response status was not 200");
+    exec.test.abort("Unexpected response status");
   }
 }
 
@@ -162,5 +166,6 @@ export function searchPostDocumentReference() {
       `Search failed with ${res.status}: ${JSON.stringify(res.body)}`
     );
     fail("Response status was not 200");
+    exec.test.abort("Unexpected response status");
   }
 }
