@@ -19,7 +19,6 @@ function getBaseURL() {
 function getHeaders(odsCode = ODS_CODE) {
   return {
     "Content-Type": "application/fhir+json",
-    "X-Request-Id": "K6PerformanceTest",
     "NHSD-Correlation-Id": "K6PerformanceTest",
     "NHSD-Connection-Metadata": JSON.stringify({
       "nrl.ods-code": odsCode,
