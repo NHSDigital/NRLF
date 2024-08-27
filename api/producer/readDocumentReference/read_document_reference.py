@@ -59,7 +59,7 @@ def handler(
         document_reference = DocumentReference.parse_raw(result.document)
     except ValidationError as exc:
         logger.log(
-            LogReference.CONREAD003,
+            LogReference.PROREAD003,
             exc_info=sys.exc_info(),
             stacklevel=5,
             error=str(exc),
