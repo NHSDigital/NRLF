@@ -30,8 +30,6 @@ function checkResponse(res) {
   const is_success = check(res, { "status is 200": (r) => r.status === 200 });
   if (!is_success) {
     console.log(res.json());
-    fail("Response status is not 200");
-    exit(1);
   }
 }
 

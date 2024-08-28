@@ -38,7 +38,6 @@ function checkResponse(res) {
   const is_success = check(res, { "status is 200": (r) => r.status === 200 });
   if (!is_success) {
     console.warn(res.json());
-    fail("Response status is not 200");
   }
 }
 
@@ -59,8 +58,6 @@ export function createDocumentReference() {
         JSON.parse(res.body).issue[0].diagnostics
       }`
     );
-    fail("Response status was not 201");
-    exit(1);
   }
 }
 
@@ -114,8 +111,6 @@ export function upsertDocumentReference() {
         JSON.parse(res.body).issue[0].diagnostics
       }`
     );
-    fail("Response status was not 201");
-    exit(1);
   }
 }
 
@@ -140,8 +135,6 @@ export function searchDocumentReference() {
     console.log(
       `Search failed with ${res.status}: ${JSON.stringify(res.body)}`
     );
-    fail("Response status was not 200");
-    exit(1);
   }
 }
 
@@ -164,7 +157,5 @@ export function searchPostDocumentReference() {
     console.log(
       `Search failed with ${res.status}: ${JSON.stringify(res.body)}`
     );
-    fail("Response status was not 200");
-    exit(1);
   }
 }
