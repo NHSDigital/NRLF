@@ -5,7 +5,7 @@ import {
   ODS_CODE,
 } from "../constants.js";
 import http from "k6/http";
-import { check, fail } from "k6";
+import { check } from "k6";
 
 function getHeaders(odsCode = ODS_CODE) {
   return {
