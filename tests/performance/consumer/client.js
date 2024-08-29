@@ -29,7 +29,7 @@ function getHeaders(odsCode = ODS_CODE) {
 function checkResponse(res) {
   const is_success = check(res, { "status is 200": (r) => r.status === 200 });
   if (!is_success) {
-    console.log(res.json());
+    console.warn(res.json());
   }
 }
 
