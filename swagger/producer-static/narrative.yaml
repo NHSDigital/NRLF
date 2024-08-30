@@ -1271,4 +1271,4 @@ components:
       schema:
         example: 60E0B220-8136-4CA5-AE46-1D97EF59D068
         description: |
-          The X-Request-ID from the request header, if supplied, mirrored back.
+          The X-Request-ID from the request header mirrored back.
