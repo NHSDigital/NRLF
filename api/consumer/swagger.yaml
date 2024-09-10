@@ -28,13 +28,18 @@ info:
     There is a growing list of health and social care organisations authorised to share records using NRL, and presently
     the pointers are classified into the following types:
 
-    * [Mental Health Crisis Plan](http://snomed.info/sct/736253002)
+    * [Mental health crisis plan](http://snomed.info/sct/736253002)
     * [Royal College of Physicians NEWS2 (National Early Warning Score 2) chart](http://snomed.info/sct/1363501000000100)
     * [ReSPECT (Recommended Summary Plan for Emergency Care and Treatment) form](http://snomed.info/sct/1382601000000107)
     * [Contingency plan](http://snomed.info/sct/325691000000100)
     * [End of life care plan](http://snomed.info/sct/736373009)
-    * [End of Life Care Coordination Summary](http://snomed.info/sct/861421000000109)
-    * [Emergency Health Care Plans](http://snomed.info/sct/887701000000100)
+    * [End of life care coordination summary](http://snomed.info/sct/861421000000109)
+    * [Emergency health care plan](http://snomed.info/sct/887701000000100)
+    * [Lloyd George record folder](http://snomed.info/sct/16521000000101)
+    * [Advanced care plan](http://snomed.info/sct/736366004)
+    * [Treatment escalation plan](http://snomed.info/sct/735324008)
+    * [Summary record]("http://snomed.info/sct|824321000000109")
+    * [Personalised care and support plan]("http://snomed.info/sct|2181441000000107")
 
     You can also retrieve booking and referal pointers however you can not currently do this by directly integrating with
     the National Record Locator, you must instead onboard to the [Booking and Referral - FHIR API](https://digital.nhs.uk/developer/api-catalogue/booking-and-referral-fhir)
@@ -1468,19 +1473,19 @@ components:
           summary: None
           value: ""
         SNOMED_CODES_MENTAL_HEALTH_CRISIS_PLAN:
-          summary: Mental Health Crisis Plan
+          summary: Mental health crisis plan
           value: http://snomed.info/sct|736253002
         SNOMED_CODES_EMERGENCY_HEALTH_CARE_PLAN:
-          summary: Emergency Healthcare Plan
+          summary: Emergency healthcare plan
           value: http://snomed.info/sct|887701000000100
         SNOMED_CODES_END_OF_LIFE_CARE_COORDINATION_SUMMARY:
-          summary: End of Life Care Coordination Summary
+          summary: End of life care coordination summary
           value: http://snomed.info/sct|861421000000109
         SNOMED_CODES_RESPECT_FORM:
           summary: ReSPECT form
           value: http://snomed.info/sct|1382601000000107
         SNOMED_CODES_NEWS2_CHART:
-          summary: Royal College of Physicians NEWS2
+          summary: Royal College of Physicians NEWS2 chart
           value: http://snomed.info/sct|1363501000000100
         SNOMED_CODES_CONTINGENCY_PLAN:
           summary: Contingency plan
@@ -1488,6 +1493,21 @@ components:
         SNOMED_CODES_END_OF_LIFE_CARE_PLAN:
           summary: End of life care plan
           value: http://snomed.info/sct|736373009
+        SNOMED_CODES_LLOYD_GEORGE_RECORD_FOLDER:
+          summary: Lloyd George record folder
+          value: http://snomed.info/sct|16521000000101
+        SNOMED_CODES_ADVANCED_CARE_PLAN:
+          summary: Advanced care plan
+          value: http://snomed.info/sct|736366004
+        SNOMED_CODES_TREATMENT_ESCALATION_PLAN:
+          summary: Treatment escalation plan
+          value: http://snomed.info/sct|735324008
+        SNOMED_CODES_SUMMARY_RECORD:
+          summary: Summary Record
+          value: http://snomed.info/sct|824321000000109
+        SNOME_CODES_PERSONALISED_CARE_AND_SUPPORT_PLAN:
+          summary: Personalised Care and Support Plan
+          value: http://snomed.info/sct|2181441000000107
         invalid:
           summary: Unknown
           value: http://snomed.info/sct|410970009
