@@ -1,23 +1,10 @@
 import json
-from typing import Literal
 
 import requests
 from pydantic import BaseModel
 
+from nrlf.core.constants import PointerTypes
 from nrlf.core.model import ConnectionMetadata
-
-PointerTypeCodes = Literal[
-    "736253002",  # Mental Health Crisis Plan
-    "887701000000100",  # Emergency Healthcare Plan
-    "861421000000109",  # End of Life Coordination Summary
-    "1382601000000107",  # ReSPECT form
-    "1363501000000100",  # Royal College of Physicians NEWS2
-    "325691000000100",  # Contingency plan
-    "736373009",  # End of life care plan
-    "16521000000101",  # Lloyd George record folder
-    "736366004",  # Advanced Care Plan
-    "735324008",  # Treatment Escalation Plan
-]
 
 
 class ClientConfig(BaseModel):
@@ -32,7 +19,7 @@ class ClientConfig(BaseModel):
 class SearchQuery:
     nhs_number: str = "UNSET"
     custodian: str | None = None
-    pointer_type: PointerTypeCodes | None = None
+    pointer_type: PointerTypes | None = None
 
     def add_nhs_number(self, nhs_number: str):
         self.nhs_number = nhs_number
@@ -42,7 +29,7 @@ class SearchQuery:
         self.custodian = custodian
         return self
 
-    def add_pointer_type(self, pointer_type: PointerTypeCodes):
+    def add_pointer_type(self, pointer_type: PointerTypes):
         self.pointer_type = pointer_type
         return self
 
@@ -90,7 +77,7 @@ class ConsumerTestClient:
         self,
         nhs_number: str | None = None,
         custodian: str | None = None,
-        pointer_type: PointerTypeCodes | None = None,
+        pointer_type: PointerTypes | None = None,
         extra_params: dict[str, str] | None = None,
     ):
         params = {**(extra_params or {})}
@@ -122,7 +109,7 @@ class ConsumerTestClient:
         self,
         nhs_number: str | None = None,
         custodian: str | None = None,
-        pointer_type: PointerTypeCodes | None = None,
+        pointer_type: PointerTypes | None = None,
         extra_fields: dict[str, str] | None = None,
     ):
         body = {**(extra_fields or {})}
@@ -233,7 +220,7 @@ class ProducerTestClient:
     def search(
         self,
         nhs_number: str | None = None,
-        pointer_type: PointerTypeCodes | None = None,
+        pointer_type: PointerTypes | None = None,
         extra_params: dict[str, str] | None = None,
     ):
         params = {**(extra_params or {})}
@@ -259,7 +246,7 @@ class ProducerTestClient:
     def search_post(
         self,
         nhs_number: str | None = None,
-        pointer_type: PointerTypeCodes | None = None,
+        pointer_type: PointerTypes | None = None,
         extra_fields: dict[str, str] | None = None,
     ):
         body = {**(extra_fields or {})}
