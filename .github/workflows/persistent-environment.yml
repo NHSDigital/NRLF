@@ -232,6 +232,11 @@ jobs:
       - name: Terraform Apply
         run: terraform -chdir=terraform/infrastructure apply tfplan
 
+      - name: Update environment config version
+        run: |
+          deployed_version="${{ inputs.branch_name }}"
+          poetry run python ./scripts/set_env_config.py inactive-version ${deployed_version} ${{ inputs.environment }}
+
       - name: Smoke Test
         run: |
           account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)

@@ -8,12 +8,18 @@ import fire
 
 CONFIG_LOCK_STATE = "lock-state"
 CONFIG_INACTIVE_STACK = "inactive-stack"
+CONFIG_INACTIVE_VERSION = "inactive-version"
 CONFIG_ACTIVE_STACK = "active-stack"
+CONFIG_ACTIVE_VERSION = "active-version"
 CONFIG_DOMAIN_NAME = "domain-name"
 
 STATE_LOCKED = "locked"
 STATE_OPEN = "open"
 VALID_LOCK_STATES = [STATE_LOCKED, STATE_OPEN]
+
+
+def _swap_config(config: dict[str, str], key1: str, key2: str):
+    config[key1], config[key2] = config[key2], config[key1]
 
 
 def _set_lock_state(
@@ -134,8 +140,8 @@ def activate_stack(stack_name: str, env: str, session: any):
         sys.exit(1)
 
     print("Updating environment config and unlocking....")
-    environment_config[CONFIG_INACTIVE_STACK] = current_active_stack
-    environment_config[CONFIG_ACTIVE_STACK] = stack_name
+    _swap_config(environment_config, CONFIG_INACTIVE_STACK, CONFIG_ACTIVE_STACK)
+    _swap_config(environment_config, CONFIG_INACTIVE_VERSION, CONFIG_ACTIVE_VERSION)
     _update_and_unlock(environment_config, parameters_key=parameters_key, sm=sm)
 
     print(f"Complete. Stack {stack_name} is now the active stack for {env}")
