@@ -1,6 +1,7 @@
 import pytest
 
 from layer.nrlf.core.constants import (
+    CATEGORY_ATTRIBUTES,
     SYSTEM_SHORT_IDS,
     TYPE_CATEGORIES,
     Categories,
@@ -46,3 +47,20 @@ def test_type_category_category_is_known(category):
     assert (
         category in Categories.list()
     ), f"Unknown category {category} used in TYPE_CATEGORIES"
+
+
+@pytest.mark.parametrize("category", Categories)
+def test_category_has_attributes(category):
+    assert (
+        category.value in CATEGORY_ATTRIBUTES
+    ), f"Category {category.value} has no attributes"
+
+
+@pytest.mark.parametrize("category", Categories)
+def test_category_has_required_attributes(category):
+    assert (
+        category.value in CATEGORY_ATTRIBUTES
+    ), f"Category {category.value} has no attributes"
+    assert (
+        "display" in CATEGORY_ATTRIBUTES[category.value]
+    ), f"Category {category.value} has no display attribute"

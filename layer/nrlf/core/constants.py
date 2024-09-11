@@ -9,7 +9,6 @@ class Source(Enum):
 VALID_SOURCES = frozenset(item.value for item in Source.__members__.values())
 EMPTY_VALUES = ("", None, [], {})
 REQUIRED_CREATE_FIELDS = ["custodian", "id", "type", "status", "subject", "category"]
-CATEGORIES = {"734163000": "Care plan", "1102421000000108": "Observations"}
 JSON_TYPES = {dict, list}
 NHS_NUMBER_INDEX = "idx_nhs_number_by_id"
 ID_SEPARATOR = "-"
@@ -83,6 +82,18 @@ class Categories(Enum):
     def coding_value(self):
         return self.value.split(TYPE_SEPARATOR)[1]
 
+
+CATEGORY_ATTRIBUTES = {
+    Categories.CARE_PLAN.value: {
+        "display": "Care plan",
+    },
+    Categories.OBSERVATIONS.value: {
+        "display": "Observations",
+    },
+    Categories.CLINICAL_NOTE.value: {
+        "display": "Clinical note",
+    },
+}
 
 TYPE_CATEGORIES = {
     #
