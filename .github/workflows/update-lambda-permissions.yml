@@ -1,0 +1,107 @@
+name: Update Lambda Permissions
+run-name: Updating permissions on ${{ inputs.environment }} using ${{ inputs.branch_name }} by ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy to
+        required: true
+        default: "dev"
+        type: environment
+
+      stack_name:
+        description: Name of stack to apply permissions to
+        required: true
+        type: string
+
+      branch_name:
+        description: Branch to deploy
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+  actions: write
+
+jobs:
+  build-permissions:
+    name: Building permissions package for ${{ inputs.environment }}
+    runs-on: [self-hosted, ci]
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Git clone - ${{ github.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id }}
+
+      - name: Create lambda permissions layer
+        run: |
+          account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
+          make get-s3-perms ENV=${account} TF_WORKSPACE_NAME=${{ inputs.stack_name }}
+
+      - name: Save NRLF permissions in cache
+        uses: actions/cache/save@v4
+        with:
+          key: ${{ github.run_id }}-nrlf-permissions
+          path: dist/nrlf_permissions.zip
+
+  apply-permissions:
+    name: Applying permissions to ${{ inputs.environment }}
+    runs-on: [self-hosted, ci]
+    environment: ${{ inputs.environment }}
+
+    needs: build-permissions
+
+    steps:
+      - name: Git clone - ${{ github.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Restore NRLF permissions cache
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ github.run_id }}-nrlf-permissions
+          path: dist/nrlf_permissions.zip
+          fail-on-cache-miss: true
+
+      - name: Terraform Init
+        run: |
+          terraform -chdir=terraform/infrastructure init
+          terraform -chdir=terraform/infrastructure workspace new ${{ inputs.stack_name }} || \
+              terraform -chdir=terraform/infrastructure workspace select ${{ inputs.stack_name }}
+
+      - name: Terraform Apply
+        run: |
+          terraform -chdir=terraform/infrastructure apply -auto-approve \
+              --var-file=etc/${{ vars.ACCOUNT_NAME }}.tfvars \
+              --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} \
+              --var use_shared_resources=$(poetry run python scripts/are_resources_shared_for_stack.py ${{ inputs.stack_name }}) \
