@@ -18,6 +18,31 @@ STATE_OPEN = "open"
 VALID_LOCK_STATES = [STATE_LOCKED, STATE_OPEN]
 
 
+def _parse_env_config(raw_config: str) -> dict:
+    env_config = json.loads(raw_config)
+    if not all(
+        key in env_config
+        for key in [
+            CONFIG_LOCK_STATE,
+            CONFIG_INACTIVE_STACK,
+            CONFIG_INACTIVE_VERSION,
+            CONFIG_ACTIVE_STACK,
+            CONFIG_ACTIVE_VERSION,
+            CONFIG_DOMAIN_NAME,
+        ]
+    ):
+        raise ValueError(
+            f"Environment config must contain keys: {CONFIG_LOCK_STATE}, {CONFIG_INACTIVE_STACK}, {CONFIG_INACTIVE_VERSION}, {CONFIG_ACTIVE_STACK}, {CONFIG_ACTIVE_VERSION}, {CONFIG_DOMAIN_NAME}"
+        )
+
+    if env_config[CONFIG_LOCK_STATE] not in VALID_LOCK_STATES:
+        raise ValueError(
+            f"Invalid lock state: {env_config[CONFIG_LOCK_STATE]}. Must be one of: {VALID_LOCK_STATES}"
+        )
+
+    return env_config
+
+
 def _swap_config(config: dict[str, str], key1: str, key2: str):
     config[key1], config[key2] = config[key2], config[key1]
 
@@ -96,7 +121,7 @@ def activate_stack(stack_name: str, env: str, session: any):
     parameters_key = f"nhsd-nrlf--{env}--env-config"
     response = sm.get_secret_value(SecretId=parameters_key)
 
-    environment_config = json.loads(response["SecretString"])
+    environment_config = _parse_env_config(response["SecretString"])
     print(f"Got environment config for {env}: {environment_config}")
 
     current_active_stack = environment_config[CONFIG_ACTIVE_STACK]
