@@ -1,3 +1,4 @@
+from layer.nrlf.core.constants import CATEGORY_ATTRIBUTES
 from nrlf.producer.fhir.r4.model import (
     Attachment,
     CodeableConcept,
@@ -70,17 +71,16 @@ def create_test_document_reference(items: dict) -> DocumentReference:
         ]
 
     if items.get("category"):
+        category_display = CATEGORY_ATTRIBUTES.get(
+            f"http://snomed.info/sct|{items['category']}", {}
+        ).get("display")
         base_doc_ref.category = [
             CodeableConcept(
                 coding=[
                     Coding(
                         system="http://snomed.info/sct",
                         code=items["category"],
-                        display=(
-                            "Care plan"
-                            if items["category"] == "734163000"
-                            else "Observations"
-                        ),
+                        display=category_display,
                     )
                 ]
             )

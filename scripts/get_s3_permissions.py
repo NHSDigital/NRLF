@@ -6,17 +6,7 @@ from pathlib import Path
 import fire
 from aws_session_assume import get_boto_session
 
-POINTER_TYPES = [
-    "http://snomed.info/sct|736253002",
-    "http://snomed.info/sct|1363501000000100",
-    "http://snomed.info/sct|1382601000000107",
-    "http://snomed.info/sct|325691000000100",
-    "http://snomed.info/sct|736373009",
-    "http://snomed.info/sct|861421000000109",
-    "http://snomed.info/sct|887701000000100",
-    "http://snomed.info/sct|736366004",
-    "http://snomed.info/sct|735324008",
-]
+from nrlf.core.constants import PointerTypes
 
 
 def get_file_folders(s3_client, bucket_name, prefix=""):
@@ -56,7 +46,7 @@ def add_test_files(folder, file_name, local_path):
     file_path = Path.joinpath(folder_path, file_name)
     file_path.parent.mkdir(parents=True, exist_ok=True)
     with open(file_path, "w") as f:
-        json.dump(POINTER_TYPES, f)
+        json.dump(PointerTypes.list(), f)
 
 
 def download_files(s3_client, bucket_name, local_path, file_names, folders):
