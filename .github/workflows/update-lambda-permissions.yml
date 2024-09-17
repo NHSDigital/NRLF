@@ -26,7 +26,7 @@ permissions:
 
 jobs:
   build-permissions:
-    name: Building permissions package for ${{ inputs.environment }}
+    name: Build permissions for ${{ inputs.environment }}
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
 
@@ -73,12 +73,10 @@ jobs:
           key: ${{ github.run_id }}-nrlf-permissions
           path: dist/nrlf_permissions.zip
 
-  apply-permissions:
-    name: Applying permissions to ${{ inputs.environment }}
+  pull-deployed-lambdas:
+    name: Pull deployed lambdas for ${{ inputs.environment }}
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
-
-    needs: build-permissions
 
     steps:
       - name: Git clone - ${{ github.ref }}
@@ -86,12 +84,122 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id }}
+
+      - name: Configure Account Role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-chaining: true
+          role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
+          role-session-name: github-actions-ci-acc-${{ inputs.environment }}-${{ github.run_id }}
+
+      - name: Pull deployed lambda artifacts
+        run: |
+          account=$(echo '${{ inputs.environment }}' | cut -d '-' -f1)
+          ./scripts/pull-lambda-code-for-stack.sh ${{ inputs.stack_name }}
+
+      - name: Save lambda artifacts in cache
+        uses: actions/cache/save@v4
+        with:
+          key: ${{ github.run_id }}-pulled-lambda-artifacts
+          path: dist/*.zip
+
+  terraform-plan:
+    name: Plan changes to ${{ inputs.environment }}
+    runs-on: [self-hosted, ci]
+    environment: ${{ inputs.environment }}
+
+    needs: [build-permissions, pull-deployed-lambdas]
+
+    steps:
+      - name: Git clone - ${{ github.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Restore pulled lambda artifacts
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ github.run_id }}-pulled-lambda-artifacts
+          path: ./dist
+          fail-on-cache-miss: true
+
       - name: Restore NRLF permissions cache
         uses: actions/cache/restore@v4
         with:
           key: ${{ github.run_id }}-nrlf-permissions
           path: dist/nrlf_permissions.zip
           fail-on-cache-miss: true
+
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id }}
+
+      - name: Terraform Init
+        run: |
+          terraform -chdir=terraform/infrastructure init
+          terraform -chdir=terraform/infrastructure workspace new ${{ inputs.stack_name }} || \
+              terraform -chdir=terraform/infrastructure workspace select ${{ inputs.stack_name }}
+
+      - name: Terraform Plan
+        run: |
+          terraform -chdir=terraform/infrastructure plan \
+              --var-file=etc/${{ vars.ACCOUNT_NAME }}.tfvars \
+              --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} \
+              --var use_shared_resources=$(poetry run python scripts/are_resources_shared_for_stack.py ${{ inputs.stack_name }}) \
+              --out tfplan
+
+      - name: Save Terraform Plan
+        run: |
+          terraform -chdir=terraform/infrastructure show -no-color tfplan > terraform/infrastructure/tfplan.txt
+          aws s3 cp terraform/infrastructure/tfplan s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan
+          aws s3 cp terraform/infrastructure/tfplan.txt s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan.txt
+
+  terraform-apply:
+    name: Apply permissions to ${{ inputs.environment }}
+    runs-on: [self-hosted, ci]
+    environment: ${{ inputs.environment }}
+
+    needs: terraform-plan
+
+    steps:
+      - name: Git clone - ${{ github.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Restore pulled lambda artifacts
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ github.run_id }}-pulled-lambda-artifacts
+          path: ./dist
+          fail-on-cache-miss: true
+
+      - name: Restore NRLF permissions cache
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ github.run_id }}-nrlf-permissions
+          path: dist/nrlf_permissions.zip
+          fail-on-cache-miss: true
+
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id }}
+
+      - name: Download Terraform Plan artifact
+        run: aws s3 cp s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan terraform/infrastructure/tfplan
 
       - name: Terraform Init
         run: |
@@ -101,7 +209,4 @@ jobs:
 
       - name: Terraform Apply
         run: |
-          terraform -chdir=terraform/infrastructure apply -auto-approve \
-              --var-file=etc/${{ vars.ACCOUNT_NAME }}.tfvars \
-              --var assume_role_arn=${{ secrets.DEPLOY_ROLE_ARN }} \
-              --var use_shared_resources=$(poetry run python scripts/are_resources_shared_for_stack.py ${{ inputs.stack_name }}) \
+          terraform -chdir=terraform/infrastructure apply tfplan
