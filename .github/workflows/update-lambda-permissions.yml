@@ -25,10 +25,66 @@ permissions:
   actions: write
 
 jobs:
+  check-versions:
+    name: Check versions
+    runs-on: [self-hosted, ci]
+
+    steps:
+      - name: Git clone - ${{ github.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Setup asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3.0.2
+
+      - name: Install zip
+        run: sudo apt-get install zip
+
+      - name: Setup Python environment
+        run: |
+          poetry install --no-root
+          source $(poetry env info --path)/bin/activate
+
+      - name: Configure Management Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.MGMT_ROLE_ARN }}
+          role-session-name: github-actions-ci-${{ inputs.environment }}-${{ github.run_id }}
+
+      - name: Terraform Init
+        run: |
+          terraform -chdir=terraform/infrastructure init
+          terraform -chdir=terraform/infrastructure workspace new ${{ inputs.stack_name }} || \
+              terraform -chdir=terraform/infrastructure workspace select ${{ inputs.stack_name }}
+
+      - name: Check deployed version matches build version
+        run: |
+          this_version="$(./scripts/get-current-info.sh) | jq -r .version)"
+          deployed_version="$(terraform -chdir=terraform/infrastructure output --raw version)"
+
+          if [ "${deployed_version}" != "${this_version}" ]; then
+            echo "Deployed version is ${deployed_version}, not ${this_version}"
+            exit 1
+          fi
+
+          echo "Deployed version matches this version: ${deployed_version}"
+
   build-permissions:
     name: Build permissions for ${{ inputs.environment }}
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
+
+    needs: [check-versions]
 
     steps:
       - name: Git clone - ${{ github.ref }}
@@ -74,9 +130,11 @@ jobs:
           path: dist/nrlf_permissions.zip
 
   pull-deployed-lambdas:
-    name: Pull deployed lambdas for ${{ inputs.environment }}
+    name: Pull deployed lambdas from ${{ inputs.stack_name }}
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
+
+    needs: [check-versions]
 
     steps:
       - name: Git clone - ${{ github.ref }}
@@ -111,7 +169,7 @@ jobs:
           path: dist/*.zip
 
   terraform-plan:
-    name: Plan changes to ${{ inputs.environment }}
+    name: Plan changes to ${{ inputs.stack_name }} for ${{ inputs.environment }}
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
 
@@ -165,7 +223,7 @@ jobs:
           aws s3 cp terraform/infrastructure/tfplan.txt s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan.txt
 
   terraform-apply:
-    name: Apply permissions to ${{ inputs.environment }}
+    name: Apply permissions to ${{ inputs.stack_name }} for ${{ inputs.environment }}
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
 
