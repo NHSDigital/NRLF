@@ -10,6 +10,8 @@ import { check } from "k6";
 function getHeaders(odsCode = ODS_CODE) {
   return {
     "Content-Type": "application/fhir+json",
+    "X-Request-Id": "K6PerformanceTest",
+    "NHSD-Correlation-Id": "K6PerformanceTest",
     "NHSD-Connection-Metadata": JSON.stringify({
       "nrl.ods-code": odsCode,
       "nrl.pointer-types": POINTER_TYPES.map(
@@ -22,6 +24,13 @@ function getHeaders(odsCode = ODS_CODE) {
       "developer.app.id": "K6PerformanceTest",
     }),
   };
+}
+
+function checkResponse(res) {
+  const is_success = check(res, { "status is 200": (r) => r.status === 200 });
+  if (!is_success) {
+    console.warn(res.json());
+  }
 }
 
 export function countDocumentReference() {
@@ -37,8 +46,7 @@ export function countDocumentReference() {
       headers: getHeaders(),
     }
   );
-
-  check(res, { "status is 200": (r) => r.status === 200 });
+  checkResponse(res);
 }
 
 export function readDocumentReference() {
@@ -52,7 +60,7 @@ export function readDocumentReference() {
     }
   );
 
-  check(res, { "status is 200": (r) => r.status === 200 });
+  checkResponse(res);
 }
 
 export function searchDocumentReference() {
@@ -71,12 +79,7 @@ export function searchDocumentReference() {
       headers: getHeaders(),
     }
   );
-
-  if (res.status !== 200) {
-    console.log(res.json());
-  }
-
-  check(res, { "status is 200": (r) => r.status === 200 });
+  checkResponse(res);
 }
 
 export function searchPostDocumentReference() {
@@ -96,6 +99,5 @@ export function searchPostDocumentReference() {
       headers: getHeaders(),
     }
   );
-
-  check(res, { "status is 200": (r) => r.status === 200 });
+  checkResponse(res);
 }

@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import ValidationError
 
 from nrlf.core.codes import SpineErrorConcept
-from nrlf.core.constants import CATEGORIES, REQUIRED_CREATE_FIELDS
+from nrlf.core.constants import CATEGORY_ATTRIBUTES, REQUIRED_CREATE_FIELDS
 from nrlf.core.errors import ParseError
 from nrlf.core.logger import LogReference, logger
 from nrlf.core.types import DocumentReference, OperationOutcomeIssue, RequestQueryType
@@ -370,7 +370,8 @@ class DocumentReferenceValidator:
             )
             return
 
-        if coding.code not in CATEGORIES.keys():
+        category_id = f"http://snomed.info/sct|{coding.code}"
+        if category_id not in CATEGORY_ATTRIBUTES.keys():
             self.result.add_error(
                 issue_code="value",
                 error_code="INVALID_RESOURCE",
@@ -379,11 +380,12 @@ class DocumentReferenceValidator:
             )
             return
 
-        if coding.display != CATEGORIES.get(coding.code):
+        category_attributes = CATEGORY_ATTRIBUTES.get(category_id, {})
+        if coding.display != category_attributes.get("display"):
             self.result.add_error(
                 issue_code="value",
                 error_code="INVALID_RESOURCE",
-                diagnostics=f"category code '{coding.code}' must have a display value of '{CATEGORIES.get(coding.code)}'",
+                diagnostics=f"category code '{coding.code}' must have a display value of '{category_attributes.get('display')}'",
                 field=f"category[0].coding[{0}].display",
             )
 

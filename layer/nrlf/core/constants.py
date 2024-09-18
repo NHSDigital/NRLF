@@ -9,7 +9,6 @@ class Source(Enum):
 VALID_SOURCES = frozenset(item.value for item in Source.__members__.values())
 EMPTY_VALUES = ("", None, [], {})
 REQUIRED_CREATE_FIELDS = ["custodian", "id", "type", "status", "subject", "category"]
-CATEGORIES = {"734163000": "Care plan", "1102421000000108": "Observations"}
 JSON_TYPES = {dict, list}
 NHS_NUMBER_INDEX = "idx_nhs_number_by_id"
 ID_SEPARATOR = "-"
@@ -54,10 +53,15 @@ class PointerTypes(Enum):
     LLOYD_GEORGE_FOLDER = "http://snomed.info/sct|16521000000101"
     ADVANCED_CARE_PLAN = "http://snomed.info/sct|736366004"
     TREATMENT_ESCALATION_PLAN = "http://snomed.info/sct|735324008"
+    SUMMARY_RECORD = "http://snomed.info/sct|824321000000109"
+    PERSONALISED_CARE_AND_SUPPORT_PLAN = "http://snomed.info/sct|2181441000000107"
 
     @staticmethod
     def list():
         return list(map(lambda type: type.value, PointerTypes))
+
+    def coding_system(self):
+        return self.value.split(TYPE_SEPARATOR)[0]
 
     def coding_value(self):
         return self.value.split(TYPE_SEPARATOR)[1]
@@ -66,12 +70,34 @@ class PointerTypes(Enum):
 class Categories(Enum):
     CARE_PLAN = "http://snomed.info/sct|734163000"
     OBSERVATIONS = "http://snomed.info/sct|1102421000000108"
+    CLINICAL_NOTE = "http://snomed.info/sct|823651000000106"
+
+    @staticmethod
+    def list():
+        return list(map(lambda category: category.value, Categories))
+
+    def coding_system(self):
+        return self.value.split(TYPE_SEPARATOR)[0]
 
     def coding_value(self):
         return self.value.split(TYPE_SEPARATOR)[1]
 
 
+CATEGORY_ATTRIBUTES = {
+    Categories.CARE_PLAN.value: {
+        "display": "Care plan",
+    },
+    Categories.OBSERVATIONS.value: {
+        "display": "Observations",
+    },
+    Categories.CLINICAL_NOTE.value: {
+        "display": "Clinical note",
+    },
+}
+
 TYPE_CATEGORIES = {
+    #
+    # Care plans
     PointerTypes.MENTAL_HEALTH_PLAN.value: Categories.CARE_PLAN.value,
     PointerTypes.EMERGENCY_HEALTHCARE_PLAN.value: Categories.CARE_PLAN.value,
     PointerTypes.EOL_COORDINATION_SUMMARY.value: Categories.CARE_PLAN.value,
@@ -79,9 +105,15 @@ TYPE_CATEGORIES = {
     PointerTypes.CONTINGENCY_PLAN.value: Categories.CARE_PLAN.value,
     PointerTypes.EOL_CARE_PLAN.value: Categories.CARE_PLAN.value,
     PointerTypes.LLOYD_GEORGE_FOLDER.value: Categories.CARE_PLAN.value,
-    PointerTypes.NEWS2_CHART.value: Categories.OBSERVATIONS.value,
     PointerTypes.ADVANCED_CARE_PLAN.value: Categories.CARE_PLAN.value,
     PointerTypes.TREATMENT_ESCALATION_PLAN.value: Categories.CARE_PLAN.value,
+    PointerTypes.PERSONALISED_CARE_AND_SUPPORT_PLAN.value: Categories.CARE_PLAN.value,
+    #
+    # Observations
+    PointerTypes.NEWS2_CHART.value: Categories.OBSERVATIONS.value,
+    #
+    # Clinical notes
+    PointerTypes.SUMMARY_RECORD.value: Categories.CLINICAL_NOTE.value,
 }
 
 

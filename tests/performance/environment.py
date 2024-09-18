@@ -30,6 +30,8 @@ POINTER_TYPES = {
     "887701000000100": "Emergency Health Care Plans",
     "736366004": "Advanced Care Plan",
     "735324008": "Treatment Escalation Plan",
+    "824321000000109": "Summary Record",
+    "2181441000000107": "Personalised Care and Support Plan",
 }
 
 

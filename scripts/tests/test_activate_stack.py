@@ -3,7 +3,7 @@ import os
 
 import pytest
 
-from scripts.activate_stack import activate_stack
+from scripts.activate_stack import _parse_env_config, activate_stack
 
 
 @pytest.fixture
@@ -68,7 +68,9 @@ def _create_mock_env_config():
     return {
         "lock-state": "open",
         "active-stack": "test-stack-1",
+        "active-version": "v1",
         "inactive-stack": "test-stack-2",
+        "inactive-version": "v2",
         "domain-name": "test.domain.name",
     }
 
@@ -88,16 +90,17 @@ def test_happy_path(mock_boto_session, mock_secretsmanager):
     expected_env_config = {
         **mock_env_config,
         "active-stack": "test-stack-2",
+        "active-version": "v2",
         "inactive-stack": "test-stack-1",
+        "inactive-version": "v1",
     }
     assert result["SecretString"] == json.dumps(expected_env_config)
 
 
 def test_lock_state_not_open(mock_boto_session, mock_secretsmanager):
     inital_env_config = {
+        **_create_mock_env_config(),
         "lock-state": "locked",
-        "inactive-stack": "test-stack-1",
-        "active-stack": "test-stack-2",
     }
     mock_secretsmanager.create_secret(
         Name="nhsd-nrlf--locked--env-config", SecretString=json.dumps(inital_env_config)
@@ -115,7 +118,7 @@ def test_lock_state_not_open(mock_boto_session, mock_secretsmanager):
 
 def test_stack_already_active(mock_boto_session, mock_secretsmanager):
     intial_env_config = {
-        "lock-state": "open",
+        **_create_mock_env_config(),
         "inactive-stack": "test-stack-1",
         "active-stack": "test-stack-2",
     }
@@ -132,3 +135,31 @@ def test_stack_already_active(mock_boto_session, mock_secretsmanager):
         SecretId="nhsd-nrlf--already-active--env-config"  # pragma: allowlist secret
     )
     assert result["SecretString"] == json.dumps(intial_env_config)
+
+
+def test_parse_env_config_valid():
+    valid_config = json.dumps(_create_mock_env_config())
+    result = _parse_env_config(valid_config)
+    assert result == _create_mock_env_config()
+
+
+def test_parse_env_config_empty():
+    with pytest.raises(ValueError):
+        _parse_env_config("")
+
+
+def test_parse_env_config_invalid_json():
+    with pytest.raises(ValueError):
+        _parse_env_config("this is not JSON!")
+
+
+def test_parse_env_config_missing_params():
+    with pytest.raises(ValueError):
+        _parse_env_config(json.dumps({"lock-state": "open"}))
+
+
+def test_parse_env_config_invalid_lock_state():
+    with pytest.raises(ValueError):
+        _parse_env_config(
+            json.dumps({**_create_mock_env_config(), "lock-state": "invalid"})
+        )
