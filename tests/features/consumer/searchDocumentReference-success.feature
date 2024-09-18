@@ -144,7 +144,6 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
       | author      | 02V                                   |
     And the Bundle does not contain a DocumentReference with ID '02V-1111111111-SearchMultipleRefTest3'
 
-  @custom_tag
   Scenario: Search for a DocumentReference by NHS Number where 0 pointers are found
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
     And the organisation 'DK94' is authorised to access pointer types:
