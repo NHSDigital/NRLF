@@ -36,7 +36,6 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
       | custodian   | 02V                             |
       | author      | 02V                             |
 
-  @custom_tag
   Scenario: Search for a DocumentReference by NHS Number and Custodian
     Given the application 'DataShare' (ID 'z00z-y11y-x22x') is registered to access the API
     And the organisation 'RX898' is authorised to access pointer types:
