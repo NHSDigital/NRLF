@@ -1,0 +1,75 @@
+{
+  "resourceType": "ValueSet",
+  "id": "NRLF-RecordType",
+  "url": "https://fhir.nhs.uk/England/CodeSystem/England-NRLRecordType",
+  "version": "1.1.1",
+  "name": "NRLF Record Type",
+  "status": "draft",
+  "date": "2024-09-18T00:00:00+00:00",
+  "publisher": "NHS Digital",
+  "contact": {
+    "name": "NRL Team at NHS Digital",
+    "telecom": {
+      "system": "email",
+      "value": "nrls@nhs.net",
+      "use": "work"
+    }
+  },
+  "description": "A code from the SNOMED Clinical Terminology UK coding system to represent the NRL clinical record type.",
+  "copyright": "Copyright 2024 NHS Digital. This value set includes content from SNOMED CT, which is copyright 2002+ International Health Terminology Standards Development Organisation (IHTSDO), and distributed by agreement between IHTSDO and HL7. Implementer use of SNOMED CT is not covered by this agreement.",
+  "compose": {
+    "include": {
+      "system": "http://snomed.info/sct",
+      "concept": [
+        {
+          "code": "736253002",
+          "display": "Mental health crisis plan"
+        },
+        {
+          "code": "887701000000100",
+          "display": "Emergency health care plan"
+        },
+        {
+          "code": "861421000000109",
+          "display": "End of life care coordination summary"
+        },
+        {
+          "code": "1382601000000107",
+          "display": "ReSPECT (Recommended Summary Plan for Emergency Care and Treatment) form"
+        },
+        {
+          "code": "1363501000000100",
+          "display": "Royal College of Physicians NEWS2 (National Early Warning Score 2) chart"
+        },
+        {
+          "code": "325691000000100",
+          "display": "Contingency plan"
+        },
+        {
+          "code": "736373009",
+          "display": "End of life care plan"
+        },
+        {
+          "code": "16521000000101",
+          "display": "Lloyd George record folder"
+        },
+        {
+          "code": "736366004",
+          "display": "Advanced care plan"
+        },
+        {
+          "code": "735324008",
+          "display": "Treatment escalation plan"
+        },
+        {
+          "code": "824321000000109",
+          "display": "Summary record"
+        },
+        {
+          "code": "2181441000000107",
+          "display": "Personalised Care and Support Plan"
+        }
+      ]
+    }
+  }
+}
