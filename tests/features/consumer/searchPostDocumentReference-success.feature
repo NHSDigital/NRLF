@@ -214,7 +214,3 @@ Feature: Consumer - searchDocumentReference - Success Scenarios
       | custodian   | X26                                   |
       | author      | X26                                   |
     And the Bundle does not contain a DocumentReference with ID 'X26-1111111111-SearchMultipleRefTestDifferentType'
-
-# No pointers found
-# Pointers exist but no permissions - done in failure scenarios
-# Search by custodian - done
