@@ -80,7 +80,7 @@ jobs:
           echo "Deployed version matches this version: ${deployed_version}"
 
   build-permissions:
-    name: Build permissions for ${{ inputs.environment }}
+    name: Build permissions
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
 
@@ -130,7 +130,7 @@ jobs:
           path: dist/nrlf_permissions.zip
 
   pull-deployed-lambdas:
-    name: Pull deployed lambdas from ${{ inputs.stack_name }}
+    name: Pull deployed lambdas
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
 
@@ -169,7 +169,7 @@ jobs:
           path: dist/*.zip
 
   terraform-plan:
-    name: Plan changes to ${{ inputs.stack_name }} for ${{ inputs.environment }}
+    name: Plan changes
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
 
@@ -242,7 +242,7 @@ jobs:
           aws s3 cp terraform/infrastructure/tfplan.txt s3://nhsd-nrlf--mgmt--github-ci-logging/${{ inputs.environment }}/${{ github.run_id }}/tfplan.txt
 
   terraform-apply:
-    name: Apply permissions to ${{ inputs.stack_name }} for ${{ inputs.environment }}
+    name: Apply permissions
     runs-on: [self-hosted, ci]
     environment: ${{ inputs.environment }}
 
@@ -258,7 +258,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           key: ${{ github.run_id }}-pulled-lambda-artifacts
-          path: ./dist
+          path: dist/*.zip
           fail-on-cache-miss: true
 
       - name: Restore NRLF permissions cache
