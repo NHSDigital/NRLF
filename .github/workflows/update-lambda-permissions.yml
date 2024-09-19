@@ -11,13 +11,19 @@ on:
         type: environment
 
       stack_name:
-        description: Name of stack to apply permissions to
+        description: Stack to update
         required: true
         type: string
 
       branch_name:
         description: Branch to deploy
         required: true
+
+      strict_versioning:
+        description: Use strict versioning (recommended)
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   id-token: write
@@ -72,12 +78,17 @@ jobs:
           this_version="$(./scripts/get-current-info.sh | jq -r .version)"
           deployed_version="$(terraform -chdir=terraform/infrastructure output --raw version)"
 
-          if [ "${deployed_version}" != "${this_version}" ]; then
-            echo "Deployed version is ${deployed_version}, not ${this_version}"
-            #exit 1
-          fi
+          echo "code-version=${this_version} deployed-version=${deployed_version}"
 
-          echo "Deployed version matches this version: ${deployed_version}"
+          if [ "${deployed_version}" != "${this_version}" ]
+          then
+            echo "${this_version} does not match deployed version: ${deployed_version}" 1>&2
+
+            if [ "${{ inputs.strict_versioning }}" == "true" ]; then
+              echo "Strict version checking failed, cancelling workflow" 1>&2
+              exit 1
+            fi
+          fi
 
   build-permissions:
     name: Build permissions
