@@ -69,7 +69,7 @@ jobs:
 
       - name: Check deployed version matches build version
         run: |
-          this_version="$(./scripts/get-current-info.sh) | jq -r .version)"
+          this_version="$(./scripts/get-current-info.sh | jq -r .version)"
           deployed_version="$(terraform -chdir=terraform/infrastructure output --raw version)"
 
           if [ "${deployed_version}" != "${this_version}" ]; then
