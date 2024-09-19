@@ -185,7 +185,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           key: ${{ github.run_id }}-pulled-lambda-artifacts
-          path: ./dist
+          path: dist/*.zip
           fail-on-cache-miss: true
 
       - name: Restore NRLF permissions cache
