@@ -38,6 +38,6 @@ data "aws_iam_policy" "pointers-kms-read-write" {
 data "external" "current-info" {
   program = [
     "bash",
-    "../../scripts/get_current_info.sh",
+    "../../scripts/get-current-info.sh",
   ]
 }
