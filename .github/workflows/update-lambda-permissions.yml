@@ -1,5 +1,5 @@
 name: Update Lambda Permissions
-run-name: Updating permissions on ${{ inputs.stack_name }} using ${{ inputs.branch_name }} by ${{ github.actor }}
+run-name: Updating permissions on ${{ inputs.stack_name }} using ${{ github.ref }} by ${{ github.actor }}
 
 on:
   workflow_dispatch:
@@ -14,10 +14,6 @@ on:
         description: Stack to update
         required: true
         type: string
-
-      branch_name:
-        description: Branch to deploy
-        required: true
 
       strict_versioning:
         description: Use strict versioning (recommended)
