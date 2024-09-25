@@ -46,3 +46,7 @@ output "certificate_domain_name" {
 output "auth_store" {
   value = local.auth_store_id
 }
+
+output "version" {
+  value = data.external.current-info.result.version
+}

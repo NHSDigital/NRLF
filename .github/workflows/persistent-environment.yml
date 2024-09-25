@@ -234,8 +234,7 @@ jobs:
 
       - name: Update environment config version
         run: |
-          short_commit_ref="$(echo ${{ github.sha }} | cut -c1-8)"
-          deployed_version="${{ inputs.branch_name }}@${short_commit_ref}"
+          deployed_version=$(terraform -chdir=terraform/infrastructure output --raw version)
           poetry run python ./scripts/set_env_config.py inactive-version ${deployed_version} ${{ inputs.environment }}
 
       - name: Smoke Test

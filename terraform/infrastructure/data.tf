@@ -34,3 +34,10 @@ data "aws_iam_policy" "pointers-kms-read-write" {
   count = var.use_shared_resources ? 1 : 0
   name  = "${local.shared_prefix}-pointers-kms-read-write"
 }
+
+data "external" "current-info" {
+  program = [
+    "bash",
+    "../../scripts/get-current-info.sh",
+  ]
+}
