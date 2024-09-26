@@ -6,7 +6,7 @@
       "Principal": {
         "AWS": "arn:aws:iam::REPLACEME:root"
       },
-      "Action": "sts:AssumeRole",
+      "Action": ["sts:AssumeRole", "sts:TagSession"],
       "Condition": {}
     }
   ]
