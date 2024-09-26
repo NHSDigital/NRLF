@@ -213,6 +213,13 @@ class DocumentPointer(DynamoDBModel):
         Validate the id of the DocumentPointer
         The id should be in the format <producer_id|producer_suffix>-<document_id>
         """
+        # special case for REF, pointer IDs would not be this long otherwise. It is because
+        # ref uses long ODS codes combined with the long legacy pointer IDs. So we basically
+        # truncate the ODS code at the start of the ID
+        if len(id_) > 64:
+            id_parts = id_.split("-", 1)
+            return f"{id_parts[0][:63-len(id_parts[1])]}-{id_parts[1]}"
+
         if not re.match(
             r"^(?=.{1,64}$)[A-Za-z0-9|\\.]+-[A-Za-z0-9]+[A-Za-z0-9\\_\\-]*$", id_
         ):

@@ -271,6 +271,27 @@ def test_validate_id(id_):
 
 
 @pytest.mark.parametrize(
+    ("id_", "result_id"),
+    [
+        (
+            "240125430100-ecee356b-d0b4-11ee-882e-06cf7080687e-58553343544334485356",
+            "240125-ecee356b-d0b4-11ee-882e-06cf7080687e-58553343544334485356",
+        ),  # higher length
+        (
+            "240125-ecee356b-d0b4-11ee-882e-06cf7080687e-58553343544334485356",
+            "240125-ecee356b-d0b4-11ee-882e-06cf7080687e-58553343544334485356",
+        ),  # exact length
+        (
+            "240-ecee356b-d0b4-11ee-882e-06cf7080687e-58553343544334485356",
+            "240-ecee356b-d0b4-11ee-882e-06cf7080687e-58553343544334485356",
+        ),  # lower length
+    ],
+)
+def test_validate_ref_id(id_, result_id):
+    assert DocumentPointer.validate_id(id_) == result_id
+
+
+@pytest.mark.parametrize(
     "id_",
     [
         "-X26-999999-999999-99999999",
