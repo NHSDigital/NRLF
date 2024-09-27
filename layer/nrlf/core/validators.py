@@ -177,6 +177,9 @@ class DocumentReferenceValidator:
     def _validate_identifiers(self, model: DocumentReference):
         """ """
         logger.log(LogReference.VALIDATOR001, step="identifiers")
+        if len(model.id) > 64:
+            id_parts = model.id.split("-", 1)
+            model.id = f"{id_parts[0][:63-len(id_parts[1])]}-{id_parts[1]}"
 
         if not (custodian_identifier := getattr(model.custodian, "identifier", None)):
             self.result.add_error(
