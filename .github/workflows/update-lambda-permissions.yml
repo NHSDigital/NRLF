@@ -1,5 +1,5 @@
 name: Update Lambda Permissions
-run-name: Updating permissions on ${{ inputs.stack_name }} using ${{ github.ref }} by ${{ github.actor }}
+run-name: Updating permissions on ${{ inputs.stack_name }} using ${{ github.ref_name }} by ${{ github.actor }}
 
 on:
   workflow_dispatch:
