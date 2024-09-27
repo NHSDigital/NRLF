@@ -138,6 +138,10 @@ class DocumentPointer(DynamoDBModel):
             created_on=created_on or create_fhir_instant(),
         )
 
+        # Exception for ref with very long custodians
+        if len(custodian) > 6:
+            core_model.producer_id = custodian
+
         logger.log(
             LogReference.DOCPOINTER005,
             producer_id=core_model.producer_id,
