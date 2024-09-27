@@ -3,7 +3,7 @@
 set -o errexit -o nounset -o pipefail
 
 BRANCH_NAME="$(git rev-parse --abbrev-ref HEAD)"
-TAG_NAME="$(git describe --tags)"
+TAG_NAME="$(git describe --tags || echo "no-tags")"
 SHORT_COMMIT_HASH="$(git rev-parse --short=8 HEAD)"
 
 if [ "${BRANCH_NAME}" == "HEAD" ]; then
