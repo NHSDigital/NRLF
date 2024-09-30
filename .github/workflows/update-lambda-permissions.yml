@@ -47,6 +47,8 @@ jobs:
 
       - name: Install asdf
         uses: asdf-vm/actions/install@v3.0.2
+        with:
+          asdf_branch: v0.13.1
 
       - name: Install zip
         run: sudo apt-get install zip
@@ -109,6 +111,8 @@ jobs:
 
       - name: Install asdf
         uses: asdf-vm/actions/install@v3.0.2
+        with:
+          asdf_branch: v0.13.1
 
       - name: Install zip
         run: sudo apt-get install zip
@@ -198,6 +202,8 @@ jobs:
 
       - name: Install asdf
         uses: asdf-vm/actions/install@v3.0.2
+        with:
+          asdf_branch: v0.13.1
 
       - name: Install zip
         run: sudo apt-get install zip
