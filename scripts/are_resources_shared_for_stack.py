@@ -22,8 +22,12 @@ persistent_environments = [
 ]
 
 
-def main(stack_name: str):
-    return "true" if stack_name in persistent_environments else "false"
+def uses_shared_resources(stack_name: str) -> bool:
+    return stack_name in persistent_environments
+
+
+def main(stack_name) -> str:
+    return "true" if uses_shared_resources(stack_name) else "false"
 
 
 if __name__ == "__main__":

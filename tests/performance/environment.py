@@ -10,6 +10,7 @@ from nhs_number import generate
 from nrlf.core.dynamodb.repository import DocumentPointer
 from nrlf.core.logger import logger
 from nrlf.tests.data import load_document_reference
+from scripts.are_resources_shared_for_stack import uses_shared_resources
 
 logger.setLevel("ERROR")
 
@@ -56,20 +57,31 @@ def _generate_records(patient_count: int, documents_per_type: int, ods_code: str
                 yield _generate_record(nhs_number, pointer_type, ods_code)
 
 
+def _get_pointers_table_name(stack_name: str):
+    if uses_shared_resources(stack_name):
+        env = stack_name.split("-")[0]
+        pointers_table_name = f"nhsd-nrlf--{env}-pointers-table"
+    else:
+        pointers_table_name = f"nhsd-nrlf--{stack_name}-pointers-table"
+    return pointers_table_name
+
+
 def setup(
-    env: str,
+    stack_name: str,
     patient_count: int = 100,
     documents_per_type: int = 10,
     ods_code: str = "Y05868",
     out: str = "tests/performance/reference-data.json",
     output_full_pointers: bool = False,
 ):
-    print(f"Creating Test Data in environment '{env}'")
+    pointers_table_name = _get_pointers_table_name(stack_name)
+
+    print(f"Creating Test Data for stack '{stack_name}' in '{pointers_table_name}'")
 
     print(f"Patient Count: {patient_count}")
     print(f"Documents Per Type: {documents_per_type}")
 
-    table = DYNAMODB.Table(f"nhsd-nrlf--{env}-pointers-table")
+    table = DYNAMODB.Table(pointers_table_name)
     documents = {}
     nhs_numbers = set()
 
@@ -95,7 +107,7 @@ def setup(
     print(f"Output written to {output_path}")
 
 
-def cleanup(env: str, input: str = "tests/performance/reference-data.json"):
+def cleanup(stack_name: str, input: str = "tests/performance/reference-data.json"):
     input_path = pathlib.Path(input)
     data = json.loads(input_path.read_text())
 
@@ -104,8 +116,12 @@ def cleanup(env: str, input: str = "tests/performance/reference-data.json"):
     else:
         pointer_ids = data["pointer_ids"]
 
-    print(f"Cleaning up {len(pointer_ids)} document pointers in environment '{env}'")
-    table = DYNAMODB.Table(f"nhsd-nrlf--{env}-pointers-table")
+    pointers_table_name = _get_pointers_table_name(stack_name)
+
+    print(
+        f"Cleaning up {len(pointer_ids)} document pointers for stack '{stack_name}' in '{pointers_table_name}'"
+    )
+    table = DYNAMODB.Table(pointers_table_name)
     with table.batch_writer() as batch:
         for id in pointer_ids:
             ods_code, document_id = id.split("-", maxsplit=1)
