@@ -126,7 +126,7 @@ test-smoke-public: check-warn ## Run the smoke tests for the external access poi
 
 test-performance-prepare:
 	mkdir -p $(DIST_PATH)
-	poetry run python tests/performance/environment.py setup $(TF_WORKSPACE_NAME)
+	PYTHONPATH=. poetry run python tests/performance/environment.py setup $(TF_WORKSPACE_NAME)
 
 test-performance: check-warn test-performance-baseline test-performance-stress ## Run the performance tests
 
@@ -148,7 +148,7 @@ test-performance-output: ## Process outputs from the performance tests
 	poetry run python tests/performance/process_results.py stress $(DIST_PATH)/consumer-stress.csv
 
 test-performance-cleanup:
-	poetry run python tests/performance/environment.py cleanup $(TF_WORKSPACE_NAME)
+	PYTHONPATH=. poetry run python tests/performance/environment.py cleanup $(TF_WORKSPACE_NAME)
 
 lint: check-warn ## Lint the project
 	SKIP="no-commit-to-branch" pre-commit run --all-files
