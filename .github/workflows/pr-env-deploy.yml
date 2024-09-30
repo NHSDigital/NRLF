@@ -60,6 +60,8 @@ jobs:
 
       - name: Install asdf
         uses: asdf-vm/actions/install@v3.0.2
+        with:
+          asdf_branch: v0.13.1
 
       - name: Install zip
         run: sudo apt-get install zip
@@ -137,6 +139,8 @@ jobs:
 
       - name: Install asdf
         uses: asdf-vm/actions/install@v3.0.2
+        with:
+          asdf_branch: v0.13.1
 
       - name: Configure Management Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -233,6 +237,8 @@ jobs:
 
       - name: Install asdf and tools
         uses: asdf-vm/actions/install@v3.0.2
+        with:
+          asdf_branch: v0.13.1
 
       - name: Python Dependency Install
         run: poetry install --no-root
@@ -280,6 +286,8 @@ jobs:
 
       - name: Install asdf and tools
         uses: asdf-vm/actions/install@v3.0.2
+        with:
+          asdf_branch: v0.13.1
 
       - name: Setup Python environment
         run: |
