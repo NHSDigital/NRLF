@@ -86,6 +86,14 @@ test-features-integration: check-warn ## Run the BDD feature tests in the integr
 		--define="use_shared_resources=${USE_SHARED_RESOURCES}" \
 		$(FEATURE_TEST_ARGS)
 
+integration-test-with-custom_tag:
+	@echo "Running feature tests in the integration environment ${TF_WORKSPACE_NAME}"
+	behave --define="integration_test=true" --tags=@custom_tag \
+		--define="env=$(TF_WORKSPACE_NAME)" \
+		--define="account_name=$(ENV)" \
+		--define="use_shared_resources=${USE_SHARED_RESOURCES}" \
+		$(FEATURE_TEST_ARGS)
+
 test-features-integration-report: check-warn ## Run the BDD feature tests in the integration environment and generate allure report therafter
 	@echo "Cleaning previous Allure results and reports"
 	rm -rf ./allure-results
