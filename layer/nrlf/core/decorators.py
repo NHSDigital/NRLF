@@ -153,6 +153,7 @@ def load_connection_metadata(headers: Dict[str, str], config: Config):
         pointer_types = get_pointer_types(metadata, config)
 
     metadata.pointer_types = pointer_types
+    logger.log(LogReference.HANDLER004c, pointer_types=pointer_types)
 
     return metadata
 
