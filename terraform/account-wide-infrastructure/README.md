@@ -20,6 +20,29 @@ Before deploying the NRLF account-wide infrastructure, you will need:
 - AWS accounts that have already been bootstrapped, as described in [bootstrap/README.md](../bootstrap/README.md). This is a one-time account setup step.
 - The required packages to build NRLF, see [the Setup section in README.md](../../README.md#setup).
 
+## Deploy mgmt resources
+
+To deploy resources into the mgmt account, first login to the AWS mgmt account on the CLI.
+
+Then, initialise your terraform workspace with:
+
+```shell
+cd mgmt
+terraform init && terraform workspace select mgmt
+```
+
+Once you have your workspace, you can plan your change with:
+
+```shell
+terraform plan
+```
+
+Once you're happy with your planned changes, you can apply them with:
+
+```shell
+terraform apply
+```
+
 ## Deploy account wide resources
 
 To deploy the account wide resources, first login to the AWS mgmt account on the CLI.

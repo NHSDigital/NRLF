@@ -124,16 +124,7 @@ resource "aws_route53_record" "NEW_dev_zone_delegation" {
   type = "NS"
 }
 
-// TODO-NOW - Get these QA zone changes reflected in mgmt account (w/ Tom or Kate)
-resource "aws_route53_zone" "qa_zone" {
-  name = "qa.record-locator.national.nhs.uk"
-
-  tags = {
-    Environment = terraform.workspace
-  }
-}
-
-resource "aws_route53_record" "qa_zone_delegation" {
+resource "aws_route53_record" "NEW_qa_zone_delegation" {
   zone_id = aws_route53_zone.prod_zone.zone_id
   name    = "qa.record-locator.national.nhs.uk"
   records = [
