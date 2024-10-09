@@ -137,6 +137,53 @@ def test_search_document_reference_happy_path_with_type(
 
 @mock_aws
 @mock_repository
+def test_search_document_reference_happy_path_with_nicip_type(
+    repository: DocumentPointerRepository,
+):
+    doc_ref = load_document_reference("Y05868-736253002-Valid")
+    doc_ref.type.coding[0].code = "MAULR"
+    doc_ref.type.coding[0].system = "https://nicip.nhs.uk"
+    doc_ref.type.coding[0].display = "MRA Upper Limb Rt"
+    doc_ref.category[0].coding[0].code = "721981007"
+    doc_ref.category[0].coding[0].display = "Diagnostic Studies Report"
+    doc_pointer = DocumentPointer.from_document_reference(doc_ref)
+
+    repository.create(doc_pointer)
+
+    event = create_test_api_gateway_event(
+        headers=create_headers(),
+        query_string_parameters={
+            "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|6700028191",
+            "type": "https://nicip.nhs.uk|MAULR",
+        },
+    )
+
+    result = handler(event, create_mock_context())
+    body = result.pop("body")
+
+    assert result == {
+        "statusCode": "200",
+        "headers": default_response_headers(),
+        "isBase64Encoded": False,
+    }
+
+    parsed_body = json.loads(body)
+    assert parsed_body == {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "link": [
+            {
+                "relation": "self",
+                "url": "https://pytest.api.service.nhs.uk/record-locator/consumer/FHIR/R4/DocumentReference?subject:identifier=https://fhir.nhs.uk/Id/nhs-number|6700028191&type=https://nicip.nhs.uk|MAULR",
+            }
+        ],
+        "total": 1,
+        "entry": [{"resource": doc_ref.dict(exclude_none=True)}],
+    }
+
+
+@mock_aws
+@mock_repository
 def test_search_document_reference_no_results(repository: DocumentPointerRepository):
     event = create_test_api_gateway_event(
         headers=create_headers(),
