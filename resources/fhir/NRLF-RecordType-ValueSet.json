@@ -68,6 +68,14 @@
         {
           "code": "2181441000000107",
           "display": "Personalised Care and Support Plan"
+        },
+        {
+          "code": "MAULR",
+          "display": "MRA Upper Limb Rt"
+        },
+        {
+          "code": "MAXIB",
+          "display": "MRI Axilla Both"
         }
       ]
     }

@@ -33,6 +33,14 @@
           {
             "code": "823651000000106",
             "display": "Clinical note"
+          },
+          {
+            "code": "721981007",
+            "display": "Diagnostic Studies Report"
+          },
+          {
+            "code": "103693007",
+            "display": "Diagnostic Procedure"
           }
         ]
       }
