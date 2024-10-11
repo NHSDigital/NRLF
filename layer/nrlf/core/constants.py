@@ -98,10 +98,10 @@ CATEGORY_ATTRIBUTES = {
         "display": "Clinical note",
     },
     Categories.DIAGNOSTIC_STUDIES_REPORT.value: {
-        "display": "Diagnostic Studies Report",
+        "display": "Diagnostic studies report",
     },
     Categories.DIAGNOSTIC_PROCEDURE.value: {
-        "display": "Diagnostic Procedure",
+        "display": "Diagnostic procedure",
     },
 }
 
