@@ -55,6 +55,8 @@ class PointerTypes(Enum):
     TREATMENT_ESCALATION_PLAN = "http://snomed.info/sct|735324008"
     SUMMARY_RECORD = "http://snomed.info/sct|824321000000109"
     PERSONALISED_CARE_AND_SUPPORT_PLAN = "http://snomed.info/sct|2181441000000107"
+    MRA_UPPER_LIMB_ARTERY = "https://nicip.nhs.uk|MAULR"
+    MRI_AXILLA_BOTH = "https://nicip.nhs.uk|MAXIB"
 
     @staticmethod
     def list():
@@ -71,6 +73,8 @@ class Categories(Enum):
     CARE_PLAN = "http://snomed.info/sct|734163000"
     OBSERVATIONS = "http://snomed.info/sct|1102421000000108"
     CLINICAL_NOTE = "http://snomed.info/sct|823651000000106"
+    DIAGNOSTIC_STUDIES_REPORT = "http://snomed.info/sct|721981007"
+    DIAGNOSTIC_PROCEDURE = "http://snomed.info/sct|103693007"
 
     @staticmethod
     def list():
@@ -93,6 +97,12 @@ CATEGORY_ATTRIBUTES = {
     Categories.CLINICAL_NOTE.value: {
         "display": "Clinical note",
     },
+    Categories.DIAGNOSTIC_STUDIES_REPORT.value: {
+        "display": "Diagnostic studies report",
+    },
+    Categories.DIAGNOSTIC_PROCEDURE.value: {
+        "display": "Diagnostic procedure",
+    },
 }
 
 TYPE_CATEGORIES = {
@@ -114,7 +124,11 @@ TYPE_CATEGORIES = {
     #
     # Clinical notes
     PointerTypes.SUMMARY_RECORD.value: Categories.CLINICAL_NOTE.value,
+    #
+    # Imaging
+    PointerTypes.MRA_UPPER_LIMB_ARTERY.value: Categories.DIAGNOSTIC_STUDIES_REPORT.value,
+    PointerTypes.MRI_AXILLA_BOTH.value: Categories.DIAGNOSTIC_PROCEDURE.value,
 }
 
 
-SYSTEM_SHORT_IDS = {"http://snomed.info/sct": "SCT"}
+SYSTEM_SHORT_IDS = {"http://snomed.info/sct": "SCT", "https://nicip.nhs.uk": "NICIP"}

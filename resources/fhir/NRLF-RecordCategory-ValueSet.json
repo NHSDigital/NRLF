@@ -2,10 +2,10 @@
   "resourceType": "ValueSet",
   "id": "NRLF-RecordCategory",
   "url": "https://fhir.nhs.uk/England/CodeSystem/England-NRLRecordCategory",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "name": "NRLF Record Category",
   "status": "draft",
-  "date": "2024-03-20T00:00:00+00:00",
+  "date": "2024-10-10T00:00:00+00:00",
   "publisher": "NHS Digital",
   "contact": {
     "name": "NRL Team at NHS Digital",
@@ -33,6 +33,14 @@
           {
             "code": "823651000000106",
             "display": "Clinical note"
+          },
+          {
+            "code": "721981007",
+            "display": "Diagnostic studies report"
+          },
+          {
+            "code": "103693007",
+            "display": "Diagnostic procedure"
           }
         ]
       }
