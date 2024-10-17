@@ -23,8 +23,7 @@ def _load_rows(file_path):
     with open(file_path, "r") as file:
         csv_reader = DictReader(file)
         for row in csv_reader:
-            # TODO-NOW - Fix deprecated parse_obj usage
-            yield K6OutputRow.parse_obj(row)
+            yield K6OutputRow.model_validate(row)
 
 
 def _load_k6_output(file_path: str):

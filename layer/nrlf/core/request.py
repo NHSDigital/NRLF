@@ -24,10 +24,8 @@ def parse_headers(headers: Dict[str, str]) -> ConnectionMetadata:
             case_insensitive_headers.get(CLIENT_RP_DETAILS, "{}")
         )
 
-        # TODO-NOW - Fix deprecated parse_obj usage
-        client_rp_details = ClientRpDetails.parse_obj(raw_client_rp_details)
-        # TODO-NOW - Fix deprecated parse_obj usage
-        return ConnectionMetadata.parse_obj(
+        client_rp_details = ClientRpDetails.model_validate(raw_client_rp_details)
+        return ConnectionMetadata.model_validate(
             {**raw_connection_metadata, "client_rp_details": client_rp_details}
         )
 
@@ -58,10 +56,8 @@ def parse_params(
     )
 
     try:
-        # TODO-NOW - Fix deprecated parse_obj usage
-        result = model.parse_obj(query_string_params or {})
-        # TODO-NOW - Fix deprecated dict usage
-        logger.log(LogReference.HANDLER007, parsed_params=result.dict())
+        result = model.model_validate(query_string_params or {})
+        logger.log(LogReference.HANDLER007, parsed_params=result.model_dump())
         return result
 
     except ValidationError as exc:
@@ -91,10 +87,8 @@ def parse_body(
         )
 
     try:
-        # TODO-NOW - Fix deprecated parse_raw usage
-        result = model.parse_raw(body)
-        # TODO-NOW - Fix deprecated dict usage
-        logger.log(LogReference.HANDLER009, parsed_body=result.dict())
+        result = model.model_validate_json(body)
+        logger.log(LogReference.HANDLER009, parsed_body=result.model_dump())
         return result
 
     except ValidationError as exc:
@@ -119,10 +113,8 @@ def parse_path(
     )
 
     try:
-        # TODO-NOW - Fix deprecated parse_obj usage
-        result = model.parse_obj(path_params or {})
-        # TODO-NOW - Fix deprecated dict usage
-        logger.log(LogReference.HANDLER011, parsed_path=result.dict())
+        result = model.model_validate(path_params or {})
+        logger.log(LogReference.HANDLER011, parsed_path=result.model_dump())
         return result
 
     except ValidationError as exc:

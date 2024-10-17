@@ -348,7 +348,7 @@ def assert_resource_in_location_header_exists_with_values(context: Context):
     items["id"] = resource_id
 
     assert_document_reference_matches_value(
-        context, DocumentReference.parse_raw(resource.document), items
+        context, DocumentReference.model_validate_json(resource.document), items
     )
 
 
@@ -368,7 +368,7 @@ def assert_resource_exists_with_values(context: Context, doc_ref_id: str):
     items = {row["property"]: row["value"] for row in context.table}
 
     assert_document_reference_matches_value(
-        context, DocumentReference.parse_raw(resource.document), items
+        context, DocumentReference.model_validate_json(resource.document), items
     )
 
 
@@ -379,5 +379,5 @@ def assert_resource_absent(context: Context, doc_ref_id: str):
         "Resource that should be absent is found in database by id",
         None,
         doc_ref_id,
-        DocumentReference.parse_raw(resource.document),
+        DocumentReference.model_validate_json(resource.document),
     )

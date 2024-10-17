@@ -91,12 +91,10 @@ def handler(
         pointer_types=pointer_types,
     ):
         try:
-            # TODO-NOW - Fix deprecated parse_raw usage
-            document_reference = DocumentReference.parse_raw(result.document)
+            document_reference = DocumentReference.model_validate_json(result.document)
             bundle["total"] += 1
             bundle["entry"].append(
-                # TODO-NOW - Fix deprecated dict usage
-                {"resource": document_reference.dict(exclude_none=True)}
+                {"resource": document_reference.model_dump(exclude_none=True)}
             )
             logger.log(
                 LogReference.CONSEARCH004,
@@ -116,8 +114,7 @@ def handler(
                 diagnostics="An error occurred whilst parsing the document reference search results",
             ) from exc
 
-    # TODO-NOW - Fix deprecated parse_obj
-    response = Response.from_resource(Bundle.parse_obj(bundle))
+    response = Response.from_resource(Bundle.model_validate(bundle))
     logger.log(LogReference.CONSEARCH999)
 
     return response

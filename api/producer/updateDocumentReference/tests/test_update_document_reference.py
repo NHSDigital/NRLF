@@ -31,7 +31,9 @@ def test_update_document_reference_happy_path(repository: DocumentPointerReposit
     existing_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
     assert existing_doc_pointer is not None
 
-    existing_doc_ref = DocumentReference.parse_raw(existing_doc_pointer.document)
+    existing_doc_ref = DocumentReference.model_validate_json(
+        existing_doc_pointer.document
+    )
     assert existing_doc_ref.docStatus == "final"
 
     doc_ref.docStatus = "entered-in-error"
@@ -75,7 +77,9 @@ def test_update_document_reference_happy_path(repository: DocumentPointerReposit
     updated_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
     assert updated_doc_pointer is not None
 
-    updated_doc_ref = DocumentReference.parse_raw(updated_doc_pointer.document)
+    updated_doc_ref = DocumentReference.model_validate_json(
+        updated_doc_pointer.document
+    )
     assert updated_doc_ref.docStatus == "entered-in-error"
 
     assert updated_doc_ref.meta.lastUpdated == "2024-03-21T12:34:56.789Z"
@@ -96,7 +100,9 @@ def test_update_document_reference_happy_path_with_ssp(
     existing_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
     assert existing_doc_pointer is not None
 
-    existing_doc_ref = DocumentReference.parse_raw(existing_doc_pointer.document)
+    existing_doc_ref = DocumentReference.model_validate_json(
+        existing_doc_pointer.document
+    )
     assert existing_doc_ref.docStatus == "final"
 
     doc_ref.docStatus = "entered-in-error"
@@ -140,7 +146,9 @@ def test_update_document_reference_happy_path_with_ssp(
     updated_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
     assert updated_doc_pointer is not None
 
-    updated_doc_ref = DocumentReference.parse_raw(updated_doc_pointer.document)
+    updated_doc_ref = DocumentReference.model_validate_json(
+        updated_doc_pointer.document
+    )
     assert updated_doc_ref.docStatus == "entered-in-error"
 
     assert updated_doc_ref.meta.lastUpdated == "2024-03-21T12:34:56.789Z"
@@ -681,7 +689,9 @@ def test_update_document_reference_with_meta_lastupdated_ignored(
     existing_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
     assert existing_doc_pointer is not None
 
-    existing_doc_ref = DocumentReference.parse_raw(existing_doc_pointer.document)
+    existing_doc_ref = DocumentReference.model_validate_json(
+        existing_doc_pointer.document
+    )
     assert existing_doc_ref.docStatus == "final"
 
     doc_ref.docStatus = "entered-in-error"
@@ -724,7 +734,9 @@ def test_update_document_reference_with_meta_lastupdated_ignored(
     updated_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
     assert updated_doc_pointer is not None
 
-    updated_doc_ref = DocumentReference.parse_raw(updated_doc_pointer.document)
+    updated_doc_ref = DocumentReference.model_validate_json(
+        updated_doc_pointer.document
+    )
     assert updated_doc_ref.docStatus == "entered-in-error"
 
     assert updated_doc_ref.meta.lastUpdated == "2024-03-21T12:34:56.789Z"
@@ -745,7 +757,9 @@ def test_update_document_reference_with_invalid_date_ignored(
     existing_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
     assert existing_doc_pointer is not None
 
-    existing_doc_ref = DocumentReference.parse_raw(existing_doc_pointer.document)
+    existing_doc_ref = DocumentReference.model_validate_json(
+        existing_doc_pointer.document
+    )
     assert existing_doc_ref.docStatus == "final"
 
     doc_ref.date = "2024-05-04T11:11:10.111Z"
@@ -790,7 +804,9 @@ def test_update_document_reference_with_invalid_date_ignored(
     updated_doc_pointer = repository.get_by_id("Y05868-99999-99999-999999")
     assert updated_doc_pointer is not None
 
-    updated_doc_ref = DocumentReference.parse_raw(updated_doc_pointer.document)
+    updated_doc_ref = DocumentReference.model_validate_json(
+        updated_doc_pointer.document
+    )
     assert updated_doc_ref.docStatus == "entered-in-error"
     assert updated_doc_ref.date == "2024-03-20T00:00:01.000Z"
 

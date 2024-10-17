@@ -71,8 +71,7 @@ def handler(
         pointer_types=pointer_types,
     ):
         try:
-            # TODO-NOW - Fix deprecated parse_raw usage
-            document_reference = DocumentReference.parse_raw(result.document)
+            document_reference = DocumentReference.model_validate_json(result.document)
             bundle["total"] += 1
             bundle["entry"].append(
                 {"resource": document_reference.dict(exclude_none=True)}
@@ -96,5 +95,4 @@ def handler(
             )
 
     logger.log(LogReference.PROPOSTSEARCH999)
-    # TODO-NOW - Fix deprecated parse_obj usage
-    return Response.from_resource(Bundle.parse_obj(bundle))
+    return Response.from_resource(Bundle.model_validate(bundle))

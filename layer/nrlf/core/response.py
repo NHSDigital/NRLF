@@ -24,8 +24,9 @@ class Response(BaseModel):
         status_code = kwargs.pop("statusCode", "200")
         return cls(
             statusCode=status_code,
-            # TODO-NOW - Fix deprecated json usage
-            body=resource.json(indent=2, exclude_none=True, exclude_defaults=True),
+            body=resource.model_dump_json(
+                indent=2, exclude_none=True, exclude_defaults=True
+            ),
             **kwargs,
         )
 
@@ -35,8 +36,7 @@ class Response(BaseModel):
             body=producer_model.OperationOutcome(
                 resourceType="OperationOutcome",
                 issue=issues,  # type: ignore
-                # TODO-NOW - Fix deprecated json usage
-            ).json(exclude_none=True, indent=2),
+            ).model_dump_json(exclude_none=True, indent=2),
             **kwargs,
         )
 
@@ -54,8 +54,7 @@ class Response(BaseModel):
                         details=SpineErrorConcept.from_code("INTERNAL_SERVER_ERROR"),
                     )
                 ],
-                # TODO-NOW - Fix deprecated json usage
-            ).json(exclude_none=True, indent=2),
+            ).model_dump_json(exclude_none=True, indent=2),
         )
 
 

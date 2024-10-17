@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Union
 
 from nhs_number import is_valid as is_valid_nhs_number
 from pydantic import BaseModel, Field, StrictStr
@@ -26,8 +26,7 @@ class ProducerRequestParams(producer_model.RequestParams, _NhsNumberMixin):
 
 
 class ConsumerRequestParams(consumer_model.RequestParams, _NhsNumberMixin):
-    class Config:
-        extra = Literal["forbid"]
+    model_config = {"extra": "forbid"}
 
 
 class CountRequestParams(consumer_model.CountRequestParams, _NhsNumberMixin):

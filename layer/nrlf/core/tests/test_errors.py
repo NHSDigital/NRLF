@@ -23,8 +23,7 @@ def test_operation_outcome_error():
     assert isinstance(error, Exception)
     assert error.status_code == status_code
 
-    # TODO-NOW - Fix deprecated dict usage
-    assert error.operation_outcome.dict(exclude_none=True) == {
+    assert error.operation_outcome.model_dump(exclude_none=True) == {
         "resourceType": "OperationOutcome",
         "issue": [
             {
@@ -40,11 +39,9 @@ def test_operation_outcome_error():
     response = error.response
     assert isinstance(response, Response)
 
-    # TODO-NOW - Fix deprecated dict usage
-    assert response.dict() == {
+    assert response.model_dump() == {
         "statusCode": status_code,
-        # TODO-NOW - Fix deprecated json usage
-        "body": error.operation_outcome.json(exclude_none=True, indent=2),
+        "body": error.operation_outcome.model_dump_json(exclude_none=True, indent=2),
         "headers": {},
         "isBase64Encoded": False,
     }
@@ -67,8 +64,7 @@ def test_parse_error():
     response = error.response
     assert isinstance(response, Response)
 
-    # TODO-NOW - Fix deprecated dict usage
-    assert error.response.dict() == {
+    assert error.response.model_dump() == {
         "statusCode": "400",
         "body": json.dumps(
             {
@@ -93,8 +89,7 @@ def test_parse_error_from_validation_error():
         test_field: str
 
     with pytest.raises(ValidationError) as error:
-        # TODO-NOW - Fix deprecated parse_obj usage
-        TestModel.parse_obj({})
+        TestModel.model_validate({})
 
     exc = error.value
     details = CodeableConcept(text="Invalid input")
@@ -103,8 +98,7 @@ def test_parse_error_from_validation_error():
     error = ParseError.from_validation_error(exc, details, msg)
 
     assert isinstance(error, Exception)
-    # TODO-NOW - Fix deprecated dict usage
-    assert [issue.dict(exclude_none=True) for issue in error.issues] == [
+    assert [issue.model_dump(exclude_none=True) for issue in error.issues] == [
         {
             "severity": "error",
             "code": "invalid",
@@ -117,8 +111,7 @@ def test_parse_error_from_validation_error():
     response = error.response
     assert isinstance(response, Response)
 
-    # TODO-NOW - Fix deprecated dict usage
-    assert response.dict() == {
+    assert response.model_dump() == {
         "statusCode": "400",
         "body": json.dumps(
             {
