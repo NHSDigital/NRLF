@@ -8,7 +8,6 @@ function _swagger_help() {
     echo "  help                         - this help screen"
     echo "  generate <options>           - generate all swagger and models or producer/consumer if specified"
     echo "  generate-swagger <options>   - generate all swagger or producer/consumer if specified"
-    echo "  generate-model <options>     - generate all models or producer/consumer if specified"
     echo "  merge <options>              - generates the record-locator/<type>.yml file"
     echo
 }
@@ -41,36 +40,14 @@ function _generate_from_fhir() {
     rm -rf ./tools/
 }
 
-function _generate_producer_model() {
-    if [ ! -d "./layer/nrlf/nrlf/producer/fhir/r4" ]; then
-        mkdir -p ./layer/nrlf/nrlf/producer/fhir/r4
-    fi
-
-    datamodel-codegen --input ./api/producer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/producer/fhir/r4/model.py --use-annotated --enum-field-as-literal all --use-double-quotes
-    datamodel-codegen --input ./api/producer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/producer/fhir/r4/strict_model.py --strict-types {str,bytes,int,float,bool}  --use-annotated --enum-field-as-literal all --use-double-quotes
-}
-
-function _generate_consumer_model() {
-    if [ ! -d "./layer/nrlf/nrlf/consumer/fhir/r4" ]; then
-        mkdir -p ./layer/nrlf/nrlf/consumer/fhir/r4
-    fi
-
-    datamodel-codegen --input ./api/consumer/swagger.yaml --input-file-type openapi --output ./layer/nrlf/nrlf/consumer/fhir/r4/model.py --use-annotated --enum-field-as-literal all --use-double-quotes
-}
-
 function _swagger() {
     local command=$1
     local type=$2
     case $command in
     "generate")
         if [[ -z "$type" ]]; then
-            _generate_from_fhir
-            (
-                cd scripts
-                python3 -c "import swagger_generator as sg; sg.entry()"
-            )
-            _generate_consumer_model
-            _generate_producer_model
+            echo "Type is required, must be either 'consumer' or 'producer'" 1>&2
+            exit 1
         else
             _get_generator
             if [ $type = 'consumer' ]; then
@@ -117,20 +94,6 @@ function _swagger() {
                 cd scripts
                 python3 -c "import swagger_generator as sg; sg.entry('$type')"
             )
-        fi
-        ;;
-    "generate-model")
-        if [[ -z "$type" ]]; then
-            _generate_consumer_model
-            _generate_producer_model
-        else
-            if [ $type = 'consumer' ]; then
-                _generate_consumer_model
-            elif [ $type = 'producer' ]; then
-                _generate_producer_model
-            else
-                _nrlf_commands_help && return 1
-            fi
         fi
         ;;
     "merge")
