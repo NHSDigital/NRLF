@@ -92,6 +92,7 @@ def handler(
         nhs_number=body.nhs_number, custodian=custodian_id, pointer_types=pointer_types
     ):
         try:
+            # TODO-NOW - Fix deprecated parse_raw usage
             document_reference = DocumentReference.parse_raw(result.document)
             bundle["total"] += 1
             bundle["entry"].append(
@@ -115,6 +116,7 @@ def handler(
                 diagnostics="An error occurred whilst parsing the document reference search results",
             ) from exc
 
+    # TODO-NOW - Fix deprecated parse_obj usage
     response = Response.from_resource(Bundle.parse_obj(bundle))
     logger.log(LogReference.CONPOSTSEARCH999)
 

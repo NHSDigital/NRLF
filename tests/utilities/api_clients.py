@@ -46,6 +46,7 @@ class ConsumerTestClient:
         }
 
         if self.config.client_cert:
+            # TODO-NOW - Fix deprecated dict usage
             connection_metadata = self.config.connection_metadata.dict(by_alias=True)
             client_rp_details = connection_metadata.pop("client_rp_details")
             self.request_headers.update(
@@ -159,6 +160,7 @@ class ProducerTestClient:
         }
 
         if self.config.client_cert:
+            # TODO-NOW - Fix deprecated dict usage
             connection_metadata = self.config.connection_metadata.dict(by_alias=True)
             client_rp_details = connection_metadata.pop("client_rp_details")
             self.request_headers.update(

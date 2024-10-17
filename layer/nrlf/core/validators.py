@@ -35,6 +35,7 @@ class ValidationResult:
     issues: List[OperationOutcomeIssue]
 
     def reset(self):
+        # TODO-NOW - Fix deprecated construct usage
         self.__init__(resource=producer_model.DocumentReference.construct(), issues=[])
 
     def add_error(
@@ -56,6 +57,7 @@ class ValidationResult:
             expression=[field] if field else None,  # type: ignore
         )
 
+        # TODO-NOW - Fix deprecated dict usage
         logger.log(LogReference.VALIDATOR002, issue=issue.dict(exclude_none=True))
         self.issues.append(issue)
 
@@ -76,12 +78,14 @@ class DocumentReferenceValidator:
     MODEL = producer_model.DocumentReference
 
     def __init__(self):
+        # TODO-NOW - Fix deprecated construct usage
         self.result = ValidationResult(resource=self.MODEL.construct(), issues=[])
 
     @classmethod
     def parse(cls, data: Dict[str, Any]):
         try:
             logger.log(LogReference.PARSE000, data=data, model=cls.MODEL.__name__)
+            # TODO-NOW - Fix deprecated parse_obj usage
             result = cls.MODEL.parse_obj(data)
             logger.log(LogReference.PARSE001, model=cls.MODEL.__name__)
             logger.log(LogReference.PARSE001a, result=result)
@@ -162,7 +166,9 @@ class DocumentReferenceValidator:
 
         if isinstance(data, DocumentReference):
             has_extra_fields = (
-                len(set(resource.__dict__) - set(resource.__fields__)) > 0
+                # TODO-NOW - Fix deprecated __fields__ usage
+                len(set(resource.__dict__) - set(resource.__fields__))
+                > 0
             )
         else:
             has_extra_fields = data != resource.dict(exclude_none=True)

@@ -23,6 +23,7 @@ def test_operation_outcome_error():
     assert isinstance(error, Exception)
     assert error.status_code == status_code
 
+    # TODO-NOW - Fix deprecated dict usage
     assert error.operation_outcome.dict(exclude_none=True) == {
         "resourceType": "OperationOutcome",
         "issue": [
@@ -39,8 +40,10 @@ def test_operation_outcome_error():
     response = error.response
     assert isinstance(response, Response)
 
+    # TODO-NOW - Fix deprecated dict usage
     assert response.dict() == {
         "statusCode": status_code,
+        # TODO-NOW - Fix deprecated json usage
         "body": error.operation_outcome.json(exclude_none=True, indent=2),
         "headers": {},
         "isBase64Encoded": False,
@@ -64,6 +67,7 @@ def test_parse_error():
     response = error.response
     assert isinstance(response, Response)
 
+    # TODO-NOW - Fix deprecated dict usage
     assert error.response.dict() == {
         "statusCode": "400",
         "body": json.dumps(
@@ -89,6 +93,7 @@ def test_parse_error_from_validation_error():
         test_field: str
 
     with pytest.raises(ValidationError) as error:
+        # TODO-NOW - Fix deprecated parse_obj usage
         TestModel.parse_obj({})
 
     exc = error.value
@@ -98,6 +103,7 @@ def test_parse_error_from_validation_error():
     error = ParseError.from_validation_error(exc, details, msg)
 
     assert isinstance(error, Exception)
+    # TODO-NOW - Fix deprecated dict usage
     assert [issue.dict(exclude_none=True) for issue in error.issues] == [
         {
             "severity": "error",
@@ -111,6 +117,7 @@ def test_parse_error_from_validation_error():
     response = error.response
     assert isinstance(response, Response)
 
+    # TODO-NOW - Fix deprecated dict usage
     assert response.dict() == {
         "statusCode": "400",
         "body": json.dumps(

@@ -119,8 +119,10 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
         item = result["Item"]
         try:
+            # TODO-NOW - Fix deprecated parse_obj usage
             parsed_item = self.ITEM_TYPE.parse_obj({"_from_dynamo": True, **item})
             logger.log(LogReference.REPOSITORY011)
+            # TODO-NOW - Fix deprecated dict usage
             logger.log(LogReference.REPOSITORY011a, result=parsed_item.dict())
             return parsed_item
         except ValidationError as exc:
@@ -379,6 +381,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
                 for item in page["Items"]:
                     try:
+                        # TODO-NOW - Fix deprecated parse_obj usage
                         yield self.ITEM_TYPE.parse_obj({"_from_dynamo": True, **item})
 
                     except ValidationError as exc:
@@ -412,6 +415,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         """
         try:
             result = self.table.put_item(
+                # TODO-NOW - Fix deprecated dict usage
                 Item=item.dict(),
                 ConditionExpression="attribute_exists(pk) AND attribute_exists(sk)",
                 ReturnConsumedCapacity="INDEXES",

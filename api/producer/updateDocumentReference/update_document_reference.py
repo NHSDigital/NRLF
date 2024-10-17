@@ -79,6 +79,7 @@ def handler(
         )
 
     try:
+        # TODO-NOW - Fix deprecated parse_raw usage
         existing_resource = DocumentReference.parse_raw(existing_model.document)
     except ValidationError as exc:
         logger.log(LogReference.PROUPDATE002, error=exc)

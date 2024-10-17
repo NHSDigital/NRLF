@@ -91,9 +91,11 @@ def handler(
         pointer_types=pointer_types,
     ):
         try:
+            # TODO-NOW - Fix deprecated parse_raw usage
             document_reference = DocumentReference.parse_raw(result.document)
             bundle["total"] += 1
             bundle["entry"].append(
+                # TODO-NOW - Fix deprecated dict usage
                 {"resource": document_reference.dict(exclude_none=True)}
             )
             logger.log(
@@ -114,6 +116,7 @@ def handler(
                 diagnostics="An error occurred whilst parsing the document reference search results",
             ) from exc
 
+    # TODO-NOW - Fix deprecated parse_obj
     response = Response.from_resource(Bundle.parse_obj(bundle))
     logger.log(LogReference.CONSEARCH999)
 

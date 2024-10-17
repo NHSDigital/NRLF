@@ -134,6 +134,7 @@ class DocumentPointer(DynamoDBModel):
             category_id=category_id,
             source="NRLF",
             version=1,
+            # TODO-NOW - Fix deprecated json usage
             document=resource.json(exclude_none=True),
             created_on=created_on or create_fhir_instant(),
         )
@@ -146,6 +147,7 @@ class DocumentPointer(DynamoDBModel):
         )
         return core_model
 
+    # TODO-NOW - Fix deprecated root_validator usage
     @root_validator(pre=True)
     @classmethod
     def extract_custodian_suffix(cls, values: Dict[str, Any]) -> Dict[str, Any]:
@@ -176,6 +178,7 @@ class DocumentPointer(DynamoDBModel):
 
         return values
 
+    # TODO-NOW - Fix deprecated root_validator usage
     @root_validator(pre=True)
     @classmethod
     def inject_producer_id(cls, values: Dict[str, Any]) -> Dict[str, Any]:
@@ -206,6 +209,7 @@ class DocumentPointer(DynamoDBModel):
         )
         return values
 
+    # TODO-NOW - Fix deprecated validator usage
     @validator("id")
     @classmethod
     def validate_id(cls, id_: str) -> str:
@@ -220,6 +224,7 @@ class DocumentPointer(DynamoDBModel):
 
         return id_
 
+    # TODO-NOW - Fix deprecated validator usage
     @validator("producer_id")
     @classmethod
     def validate_producer_id(cls, producer_id: str, values: Dict[str, Any]) -> str:
@@ -242,6 +247,7 @@ class DocumentPointer(DynamoDBModel):
 
         return producer_id
 
+    # TODO-NOW - Fix deprecated validator usage
     @validator("type")
     @classmethod
     def validate_type(cls, type: str) -> str:
@@ -254,6 +260,7 @@ class DocumentPointer(DynamoDBModel):
 
         return type
 
+    # TODO-NOW - Fix deprecated validator usage
     @validator("nhs_number")
     @classmethod
     def validate_nhs_number(cls, nhs_number: str) -> str:
@@ -266,6 +273,7 @@ class DocumentPointer(DynamoDBModel):
 
         return nhs_number
 
+    # TODO-NOW - Fix deprecated validator usage
     @validator("source")
     @classmethod
     def validate_source(cls, source: str) -> str:
@@ -278,6 +286,7 @@ class DocumentPointer(DynamoDBModel):
 
         return source
 
+    # TODO-NOW - Fix deprecated validator usage
     @validator("created_on")
     @classmethod
     def validate_created_on(cls, created_on: str) -> str:
@@ -294,6 +303,7 @@ class DocumentPointer(DynamoDBModel):
 
         return created_on
 
+    # TODO-NOW - Fix deprecated validator usage
     @validator("updated_on")
     @classmethod
     def validate_updated_on(cls, updated_on: Optional[str]) -> Optional[str]:

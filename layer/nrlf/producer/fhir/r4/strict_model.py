@@ -9,6 +9,8 @@ from typing_extensions import Annotated, Literal
 
 from nrlf.core.constants import PointerTypes
 
+# TODO-NOW - Does this file need to be regenerated?
+
 
 class LocationItem(BaseModel):
     __root__: Annotated[

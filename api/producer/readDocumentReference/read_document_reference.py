@@ -56,6 +56,7 @@ def handler(
         )
 
     try:
+        # TODO-NOW - Fix deprecated parse_raw usage
         document_reference = DocumentReference.parse_raw(result.document)
     except ValidationError as exc:
         logger.log(

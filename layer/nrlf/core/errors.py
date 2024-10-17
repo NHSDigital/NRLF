@@ -40,6 +40,7 @@ class OperationOutcomeError(Exception):
     def response(self) -> Response:
         return Response(
             statusCode=self.status_code,
+            # TODO-NOW - Fix deprecated json usage
             body=self.operation_outcome.json(exclude_none=True, indent=2),
         )
 
@@ -74,5 +75,6 @@ class ParseError(Exception):
             body=producer_model.OperationOutcome(
                 resourceType="OperationOutcome",
                 issue=self.issues,
+                # TODO-NOW - Fix deprecated json usage
             ).json(exclude_none=True, indent=2),
         )

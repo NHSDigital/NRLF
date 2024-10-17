@@ -42,16 +42,19 @@ def error_handler(
             return wrapped_func(*args, **kwargs)
 
         except OperationOutcomeError as exc:
+            # TODO-NOW - Fix deprecated dict usage
             response = exc.response.dict(exclude_none=True)
             logger.log(LogReference.ERROR001, error=str(exc), response=response)
             return response
 
         except ParseError as exc:
+            # TODO-NOW - Fix deprecated dict usage
             response = exc.response.dict(exclude_none=True)
             logger.log(LogReference.ERROR002, error=str(exc), response=response)
             return response
 
         except Exception as exc:
+            # TODO-NOW - Fix deprecated dict usage
             response = Response.from_exception(exc).dict(exclude_none=True)
             logger.exception(
                 "An unhandled exception occurred whilst processing the request",
@@ -210,8 +213,10 @@ def basic_handler(
     logger.log(
         LogReference.HANDLER999,
         status_code=response.statusCode,
+        # TODO-NOW - Fix deprecated dict usage
         response=response.dict(),
     )
+    # TODO-NOW - Fix deprecated dict usage
     return response.dict()
 
 
@@ -253,6 +258,7 @@ def request_handler(
             verify_request_ids(event)
 
             config = Config()
+            # TODO-NOW - Fix deprecated dict usage
             logger.log(LogReference.HANDLER001, config=config.dict())
             metadata = load_connection_metadata(event.headers, config)
 
@@ -291,8 +297,10 @@ def request_handler(
             logger.log(
                 LogReference.HANDLER999,
                 status_code=response.statusCode,
+                # TODO-NOW - Fix deprecated dict usage
                 response=response.dict(),
             )
+            # TODO-NOW - Fix deprecated dict usage
             return response.dict()
 
         decorators = [
