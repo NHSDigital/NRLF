@@ -23,7 +23,7 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
             "display": "Message not well formed"
           }]
         },
-        "diagnostics": "Request body could not be parsed (extra: extra fields not permitted)",
+        "diagnostics": "Request body could not be parsed (extra: Extra inputs are not permitted)",
         "expression": ["extra"]
       }
       """

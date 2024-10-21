@@ -23,7 +23,7 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
             "display": "Invalid parameter"
           }]
         },
-        "diagnostics": "Invalid query parameter (extra: extra fields not permitted)",
+        "diagnostics": "Invalid query parameter (extra: Extra inputs are not permitted)",
         "expression": ["extra"]
       }
       """
