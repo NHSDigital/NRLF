@@ -578,7 +578,7 @@ def test_request_handler_with_body_invalid_body():
                         }
                     ]
                 },
-                "diagnostics": "Request body could not be parsed (param1: str type expected)",
+                "diagnostics": "Request body could not be parsed (param1: Input should be a valid string)",
                 "expression": ["param1"],
             },
             {
@@ -593,7 +593,7 @@ def test_request_handler_with_body_invalid_body():
                         }
                     ],
                 },
-                "diagnostics": "Request body could not be parsed (param2: value is not a valid integer)",
+                "diagnostics": "Request body could not be parsed (param2: Input should be a valid integer, unable to parse string as an integer)",
                 "expression": ["param2"],
             },
         ],

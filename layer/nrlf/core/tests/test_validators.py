@@ -174,7 +174,7 @@ def test_document_reference_validator_parse_invalid():
                 }
             ]
         },
-        "diagnostics": "Failed to parse DocumentReference resource (id: str type expected)",
+        "diagnostics": "Failed to parse DocumentReference resource (id: Input should be a valid string)",
         "expression": ["id"],
     }
     assert exc.issues[1].model_dump(exclude_none=True) == {
@@ -189,7 +189,7 @@ def test_document_reference_validator_parse_invalid():
                 }
             ]
         },
-        "diagnostics": "Failed to parse DocumentReference resource (type: value is not a valid dict)",
+        "diagnostics": "Failed to parse DocumentReference resource (type: Input should be a valid dictionary or instance of CodeableConcept)",
         "expression": ["type"],
     }
 

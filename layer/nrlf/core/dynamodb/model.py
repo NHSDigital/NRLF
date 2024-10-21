@@ -74,15 +74,21 @@ class DocumentPointer(DynamoDBModel):
     document_id: str = Field(exclude=True)
     schemas: list = Field(default_factory=list)
 
-    def dict(self, **kwargs) -> dict:
+    def model_dump(self, **kwargs) -> dict:
         """
-        Override dict() to include partition and sort keys
+        Override model_dump() to include partition and sort keys
         """
-        default_dict = super().dict(**kwargs)
+        default_dict = super().model_dump(**kwargs)
         return {
             **default_dict,
             **self.indexes,
         }
+
+    def dict(self, **kwargs: dict[str, Any]) -> dict[str, Any]:
+        """
+        Define dict() to do same as model_dump
+        """
+        return self.model_dump(**kwargs)
 
     @classmethod
     def from_document_reference(
