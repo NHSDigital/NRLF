@@ -199,12 +199,17 @@ generate-models: check-warn ## Generate Pydantic Models
 		--input-file-type openapi \
 		--output ./layer/nrlf/producer/fhir/r4/model.py \
 		--output-model-type "pydantic_v2.BaseModel"
-	poetry run datamodel-codegen --strict-types {str,bytes,int,float,bool} \
-		--input ./api/producer/swagger.yaml --input-file-type openapi \
-		--output ./layer/nrlf/producer/fhir/r4/strict_model.py --output-model-type "pydantic_v2.BaseModel"
+	poetry run datamodel-codegen \
+		--strict-types {str,bytes,int,float,bool} \
+		--input ./api/producer/swagger.yaml \
+		--input-file-type openapi \
+		--output ./layer/nrlf/producer/fhir/r4/strict_model.py \
+		--output-model-type "pydantic_v2.BaseModel"
 
 	@echo "Generating consumer model"
 	mkdir -p ./layer/nrlf/consumer/fhir/r4
 	poetry run datamodel-codegen \
-		--input ./api/consumer/swagger.yaml --input-file-type openapi \
-		--output ./layer/nrlf/consumer/fhir/r4/model.py --output-model-type "pydantic_v2.BaseModel"
+		--input ./api/consumer/swagger.yaml \
+		--input-file-type openapi \
+		--output ./layer/nrlf/consumer/fhir/r4/model.py \
+		--output-model-type "pydantic_v2.BaseModel"
