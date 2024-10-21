@@ -61,7 +61,7 @@ def test_config_invalid_env_vars():
         Config(**env_vars)
 
     assert "SPLUNK_INDEX" in str(e.value)
-    assert "field required" in str(e.value)
+    assert "Field required" in str(e.value)
 
     os.environ.update(_current_env_vars)
 

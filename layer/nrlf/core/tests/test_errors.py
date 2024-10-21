@@ -103,7 +103,7 @@ def test_parse_error_from_validation_error():
             "severity": "error",
             "code": "invalid",
             "details": {"text": "Invalid input"},
-            "diagnostics": "Validation failed (test_field: field required)",
+            "diagnostics": "Validation failed (test_field: Field required)",
             "expression": ["test_field"],
         }
     ]
@@ -121,7 +121,7 @@ def test_parse_error_from_validation_error():
                         "severity": "error",
                         "code": "invalid",
                         "details": {"text": "Invalid input"},
-                        "diagnostics": "Validation failed (test_field: field required)",
+                        "diagnostics": "Validation failed (test_field: Field required)",
                         "expression": ["test_field"],
                     }
                 ],

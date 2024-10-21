@@ -212,7 +212,7 @@ def test_search_post_document_reference_missing_nhs_number(
                         }
                     ]
                 },
-                "diagnostics": "Request body could not be parsed (subject:identifier: field required)",
+                "diagnostics": "Request body could not be parsed (subject:identifier: Field required)",
                 "expression": ["subject:identifier"],
             }
         ],

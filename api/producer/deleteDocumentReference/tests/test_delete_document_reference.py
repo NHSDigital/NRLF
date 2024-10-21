@@ -86,7 +86,7 @@ def test_delete_document_reference_invalid_id_in_path():
                         }
                     ]
                 },
-                "diagnostics": "Invalid path parameter (id: field required)",
+                "diagnostics": "Invalid path parameter (id: Field required)",
                 "expression": ["id"],
             }
         ],

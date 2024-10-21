@@ -257,7 +257,7 @@ def test_upsert_document_reference_invalid_body():
                         }
                     ],
                 },
-                "diagnostics": "Request body could not be parsed (resourceType: field required)",
+                "diagnostics": "Request body could not be parsed (resourceType: Field required)",
                 "expression": ["resourceType"],
             },
             {
@@ -272,7 +272,7 @@ def test_upsert_document_reference_invalid_body():
                         }
                     ],
                 },
-                "diagnostics": "Request body could not be parsed (status: field required)",
+                "diagnostics": "Request body could not be parsed (status: Field required)",
                 "expression": ["status"],
             },
             {
@@ -287,7 +287,7 @@ def test_upsert_document_reference_invalid_body():
                         }
                     ],
                 },
-                "diagnostics": "Request body could not be parsed (content: field required)",
+                "diagnostics": "Request body could not be parsed (content: Field required)",
                 "expression": ["content"],
             },
         ],

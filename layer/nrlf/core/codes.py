@@ -17,15 +17,18 @@ class _CodeableConcept(producer_model.CodeableConcept, consumer_model.CodeableCo
         """
         Creates a CodeableConcept instance from a given code.
         """
-        if code not in cls._TEXT_MAP:
+        text_map = cls._TEXT_MAP.get_default()
+        system = cls._SYSTEM.get_default()
+
+        if code not in text_map:
             raise ValueError(f"Unknown code: {code}")
 
         return cls(
             coding=[
                 producer_model.Coding(
-                    system=cls._SYSTEM,
+                    system=system,
                     code=code,
-                    display=cls._TEXT_MAP[code],
+                    display=text_map[code],
                 )
             ]
         )

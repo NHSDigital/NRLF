@@ -1069,6 +1069,11 @@ components:
         format:
           $ref: "#/components/schemas/Coding"
           description: An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.
+        extension:
+          type: array
+          items:
+            $ref: "#/components/schemas/Extension"
+            description: Additional content defined by implementations.
       required:
         - attachment
     DocumentReferenceRelatesTo:
@@ -1143,6 +1148,11 @@ components:
           type: string
           pattern: "[ \\r\\n\\t\\S]+"
           description: A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.
+        extension:
+          type: array
+          items:
+            $ref: "#/components/schemas/Extension"
+            description: Additional content defined by implementations.
     Coding:
       type: object
       properties:
@@ -1169,6 +1179,16 @@ components:
         userSelected:
           type: boolean
           description: Indicates that this coding was chosen by a user directly &ndash; e.g. off a pick list of available items (codes or displays).
+    Extension:
+      type: object
+      properties:
+        valueCodeableConcept:
+          $ref: "#/components/schemas/CodeableConcept"
+          description: A name which details the functional use for this link &ndash; see [http://www.iana.org/assignments/link&ndash;relations/link&ndash;relations.xhtml#link&ndash;relations&ndash;1](http://www.iana.org/assignments/link&ndash;relations/link&ndash;relations.xhtml#link&ndash;relations&ndash;1).
+        url:
+          type: string
+          pattern: \S*
+          description: The reference details for the link.
     Identifier:
       type: object
       properties:

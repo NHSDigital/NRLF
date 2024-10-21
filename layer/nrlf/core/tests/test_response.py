@@ -5,7 +5,7 @@ from nrlf.producer.fhir.r4 import model as producer_model
 
 
 def test_from_resource():
-    resource = producer_model.DocumentReference.construct(id="test-doc-ref")
+    resource = producer_model.DocumentReference.model_construct(id="test-doc-ref")
     response = Response.from_resource(
         resource,
         statusCode="201",

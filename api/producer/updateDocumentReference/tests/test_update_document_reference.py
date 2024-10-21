@@ -228,7 +228,7 @@ def test_create_document_reference_invalid_body():
                         }
                     ]
                 },
-                "diagnostics": "Request body could not be parsed (resourceType: field required)",
+                "diagnostics": "Request body could not be parsed (resourceType: Field required)",
                 "expression": ["resourceType"],
             },
             {
@@ -243,7 +243,7 @@ def test_create_document_reference_invalid_body():
                         }
                     ]
                 },
-                "diagnostics": "Request body could not be parsed (status: field required)",
+                "diagnostics": "Request body could not be parsed (status: Field required)",
                 "expression": ["status"],
             },
             {
@@ -258,7 +258,7 @@ def test_create_document_reference_invalid_body():
                         }
                     ]
                 },
-                "diagnostics": "Request body could not be parsed (content: field required)",
+                "diagnostics": "Request body could not be parsed (content: Field required)",
                 "expression": ["content"],
             },
         ],
@@ -299,7 +299,7 @@ def test_update_document_reference_no_id_in_path():
                         }
                     ]
                 },
-                "diagnostics": "Invalid path parameter (id: field required)",
+                "diagnostics": "Invalid path parameter (id: Field required)",
                 "expression": ["id"],
             }
         ],

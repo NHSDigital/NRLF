@@ -105,7 +105,7 @@ def test_read_document_reference_missing_id():
                         }
                     ]
                 },
-                "diagnostics": "Invalid path parameter (id: field required)",
+                "diagnostics": "Invalid path parameter (id: Field required)",
                 "expression": ["id"],
             }
         ],

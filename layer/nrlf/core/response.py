@@ -163,7 +163,7 @@ class SpineErrorResponse(Response):
                     details=SpineErrorConcept.from_code("INVALID_IDENTIFIER_VALUE"),
                     diagnostics=diagnostics,
                     expression=(
-                        [producer_model.ExpressionItem(__root__=expression)]
+                        [producer_model.ExpressionItem(root=expression)]
                         if expression
                         else None
                     ),
@@ -184,7 +184,7 @@ class SpineErrorResponse(Response):
                     details=SpineErrorConcept.from_code("INVALID_NHS_NUMBER"),
                     diagnostics=diagnostics,
                     expression=(
-                        [producer_model.ExpressionItem(__root__=expression)]
+                        [producer_model.ExpressionItem(root=expression)]
                         if expression
                         else None
                     ),
@@ -205,7 +205,7 @@ class SpineErrorResponse(Response):
                     details=SpineErrorConcept.from_code("INVALID_CODE_SYSTEM"),
                     diagnostics=diagnostics,
                     expression=(
-                        [producer_model.ExpressionItem(__root__=expression)]
+                        [producer_model.ExpressionItem(root=expression)]
                         if expression
                         else None
                     ),
@@ -226,7 +226,7 @@ class SpineErrorResponse(Response):
                     details=SpineErrorConcept.from_code("BAD_REQUEST"),
                     diagnostics=diagnostics,
                     expression=(
-                        [producer_model.ExpressionItem(__root__=expression)]
+                        [producer_model.ExpressionItem(root=expression)]
                         if expression
                         else None
                     ),
@@ -247,7 +247,7 @@ class SpineErrorResponse(Response):
                     details=SpineErrorConcept.from_code("AUTHOR_CREDENTIALS_ERROR"),
                     diagnostics=diagnostics,
                     expression=(
-                        [producer_model.ExpressionItem(__root__=expression)]
+                        [producer_model.ExpressionItem(root=expression)]
                         if expression
                         else None
                     ),

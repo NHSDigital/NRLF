@@ -62,16 +62,16 @@ def handler(
         )
 
     custodian_id = (
-        body.custodian_identifier.__root__.split("|", maxsplit=1)[1]
+        body.custodian_identifier.root.split("|", maxsplit=1)[1]
         if body.custodian_identifier
         else None
     )
     if custodian_id:
         self_link += f"&custodian:identifier=https://fhir.nhs.uk/Id/ods-organization-code|{custodian_id}"
 
-    pointer_types = [body.type.__root__] if body.type else metadata.pointer_types
+    pointer_types = [body.type.root] if body.type else metadata.pointer_types
     if body.type:
-        self_link += f"&type={body.type.__root__}"
+        self_link += f"&type={body.type.root}"
 
     bundle = {
         "resourceType": "Bundle",

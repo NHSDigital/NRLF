@@ -438,7 +438,7 @@ def test_request_handler_with_params_missing_params():
                         }
                     ]
                 },
-                "diagnostics": "Invalid query parameter (param1: field required)",
+                "diagnostics": "Invalid query parameter (param1: Field required)",
                 "expression": ["param1"],
             },
             {
@@ -453,7 +453,7 @@ def test_request_handler_with_params_missing_params():
                         }
                     ]
                 },
-                "diagnostics": "Invalid query parameter (param2: field required)",
+                "diagnostics": "Invalid query parameter (param2: Field required)",
                 "expression": ["param2"],
             },
         ],

@@ -59,7 +59,7 @@ def handler(
             expression="type",
         )
 
-    pointer_types = [params.type.__root__] if params.type else metadata.pointer_types
+    pointer_types = [params.type.root] if params.type else metadata.pointer_types
     bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
 
     logger.log(

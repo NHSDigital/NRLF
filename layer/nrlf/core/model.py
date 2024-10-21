@@ -13,7 +13,7 @@ class _NhsNumberMixin:
         if self.subject_identifier is None:
             return None
 
-        nhs_number = self.subject_identifier.__root__.split("|", 1)[1]
+        nhs_number = self.subject_identifier.root.split("|", 1)[1]
 
         if not is_valid_nhs_number(nhs_number):
             return None

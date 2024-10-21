@@ -49,7 +49,7 @@ Feature: Consumer - searchDocumentReference - Failure Scenarios
             "display": "Invalid parameter"
           }]
         },
-        "diagnostics": "Invalid query parameter (subject:identifier: field required)",
+        "diagnostics": "Invalid query parameter (subject:identifier: Field required)",
         "expression": ["subject:identifier"]
       }
       """

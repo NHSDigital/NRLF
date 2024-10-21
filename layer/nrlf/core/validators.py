@@ -78,7 +78,7 @@ class DocumentReferenceValidator:
     MODEL = producer_model.DocumentReference
 
     def __init__(self):
-        self.result = ValidationResult(resource=self.MODEL.construct(), issues=[])
+        self.result = ValidationResult(resource=self.MODEL.model_construct(), issues=[])
 
     @classmethod
     def parse(cls, data: Dict[str, Any]):
