@@ -74,7 +74,7 @@ def handler(
             document_reference = DocumentReference.model_validate_json(result.document)
             bundle["total"] += 1
             bundle["entry"].append(
-                {"resource": document_reference.dict(exclude_none=True)}
+                {"resource": document_reference.model_dump(exclude_none=True)}
             )
             logger.log(
                 LogReference.PROPOSTSEARCH004,

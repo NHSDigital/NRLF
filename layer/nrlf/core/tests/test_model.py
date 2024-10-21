@@ -7,7 +7,7 @@ from nrlf.core.model import (
 
 
 def test_connection_metadata():
-    metadata = ConnectionMetadata.parse_obj(
+    metadata = ConnectionMetadata.model_validate(
         {
             "nrl.pointer-types": ["test"],
             "nrl.ods-code": "test",
@@ -34,7 +34,7 @@ def test_connection_metadata():
 
 
 def test_producer_request_params():
-    params = ProducerRequestParams.parse_obj(
+    params = ProducerRequestParams.model_validate(
         {
             "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|9999999999",
             "type": "test-type",
@@ -59,7 +59,7 @@ def test_producer_request_params():
 
 
 def test_consumer_request_params():
-    params = ConsumerRequestParams.parse_obj(
+    params = ConsumerRequestParams.model_validate(
         {
             "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|9999999999",
             "custodian:identifier": "https://fhir.nhs.uk/Id/ods-organization-code|test",
@@ -91,7 +91,7 @@ def test_consumer_request_params():
 
 
 def test_count_request_params():
-    params = CountRequestParams.parse_obj(
+    params = CountRequestParams.model_validate(
         {
             "subject:identifier": "https://fhir.nhs.uk/Id/nhs-number|9999999999",
         }

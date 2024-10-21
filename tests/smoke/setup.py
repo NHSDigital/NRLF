@@ -91,7 +91,7 @@ def upsert_test_pointer(
 ) -> DocumentReference:
     docref.id = id
 
-    create_response = producer_client.upsert(docref.dict())
+    create_response = producer_client.upsert(docref.model_dump())
 
     if not create_response.ok:
         raise ValueError(f"Failed to create test pointer: {create_response.text}")

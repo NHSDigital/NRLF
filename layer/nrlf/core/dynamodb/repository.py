@@ -64,7 +64,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
         try:
             result = self.table.put_item(
-                Item=item.dict(),
+                Item=item.model_dump(),
                 ConditionExpression="attribute_not_exists(pk) AND attribute_not_exists(sk)",
                 ReturnConsumedCapacity="INDEXES",
             )

@@ -23,7 +23,7 @@ def _config_from_context(context: Context, ods_code: str):
         base_url=context.base_url,
         custom_headers=feature_test_headers,
         client_cert=context.client_cert,
-        connection_metadata=ConnectionMetadata.parse_obj(
+        connection_metadata=ConnectionMetadata.model_validate(
             {
                 "nrl.ods-code": ods_code_parts[0],
                 "nrl.ods-code-extension": ods_code_extension,

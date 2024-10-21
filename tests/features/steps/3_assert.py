@@ -48,7 +48,7 @@ def assert_bundle_step(context: Context, bundle_type: str):
         context.response.text,
     )
 
-    context.bundle = Bundle.parse_obj(body)
+    context.bundle = Bundle.model_validate(body)
 
 
 @then("the Bundle has a total of {total}")
@@ -83,7 +83,7 @@ def assert_bundle_self(context: Context, rel_url: str):
         context.response.text,
     )
 
-    link_entry = context.bundle.link[0].dict(exclude_none=True)
+    link_entry = context.bundle.link[0].model_dump(exclude_none=True)
     assert link_entry.get("relation") == "self", format_error(
         "Link should specify a 'self' type relation",
         "self",
@@ -129,7 +129,7 @@ def assert_document_reference_matches_value(
         AssertionError: If any of the document reference values do not match the expected values.
     """
     if isinstance(doc_ref, dict):
-        doc_ref = DocumentReference.parse_obj(doc_ref)
+        doc_ref = DocumentReference.model_validate(doc_ref)
 
     assert doc_ref.id == items["id"], format_error(
         "DocumentReference ID does not match",
@@ -238,7 +238,7 @@ def assert_response_operation_outcome_step(context: Context, num_issues: str):
     assert body["resourceType"] == "OperationOutcome"
     assert len(body["issue"]) == int(num_issues)
 
-    context.operation_outcome = OperationOutcome.parse_obj(body)
+    context.operation_outcome = OperationOutcome.model_validate(body)
 
 
 @then("the OperationOutcome contains the issue")
@@ -252,7 +252,7 @@ def assert_response_operation_outcome_issue(context: Context):
         raise ValueError("Invalid JSON provided")
 
     for issue in context.operation_outcome.issue:
-        if issue.dict(exclude_none=True) == content:
+        if issue.model_dump(exclude_none=True) == content:
             return
 
     raise ValueError(

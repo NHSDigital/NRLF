@@ -373,7 +373,7 @@ def test_request_handler_with_params():
     def decorated_function(params) -> Response:
         return Response(
             statusCode="200",
-            body=params.json(exclude_none=True),
+            body=params.model_dump_json(exclude_none=True),
             headers={"Content-Type": "application/json"},
         )
 
@@ -406,7 +406,7 @@ def test_request_handler_with_params_missing_params():
     def decorated_function(params) -> Response:
         return Response(
             statusCode="200",
-            body=params.json(exclude_none=True),
+            body=params.model_dump_json(exclude_none=True),
             headers={"Content-Type": "application/json"},
         )
 
@@ -469,7 +469,7 @@ def test_request_handler_with_body():
     def decorated_function(event, context, config, metadata, body) -> Response:
         return Response(
             statusCode="200",
-            body=body.json(exclude_none=True),
+            body=body.model_dump_json(exclude_none=True),
             headers={"Content-Type": "application/json"},
         )
 
@@ -500,7 +500,7 @@ def test_request_handler_with_body_missing_body():
     def decorated_function(event, context, config, metadata, body) -> Response:
         return Response(
             statusCode="200",
-            body=body.json(exclude_none=True),
+            body=body.model_dump_json(exclude_none=True),
             headers={"Content-Type": "application/json"},
         )
 
@@ -545,7 +545,7 @@ def test_request_handler_with_body_invalid_body():
     def decorated_function(event, context, config, metadata, body) -> Response:
         return Response(
             statusCode="200",
-            body=body.json(exclude_none=True),
+            body=body.model_dump_json(exclude_none=True),
             headers={"Content-Type": "application/json"},
         )
 

@@ -140,7 +140,7 @@ RepositoryType = Union[Type[DocumentPointerRepository], None]
 def load_connection_metadata(headers: Dict[str, str], config: Config):
     logger.log(LogReference.HANDLER002, headers=headers)
     metadata = parse_headers(headers)
-    logger.log(LogReference.HANDLER003, metadata=metadata.dict())
+    logger.log(LogReference.HANDLER003, metadata=metadata.model_dump())
     if PERMISSION_ALLOW_ALL_POINTER_TYPES in metadata.nrl_permissions:
         logger.log(LogReference.HANDLER004a)
         metadata.pointer_types = PointerTypes.list()

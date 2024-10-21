@@ -40,7 +40,7 @@ def test_update_document_reference_happy_path(repository: DocumentPointerReposit
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={"id": "Y05868-99999-99999-999999"},
-        body=doc_ref.json(),
+        body=doc_ref.model_dump_json(),
     )
 
     result = handler(event, create_mock_context())
@@ -109,7 +109,7 @@ def test_update_document_reference_happy_path_with_ssp(
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={"id": "Y05868-99999-99999-999999"},
-        body=doc_ref.json(),
+        body=doc_ref.model_dump_json(),
     )
 
     result = handler(event, create_mock_context())
@@ -270,7 +270,7 @@ def test_update_document_reference_no_id_in_path():
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={},
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -311,7 +311,7 @@ def test_update_document_reference_id_mismatch():
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={"id": "IDoNotMatch"},
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -353,7 +353,7 @@ def test_update_document_reference_invalid_resource():
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={"id": "Y05868-99999-99999-999999"},
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -394,7 +394,7 @@ def test_update_document_reference_invalid_producer_id():
     event = create_test_api_gateway_event(
         headers=create_headers(ods_code="RQI"),
         path_parameters={"id": "Y05868-99999-99999-999999"},
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -436,7 +436,7 @@ def test_update_document_reference_no_existing_pointer(repository):
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={"id": "Y05868-99999-99999-999999"},
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -482,7 +482,7 @@ def test_update_document_reference_immutable_fields(repository):
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={"id": "Y05868-99999-99999-999999"},
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -530,7 +530,7 @@ def test_update_document_reference_with_no_context_related_for_ssp_url(repositor
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={"id": "Y05868-99999-99999-999999"},
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -585,7 +585,7 @@ def test_create_document_reference_with_no_asid_in_for_ssp_url(
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={"id": "Y05868-99999-99999-999999"},
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -640,7 +640,7 @@ def test_create_document_reference_with_invalid_asid_for_ssp_url(
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={"id": "Y05868-99999-99999-999999"},
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -698,7 +698,7 @@ def test_update_document_reference_with_meta_lastupdated_ignored(
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={"id": "Y05868-99999-99999-999999"},
-        body=doc_ref.json(),
+        body=doc_ref.model_dump_json(),
     )
 
     result = handler(event, create_mock_context())
@@ -768,7 +768,7 @@ def test_update_document_reference_with_invalid_date_ignored(
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={"id": "Y05868-99999-99999-999999"},
-        body=doc_ref.json(),
+        body=doc_ref.model_dump_json(),
     )
 
     result = handler(event, create_mock_context())
@@ -826,7 +826,7 @@ def test_update_document_reference_existing_invalid_json(
     event = create_test_api_gateway_event(
         headers=create_headers(),
         path_parameters={"id": "Y05868-99999-99999-999999"},
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -874,8 +874,8 @@ def test__set_update_time_fields(doc_ref_name: str):
 
     response = _set_update_time_fields(test_time, test_doc_ref)
 
-    assert response.dict(exclude_none=True) == {
-        **test_doc_ref.dict(exclude_none=True),
+    assert response.model_dump(exclude_none=True) == {
+        **test_doc_ref.model_dump(exclude_none=True),
         "meta": {
             "lastUpdated": test_time,
         },

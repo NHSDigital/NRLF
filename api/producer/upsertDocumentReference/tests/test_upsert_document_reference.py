@@ -154,7 +154,7 @@ def test_upsert_document_reference_invalid_category_type():
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -300,7 +300,7 @@ def test_upsert_document_reference_invalid_resource():
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -341,7 +341,7 @@ def test_upsert_document_reference_invalid_producer_id():
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -382,7 +382,7 @@ def test_upsert_document_reference_with_no_custodian():
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -425,7 +425,7 @@ def test_upsert_document_reference_invalid_custodian_id():
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -469,7 +469,7 @@ def test_upsert_document_reference_invalid_pointer_type():
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -515,7 +515,7 @@ def test_upsert_document_reference_no_relatesto_target():
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -564,7 +564,7 @@ def test_upsert_document_reference_invalid_relatesto_target_producer_id():
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -616,7 +616,7 @@ def test_upsert_document_reference_invalid_relatesto_not_exists(repository):
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -672,7 +672,7 @@ def test_upsert_document_reference_invalid_relatesto_not_exists_still_creates_wi
         headers=create_headers(
             nrl_permissions=[PERMISSION_SUPERSEDE_IGNORE_DELETE_FAIL]
         ),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -735,7 +735,7 @@ def test_upsert_document_reference_invalid_relatesto_nhs_number(
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -798,7 +798,7 @@ def test_upsert_document_reference_invalid_relatesto_type(
         headers=create_headers(
             app_id="12356",
         ),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -845,7 +845,7 @@ def test_upsert_document_reference_with_no_context_related_for_ssp_url(
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -899,7 +899,7 @@ def test_upsert_document_reference_with_no_asid_in_for_ssp_url(
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -953,7 +953,7 @@ def test_upsert_document_reference_with_invalid_asid_for_ssp_url(
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -1011,7 +1011,7 @@ def test_upsert_document_reference_supersede_deletes_old_pointers_replace(
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -1071,7 +1071,7 @@ def test_upsert_document_reference_supersede_succeeds_with_toggle(
 
     event = create_test_api_gateway_event(
         headers=create_headers(nrl_permissions=["supersede-ignore-delete-fail"]),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -1131,7 +1131,7 @@ def test_upsert_document_reference_supersede_fails_without_toggle(
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -1189,7 +1189,7 @@ def test_upsert_document_reference_create_relatesto_not_replaces(
 
     event = create_test_api_gateway_event(
         headers=create_headers(),
-        body=doc_ref.json(exclude_none=True),
+        body=doc_ref.model_dump_json(exclude_none=True),
     )
 
     result = handler(event, create_mock_context())
@@ -1428,8 +1428,8 @@ def test__set_create_time_fields(doc_ref_name: str):
 
     response = _set_upsert_time_fields(test_time, test_doc_ref, test_perms)
 
-    assert response.dict(exclude_none=True) == {
-        **test_doc_ref.dict(exclude_none=True),
+    assert response.model_dump(exclude_none=True) == {
+        **test_doc_ref.model_dump(exclude_none=True),
         "meta": {
             "lastUpdated": "2024-03-24T12:34:56.789Z",
         },
@@ -1452,8 +1452,8 @@ def test__set_create_time_fields_when_doc_has_date_and_perms(doc_ref_name: str):
 
     response = _set_upsert_time_fields(test_time, test_doc_ref, test_perms)
 
-    assert response.dict(exclude_none=True) == {
-        **test_doc_ref.dict(exclude_none=True),
+    assert response.model_dump(exclude_none=True) == {
+        **test_doc_ref.model_dump(exclude_none=True),
         "meta": {
             "lastUpdated": test_time,
         },
@@ -1469,8 +1469,8 @@ def test__set_create_time_fields_when_no_date_but_perms():
 
     response = _set_upsert_time_fields(test_time, test_doc_ref, test_perms)
 
-    assert response.dict(exclude_none=True) == {
-        **test_doc_ref.dict(exclude_none=True),
+    assert response.model_dump(exclude_none=True) == {
+        **test_doc_ref.model_dump(exclude_none=True),
         "meta": {
             "lastUpdated": test_time,
         },

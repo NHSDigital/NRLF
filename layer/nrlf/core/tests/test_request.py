@@ -15,7 +15,7 @@ def test_parse_headers_empty_headers():
     exc = error.value
 
     assert exc.status_code == "401"
-    assert exc.operation_outcome.dict(exclude_none=True) == {
+    assert exc.operation_outcome.model_dump(exclude_none=True) == {
         "resourceType": "OperationOutcome",
         "issue": [
             {
@@ -79,7 +79,7 @@ def test_parse_headers_invalid_headers():
     exc = error.value
 
     assert exc.status_code == "401"
-    assert exc.operation_outcome.dict(exclude_none=True) == {
+    assert exc.operation_outcome.model_dump(exclude_none=True) == {
         "resourceType": "OperationOutcome",
         "issue": [
             {

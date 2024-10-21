@@ -49,7 +49,7 @@ def test_search_document_reference_happy_path(repository: DocumentPointerReposit
             }
         ],
         "total": 1,
-        "entry": [{"resource": doc_ref.dict(exclude_none=True)}],
+        "entry": [{"resource": doc_ref.model_dump(exclude_none=True)}],
     }
 
 
@@ -90,7 +90,7 @@ def test_search_document_reference_happy_path_with_custodian(
             }
         ],
         "total": 1,
-        "entry": [{"resource": doc_ref.dict(exclude_none=True)}],
+        "entry": [{"resource": doc_ref.model_dump(exclude_none=True)}],
     }
 
 
@@ -131,7 +131,7 @@ def test_search_document_reference_happy_path_with_type(
             }
         ],
         "total": 1,
-        "entry": [{"resource": doc_ref.dict(exclude_none=True)}],
+        "entry": [{"resource": doc_ref.model_dump(exclude_none=True)}],
     }
 
 
@@ -178,7 +178,7 @@ def test_search_document_reference_happy_path_with_nicip_type(
             }
         ],
         "total": 1,
-        "entry": [{"resource": doc_ref.dict(exclude_none=True)}],
+        "entry": [{"resource": doc_ref.model_dump(exclude_none=True)}],
     }
 
 

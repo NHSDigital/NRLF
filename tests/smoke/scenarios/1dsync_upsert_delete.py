@@ -39,7 +39,7 @@ def test_1dsync_upsert_delete(
             test_docref.id = (
                 f"{test_ods_code}-smoketest_1dsync_upsert_delete_pointer_{attempts}"
             )
-            upsert_response = producer_client_1dsync.upsert(test_docref.dict())
+            upsert_response = producer_client_1dsync.upsert(test_docref.model_dump())
             assert upsert_response.ok
             assert upsert_response.headers["Location"].split("/")[-1] == test_docref.id
         finally:
