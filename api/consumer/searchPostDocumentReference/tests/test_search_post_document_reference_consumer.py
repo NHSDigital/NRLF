@@ -54,7 +54,7 @@ def test_search_post_document_reference_happy_path(
             }
         ],
         "total": 1,
-        "entry": [{"resource": doc_ref.dict(exclude_none=True)}],
+        "entry": [{"resource": doc_ref.model_dump(exclude_none=True)}],
     }
 
 
@@ -97,7 +97,7 @@ def test_search_post_document_reference_happy_path_with_custodian(
             }
         ],
         "total": 1,
-        "entry": [{"resource": doc_ref.dict(exclude_none=True)}],
+        "entry": [{"resource": doc_ref.model_dump(exclude_none=True)}],
     }
 
 
@@ -140,7 +140,7 @@ def test_search_post_document_reference_happy_path_with_type(
             }
         ],
         "total": 1,
-        "entry": [{"resource": doc_ref.dict(exclude_none=True)}],
+        "entry": [{"resource": doc_ref.model_dump(exclude_none=True)}],
     }
 
 
@@ -212,7 +212,7 @@ def test_search_post_document_reference_missing_nhs_number(
                         }
                     ]
                 },
-                "diagnostics": "Request body could not be parsed (subject:identifier: field required)",
+                "diagnostics": "Request body could not be parsed (subject:identifier: Field required)",
                 "expression": ["subject:identifier"],
             }
         ],

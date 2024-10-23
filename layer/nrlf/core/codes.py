@@ -1,16 +1,16 @@
-from typing import Dict
+from typing import ClassVar
 
 from nrlf.consumer.fhir.r4 import model as consumer_model
 from nrlf.producer.fhir.r4 import model as producer_model
 
 
-class _CodeableConcept(producer_model.CodeableConcept, consumer_model.CodeableConcept):
+class _CodeableConcept(producer_model.CodeableConcept, consumer_model.CodeableConcept):  # type: ignore
     """
     Represents a codeable concept with a mapping of codes to text values.
     """
 
-    _TEXT_MAP: Dict[str, str] = {}
-    _SYSTEM: str = ""
+    _TEXT_MAP: ClassVar[dict[str, str]] = {}
+    _SYSTEM: ClassVar[str] = ""
 
     @classmethod
     def from_code(cls, code: str) -> "_CodeableConcept":

@@ -17,7 +17,7 @@ def test_dynamodb_model_init():
     assert model._from_dynamo is False
 
     # Check _from_dynamo is a private attribute
-    assert model.dict() == {}
+    assert model.model_dump() == {}
 
 
 def test_dynamodb_model_init_from_dynamo():
@@ -26,7 +26,7 @@ def test_dynamodb_model_init_from_dynamo():
     assert model._from_dynamo is True
 
     # Check _from_dynamo is a private attribute
-    assert model.dict() == {}
+    assert model.model_dump() == {}
 
 
 @freeze_time("2024-01-01")
@@ -52,7 +52,7 @@ def test_document_pointer_init():
     assert model.public_alias() == "DocumentReference"
     assert model._from_dynamo is False
 
-    assert model.dict() == {
+    assert model.model_dump() == {
         "id": "X26-999999-999999-99999999",
         "nhs_number": "9999999999",
         "custodian": "X26",
@@ -83,7 +83,7 @@ def test_document_pointer_from_document_reference_valid():
     doc_ref = load_document_reference("Y05868-736253002-Valid")
     model = DocumentPointer.from_document_reference(doc_ref)
 
-    model_data = model.dict()
+    model_data = model.model_dump()
     document = model_data.pop("document")
 
     assert model_data == {
@@ -109,7 +109,7 @@ def test_document_pointer_from_document_reference_valid():
         "patient_sort": "C#SCT-734163000#T#SCT-736253002#CO#2024-01-01T00:00:00.000Z#D#Y05868-99999-99999-999999",
     }
 
-    assert json.loads(document) == doc_ref.dict(exclude_none=True)
+    assert json.loads(document) == doc_ref.model_dump(exclude_none=True)
 
 
 def test_document_pointer_from_document_reference_valid_with_created_on():
@@ -118,7 +118,7 @@ def test_document_pointer_from_document_reference_valid_with_created_on():
         doc_ref, created_on="2024-02-02T12:34:56.000Z"
     )
 
-    model_data = model.dict()
+    model_data = model.model_dump()
     document = model_data.pop("document")
 
     assert model_data == {
@@ -144,7 +144,7 @@ def test_document_pointer_from_document_reference_valid_with_created_on():
         "patient_sort": "C#SCT-734163000#T#SCT-736253002#CO#2024-02-02T12:34:56.000Z#D#Y05868-99999-99999-999999",
     }
 
-    assert json.loads(document) == doc_ref.dict(exclude_none=True)
+    assert json.loads(document) == doc_ref.model_dump(exclude_none=True)
 
 
 def test_document_pointer_from_document_reference_invalid():
@@ -161,7 +161,7 @@ def test_document_pointer_from_document_reference_invalid():
 
 def test_document_pointer_from_document_reference_multiple_types():
     doc_ref_data = load_document_reference_json("Y05868-736253002-Valid")
-    doc_ref = DocumentReference.parse_obj(
+    doc_ref = DocumentReference.model_validate(
         {
             **doc_ref_data,
             "type": {

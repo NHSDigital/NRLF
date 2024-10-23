@@ -36,7 +36,7 @@ def test_read_document_reference_happy_path(repository: DocumentPointerRepositor
     }
 
     parsed_body = json.loads(body)
-    assert parsed_body == doc_ref.dict(exclude_none=True)
+    assert parsed_body == doc_ref.model_dump(exclude_none=True)
 
 
 @mock_aws
@@ -105,7 +105,7 @@ def test_read_document_reference_missing_id():
                         }
                     ]
                 },
-                "diagnostics": "Invalid path parameter (id: field required)",
+                "diagnostics": "Invalid path parameter (id: Field required)",
                 "expression": ["id"],
             }
         ],

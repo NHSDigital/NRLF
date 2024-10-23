@@ -64,7 +64,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
         try:
             result = self.table.put_item(
-                Item=item.dict(),
+                Item=item.model_dump(),
                 ConditionExpression="attribute_not_exists(pk) AND attribute_not_exists(sk)",
                 ReturnConsumedCapacity="INDEXES",
             )
@@ -119,9 +119,9 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
         item = result["Item"]
         try:
-            parsed_item = self.ITEM_TYPE.parse_obj({"_from_dynamo": True, **item})
+            parsed_item = self.ITEM_TYPE.model_validate({"_from_dynamo": True, **item})
             logger.log(LogReference.REPOSITORY011)
-            logger.log(LogReference.REPOSITORY011a, result=parsed_item.dict())
+            logger.log(LogReference.REPOSITORY011a, result=parsed_item.model_dump())
             return parsed_item
         except ValidationError as exc:
             logger.log(
@@ -379,7 +379,9 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
 
                 for item in page["Items"]:
                     try:
-                        yield self.ITEM_TYPE.parse_obj({"_from_dynamo": True, **item})
+                        yield self.ITEM_TYPE.model_validate(
+                            {"_from_dynamo": True, **item}
+                        )
 
                     except ValidationError as exc:
                         logger.log(
@@ -412,7 +414,7 @@ class DocumentPointerRepository(Repository[DocumentPointer]):
         """
         try:
             result = self.table.put_item(
-                Item=item.dict(),
+                Item=item.model_dump(),
                 ConditionExpression="attribute_exists(pk) AND attribute_exists(sk)",
                 ReturnConsumedCapacity="INDEXES",
             )

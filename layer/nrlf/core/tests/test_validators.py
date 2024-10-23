@@ -18,7 +18,7 @@ from nrlf.tests.data import load_document_reference_json
 
 
 def test_validate_type_system_valid():
-    type_ = RequestQueryType(__root__=PointerTypes.MENTAL_HEALTH_PLAN.value)
+    type_ = RequestQueryType(root=PointerTypes.MENTAL_HEALTH_PLAN.value)
     pointer_types = [
         PointerTypes.MENTAL_HEALTH_PLAN.value,
         PointerTypes.EOL_CARE_PLAN.value,
@@ -27,7 +27,7 @@ def test_validate_type_system_valid():
 
 
 def test_validate_type_system_invalid():
-    type_ = RequestQueryType(__root__="http://snomed.info/invalid|736373009")
+    type_ = RequestQueryType(root="http://snomed.info/invalid|736373009")
     pointer_types = [
         PointerTypes.EOL_CARE_PLAN.value,
         PointerTypes.EOL_CARE_PLAN.value,
@@ -37,14 +37,14 @@ def test_validate_type_system_invalid():
 
 def test_validate_type_system_empty():
     type_ = None
-    pointer_types = []
+    pointer_types: list[str] = []
     assert validate_type_system(type_, pointer_types) is True
 
 
 def test_validation_result_reset():
     validation_result = ValidationResult(
-        resource=DocumentReference.construct(id="example_resource"),
-        issues=[OperationOutcomeIssue.construct()],
+        resource=DocumentReference.model_construct(id="example_resource"),
+        issues=[OperationOutcomeIssue.model_construct()],
     )
 
     assert validation_result.resource.id == "example_resource"
@@ -56,7 +56,7 @@ def test_validation_result_reset():
 
 def test_validation_result_add_error():
     validation_result = ValidationResult(
-        resource=DocumentReference.construct(), issues=[]
+        resource=DocumentReference.model_construct(), issues=[]
     )
 
     issue_code = "issue_code"
@@ -67,7 +67,7 @@ def test_validation_result_add_error():
     validation_result.add_error(issue_code, error_code, diagnostics, field)
 
     assert len(validation_result.issues) == 1
-    assert validation_result.issues[0].dict(exclude_none=True) == {
+    assert validation_result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "issue_code",
         "details": {
@@ -86,7 +86,7 @@ def test_validation_result_add_error():
 
 def test_validation_result_add_error_no_error_code():
     validation_result = ValidationResult(
-        resource=DocumentReference.construct(), issues=[]
+        resource=DocumentReference.model_construct(), issues=[]
     )
 
     issue_code = "issue_code"
@@ -98,7 +98,7 @@ def test_validation_result_add_error_no_error_code():
     )
 
     assert len(validation_result.issues) == 1
-    assert validation_result.issues[0].dict(exclude_none=True) == {
+    assert validation_result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "issue_code",
         "diagnostics": "diagnostics",
@@ -108,24 +108,24 @@ def test_validation_result_add_error_no_error_code():
 
 def test_validation_result_is_valid():
     validation_result = ValidationResult(
-        resource=DocumentReference.construct(), issues=[]
+        resource=DocumentReference.model_construct(), issues=[]
     )
 
     assert validation_result.is_valid is True
 
     validation_result.issues = [
-        OperationOutcomeIssue.construct(severity="information"),
+        OperationOutcomeIssue.model_construct(severity="information"),
     ]
 
     assert validation_result.is_valid is True
 
     validation_result.issues = [
-        OperationOutcomeIssue.construct(severity="error"),
+        OperationOutcomeIssue.model_construct(severity="error"),
     ]
     assert validation_result.is_valid is False
 
     validation_result.issues = [
-        OperationOutcomeIssue.construct(severity="fatal"),
+        OperationOutcomeIssue.model_construct(severity="fatal"),
     ]
     assert validation_result.is_valid is False
 
@@ -162,7 +162,7 @@ def test_document_reference_validator_parse_invalid():
     exc = error.value
 
     assert len(exc.issues) == 2
-    assert exc.issues[0].dict(exclude_none=True) == {
+    assert exc.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "invalid",
         "details": {
@@ -174,10 +174,10 @@ def test_document_reference_validator_parse_invalid():
                 }
             ]
         },
-        "diagnostics": "Failed to parse DocumentReference resource (id: str type expected)",
+        "diagnostics": "Failed to parse DocumentReference resource (id: Input should be a valid string)",
         "expression": ["id"],
     }
-    assert exc.issues[1].dict(exclude_none=True) == {
+    assert exc.issues[1].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "invalid",
         "details": {
@@ -189,7 +189,7 @@ def test_document_reference_validator_parse_invalid():
                 }
             ]
         },
-        "diagnostics": "Failed to parse DocumentReference resource (type: value is not a valid dict)",
+        "diagnostics": "Failed to parse DocumentReference resource (type: Input should be a valid dictionary or instance of CodeableConcept)",
         "expression": ["type"],
     }
 
@@ -220,7 +220,7 @@ def test_validate_document_reference_missing_fields():
     assert result.is_valid is False
     assert result.resource.id is None
     assert len(result.issues) == 5
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "required",
         "details": {
@@ -275,7 +275,7 @@ def test_validate_document_reference_extra_fields():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "invalid",
         "details": {
@@ -302,7 +302,7 @@ def test_validate_identifiers_no_custodian_identifier():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "required",
         "details": {
@@ -330,7 +330,7 @@ def test_validate_identifiers_no_subject_identifier():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "required",
         "details": {
@@ -358,7 +358,7 @@ def test_validate_category_no_category():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "required",
         "details": {
@@ -396,7 +396,7 @@ def test_validate_category_too_many_category():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "invalid",
         "details": {
@@ -432,7 +432,7 @@ def test_validate_category_coding_display_mismatch_care_plan():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "value",
         "details": {
@@ -468,7 +468,7 @@ def test_validate_category_coding_display_mismatch_observations():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "value",
         "details": {
@@ -514,7 +514,7 @@ def test_validate_category_coding_invalid_code():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "invalid",
         "details": {
@@ -546,7 +546,7 @@ def test_validate_category_coding_multiple_codings():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "value",
         "details": {
@@ -582,7 +582,7 @@ def test_validate_category_coding_invalid_system():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "value",
         "details": {
@@ -623,7 +623,7 @@ def test_validate_content_extension_too_many_extensions():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "invalid",
         "details": {
@@ -662,7 +662,7 @@ def test_validate_content_extension_invalid_code():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "value",
         "details": {
@@ -701,7 +701,7 @@ def test_validate_content_extension_invalid_display():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "value",
         "details": {
@@ -742,7 +742,7 @@ def test_validate_content_extension_invalid_system():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "value",
         "details": {
@@ -781,7 +781,7 @@ def test_validate_content_extension_invalid_url():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "value",
         "details": {
@@ -812,7 +812,7 @@ def test_validate_content_extension_missing_coding():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "required",
         "details": {
@@ -841,7 +841,7 @@ def test_validate_identifiers_invalid_systems():
     assert result.is_valid is False
     assert result.resource.id == "Y05868-99999-99999-999999"
     assert len(result.issues) == 2
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "invalid",
         "details": {
@@ -856,7 +856,7 @@ def test_validate_identifiers_invalid_systems():
         "diagnostics": "Provided custodian identifier system is not the ODS system (expected: 'https://fhir.nhs.uk/Id/ods-organization-code')",
         "expression": ["custodian.identifier.system"],
     }
-    assert result.issues[1].dict(exclude_none=True) == {
+    assert result.issues[1].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "invalid",
         "details": {
@@ -914,7 +914,7 @@ def test_validate_relates_to_invalid_code():
 
     assert result.is_valid is False
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "value",
         "details": {
@@ -941,7 +941,7 @@ def test_validate_relates_to_no_target_identifier():
 
     assert result.is_valid is False
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "required",
         "details": {
@@ -999,7 +999,7 @@ def test_validate_ssp_content_without_any_context_related():
 
     assert result.is_valid is False
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "required",
         "details": {
@@ -1033,7 +1033,7 @@ def test_validate_asid_with_no_ssp_content():
 
     assert result.is_valid is False
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "value",
         "details": {
@@ -1069,7 +1069,7 @@ def test_validate_ssp_content_without_asid_in_context_related():
 
     assert result.is_valid is False
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "required",
         "details": {
@@ -1100,7 +1100,7 @@ def test_validate_ssp_content_with_invalid_asid_value():
 
     assert result.is_valid is False
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "value",
         "details": {
@@ -1152,7 +1152,7 @@ def test_validate_ssp_content_with_invalid_asid_value_and_multiple_related():
 
     assert result.is_valid is False
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "value",
         "details": {
@@ -1191,7 +1191,7 @@ def test_validate_ssp_content_with_multiple_asids():
 
     assert result.is_valid is False
     assert len(result.issues) == 1
-    assert result.issues[0].dict(exclude_none=True) == {
+    assert result.issues[0].model_dump(exclude_none=True) == {
         "severity": "error",
         "code": "invalid",
         "details": {

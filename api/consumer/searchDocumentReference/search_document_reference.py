@@ -59,16 +59,16 @@ def handler(
         )
 
     custodian_id = (
-        params.custodian_identifier.__root__.split("|", maxsplit=1)[1]
+        params.custodian_identifier.root.split("|", maxsplit=1)[1]
         if params.custodian_identifier
         else None
     )
     if custodian_id:
         self_link += f"&custodian:identifier=https://fhir.nhs.uk/Id/ods-organization-code|{custodian_id}"
 
-    pointer_types = [params.type.__root__] if params.type else metadata.pointer_types
+    pointer_types = [params.type.root] if params.type else metadata.pointer_types
     if params.type:
-        self_link += f"&type={params.type.__root__}"
+        self_link += f"&type={params.type.root}"
 
     bundle = {
         "resourceType": "Bundle",
@@ -91,10 +91,10 @@ def handler(
         pointer_types=pointer_types,
     ):
         try:
-            document_reference = DocumentReference.parse_raw(result.document)
+            document_reference = DocumentReference.model_validate_json(result.document)
             bundle["total"] += 1
             bundle["entry"].append(
-                {"resource": document_reference.dict(exclude_none=True)}
+                {"resource": document_reference.model_dump(exclude_none=True)}
             )
             logger.log(
                 LogReference.CONSEARCH004,
@@ -114,7 +114,7 @@ def handler(
                 diagnostics="An error occurred whilst parsing the document reference search results",
             ) from exc
 
-    response = Response.from_resource(Bundle.parse_obj(bundle))
+    response = Response.from_resource(Bundle.model_validate(bundle))
     logger.log(LogReference.CONSEARCH999)
 
     return response

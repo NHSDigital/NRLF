@@ -42,17 +42,17 @@ def error_handler(
             return wrapped_func(*args, **kwargs)
 
         except OperationOutcomeError as exc:
-            response = exc.response.dict(exclude_none=True)
+            response = exc.response.model_dump(exclude_none=True)
             logger.log(LogReference.ERROR001, error=str(exc), response=response)
             return response
 
         except ParseError as exc:
-            response = exc.response.dict(exclude_none=True)
+            response = exc.response.model_dump(exclude_none=True)
             logger.log(LogReference.ERROR002, error=str(exc), response=response)
             return response
 
         except Exception as exc:
-            response = Response.from_exception(exc).dict(exclude_none=True)
+            response = Response.from_exception(exc).model_dump(exclude_none=True)
             logger.exception(
                 "An unhandled exception occurred whilst processing the request",
                 exc_info=sys.exc_info(),
@@ -140,7 +140,7 @@ RepositoryType = Union[Type[DocumentPointerRepository], None]
 def load_connection_metadata(headers: Dict[str, str], config: Config):
     logger.log(LogReference.HANDLER002, headers=headers)
     metadata = parse_headers(headers)
-    logger.log(LogReference.HANDLER003, metadata=metadata.dict())
+    logger.log(LogReference.HANDLER003, metadata=metadata.model_dump())
     if PERMISSION_ALLOW_ALL_POINTER_TYPES in metadata.nrl_permissions:
         logger.log(LogReference.HANDLER004a)
         metadata.pointer_types = PointerTypes.list()
@@ -210,9 +210,9 @@ def basic_handler(
     logger.log(
         LogReference.HANDLER999,
         status_code=response.statusCode,
-        response=response.dict(),
+        response=response.model_dump(),
     )
-    return response.dict()
+    return response.model_dump()
 
 
 def request_handler(
@@ -253,7 +253,7 @@ def request_handler(
             verify_request_ids(event)
 
             config = Config()
-            logger.log(LogReference.HANDLER001, config=config.dict())
+            logger.log(LogReference.HANDLER001, config=config.model_dump())
             metadata = load_connection_metadata(event.headers, config)
 
             if metadata.pointer_types == []:
@@ -291,9 +291,9 @@ def request_handler(
             logger.log(
                 LogReference.HANDLER999,
                 status_code=response.statusCode,
-                response=response.dict(),
+                response=response.model_dump(),
             )
-            return response.dict()
+            return response.model_dump()
 
         decorators = [
             functools.wraps(func),

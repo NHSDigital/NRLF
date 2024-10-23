@@ -4,7 +4,14 @@ from enum import Enum
 from typing import Any, Dict, Optional
 
 from nhs_number import is_valid as is_valid_nhs_number
-from pydantic import BaseModel, Field, PrivateAttr, root_validator, validator
+from pydantic import (
+    BaseModel,
+    Field,
+    PrivateAttr,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
 from nrlf.core.constants import SYSTEM_SHORT_IDS, VALID_SOURCES
 from nrlf.core.logger import LogReference, logger
@@ -67,15 +74,21 @@ class DocumentPointer(DynamoDBModel):
     document_id: str = Field(exclude=True)
     schemas: list = Field(default_factory=list)
 
-    def dict(self, **kwargs) -> dict:
+    def model_dump(self, **kwargs) -> dict[str, Any]:
         """
-        Override dict() to include partition and sort keys
+        Override model_dump() to include partition and sort keys
         """
-        default_dict = super().dict(**kwargs)
+        default_dict = super().model_dump(**kwargs)
         return {
             **default_dict,
             **self.indexes,
         }
+
+    def dict(self, **kwargs) -> dict[str, Any]:
+        """
+        Define dict() to do same as model_dump
+        """
+        return self.model_dump(**kwargs)
 
     @classmethod
     def from_document_reference(
@@ -134,7 +147,7 @@ class DocumentPointer(DynamoDBModel):
             category_id=category_id,
             source="NRLF",
             version=1,
-            document=resource.json(exclude_none=True),
+            document=resource.model_dump_json(exclude_none=True),
             created_on=created_on or create_fhir_instant(),
         )
 
@@ -146,7 +159,7 @@ class DocumentPointer(DynamoDBModel):
         )
         return core_model
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     @classmethod
     def extract_custodian_suffix(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -176,7 +189,7 @@ class DocumentPointer(DynamoDBModel):
 
         return values
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     @classmethod
     def inject_producer_id(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -206,7 +219,7 @@ class DocumentPointer(DynamoDBModel):
         )
         return values
 
-    @validator("id")
+    @field_validator("id")
     @classmethod
     def validate_id(cls, id_: str) -> str:
         """
@@ -220,9 +233,13 @@ class DocumentPointer(DynamoDBModel):
 
         return id_
 
-    @validator("producer_id")
+    @field_validator("producer_id")
     @classmethod
-    def validate_producer_id(cls, producer_id: str, values: Dict[str, Any]) -> str:
+    def validate_producer_id(
+        cls, producer_id: str, validation_info: ValidationInfo
+    ) -> str:
+        values = validation_info.data
+
         id_ = values.get("id")
         custodian = values.get("custodian_id")
         custodian_suffix = values.get("custodian_suffix")
@@ -242,7 +259,7 @@ class DocumentPointer(DynamoDBModel):
 
         return producer_id
 
-    @validator("type")
+    @field_validator("type")
     @classmethod
     def validate_type(cls, type: str) -> str:
         """
@@ -254,7 +271,7 @@ class DocumentPointer(DynamoDBModel):
 
         return type
 
-    @validator("nhs_number")
+    @field_validator("nhs_number")
     @classmethod
     def validate_nhs_number(cls, nhs_number: str) -> str:
         """
@@ -266,7 +283,7 @@ class DocumentPointer(DynamoDBModel):
 
         return nhs_number
 
-    @validator("source")
+    @field_validator("source")
     @classmethod
     def validate_source(cls, source: str) -> str:
         """
@@ -278,7 +295,7 @@ class DocumentPointer(DynamoDBModel):
 
         return source
 
-    @validator("created_on")
+    @field_validator("created_on")
     @classmethod
     def validate_created_on(cls, created_on: str) -> str:
         """
@@ -294,7 +311,7 @@ class DocumentPointer(DynamoDBModel):
 
         return created_on
 
-    @validator("updated_on")
+    @field_validator("updated_on")
     @classmethod
     def validate_updated_on(cls, updated_on: Optional[str]) -> Optional[str]:
         """

@@ -21,7 +21,7 @@ def validate_type_system(
     if not type_:
         return True
 
-    type_system = type_.__root__.split("|", 1)[0]
+    type_system = type_.root.split("|", 1)[0]
     pointer_type_systems = [
         pointer_type.split("|", 1)[0] for pointer_type in pointer_types
     ]
@@ -35,7 +35,9 @@ class ValidationResult:
     issues: List[OperationOutcomeIssue]
 
     def reset(self):
-        self.__init__(resource=producer_model.DocumentReference.construct(), issues=[])
+        self.__init__(
+            resource=producer_model.DocumentReference.model_construct(), issues=[]
+        )
 
     def add_error(
         self,
@@ -56,7 +58,7 @@ class ValidationResult:
             expression=[field] if field else None,  # type: ignore
         )
 
-        logger.log(LogReference.VALIDATOR002, issue=issue.dict(exclude_none=True))
+        logger.log(LogReference.VALIDATOR002, issue=issue.model_dump(exclude_none=True))
         self.issues.append(issue)
 
     @property
@@ -76,13 +78,13 @@ class DocumentReferenceValidator:
     MODEL = producer_model.DocumentReference
 
     def __init__(self):
-        self.result = ValidationResult(resource=self.MODEL.construct(), issues=[])
+        self.result = ValidationResult(resource=self.MODEL.model_construct(), issues=[])
 
     @classmethod
     def parse(cls, data: Dict[str, Any]):
         try:
             logger.log(LogReference.PARSE000, data=data, model=cls.MODEL.__name__)
-            result = cls.MODEL.parse_obj(data)
+            result = cls.MODEL.model_validate(data)
             logger.log(LogReference.PARSE001, model=cls.MODEL.__name__)
             logger.log(LogReference.PARSE001a, result=result)
             return result
@@ -162,10 +164,10 @@ class DocumentReferenceValidator:
 
         if isinstance(data, DocumentReference):
             has_extra_fields = (
-                len(set(resource.__dict__) - set(resource.__fields__)) > 0
+                len(set(resource.__dict__) - set(resource.model_fields)) > 0
             )
         else:
-            has_extra_fields = data != resource.dict(exclude_none=True)
+            has_extra_fields = data != resource.model_dump(exclude_none=True)
 
         if has_extra_fields:
             self.result.add_error(

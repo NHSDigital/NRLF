@@ -373,7 +373,7 @@ def test_request_handler_with_params():
     def decorated_function(params) -> Response:
         return Response(
             statusCode="200",
-            body=params.json(exclude_none=True),
+            body=params.model_dump_json(exclude_none=True),
             headers={"Content-Type": "application/json"},
         )
 
@@ -406,7 +406,7 @@ def test_request_handler_with_params_missing_params():
     def decorated_function(params) -> Response:
         return Response(
             statusCode="200",
-            body=params.json(exclude_none=True),
+            body=params.model_dump_json(exclude_none=True),
             headers={"Content-Type": "application/json"},
         )
 
@@ -438,7 +438,7 @@ def test_request_handler_with_params_missing_params():
                         }
                     ]
                 },
-                "diagnostics": "Invalid query parameter (param1: field required)",
+                "diagnostics": "Invalid query parameter (param1: Field required)",
                 "expression": ["param1"],
             },
             {
@@ -453,7 +453,7 @@ def test_request_handler_with_params_missing_params():
                         }
                     ]
                 },
-                "diagnostics": "Invalid query parameter (param2: field required)",
+                "diagnostics": "Invalid query parameter (param2: Field required)",
                 "expression": ["param2"],
             },
         ],
@@ -469,7 +469,7 @@ def test_request_handler_with_body():
     def decorated_function(event, context, config, metadata, body) -> Response:
         return Response(
             statusCode="200",
-            body=body.json(exclude_none=True),
+            body=body.model_dump_json(exclude_none=True),
             headers={"Content-Type": "application/json"},
         )
 
@@ -500,7 +500,7 @@ def test_request_handler_with_body_missing_body():
     def decorated_function(event, context, config, metadata, body) -> Response:
         return Response(
             statusCode="200",
-            body=body.json(exclude_none=True),
+            body=body.model_dump_json(exclude_none=True),
             headers={"Content-Type": "application/json"},
         )
 
@@ -545,7 +545,7 @@ def test_request_handler_with_body_invalid_body():
     def decorated_function(event, context, config, metadata, body) -> Response:
         return Response(
             statusCode="200",
-            body=body.json(exclude_none=True),
+            body=body.model_dump_json(exclude_none=True),
             headers={"Content-Type": "application/json"},
         )
 
@@ -578,7 +578,7 @@ def test_request_handler_with_body_invalid_body():
                         }
                     ]
                 },
-                "diagnostics": "Request body could not be parsed (param1: str type expected)",
+                "diagnostics": "Request body could not be parsed (param1: Input should be a valid string)",
                 "expression": ["param1"],
             },
             {
@@ -593,7 +593,7 @@ def test_request_handler_with_body_invalid_body():
                         }
                     ],
                 },
-                "diagnostics": "Request body could not be parsed (param2: value is not a valid integer)",
+                "diagnostics": "Request body could not be parsed (param2: Input should be a valid integer, unable to parse string as an integer)",
                 "expression": ["param2"],
             },
         ],

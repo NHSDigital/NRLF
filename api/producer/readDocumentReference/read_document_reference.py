@@ -56,7 +56,7 @@ def handler(
         )
 
     try:
-        document_reference = DocumentReference.parse_raw(result.document)
+        document_reference = DocumentReference.model_validate_json(result.document)
     except ValidationError as exc:
         logger.log(
             LogReference.PROREAD003,

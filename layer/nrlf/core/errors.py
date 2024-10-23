@@ -40,7 +40,7 @@ class OperationOutcomeError(Exception):
     def response(self) -> Response:
         return Response(
             statusCode=self.status_code,
-            body=self.operation_outcome.json(exclude_none=True, indent=2),
+            body=self.operation_outcome.model_dump_json(exclude_none=True, indent=2),
         )
 
 
@@ -74,5 +74,5 @@ class ParseError(Exception):
             body=producer_model.OperationOutcome(
                 resourceType="OperationOutcome",
                 issue=self.issues,
-            ).json(exclude_none=True, indent=2),
+            ).model_dump_json(exclude_none=True, indent=2),
         )

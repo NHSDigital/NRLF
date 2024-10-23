@@ -5,15 +5,17 @@ description = ""
 authors = ["NHS Digital"]
 license = "MIT"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
-pydantic = "1.10.16"
 nhs-number = "1.3.4"
 aws-lambda-powertools = "^2.35.1"
 requests = "^2.31.0"
 boto3-stubs = {extras = ["dynamodb", "firehose", "kinesis", "lambda", "rds", "s3"], version = "^1.34.65"}
 pyjwt = "^2.8.0"
+pydantic = "^2.9.2"
+pydantic-settings = "^2.5.2"
 
 [tool.poetry.group.dev.dependencies]
 layers = {path = "layer", develop = true}
@@ -26,7 +28,6 @@ sh = "^2.0.6"
 moto = {extras = ["dynamodb", "s3"], version = "^5.0.5"}
 behave = "^1.2.6"
 pyyaml = "^6.0.1"
-datamodel-code-generator = "^0.25.4"
 pre-commit = "^3.6.2"
 ruff = "^0.3.2"
 fire = "^0.6.0"
@@ -37,6 +38,7 @@ freezegun = "^1.4.0"
 pytest-env = "^1.1.3"
 matplotlib = "^3.8.4"
 freeze-uuid = "^0.3.0"
+datamodel-code-generator = "^0.26.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -102,3 +104,9 @@ env = [
     "TABLE_NAME=unit-test-document-pointer"
 ]
 pythonpath = [".", "./scripts"]
+
+[tool.datamodel-codegen]
+target-python-version = "3.12"
+use-annotated = true
+use-double-quotes = true
+enum-field-as-literal = "all"

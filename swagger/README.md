@@ -33,10 +33,8 @@ The generate- command will use that `./api/*/swagger.yaml` file that was generat
 you can run the model generate using the below command:
 
 ```shell
-make generate-model TYPE={type}
+make generate-models
 ```
-
-With TYPE being one of the following: `consumer` or `producer`.
 
 ## Generate - DO NOT DO THIS UNLESS EXPLICITLY TOLD TO
 

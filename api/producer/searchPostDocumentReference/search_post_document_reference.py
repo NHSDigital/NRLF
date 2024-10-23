@@ -53,7 +53,7 @@ def handler(
             expression="type",
         )
 
-    pointer_types = [body.type.__root__] if body.type else metadata.pointer_types
+    pointer_types = [body.type.root] if body.type else metadata.pointer_types
     bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
 
     logger.log(
@@ -71,10 +71,10 @@ def handler(
         pointer_types=pointer_types,
     ):
         try:
-            document_reference = DocumentReference.parse_raw(result.document)
+            document_reference = DocumentReference.model_validate_json(result.document)
             bundle["total"] += 1
             bundle["entry"].append(
-                {"resource": document_reference.dict(exclude_none=True)}
+                {"resource": document_reference.model_dump(exclude_none=True)}
             )
             logger.log(
                 LogReference.PROPOSTSEARCH004,
@@ -95,4 +95,4 @@ def handler(
             )
 
     logger.log(LogReference.PROPOSTSEARCH999)
-    return Response.from_resource(Bundle.parse_obj(bundle))
+    return Response.from_resource(Bundle.model_validate(bundle))

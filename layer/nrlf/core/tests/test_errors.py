@@ -23,7 +23,7 @@ def test_operation_outcome_error():
     assert isinstance(error, Exception)
     assert error.status_code == status_code
 
-    assert error.operation_outcome.dict(exclude_none=True) == {
+    assert error.operation_outcome.model_dump(exclude_none=True) == {
         "resourceType": "OperationOutcome",
         "issue": [
             {
@@ -39,9 +39,9 @@ def test_operation_outcome_error():
     response = error.response
     assert isinstance(response, Response)
 
-    assert response.dict() == {
+    assert response.model_dump() == {
         "statusCode": status_code,
-        "body": error.operation_outcome.json(exclude_none=True, indent=2),
+        "body": error.operation_outcome.model_dump_json(exclude_none=True, indent=2),
         "headers": {},
         "isBase64Encoded": False,
     }
@@ -64,7 +64,7 @@ def test_parse_error():
     response = error.response
     assert isinstance(response, Response)
 
-    assert error.response.dict() == {
+    assert error.response.model_dump() == {
         "statusCode": "400",
         "body": json.dumps(
             {
@@ -89,7 +89,7 @@ def test_parse_error_from_validation_error():
         test_field: str
 
     with pytest.raises(ValidationError) as error:
-        TestModel.parse_obj({})
+        TestModel.model_validate({})
 
     exc = error.value
     details = CodeableConcept(text="Invalid input")
@@ -98,12 +98,12 @@ def test_parse_error_from_validation_error():
     error = ParseError.from_validation_error(exc, details, msg)
 
     assert isinstance(error, Exception)
-    assert [issue.dict(exclude_none=True) for issue in error.issues] == [
+    assert [issue.model_dump(exclude_none=True) for issue in error.issues] == [
         {
             "severity": "error",
             "code": "invalid",
             "details": {"text": "Invalid input"},
-            "diagnostics": "Validation failed (test_field: field required)",
+            "diagnostics": "Validation failed (test_field: Field required)",
             "expression": ["test_field"],
         }
     ]
@@ -111,7 +111,7 @@ def test_parse_error_from_validation_error():
     response = error.response
     assert isinstance(response, Response)
 
-    assert response.dict() == {
+    assert response.model_dump() == {
         "statusCode": "400",
         "body": json.dumps(
             {
@@ -121,7 +121,7 @@ def test_parse_error_from_validation_error():
                         "severity": "error",
                         "code": "invalid",
                         "details": {"text": "Invalid input"},
-                        "diagnostics": "Validation failed (test_field: field required)",
+                        "diagnostics": "Validation failed (test_field: Field required)",
                         "expression": ["test_field"],
                     }
                 ],

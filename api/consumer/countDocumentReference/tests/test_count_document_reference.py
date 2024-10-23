@@ -81,7 +81,7 @@ def test_count_document_reference_missing_nhs_number():
                         }
                     ]
                 },
-                "diagnostics": "Invalid query parameter (subject:identifier: field required)",
+                "diagnostics": "Invalid query parameter (subject:identifier: Field required)",
                 "expression": ["subject:identifier"],
             }
         ],

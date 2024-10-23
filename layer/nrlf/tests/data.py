@@ -31,4 +31,4 @@ def load_document_reference(
     file_name: str, model: Type[DocumentReference] = producer_model.DocumentReference
 ):
     contents = load_document_reference_data(file_name)
-    return model.parse_raw(contents)
+    return model.model_validate_json(contents)

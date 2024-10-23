@@ -1,4 +1,5 @@
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class Config(BaseSettings):
@@ -13,10 +14,10 @@ class Config(BaseSettings):
     logic to be supported.
     """
 
-    AWS_REGION: str = Field(default=..., env="AWS_REGION")
-    PREFIX: str = Field(default=..., env="PREFIX")
-    ENVIRONMENT: str = Field(default=..., env="ENVIRONMENT")
-    SPLUNK_INDEX: str = Field(default=..., env="SPLUNK_INDEX")
-    SOURCE: str = Field(default=..., env="SOURCE")
-    AUTH_STORE: str = Field(default=..., env="AUTH_STORE")
-    TABLE_NAME: str = Field(default=..., env="TABLE_NAME")
+    AWS_REGION: str = Field(default=...)
+    PREFIX: str = Field(default=...)
+    ENVIRONMENT: str = Field(default=...)
+    SPLUNK_INDEX: str = Field(default=...)
+    SOURCE: str = Field(default=...)
+    AUTH_STORE: str = Field(default=...)
+    TABLE_NAME: str = Field(default=...)

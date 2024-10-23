@@ -88,9 +88,9 @@ def setup(
     with table.batch_writer() as batch:
         for record in _generate_records(patient_count, documents_per_type, ods_code):
             pointer = DocumentPointer.from_document_reference(record)
-            batch.put_item(Item=pointer.dict())
+            batch.put_item(Item=pointer.model_dump())
 
-            documents[pointer.id] = record.dict(exclude_none=True)
+            documents[pointer.id] = record.model_dump(exclude_none=True)
             nhs_numbers.add(pointer.nhs_number)
 
     print(f"Created {len(documents)} documents for {len(nhs_numbers)} patients")

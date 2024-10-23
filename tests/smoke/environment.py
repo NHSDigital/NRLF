@@ -38,7 +38,7 @@ class EnvironmentConfig:
         return f"nhsd-nrlf--{self.env_name}--smoke-test-parameters"
 
     def to_client_config(self, parameters: SmokeTestParameters):
-        connection_metadata = ConnectionMetadata.parse_obj(
+        connection_metadata = ConnectionMetadata.model_validate(
             {
                 "nrl.ods-code": parameters.ods_code,
                 "nrl.permissions": [],

@@ -62,16 +62,16 @@ def handler(
         )
 
     custodian_id = (
-        body.custodian_identifier.__root__.split("|", maxsplit=1)[1]
+        body.custodian_identifier.root.split("|", maxsplit=1)[1]
         if body.custodian_identifier
         else None
     )
     if custodian_id:
         self_link += f"&custodian:identifier=https://fhir.nhs.uk/Id/ods-organization-code|{custodian_id}"
 
-    pointer_types = [body.type.__root__] if body.type else metadata.pointer_types
+    pointer_types = [body.type.root] if body.type else metadata.pointer_types
     if body.type:
-        self_link += f"&type={body.type.__root__}"
+        self_link += f"&type={body.type.root}"
 
     bundle = {
         "resourceType": "Bundle",
@@ -92,10 +92,10 @@ def handler(
         nhs_number=body.nhs_number, custodian=custodian_id, pointer_types=pointer_types
     ):
         try:
-            document_reference = DocumentReference.parse_raw(result.document)
+            document_reference = DocumentReference.model_validate_json(result.document)
             bundle["total"] += 1
             bundle["entry"].append(
-                {"resource": document_reference.dict(exclude_none=True)}
+                {"resource": document_reference.model_dump(exclude_none=True)}
             )
             logger.log(
                 LogReference.CONPOSTSEARCH004,
@@ -115,7 +115,7 @@ def handler(
                 diagnostics="An error occurred whilst parsing the document reference search results",
             ) from exc
 
-    response = Response.from_resource(Bundle.parse_obj(bundle))
+    response = Response.from_resource(Bundle.model_validate(bundle))
     logger.log(LogReference.CONPOSTSEARCH999)
 
     return response

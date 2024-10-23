@@ -2,6 +2,8 @@ import pytest
 
 from nrlf.core.codes import NRLResponseConcept, SpineErrorConcept, _CodeableConcept
 
+# TODO-NOW Fix up these codes impls to work better in test cases
+
 
 def test_from_code_known_code():
     # Arrange

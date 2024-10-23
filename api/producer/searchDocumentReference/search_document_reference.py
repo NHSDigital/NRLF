@@ -59,7 +59,7 @@ def handler(
             expression="type",
         )
 
-    pointer_types = [params.type.__root__] if params.type else metadata.pointer_types
+    pointer_types = [params.type.root] if params.type else metadata.pointer_types
     bundle = {"resourceType": "Bundle", "type": "searchset", "total": 0, "entry": []}
 
     logger.log(
@@ -77,10 +77,10 @@ def handler(
         pointer_types=pointer_types,
     ):
         try:
-            document_reference = DocumentReference.parse_raw(result.document)
+            document_reference = DocumentReference.model_validate_json(result.document)
             bundle["total"] += 1
             bundle["entry"].append(
-                {"resource": document_reference.dict(exclude_none=True)}
+                {"resource": document_reference.model_dump(exclude_none=True)}
             )
             logger.log(
                 LogReference.PROSEARCH004,
@@ -100,6 +100,6 @@ def handler(
                 diagnostics="An error occurred whilst parsing the document reference search results",
             )
 
-    response = Response.from_resource(Bundle.parse_obj(bundle))
+    response = Response.from_resource(Bundle.model_validate(bundle))
     logger.log(LogReference.PROSEARCH999)
     return response
