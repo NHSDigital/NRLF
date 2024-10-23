@@ -569,7 +569,7 @@ class DocumentReference(BaseModel):
         str,
         Field(
             description="The status of this document reference.",
-            pattern="[^\\s]+(\\s[^\\s]+)*",
+            pattern="^current$",
         ),
     ]
     docStatus: Annotated[
