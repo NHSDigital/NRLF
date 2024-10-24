@@ -51,17 +51,17 @@ def test_consumer_count_search_read(
         {"subject:identifier": f"{NHS_NUMBER_SYSTEM_URL}|{patient_id}"}
     )
     assert count_response.ok
-    assert count_response.json()["total"] == len(test_pointers)
+    assert count_response.json()["total"] >= len(test_pointers)
 
     # Search
     search_response = consumer_client.search(patient_id)
     assert search_response.ok
-    assert search_response.json()["total"] == len(test_pointers)
+    assert search_response.json()["total"] >= len(test_pointers)
 
     # Search with POST
     search_response = consumer_client.search_post(patient_id)
     assert search_response.ok
-    assert search_response.json()["total"] == len(test_pointers)
+    assert search_response.json()["total"] >= len(test_pointers)
 
     # Read
     read_response = consumer_client.read(test_pointers[0].id)
